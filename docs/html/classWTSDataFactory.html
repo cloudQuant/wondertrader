@@ -1,0 +1,1295 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: WTSDataFactory类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classWTSDataFactory.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pro-methods">Protected 成员函数</a> &#124;
+<a href="#pro-static-methods">静态 Protected 成员函数</a> &#124;
+<a href="classWTSDataFactory-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">WTSDataFactory类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>数据工厂类，负责K线数据的生成、更新和合并  
+ <a href="classWTSDataFactory.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="WTSDataFactory_8h_source.html">WTSDataFactory.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a091516188f5425c7e122de89236b731a" id="r_a091516188f5425c7e122de89236b731a"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#a091516188f5425c7e122de89236b731a">updateKlineData</a> (<a class="el" href="classWTSKlineData.html">WTSKlineData</a> *klineData, <a class="el" href="classWTSTickData.html">WTSTickData</a> *tick, <a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *sInfo, bool bAlignSec=false)</td></tr>
+<tr class="memdesc:a091516188f5425c7e122de89236b731a"><td class="mdescLeft">&#160;</td><td class="mdescRight">利用tick数据更新K线  <br /></td></tr>
+<tr class="separator:a091516188f5425c7e122de89236b731a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14a819a737f825ebb96c868bab4b5ccd" id="r_a14a819a737f825ebb96c868bab4b5ccd"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#a14a819a737f825ebb96c868bab4b5ccd">updateKlineData</a> (<a class="el" href="classWTSKlineData.html">WTSKlineData</a> *klineData, <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *newBasicBar, <a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *sInfo, bool bAlignSec=false)</td></tr>
+<tr class="memdesc:a14a819a737f825ebb96c868bab4b5ccd"><td class="mdescLeft">&#160;</td><td class="mdescRight">利用基础周期K线数据更新K线  <br /></td></tr>
+<tr class="separator:a14a819a737f825ebb96c868bab4b5ccd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf283ddb33effa4d3338d38ff76dc1a4" id="r_acf283ddb33effa4d3338d38ff76dc1a4"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#acf283ddb33effa4d3338d38ff76dc1a4">extractKlineData</a> (<a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> *baseKline, <a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, uint32_t times, <a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *sInfo, bool bIncludeOpen=true, bool bAlignSec=false)</td></tr>
+<tr class="memdesc:acf283ddb33effa4d3338d38ff76dc1a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">从基础周期K线数据提取非基础周期的K线数据  <br /></td></tr>
+<tr class="separator:acf283ddb33effa4d3338d38ff76dc1a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21875de8f27e499d60c2dcc6523a4d42" id="r_a21875de8f27e499d60c2dcc6523a4d42"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#a21875de8f27e499d60c2dcc6523a4d42">extractKlineData</a> (<a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> *ayTicks, uint32_t seconds, <a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *sInfo, bool bUnixTime=false, bool bAlignSec=false)</td></tr>
+<tr class="memdesc:a21875de8f27e499d60c2dcc6523a4d42"><td class="mdescLeft">&#160;</td><td class="mdescRight">从tick数据提取秒周期的K线数据  <br /></td></tr>
+<tr class="separator:a21875de8f27e499d60c2dcc6523a4d42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b3b7383fc790f21eeec443aa753a587" id="r_a8b3b7383fc790f21eeec443aa753a587"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#a8b3b7383fc790f21eeec443aa753a587">mergeKlineData</a> (<a class="el" href="classWTSKlineData.html">WTSKlineData</a> *klineData, <a class="el" href="classWTSKlineData.html">WTSKlineData</a> *newKline)</td></tr>
+<tr class="memdesc:a8b3b7383fc790f21eeec443aa753a587"><td class="mdescLeft">&#160;</td><td class="mdescRight">合并K线数据  <br /></td></tr>
+<tr class="separator:a8b3b7383fc790f21eeec443aa753a587"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+Protected 成员函数</h2></td></tr>
+<tr class="memitem:afd72609c8bbced67a6f750039f141aab" id="r_afd72609c8bbced67a6f750039f141aab"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#afd72609c8bbced67a6f750039f141aab">updateMin1Data</a> (<a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *sInfo, <a class="el" href="classWTSKlineData.html">WTSKlineData</a> *klineData, <a class="el" href="classWTSTickData.html">WTSTickData</a> *tick, bool bAlignSec=false)</td></tr>
+<tr class="memdesc:afd72609c8bbced67a6f750039f141aab"><td class="mdescLeft">&#160;</td><td class="mdescRight">更新1分钟K线数据  <br /></td></tr>
+<tr class="separator:afd72609c8bbced67a6f750039f141aab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3fd05f6e779b48cbfcfa68b6d10a330" id="r_ac3fd05f6e779b48cbfcfa68b6d10a330"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#ac3fd05f6e779b48cbfcfa68b6d10a330">updateMin5Data</a> (<a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *sInfo, <a class="el" href="classWTSKlineData.html">WTSKlineData</a> *klineData, <a class="el" href="classWTSTickData.html">WTSTickData</a> *tick, bool bAlignSec=false)</td></tr>
+<tr class="memdesc:ac3fd05f6e779b48cbfcfa68b6d10a330"><td class="mdescLeft">&#160;</td><td class="mdescRight">更新5分钟K线数据  <br /></td></tr>
+<tr class="separator:ac3fd05f6e779b48cbfcfa68b6d10a330"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78d5a88aa9a66039e30319de03232ce0" id="r_a78d5a88aa9a66039e30319de03232ce0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#a78d5a88aa9a66039e30319de03232ce0">updateDayData</a> (<a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *sInfo, <a class="el" href="classWTSKlineData.html">WTSKlineData</a> *klineData, <a class="el" href="classWTSTickData.html">WTSTickData</a> *tick)</td></tr>
+<tr class="memdesc:a78d5a88aa9a66039e30319de03232ce0"><td class="mdescLeft">&#160;</td><td class="mdescRight">更新日线数据  <br /></td></tr>
+<tr class="separator:a78d5a88aa9a66039e30319de03232ce0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a526acca9eab30b554db3c7556b1cf28e" id="r_a526acca9eab30b554db3c7556b1cf28e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#a526acca9eab30b554db3c7556b1cf28e">updateSecData</a> (<a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *sInfo, <a class="el" href="classWTSKlineData.html">WTSKlineData</a> *klineData, <a class="el" href="classWTSTickData.html">WTSTickData</a> *tick)</td></tr>
+<tr class="memdesc:a526acca9eab30b554db3c7556b1cf28e"><td class="mdescLeft">&#160;</td><td class="mdescRight">更新秒级K线数据  <br /></td></tr>
+<tr class="separator:a526acca9eab30b554db3c7556b1cf28e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b094800099271a276e4956775ef21ef" id="r_a7b094800099271a276e4956775ef21ef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#a7b094800099271a276e4956775ef21ef">updateMin1Data</a> (<a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *sInfo, <a class="el" href="classWTSKlineData.html">WTSKlineData</a> *klineData, <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *newBasicBar, bool bAlignSec=false)</td></tr>
+<tr class="memdesc:a7b094800099271a276e4956775ef21ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">使用基础K线更新1分钟K线数据  <br /></td></tr>
+<tr class="separator:a7b094800099271a276e4956775ef21ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4382007a5bc3055d83b4c5913bb9253d" id="r_a4382007a5bc3055d83b4c5913bb9253d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#a4382007a5bc3055d83b4c5913bb9253d">updateMin5Data</a> (<a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *sInfo, <a class="el" href="classWTSKlineData.html">WTSKlineData</a> *klineData, <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *newBasicBar, bool bAlignSec=false)</td></tr>
+<tr class="memdesc:a4382007a5bc3055d83b4c5913bb9253d"><td class="mdescLeft">&#160;</td><td class="mdescRight">使用基础K线更新5分钟K线数据  <br /></td></tr>
+<tr class="separator:a4382007a5bc3055d83b4c5913bb9253d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade5aab83825454c9d94091ec2989b63a" id="r_ade5aab83825454c9d94091ec2989b63a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#ade5aab83825454c9d94091ec2989b63a">extractMin1Data</a> (<a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> *baseKline, uint32_t times, <a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *sInfo, bool bIncludeOpen=true, bool bAlignSec=false)</td></tr>
+<tr class="memdesc:ade5aab83825454c9d94091ec2989b63a"><td class="mdescLeft">&#160;</td><td class="mdescRight">从基础K线提取1分钟K线数据  <br /></td></tr>
+<tr class="separator:ade5aab83825454c9d94091ec2989b63a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3742821505b8475967f9a3f2b0398490" id="r_a3742821505b8475967f9a3f2b0398490"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#a3742821505b8475967f9a3f2b0398490">extractMin5Data</a> (<a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> *baseKline, uint32_t times, <a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *sInfo, bool bIncludeOpen=true, bool bAlignSec=false)</td></tr>
+<tr class="memdesc:a3742821505b8475967f9a3f2b0398490"><td class="mdescLeft">&#160;</td><td class="mdescRight">从基础K线提取5分钟K线数据  <br /></td></tr>
+<tr class="separator:a3742821505b8475967f9a3f2b0398490"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8b639f86dff2e861e2e9a4c93d47cb3" id="r_ae8b639f86dff2e861e2e9a4c93d47cb3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#ae8b639f86dff2e861e2e9a4c93d47cb3">extractDayData</a> (<a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> *baseKline, uint32_t times, bool bIncludeOpen=true)</td></tr>
+<tr class="memdesc:ae8b639f86dff2e861e2e9a4c93d47cb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">从基础K线提取日线数据  <br /></td></tr>
+<tr class="separator:ae8b639f86dff2e861e2e9a4c93d47cb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-methods" name="pro-static-methods"></a>
+静态 Protected 成员函数</h2></td></tr>
+<tr class="memitem:a930436cbadaab52cd19a64e3cd114ea6" id="r_a930436cbadaab52cd19a64e3cd114ea6"><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSDataFactory.html#a930436cbadaab52cd19a64e3cd114ea6">getPrevMinute</a> (uint32_t curMinute, int period=1)</td></tr>
+<tr class="memdesc:a930436cbadaab52cd19a64e3cd114ea6"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取前一个分钟时间  <br /></td></tr>
+<tr class="separator:a930436cbadaab52cd19a64e3cd114ea6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>数据工厂类，负责K线数据的生成、更新和合并 </p>
+<p>WTSDataFactory实现了IDataFactory接口，提供了丰富的数据处理功能，包括：</p><ul>
+<li>从Tick数据构建和更新各种周期的K线数据</li>
+<li>从基础周期K线提取更高周期的K线数据</li>
+<li>合并不同时间段的K线数据 该类是WonderTrader中数据处理的核心组件 </li>
+</ul>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8h_source.html">WTSDataFactory.h</a> 第 <a class="el" href="WTSDataFactory_8h_source.html#l00028">28</a> 行定义.</p>
+</div><h2 class="groupheader">成员函数说明</h2>
+<a id="ae8b639f86dff2e861e2e9a4c93d47cb3" name="ae8b639f86dff2e861e2e9a4c93d47cb3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8b639f86dff2e861e2e9a4c93d47cb3">&#9670;&#160;</a></span>extractDayData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> * WTSDataFactory::extractDayData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> *&#160;</td>
+          <td class="paramname"><em>baseKline</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>times</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bIncludeOpen</em> = <code>true</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>从基础K线提取日线数据 </p>
+<p>从基础K线切片中提取日线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">baseKline</td><td>基础K线切片 </td></tr>
+    <tr><td class="paramname">times</td><td>周期倍数 </td></tr>
+    <tr><td class="paramname">bIncludeOpen</td><td>是否包含未闭合K线 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSKlineData* 提取的K线数据</dd></dl>
+<p>从基础K线切片中生成指定倍数的日线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">baseKline</td><td>基础K线切片对象指针 </td></tr>
+    <tr><td class="paramname">times</td><td>周期倍数，表示生成的K线周期为多少天 </td></tr>
+    <tr><td class="paramname">bIncludeOpen</td><td>是否包含未完成的当前K线，默认为true </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSKlineData* 新生成的日线数据对象指针，失败返回NULL </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l01029">1029</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acf283ddb33effa4d3338d38ff76dc1a4" name="acf283ddb33effa4d3338d38ff76dc1a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf283ddb33effa4d3338d38ff76dc1a4">&#9670;&#160;</a></span>extractKlineData() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> * WTSDataFactory::extractKlineData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> *&#160;</td>
+          <td class="paramname"><em>baseKline</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a>&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>times</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td>
+          <td class="paramname"><em>sInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bIncludeOpen</em> = <code>true</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAlignSec</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>从基础周期K线数据提取非基础周期的K线数据 </p>
+<p>从基础K线切片中提取指定周期的K线数据</p>
+<p>根据基础周期K线数据，提取生成更高周期的K线数据，如从1分钟K线生成5分钟K线</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">baseKline</td><td>基础周期K线数据切片 </td></tr>
+    <tr><td class="paramname">period</td><td>基础周期类型，如m1/m5/day </td></tr>
+    <tr><td class="paramname">times</td><td>周期倍数，用于计算目标周期 </td></tr>
+    <tr><td class="paramname">sInfo</td><td>交易时间模板，用于确定交易时段 </td></tr>
+    <tr><td class="paramname">bIncludeOpen</td><td>是否包含未闭合的K线，默认为true </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按交易小节对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSKlineData* 返回提取的K线数据对象，如果提取失败则返回NULL</dd></dl>
+<p>根据输入的基础K线切片和目标周期，生成新的K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">baseKline</td><td>基础K线切片对象指针 </td></tr>
+    <tr><td class="paramname">period</td><td>目标K线周期 </td></tr>
+    <tr><td class="paramname">times</td><td>周期倍数，例如对1分钟周期，times=5表示5分钟 </td></tr>
+    <tr><td class="paramname">sInfo</td><td>交易时间信息对象指针 </td></tr>
+    <tr><td class="paramname">bIncludeOpen</td><td>是否包含未完成的当前K线，默认为true </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按照交易小节对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSKlineData* 新生成的K线数据对象指针，失败返回NULL </dd></dl>
+
+<p>实现了 <a class="el" href="classIDataFactory.html#a0939d4fd25e69ea7920e0fc54b271eb0">IDataFactory</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l00719">719</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a21875de8f27e499d60c2dcc6523a4d42" name="a21875de8f27e499d60c2dcc6523a4d42"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21875de8f27e499d60c2dcc6523a4d42">&#9670;&#160;</a></span>extractKlineData() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> * WTSDataFactory::extractKlineData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> *&#160;</td>
+          <td class="paramname"><em>ayTicks</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>seconds</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td>
+          <td class="paramname"><em>sInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bUnixTime</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAlignSec</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>从tick数据提取秒周期的K线数据 </p>
+<p>从Tick切片中提取秒线数据</p>
+<p>根据tick数据序列，生成指定秒数周期的K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ayTicks</td><td>tick数据切片 </td></tr>
+    <tr><td class="paramname">seconds</td><td>目标周期的秒数 </td></tr>
+    <tr><td class="paramname">sInfo</td><td>交易时间模板，用于确定交易时段 </td></tr>
+    <tr><td class="paramname">bUnixTime</td><td>tick时间戳是否是Unix时间戳格式，默认为false </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按交易小节对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSKlineData* 返回提取的K线数据对象，如果提取失败则返回NULL</dd></dl>
+<p>根据输入的Tick切片和秒数，生成新的秒线K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ayTicks</td><td>Tick切片对象指针 </td></tr>
+    <tr><td class="paramname">seconds</td><td>秒数，表示生成的K线周期为多少秒 </td></tr>
+    <tr><td class="paramname">sInfo</td><td>交易时间信息对象指针 </td></tr>
+    <tr><td class="paramname">bUnixTime</td><td>是否使用Unix时间戳，默认为false </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按照交易小节对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSKlineData* 新生成的K线数据对象指针，失败返回NULL </dd></dl>
+
+<p>实现了 <a class="el" href="classIDataFactory.html#a54d32f3526c861080981f717b29017ff">IDataFactory</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l01102">1102</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ade5aab83825454c9d94091ec2989b63a" name="ade5aab83825454c9d94091ec2989b63a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade5aab83825454c9d94091ec2989b63a">&#9670;&#160;</a></span>extractMin1Data()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> * WTSDataFactory::extractMin1Data </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> *&#160;</td>
+          <td class="paramname"><em>baseKline</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>times</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td>
+          <td class="paramname"><em>sInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bIncludeOpen</em> = <code>true</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAlignSec</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>从基础K线提取1分钟K线数据 </p>
+<p>从基础K线切片中提取1分钟周期K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">baseKline</td><td>基础K线切片 </td></tr>
+    <tr><td class="paramname">times</td><td>周期倍数 </td></tr>
+    <tr><td class="paramname">sInfo</td><td>交易时间模板 </td></tr>
+    <tr><td class="paramname">bIncludeOpen</td><td>是否包含未闭合K线 </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按交易小节对齐 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSKlineData* 提取的K线数据</dd></dl>
+<p>从基础K线切片中生成指定倍数的1分钟周期K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">baseKline</td><td>基础K线切片对象指针 </td></tr>
+    <tr><td class="paramname">times</td><td>周期倍数，表示生成的K线周期为多少分钟 </td></tr>
+    <tr><td class="paramname">sInfo</td><td>交易时间信息对象指针 </td></tr>
+    <tr><td class="paramname">bIncludeOpen</td><td>是否包含未完成的当前K线，默认为true </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按照交易小节对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSKlineData* 新生成的1分钟周期K线数据对象指针，失败返回NULL </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l00759">759</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3742821505b8475967f9a3f2b0398490" name="a3742821505b8475967f9a3f2b0398490"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3742821505b8475967f9a3f2b0398490">&#9670;&#160;</a></span>extractMin5Data()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> * WTSDataFactory::extractMin5Data </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> *&#160;</td>
+          <td class="paramname"><em>baseKline</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>times</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td>
+          <td class="paramname"><em>sInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bIncludeOpen</em> = <code>true</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAlignSec</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>从基础K线提取5分钟K线数据 </p>
+<p>从基础K线切片中提取5分钟周期K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">baseKline</td><td>基础K线切片 </td></tr>
+    <tr><td class="paramname">times</td><td>周期倍数 </td></tr>
+    <tr><td class="paramname">sInfo</td><td>交易时间模板 </td></tr>
+    <tr><td class="paramname">bIncludeOpen</td><td>是否包含未闭合K线 </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按交易小节对齐 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSKlineData* 提取的K线数据</dd></dl>
+<p>从基础K线切片中生成指定倍数的5分钟周期K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">baseKline</td><td>基础K线切片对象指针 </td></tr>
+    <tr><td class="paramname">times</td><td>周期倍数，表示生成的K线周期为5*times分钟 </td></tr>
+    <tr><td class="paramname">sInfo</td><td>交易时间信息对象指针 </td></tr>
+    <tr><td class="paramname">bIncludeOpen</td><td>是否包含未完成的当前K线，默认为true </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按照交易小节对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSKlineData* 新生成的5分钟周期K线数据对象指针，失败返回NULL </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l00897">897</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a930436cbadaab52cd19a64e3cd114ea6" name="a930436cbadaab52cd19a64e3cd114ea6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a930436cbadaab52cd19a64e3cd114ea6">&#9670;&#160;</a></span>getPrevMinute()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WTSDataFactory::getPrevMinute </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>curMinute</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>period</em> = <code>1</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取前一个分钟时间 </p>
+<p>获取前一分钟数据</p>
+<p>根据当前分钟和周期，计算前一个周期的分钟时间</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curMinute</td><td>当前分钟时间 </td></tr>
+    <tr><td class="paramname">period</td><td>周期，默认为1 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>uint32_t 前一个周期的分钟时间</dd></dl>
+<p>根据当前分钟和周期计算前一个周期的分钟数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curMinute</td><td>当前分钟数据，以分钟数计 </td></tr>
+    <tr><td class="paramname">period</td><td>周期，默认为1分钟 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>uint32_t 前一个周期的分钟数据 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l00689">689</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8b3b7383fc790f21eeec443aa753a587" name="a8b3b7383fc790f21eeec443aa753a587"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b3b7383fc790f21eeec443aa753a587">&#9670;&#160;</a></span>mergeKlineData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WTSDataFactory::mergeKlineData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td>
+          <td class="paramname"><em>klineData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td>
+          <td class="paramname"><em>newKline</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>合并K线数据 </p>
+<p>合并两个K线数据对象</p>
+<p>将新的K线数据合并到目标K线数据中，通常用于合并不同时间段的K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">klineData</td><td>目标K线数据对象，合并结果将保存在此对象中 </td></tr>
+    <tr><td class="paramname">newKline</td><td>待合并的新K线数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 合并是否成功</dd></dl>
+<p>将新的K线数据合并到目标K线数据对象中，根据时间戳对齐进行合并 合并时会将比目标数据早的数据放在前面，比目标数据晚的数据放在后面</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">klineData</td><td>目标K线数据对象指针 </td></tr>
+    <tr><td class="paramname">newKline</td><td>新的K线数据对象指针，待合并的数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 合并成功返回true，失败返回false </dd></dl>
+
+<p>实现了 <a class="el" href="classIDataFactory.html#a37bed6aed967130e3da6df11b35e818c">IDataFactory</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l01196">1196</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a78d5a88aa9a66039e30319de03232ce0" name="a78d5a88aa9a66039e30319de03232ce0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78d5a88aa9a66039e30319de03232ce0">&#9670;&#160;</a></span>updateDayData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> * WTSDataFactory::updateDayData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td>
+          <td class="paramname"><em>sInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td>
+          <td class="paramname"><em>klineData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>tick</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>更新日线数据 </p>
+<p>使用Tick数据更新日线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sInfo</td><td>交易时间模板 </td></tr>
+    <tr><td class="paramname">klineData</td><td>现有K线数据 </td></tr>
+    <tr><td class="paramname">tick</td><td>最新tick数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 更新后的K线结构</dd></dl>
+<p>将单个Tick数据合并到已有的日线数据中，日线的日期使用交易日期</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sInfo</td><td>交易时间信息对象指针 </td></tr>
+    <tr><td class="paramname">klineData</td><td>需要更新的K线数据对象指针 </td></tr>
+    <tr><td class="paramname">tick</td><td>Tick数据对象指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 返回更新后的K线结构指针，更新失败返回NULL </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l00586">586</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a14a819a737f825ebb96c868bab4b5ccd" name="a14a819a737f825ebb96c868bab4b5ccd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14a819a737f825ebb96c868bab4b5ccd">&#9670;&#160;</a></span>updateKlineData() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> * WTSDataFactory::updateKlineData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td>
+          <td class="paramname"><em>klineData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td>
+          <td class="paramname"><em>newBasicBar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td>
+          <td class="paramname"><em>sInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAlignSec</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>利用基础周期K线数据更新K线 </p>
+<p>使用基础K线数据更新K线数据</p>
+<p>根据新的基础周期K线数据更新现有的K线数据，主要用于K线周期的转换</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">klineData</td><td>K线数据对象，存储当前已有的K线数据 </td></tr>
+    <tr><td class="paramname">newBasicBar</td><td>新的基础周期K线数据 </td></tr>
+    <tr><td class="paramname">sInfo</td><td>交易时间模板，用于确定交易时段 </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按照交易小节对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 返回更新后的K线结构指针，如果更新失败则返回NULL</dd></dl>
+<p>使用一个基础K线数据结构更新现有的K线数据，通常用于从较小周期K线合成较大周期K线</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">klineData</td><td>需要更新的K线数据对象指针 </td></tr>
+    <tr><td class="paramname">newBasicBar</td><td>基础K线结构指针 </td></tr>
+    <tr><td class="paramname">sInfo</td><td>交易时间信息对象指针 </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按照小节对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 返回更新后的K线结构指针，如果更新失败则返回NULL </dd></dl>
+
+<p>实现了 <a class="el" href="classIDataFactory.html#a082b553b920e92d85cb08a2d2d4fe813">IDataFactory</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l00075">75</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a091516188f5425c7e122de89236b731a" name="a091516188f5425c7e122de89236b731a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a091516188f5425c7e122de89236b731a">&#9670;&#160;</a></span>updateKlineData() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> * WTSDataFactory::updateKlineData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td>
+          <td class="paramname"><em>klineData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>tick</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td>
+          <td class="paramname"><em>sInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAlignSec</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>利用tick数据更新K线 </p>
+<p>使用Tick数据更新K线数据</p>
+<p>根据最新的tick数据更新现有的K线数据，支持秒、分钟和日线级别的K线更新</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">klineData</td><td>K线数据对象，存储当前已有的K线数据 </td></tr>
+    <tr><td class="paramname">tick</td><td>最新的tick数据 </td></tr>
+    <tr><td class="paramname">sInfo</td><td>交易时间模板，用于确定交易时段 </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按照交易小节对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 返回更新后的K线结构指针，如果更新失败则返回NULL</dd></dl>
+<p>根据Tick数据更新现有的K线数据，根据K线周期类型调用相应的更新函数</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">klineData</td><td>需要更新的K线数据对象指针 </td></tr>
+    <tr><td class="paramname">tick</td><td>Tick数据对象指针 </td></tr>
+    <tr><td class="paramname">sInfo</td><td>交易时间信息对象指针 </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按照小节对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 返回更新后的K线结构指针，如果更新失败则返回NULL </dd></dl>
+
+<p>实现了 <a class="el" href="classIDataFactory.html#a69f1b17bc26078fc05a94b26d58ba176">IDataFactory</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l00033">33</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7b094800099271a276e4956775ef21ef" name="a7b094800099271a276e4956775ef21ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b094800099271a276e4956775ef21ef">&#9670;&#160;</a></span>updateMin1Data() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> * WTSDataFactory::updateMin1Data </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td>
+          <td class="paramname"><em>sInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td>
+          <td class="paramname"><em>klineData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td>
+          <td class="paramname"><em>newBasicBar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAlignSec</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>使用基础K线更新1分钟K线数据 </p>
+<p>使用基础K线结构更新1分钟周期K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sInfo</td><td>交易时间模板 </td></tr>
+    <tr><td class="paramname">klineData</td><td>现有K线数据 </td></tr>
+    <tr><td class="paramname">newBasicBar</td><td>新的基础K线数据 </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按交易小节对齐 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 更新后的K线结构</dd></dl>
+<p>将基础K线结构数据合并到已有的1分钟周期K线中，可以选择是否按照交易小节对齐</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sInfo</td><td>交易时间信息对象指针，用于计算时间戳 </td></tr>
+    <tr><td class="paramname">klineData</td><td>需要更新的K线数据对象指针 </td></tr>
+    <tr><td class="paramname">newBasicBar</td><td>新的基础K线结构指针 </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按照交易小节对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 返回更新后的K线结构指针，更新失败返回NULL </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l00106">106</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afd72609c8bbced67a6f750039f141aab" name="afd72609c8bbced67a6f750039f141aab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd72609c8bbced67a6f750039f141aab">&#9670;&#160;</a></span>updateMin1Data() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> * WTSDataFactory::updateMin1Data </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td>
+          <td class="paramname"><em>sInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td>
+          <td class="paramname"><em>klineData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>tick</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAlignSec</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>更新1分钟K线数据 </p>
+<p>使用Tick数据更新1分钟周期K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sInfo</td><td>交易时间模板 </td></tr>
+    <tr><td class="paramname">klineData</td><td>现有K线数据 </td></tr>
+    <tr><td class="paramname">tick</td><td>最新tick数据 </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按交易小节对齐 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 更新后的K线结构</dd></dl>
+<p>将单个Tick数据合并到已有的1分钟周期K线中，可以选择是否按照交易小节对齐</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sInfo</td><td>交易时间信息对象指针，用于计算时间戳 </td></tr>
+    <tr><td class="paramname">klineData</td><td>需要更新的K线数据对象指针 </td></tr>
+    <tr><td class="paramname">tick</td><td>Tick数据对象指针 </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按照交易小节对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 返回更新后的K线结构指针，更新失败返回NULL </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l00234">234</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4382007a5bc3055d83b4c5913bb9253d" name="a4382007a5bc3055d83b4c5913bb9253d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4382007a5bc3055d83b4c5913bb9253d">&#9670;&#160;</a></span>updateMin5Data() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> * WTSDataFactory::updateMin5Data </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td>
+          <td class="paramname"><em>sInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td>
+          <td class="paramname"><em>klineData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td>
+          <td class="paramname"><em>newBasicBar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAlignSec</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>使用基础K线更新5分钟K线数据 </p>
+<p>使用基础K线结构更新5分钟周期K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sInfo</td><td>交易时间模板 </td></tr>
+    <tr><td class="paramname">klineData</td><td>现有K线数据 </td></tr>
+    <tr><td class="paramname">newBasicBar</td><td>新的基础K线数据 </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按交易小节对齐 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 更新后的K线结构</dd></dl>
+<p>将基础K线结构数据合并到已有的5分钟周期K线中，可以选择是否按照交易小节对齐</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sInfo</td><td>交易时间信息对象指针，用于计算时间戳 </td></tr>
+    <tr><td class="paramname">klineData</td><td>需要更新的K线数据对象指针 </td></tr>
+    <tr><td class="paramname">newBasicBar</td><td>新的基础K线结构指针 </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按照交易小节对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 返回更新后的K线结构指针，更新失败返回NULL </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l00360">360</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac3fd05f6e779b48cbfcfa68b6d10a330" name="ac3fd05f6e779b48cbfcfa68b6d10a330"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3fd05f6e779b48cbfcfa68b6d10a330">&#9670;&#160;</a></span>updateMin5Data() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> * WTSDataFactory::updateMin5Data </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td>
+          <td class="paramname"><em>sInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td>
+          <td class="paramname"><em>klineData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>tick</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAlignSec</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>更新5分钟K线数据 </p>
+<p>使用Tick数据更新5分钟周期K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sInfo</td><td>交易时间模板 </td></tr>
+    <tr><td class="paramname">klineData</td><td>现有K线数据 </td></tr>
+    <tr><td class="paramname">tick</td><td>最新tick数据 </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按交易小节对齐 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 更新后的K线结构</dd></dl>
+<p>将单个Tick数据合并到已有的5分钟周期K线中，可以选择是否按照交易小节对齐</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sInfo</td><td>交易时间信息对象指针，用于计算时间戳 </td></tr>
+    <tr><td class="paramname">klineData</td><td>需要更新的K线数据对象指针 </td></tr>
+    <tr><td class="paramname">tick</td><td>Tick数据对象指针 </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按照交易小节对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 返回更新后的K线结构指针，更新失败返回NULL </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l00487">487</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a526acca9eab30b554db3c7556b1cf28e" name="a526acca9eab30b554db3c7556b1cf28e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a526acca9eab30b554db3c7556b1cf28e">&#9670;&#160;</a></span>updateSecData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> * WTSDataFactory::updateSecData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td>
+          <td class="paramname"><em>sInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSKlineData.html">WTSKlineData</a> *&#160;</td>
+          <td class="paramname"><em>klineData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>tick</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>更新秒级K线数据 </p>
+<p>使用Tick数据更新秒线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sInfo</td><td>交易时间模板 </td></tr>
+    <tr><td class="paramname">klineData</td><td>现有K线数据 </td></tr>
+    <tr><td class="paramname">tick</td><td>最新tick数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 更新后的K线结构</dd></dl>
+<p>将单个Tick数据合并到已有的秒线数据中，根据klineData中设置的时间单位(times)进行合并</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sInfo</td><td>交易时间信息对象指针 </td></tr>
+    <tr><td class="paramname">klineData</td><td>需要更新的K线数据对象指针 </td></tr>
+    <tr><td class="paramname">tick</td><td>Tick数据对象指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 返回更新后的K线结构指针，更新失败返回NULL </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a> 第 <a class="el" href="WTSDataFactory_8cpp_source.html#l00633">633</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WTSTools/<a class="el" href="WTSDataFactory_8h_source.html">WTSDataFactory.h</a></li>
+<li>src/WTSTools/<a class="el" href="WTSDataFactory_8cpp_source.html">WTSDataFactory.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classWTSDataFactory.html">WTSDataFactory</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/WtLMDB.hpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtLMDB_8hpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">WtLMDB.hpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>LMDB数据库封装类  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &lt;stdint.h&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;functional&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+<code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;unistd.h&gt;</code><br />
+<code>#include &lt;sys/stat.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="WTSMarcos_8h_source.html">../Includes/WTSMarcos.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="lmdb_8h_source.html">lmdb/lmdb.h</a>&quot;</code><br />
+</div>
+<p><a href="WtLMDB_8hpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html">WtLMDB</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">LMDB数据库封装基础类  <a href="classWtLMDB.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html">WtLMDBQuery</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">LMDB数据库查询和操作类  <a href="classWtLMDBQuery.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a0cdd304877129230e16c3606e714bcd2" id="r_a0cdd304877129230e16c3606e714bcd2"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; void(<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WtLMDB_8hpp.html#a50dea8b3647d6fb33fc4037ec96cb6ef">ValueArray</a> &amp;, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WtLMDB_8hpp.html#a50dea8b3647d6fb33fc4037ec96cb6ef">ValueArray</a> &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtLMDB_8hpp.html#a0cdd304877129230e16c3606e714bcd2">LMDBQueryCallback</a></td></tr>
+<tr class="memdesc:a0cdd304877129230e16c3606e714bcd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">LMDB查询回调函数类型  <br /></td></tr>
+<tr class="separator:a0cdd304877129230e16c3606e714bcd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a50dea8b3647d6fb33fc4037ec96cb6ef" id="r_a50dea8b3647d6fb33fc4037ec96cb6ef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a> typedef std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtLMDB_8hpp.html#a50dea8b3647d6fb33fc4037ec96cb6ef">ValueArray</a></td></tr>
+<tr class="memdesc:a50dea8b3647d6fb33fc4037ec96cb6ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">字符串数组类型  <br /></td></tr>
+<tr class="separator:a50dea8b3647d6fb33fc4037ec96cb6ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>LMDB数据库封装类 </p>
+<p>\project WonderTrader</p>
+<dl class="section author"><dt>作者</dt><dd>Wesley </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2020/03/30</dd></dl>
+<p>本文件实现了对LMDB（Lightning Memory-Mapped Database）的封装， 提供了高效的内存映射型键值数据库操作功能。 LMDB是一个高性能的事务性键值存储，在WonderTrader中用于存储各种交易数据。 包含了两个主要类：WtLMDB（数据库基础类）和WtLMDBQuery（数据查询和操作类）。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 中定义.</p>
+</div><h2 class="groupheader">类型定义说明</h2>
+<a id="a0cdd304877129230e16c3606e714bcd2" name="a0cdd304877129230e16c3606e714bcd2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cdd304877129230e16c3606e714bcd2">&#9670;&#160;</a></span>LMDBQueryCallback</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::function&lt;void(<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WtLMDB_8hpp.html#a50dea8b3647d6fb33fc4037ec96cb6ef">ValueArray</a>&amp;, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WtLMDB_8hpp.html#a50dea8b3647d6fb33fc4037ec96cb6ef">ValueArray</a>&amp;)&gt; <a class="el" href="WtLMDB_8hpp.html#a0cdd304877129230e16c3606e714bcd2">LMDBQueryCallback</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>LMDB查询回调函数类型 </p>
+<p>用于定义查询结果的回调函数，接收两个ValueArray参数，分别表示键数组和值数组 </p>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00048">48</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a50dea8b3647d6fb33fc4037ec96cb6ef" name="a50dea8b3647d6fb33fc4037ec96cb6ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50dea8b3647d6fb33fc4037ec96cb6ef">&#9670;&#160;</a></span>ValueArray</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a> typedef std::vector&lt;std::string&gt; ValueArray</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>字符串数组类型 </p>
+<p>用于存储数据库查询结果中的键或值的字符串数组 </p>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00041">41</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="WtLMDB_8hpp.html">WtLMDB.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

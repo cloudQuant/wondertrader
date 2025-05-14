@@ -1,0 +1,486 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/sutil/platform/spk_platforms.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('spk__platforms_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">spk_platforms.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="spk__platforms_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright 2009-2016 the original author or authors.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * you may not use this file except in compliance with the License.</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * You may obtain a copy of the License at</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *     http://www.apache.org/licenses/LICENSE-2.0</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * Unless required by applicable law or agreed to in writing, software</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * See the License for the specific language governing permissions and</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * limitations under the License.</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#ifndef _SPK_PLATFORMS_H</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#define _SPK_PLATFORMS_H</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include    &lt;<a class="code" href="types_8h.html">sutil/types.h</a>&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment"> * 标准库头文件</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#include    &lt;stdio.h&gt;</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#include    &lt;stdlib.h&gt;</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#include    &lt;stddef.h&gt;</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#include    &lt;ctype.h&gt;</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#include    &lt;limits.h&gt;</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#include    &lt;signal.h&gt;</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#include    &lt;errno.h&gt;</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#include    &lt;assert.h&gt;</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#include    &lt;fcntl.h&gt;</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#include    &lt;time.h&gt;</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#include    &lt;stdarg.h&gt;</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#include    &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#include    &lt;<a class="code" href="memory_8h.html">memory.h</a>&gt;</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#include    &lt;setjmp.h&gt;</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#include    &lt;sys/types.h&gt;</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#include    &lt;sys/stat.h&gt;</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment"> * 平台特定的头文件</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#if ! (defined (__WINDOWS__) || (defined (__MINGW__) &amp;&amp; ! defined (USE_GNULIB)))</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#   include &lt;unistd.h&gt;</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">#   include &lt;sys/file.h&gt;</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="preprocessor">#   include &lt;sys/time.h&gt;</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#   include &lt;sys/socket.h&gt;</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">#   include &lt;sys/select.h&gt;</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#   include &lt;sys/ioctl.h&gt;</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#   include &lt;sys/wait.h&gt;</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#   include &lt;netinet/in.h&gt;</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">#   include &lt;arpa/inet.h&gt;</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#   include &lt;netdb.h&gt;</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">#   include &lt;pthread.h&gt;</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#   if ! defined (__MINGW__)</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">#       include &lt;sys/un.h&gt;</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#       include &lt;sys/ipc.h&gt;</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="preprocessor">#       include &lt;sys/sem.h&gt;</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="preprocessor">#       include &lt;sys/shm.h&gt;</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="preprocessor">#       include &lt;sys/mman.h&gt;</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">#       include &lt;netinet/tcp.h&gt;</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="preprocessor">#       include &lt;poll.h&gt;</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="preprocessor">#   else</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="preprocessor">#       include &lt;sys/uio.h&gt;</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="preprocessor">#       include &quot;fatal-signal.h&quot;</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="preprocessor">#       include &quot;nonblocking.h&quot;</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">#       include &quot;sockets.h&quot;</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="preprocessor">#   endif</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="preprocessor">#if defined (__LINUX__) || defined (__CYGWIN__) || defined (__MINGW__) \</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="preprocessor">        || defined (__HPUX__) || defined (__AIX__) || defined (__SOLARIS__)</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="preprocessor">#   include &lt;malloc.h&gt;</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="preprocessor">#if defined (__BSD__) || defined (__APPLE__) || defined (__LINUX__)</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="preprocessor">#   include &lt;sys/uio.h&gt;</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="preprocessor">#if defined (__SOLARIS__)</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">#   include &lt;sys/sockio.h&gt;</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="preprocessor">#if defined (__WINDOWS__) || defined (__MINGW__)</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="preprocessor">#   include &lt;io.h&gt;</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="preprocessor">#   include &lt;sys/timeb.h&gt;</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="preprocessor">#   if defined (_MSC_VER) &amp;&amp; _MSC_VER &gt;= 1400</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="preprocessor">#       include &lt;intrin.h&gt;</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="preprocessor">#   endif</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="comment"> * 跨平台兼容性处理</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="comment">/* snprintf */</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span><span class="preprocessor">#if (defined(__WINDOWS__) || defined(__MINGW__)) \</span></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="preprocessor">        &amp;&amp; ((defined(_MSC_VER) &amp;&amp; (_MSC_VER &lt;= 1800 || !defined(__cplusplus))) \</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="preprocessor">                || (defined(__GNUC__) \</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="preprocessor">                        &amp;&amp; ((!defined(__USE_MINGW_ANSI_STDIO) || __GNUC__ &lt; 11) \</span></div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span><span class="preprocessor">                                &amp;&amp; !defined(__cplusplus))))</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><span class="preprocessor">#   define  snprintf                        _snprintf</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span><span class="preprocessor">#   define  __SPK_FMT_LL__                  &quot;I64&quot;</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="preprocessor">#   define  __SPK_FMT_HH__                  &quot;&quot;</span></div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span><span class="preprocessor">#   define  __SPK_FMT_SHORT__               &quot;&quot;</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#ae9f2f4c9ef5d99802e603a37449b860b">  140</a></span><span class="preprocessor">#   define  __SPK_FMT_LL__                  &quot;ll&quot;</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a3b9bda10c0f6b206595e7e1f1b1982ee">  141</a></span><span class="preprocessor">#   define  __SPK_FMT_HH__                  &quot;hh&quot;</span></div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a9d39d384a08d0c3855c03ae0df67abf8">  142</a></span><span class="preprocessor">#   define  __SPK_FMT_SHORT__               &quot;h&quot;</span></div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span> </div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="comment"> * 涉及跨平台兼容的错误号处理</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span><span class="comment"> * 判断errno是否是 EAGAIN / EWOULDBLOCK</span></div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span><span class="comment"> * 用于非阻塞I/O</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span><span class="preprocessor">#if defined(EAGAIN) &amp;&amp; defined(EWOULDBLOCK) &amp;&amp; (EWOULDBLOCK != EAGAIN)</span></div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span><span class="preprocessor">#   define  _SPK_IS_ERRNO_EAGAIN(e)         ((e) == EAGAIN || (e) == EWOULDBLOCK)</span></div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span><span class="preprocessor">#elif defined(EAGAIN)</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span><span class="preprocessor">#   define  _SPK_IS_ERRNO_EAGAIN(e)         ((e) == EAGAIN)</span></div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span><span class="preprocessor">#elif defined(EWOULDBLOCK)</span></div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span><span class="preprocessor">#   define  _SPK_IS_ERRNO_EAGAIN(e)         ((e) == EWOULDBLOCK)</span></div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span><span class="preprocessor">#   error   &quot;Neither EAGAIN nor EWOULDBLOCK is defined!&quot;</span></div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span><span class="comment"> * 判断errno是否是 ECONNABORTED</span></div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span><span class="comment"> * 用于非阻塞accept</span></div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span><span class="preprocessor">#if defined(ECONNABORTED)</span></div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span><span class="preprocessor">#   define  _SPK_IS_ERRNO_ECONNABORTED(e)   ((e) == ECONNABORTED)</span></div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#ad1d7f89256001c100cbe9793079b2c2b">  175</a></span><span class="preprocessor">#   define  _SPK_IS_ERRNO_ECONNABORTED(e)   (0)</span></div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span><span class="comment"> * 判断errno是否是 EPROTO</span></div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span><span class="comment"> * 用于非阻塞accept</span></div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span><span class="preprocessor">#if defined(EPROTO)</span></div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span><span class="preprocessor">#   define  _SPK_IS_ERRNO_EPROTO(e)         ((e) == EPROTO)</span></div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#ab4a5df7f1e18a061735bb93883e65e7e">  187</a></span><span class="preprocessor">#   define  _SPK_IS_ERRNO_EPROTO(e)         (0)</span></div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span> </div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span><span class="preprocessor">#if defined (__WINDOWS__)</span></div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span><span class="preprocessor">#   define SPK_GET_ERRNO()                  (__SPlatform_GetErrno())</span></div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span><span class="preprocessor">#   define SPK_GET_NEG_ERRNO()              (__SPlatform_GetNegErrno())</span></div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span><span class="preprocessor">#   define SPK_SET_ERRNO(e)                 (__SPlatform_SetErrno((e)))</span></div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span> </div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span><span class="preprocessor">#   define SPK_IS_EAGAIN(e)                 (__SPlatform_IsErrEagain((e)))</span></div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span><span class="preprocessor">#   define SPK_IS_ECONNABORTED(e)           (__SPlatform_IsErrEconnaborted((e)))</span></div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span><span class="preprocessor">#   define SPK_IS_EPROTO(e)                 (__SPlatform_IsErrEproto((e)))</span></div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span><span class="preprocessor">#   define SPK_IS_ETIMEDOUT(e)              (__SPlatform_IsErrEtimeout((e)))</span></div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span><span class="preprocessor">#   define SPK_IS_EPIPE(e)                  (__SPlatform_IsErrEpipe((e)))</span></div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span><span class="preprocessor">#   define SPK_IS_EINTR(e)                  (__SPlatform_IsErrEintr((e)))</span></div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span><span class="preprocessor">#   define SPK_IS_EBADMSG(e)                (__SPlatform_IsErrEbadmsg((e)))</span></div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span><span class="preprocessor">#   define SPK_IS_EINVAL(e)                 (__SPlatform_IsErrEinval((e)))</span></div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span><span class="preprocessor">#   define SPK_IS_ERANGE(e)                 (__SPlatform_IsErrErange((e)))</span></div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span><span class="preprocessor">#   define SPK_IS_ENOSPC(e)                 (__SPlatform_IsErrEnospc((e)))</span></div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span><span class="preprocessor">#   define SPK_IS_ENOENT(e)                 (__SPlatform_IsErrEnoent((e)))</span></div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span><span class="preprocessor">#   define SPK_IS_ENODATA(e)                (__SPlatform_IsErrEnodata((e)))</span></div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span><span class="preprocessor">#   define SPK_IS_EEXIST(e)                 (__SPlatform_IsErrEexist((e)))</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span> </div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span><span class="preprocessor">#   define SPK_IS_NEG_EAGAIN(e)             (__SPlatform_IsNegEagain((e)))</span></div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span><span class="preprocessor">#   define SPK_IS_NEG_ECONNABORTED(e)       (__SPlatform_IsNegEconnaborted((e)))</span></div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span><span class="preprocessor">#   define SPK_IS_NEG_EPROTO(e)             (__SPlatform_IsNegEproto((e)))</span></div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span><span class="preprocessor">#   define SPK_IS_NEG_ETIMEDOUT(e)          (__SPlatform_IsNegEtimeout((e)))</span></div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span><span class="preprocessor">#   define SPK_IS_NEG_EPIPE(e)              (__SPlatform_IsNegEpipe((e)))</span></div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span><span class="preprocessor">#   define SPK_IS_NEG_EINTR(e)              (__SPlatform_IsNegEintr((e)))</span></div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span><span class="preprocessor">#   define SPK_IS_NEG_EBADMSG(e)            (__SPlatform_IsNegEbadmsg((e)))</span></div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span><span class="preprocessor">#   define SPK_IS_NEG_EINVAL(e)             (__SPlatform_IsNegEinval((e)))</span></div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span><span class="preprocessor">#   define SPK_IS_NEG_ERANGE(e)             (__SPlatform_IsNegErange((e)))</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span><span class="preprocessor">#   define SPK_IS_NEG_ENOSPC(e)             (__SPlatform_IsNegEnospc((e)))</span></div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span><span class="preprocessor">#   define SPK_IS_NEG_ENOENT(e)             (__SPlatform_IsNegEnoent((e)))</span></div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span><span class="preprocessor">#   define SPK_IS_NEG_ENODATA(e)            (__SPlatform_IsNegEnodata((e)))</span></div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span><span class="preprocessor">#   define SPK_IS_NEG_EEXIST(e)             (__SPlatform_IsNegEexist((e)))</span></div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span> </div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span> </div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">  228</a></span><span class="preprocessor">#   define SPK_GET_ERRNO()                  (errno)</span></div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a278c85f5bced6ae2233b250d6d3721ab">  229</a></span><span class="preprocessor">#   define SPK_GET_NEG_ERRNO()              ((errno) &gt; 0 ? -(errno) : -1)</span></div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#aff874845f15f04e42cadbaf944d53378">  230</a></span><span class="preprocessor">#   define SPK_SET_ERRNO(e)                 (errno = (e))</span></div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span> </div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#ab039951043c3fe4df323690ee60d975c">  232</a></span><span class="preprocessor">#   define SPK_IS_EAGAIN(e)                 (_SPK_IS_ERRNO_EAGAIN(e))</span></div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a2b8676746e3d4a66639339297a4b0903">  233</a></span><span class="preprocessor">#   define SPK_IS_ECONNABORTED(e)           (_SPK_IS_ERRNO_ECONNABORTED(e))</span></div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#aa0413633c30f0448bd03060c96971f73">  234</a></span><span class="preprocessor">#   define SPK_IS_EPROTO(e)                 (_SPK_IS_ERRNO_EPROTO(e))</span></div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a056eff3ab7b0d56627594d873435ac2c">  235</a></span><span class="preprocessor">#   define SPK_IS_ETIMEDOUT(e)              ((e) == ETIMEDOUT)</span></div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a5f5db3af5ce3a0fb5c2a890345fdfbea">  236</a></span><span class="preprocessor">#   define SPK_IS_EPIPE(e)                  ((e) == EPIPE)</span></div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a0cd9959594b6776f40e4320a149daba5">  237</a></span><span class="preprocessor">#   define SPK_IS_EINTR(e)                  ((e) == EINTR)</span></div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#aca770722b58289c23ec7c048bec838dc">  238</a></span><span class="preprocessor">#   define SPK_IS_EBADMSG(e)                ((e) == EBADMSG)</span></div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a12987a97e763fa869f1129c4ed5aa188">  239</a></span><span class="preprocessor">#   define SPK_IS_EINVAL(e)                 ((e) == EINVAL)</span></div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a552c7651cdc7436fe381e061d34d431e">  240</a></span><span class="preprocessor">#   define SPK_IS_ERANGE(e)                 ((e) == ERANGE)</span></div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a2a148e97be5af79340cae89bdd9e2433">  241</a></span><span class="preprocessor">#   define SPK_IS_ENOSPC(e)                 ((e) == ENOSPC)</span></div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#af31b3aaed12696ae52f424f178d4040a">  242</a></span><span class="preprocessor">#   define SPK_IS_ENOENT(e)                 ((e) == ENOENT)</span></div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#ac25068b959b9f57cd99a46f2d06ae691">  243</a></span><span class="preprocessor">#   define SPK_IS_ENODATA(e)                ((e) == ENODATA)</span></div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a30948369649372ff51d8557d413ee681">  244</a></span><span class="preprocessor">#   define SPK_IS_EEXIST(e)                 ((e) == EEXIST)</span></div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> </div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a63f0fcce548ffc12392a8cbe78c92ff2">  246</a></span><span class="preprocessor">#   define SPK_IS_NEG_EAGAIN(e)             (_SPK_IS_ERRNO_EAGAIN(-(e)))</span></div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a7476db66d02e74ccefc8d4e7e9977c9c">  247</a></span><span class="preprocessor">#   define SPK_IS_NEG_ECONNABORTED(e)       (_SPK_IS_ERRNO_ECONNABORTED(-(e)))</span></div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a7eaee368955006246a9b95ab862e1544">  248</a></span><span class="preprocessor">#   define SPK_IS_NEG_EPROTO(e)             (_SPK_IS_ERRNO_EPROTO(-(e)))</span></div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a9b14d755d2d5dd449f599a0c0dadf04e">  249</a></span><span class="preprocessor">#   define SPK_IS_NEG_ETIMEDOUT(e)          ((e) == -(ETIMEDOUT))</span></div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a6d206a18e9da707a72887ae05f8c5ac6">  250</a></span><span class="preprocessor">#   define SPK_IS_NEG_EPIPE(e)              ((e) == -(EPIPE))</span></div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#ab759f05e94948f8d4481bd34251d3d3c">  251</a></span><span class="preprocessor">#   define SPK_IS_NEG_EINTR(e)              ((e) == -(EINTR))</span></div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a851ffa9ec47aff1660467acf91f3bf04">  252</a></span><span class="preprocessor">#   define SPK_IS_NEG_EBADMSG(e)            ((e) == -(EBADMSG))</span></div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a770b110ff67c02b15c558207ca22fd5c">  253</a></span><span class="preprocessor">#   define SPK_IS_NEG_EINVAL(e)             ((e) == -(EINVAL))</span></div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a4161314f812ba69b5974b1ad621d9763">  254</a></span><span class="preprocessor">#   define SPK_IS_NEG_ERANGE(e)             ((e) == -(ERANGE))</span></div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a9d53c9937e6dc31f7f5dcd410382a2c5">  255</a></span><span class="preprocessor">#   define SPK_IS_NEG_ENOSPC(e)             ((e) == -(ENOSPC))</span></div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a2f441f3bfef39e1a9e8334801b73993e">  256</a></span><span class="preprocessor">#   define SPK_IS_NEG_ENOENT(e)             ((e) == -(ENOENT))</span></div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a4156ba6d685dcff9ef38a0784fe99c91">  257</a></span><span class="preprocessor">#   define SPK_IS_NEG_ENODATA(e)            ((e) == -(ENODATA))</span></div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a05716b7fb0059a1d4f926a178294e275">  258</a></span><span class="preprocessor">#   define SPK_IS_NEG_EEXIST(e)             ((e) == -(EEXIST))</span></div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span> </div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span> </div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span> </div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#af8d084ddc89cf4e61153da8ceb0724b3">  263</a></span><span class="preprocessor">#define SPK_IS_ERRNO_EAGAIN()               (SPK_IS_EAGAIN(SPK_GET_ERRNO()))</span></div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a924d540fb7b3c590e3e20971c9e58c59">  264</a></span><span class="preprocessor">#define SPK_IS_ERRNO_ECONNABORTED()         (SPK_IS_ECONNABORTED(SPK_GET_ERRNO()))</span></div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#ab578e303ec925f4d14d55adeaa676ff8">  265</a></span><span class="preprocessor">#define SPK_IS_ERRNO_EPROTO()               (SPK_IS_EPROTO(SPK_GET_ERRNO()))</span></div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a20e1b8f8eaad8183a5ec4ab84b8eb03d">  266</a></span><span class="preprocessor">#define SPK_IS_ERRNO_ETIMEDOUT()            (SPK_IS_ETIMEDOUT(SPK_GET_ERRNO()))</span></div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a43fcaba74a164008d38a0d39f1e87b03">  267</a></span><span class="preprocessor">#define SPK_IS_ERRNO_EPIPE()                (SPK_IS_EPIPE(SPK_GET_ERRNO()))</span></div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#ab66bfeaa101122fe5f944c417ff133a8">  268</a></span><span class="preprocessor">#define SPK_IS_ERRNO_EINTR()                (SPK_IS_EINTR(SPK_GET_ERRNO()))</span></div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a017472380f6d3f09129f364399def5da">  269</a></span><span class="preprocessor">#define SPK_IS_ERRNO_EBADMSG()              (SPK_IS_EBADMSG(SPK_GET_ERRNO()))</span></div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a573f903be84c377df7908dc78e61e15b">  270</a></span><span class="preprocessor">#define SPK_IS_ERRNO_EINVAL()               (SPK_IS_EINVAL(SPK_GET_ERRNO()))</span></div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a54b03125607c2c137af633382723f53d">  271</a></span><span class="preprocessor">#define SPK_IS_ERRNO_ERANGE()               (SPK_IS_ERANGE(SPK_GET_ERRNO()))</span></div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a8dd35dc8a760f3c7a454dbd05635888a">  272</a></span><span class="preprocessor">#define SPK_IS_ERRNO_ENOSPC()               (SPK_IS_ENOSPC(SPK_GET_ERRNO()))</span></div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a6c099e95e794e11039c86c5bda128fc2">  273</a></span><span class="preprocessor">#define SPK_IS_ERRNO_ENOENT()               (SPK_IS_ENOENT(SPK_GET_ERRNO()))</span></div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a89e4317001834eeafe696f39b5b7219e">  274</a></span><span class="preprocessor">#define SPK_IS_ERRNO_ENODATA()              (SPK_IS_ENODATA(SPK_GET_ERRNO()))</span></div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a2d05e93b26c03840286e2e09dce744be">  275</a></span><span class="preprocessor">#define SPK_IS_ERRNO_EEXIST()               (SPK_IS_EEXIST(SPK_GET_ERRNO()))</span></div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span> </div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span><span class="comment"> * 函数声明</span></div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span> </div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span><span class="comment">/* 返回错误号 errno */</span></div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#aca810dc80a391722df44b7b759e53fd4">  284</a></span><a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>       <a class="code hl_function" href="spk__platforms_8h.html#aca810dc80a391722df44b7b759e53fd4">__SPlatform_GetErrno</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span> </div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span><span class="comment">/* 返回负的错误号 */</span></div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a3075772be1fe6a3744dd3e0bc24fbf80">  287</a></span><a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>       <a class="code hl_function" href="spk__platforms_8h.html#a3075772be1fe6a3744dd3e0bc24fbf80">__SPlatform_GetNegErrno</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span> </div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span><span class="comment">/* 设置错误号 errno */</span></div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a4c7d4a8dbfed37d9add9511f521f1356">  290</a></span><span class="keywordtype">void</span>        <a class="code hl_function" href="spk__platforms_8h.html#a4c7d4a8dbfed37d9add9511f521f1356">__SPlatform_SetErrno</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span> </div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span><span class="comment">/* 返回错误号是否是 EAGAIN */</span></div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a0c897e0347c9daf99450cd4d0083f27e">  293</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a0c897e0347c9daf99450cd4d0083f27e">__SPlatform_IsErrEagain</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span><span class="comment">/* 返回错误号是否是 ECONNABORTED */</span></div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a3d1c2a7fc8901f4c273ef0454b1d4035">  295</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a3d1c2a7fc8901f4c273ef0454b1d4035">__SPlatform_IsErrEconnaborted</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span><span class="comment">/* 返回错误号是否是 EPROTO */</span></div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#af90f9a07dc4a165609e7d8b11638df40">  297</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#af90f9a07dc4a165609e7d8b11638df40">__SPlatform_IsErrEproto</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span><span class="comment">/* 返回错误号是否是 ETIMEDOUT */</span></div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a7baffe84830698d5c350baf2dfd9dce2">  299</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a7baffe84830698d5c350baf2dfd9dce2">__SPlatform_IsErrEtimeout</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span><span class="comment">/* 返回错误号是否是 EPIPE */</span></div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a1ffe668d0d05fefff8541519328852c1">  301</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a1ffe668d0d05fefff8541519328852c1">__SPlatform_IsErrEpipe</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span><span class="comment">/* 返回错误号是否是 EINTR */</span></div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a403ebee3d3b87e0b0a625bf57fffa140">  303</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a403ebee3d3b87e0b0a625bf57fffa140">__SPlatform_IsErrEintr</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span><span class="comment">/* 返回错误号是否是 EBADMSG */</span></div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a3ff623c53504aa6a7f4af473dbcc5129">  305</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a3ff623c53504aa6a7f4af473dbcc5129">__SPlatform_IsErrEbadmsg</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span><span class="comment">/* 返回错误号是否是 EINVAL */</span></div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#aff273ec8ae5772b19405cb4e3db29504">  307</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#aff273ec8ae5772b19405cb4e3db29504">__SPlatform_IsErrEinval</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span><span class="comment">/* 返回错误号是否是 ERANGE */</span></div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a105e52eedf0761e53ff8185279d2b756">  309</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a105e52eedf0761e53ff8185279d2b756">__SPlatform_IsErrErange</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span><span class="comment">/* 返回错误号是否是 ENOSPC */</span></div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a5c349253fe084a2f28aaaa9468229806">  311</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a5c349253fe084a2f28aaaa9468229806">__SPlatform_IsErrEnospc</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span><span class="comment">/* 返回错误号是否是 ENOENT */</span></div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a2721e1627411094cd4a135af3e806b12">  313</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a2721e1627411094cd4a135af3e806b12">__SPlatform_IsErrEnoent</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span><span class="comment">/* 返回错误号是否是 ENODATA */</span></div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#ade961b5164fc4fd57a6e4dd4d869632c">  315</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#ade961b5164fc4fd57a6e4dd4d869632c">__SPlatform_IsErrEnodata</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span><span class="comment">/* 返回错误号是否是 EEXIST */</span></div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a5f716fe39dc28bdd6564187b3d069842">  317</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a5f716fe39dc28bdd6564187b3d069842">__SPlatform_IsErrEexist</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span> </div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span><span class="comment">/* 返回错误号是否是负的 EAGAIN */</span></div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a37fa5cca53fd380b80f9f5d6457f88a3">  320</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a37fa5cca53fd380b80f9f5d6457f88a3">__SPlatform_IsNegEagain</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span><span class="comment">/* 返回错误号是否是负的 ECONNABORTED */</span></div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#adb8cd59878686f3367f935496039a0ae">  322</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#adb8cd59878686f3367f935496039a0ae">__SPlatform_IsNegEconnaborted</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span><span class="comment">/* 返回错误号是否是负的 EPROTO */</span></div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#ac0bb83b258d7defa4c811e71ee0abc24">  324</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#ac0bb83b258d7defa4c811e71ee0abc24">__SPlatform_IsNegEproto</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span><span class="comment">/* 返回错误号是否是负的 ETIMEDOUT */</span></div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a80031b258523239a6b142dfb9648826d">  326</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a80031b258523239a6b142dfb9648826d">__SPlatform_IsNegEtimeout</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span><span class="comment">/* 返回错误号是否是负的 EPIPE */</span></div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a2fab948495b08c561be342cbe108e5d6">  328</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a2fab948495b08c561be342cbe108e5d6">__SPlatform_IsNegEpipe</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span><span class="comment">/* 返回错误号是否是负的 EINTR */</span></div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a41243fdedabd7822096feb14bd4c4d6a">  330</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a41243fdedabd7822096feb14bd4c4d6a">__SPlatform_IsNegEintr</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span><span class="comment">/* 返回错误号是否是负的 EBADMSG */</span></div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#adedb572ac578f94516644f795597b49b">  332</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#adedb572ac578f94516644f795597b49b">__SPlatform_IsNegEbadmsg</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span><span class="comment">/* 返回错误号是否是负的 EINVAL */</span></div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#ae6683b6745123400680cbe21b5a52412">  334</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#ae6683b6745123400680cbe21b5a52412">__SPlatform_IsNegEinval</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span><span class="comment">/* 返回错误号是否是负的 ERANGE */</span></div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a0828994c79ff3e10a13a460c663ca65b">  336</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a0828994c79ff3e10a13a460c663ca65b">__SPlatform_IsNegErange</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span><span class="comment">/* 返回错误号是否是负的 ENOSPC */</span></div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a911af1305a556889714d0093bc649e89">  338</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a911af1305a556889714d0093bc649e89">__SPlatform_IsNegEnospc</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span><span class="comment">/* 返回错误号是否是负的 ENOENT */</span></div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a44dcc94102d1b5475da9e8891978b8f9">  340</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a44dcc94102d1b5475da9e8891978b8f9">__SPlatform_IsNegEnoent</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span><span class="comment">/* 返回错误号是否是负的 ENODATA */</span></div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a539fca4bc82c99025751b41692283a53">  342</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a539fca4bc82c99025751b41692283a53">__SPlatform_IsNegEnodata</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span><span class="comment">/* 返回错误号是否是负的 EEXIST */</span></div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno"><a class="line" href="spk__platforms_8h.html#a4b29a10a7f81e997330ccf2187591b62">  344</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>        <a class="code hl_function" href="spk__platforms_8h.html#a4b29a10a7f81e997330ccf2187591b62">__SPlatform_IsNegEexist</a>(<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err);</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span> </div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span> </div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>}</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span> </div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span><span class="preprocessor">#endif  </span><span class="comment">/* _SPK_PLATFORMS_H */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_ad3ce9f24199b79b2629169eebf59489b"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a></div><div class="ttdeci">__int32 int32</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00070">itpdk_typedef.h:70</a></div></div>
+<div class="ttc" id="amemory_8h_html"><div class="ttname"><a href="memory_8h.html">memory.h</a></div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a0828994c79ff3e10a13a460c663ca65b"><div class="ttname"><a href="spk__platforms_8h.html#a0828994c79ff3e10a13a460c663ca65b">__SPlatform_IsNegErange</a></div><div class="ttdeci">BOOL __SPlatform_IsNegErange(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a0c897e0347c9daf99450cd4d0083f27e"><div class="ttname"><a href="spk__platforms_8h.html#a0c897e0347c9daf99450cd4d0083f27e">__SPlatform_IsErrEagain</a></div><div class="ttdeci">BOOL __SPlatform_IsErrEagain(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a105e52eedf0761e53ff8185279d2b756"><div class="ttname"><a href="spk__platforms_8h.html#a105e52eedf0761e53ff8185279d2b756">__SPlatform_IsErrErange</a></div><div class="ttdeci">BOOL __SPlatform_IsErrErange(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a1ffe668d0d05fefff8541519328852c1"><div class="ttname"><a href="spk__platforms_8h.html#a1ffe668d0d05fefff8541519328852c1">__SPlatform_IsErrEpipe</a></div><div class="ttdeci">BOOL __SPlatform_IsErrEpipe(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a2721e1627411094cd4a135af3e806b12"><div class="ttname"><a href="spk__platforms_8h.html#a2721e1627411094cd4a135af3e806b12">__SPlatform_IsErrEnoent</a></div><div class="ttdeci">BOOL __SPlatform_IsErrEnoent(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a2fab948495b08c561be342cbe108e5d6"><div class="ttname"><a href="spk__platforms_8h.html#a2fab948495b08c561be342cbe108e5d6">__SPlatform_IsNegEpipe</a></div><div class="ttdeci">BOOL __SPlatform_IsNegEpipe(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a3075772be1fe6a3744dd3e0bc24fbf80"><div class="ttname"><a href="spk__platforms_8h.html#a3075772be1fe6a3744dd3e0bc24fbf80">__SPlatform_GetNegErrno</a></div><div class="ttdeci">int32 __SPlatform_GetNegErrno(void)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a37fa5cca53fd380b80f9f5d6457f88a3"><div class="ttname"><a href="spk__platforms_8h.html#a37fa5cca53fd380b80f9f5d6457f88a3">__SPlatform_IsNegEagain</a></div><div class="ttdeci">BOOL __SPlatform_IsNegEagain(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a3d1c2a7fc8901f4c273ef0454b1d4035"><div class="ttname"><a href="spk__platforms_8h.html#a3d1c2a7fc8901f4c273ef0454b1d4035">__SPlatform_IsErrEconnaborted</a></div><div class="ttdeci">BOOL __SPlatform_IsErrEconnaborted(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a3ff623c53504aa6a7f4af473dbcc5129"><div class="ttname"><a href="spk__platforms_8h.html#a3ff623c53504aa6a7f4af473dbcc5129">__SPlatform_IsErrEbadmsg</a></div><div class="ttdeci">BOOL __SPlatform_IsErrEbadmsg(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a403ebee3d3b87e0b0a625bf57fffa140"><div class="ttname"><a href="spk__platforms_8h.html#a403ebee3d3b87e0b0a625bf57fffa140">__SPlatform_IsErrEintr</a></div><div class="ttdeci">BOOL __SPlatform_IsErrEintr(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a41243fdedabd7822096feb14bd4c4d6a"><div class="ttname"><a href="spk__platforms_8h.html#a41243fdedabd7822096feb14bd4c4d6a">__SPlatform_IsNegEintr</a></div><div class="ttdeci">BOOL __SPlatform_IsNegEintr(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a44dcc94102d1b5475da9e8891978b8f9"><div class="ttname"><a href="spk__platforms_8h.html#a44dcc94102d1b5475da9e8891978b8f9">__SPlatform_IsNegEnoent</a></div><div class="ttdeci">BOOL __SPlatform_IsNegEnoent(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a4b29a10a7f81e997330ccf2187591b62"><div class="ttname"><a href="spk__platforms_8h.html#a4b29a10a7f81e997330ccf2187591b62">__SPlatform_IsNegEexist</a></div><div class="ttdeci">BOOL __SPlatform_IsNegEexist(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a4c7d4a8dbfed37d9add9511f521f1356"><div class="ttname"><a href="spk__platforms_8h.html#a4c7d4a8dbfed37d9add9511f521f1356">__SPlatform_SetErrno</a></div><div class="ttdeci">void __SPlatform_SetErrno(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a539fca4bc82c99025751b41692283a53"><div class="ttname"><a href="spk__platforms_8h.html#a539fca4bc82c99025751b41692283a53">__SPlatform_IsNegEnodata</a></div><div class="ttdeci">BOOL __SPlatform_IsNegEnodata(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a5c349253fe084a2f28aaaa9468229806"><div class="ttname"><a href="spk__platforms_8h.html#a5c349253fe084a2f28aaaa9468229806">__SPlatform_IsErrEnospc</a></div><div class="ttdeci">BOOL __SPlatform_IsErrEnospc(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a5f716fe39dc28bdd6564187b3d069842"><div class="ttname"><a href="spk__platforms_8h.html#a5f716fe39dc28bdd6564187b3d069842">__SPlatform_IsErrEexist</a></div><div class="ttdeci">BOOL __SPlatform_IsErrEexist(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a7baffe84830698d5c350baf2dfd9dce2"><div class="ttname"><a href="spk__platforms_8h.html#a7baffe84830698d5c350baf2dfd9dce2">__SPlatform_IsErrEtimeout</a></div><div class="ttdeci">BOOL __SPlatform_IsErrEtimeout(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a80031b258523239a6b142dfb9648826d"><div class="ttname"><a href="spk__platforms_8h.html#a80031b258523239a6b142dfb9648826d">__SPlatform_IsNegEtimeout</a></div><div class="ttdeci">BOOL __SPlatform_IsNegEtimeout(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_a911af1305a556889714d0093bc649e89"><div class="ttname"><a href="spk__platforms_8h.html#a911af1305a556889714d0093bc649e89">__SPlatform_IsNegEnospc</a></div><div class="ttdeci">BOOL __SPlatform_IsNegEnospc(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_ac0bb83b258d7defa4c811e71ee0abc24"><div class="ttname"><a href="spk__platforms_8h.html#ac0bb83b258d7defa4c811e71ee0abc24">__SPlatform_IsNegEproto</a></div><div class="ttdeci">BOOL __SPlatform_IsNegEproto(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_aca810dc80a391722df44b7b759e53fd4"><div class="ttname"><a href="spk__platforms_8h.html#aca810dc80a391722df44b7b759e53fd4">__SPlatform_GetErrno</a></div><div class="ttdeci">int32 __SPlatform_GetErrno(void)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_adb8cd59878686f3367f935496039a0ae"><div class="ttname"><a href="spk__platforms_8h.html#adb8cd59878686f3367f935496039a0ae">__SPlatform_IsNegEconnaborted</a></div><div class="ttdeci">BOOL __SPlatform_IsNegEconnaborted(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_ade961b5164fc4fd57a6e4dd4d869632c"><div class="ttname"><a href="spk__platforms_8h.html#ade961b5164fc4fd57a6e4dd4d869632c">__SPlatform_IsErrEnodata</a></div><div class="ttdeci">BOOL __SPlatform_IsErrEnodata(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_adedb572ac578f94516644f795597b49b"><div class="ttname"><a href="spk__platforms_8h.html#adedb572ac578f94516644f795597b49b">__SPlatform_IsNegEbadmsg</a></div><div class="ttdeci">BOOL __SPlatform_IsNegEbadmsg(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_ae6683b6745123400680cbe21b5a52412"><div class="ttname"><a href="spk__platforms_8h.html#ae6683b6745123400680cbe21b5a52412">__SPlatform_IsNegEinval</a></div><div class="ttdeci">BOOL __SPlatform_IsNegEinval(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_af90f9a07dc4a165609e7d8b11638df40"><div class="ttname"><a href="spk__platforms_8h.html#af90f9a07dc4a165609e7d8b11638df40">__SPlatform_IsErrEproto</a></div><div class="ttdeci">BOOL __SPlatform_IsErrEproto(int32 err)</div></div>
+<div class="ttc" id="aspk__platforms_8h_html_aff273ec8ae5772b19405cb4e3db29504"><div class="ttname"><a href="spk__platforms_8h.html#aff273ec8ae5772b19405cb4e3db29504">__SPlatform_IsErrEinval</a></div><div class="ttdeci">BOOL __SPlatform_IsErrEinval(int32 err)</div></div>
+<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div></div>
+<div class="ttc" id="atypes_8h_html_ae4cc35dcc70810fa972cc8a5185a28fa"><div class="ttname"><a href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a></div><div class="ttdeci">#define BOOL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00305">types.h:305</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_248d918e0c46523948aef7b06f6106c0.html">sutil</a></li><li class="navelem"><a class="el" href="dir_3c03f0dc5fcf24f56901870d4d53fda7.html">platform</a></li><li class="navelem"><a class="el" href="spk__platforms_8h.html">spk_platforms.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

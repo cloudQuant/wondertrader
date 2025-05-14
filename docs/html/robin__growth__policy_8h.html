@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/FasterLibs/tsl/robin_growth_policy.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('robin__growth__policy_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#namespaces">命名空间</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">robin_growth_policy.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;array&gt;</code><br />
+<code>#include &lt;climits&gt;</code><br />
+<code>#include &lt;cmath&gt;</code><br />
+<code>#include &lt;cstddef&gt;</code><br />
+<code>#include &lt;cstdint&gt;</code><br />
+<code>#include &lt;iterator&gt;</code><br />
+<code>#include &lt;limits&gt;</code><br />
+<code>#include &lt;ratio&gt;</code><br />
+<code>#include &lt;stdexcept&gt;</code><br />
+<code>#include &lt;iostream&gt;</code><br />
+</div>
+<p><a href="robin__growth__policy_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtsl_1_1rh_1_1power__of__two__growth__policy.html">tsl::rh::power_of_two_growth_policy&lt; GrowthFactor &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtsl_1_1rh_1_1mod__growth__policy.html">tsl::rh::mod_growth_policy&lt; GrowthFactor &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtsl_1_1rh_1_1prime__growth__policy.html">tsl::rh::prime_growth_policy</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+命名空间</h2></td></tr>
+<tr class="memitem:namespacetsl" id="r_namespacetsl"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacetsl.html">tsl</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespacetsl_1_1rh" id="r_namespacetsl_1_1rh"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacetsl_1_1rh.html">tsl::rh</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespacetsl_1_1rh_1_1detail" id="r_namespacetsl_1_1rh_1_1detail"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacetsl_1_1rh_1_1detail.html">tsl::rh::detail</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:abf43b6f27a3bf5120e9d61e5f5d0d0ee" id="r_abf43b6f27a3bf5120e9d61e5f5d0d0ee"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="robin__growth__policy_8h.html#abf43b6f27a3bf5120e9d61e5f5d0d0ee">tsl_rh_assert</a>(expr)&#160;&#160;&#160;(static_cast&lt;void&gt;(0))</td></tr>
+<tr class="separator:abf43b6f27a3bf5120e9d61e5f5d0d0ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa352528d449223f8086405d2ce4e8f9b" id="r_aa352528d449223f8086405d2ce4e8f9b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="robin__growth__policy_8h.html#aa352528d449223f8086405d2ce4e8f9b">TSL_RH_NO_EXCEPTIONS</a></td></tr>
+<tr class="separator:aa352528d449223f8086405d2ce4e8f9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6763b674ae3f1893aa7524c5c8a8e9b2" id="r_a6763b674ae3f1893aa7524c5c8a8e9b2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="robin__growth__policy_8h.html#a6763b674ae3f1893aa7524c5c8a8e9b2">TSL_RH_THROW_OR_TERMINATE</a>(ex,  msg)&#160;&#160;&#160;do { std::cerr &lt;&lt; msg &lt;&lt; std::endl; std::terminate(); } while(0)</td></tr>
+<tr class="separator:a6763b674ae3f1893aa7524c5c8a8e9b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15c2bc0fd0ed52be3b0bc91b814b69cb" id="r_a15c2bc0fd0ed52be3b0bc91b814b69cb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="robin__growth__policy_8h.html#a15c2bc0fd0ed52be3b0bc91b814b69cb">TSL_RH_LIKELY</a>(exp)&#160;&#160;&#160;(exp)</td></tr>
+<tr class="separator:a15c2bc0fd0ed52be3b0bc91b814b69cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08451e00a4de2f773fe0a762e39db53d" id="r_a08451e00a4de2f773fe0a762e39db53d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="robin__growth__policy_8h.html#a08451e00a4de2f773fe0a762e39db53d">TSL_RH_NB_PRIMES</a>&#160;&#160;&#160;51</td></tr>
+<tr class="separator:a08451e00a4de2f773fe0a762e39db53d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a01a38ec6ebb3561c84d2cba84b02cb07" id="r_a01a38ec6ebb3561c84d2cba84b02cb07"><td class="memTemplParams" colspan="2">template&lt;unsigned int IPrime&gt; </td></tr>
+<tr class="memitem:a01a38ec6ebb3561c84d2cba84b02cb07"><td class="memTemplItemLeft" align="right" valign="top">static constexpr std::size_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacetsl_1_1rh_1_1detail.html#a01a38ec6ebb3561c84d2cba84b02cb07">tsl::rh::detail::mod</a> (std::size_t hash)</td></tr>
+<tr class="separator:a01a38ec6ebb3561c84d2cba84b02cb07"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:aea3b0a65ca1f9a4cefc548a90899a5e4" id="r_aea3b0a65ca1f9a4cefc548a90899a5e4"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::array&lt; std::size_t, <a class="el" href="robin__growth__policy_8h.html#a08451e00a4de2f773fe0a762e39db53d">TSL_RH_NB_PRIMES</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacetsl_1_1rh_1_1detail.html#aea3b0a65ca1f9a4cefc548a90899a5e4">tsl::rh::detail::PRIMES</a></td></tr>
+<tr class="separator:aea3b0a65ca1f9a4cefc548a90899a5e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64bf6cb83897c08ed44cf4625ef74af1" id="r_a64bf6cb83897c08ed44cf4625ef74af1"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::array&lt; std::size_t(*)(std::size_t), <a class="el" href="robin__growth__policy_8h.html#a08451e00a4de2f773fe0a762e39db53d">TSL_RH_NB_PRIMES</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacetsl_1_1rh_1_1detail.html#a64bf6cb83897c08ed44cf4625ef74af1">tsl::rh::detail::MOD_PRIME</a></td></tr>
+<tr class="separator:a64bf6cb83897c08ed44cf4625ef74af1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="abf43b6f27a3bf5120e9d61e5f5d0d0ee" name="abf43b6f27a3bf5120e9d61e5f5d0d0ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf43b6f27a3bf5120e9d61e5f5d0d0ee">&#9670;&#160;</a></span>tsl_rh_assert</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define tsl_rh_assert</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">expr</td><td>)</td>
+          <td>&#160;&#160;&#160;(static_cast&lt;void&gt;(0))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>MIT License</p>
+<p>Copyright (c) 2017 Thibaut Goetghebuer-Planchon <a href="#" onclick="location.href='mai'+'lto:'+'tes'+'si'+'l@g'+'mx'+'.co'+'m'; return false;">tessi<span class="obfuscator">.nosp@m.</span>l@gm<span class="obfuscator">.nosp@m.</span>x.com</a></p>
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR <a class="el" href="classA.html">A</a> PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. </p>
+
+<p class="definition">在文件 <a class="el" href="robin__growth__policy_8h_source.html">robin_growth_policy.h</a> 第 <a class="el" href="robin__growth__policy_8h_source.html#l00043">43</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a15c2bc0fd0ed52be3b0bc91b814b69cb" name="a15c2bc0fd0ed52be3b0bc91b814b69cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15c2bc0fd0ed52be3b0bc91b814b69cb">&#9670;&#160;</a></span>TSL_RH_LIKELY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define TSL_RH_LIKELY</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">exp</td><td>)</td>
+          <td>&#160;&#160;&#160;(exp)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="robin__growth__policy_8h_source.html">robin_growth_policy.h</a> 第 <a class="el" href="robin__growth__policy_8h_source.html#l00066">66</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a08451e00a4de2f773fe0a762e39db53d" name="a08451e00a4de2f773fe0a762e39db53d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08451e00a4de2f773fe0a762e39db53d">&#9670;&#160;</a></span>TSL_RH_NB_PRIMES</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define TSL_RH_NB_PRIMES&#160;&#160;&#160;51</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="robin__growth__policy_8h_source.html">robin_growth_policy.h</a> 第 <a class="el" href="robin__growth__policy_8h_source.html#l00234">234</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa352528d449223f8086405d2ce4e8f9b" name="aa352528d449223f8086405d2ce4e8f9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa352528d449223f8086405d2ce4e8f9b">&#9670;&#160;</a></span>TSL_RH_NO_EXCEPTIONS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define TSL_RH_NO_EXCEPTIONS</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>If exceptions are enabled, throw the exception passed in parameter, otherwise call std::terminate. </p>
+
+<p class="definition">在文件 <a class="el" href="robin__growth__policy_8h_source.html">robin_growth_policy.h</a> 第 <a class="el" href="robin__growth__policy_8h_source.html#l00053">53</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6763b674ae3f1893aa7524c5c8a8e9b2" name="a6763b674ae3f1893aa7524c5c8a8e9b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6763b674ae3f1893aa7524c5c8a8e9b2">&#9670;&#160;</a></span>TSL_RH_THROW_OR_TERMINATE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define TSL_RH_THROW_OR_TERMINATE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">ex, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">msg&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;do { std::cerr &lt;&lt; msg &lt;&lt; std::endl; std::terminate(); } while(0)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="robin__growth__policy_8h_source.html">robin_growth_policy.h</a> 第 <a class="el" href="robin__growth__policy_8h_source.html#l00058">58</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_df9d77264400bd383da4e3f74b3dec6a.html">FasterLibs</a></li><li class="navelem"><a class="el" href="dir_ae175b046b2c4483f834bc31aeec2ea7.html">tsl</a></li><li class="navelem"><a class="el" href="robin__growth__policy_8h.html">robin_growth_policy.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

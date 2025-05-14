@@ -1,0 +1,25 @@
+var structSTRspQryOrder =
+[
+    [ "chIsWithdraw", "structSTRspQryOrder.html#a5b0ea2f923532b7dfa39a8d5e8a6bad1", null ],
+    [ "chIsWithdrawn", "structSTRspQryOrder.html#a93fc3cbd34faa8c009012f81932f4ffe", null ],
+    [ "chOrderStatus", "structSTRspQryOrder.html#a3e5724c25a9648e2e3ca91e7a28fa955", null ],
+    [ "iOrderBsn", "structSTRspQryOrder.html#a3082d416a3ee553eee5a5b300132a8d5", null ],
+    [ "iStkBiz", "structSTRspQryOrder.html#a4b750af37821c927e36c7fab3558c773", null ],
+    [ "iStrategySn", "structSTRspQryOrder.html#ae92de66a58bbd2dd5db081749307003c", null ],
+    [ "llCuacctCode", "structSTRspQryOrder.html#a7fca4e29d1de750cb24d7eff7b19f7ec", null ],
+    [ "llMatchedQty", "structSTRspQryOrder.html#a5c8e9e751b3de37530db882f1d5d5553", null ],
+    [ "llOrderQty", "structSTRspQryOrder.html#a5e4938f66bec385d5e27ea36755384cc", null ],
+    [ "llWithdrawnQty", "structSTRspQryOrder.html#acde1102fd81e4408eff45bfe8b18a235", null ],
+    [ "szOrderAmt", "structSTRspQryOrder.html#adbe78349e2a70958f31975c25416cdd6", null ],
+    [ "szOrderFrzAmt", "structSTRspQryOrder.html#a0f28a1faaa8dca5760becc2c04db7bae", null ],
+    [ "szOrderId", "structSTRspQryOrder.html#a6d6facd089c639d2b491cd38fff9ca0e", null ],
+    [ "szOrderPrice", "structSTRspQryOrder.html#a0ec0c8070df349b59e76b97a2d29faba", null ],
+    [ "szOrderTime", "structSTRspQryOrder.html#a9abf5f9a0ed55b7b4f48f6edd2557242", null ],
+    [ "szOrderUfzAmt", "structSTRspQryOrder.html#ac95bbc90d13ed4a5511521dde43e937c", null ],
+    [ "szQryPos", "structSTRspQryOrder.html#ad034cdc7f5d0eab47aad09cbc47a5714", null ],
+    [ "szRawOrderId", "structSTRspQryOrder.html#a41123e4f99c0ff2fa6525f3f122d8611", null ],
+    [ "szStkbd", "structSTRspQryOrder.html#a8773892e511792be432164bff0d07d6a", null ],
+    [ "szStkCode", "structSTRspQryOrder.html#ad12b6f63021fa063902c13afd87e201f", null ],
+    [ "szStkName", "structSTRspQryOrder.html#a7ea98c47cb679f28a621db66be2331a6", null ],
+    [ "szTrdacct", "structSTRspQryOrder.html#a650a4b7e4c2062717d30005dd7c76b61", null ]
+];

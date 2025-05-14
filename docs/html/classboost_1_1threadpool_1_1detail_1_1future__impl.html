@@ -1,0 +1,742 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: boost::threadpool::detail::future_impl&lt; Result &gt; 模板类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classboost_1_1threadpool_1_1detail_1_1future__impl.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Public 类型</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classboost_1_1threadpool_1_1detail_1_1future__impl-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">boost::threadpool::detail::future_impl&lt; Result &gt; 模板类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Future 模式的内部实现类  
+ <a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="detail_2future_8hpp_source.html">future.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public 类型</h2></td></tr>
+<tr class="memitem:ab3fcdeabd2ce45a5abfa950beb8081f1" id="r_ab3fcdeabd2ce45a5abfa950beb8081f1"><td class="memItemLeft" align="right" valign="top">typedef Result <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>  &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ab3fcdeabd2ce45a5abfa950beb8081f1">result_type</a></td></tr>
+<tr class="memdesc:ab3fcdeabd2ce45a5abfa950beb8081f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">任务函数的结果类型  <br /></td></tr>
+<tr class="separator:ab3fcdeabd2ce45a5abfa950beb8081f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac678957fa267fb3c1164f7ab4f0ecc3f" id="r_ac678957fa267fb3c1164f7ab4f0ecc3f"><td class="memItemLeft" align="right" valign="top">typedef Result&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ac678957fa267fb3c1164f7ab4f0ecc3f">future_result_type</a></td></tr>
+<tr class="memdesc:ac678957fa267fb3c1164f7ab4f0ecc3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Future 对象的结果类型  <br /></td></tr>
+<tr class="separator:ac678957fa267fb3c1164f7ab4f0ecc3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35c27a51b83ff32314629cbcdb680cfe" id="r_a35c27a51b83ff32314629cbcdb680cfe"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">future_impl</a>&lt; <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ac678957fa267fb3c1164f7ab4f0ecc3f">future_result_type</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a35c27a51b83ff32314629cbcdb680cfe">future_type</a></td></tr>
+<tr class="memdesc:a35c27a51b83ff32314629cbcdb680cfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Future 实现类的类型  <br /></td></tr>
+<tr class="separator:a35c27a51b83ff32314629cbcdb680cfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:aa390dff0d9887dbd24965c6f4d017f5b" id="r_aa390dff0d9887dbd24965c6f4d017f5b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aa390dff0d9887dbd24965c6f4d017f5b">future_impl</a> ()</td></tr>
+<tr class="memdesc:aa390dff0d9887dbd24965c6f4d017f5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:aa390dff0d9887dbd24965c6f4d017f5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a178496f6637e72f2fe79012b41ef925f" id="r_a178496f6637e72f2fe79012b41ef925f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a178496f6637e72f2fe79012b41ef925f">ready</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a></td></tr>
+<tr class="memdesc:a178496f6637e72f2fe79012b41ef925f"><td class="mdescLeft">&#160;</td><td class="mdescRight">检查结果是否就绪  <br /></td></tr>
+<tr class="separator:a178496f6637e72f2fe79012b41ef925f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01b85fac8a6aa04ab9787816329f51d8" id="r_a01b85fac8a6aa04ab9787816329f51d8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a01b85fac8a6aa04ab9787816329f51d8">wait</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a></td></tr>
+<tr class="memdesc:a01b85fac8a6aa04ab9787816329f51d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">等待结果可用  <br /></td></tr>
+<tr class="separator:a01b85fac8a6aa04ab9787816329f51d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e7c501350b2f417490a5f8efe164615" id="r_a3e7c501350b2f417490a5f8efe164615"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a3e7c501350b2f417490a5f8efe164615">timed_wait</a> (boost::xtime <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;timestamp) <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a3e7c501350b2f417490a5f8efe164615"><td class="mdescLeft">&#160;</td><td class="mdescRight">带超时的结果等待  <br /></td></tr>
+<tr class="separator:a3e7c501350b2f417490a5f8efe164615"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf2796f878501c1e11afe3d8dcf3b1e2" id="r_adf2796f878501c1e11afe3d8dcf3b1e2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ab3fcdeabd2ce45a5abfa950beb8081f1">result_type</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#adf2796f878501c1e11afe3d8dcf3b1e2">operator()</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a></td></tr>
+<tr class="memdesc:adf2796f878501c1e11afe3d8dcf3b1e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">函数调用操作符，获取任务结果  <br /></td></tr>
+<tr class="separator:adf2796f878501c1e11afe3d8dcf3b1e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a356c650f20f154920bcca0223bf06f83" id="r_a356c650f20f154920bcca0223bf06f83"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a356c650f20f154920bcca0223bf06f83">set_value</a> (<a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ac678957fa267fb3c1164f7ab4f0ecc3f">future_result_type</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;r) <a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a></td></tr>
+<tr class="memdesc:a356c650f20f154920bcca0223bf06f83"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置任务的执行结果  <br /></td></tr>
+<tr class="separator:a356c650f20f154920bcca0223bf06f83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66a7c8ceebd11d815cd689ef71baedab" id="r_a66a7c8ceebd11d815cd689ef71baedab"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a66a7c8ceebd11d815cd689ef71baedab">cancel</a> () <a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a></td></tr>
+<tr class="memdesc:a66a7c8ceebd11d815cd689ef71baedab"><td class="mdescLeft">&#160;</td><td class="mdescRight">取消任务  <br /></td></tr>
+<tr class="separator:a66a7c8ceebd11d815cd689ef71baedab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f6b02342312ba7fd5ffab15a3a590f1" id="r_a9f6b02342312ba7fd5ffab15a3a590f1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a9f6b02342312ba7fd5ffab15a3a590f1">is_cancelled</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a></td></tr>
+<tr class="memdesc:a9f6b02342312ba7fd5ffab15a3a590f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">检查任务是否已取消  <br /></td></tr>
+<tr class="separator:a9f6b02342312ba7fd5ffab15a3a590f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9456efc58cb244c468a295c5bf113528" id="r_a9456efc58cb244c468a295c5bf113528"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a9456efc58cb244c468a295c5bf113528">set_execution_status</a> (bool executing) <a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a></td></tr>
+<tr class="memdesc:a9456efc58cb244c468a295c5bf113528"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置任务的执行状态  <br /></td></tr>
+<tr class="separator:a9456efc58cb244c468a295c5bf113528"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:a4e9c3df8e837cfc96d5e10feba7b8b15" id="r_a4e9c3df8e837cfc96d5e10feba7b8b15"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a4e9c3df8e837cfc96d5e10feba7b8b15">m_ready</a></td></tr>
+<tr class="memdesc:a4e9c3df8e837cfc96d5e10feba7b8b15"><td class="mdescLeft">&#160;</td><td class="mdescRight">结果就绪状态标志  <br /></td></tr>
+<tr class="separator:a4e9c3df8e837cfc96d5e10feba7b8b15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60a9bb8ab280e5518887d9bbb9e9bed2" id="r_a60a9bb8ab280e5518887d9bbb9e9bed2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ac678957fa267fb3c1164f7ab4f0ecc3f">future_result_type</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a60a9bb8ab280e5518887d9bbb9e9bed2">m_result</a></td></tr>
+<tr class="memdesc:a60a9bb8ab280e5518887d9bbb9e9bed2"><td class="mdescLeft">&#160;</td><td class="mdescRight">存储任务执行的结果  <br /></td></tr>
+<tr class="separator:a60a9bb8ab280e5518887d9bbb9e9bed2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5148419b5a7ece53dd8614845484b6ea" id="r_a5148419b5a7ece53dd8614845484b6ea"><td class="memItemLeft" align="right" valign="top">mutex&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a5148419b5a7ece53dd8614845484b6ea">m_monitor</a></td></tr>
+<tr class="memdesc:a5148419b5a7ece53dd8614845484b6ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">互斥锁，用于保护对共享数据的访问  <br /></td></tr>
+<tr class="separator:a5148419b5a7ece53dd8614845484b6ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea94c188c6ff4cb7919c91da229d3af0" id="r_aea94c188c6ff4cb7919c91da229d3af0"><td class="memItemLeft" align="right" valign="top">condition&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aea94c188c6ff4cb7919c91da229d3af0">m_condition_ready</a></td></tr>
+<tr class="memdesc:aea94c188c6ff4cb7919c91da229d3af0"><td class="mdescLeft">&#160;</td><td class="mdescRight">条件变量，用于等待结果准备就绪  <br /></td></tr>
+<tr class="separator:aea94c188c6ff4cb7919c91da229d3af0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75b98cbd2fb8c4a133f4c23eadf8b237" id="r_a75b98cbd2fb8c4a133f4c23eadf8b237"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a75b98cbd2fb8c4a133f4c23eadf8b237">m_is_cancelled</a></td></tr>
+<tr class="memdesc:a75b98cbd2fb8c4a133f4c23eadf8b237"><td class="mdescLeft">&#160;</td><td class="mdescRight">取消状态标志  <br /></td></tr>
+<tr class="separator:a75b98cbd2fb8c4a133f4c23eadf8b237"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaeac3fd5eea95300f2c8cecad3c7eabc" id="r_aaeac3fd5eea95300f2c8cecad3c7eabc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aaeac3fd5eea95300f2c8cecad3c7eabc">m_executing</a></td></tr>
+<tr class="memdesc:aaeac3fd5eea95300f2c8cecad3c7eabc"><td class="mdescLeft">&#160;</td><td class="mdescRight">执行状态标志  <br /></td></tr>
+<tr class="separator:aaeac3fd5eea95300f2c8cecad3c7eabc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;class Result&gt;<br />
+class boost::threadpool::detail::future_impl&lt; Result &gt;</div><p>Future 模式的内部实现类 </p>
+<p>该类提供了异步执行的核心功能，包括结果存储、状态检查、等待和通知机制。 它允许在未来某个时间点检索返回值，无需立即获取结果。 </p><dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Result</td><td>异步任务的返回类型 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00047">47</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="ac678957fa267fb3c1164f7ab4f0ecc3f" name="ac678957fa267fb3c1164f7ab4f0ecc3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac678957fa267fb3c1164f7ab4f0ecc3f">&#9670;&#160;</a></span>future_result_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef Result <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::future_result_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Future 对象的结果类型 </p>
+<p>指定了 Future 对象存储的结果类型 </p>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00060">60</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a35c27a51b83ff32314629cbcdb680cfe" name="a35c27a51b83ff32314629cbcdb680cfe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35c27a51b83ff32314629cbcdb680cfe">&#9670;&#160;</a></span>future_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">future_impl</a>&lt;<a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ac678957fa267fb3c1164f7ab4f0ecc3f">future_result_type</a>&gt; <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::future_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Future 实现类的类型 </p>
+<p>定义了 <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html" title="Future 模式的内部实现类">future_impl</a> 类的类型别名，便于内部引用 </p>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00066">66</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab3fcdeabd2ce45a5abfa950beb8081f1" name="ab3fcdeabd2ce45a5abfa950beb8081f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3fcdeabd2ce45a5abfa950beb8081f1">&#9670;&#160;</a></span>result_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef Result <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&amp; <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::result_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>任务函数的结果类型 </p>
+<p>指定了函数对象返回值的常量引用类型 </p>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00054">54</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="aa390dff0d9887dbd24965c6f4d017f5b" name="aa390dff0d9887dbd24965c6f4d017f5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa390dff0d9887dbd24965c6f4d017f5b">&#9670;&#160;</a></span>future_impl()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::future_impl </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>创建一个新的 <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html" title="Future 模式的内部实现类">future_impl</a> 对象，初始化其状态为未就绪、未取消 </p>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00114">114</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a66a7c8ceebd11d815cd689ef71baedab" name="a66a7c8ceebd11d815cd689ef71baedab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66a7c8ceebd11d815cd689ef71baedab">&#9670;&#160;</a></span>cancel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::cancel </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> volatile</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>取消任务 </p>
+<p>尝试取消未完成或正在执行中的任务。 如果任务已完成，则无法取消 </p><dl class="section return"><dt>返回</dt><dd>如果取消成功返回 true，如果任务已完成无法取消则返回 false </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00222">222</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9f6b02342312ba7fd5ffab15a3a590f1" name="a9f6b02342312ba7fd5ffab15a3a590f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f6b02342312ba7fd5ffab15a3a590f1">&#9670;&#160;</a></span>is_cancelled()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::is_cancelled </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const volatile</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>检查任务是否已取消 </p>
+<p>返回当前任务的取消状态 </p><dl class="section return"><dt>返回</dt><dd>如果任务已被取消返回 true，否则返回 false </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00241">241</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adf2796f878501c1e11afe3d8dcf3b1e2" name="adf2796f878501c1e11afe3d8dcf3b1e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf2796f878501c1e11afe3d8dcf3b1e2">&#9670;&#160;</a></span>operator()()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ab3fcdeabd2ce45a5abfa950beb8081f1">result_type</a> <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::operator() </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const volatile</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>函数调用操作符，获取任务结果 </p>
+<p>等待任务完成并返回结果。如果结果尚未就绪，将阻塞直到结果可用 </p><dl class="section return"><dt>返回</dt><dd>返回任务执行的结果 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00173">173</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a178496f6637e72f2fe79012b41ef925f" name="a178496f6637e72f2fe79012b41ef925f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a178496f6637e72f2fe79012b41ef925f">&#9670;&#160;</a></span>ready()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::ready </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const volatile</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>检查结果是否就绪 </p>
+<p>判断任务是否已经完成并且结果已经可用 </p><dl class="section return"><dt>返回</dt><dd>如果结果就绪返回 true，否则返回 false </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00126">126</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9456efc58cb244c468a295c5bf113528" name="a9456efc58cb244c468a295c5bf113528"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9456efc58cb244c468a295c5bf113528">&#9670;&#160;</a></span>set_execution_status()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::set_execution_status </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>executing</em></td><td>)</td>
+          <td> volatile</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>设置任务的执行状态 </p>
+<p>更新任务的执行状态标志，标记任务是否正在执行中 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">executing</td><td>如果任务正在执行设置为 true，否则设置为 false </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00252">252</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a356c650f20f154920bcca0223bf06f83" name="a356c650f20f154920bcca0223bf06f83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a356c650f20f154920bcca0223bf06f83">&#9670;&#160;</a></span>set_value()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::set_value </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ac678957fa267fb3c1164f7ab4f0ecc3f">future_result_type</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;&#160;</td>
+          <td class="paramname"><em>r</em></td><td>)</td>
+          <td> volatile</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>设置任务的执行结果 </p>
+<p>当任务完成时，调用此方法将结果设置到 Future 对象中， 并通知所有等待的线程。只有在任务未就绪且未取消时才会设置 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">r</td><td>要设置的任务结果 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00193">193</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3e7c501350b2f417490a5f8efe164615" name="a3e7c501350b2f417490a5f8efe164615"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e7c501350b2f417490a5f8efe164615">&#9670;&#160;</a></span>timed_wait()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::timed_wait </td>
+          <td>(</td>
+          <td class="paramtype">boost::xtime <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;&#160;</td>
+          <td class="paramname"><em>timestamp</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>带超时的结果等待 </p>
+<p>阻塞当前线程直到结果可用、任务已取消或超时 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">timestamp</td><td>超时的时间点，使用 boost::xtime 表示 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>如果在超时前结果就绪返回 true，如果超时返回 false </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00154">154</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a01b85fac8a6aa04ab9787816329f51d8" name="a01b85fac8a6aa04ab9787816329f51d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01b85fac8a6aa04ab9787816329f51d8">&#9670;&#160;</a></span>wait()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::wait </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const volatile</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>等待结果可用 </p>
+<p>阻塞当前线程直到结果可用或任务已取消 通过条件变量实现等待机制 </p>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00136">136</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="aea94c188c6ff4cb7919c91da229d3af0" name="aea94c188c6ff4cb7919c91da229d3af0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea94c188c6ff4cb7919c91da229d3af0">&#9670;&#160;</a></span>m_condition_ready</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">condition <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::m_condition_ready</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>条件变量，用于等待结果准备就绪 </p>
+<p>当结果就绪时通知等待的线程 </p>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00091">91</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaeac3fd5eea95300f2c8cecad3c7eabc" name="aaeac3fd5eea95300f2c8cecad3c7eabc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaeac3fd5eea95300f2c8cecad3c7eabc">&#9670;&#160;</a></span>m_executing</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> bool <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::m_executing</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>执行状态标志 </p>
+<p>标记任务是否正在执行中 </p>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00103">103</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a75b98cbd2fb8c4a133f4c23eadf8b237" name="a75b98cbd2fb8c4a133f4c23eadf8b237"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75b98cbd2fb8c4a133f4c23eadf8b237">&#9670;&#160;</a></span>m_is_cancelled</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> bool <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::m_is_cancelled</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>取消状态标志 </p>
+<p>标记任务是否已被取消 </p>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00097">97</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5148419b5a7ece53dd8614845484b6ea" name="a5148419b5a7ece53dd8614845484b6ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5148419b5a7ece53dd8614845484b6ea">&#9670;&#160;</a></span>m_monitor</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">mutex <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::m_monitor</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>互斥锁，用于保护对共享数据的访问 </p>
+<p>用于同步访问共享状态和结果 </p>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00085">85</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4e9c3df8e837cfc96d5e10feba7b8b15" name="a4e9c3df8e837cfc96d5e10feba7b8b15"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e9c3df8e837cfc96d5e10feba7b8b15">&#9670;&#160;</a></span>m_ready</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> bool <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::m_ready</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>结果就绪状态标志 </p>
+<p>标记任务是否已完成并且结果可用 </p>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00073">73</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a60a9bb8ab280e5518887d9bbb9e9bed2" name="a60a9bb8ab280e5518887d9bbb9e9bed2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60a9bb8ab280e5518887d9bbb9e9bed2">&#9670;&#160;</a></span>m_result</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Result &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ac678957fa267fb3c1164f7ab4f0ecc3f">future_result_type</a> <a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a>&lt; Result &gt;::m_result</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>存储任务执行的结果 </p>
+<p>当任务完成时，结果将存储在这个变量中 </p>
+
+<p class="definition">在文件 <a class="el" href="detail_2future_8hpp_source.html">future.hpp</a> 第 <a class="el" href="detail_2future_8hpp_source.html#l00079">79</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/Share/threadpool/detail/<a class="el" href="detail_2future_8hpp_source.html">future.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespaceboost.html">boost</a></li><li class="navelem"><a class="el" href="namespaceboost_1_1threadpool.html">threadpool</a></li><li class="navelem"><a class="el" href="namespaceboost_1_1threadpool_1_1detail.html">detail</a></li><li class="navelem"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">future_impl</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

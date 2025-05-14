@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtDataStorage/WtDataReader.cpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtDataReader_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">WtDataReader.cpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>数据读取模块实现文件  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="WtDataReader_8h_source.html">WtDataReader.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSVariant_8hpp_source.html">../Includes/WTSVariant.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="TimeUtils_8hpp_source.html">../Share/TimeUtils.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="CodeHelper_8hpp_source.html">../Share/CodeHelper.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="StdUtils_8hpp_source.html">../Share/StdUtils.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSContractInfo_8hpp_source.html">../Includes/WTSContractInfo.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="IBaseDataMgr_8h_source.html">../Includes/IBaseDataMgr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="IHotMgr_8h_source.html">../Includes/IHotMgr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSDataDef_8hpp_source.html">../Includes/WTSDataDef.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSCmpHelper_8hpp_source.html">../WTSUtils/WTSCmpHelper.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSCfgLoader_8h_source.html">../WTSUtils/WTSCfgLoader.h</a>&quot;</code><br />
+<code>#include &lt;rapidjson/document.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="fmtlib_8h_source.html">../Share/fmtlib.h</a>&quot;</code><br />
+</div>
+<p><a href="WtDataReader_8cpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a393d5a98c51173beda83ead5efcfc6e4" id="r_a393d5a98c51173beda83ead5efcfc6e4"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a393d5a98c51173beda83ead5efcfc6e4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="WtDataReader_8cpp.html#a393d5a98c51173beda83ead5efcfc6e4">pipe_reader_log</a> (<a class="el" href="classIDataReaderSink.html">IDataReaderSink</a> *sink, <a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;... args)</td></tr>
+<tr class="memdesc:a393d5a98c51173beda83ead5efcfc6e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">日志输出函数  <br /></td></tr>
+<tr class="separator:a393d5a98c51173beda83ead5efcfc6e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c5f054c192e90241614bd58fc37c172" id="r_a0c5f054c192e90241614bd58fc37c172"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a> <a class="el" href="classIDataReader.html">IDataReader</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDataReader_8cpp.html#a0c5f054c192e90241614bd58fc37c172">createDataReader</a> ()</td></tr>
+<tr class="memdesc:a0c5f054c192e90241614bd58fc37c172"><td class="mdescLeft">&#160;</td><td class="mdescRight">导出C接口  <br /></td></tr>
+<tr class="separator:a0c5f054c192e90241614bd58fc37c172"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac014735da892841bea0412ce0c3f10f9" id="r_ac014735da892841bea0412ce0c3f10f9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDataReader_8cpp.html#ac014735da892841bea0412ce0c3f10f9">deleteDataReader</a> (<a class="el" href="classIDataReader.html">IDataReader</a> *reader)</td></tr>
+<tr class="memdesc:ac014735da892841bea0412ce0c3f10f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">删除数据读取器实例  <br /></td></tr>
+<tr class="separator:ac014735da892841bea0412ce0c3f10f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4121e0ca49fabb58e2d0a0b0521e50a" id="r_af4121e0ca49fabb58e2d0a0b0521e50a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDataReader_8cpp.html#af4121e0ca49fabb58e2d0a0b0521e50a">proc_block_data</a> (std::string &amp;content, bool isBar, bool bKeepHead)</td></tr>
+<tr class="memdesc:af4121e0ca49fabb58e2d0a0b0521e50a"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理数据块内容  <br /></td></tr>
+<tr class="separator:af4121e0ca49fabb58e2d0a0b0521e50a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>数据读取模块实现文件 </p>
+<dl class="section author"><dt>作者</dt><dd>Wesley </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2020/03/30</dd></dl>
+<p>从不同的数据存储引擎中读取K线、订单簿、成交明细等数据的具体实现 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataReader_8cpp_source.html">WtDataReader.cpp</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="a0c5f054c192e90241614bd58fc37c172" name="a0c5f054c192e90241614bd58fc37c172"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c5f054c192e90241614bd58fc37c172">&#9670;&#160;</a></span>createDataReader()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a> <a class="el" href="classIDataReader.html">IDataReader</a> * createDataReader </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>导出C接口 </p>
+<p>提供创建和删除数据读取器的C接口函数，用于动态库加载</p>
+<p>创建数据读取器实例 </p><dl class="section return"><dt>返回</dt><dd>数据读取器接口指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtDataReader_8cpp_source.html">WtDataReader.cpp</a> 第 <a class="el" href="WtDataReader_8cpp_source.html#l00063">63</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac014735da892841bea0412ce0c3f10f9" name="ac014735da892841bea0412ce0c3f10f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac014735da892841bea0412ce0c3f10f9">&#9670;&#160;</a></span>deleteDataReader()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a> void deleteDataReader </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classIDataReader.html">IDataReader</a> *&#160;</td>
+          <td class="paramname"><em>reader</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>删除数据读取器实例 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">reader</td><td>数据读取器接口指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtDataReader_8cpp_source.html">WtDataReader.cpp</a> 第 <a class="el" href="WtDataReader_8cpp_source.html#l00073">73</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a393d5a98c51173beda83ead5efcfc6e4" name="a393d5a98c51173beda83ead5efcfc6e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a393d5a98c51173beda83ead5efcfc6e4">&#9670;&#160;</a></span>pipe_reader_log()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void pipe_reader_log </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classIDataReaderSink.html">IDataReaderSink</a> *&#160;</td>
+          <td class="paramname"><em>sink</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>&#160;</td>
+          <td class="paramname"><em>ll</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>日志输出函数 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sink</td><td>日志输出接口 </td></tr>
+    <tr><td class="paramname">ll</td><td>日志级别 </td></tr>
+    <tr><td class="paramname">format</td><td>日志格式字符串 </td></tr>
+    <tr><td class="paramname">args</td><td>日志格式字符串参数</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将日志信息输出到指定的接口 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataReader_8cpp_source.html">WtDataReader.cpp</a> 第 <a class="el" href="WtDataReader_8cpp_source.html#l00043">43</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af4121e0ca49fabb58e2d0a0b0521e50a" name="af4121e0ca49fabb58e2d0a0b0521e50a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4121e0ca49fabb58e2d0a0b0521e50a">&#9670;&#160;</a></span>proc_block_data()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool proc_block_data </td>
+          <td>(</td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>content</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isBar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bKeepHead</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>处理数据块内容 </p>
+<p>处理数据块</p>
+<p>外部函数声明，用于处理数据块</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">content</td><td>数据块内容，传入传出参数 </td></tr>
+    <tr><td class="paramname">isBar</td><td>是否为K线数据，true为K线数据，false为Tick数据 </td></tr>
+    <tr><td class="paramname">bKeepHead</td><td>是否保留数据块头部，默认为true </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>处理是否成功</dd></dl>
+<p>处理数据块的压缩和版本转换，包括解压缩和旧版本数据结构的转换 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataReader_8cpp_source.html">WtDataReader.cpp</a> 第 <a class="el" href="WtDataReader_8cpp_source.html#l00090">90</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_bf83bd424bb7d7e355a4438ebc2611b7.html">WtDataStorage</a></li><li class="navelem"><a class="el" href="WtDataReader_8cpp.html">WtDataReader.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

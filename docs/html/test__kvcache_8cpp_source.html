@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/TestUnits/test_kvcache.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('test__kvcache_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">test_kvcache.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="test__kvcache_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#include &quot;../Share/WtKVCache.hpp&quot;</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &quot;../Share/IniHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;../Share/TimeUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;../Share/fmtlib.h&quot;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;<a class="code" href="gtest_8h.html">gtest/gtest/gtest.h</a>&quot;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno"><a class="line" href="test__kvcache_8cpp.html#a17226795848decb565e90624584e5c0f">    7</a></span><a class="code hl_variable" href="test__kvcache_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="foldopen" id="foldopen00009" data-start="{" data-end="}">
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="test__kvcache_8cpp.html#afb606ee89fb80bfa55510c358c4c2770">    9</a></span><a class="code hl_define" href="gtest_8h.html#ad8b332753515c0ab8baada563c2547eb">TEST</a>(test_kvcache, test_usage)</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>{</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    {</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>        <a class="code hl_class" href="classWtKVCache.html">WtKVCache</a> cache;</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>        <a class="code hl_define" href="gtest_8h.html#ac33e7cdfb5d44a7a0f0ab552eb5c3c6a">EXPECT_TRUE</a>(cache.<a class="code hl_function" href="classWtKVCache.html#ad9a813637cfc02fbfe0f5472c28c0998">init</a>(<span class="stringliteral">&quot;./simplecache.dat&quot;</span>, 20220325, [](<span class="keyword">const</span> <span class="keywordtype">char</span>* msg) {</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>            printf(msg);</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>            printf(<span class="stringliteral">&quot;\n&quot;</span>);</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>        }));</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>        cache.<a class="code hl_function" href="classWtKVCache.html#aaf6e78312573e57e83edb3b8bb205f24">clear</a>();</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        <a class="code hl_define" href="gtest_8h.html#ad20f7b94ac5081e16f0005b94e95f0c6">EXPECT_STREQ</a>(cache.<a class="code hl_function" href="classWtKVCache.html#affd3329dbb692211cf917a4a2f87930d">get</a>(<span class="stringliteral">&quot;test_null&quot;</span>), <span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        cache.<a class="code hl_function" href="classWtKVCache.html#aae8583afe4a8085e333e80beb9d0e7ed">put</a>(<span class="stringliteral">&quot;test&quot;</span>, <span class="stringliteral">&quot;this is a test string&quot;</span>, 0, [](<span class="keyword">const</span> <span class="keywordtype">char</span>* msg) {</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>            printf(msg);</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>            printf(<span class="stringliteral">&quot;\n&quot;</span>);</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        });</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        <a class="code hl_define" href="gtest_8h.html#ad20f7b94ac5081e16f0005b94e95f0c6">EXPECT_STREQ</a>(cache.<a class="code hl_function" href="classWtKVCache.html#affd3329dbb692211cf917a4a2f87930d">get</a>(<span class="stringliteral">&quot;test&quot;</span>), <span class="stringliteral">&quot;this is a test string&quot;</span>);</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        <a class="code hl_define" href="gtest_8h.html#a4159019abda84f5366acdb7604ff220a">EXPECT_EQ</a>(cache.<a class="code hl_function" href="classWtKVCache.html#a32823a6892d2461d7f72fb1702160b6c">size</a>(), 1);</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    }</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    {</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <a class="code hl_class" href="classWtKVCache.html">WtKVCache</a> cache;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <a class="code hl_define" href="gtest_8h.html#ac33e7cdfb5d44a7a0f0ab552eb5c3c6a">EXPECT_TRUE</a>(cache.<a class="code hl_function" href="classWtKVCache.html#ad9a813637cfc02fbfe0f5472c28c0998">init</a>(<span class="stringliteral">&quot;./simplecache.dat&quot;</span>, 20220326, [](<span class="keyword">const</span> <span class="keywordtype">char</span>* msg) {</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>            printf(msg);</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>            printf(<span class="stringliteral">&quot;\n&quot;</span>);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        }));</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <a class="code hl_define" href="gtest_8h.html#a4159019abda84f5366acdb7604ff220a">EXPECT_EQ</a>(cache.<a class="code hl_function" href="classWtKVCache.html#a32823a6892d2461d7f72fb1702160b6c">size</a>(), 0);</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    }</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>}</div>
+</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="foldopen" id="foldopen00041" data-start="{" data-end="}">
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="test__kvcache_8cpp.html#a000333929c5548457e29fe76cd3c06f1">   41</a></span><a class="code hl_define" href="gtest_8h.html#ad8b332753515c0ab8baada563c2547eb">TEST</a>(test_kvcache, test_perform)</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>{</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <a class="code hl_class" href="classWtKVCache.html">WtKVCache</a> cache;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    cache.<a class="code hl_function" href="classWtKVCache.html#ad9a813637cfc02fbfe0f5472c28c0998">init</a>(<span class="stringliteral">&quot;./scperform.dat&quot;</span>, 20220325, [](<span class="keyword">const</span> <span class="keywordtype">char</span>* msg) {</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        printf(msg);</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        printf(<span class="stringliteral">&quot;\n&quot;</span>);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    });</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    cache.<a class="code hl_function" href="classWtKVCache.html#aaf6e78312573e57e83edb3b8bb205f24">clear</a>();</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <a class="code hl_class" href="classIniHelper.html">IniHelper</a> ini;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    ini.<a class="code hl_function" href="classIniHelper.html#acd103155c6f8b40be1d09c67da0daf1a">load</a>(<span class="stringliteral">&quot;./scperform.ini&quot;</span>);</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    ini.<a class="code hl_function" href="classIniHelper.html#acc97911c062f5e4a0c9492c7a65cc855">removeSection</a>(<span class="stringliteral">&quot;test&quot;</span>);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    ini.<a class="code hl_function" href="classIniHelper.html#a0e46f54304cb51a573c0d2a941a6860a">save</a>();</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    uint32_t times = 10000;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <a class="code hl_class" href="classTimeUtils_1_1Ticker.html">TimeUtils::Ticker</a> ticker;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordtype">char</span> buffer[16] = { 0 };</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="comment">//œ»≤‚ ‘simplecache</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keywordflow">for</span>(uint32_t i = 0; i &lt; times; i++)</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    {</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="keywordtype">char</span>* s = fmt::format_to(buffer, <span class="stringliteral">&quot;{}&quot;</span>, i);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        s[0] = <span class="charliteral">&#39;\0&#39;</span>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        cache.<a class="code hl_function" href="classWtKVCache.html#aae8583afe4a8085e333e80beb9d0e7ed">put</a>(buffer, buffer);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    }</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keywordflow">for</span> (uint32_t i = 0; i &lt; times; i++)</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    {</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keywordtype">char</span>* s = fmt::format_to(buffer, <span class="stringliteral">&quot;{}&quot;</span>, i);</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        s[0] = <span class="charliteral">&#39;\0&#39;</span>;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        cache.<a class="code hl_function" href="classWtKVCache.html#affd3329dbb692211cf917a4a2f87930d">get</a>(buffer);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    }</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    uint64_t a = ticker.<a class="code hl_function" href="classTimeUtils_1_1Ticker.html#a9f5a908d00243147bdba73ea43a80fe7">nano_seconds</a>();</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="comment">//‘Ÿ≤‚ ‘ini</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    ticker.<a class="code hl_function" href="classTimeUtils_1_1Ticker.html#a5b1fae6d474d30f79c9d90a5cd39ada6">reset</a>();</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordflow">for</span> (uint32_t i = 0; i &lt; times; i++)</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    {</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        <span class="keywordtype">char</span>* s = fmt::format_to(buffer, <span class="stringliteral">&quot;{}&quot;</span>, i);</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        s[0] = <span class="charliteral">&#39;\0&#39;</span>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        ini.<a class="code hl_function" href="classIniHelper.html#aedf1d45631025dc222ed9c90647f176f">writeString</a>(<span class="stringliteral">&quot;test&quot;</span>, buffer, buffer);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        <span class="comment">//ini.save();</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    }</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keywordflow">for</span> (uint32_t i = 0; i &lt; times; i++)</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    {</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        <span class="keywordtype">char</span>* s = fmt::format_to(buffer, <span class="stringliteral">&quot;{}&quot;</span>, i);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        s[0] = <span class="charliteral">&#39;\0&#39;</span>;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        ini.<a class="code hl_function" href="classIniHelper.html#a8fc6124741fd9b320c74e204635074dc">readString</a>(<span class="stringliteral">&quot;test&quot;</span>, buffer);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    }</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    uint64_t b = ticker.<a class="code hl_function" href="classTimeUtils_1_1Ticker.html#a9f5a908d00243147bdba73ea43a80fe7">nano_seconds</a>();</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    fmt::print(<span class="stringliteral">&quot;cache: {} - ini: {}\n&quot;</span>, a, b);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>}</div>
+</div>
+<div class="ttc" id="aclassIniHelper_html"><div class="ttname"><a href="classIniHelper.html">IniHelper</a></div><div class="ttdoc">INI配置文件辅助类</div><div class="ttdef"><b>Definition</b> <a href="IniHelper_8hpp_source.html#l00034">IniHelper.hpp:35</a></div></div>
+<div class="ttc" id="aclassIniHelper_html_a0e46f54304cb51a573c0d2a941a6860a"><div class="ttname"><a href="classIniHelper.html#a0e46f54304cb51a573c0d2a941a6860a">IniHelper::save</a></div><div class="ttdeci">void save(const char *filename=&quot;&quot;)</div><div class="ttdoc">保存配置文件</div><div class="ttdef"><b>Definition</b> <a href="IniHelper_8hpp_source.html#l00095">IniHelper.hpp:95</a></div></div>
+<div class="ttc" id="aclassIniHelper_html_a8fc6124741fd9b320c74e204635074dc"><div class="ttname"><a href="classIniHelper.html#a8fc6124741fd9b320c74e204635074dc">IniHelper::readString</a></div><div class="ttdeci">std::string readString(const char *szSec, const char *szKey, const char *defVal=&quot;&quot;)</div><div class="ttdoc">读取字符串值</div><div class="ttdef"><b>Definition</b> <a href="IniHelper_8hpp_source.html#l00181">IniHelper.hpp:181</a></div></div>
+<div class="ttc" id="aclassIniHelper_html_acc97911c062f5e4a0c9492c7a65cc855"><div class="ttname"><a href="classIniHelper.html#acc97911c062f5e4a0c9492c7a65cc855">IniHelper::removeSection</a></div><div class="ttdeci">void removeSection(const char *szSec)</div><div class="ttdoc">移除指定节</div><div class="ttdef"><b>Definition</b> <a href="IniHelper_8hpp_source.html#l00137">IniHelper.hpp:137</a></div></div>
+<div class="ttc" id="aclassIniHelper_html_acd103155c6f8b40be1d09c67da0daf1a"><div class="ttname"><a href="classIniHelper.html#acd103155c6f8b40be1d09c67da0daf1a">IniHelper::load</a></div><div class="ttdeci">void load(const char *szFile)</div><div class="ttdoc">加载配置文件</div><div class="ttdef"><b>Definition</b> <a href="IniHelper_8hpp_source.html#l00073">IniHelper.hpp:73</a></div></div>
+<div class="ttc" id="aclassIniHelper_html_aedf1d45631025dc222ed9c90647f176f"><div class="ttname"><a href="classIniHelper.html#aedf1d45631025dc222ed9c90647f176f">IniHelper::writeString</a></div><div class="ttdeci">void writeString(const char *szSec, const char *szKey, const char *val)</div><div class="ttdoc">写入字符串值</div><div class="ttdef"><b>Definition</b> <a href="IniHelper_8hpp_source.html#l00349">IniHelper.hpp:349</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Ticker_html"><div class="ttname"><a href="classTimeUtils_1_1Ticker.html">TimeUtils::Ticker</a></div><div class="ttdoc">高精度计时器类</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00731">TimeUtils.hpp:732</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Ticker_html_a5b1fae6d474d30f79c9d90a5cd39ada6"><div class="ttname"><a href="classTimeUtils_1_1Ticker.html#a5b1fae6d474d30f79c9d90a5cd39ada6">TimeUtils::Ticker::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdoc">重置计时器</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00754">TimeUtils.hpp:754</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Ticker_html_a9f5a908d00243147bdba73ea43a80fe7"><div class="ttname"><a href="classTimeUtils_1_1Ticker.html#a9f5a908d00243147bdba73ea43a80fe7">TimeUtils::Ticker::nano_seconds</a></div><div class="ttdeci">int64_t nano_seconds() const</div><div class="ttdoc">获取从计时器初始化或重置开始经过的纳秒数</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00819">TimeUtils.hpp:819</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html"><div class="ttname"><a href="classWtKVCache.html">WtKVCache</a></div><div class="ttdoc">键值对缓存实现类</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00058">WtKVCache.hpp:59</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_a32823a6892d2461d7f72fb1702160b6c"><div class="ttname"><a href="classWtKVCache.html#a32823a6892d2461d7f72fb1702160b6c">WtKVCache::size</a></div><div class="ttdeci">uint32_t size() const</div><div class="ttdoc">获取当前缓存中的键值对数量</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00397">WtKVCache.hpp:397</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_aae8583afe4a8085e333e80beb9d0e7ed"><div class="ttname"><a href="classWtKVCache.html#aae8583afe4a8085e333e80beb9d0e7ed">WtKVCache::put</a></div><div class="ttdeci">void put(const char *key, const char *val, std::size_t len=0, CacheLogger logger=nullptr)</div><div class="ttdoc">添加或更新键值对</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00360">WtKVCache.hpp:360</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_aaf6e78312573e57e83edb3b8bb205f24"><div class="ttname"><a href="classWtKVCache.html#aaf6e78312573e57e83edb3b8bb205f24">WtKVCache::clear</a></div><div class="ttdeci">void clear()</div><div class="ttdoc">清空缓存</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00320">WtKVCache.hpp:320</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_ad9a813637cfc02fbfe0f5472c28c0998"><div class="ttname"><a href="classWtKVCache.html#ad9a813637cfc02fbfe0f5472c28c0998">WtKVCache::init</a></div><div class="ttdeci">bool init(const char *filename, uint32_t uDate, CacheLogger logger=nullptr)</div><div class="ttdoc">初始化缓存</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00248">WtKVCache.hpp:248</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_affd3329dbb692211cf917a4a2f87930d"><div class="ttname"><a href="classWtKVCache.html#affd3329dbb692211cf917a4a2f87930d">WtKVCache::get</a></div><div class="ttdeci">const char * get(const char *key) const</div><div class="ttdoc">获取指定键的值</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00341">WtKVCache.hpp:341</a></div></div>
+<div class="ttc" id="agtest_8h_html"><div class="ttname"><a href="gtest_8h.html">gtest.h</a></div></div>
+<div class="ttc" id="agtest_8h_html_a4159019abda84f5366acdb7604ff220a"><div class="ttname"><a href="gtest_8h.html#a4159019abda84f5366acdb7604ff220a">EXPECT_EQ</a></div><div class="ttdeci">#define EXPECT_EQ(val1, val2)</div><div class="ttdef"><b>Definition</b> <a href="gtest_8h_source.html#l01966">gtest.h:1966</a></div></div>
+<div class="ttc" id="agtest_8h_html_ac33e7cdfb5d44a7a0f0ab552eb5c3c6a"><div class="ttname"><a href="gtest_8h.html#ac33e7cdfb5d44a7a0f0ab552eb5c3c6a">EXPECT_TRUE</a></div><div class="ttdeci">#define EXPECT_TRUE(condition)</div><div class="ttdef"><b>Definition</b> <a href="gtest_8h_source.html#l01907">gtest.h:1907</a></div></div>
+<div class="ttc" id="agtest_8h_html_ad20f7b94ac5081e16f0005b94e95f0c6"><div class="ttname"><a href="gtest_8h.html#ad20f7b94ac5081e16f0005b94e95f0c6">EXPECT_STREQ</a></div><div class="ttdeci">#define EXPECT_STREQ(s1, s2)</div><div class="ttdef"><b>Definition</b> <a href="gtest_8h_source.html#l02039">gtest.h:2039</a></div></div>
+<div class="ttc" id="agtest_8h_html_ad8b332753515c0ab8baada563c2547eb"><div class="ttname"><a href="gtest_8h.html#ad8b332753515c0ab8baada563c2547eb">TEST</a></div><div class="ttdeci">#define TEST(test_case_name, test_name)</div><div class="ttdef"><b>Definition</b> <a href="gtest_8h_source.html#l02287">gtest.h:2287</a></div></div>
+<div class="ttc" id="atest__kvcache_8cpp_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="test__kvcache_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="test__kvcache_8cpp_source.html#l00007">test_kvcache.cpp:7</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_cd568b69e134830ef198a684977df832.html">TestUnits</a></li><li class="navelem"><a class="el" href="test__kvcache_8cpp.html">test_kvcache.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,697 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: WTSQueue类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classWTSQueue.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Public 类型</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pub-static-methods">静态 Public 成员函数</a> &#124;
+<a href="#pro-methods">Protected 成员函数</a> &#124;
+<a href="#pro-attribs">Protected 属性</a> &#124;
+<a href="classWTSQueue-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">WTSQueue类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public 类型</h2></td></tr>
+<tr class="memitem:af9d4f9a331f97beef9a3a344bf0aa793" id="r_af9d4f9a331f97beef9a3a344bf0aa793"><td class="memItemLeft" align="right" valign="top">typedef std::deque&lt; <a class="el" href="classWTSObject.html">WTSObject</a> * &gt;::iterator&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#af9d4f9a331f97beef9a3a344bf0aa793">Iterator</a></td></tr>
+<tr class="separator:af9d4f9a331f97beef9a3a344bf0aa793"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b7764f1d8bfa3adf9084860b2c14e35" id="r_a8b7764f1d8bfa3adf9084860b2c14e35"><td class="memItemLeft" align="right" valign="top">typedef std::deque&lt; <a class="el" href="classWTSObject.html">WTSObject</a> * &gt;::const_iterator&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#a8b7764f1d8bfa3adf9084860b2c14e35">ConstIterator</a></td></tr>
+<tr class="separator:a8b7764f1d8bfa3adf9084860b2c14e35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:abf1b7630c476a7b1b997deaeb315b790" id="r_abf1b7630c476a7b1b997deaeb315b790"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#abf1b7630c476a7b1b997deaeb315b790">pop</a> ()</td></tr>
+<tr class="separator:abf1b7630c476a7b1b997deaeb315b790"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4e09d5763b58a2581ed1e9f7ff770bc" id="r_aa4e09d5763b58a2581ed1e9f7ff770bc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#aa4e09d5763b58a2581ed1e9f7ff770bc">push</a> (<a class="el" href="classWTSObject.html">WTSObject</a> *obj, bool bAutoRetain=true)</td></tr>
+<tr class="separator:aa4e09d5763b58a2581ed1e9f7ff770bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ac3e2366dc41654a2c7dd9f95afe2d6" id="r_a3ac3e2366dc41654a2c7dd9f95afe2d6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSObject.html">WTSObject</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#a3ac3e2366dc41654a2c7dd9f95afe2d6">front</a> (bool bRetain=true)</td></tr>
+<tr class="separator:a3ac3e2366dc41654a2c7dd9f95afe2d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4c0baae84b4dea520df2e6447f1a1b8" id="r_ad4c0baae84b4dea520df2e6447f1a1b8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSObject.html">WTSObject</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#ad4c0baae84b4dea520df2e6447f1a1b8">back</a> (bool bRetain=true)</td></tr>
+<tr class="separator:ad4c0baae84b4dea520df2e6447f1a1b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5ed2f267ba4b8dce5f465737c24db98" id="r_ac5ed2f267ba4b8dce5f465737c24db98"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#ac5ed2f267ba4b8dce5f465737c24db98">size</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:ac5ed2f267ba4b8dce5f465737c24db98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa5803572683bf857df1f7c3975b78e2" id="r_aaa5803572683bf857df1f7c3975b78e2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#aaa5803572683bf857df1f7c3975b78e2">empty</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:aaa5803572683bf857df1f7c3975b78e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2ae21dea4547e9ba5d55036e8f23e8e" id="r_aa2ae21dea4547e9ba5d55036e8f23e8e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#aa2ae21dea4547e9ba5d55036e8f23e8e">release</a> ()</td></tr>
+<tr class="separator:aa2ae21dea4547e9ba5d55036e8f23e8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9931c11237eb4e422fa0b7c5a835b9b8" id="r_a9931c11237eb4e422fa0b7c5a835b9b8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#a9931c11237eb4e422fa0b7c5a835b9b8">clear</a> ()</td></tr>
+<tr class="separator:a9931c11237eb4e422fa0b7c5a835b9b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a905338fae3cab07d9f97de12a58e74" id="r_a3a905338fae3cab07d9f97de12a58e74"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSQueue.html#af9d4f9a331f97beef9a3a344bf0aa793">Iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#a3a905338fae3cab07d9f97de12a58e74">begin</a> ()</td></tr>
+<tr class="separator:a3a905338fae3cab07d9f97de12a58e74"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44e56404de433ff3d7a2d9a6c0a0d72c" id="r_a44e56404de433ff3d7a2d9a6c0a0d72c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSQueue.html#a8b7764f1d8bfa3adf9084860b2c14e35">ConstIterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#a44e56404de433ff3d7a2d9a6c0a0d72c">begin</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:a44e56404de433ff3d7a2d9a6c0a0d72c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e0875c964920847194e88a63f6e8a35" id="r_a3e0875c964920847194e88a63f6e8a35"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#a3e0875c964920847194e88a63f6e8a35">swap</a> (<a class="el" href="classWTSQueue.html">WTSQueue</a> *right)</td></tr>
+<tr class="separator:a3e0875c964920847194e88a63f6e8a35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9e883e1fb09b3509ba3eb912e687527" id="r_ad9e883e1fb09b3509ba3eb912e687527"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSQueue.html#af9d4f9a331f97beef9a3a344bf0aa793">Iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#ad9e883e1fb09b3509ba3eb912e687527">end</a> ()</td></tr>
+<tr class="separator:ad9e883e1fb09b3509ba3eb912e687527"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a526ae5aa5933bbce8a65fffc1323a6f6" id="r_a526ae5aa5933bbce8a65fffc1323a6f6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSQueue.html#a8b7764f1d8bfa3adf9084860b2c14e35">ConstIterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#a526ae5aa5933bbce8a65fffc1323a6f6">end</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:a526ae5aa5933bbce8a65fffc1323a6f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classWTSObject"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classWTSObject')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classWTSObject.html">WTSObject</a></td></tr>
+<tr class="memitem:aaa1501722eea3c1368ba68bf97b12d4b inherit pub_methods_classWTSObject" id="r_aaa1501722eea3c1368ba68bf97b12d4b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSObject.html#aaa1501722eea3c1368ba68bf97b12d4b">WTSObject</a> ()</td></tr>
+<tr class="separator:aaa1501722eea3c1368ba68bf97b12d4b inherit pub_methods_classWTSObject"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac3557f86dcdcbc08ebe4b95e0b5f3c2 inherit pub_methods_classWTSObject" id="r_aac3557f86dcdcbc08ebe4b95e0b5f3c2"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSObject.html#aac3557f86dcdcbc08ebe4b95e0b5f3c2">~WTSObject</a> ()</td></tr>
+<tr class="separator:aac3557f86dcdcbc08ebe4b95e0b5f3c2 inherit pub_methods_classWTSObject"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e41434e26313af90b03c8c8b395b049 inherit pub_methods_classWTSObject" id="r_a3e41434e26313af90b03c8c8b395b049"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSObject.html#a3e41434e26313af90b03c8c8b395b049">retain</a> ()</td></tr>
+<tr class="separator:a3e41434e26313af90b03c8c8b395b049 inherit pub_methods_classWTSObject"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5add3c4b61260e79d5abc764a2507bb7 inherit pub_methods_classWTSObject" id="r_a5add3c4b61260e79d5abc764a2507bb7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSObject.html#a5add3c4b61260e79d5abc764a2507bb7">isSingleRefs</a> ()</td></tr>
+<tr class="separator:a5add3c4b61260e79d5abc764a2507bb7 inherit pub_methods_classWTSObject"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89db877af3320c3c4b9a756bbacd3925 inherit pub_methods_classWTSObject" id="r_a89db877af3320c3c4b9a756bbacd3925"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSObject.html#a89db877af3320c3c4b9a756bbacd3925">retainCount</a> ()</td></tr>
+<tr class="separator:a89db877af3320c3c4b9a756bbacd3925 inherit pub_methods_classWTSObject"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+静态 Public 成员函数</h2></td></tr>
+<tr class="memitem:a3731604dad3871f0b3ffb6085ccc4641" id="r_a3731604dad3871f0b3ffb6085ccc4641"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classWTSQueue.html">WTSQueue</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#a3731604dad3871f0b3ffb6085ccc4641">create</a> ()</td></tr>
+<tr class="separator:a3731604dad3871f0b3ffb6085ccc4641"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+Protected 成员函数</h2></td></tr>
+<tr class="memitem:a662f1750018c2f2785d0a8f01ffb032e" id="r_a662f1750018c2f2785d0a8f01ffb032e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#a662f1750018c2f2785d0a8f01ffb032e">WTSQueue</a> ()</td></tr>
+<tr class="separator:a662f1750018c2f2785d0a8f01ffb032e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d4d36f986292f78b8cf6f4978023257" id="r_a8d4d36f986292f78b8cf6f4978023257"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#a8d4d36f986292f78b8cf6f4978023257">~WTSQueue</a> ()</td></tr>
+<tr class="separator:a8d4d36f986292f78b8cf6f4978023257"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
+Protected 属性</h2></td></tr>
+<tr class="memitem:a1c73a4455751eeb2e31a76265acaa0e1" id="r_a1c73a4455751eeb2e31a76265acaa0e1"><td class="memItemLeft" align="right" valign="top">std::deque&lt; <a class="el" href="classWTSObject.html">WTSObject</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSQueue.html#a1c73a4455751eeb2e31a76265acaa0e1">_queue</a></td></tr>
+<tr class="separator:a1c73a4455751eeb2e31a76265acaa0e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_attribs_classWTSObject"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classWTSObject')"><img src="closed.png" alt="-"/>&#160;Protected 属性 继承自 <a class="el" href="classWTSObject.html">WTSObject</a></td></tr>
+<tr class="memitem:afc6ccb094bdb9a5d82a6b684a23870a1 inherit pro_attribs_classWTSObject" id="r_afc6ccb094bdb9a5d82a6b684a23870a1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> std::atomic&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSObject.html#afc6ccb094bdb9a5d82a6b684a23870a1">m_uRefs</a></td></tr>
+<tr class="separator:afc6ccb094bdb9a5d82a6b684a23870a1 inherit pro_attribs_classWTSObject"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock">
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00754">754</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="a8b7764f1d8bfa3adf9084860b2c14e35" name="a8b7764f1d8bfa3adf9084860b2c14e35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b7764f1d8bfa3adf9084860b2c14e35">&#9670;&#160;</a></span>ConstIterator</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::deque&lt;<a class="el" href="classWTSObject.html">WTSObject</a>*&gt;::const_iterator <a class="el" href="classWTSQueue.html#a8b7764f1d8bfa3adf9084860b2c14e35">WTSQueue::ConstIterator</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00758">758</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af9d4f9a331f97beef9a3a344bf0aa793" name="af9d4f9a331f97beef9a3a344bf0aa793"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9d4f9a331f97beef9a3a344bf0aa793">&#9670;&#160;</a></span>Iterator</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::deque&lt;<a class="el" href="classWTSObject.html">WTSObject</a>*&gt;::iterator <a class="el" href="classWTSQueue.html#af9d4f9a331f97beef9a3a344bf0aa793">WTSQueue::Iterator</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00757">757</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a662f1750018c2f2785d0a8f01ffb032e" name="a662f1750018c2f2785d0a8f01ffb032e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a662f1750018c2f2785d0a8f01ffb032e">&#9670;&#160;</a></span>WTSQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">WTSQueue::WTSQueue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00869">869</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8d4d36f986292f78b8cf6f4978023257" name="a8d4d36f986292f78b8cf6f4978023257"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d4d36f986292f78b8cf6f4978023257">&#9670;&#160;</a></span>~WTSQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual WTSQueue::~WTSQueue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00870">870</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="ad4c0baae84b4dea520df2e6447f1a1b8" name="ad4c0baae84b4dea520df2e6447f1a1b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4c0baae84b4dea520df2e6447f1a1b8">&#9670;&#160;</a></span>back()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSObject.html">WTSObject</a> * WTSQueue::back </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bRetain</em> = <code>true</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00791">791</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3a905338fae3cab07d9f97de12a58e74" name="a3a905338fae3cab07d9f97de12a58e74"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a905338fae3cab07d9f97de12a58e74">&#9670;&#160;</a></span>begin() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSQueue.html#af9d4f9a331f97beef9a3a344bf0aa793">Iterator</a> WTSQueue::begin </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00840">840</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a44e56404de433ff3d7a2d9a6c0a0d72c" name="a44e56404de433ff3d7a2d9a6c0a0d72c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44e56404de433ff3d7a2d9a6c0a0d72c">&#9670;&#160;</a></span>begin() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSQueue.html#a8b7764f1d8bfa3adf9084860b2c14e35">ConstIterator</a> WTSQueue::begin </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00845">845</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9931c11237eb4e422fa0b7c5a835b9b8" name="a9931c11237eb4e422fa0b7c5a835b9b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9931c11237eb4e422fa0b7c5a835b9b8">&#9670;&#160;</a></span>clear()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSQueue::clear </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00827">827</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3731604dad3871f0b3ffb6085ccc4641" name="a3731604dad3871f0b3ffb6085ccc4641"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3731604dad3871f0b3ffb6085ccc4641">&#9670;&#160;</a></span>create()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classWTSQueue.html">WTSQueue</a> * WTSQueue::create </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00760">760</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaa5803572683bf857df1f7c3975b78e2" name="aaa5803572683bf857df1f7c3975b78e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa5803572683bf857df1f7c3975b78e2">&#9670;&#160;</a></span>empty()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WTSQueue::empty </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00805">805</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad9e883e1fb09b3509ba3eb912e687527" name="ad9e883e1fb09b3509ba3eb912e687527"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9e883e1fb09b3509ba3eb912e687527">&#9670;&#160;</a></span>end() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSQueue.html#af9d4f9a331f97beef9a3a344bf0aa793">Iterator</a> WTSQueue::end </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00858">858</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a526ae5aa5933bbce8a65fffc1323a6f6" name="a526ae5aa5933bbce8a65fffc1323a6f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a526ae5aa5933bbce8a65fffc1323a6f6">&#9670;&#160;</a></span>end() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSQueue.html#a8b7764f1d8bfa3adf9084860b2c14e35">ConstIterator</a> WTSQueue::end </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00863">863</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3ac3e2366dc41654a2c7dd9f95afe2d6" name="a3ac3e2366dc41654a2c7dd9f95afe2d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ac3e2366dc41654a2c7dd9f95afe2d6">&#9670;&#160;</a></span>front()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSObject.html">WTSObject</a> * WTSQueue::front </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bRetain</em> = <code>true</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00779">779</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abf1b7630c476a7b1b997deaeb315b790" name="abf1b7630c476a7b1b997deaeb315b790"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf1b7630c476a7b1b997deaeb315b790">&#9670;&#160;</a></span>pop()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSQueue::pop </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00766">766</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa4e09d5763b58a2581ed1e9f7ff770bc" name="aa4e09d5763b58a2581ed1e9f7ff770bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa4e09d5763b58a2581ed1e9f7ff770bc">&#9670;&#160;</a></span>push()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSQueue::push </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSObject.html">WTSObject</a> *&#160;</td>
+          <td class="paramname"><em>obj</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAutoRetain</em> = <code>true</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00771">771</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa2ae21dea4547e9ba5d55036e8f23e8e" name="aa2ae21dea4547e9ba5d55036e8f23e8e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2ae21dea4547e9ba5d55036e8f23e8e">&#9670;&#160;</a></span>release()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSQueue::release </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classWTSObject.html#a57b87f47529974f735f4989eaf2dd55f">WTSObject</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00807">807</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac5ed2f267ba4b8dce5f465737c24db98" name="ac5ed2f267ba4b8dce5f465737c24db98"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5ed2f267ba4b8dce5f465737c24db98">&#9670;&#160;</a></span>size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WTSQueue::size </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00803">803</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3e0875c964920847194e88a63f6e8a35" name="a3e0875c964920847194e88a63f6e8a35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e0875c964920847194e88a63f6e8a35">&#9670;&#160;</a></span>swap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSQueue::swap </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSQueue.html">WTSQueue</a> *&#160;</td>
+          <td class="paramname"><em>right</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00850">850</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a1c73a4455751eeb2e31a76265acaa0e1" name="a1c73a4455751eeb2e31a76265acaa0e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c73a4455751eeb2e31a76265acaa0e1">&#9670;&#160;</a></span>_queue</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::deque&lt;<a class="el" href="classWTSObject.html">WTSObject</a>*&gt; WTSQueue::_queue</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a> 第 <a class="el" href="WTSCollection_8hpp_source.html#l00872">872</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/Includes/<a class="el" href="WTSCollection_8hpp_source.html">WTSCollection.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classWTSQueue.html">WTSQueue</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

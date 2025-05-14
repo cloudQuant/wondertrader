@@ -1,0 +1,2508 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/sutil/string/spk_strings.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('spk__strings_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">spk_strings.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;<a class="el" href="types_8h_source.html">sutil/types.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">sutil/compiler.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="cmnlib_8h_source.html">sutil/cmnlib.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__platforms_8h_source.html">sutil/platform/spk_platforms.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__string__convert_8h_source.html">sutil/string/spk_string_convert.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__string__var_8h_source.html">sutil/string/spk_string_var.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__multi__field__string_8h_source.html">sutil/string/spk_multi_field_string.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__fixed__snprintf_8h_source.html">sutil/string/spk_fixed_snprintf.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__strverscmp_8h_source.html">sutil/string/spk_strverscmp.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__console__masked__log_8h_source.html">sutil/logger/spk_console_masked_log.h</a>&gt;</code><br />
+</div>
+<p><a href="spk__strings_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a6428da752682384c9573b18d2c58f7c4" id="r_a6428da752682384c9573b18d2c58f7c4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a6428da752682384c9573b18d2c58f7c4">SStr_Strchcmp</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *s1, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *s2, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> endChar)</td></tr>
+<tr class="separator:a6428da752682384c9573b18d2c58f7c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe7dcf1190532e66f7dfb555dd4dc44f" id="r_afe7dcf1190532e66f7dfb555dd4dc44f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#afe7dcf1190532e66f7dfb555dd4dc44f">SStr_Strncasecmp</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *s1, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *s2, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> n)</td></tr>
+<tr class="separator:afe7dcf1190532e66f7dfb555dd4dc44f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ff9ab523ba427b4270bc31cec6ea6b8" id="r_a0ff9ab523ba427b4270bc31cec6ea6b8"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a0ff9ab523ba427b4270bc31cec6ea6b8">SStr_Replace</a> (char *pBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pTarget, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pOldStr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pNewStr)</td></tr>
+<tr class="separator:a0ff9ab523ba427b4270bc31cec6ea6b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3594f28c04cfb2143e4ef48e3edebcdc" id="r_a3594f28c04cfb2143e4ef48e3edebcdc"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a3594f28c04cfb2143e4ef48e3edebcdc">SStr_ReplaceAppointed</a> (char *pBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pTarget, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pOldStr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pNewStr, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> n)</td></tr>
+<tr class="separator:a3594f28c04cfb2143e4ef48e3edebcdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fd70cd1cf6dba979022fc46d9e240e7" id="r_a3fd70cd1cf6dba979022fc46d9e240e7"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a3fd70cd1cf6dba979022fc46d9e240e7">SStr_GetWrappedString</a> (char *pBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pTarget, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pPrefix, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pPostfix)</td></tr>
+<tr class="separator:a3fd70cd1cf6dba979022fc46d9e240e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57cd117cc85c58239777218fd980069b" id="r_a57cd117cc85c58239777218fd980069b"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a57cd117cc85c58239777218fd980069b">SStr_BuildWrappedString</a> (char *pBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pTarget, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> targetLen, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pPrefix, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pPostfix)</td></tr>
+<tr class="separator:a57cd117cc85c58239777218fd980069b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f1035155694e882dd58c0207ee4b572" id="r_a6f1035155694e882dd58c0207ee4b572"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a6f1035155694e882dd58c0207ee4b572">SStr_IsStartWith</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStartWith, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pAnyChar, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> n)</td></tr>
+<tr class="separator:a6f1035155694e882dd58c0207ee4b572"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acaa46fdd54b94e4622da5139b32ffe76" id="r_acaa46fdd54b94e4622da5139b32ffe76"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#acaa46fdd54b94e4622da5139b32ffe76">SStr_IsStartWith2</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStartWith, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pAnyChar, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> n, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char **ppAfterMatched)</td></tr>
+<tr class="separator:acaa46fdd54b94e4622da5139b32ffe76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc8b6465df4c9ff149756bb975e1a76a" id="r_adc8b6465df4c9ff149756bb975e1a76a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#adc8b6465df4c9ff149756bb975e1a76a">SStr_IsIgnoreCaseStartWith</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStartWith, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pAnyChar, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> n)</td></tr>
+<tr class="separator:adc8b6465df4c9ff149756bb975e1a76a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0adadff88300bfec303de87644f5b05" id="r_ab0adadff88300bfec303de87644f5b05"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#ab0adadff88300bfec303de87644f5b05">SStr_IsIgnoreCaseStartWith2</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStartWith, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pAnyChar, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> n, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char **ppAfterMatched)</td></tr>
+<tr class="separator:ab0adadff88300bfec303de87644f5b05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60fdbe47f4acdfb5c40749af94f8b0ec" id="r_a60fdbe47f4acdfb5c40749af94f8b0ec"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a60fdbe47f4acdfb5c40749af94f8b0ec">SStr_IsEndsWith</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pEndsWith)</td></tr>
+<tr class="separator:a60fdbe47f4acdfb5c40749af94f8b0ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed7ac0f8520e1bf7d0caf6a97c9ca84a" id="r_aed7ac0f8520e1bf7d0caf6a97c9ca84a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#aed7ac0f8520e1bf7d0caf6a97c9ca84a">SStr_IsIgnoreCaseEndsWith</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pEndsWith)</td></tr>
+<tr class="separator:aed7ac0f8520e1bf7d0caf6a97c9ca84a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad37d8b10b9eca6887551936dd9d53ac5" id="r_ad37d8b10b9eca6887551936dd9d53ac5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#ad37d8b10b9eca6887551936dd9d53ac5">SStr_TotalChars</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pChars)</td></tr>
+<tr class="separator:ad37d8b10b9eca6887551936dd9d53ac5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb4e69ce7d0752ecbc142c9e481c4790" id="r_adb4e69ce7d0752ecbc142c9e481c4790"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#adb4e69ce7d0752ecbc142c9e481c4790">SStr_IsAnyChar</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char ch, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *accept)</td></tr>
+<tr class="separator:adb4e69ce7d0752ecbc142c9e481c4790"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab851d516fbfe58c38b7d801315aaec87" id="r_ab851d516fbfe58c38b7d801315aaec87"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#ab851d516fbfe58c38b7d801315aaec87">SStr_IsAnyChar2</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char ch, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *accept, int len)</td></tr>
+<tr class="separator:ab851d516fbfe58c38b7d801315aaec87"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9535c9492aebaf6c12829fdaa2525117" id="r_a9535c9492aebaf6c12829fdaa2525117"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a9535c9492aebaf6c12829fdaa2525117">SStr_Strpbrk</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *s, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *accept)</td></tr>
+<tr class="separator:a9535c9492aebaf6c12829fdaa2525117"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa117a39b50c062d42c1d39e568847c48" id="r_aa117a39b50c062d42c1d39e568847c48"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#aa117a39b50c062d42c1d39e568847c48">SStr_StrpbrkReverse</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *s, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *accept)</td></tr>
+<tr class="separator:aa117a39b50c062d42c1d39e568847c48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb0467fcd983645ff28f1a88b232195d" id="r_acb0467fcd983645ff28f1a88b232195d"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#acb0467fcd983645ff28f1a88b232195d">SStr_Strsep2</a> (char **ppString, char **ppTokenEnd, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pDelim)</td></tr>
+<tr class="separator:acb0467fcd983645ff28f1a88b232195d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c405bb904f867e42b9bbc908a3a5a5c" id="r_a6c405bb904f867e42b9bbc908a3a5a5c"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a6c405bb904f867e42b9bbc908a3a5a5c">SStr_Strsep</a> (char **stringp, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *delim)</td></tr>
+<tr class="separator:a6c405bb904f867e42b9bbc908a3a5a5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87bc5244d27628013209bd5532c86013" id="r_a87bc5244d27628013209bd5532c86013"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a87bc5244d27628013209bd5532c86013">SStr_IsEmpty</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr)</td></tr>
+<tr class="separator:a87bc5244d27628013209bd5532c86013"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2b67c0089695a80cfa37ac790315c55" id="r_af2b67c0089695a80cfa37ac790315c55"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#af2b67c0089695a80cfa37ac790315c55">SStr_IsBlank</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr)</td></tr>
+<tr class="separator:af2b67c0089695a80cfa37ac790315c55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1aafa275c65f253349cf074c4fe003b5" id="r_a1aafa275c65f253349cf074c4fe003b5"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a1aafa275c65f253349cf074c4fe003b5">SStr_IsVisibleAsciiString</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr)</td></tr>
+<tr class="separator:a1aafa275c65f253349cf074c4fe003b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5948646b335395f6e82bc10d424d94ec" id="r_a5948646b335395f6e82bc10d424d94ec"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a5948646b335395f6e82bc10d424d94ec">SStr_IsValidMd5String</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr)</td></tr>
+<tr class="separator:a5948646b335395f6e82bc10d424d94ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f6e3595ac95a974658220178e50fe7d" id="r_a0f6e3595ac95a974658220178e50fe7d"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a0f6e3595ac95a974658220178e50fe7d">SStr_IsValidPasswdString</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr)</td></tr>
+<tr class="separator:a0f6e3595ac95a974658220178e50fe7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a007bf95a9ce17c00e609d75de56a91" id="r_a2a007bf95a9ce17c00e609d75de56a91"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a2a007bf95a9ce17c00e609d75de56a91">SStr_CheckPasswdStrength</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> strength, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> minLength)</td></tr>
+<tr class="separator:a2a007bf95a9ce17c00e609d75de56a91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a1176263345e1766006a37624453cfa" id="r_a7a1176263345e1766006a37624453cfa"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a7a1176263345e1766006a37624453cfa">SStr_SwitchBlankStr</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *s, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *v)</td></tr>
+<tr class="separator:a7a1176263345e1766006a37624453cfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8851e3efd80704b0b86a29573f8e530" id="r_aa8851e3efd80704b0b86a29573f8e530"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#aa8851e3efd80704b0b86a29573f8e530">SStr_Ltrim</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr)</td></tr>
+<tr class="separator:aa8851e3efd80704b0b86a29573f8e530"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87b594430a64bad1bc220665645eed65" id="r_a87b594430a64bad1bc220665645eed65"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a87b594430a64bad1bc220665645eed65">SStr_LtrimZero</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr)</td></tr>
+<tr class="separator:a87b594430a64bad1bc220665645eed65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53a24f4a3302540ff496e230b2098608" id="r_a53a24f4a3302540ff496e230b2098608"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a53a24f4a3302540ff496e230b2098608">SStr_RtrimRude</a> (char *pStr)</td></tr>
+<tr class="separator:a53a24f4a3302540ff496e230b2098608"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3678e235d603eb662371d70741a94c8" id="r_aa3678e235d603eb662371d70741a94c8"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#aa3678e235d603eb662371d70741a94c8">SStr_TrimRude</a> (char *pStr)</td></tr>
+<tr class="separator:aa3678e235d603eb662371d70741a94c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84140b992121c4f2428ed8ef05d4fde6" id="r_a84140b992121c4f2428ed8ef05d4fde6"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a84140b992121c4f2428ed8ef05d4fde6">SStr_ToUpper</a> (char *pStr)</td></tr>
+<tr class="separator:a84140b992121c4f2428ed8ef05d4fde6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a104b8e38d0ddfa07e711637167756c6d" id="r_a104b8e38d0ddfa07e711637167756c6d"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a104b8e38d0ddfa07e711637167756c6d">SStr_ToUpperR</a> (char *pBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr)</td></tr>
+<tr class="separator:a104b8e38d0ddfa07e711637167756c6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bd66264777e02910b92ebd003415748" id="r_a2bd66264777e02910b92ebd003415748"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a2bd66264777e02910b92ebd003415748">SStr_ToLower</a> (char *pStr)</td></tr>
+<tr class="separator:a2bd66264777e02910b92ebd003415748"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c63e3d440b1250956b967f1c59b7c31" id="r_a4c63e3d440b1250956b967f1c59b7c31"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a4c63e3d440b1250956b967f1c59b7c31">SStr_ToLowerR</a> (char *pBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr)</td></tr>
+<tr class="separator:a4c63e3d440b1250956b967f1c59b7c31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af46f9d24ca3f4c3790f3afd4af5bd6e6" id="r_af46f9d24ca3f4c3790f3afd4af5bd6e6"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#af46f9d24ca3f4c3790f3afd4af5bd6e6">SStr_StrCopy2</a> (char *pBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> maxStrLen, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> *pOutCopyLen)</td></tr>
+<tr class="separator:af46f9d24ca3f4c3790f3afd4af5bd6e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f59dda054a801be860e48c2d7da02be" id="r_a5f59dda054a801be860e48c2d7da02be"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a5f59dda054a801be860e48c2d7da02be">SStr_StrCopy</a> (char *pBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> maxStrLen)</td></tr>
+<tr class="separator:a5f59dda054a801be860e48c2d7da02be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43ecd827f06519415f075f31f25508e9" id="r_a43ecd827f06519415f075f31f25508e9"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a43ecd827f06519415f075f31f25508e9">SStr_StrFixedLengthCopy</a> (char *pBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> strLen)</td></tr>
+<tr class="separator:a43ecd827f06519415f075f31f25508e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a576883187fe1086aa17dd866308f690b" id="r_a576883187fe1086aa17dd866308f690b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a576883187fe1086aa17dd866308f690b">SStr_SubStrCopy</a> (char *pBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> from, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> subLen)</td></tr>
+<tr class="separator:a576883187fe1086aa17dd866308f690b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed9c269201563899636f721b3b2986e6" id="r_aed9c269201563899636f721b3b2986e6"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#aed9c269201563899636f721b3b2986e6">SStr_StrCat</a> (char *pBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *s1, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *s2, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> maxStrlen)</td></tr>
+<tr class="separator:aed9c269201563899636f721b3b2986e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad37b218e8f3b2368d6a4a809d7b6f9a6" id="r_ad37b218e8f3b2368d6a4a809d7b6f9a6"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#ad37b218e8f3b2368d6a4a809d7b6f9a6">SStr_StrCatP</a> (char **ppString, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *s, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> *pMaxStrlen)</td></tr>
+<tr class="separator:ad37b218e8f3b2368d6a4a809d7b6f9a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85f0d3c2907d52e31e3562d41cd4ec87" id="r_a85f0d3c2907d52e31e3562d41cd4ec87"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a85f0d3c2907d52e31e3562d41cd4ec87">SStr_StrCatChStr</a> (char *pBuf, char ch, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> maxStrlen)</td></tr>
+<tr class="separator:a85f0d3c2907d52e31e3562d41cd4ec87"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1127134af9dbc1f6dbd2aa42ded2e8cd" id="r_a1127134af9dbc1f6dbd2aa42ded2e8cd"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a1127134af9dbc1f6dbd2aa42ded2e8cd">SStr_StrTrimCopy</a> (char *pBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> maxStrlen)</td></tr>
+<tr class="separator:a1127134af9dbc1f6dbd2aa42ded2e8cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47248eca66e0f04acafd206640e40d83" id="r_a47248eca66e0f04acafd206640e40d83"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a47248eca66e0f04acafd206640e40d83">SStr_StrFixedLengthTrimCopy</a> (char *pBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> maxStrlen)</td></tr>
+<tr class="separator:a47248eca66e0f04acafd206640e40d83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69c0828f4d94a93facd972ba57232d6d" id="r_a69c0828f4d94a93facd972ba57232d6d"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a69c0828f4d94a93facd972ba57232d6d">SStr_StrRightAlignmentCopy</a> (char *pBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> alignedLen, char leftFiller)</td></tr>
+<tr class="separator:a69c0828f4d94a93facd972ba57232d6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15170c91998b0c9c232567d7c90fe6aa" id="r_a15170c91998b0c9c232567d7c90fe6aa"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a15170c91998b0c9c232567d7c90fe6aa">SStr_SkipSpaces</a> (char **ppStr)</td></tr>
+<tr class="separator:a15170c91998b0c9c232567d7c90fe6aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f67974ac459ffc94302d543092e57fd" id="r_a9f67974ac459ffc94302d543092e57fd"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a9f67974ac459ffc94302d543092e57fd">SStr_SkipSpacesReverse</a> (char **ppEnd, char *pBegin)</td></tr>
+<tr class="separator:a9f67974ac459ffc94302d543092e57fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82b450d5c9ffbf5a9cc0b490fa6f67cd" id="r_a82b450d5c9ffbf5a9cc0b490fa6f67cd"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a82b450d5c9ffbf5a9cc0b490fa6f67cd">SStr_SkipString</a> (char **ppStr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pSkipKey)</td></tr>
+<tr class="separator:a82b450d5c9ffbf5a9cc0b490fa6f67cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae686336fb224bc4ca868d3e471dbd66" id="r_aae686336fb224bc4ca868d3e471dbd66"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#aae686336fb224bc4ca868d3e471dbd66">SStr_ReplaceInvisibleChar</a> (char *pStr, char charReplacement, char spaceReplacement)</td></tr>
+<tr class="separator:aae686336fb224bc4ca868d3e471dbd66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8313cf25d454b3bbb94cfbd33a8ad62b" id="r_a8313cf25d454b3bbb94cfbd33a8ad62b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a8313cf25d454b3bbb94cfbd33a8ad62b">SStr_ReplaceChar</a> (char *pStr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char c1, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char c2, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> n)</td></tr>
+<tr class="separator:a8313cf25d454b3bbb94cfbd33a8ad62b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab797360004e8cfd045a669d60b8eeb2" id="r_aab797360004e8cfd045a669d60b8eeb2"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#aab797360004e8cfd045a669d60b8eeb2">SStr_ReplaceCharReverse</a> (char *pStr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char c1, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char c2, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> n)</td></tr>
+<tr class="separator:aab797360004e8cfd045a669d60b8eeb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a159447078b1ca426195c9734ad4d81" id="r_a3a159447078b1ca426195c9734ad4d81"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a3a159447078b1ca426195c9734ad4d81">SStr_GetParentSection</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pDelimChars, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a3a159447078b1ca426195c9734ad4d81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a642ee8fc1a23b1a850f67a2d1ab27981" id="r_a642ee8fc1a23b1a850f67a2d1ab27981"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__strings_8h.html#a642ee8fc1a23b1a850f67a2d1ab27981">SStr_GetLastSection</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pDelimChars)</td></tr>
+<tr class="separator:a642ee8fc1a23b1a850f67a2d1ab27981"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>字符串处理函数的头文件(线程安全)</p>
+<dl class="section version"><dt>版本</dt><dd>$Id$ </dd></dl>
+<dl class="section since"><dt>自从</dt><dd>2012/01/05 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="a57cd117cc85c58239777218fd980069b" name="a57cd117cc85c58239777218fd980069b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57cd117cc85c58239777218fd980069b">&#9670;&#160;</a></span>SStr_BuildWrappedString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * SStr_BuildWrappedString </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pTarget</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>targetLen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pPrefix</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pPostfix</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2a007bf95a9ce17c00e609d75de56a91" name="a2a007bf95a9ce17c00e609d75de56a91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a007bf95a9ce17c00e609d75de56a91">&#9670;&#160;</a></span>SStr_CheckPasswdStrength()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_CheckPasswdStrength </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>strength</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>minLength</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>校验密码强度 (只能包含字母+数字, 以及 '._-' 这几个邮箱地址相关的特殊字符) (若指定密码强度或密码最小长度, 须符合对应限制条件)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pStr</td><td>待校验字符串 </td></tr>
+    <tr><td class="paramname">strength</td><td>密码强度, 0表示无限制 </td></tr>
+    <tr><td class="paramname">minLength</td><td>密码最小长度, 0表示无限制 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>等于0: 有效; 大于0: 密码强度弱; 小于0: 密码包含无效字符 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00416">416</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a642ee8fc1a23b1a850f67a2d1ab27981" name="a642ee8fc1a23b1a850f67a2d1ab27981"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a642ee8fc1a23b1a850f67a2d1ab27981">&#9670;&#160;</a></span>SStr_GetLastSection()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * SStr_GetLastSection </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pDelimChars</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>返回按指定分隔符分割的末尾区段名称</p>
+<p>例如:</p><ul>
+<li>a.b.c =&gt; c</li>
+<li>a.b. =&gt; ""</li>
+<li>a.b =&gt; b</li>
+<li>a =&gt; a</li>
+</ul>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pStr</td><td>待解析的目标字符串 </td></tr>
+    <tr><td class="paramname">pDelimChars</td><td>分割符列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>末尾区段名称; NULL, 参数为空 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l01189">1189</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3a159447078b1ca426195c9734ad4d81" name="a3a159447078b1ca426195c9734ad4d81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a159447078b1ca426195c9734ad4d81">&#9670;&#160;</a></span>SStr_GetParentSection()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * SStr_GetParentSection </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pDelimChars</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>返回按指定分隔符分割的上级区段名称</p>
+<p>例如:</p><ul>
+<li>a.b.c =&gt; a.b</li>
+<li>a.b. =&gt; a.b</li>
+<li>a.b =&gt; a</li>
+<li>a =&gt; a</li>
+</ul>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">pStr</td><td>待解析的目标字符串 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pDelimChars</td><td>分割符列表 </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">pBuf</td><td>用于输出数据的缓存区指针 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">bufSize</td><td>缓存区大小 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>上级区段名称; NULL, 参数为空 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l01146">1146</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3fd70cd1cf6dba979022fc46d9e240e7" name="a3fd70cd1cf6dba979022fc46d9e240e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fd70cd1cf6dba979022fc46d9e240e7">&#9670;&#160;</a></span>SStr_GetWrappedString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * SStr_GetWrappedString </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pTarget</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pPrefix</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pPostfix</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adb4e69ce7d0752ecbc142c9e481c4790" name="adb4e69ce7d0752ecbc142c9e481c4790"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb4e69ce7d0752ecbc142c9e481c4790">&#9670;&#160;</a></span>SStr_IsAnyChar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsAnyChar </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char&#160;</td>
+          <td class="paramname"><em>ch</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>accept</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>check a char is any of a set of characters </p>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00146">146</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab851d516fbfe58c38b7d801315aaec87" name="ab851d516fbfe58c38b7d801315aaec87"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab851d516fbfe58c38b7d801315aaec87">&#9670;&#160;</a></span>SStr_IsAnyChar2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsAnyChar2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char&#160;</td>
+          <td class="paramname"><em>ch</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>accept</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>check a char is any of a set of characters </p>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00161">161</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af2b67c0089695a80cfa37ac790315c55" name="af2b67c0089695a80cfa37ac790315c55"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2b67c0089695a80cfa37ac790315c55">&#9670;&#160;</a></span>SStr_IsBlank()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsBlank </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>返回字符串是否是空字符串</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pStr</td><td>待校验字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>TRUE, 为空; FALSE, 不为空 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00317">317</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a87bc5244d27628013209bd5532c86013" name="a87bc5244d27628013209bd5532c86013"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87bc5244d27628013209bd5532c86013">&#9670;&#160;</a></span>SStr_IsEmpty()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsEmpty </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>返回字符串是否是空字符串</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pStr</td><td>待校验字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>TRUE, 为空; FALSE, 不为空 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00305">305</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a60fdbe47f4acdfb5c40749af94f8b0ec" name="a60fdbe47f4acdfb5c40749af94f8b0ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60fdbe47f4acdfb5c40749af94f8b0ec">&#9670;&#160;</a></span>SStr_IsEndsWith()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsEndsWith </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pEndsWith</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aed7ac0f8520e1bf7d0caf6a97c9ca84a" name="aed7ac0f8520e1bf7d0caf6a97c9ca84a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed7ac0f8520e1bf7d0caf6a97c9ca84a">&#9670;&#160;</a></span>SStr_IsIgnoreCaseEndsWith()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsIgnoreCaseEndsWith </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pEndsWith</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adc8b6465df4c9ff149756bb975e1a76a" name="adc8b6465df4c9ff149756bb975e1a76a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc8b6465df4c9ff149756bb975e1a76a">&#9670;&#160;</a></span>SStr_IsIgnoreCaseStartWith()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsIgnoreCaseStartWith </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStartWith</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pAnyChar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab0adadff88300bfec303de87644f5b05" name="ab0adadff88300bfec303de87644f5b05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0adadff88300bfec303de87644f5b05">&#9670;&#160;</a></span>SStr_IsIgnoreCaseStartWith2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsIgnoreCaseStartWith2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStartWith</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pAnyChar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char **&#160;</td>
+          <td class="paramname"><em>ppAfterMatched</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6f1035155694e882dd58c0207ee4b572" name="a6f1035155694e882dd58c0207ee4b572"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f1035155694e882dd58c0207ee4b572">&#9670;&#160;</a></span>SStr_IsStartWith()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsStartWith </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStartWith</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pAnyChar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acaa46fdd54b94e4622da5139b32ffe76" name="acaa46fdd54b94e4622da5139b32ffe76"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acaa46fdd54b94e4622da5139b32ffe76">&#9670;&#160;</a></span>SStr_IsStartWith2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsStartWith2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStartWith</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pAnyChar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char **&#160;</td>
+          <td class="paramname"><em>ppAfterMatched</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5948646b335395f6e82bc10d424d94ec" name="a5948646b335395f6e82bc10d424d94ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5948646b335395f6e82bc10d424d94ec">&#9670;&#160;</a></span>SStr_IsValidMd5String()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsValidMd5String </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>返回字符串是否是有效的MD5字符串 (字母+数字)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pStr</td><td>待校验字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>TRUE, 有效; FALSE, 无效 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00361">361</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0f6e3595ac95a974658220178e50fe7d" name="a0f6e3595ac95a974658220178e50fe7d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f6e3595ac95a974658220178e50fe7d">&#9670;&#160;</a></span>SStr_IsValidPasswdString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsValidPasswdString </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>返回字符串是否是有效的密码串 (字母+数字, 以及 '._-' 这几个邮箱地址相关的特殊字符)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pStr</td><td>待校验字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>TRUE, 有效; FALSE, 无效 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00388">388</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1aafa275c65f253349cf074c4fe003b5" name="a1aafa275c65f253349cf074c4fe003b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1aafa275c65f253349cf074c4fe003b5">&#9670;&#160;</a></span>SStr_IsVisibleAsciiString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsVisibleAsciiString </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>返回字符串是否全是有效的ASCII可见字符 (不能包含空格和不可见字符等)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pStr</td><td>待校验字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>TRUE, 有效; FALSE, 无效 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00337">337</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa8851e3efd80704b0b86a29573f8e530" name="aa8851e3efd80704b0b86a29573f8e530"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8851e3efd80704b0b86a29573f8e530">&#9670;&#160;</a></span>SStr_Ltrim()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * SStr_Ltrim </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>返回跳过左端空格后的字符串</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pStr</td><td>字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>跳过左端空格后的字符串指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00474">474</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a87b594430a64bad1bc220665645eed65" name="a87b594430a64bad1bc220665645eed65"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87b594430a64bad1bc220665645eed65">&#9670;&#160;</a></span>SStr_LtrimZero()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * SStr_LtrimZero </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>跳过字符串起始的空格和'0'</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pStr</td><td>字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>跳过左端空格和'0'后的字符串指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00493">493</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0ff9ab523ba427b4270bc31cec6ea6b8" name="a0ff9ab523ba427b4270bc31cec6ea6b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ff9ab523ba427b4270bc31cec6ea6b8">&#9670;&#160;</a></span>SStr_Replace()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * SStr_Replace </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pTarget</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pOldStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pNewStr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3594f28c04cfb2143e4ef48e3edebcdc" name="a3594f28c04cfb2143e4ef48e3edebcdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3594f28c04cfb2143e4ef48e3edebcdc">&#9670;&#160;</a></span>SStr_ReplaceAppointed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * SStr_ReplaceAppointed </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pTarget</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pOldStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pNewStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8313cf25d454b3bbb94cfbd33a8ad62b" name="a8313cf25d454b3bbb94cfbd33a8ad62b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8313cf25d454b3bbb94cfbd33a8ad62b">&#9670;&#160;</a></span>SStr_ReplaceChar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_ReplaceChar </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char&#160;</td>
+          <td class="paramname"><em>c1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char&#160;</td>
+          <td class="paramname"><em>c2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>替换字符串中的指定字符</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">pStr</td><td>待处理的字符串 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">c1</td><td>被替换字符 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">c2</td><td>替换字符 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td>最多替换次数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>已替换的字符数量 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l01084">1084</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aab797360004e8cfd045a669d60b8eeb2" name="aab797360004e8cfd045a669d60b8eeb2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab797360004e8cfd045a669d60b8eeb2">&#9670;&#160;</a></span>SStr_ReplaceCharReverse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_ReplaceCharReverse </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char&#160;</td>
+          <td class="paramname"><em>c1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char&#160;</td>
+          <td class="paramname"><em>c2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>从后面开始替换字符串中的指定字符</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">pStr</td><td>待处理的字符串 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">c1</td><td>被替换字符 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">c2</td><td>替换字符 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td>最多替换次数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>已替换的字符数量 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l01111">1111</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aae686336fb224bc4ca868d3e471dbd66" name="aae686336fb224bc4ca868d3e471dbd66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae686336fb224bc4ca868d3e471dbd66">&#9670;&#160;</a></span>SStr_ReplaceInvisibleChar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_ReplaceInvisibleChar </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>charReplacement</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>spaceReplacement</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>替换字符串中的不可见字符 </p><dl class="section note"><dt>注解</dt><dd>空格字符(含制表符和换行符)特殊对待</dd></dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">pStr</td><td>待处理的字符串 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">charReplacement</td><td>不可见字符的替换字符 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">spaceReplacement</td><td>空格字符的替换字符 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>已替换的字符数量 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l01055">1055</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a53a24f4a3302540ff496e230b2098608" name="a53a24f4a3302540ff496e230b2098608"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53a24f4a3302540ff496e230b2098608">&#9670;&#160;</a></span>SStr_RtrimRude()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_RtrimRude </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>去除字符串右端的空格</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pStr</td><td>字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>去除空格后的字符串 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00520">520</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a15170c91998b0c9c232567d7c90fe6aa" name="a15170c91998b0c9c232567d7c90fe6aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15170c91998b0c9c232567d7c90fe6aa">&#9670;&#160;</a></span>SStr_SkipSpaces()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_SkipSpaces </td>
+          <td>(</td>
+          <td class="paramtype">char **&#160;</td>
+          <td class="paramname"><em>ppStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>跳过空字符 </p>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00982">982</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9f67974ac459ffc94302d543092e57fd" name="a9f67974ac459ffc94302d543092e57fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f67974ac459ffc94302d543092e57fd">&#9670;&#160;</a></span>SStr_SkipSpacesReverse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> void SStr_SkipSpacesReverse </td>
+          <td>(</td>
+          <td class="paramtype">char **&#160;</td>
+          <td class="paramname"><em>ppEnd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBegin</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>从字符串末端反向跳过空字符 </p>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00996">996</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a82b450d5c9ffbf5a9cc0b490fa6f67cd" name="a82b450d5c9ffbf5a9cc0b490fa6f67cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82b450d5c9ffbf5a9cc0b490fa6f67cd">&#9670;&#160;</a></span>SStr_SkipString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_SkipString </td>
+          <td>(</td>
+          <td class="paramtype">char **&#160;</td>
+          <td class="paramname"><em>ppStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pSkipKey</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>跳过所有字符直到指定的字符串末尾</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ppStr</td><td>&lt;in/out: char**&gt; 待处理字符串的指针的指针 </td></tr>
+    <tr><td class="paramname">pSkipKey</td><td>&lt;char*&gt; 待跳过的字符串指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>小于0, 未找到指定的字符串; 大于等于0, 已跳过字符串的起始位置(相对值) </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l01026">1026</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aed9c269201563899636f721b3b2986e6" name="aed9c269201563899636f721b3b2986e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed9c269201563899636f721b3b2986e6">&#9670;&#160;</a></span>SStr_StrCat()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_StrCat </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>s1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>s2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>maxStrlen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>连接两个字符串到新字符串中 </p>
+<p>需保证缓存有足够的空间(maxStrlen + 1)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">maxStrlen</td><td>最大有效字符长度(不包括结尾的'\0')，即buf的长度需至少 为 maxStrlen + 1 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00757">757</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a85f0d3c2907d52e31e3562d41cd4ec87" name="a85f0d3c2907d52e31e3562d41cd4ec87"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85f0d3c2907d52e31e3562d41cd4ec87">&#9670;&#160;</a></span>SStr_StrCatChStr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_StrCatChStr </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>ch</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>maxStrlen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>连接字符和字符串 </p>
+<p>需保证缓存有足够的空间(maxStrlen + 1)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">maxStrlen</td><td>最大有效字符长度(不包括结尾的'\0')，即buf的长度需至少 为 maxStrlen + 1 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00834">834</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad37b218e8f3b2368d6a4a809d7b6f9a6" name="ad37b218e8f3b2368d6a4a809d7b6f9a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad37b218e8f3b2368d6a4a809d7b6f9a6">&#9670;&#160;</a></span>SStr_StrCatP()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_StrCatP </td>
+          <td>(</td>
+          <td class="paramtype">char **&#160;</td>
+          <td class="paramname"><em>ppString</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> *&#160;</td>
+          <td class="paramname"><em>pMaxStrlen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>连接字符串并将字符串指针移动到新字符串末尾</p>
+<dl class="section return"><dt>返回</dt><dd>原字符串地址 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00786">786</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6428da752682384c9573b18d2c58f7c4" name="a6428da752682384c9573b18d2c58f7c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6428da752682384c9573b18d2c58f7c4">&#9670;&#160;</a></span>SStr_Strchcmp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_Strchcmp </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>s1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>s2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>endChar</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5f59dda054a801be860e48c2d7da02be" name="a5f59dda054a801be860e48c2d7da02be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f59dda054a801be860e48c2d7da02be">&#9670;&#160;</a></span>SStr_StrCopy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_StrCopy </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>maxStrLen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>拷贝指定长度的字符串 </p>
+<p>需保证缓存有足够的空间(maxStrLen + 1)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">pBuf</td><td>用于输出数据的缓存区指针 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pStr</td><td>待拷贝的字符串 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">maxStrLen</td><td>最大有效字符长度(不包括结尾的'\0')，即buf的长度需至少 为 maxStrLen + 1 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>返回拷贝后字符串 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00679">679</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af46f9d24ca3f4c3790f3afd4af5bd6e6" name="af46f9d24ca3f4c3790f3afd4af5bd6e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af46f9d24ca3f4c3790f3afd4af5bd6e6">&#9670;&#160;</a></span>SStr_StrCopy2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_StrCopy2 </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>maxStrLen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> *&#160;</td>
+          <td class="paramname"><em>pOutCopyLen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>拷贝指定长度的字符串 </p>
+<p>需保证缓存有足够的空间(maxStrLen + 1)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">pBuf</td><td>用于输出数据的缓存区指针 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pStr</td><td>待拷贝的字符串 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">maxStrLen</td><td>最大有效字符长度(不包括结尾的'\0')，即buf的长度需至少 为 maxStrLen + 1 </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">pOutCopyLen</td><td>拷贝字符串的长度 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>返回拷贝后字符串 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00646">646</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a43ecd827f06519415f075f31f25508e9" name="a43ecd827f06519415f075f31f25508e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43ecd827f06519415f075f31f25508e9">&#9670;&#160;</a></span>SStr_StrFixedLengthCopy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_StrFixedLengthCopy </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>strLen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>拷贝指定长度的字符串 </p>
+<p>需保证缓存有足够的空间(maxStrlen + 1)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">strLen</td><td>有效字符长度(不包括结尾的'\0')，即buf的长度需至少为 strLen + 1 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00691">691</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a47248eca66e0f04acafd206640e40d83" name="a47248eca66e0f04acafd206640e40d83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47248eca66e0f04acafd206640e40d83">&#9670;&#160;</a></span>SStr_StrFixedLengthTrimCopy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_StrFixedLengthTrimCopy </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>maxStrlen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>先拷贝字符串再去除空格 </p>
+<p>需保证缓存有足够的空间(maxStrlen + 1)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">maxStrlen</td><td>最大有效字符长度(不包括结尾的'\0')，即buf的长度需至少 为 maxStrlen + 1 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00902">902</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afe7dcf1190532e66f7dfb555dd4dc44f" name="afe7dcf1190532e66f7dfb555dd4dc44f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe7dcf1190532e66f7dfb555dd4dc44f">&#9670;&#160;</a></span>SStr_Strncasecmp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_Strncasecmp </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>s1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>s2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>n</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9535c9492aebaf6c12829fdaa2525117" name="a9535c9492aebaf6c12829fdaa2525117"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9535c9492aebaf6c12829fdaa2525117">&#9670;&#160;</a></span>SStr_Strpbrk()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_Strpbrk </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>accept</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>search a string for any of a set of characters</p>
+<p>The strpbrk() function locates the first occurrence in the string s of any of the characters in the string accept.</p>
+<dl class="section return"><dt>返回</dt><dd>returns a pointer to the character in s that matches one of the characters in accept, or NULL if no such character is found. </dd></dl>
+<dl class="section see"><dt>参见</dt><dd>strpbrk() </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00183">183</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa117a39b50c062d42c1d39e568847c48" name="aa117a39b50c062d42c1d39e568847c48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa117a39b50c062d42c1d39e568847c48">&#9670;&#160;</a></span>SStr_StrpbrkReverse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_StrpbrkReverse </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>accept</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>search a string for any of a set of characters reverse</p>
+<dl class="section return"><dt>返回</dt><dd>returns a pointer to the character in s that matches one of the characters in accept, or NULL if no such character is found. </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00205">205</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a69c0828f4d94a93facd972ba57232d6d" name="a69c0828f4d94a93facd972ba57232d6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69c0828f4d94a93facd972ba57232d6d">&#9670;&#160;</a></span>SStr_StrRightAlignmentCopy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_StrRightAlignmentCopy </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>alignedLen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>leftFiller</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>以右对齐的方式拷贝字符串并去除空格 </p>
+<p>需保证缓存有足够的空间(maxlen + 1)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">alignedLen</td><td>最大有效字符长度(不包括结尾的'\0')，即buf的长度需至少 为 alignedLen + 1 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00939">939</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6c405bb904f867e42b9bbc908a3a5a5c" name="a6c405bb904f867e42b9bbc908a3a5a5c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c405bb904f867e42b9bbc908a3a5a5c">&#9670;&#160;</a></span>SStr_Strsep()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_Strsep </td>
+          <td>(</td>
+          <td class="paramtype">char **&#160;</td>
+          <td class="paramname"><em>stringp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>delim</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>extract token from string</p>
+<p>If *stringp is NULL, the strsep() function returns NULL and does nothing else. Otherwise, this function finds the first token in the string *stringp, where tokens are delimited by symbols in the string delim. This token is terminated with a '\0' character (by overwriting the delimiter) and *stringp is updated to point past the token. In case no delimiter was found, the token is taken to be the entire string *stringp, and *stringp is made NULL.</p>
+<dl class="section return"><dt>返回</dt><dd>The strsep() function returns a pointer to the token, that is, it returns the original value of *stringp. </dd></dl>
+<dl class="section see"><dt>参见</dt><dd>strsep() </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00293">293</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acb0467fcd983645ff28f1a88b232195d" name="acb0467fcd983645ff28f1a88b232195d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb0467fcd983645ff28f1a88b232195d">&#9670;&#160;</a></span>SStr_Strsep2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_Strsep2 </td>
+          <td>(</td>
+          <td class="paramtype">char **&#160;</td>
+          <td class="paramname"><em>ppString</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char **&#160;</td>
+          <td class="paramname"><em>ppTokenEnd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pDelim</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>extract token from string, and return the end of token</p>
+<p>注意： 对于theEnd的处理，要注意是否已考虑到对以下两种特殊情况的处理： 1、delim位于字符串首。这时*theEnd == return 2、若字符串不是以delim结尾的，当最后一次返回时，*theEnd == NULL </p>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00232">232</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1127134af9dbc1f6dbd2aa42ded2e8cd" name="a1127134af9dbc1f6dbd2aa42ded2e8cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1127134af9dbc1f6dbd2aa42ded2e8cd">&#9670;&#160;</a></span>SStr_StrTrimCopy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_StrTrimCopy </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>maxStrlen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>拷贝字符串并去除空格 </p>
+<p>需保证缓存有足够的空间(maxStrlen + 1)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">maxStrlen</td><td>最大有效字符长度(不包括结尾的'\0')，即buf的长度需至少 为 maxStrlen + 1 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00865">865</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a576883187fe1086aa17dd866308f690b" name="a576883187fe1086aa17dd866308f690b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a576883187fe1086aa17dd866308f690b">&#9670;&#160;</a></span>SStr_SubStrCopy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_SubStrCopy </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>from</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>subLen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>从字符串中拷贝指定位置的子字符串</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">pBuf</td><td>用于输出数据的缓存区指针 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pStr</td><td>待拷贝的字符串 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">from</td><td>子字符串的开始位置 (从0开始计数, 小于等于0则从头开始复制) </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">subLen</td><td>子字符串的长度 (小于等于0表示从末尾开始计数的子字符串结束位置)<ul>
+<li>大于0, 子字符串的长度</li>
+<li>等于0, 复制从 from 至末尾的所有字符</li>
+<li>小于0, 末尾开始计数的子字符串结束位置 </li>
+</ul>
+</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>返回复制到字符串 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00717">717</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7a1176263345e1766006a37624453cfa" name="a7a1176263345e1766006a37624453cfa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a1176263345e1766006a37624453cfa">&#9670;&#160;</a></span>SStr_SwitchBlankStr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * SStr_SwitchBlankStr </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>v</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>若字符串为空则返回指定的值 </p>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00462">462</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2bd66264777e02910b92ebd003415748" name="a2bd66264777e02910b92ebd003415748"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2bd66264777e02910b92ebd003415748">&#9670;&#160;</a></span>SStr_ToLower()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_ToLower </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>返回转换为小写后的字符串 </p>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00595">595</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4c63e3d440b1250956b967f1c59b7c31" name="a4c63e3d440b1250956b967f1c59b7c31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c63e3d440b1250956b967f1c59b7c31">&#9670;&#160;</a></span>SStr_ToLowerR()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_ToLowerR </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>返回转换为小写后的字符串 </p>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00614">614</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad37d8b10b9eca6887551936dd9d53ac5" name="ad37d8b10b9eca6887551936dd9d53ac5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad37d8b10b9eca6887551936dd9d53ac5">&#9670;&#160;</a></span>SStr_TotalChars()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_TotalChars </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pChars</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a84140b992121c4f2428ed8ef05d4fde6" name="a84140b992121c4f2428ed8ef05d4fde6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84140b992121c4f2428ed8ef05d4fde6">&#9670;&#160;</a></span>SStr_ToUpper()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_ToUpper </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>返回转换为大写后的字符串 </p>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00553">553</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a104b8e38d0ddfa07e711637167756c6d" name="a104b8e38d0ddfa07e711637167756c6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a104b8e38d0ddfa07e711637167756c6d">&#9670;&#160;</a></span>SStr_ToUpperR()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_ToUpperR </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>返回转换为大写后的字符串 </p>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00572">572</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa3678e235d603eb662371d70741a94c8" name="aa3678e235d603eb662371d70741a94c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3678e235d603eb662371d70741a94c8">&#9670;&#160;</a></span>SStr_TrimRude()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> char * SStr_TrimRude </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>去除字符串前后端的空格</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pStr</td><td>字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>去除空格后的字符串 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__strings_8h_source.html">spk_strings.h</a> 第 <a class="el" href="spk__strings_8h_source.html#l00544">544</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_248d918e0c46523948aef7b06f6106c0.html">sutil</a></li><li class="navelem"><a class="el" href="dir_bdb4f1a6a1bf518a71fb3fe714c9221a.html">string</a></li><li class="navelem"><a class="el" href="spk__strings_8h.html">spk_strings.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

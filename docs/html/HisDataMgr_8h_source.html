@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtBtCore/HisDataMgr.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('HisDataMgr_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">HisDataMgr.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="HisDataMgr_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;functional&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Includes/IBtDtReader.h&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="HisDataMgr_8h.html#a9a99c3178999fefe3fee50ebb7e861ac">   20</a></span><span class="keyword">typedef</span> std::function&lt;void(std::string&amp;)&gt; <a class="code hl_typedef" href="HisDataMgr_8h.html#a9a99c3178999fefe3fee50ebb7e861ac">FuncLoadDataCallback</a>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">class </span><a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="HisDataMgr_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">   26</a></span><a class="code hl_variable" href="HisDataMgr_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="foldopen" id="foldopen00033" data-start="{" data-end="};">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classHisDataMgr.html">   33</a></span><span class="keyword">class </span><a class="code hl_class" href="classHisDataMgr.html">HisDataMgr</a> : <span class="keyword">public</span> <a class="code hl_class" href="classIBtDtReaderSink.html">IBtDtReaderSink</a></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>{</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="classHisDataMgr.html#aaf5d24a1d23052d5073b220f753bcecf">   40</a></span>    <a class="code hl_function" href="classHisDataMgr.html#aaf5d24a1d23052d5073b220f753bcecf">HisDataMgr</a>() :<a class="code hl_variable" href="classHisDataMgr.html#a1787866cb937b1a40c4d6ce222424ce8">_reader</a>(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>) {}</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="classHisDataMgr.html#a85a279a0075d83961b1083adb0f5e52d">   45</a></span>    <a class="code hl_function" href="classHisDataMgr.html#a85a279a0075d83961b1083adb0f5e52d">~HisDataMgr</a>(){}</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHisDataMgr.html#aa4cfad94a2b75179e01093f4cfc742ef">reader_log</a>(<a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* message) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classHisDataMgr.html#a11d37b839be15dfdc8477bab47f7a116">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classHisDataMgr.html#a1979051e333933352ea9b994dab5d410">load_raw_bars</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, <a class="code hl_typedef" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, <a class="code hl_typedef" href="HisDataMgr_8h.html#a9a99c3178999fefe3fee50ebb7e861ac">FuncLoadDataCallback</a> cb);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classHisDataMgr.html#ad0918b0a17c2cc0beec3e719adf2e071">load_raw_ticks</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, uint32_t uDate, <a class="code hl_typedef" href="HisDataMgr_8h.html#a9a99c3178999fefe3fee50ebb7e861ac">FuncLoadDataCallback</a> cb);</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classHisDataMgr.html#a0cea000069feab87d2bcb3ec180bd900">load_raw_ordque</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, uint32_t uDate, <a class="code hl_typedef" href="HisDataMgr_8h.html#a9a99c3178999fefe3fee50ebb7e861ac">FuncLoadDataCallback</a> cb);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classHisDataMgr.html#a551799b33f9d2967111b0d97f9ca5ff4">load_raw_orddtl</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, uint32_t uDate, <a class="code hl_typedef" href="HisDataMgr_8h.html#a9a99c3178999fefe3fee50ebb7e861ac">FuncLoadDataCallback</a> cb);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classHisDataMgr.html#ae05561185981c80c913ad5cf3781680a">load_raw_trans</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, uint32_t uDate, <a class="code hl_typedef" href="HisDataMgr_8h.html#a9a99c3178999fefe3fee50ebb7e861ac">FuncLoadDataCallback</a> cb);</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="classHisDataMgr.html#a1787866cb937b1a40c4d6ce222424ce8">  125</a></span>    <a class="code hl_class" href="classIBtDtReader.html">IBtDtReader</a>*    <a class="code hl_variable" href="classHisDataMgr.html#a1787866cb937b1a40c4d6ce222424ce8">_reader</a>;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>};</div>
+</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
+<div class="ttc" id="aHisDataMgr_8h_html_a9a99c3178999fefe3fee50ebb7e861ac"><div class="ttname"><a href="HisDataMgr_8h.html#a9a99c3178999fefe3fee50ebb7e861ac">FuncLoadDataCallback</a></div><div class="ttdeci">std::function&lt; void(std::string &amp;)&gt; FuncLoadDataCallback</div><div class="ttdoc">数据加载回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="HisDataMgr_8h_source.html#l00020">HisDataMgr.h:20</a></div></div>
+<div class="ttc" id="aHisDataMgr_8h_html_a9e1fc31194100ab43bbad77a2f5c12b3"><div class="ttname"><a href="HisDataMgr_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a></div><div class="ttdeci">NS_WTP_END USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="HisDataMgr_8h_source.html#l00026">HisDataMgr.h:26</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_a27f5d8bd7208a5fc1d044c6f5961904c"><div class="ttname"><a href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a></div><div class="ttdeci">enum tagKlinePeriod WTSKlinePeriod</div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aa7b93f4aa2259e69e48f27448c247dc8"><div class="ttname"><a href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a></div><div class="ttdeci">enum tagLogLevel WTSLogLevel</div></div>
+<div class="ttc" id="aclassHisDataMgr_html"><div class="ttname"><a href="classHisDataMgr.html">HisDataMgr</a></div><div class="ttdoc">历史数据管理器类</div><div class="ttdef"><b>Definition</b> <a href="HisDataMgr_8h_source.html#l00033">HisDataMgr.h:34</a></div></div>
+<div class="ttc" id="aclassHisDataMgr_html_a0cea000069feab87d2bcb3ec180bd900"><div class="ttname"><a href="classHisDataMgr.html#a0cea000069feab87d2bcb3ec180bd900">HisDataMgr::load_raw_ordque</a></div><div class="ttdeci">bool load_raw_ordque(const char *exchg, const char *code, uint32_t uDate, FuncLoadDataCallback cb)</div><div class="ttdoc">加载委托队列原始数据</div><div class="ttdef"><b>Definition</b> <a href="HisDataMgr_8cpp_source.html#l00169">HisDataMgr.cpp:169</a></div></div>
+<div class="ttc" id="aclassHisDataMgr_html_a11d37b839be15dfdc8477bab47f7a116"><div class="ttname"><a href="classHisDataMgr.html#a11d37b839be15dfdc8477bab47f7a116">HisDataMgr::init</a></div><div class="ttdeci">bool init(WTSVariant *cfg)</div><div class="ttdoc">初始化历史数据管理器</div><div class="ttdef"><b>Definition</b> <a href="HisDataMgr_8cpp_source.html#l00036">HisDataMgr.cpp:36</a></div></div>
+<div class="ttc" id="aclassHisDataMgr_html_a1787866cb937b1a40c4d6ce222424ce8"><div class="ttname"><a href="classHisDataMgr.html#a1787866cb937b1a40c4d6ce222424ce8">HisDataMgr::_reader</a></div><div class="ttdeci">IBtDtReader * _reader</div><div class="ttdoc">回测数据读取器接口指针</div><div class="ttdef"><b>Definition</b> <a href="HisDataMgr_8h_source.html#l00125">HisDataMgr.h:125</a></div></div>
+<div class="ttc" id="aclassHisDataMgr_html_a1979051e333933352ea9b994dab5d410"><div class="ttname"><a href="classHisDataMgr.html#a1979051e333933352ea9b994dab5d410">HisDataMgr::load_raw_bars</a></div><div class="ttdeci">bool load_raw_bars(const char *exchg, const char *code, WTSKlinePeriod period, FuncLoadDataCallback cb)</div><div class="ttdoc">加载K线原始数据</div><div class="ttdef"><b>Definition</b> <a href="HisDataMgr_8cpp_source.html#l00085">HisDataMgr.cpp:85</a></div></div>
+<div class="ttc" id="aclassHisDataMgr_html_a551799b33f9d2967111b0d97f9ca5ff4"><div class="ttname"><a href="classHisDataMgr.html#a551799b33f9d2967111b0d97f9ca5ff4">HisDataMgr::load_raw_orddtl</a></div><div class="ttdeci">bool load_raw_orddtl(const char *exchg, const char *code, uint32_t uDate, FuncLoadDataCallback cb)</div><div class="ttdoc">加载逐笔成交原始数据</div><div class="ttdef"><b>Definition</b> <a href="HisDataMgr_8cpp_source.html#l00197">HisDataMgr.cpp:197</a></div></div>
+<div class="ttc" id="aclassHisDataMgr_html_a85a279a0075d83961b1083adb0f5e52d"><div class="ttname"><a href="classHisDataMgr.html#a85a279a0075d83961b1083adb0f5e52d">HisDataMgr::~HisDataMgr</a></div><div class="ttdeci">~HisDataMgr()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="HisDataMgr_8h_source.html#l00045">HisDataMgr.h:45</a></div></div>
+<div class="ttc" id="aclassHisDataMgr_html_aa4cfad94a2b75179e01093f4cfc742ef"><div class="ttname"><a href="classHisDataMgr.html#aa4cfad94a2b75179e01093f4cfc742ef">HisDataMgr::reader_log</a></div><div class="ttdeci">virtual void reader_log(WTSLogLevel ll, const char *message) override</div><div class="ttdoc">实现日志输出回调函数</div><div class="ttdef"><b>Definition</b> <a href="HisDataMgr_8cpp_source.html#l00024">HisDataMgr.cpp:24</a></div></div>
+<div class="ttc" id="aclassHisDataMgr_html_aaf5d24a1d23052d5073b220f753bcecf"><div class="ttname"><a href="classHisDataMgr.html#aaf5d24a1d23052d5073b220f753bcecf">HisDataMgr::HisDataMgr</a></div><div class="ttdeci">HisDataMgr()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="HisDataMgr_8h_source.html#l00040">HisDataMgr.h:40</a></div></div>
+<div class="ttc" id="aclassHisDataMgr_html_ad0918b0a17c2cc0beec3e719adf2e071"><div class="ttname"><a href="classHisDataMgr.html#ad0918b0a17c2cc0beec3e719adf2e071">HisDataMgr::load_raw_ticks</a></div><div class="ttdeci">bool load_raw_ticks(const char *exchg, const char *code, uint32_t uDate, FuncLoadDataCallback cb)</div><div class="ttdoc">加载tick原始数据</div><div class="ttdef"><b>Definition</b> <a href="HisDataMgr_8cpp_source.html#l00113">HisDataMgr.cpp:113</a></div></div>
+<div class="ttc" id="aclassHisDataMgr_html_ae05561185981c80c913ad5cf3781680a"><div class="ttname"><a href="classHisDataMgr.html#ae05561185981c80c913ad5cf3781680a">HisDataMgr::load_raw_trans</a></div><div class="ttdeci">bool load_raw_trans(const char *exchg, const char *code, uint32_t uDate, FuncLoadDataCallback cb)</div><div class="ttdoc">加载分笔成交原始数据</div><div class="ttdef"><b>Definition</b> <a href="HisDataMgr_8cpp_source.html#l00141">HisDataMgr.cpp:141</a></div></div>
+<div class="ttc" id="aclassIBtDtReaderSink_html"><div class="ttname"><a href="classIBtDtReaderSink.html">IBtDtReaderSink</a></div><div class="ttdef"><b>Definition</b> <a href="IBtDtReader_8h_source.html#l00022">IBtDtReader.h:23</a></div></div>
+<div class="ttc" id="aclassIBtDtReader_html"><div class="ttname"><a href="classIBtDtReader.html">IBtDtReader</a></div><div class="ttdef"><b>Definition</b> <a href="IBtDtReader_8h_source.html#l00036">IBtDtReader.h:37</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_e0a6b04728b7bc818baf88501da85ff3.html">WtBtCore</a></li><li class="navelem"><a class="el" href="HisDataMgr_8h.html">HisDataMgr.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

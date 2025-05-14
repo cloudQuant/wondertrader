@@ -1,0 +1,551 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/node_data.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('node__data_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">node_data.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="node__data_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &lt;cassert&gt;</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;iterator&gt;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;sstream&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;<a class="code" href="exceptions_8h.html">yaml-cpp/exceptions.h</a>&quot;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="memory_8h.html">yaml-cpp/node/detail/memory.h</a>&quot;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;<a class="code" href="detail_2node_8h.html">yaml-cpp/node/detail/node.h</a>&quot;</span>  <span class="comment">// IWYU pragma: keep</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;<a class="code" href="node__data_8h.html">yaml-cpp/node/detail/node_data.h</a>&quot;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="node__iterator_8h.html">yaml-cpp/node/detail/node_iterator.h</a>&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="ptr_8h.html">yaml-cpp/node/ptr.h</a>&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="type_8h.html">yaml-cpp/node/type.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceYAML.html">YAML</a> {</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacedetail.html">detail</a> {</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>std::atomic&lt;size_t&gt; <a class="code hl_variable" href="classYAML_1_1detail_1_1node.html#ad4cb2d56142d84d6c5d07c9a65ada1f6">node::m_amount</a>{0};</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="foldopen" id="foldopen00018" data-start="{" data-end="}">
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a2f80d978fb75e02fdf65353d0685c3af">   18</a></span><span class="keyword">const</span> std::string&amp; <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a2f80d978fb75e02fdf65353d0685c3af">node_data::empty_scalar</a>() {</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>  <span class="keyword">static</span> <span class="keyword">const</span> std::string svalue;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>  <span class="keywordflow">return</span> svalue;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>}</div>
+</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="foldopen" id="foldopen00023" data-start="{" data-end="}">
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#aba27100ebb9091c8353ee416666f4c24">   23</a></span><a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#aba27100ebb9091c8353ee416666f4c24">node_data::node_data</a>()</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    : m_isDefined(false),</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>      m_mark(<a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>::null_mark()),</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>      m_type(<a class="code hl_struct" href="structYAML_1_1NodeType.html">NodeType</a>::<a class="code hl_variable" href="namespaceYAML.html#a783b088b8f0d79385ea8ab59e9da4c8f">Null</a>),</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>      m_tag{},</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>      m_style(<a class="code hl_struct" href="structYAML_1_1EmitterStyle.html">EmitterStyle</a>::Default),</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>      m_scalar{},</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>      m_sequence{},</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>      m_seqSize(0),</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>      m_map{},</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>      m_undefinedPairs{} {}</div>
+</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="foldopen" id="foldopen00035" data-start="{" data-end="}">
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#ad221be844f0c11bac6c5c3896db05181">   35</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#ad221be844f0c11bac6c5c3896db05181">node_data::mark_defined</a>() {</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> == <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4aeb0d86b144df4896751615d3ec6665a9">NodeType::Undefined</a>)</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> = <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a41a3999c88dafc01670232938fa117a6">NodeType::Null</a>;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a9c530907b5854aea5fd4bf392fc745af">m_isDefined</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>}</div>
+</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a85509514e2fb3cab1e55a6e1fead816f">   41</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a85509514e2fb3cab1e55a6e1fead816f">node_data::set_mark</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark) { <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#ae254b731454c82e359e3ef8924f5d267">m_mark</a> = <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#adf573248c3251285f91c205f3b820dc6">mark</a>; }</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="foldopen" id="foldopen00043" data-start="{" data-end="}">
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a5d95af82af117629f60af392cc6bcab2">   43</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a5d95af82af117629f60af392cc6bcab2">node_data::set_type</a>(<a class="code hl_enumeration" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4">NodeType::value</a> type) {</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <span class="keywordflow">if</span> (<a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#aff9369bc7ec59c7a7cf4c8799e11791d">type</a> == <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4aeb0d86b144df4896751615d3ec6665a9">NodeType::Undefined</a>) {</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> = <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#aff9369bc7ec59c7a7cf4c8799e11791d">type</a>;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a9c530907b5854aea5fd4bf392fc745af">m_isDefined</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  }</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a9c530907b5854aea5fd4bf392fc745af">m_isDefined</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <span class="keywordflow">if</span> (<a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#aff9369bc7ec59c7a7cf4c8799e11791d">type</a> == <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a>)</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> = <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#aff9369bc7ec59c7a7cf4c8799e11791d">type</a>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <span class="keywordflow">switch</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a>) {</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a41a3999c88dafc01670232938fa117a6">NodeType::Null</a>:</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a0c01179d94bd3d4c7776384016b89c1f">NodeType::Scalar</a>:</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>      <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a19b9980bd4982a385ee72791ce7c63b2">m_scalar</a>.clear();</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4ae197fc9c4aad8fe2f58aa35fa908ed5a">NodeType::Sequence</a>:</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>      <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a08349b70401eb84a5cdb2ce060f4f384">reset_sequence</a>();</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6">NodeType::Map</a>:</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>      <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a48988d51fe8aab63dfb1056d92392378">reset_map</a>();</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4aeb0d86b144df4896751615d3ec6665a9">NodeType::Undefined</a>:</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>      <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(<span class="keyword">false</span>);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  }</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>}</div>
+</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#ac9e581dc9fb4bedde979bddf3bf1830a">   74</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#ac9e581dc9fb4bedde979bddf3bf1830a">node_data::set_tag</a>(<span class="keyword">const</span> std::string&amp; tag) { <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a2c9f17dfc482d882694b6ac38cdf9506">m_tag</a> = <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#ad93339c1f76c30de2abeb4b604fcd3d3">tag</a>; }</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a7a2d678873cca6097c00c9b39b790285">   76</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a7a2d678873cca6097c00c9b39b790285">node_data::set_style</a>(<a class="code hl_enumeration" href="structYAML_1_1EmitterStyle.html#ae86640662c85ce6062a37f9636b6959f">EmitterStyle::value</a> style) { <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#af0ebccbc655a8b1068637bef02ec3fad">m_style</a> = <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#af1a062a51a54401fbba6ba85f643b059">style</a>; }</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="foldopen" id="foldopen00078" data-start="{" data-end="}">
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a765300dc8a23d9e5d9d0eccdd4127ee9">   78</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a765300dc8a23d9e5d9d0eccdd4127ee9">node_data::set_null</a>() {</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a9c530907b5854aea5fd4bf392fc745af">m_isDefined</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> = <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a41a3999c88dafc01670232938fa117a6">NodeType::Null</a>;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>}</div>
+</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="foldopen" id="foldopen00083" data-start="{" data-end="}">
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#ac74624533162f0757b1f667da2c7d6ca">   83</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#ac74624533162f0757b1f667da2c7d6ca">node_data::set_scalar</a>(<span class="keyword">const</span> std::string&amp; scalar) {</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a9c530907b5854aea5fd4bf392fc745af">m_isDefined</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> = <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a0c01179d94bd3d4c7776384016b89c1f">NodeType::Scalar</a>;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a19b9980bd4982a385ee72791ce7c63b2">m_scalar</a> = <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a0066b18dd5e78f2ebb45a54a870f094b">scalar</a>;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>}</div>
+</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="comment">// size/iterator</span></div>
+<div class="foldopen" id="foldopen00090" data-start="{" data-end="}">
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a2b64f36a1d6584d9032583fd6b4299e0">   90</a></span>std::size_t <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a2b64f36a1d6584d9032583fd6b4299e0">node_data::size</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a9c530907b5854aea5fd4bf392fc745af">m_isDefined</a>)</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  <span class="keywordflow">switch</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a>) {</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4ae197fc9c4aad8fe2f58aa35fa908ed5a">NodeType::Sequence</a>:</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>      <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a68ca2077c28584261880653a4030ac58">compute_seq_size</a>();</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>      <span class="keywordflow">return</span> <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0aced4e79cdb4e11d98d1122d7c9ed06">m_seqSize</a>;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6">NodeType::Map</a>:</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>      <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a5fa6c6ddcd4ffb0db0923e2653125e8b">compute_map_size</a>();</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>      <span class="keywordflow">return</span> <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.size() - <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a3c04d85dc7975981c25f18b351267182">m_undefinedPairs</a>.size();</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <span class="keywordflow">default</span>:</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>      <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  }</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>}</div>
+</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="foldopen" id="foldopen00107" data-start="{" data-end="}">
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a68ca2077c28584261880653a4030ac58">  107</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a68ca2077c28584261880653a4030ac58">node_data::compute_seq_size</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <span class="keywordflow">while</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0aced4e79cdb4e11d98d1122d7c9ed06">m_seqSize</a> &lt; <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#af33676e811fe66d78d8befd6b942a50e">m_sequence</a>.size() &amp;&amp; <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#af33676e811fe66d78d8befd6b942a50e">m_sequence</a>[<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0aced4e79cdb4e11d98d1122d7c9ed06">m_seqSize</a>]-&gt;is_defined())</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0aced4e79cdb4e11d98d1122d7c9ed06">m_seqSize</a>++;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>}</div>
+</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="foldopen" id="foldopen00112" data-start="{" data-end="}">
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a5fa6c6ddcd4ffb0db0923e2653125e8b">  112</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a5fa6c6ddcd4ffb0db0923e2653125e8b">node_data::compute_map_size</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  <span class="keyword">auto</span> it = <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a3c04d85dc7975981c25f18b351267182">m_undefinedPairs</a>.begin();</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  <span class="keywordflow">while</span> (it != <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a3c04d85dc7975981c25f18b351267182">m_undefinedPairs</a>.end()) {</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="keyword">auto</span> jt = std::next(it);</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <span class="keywordflow">if</span> (it-&gt;first-&gt;is_defined() &amp;&amp; it-&gt;second-&gt;is_defined())</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>      <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a3c04d85dc7975981c25f18b351267182">m_undefinedPairs</a>.erase(it);</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    it = jt;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  }</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>}</div>
+</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="foldopen" id="foldopen00122" data-start="{" data-end="}">
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#aee8d9e1ee89a512c2df989c513ab5eba">  122</a></span><a class="code hl_class" href="classYAML_1_1detail_1_1node__iterator__base.html">const_node_iterator</a> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#aee8d9e1ee89a512c2df989c513ab5eba">node_data::begin</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>  <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a9c530907b5854aea5fd4bf392fc745af">m_isDefined</a>)</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    <span class="keywordflow">return</span> {};</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>  <span class="keywordflow">switch</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a>) {</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4ae197fc9c4aad8fe2f58aa35fa908ed5a">NodeType::Sequence</a>:</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>      <span class="keywordflow">return</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#ad9372e300cc5f278a78231a6729543ce">const_node_iterator</a>(<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#af33676e811fe66d78d8befd6b942a50e">m_sequence</a>.begin());</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6">NodeType::Map</a>:</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>      <span class="keywordflow">return</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#ad9372e300cc5f278a78231a6729543ce">const_node_iterator</a>(<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.begin(), <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.end());</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keywordflow">default</span>:</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>      <span class="keywordflow">return</span> {};</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>  }</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>}</div>
+</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="foldopen" id="foldopen00136" data-start="{" data-end="}">
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a09fccbdf67e54810dfd5d4cf3a6e8b8f">  136</a></span><a class="code hl_class" href="classYAML_1_1detail_1_1node__iterator__base.html">node_iterator</a> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#aee8d9e1ee89a512c2df989c513ab5eba">node_data::begin</a>() {</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>  <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a9c530907b5854aea5fd4bf392fc745af">m_isDefined</a>)</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="keywordflow">return</span> {};</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span> </div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>  <span class="keywordflow">switch</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a>) {</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4ae197fc9c4aad8fe2f58aa35fa908ed5a">NodeType::Sequence</a>:</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>      <span class="keywordflow">return</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#a9983dda5eb65de064d3f41630fef240b">node_iterator</a>(<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#af33676e811fe66d78d8befd6b942a50e">m_sequence</a>.begin());</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6">NodeType::Map</a>:</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>      <span class="keywordflow">return</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#a9983dda5eb65de064d3f41630fef240b">node_iterator</a>(<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.begin(), <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.end());</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    <span class="keywordflow">default</span>:</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>      <span class="keywordflow">return</span> {};</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>  }</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>}</div>
+</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="foldopen" id="foldopen00150" data-start="{" data-end="}">
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a426ba063be0b0ad4e5a590f966b200b6">  150</a></span><a class="code hl_class" href="classYAML_1_1detail_1_1node__iterator__base.html">const_node_iterator</a> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a426ba063be0b0ad4e5a590f966b200b6">node_data::end</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>  <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a9c530907b5854aea5fd4bf392fc745af">m_isDefined</a>)</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    <span class="keywordflow">return</span> {};</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>  <span class="keywordflow">switch</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a>) {</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4ae197fc9c4aad8fe2f58aa35fa908ed5a">NodeType::Sequence</a>:</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>      <span class="keywordflow">return</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#ad9372e300cc5f278a78231a6729543ce">const_node_iterator</a>(<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#af33676e811fe66d78d8befd6b942a50e">m_sequence</a>.end());</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6">NodeType::Map</a>:</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>      <span class="keywordflow">return</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#ad9372e300cc5f278a78231a6729543ce">const_node_iterator</a>(<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.end(), <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.end());</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="keywordflow">default</span>:</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>      <span class="keywordflow">return</span> {};</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>  }</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>}</div>
+</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
+<div class="foldopen" id="foldopen00164" data-start="{" data-end="}">
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a6afbee969af24854ba720d5f97927e19">  164</a></span><a class="code hl_class" href="classYAML_1_1detail_1_1node__iterator__base.html">node_iterator</a> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a426ba063be0b0ad4e5a590f966b200b6">node_data::end</a>() {</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>  <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a9c530907b5854aea5fd4bf392fc745af">m_isDefined</a>)</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    <span class="keywordflow">return</span> {};</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>  <span class="keywordflow">switch</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a>) {</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4ae197fc9c4aad8fe2f58aa35fa908ed5a">NodeType::Sequence</a>:</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>      <span class="keywordflow">return</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#a9983dda5eb65de064d3f41630fef240b">node_iterator</a>(<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#af33676e811fe66d78d8befd6b942a50e">m_sequence</a>.end());</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6">NodeType::Map</a>:</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>      <span class="keywordflow">return</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#a9983dda5eb65de064d3f41630fef240b">node_iterator</a>(<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.end(), <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.end());</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    <span class="keywordflow">default</span>:</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>      <span class="keywordflow">return</span> {};</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>  }</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>}</div>
+</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span><span class="comment">// sequence</span></div>
+<div class="foldopen" id="foldopen00179" data-start="{" data-end="}">
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a21c2d55b5f102d65a4ebcc4fbc92002c">  179</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a21c2d55b5f102d65a4ebcc4fbc92002c">node_data::push_back</a>(<a class="code hl_class" href="classYAML_1_1detail_1_1node.html">node</a>&amp; <a class="code hl_class" href="classYAML_1_1detail_1_1node.html">node</a>,</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>                          <span class="keyword">const</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#a02dee2ddd5c753bedbd194328e1913c4">shared_memory_holder</a>&amp; <span class="comment">/* pMemory */</span>) {</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> == <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4aeb0d86b144df4896751615d3ec6665a9">NodeType::Undefined</a> || <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> == <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a41a3999c88dafc01670232938fa117a6">NodeType::Null</a>) {</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> = <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4ae197fc9c4aad8fe2f58aa35fa908ed5a">NodeType::Sequence</a>;</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a08349b70401eb84a5cdb2ce060f4f384">reset_sequence</a>();</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>  }</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> != <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4ae197fc9c4aad8fe2f58aa35fa908ed5a">NodeType::Sequence</a>)</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>    <span class="keywordflow">throw</span> <a class="code hl_class" href="classYAML_1_1BadPushback.html">BadPushback</a>();</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span> </div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#af33676e811fe66d78d8befd6b942a50e">m_sequence</a>.push_back(&amp;<a class="code hl_class" href="classYAML_1_1detail_1_1node.html">node</a>);</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>}</div>
+</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
+<div class="foldopen" id="foldopen00192" data-start="{" data-end="}">
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#accdbf856c059353d6d74a0302b61130f">  192</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#accdbf856c059353d6d74a0302b61130f">node_data::insert</a>(<a class="code hl_class" href="classYAML_1_1detail_1_1node.html">node</a>&amp; key, <a class="code hl_class" href="classYAML_1_1detail_1_1node.html">node</a>&amp; <a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>,</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>                       <span class="keyword">const</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#a02dee2ddd5c753bedbd194328e1913c4">shared_memory_holder</a>&amp; pMemory) {</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>  <span class="keywordflow">switch</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a>) {</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6">NodeType::Map</a>:</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4aeb0d86b144df4896751615d3ec6665a9">NodeType::Undefined</a>:</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a41a3999c88dafc01670232938fa117a6">NodeType::Null</a>:</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4ae197fc9c4aad8fe2f58aa35fa908ed5a">NodeType::Sequence</a>:</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>      <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a746d8a6fb42b9c1dba4b42b9cc620c1d">convert_to_map</a>(pMemory);</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a0c01179d94bd3d4c7776384016b89c1f">NodeType::Scalar</a>:</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>      <span class="keywordflow">throw</span> <a class="code hl_class" href="classYAML_1_1BadSubscript.html">BadSubscript</a>(<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#ae254b731454c82e359e3ef8924f5d267">m_mark</a>, key);</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>  }</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>  <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a81e7b0f37c4fc917476ddcd42a25ef7e">insert_map_pair</a>(key, <a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>);</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>}</div>
+</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span> </div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span><span class="comment">// indexing</span></div>
+<div class="foldopen" id="foldopen00210" data-start="{" data-end="}">
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a6ee5a79d63e7f830d916156f7a7f4b0e">  210</a></span><a class="code hl_class" href="classYAML_1_1detail_1_1node.html">node</a>* <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a6943f32eb9e9029c533b369286bb5123">node_data::get</a>(<a class="code hl_class" href="classYAML_1_1detail_1_1node.html">node</a>&amp; key,</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>                     <span class="keyword">const</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#a02dee2ddd5c753bedbd194328e1913c4">shared_memory_holder</a>&amp; <span class="comment">/* pMemory */</span>)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> != <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6">NodeType::Map</a>) {</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>  }</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span> </div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; it : <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>) {</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>    <span class="keywordflow">if</span> (it.first-&gt;is(key))</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>      <span class="keywordflow">return</span> it.second;</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>  }</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span> </div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>  <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>}</div>
+</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span> </div>
+<div class="foldopen" id="foldopen00224" data-start="{" data-end="}">
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#ad364909720e14eb3d5abdcc74ae59c31">  224</a></span><a class="code hl_class" href="classYAML_1_1detail_1_1node.html">node</a>&amp; <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a6943f32eb9e9029c533b369286bb5123">node_data::get</a>(<a class="code hl_class" href="classYAML_1_1detail_1_1node.html">node</a>&amp; key, <span class="keyword">const</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#a02dee2ddd5c753bedbd194328e1913c4">shared_memory_holder</a>&amp; pMemory) {</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>  <span class="keywordflow">switch</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a>) {</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6">NodeType::Map</a>:</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4aeb0d86b144df4896751615d3ec6665a9">NodeType::Undefined</a>:</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a41a3999c88dafc01670232938fa117a6">NodeType::Null</a>:</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4ae197fc9c4aad8fe2f58aa35fa908ed5a">NodeType::Sequence</a>:</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>      <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a746d8a6fb42b9c1dba4b42b9cc620c1d">convert_to_map</a>(pMemory);</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a0c01179d94bd3d4c7776384016b89c1f">NodeType::Scalar</a>:</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>      <span class="keywordflow">throw</span> <a class="code hl_class" href="classYAML_1_1BadSubscript.html">BadSubscript</a>(<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#ae254b731454c82e359e3ef8924f5d267">m_mark</a>, key);</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>  }</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span> </div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; it : <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>) {</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    <span class="keywordflow">if</span> (it.first-&gt;is(key))</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>      <span class="keywordflow">return</span> *it.second;</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>  }</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>  <a class="code hl_class" href="classYAML_1_1detail_1_1node.html">node</a>&amp; <a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a> = pMemory-&gt;create_node();</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>  <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a81e7b0f37c4fc917476ddcd42a25ef7e">insert_map_pair</a>(key, <a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>);</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>;</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>}</div>
+</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span> </div>
+<div class="foldopen" id="foldopen00247" data-start="{" data-end="}">
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a497dfc3eb2567d46bb2cfea06e64673a">  247</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#aec83cdc1932b604c83c76cea09a9e3a1">node_data::remove</a>(<a class="code hl_class" href="classYAML_1_1detail_1_1node.html">node</a>&amp; key, <span class="keyword">const</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#a02dee2ddd5c753bedbd194328e1913c4">shared_memory_holder</a>&amp; <span class="comment">/* pMemory */</span>) {</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> != <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6">NodeType::Map</a>)</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span> </div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span> it = <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a3c04d85dc7975981c25f18b351267182">m_undefinedPairs</a>.begin(); it != <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a3c04d85dc7975981c25f18b351267182">m_undefinedPairs</a>.end();) {</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>    <span class="keyword">auto</span> jt = std::next(it);</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    <span class="keywordflow">if</span> (it-&gt;first-&gt;is(key))</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>      <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a3c04d85dc7975981c25f18b351267182">m_undefinedPairs</a>.erase(it);</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>    it = jt;</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>  }</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>  <span class="keyword">auto</span> it =</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>      std::find_if(<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.begin(), <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.end(),</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>                   [&amp;](std::pair&lt;YAML::detail::node*, YAML::detail::node*&gt; j) {</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>                     return (j.first-&gt;is(key));</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>                   });</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span> </div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>  <span class="keywordflow">if</span> (it != <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.end()) {</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.erase(it);</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>  }</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>  <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>}</div>
+</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span> </div>
+<div class="foldopen" id="foldopen00272" data-start="{" data-end="}">
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a08349b70401eb84a5cdb2ce060f4f384">  272</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a08349b70401eb84a5cdb2ce060f4f384">node_data::reset_sequence</a>() {</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#af33676e811fe66d78d8befd6b942a50e">m_sequence</a>.clear();</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0aced4e79cdb4e11d98d1122d7c9ed06">m_seqSize</a> = 0;</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>}</div>
+</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span> </div>
+<div class="foldopen" id="foldopen00277" data-start="{" data-end="}">
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a48988d51fe8aab63dfb1056d92392378">  277</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a48988d51fe8aab63dfb1056d92392378">node_data::reset_map</a>() {</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.clear();</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a3c04d85dc7975981c25f18b351267182">m_undefinedPairs</a>.clear();</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>}</div>
+</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span> </div>
+<div class="foldopen" id="foldopen00282" data-start="{" data-end="}">
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a81e7b0f37c4fc917476ddcd42a25ef7e">  282</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a81e7b0f37c4fc917476ddcd42a25ef7e">node_data::insert_map_pair</a>(<a class="code hl_class" href="classYAML_1_1detail_1_1node.html">node</a>&amp; key, <a class="code hl_class" href="classYAML_1_1detail_1_1node.html">node</a>&amp; <a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>) {</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">m_map</a>.emplace_back(&amp;key, &amp;<a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>);</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span> </div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>  <span class="keywordflow">if</span> (!key.<a class="code hl_function" href="classYAML_1_1detail_1_1node.html#a18d5d6bb65a79aa3ea9067e5194167ad">is_defined</a>() || !<a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>.is_defined())</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>    <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a3c04d85dc7975981c25f18b351267182">m_undefinedPairs</a>.emplace_back(&amp;key, &amp;<a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>);</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>}</div>
+</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span> </div>
+<div class="foldopen" id="foldopen00289" data-start="{" data-end="}">
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a746d8a6fb42b9c1dba4b42b9cc620c1d">  289</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a746d8a6fb42b9c1dba4b42b9cc620c1d">node_data::convert_to_map</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#a02dee2ddd5c753bedbd194328e1913c4">shared_memory_holder</a>&amp; pMemory) {</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>  <span class="keywordflow">switch</span> (<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a>) {</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4aeb0d86b144df4896751615d3ec6665a9">NodeType::Undefined</a>:</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a41a3999c88dafc01670232938fa117a6">NodeType::Null</a>:</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>      <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a48988d51fe8aab63dfb1056d92392378">reset_map</a>();</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>      <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> = <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6">NodeType::Map</a>;</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4ae197fc9c4aad8fe2f58aa35fa908ed5a">NodeType::Sequence</a>:</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>      <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a782ade05c2288e8b6271cc2d39c4a889">convert_sequence_to_map</a>(pMemory);</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6">NodeType::Map</a>:</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a0c01179d94bd3d4c7776384016b89c1f">NodeType::Scalar</a>:</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>      <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(<span class="keyword">false</span>);</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>  }</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>}</div>
+</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span> </div>
+<div class="foldopen" id="foldopen00307" data-start="{" data-end="}">
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno"><a class="line" href="classYAML_1_1detail_1_1node__data.html#a782ade05c2288e8b6271cc2d39c4a889">  307</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a782ade05c2288e8b6271cc2d39c4a889">node_data::convert_sequence_to_map</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#a02dee2ddd5c753bedbd194328e1913c4">shared_memory_holder</a>&amp; pMemory) {</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>  <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> == <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4ae197fc9c4aad8fe2f58aa35fa908ed5a">NodeType::Sequence</a>);</div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span> </div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>  <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a48988d51fe8aab63dfb1056d92392378">reset_map</a>();</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>  <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#af33676e811fe66d78d8befd6b942a50e">m_sequence</a>.size(); i++) {</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>    std::stringstream stream;</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>    stream &lt;&lt; i;</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span> </div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>    <a class="code hl_class" href="classYAML_1_1detail_1_1node.html">node</a>&amp; key = pMemory-&gt;create_node();</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>    key.<a class="code hl_function" href="classYAML_1_1detail_1_1node.html#aacde9a661dc94e3a699f84b975f1306a">set_scalar</a>(stream.str());</div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>    <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a81e7b0f37c4fc917476ddcd42a25ef7e">insert_map_pair</a>(key, *<a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#af33676e811fe66d78d8befd6b942a50e">m_sequence</a>[i]);</div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>  }</div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span> </div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>  <a class="code hl_function" href="classYAML_1_1detail_1_1node__data.html#a08349b70401eb84a5cdb2ce060f4f384">reset_sequence</a>();</div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>  <a class="code hl_variable" href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">m_type</a> = <a class="code hl_enumvalue" href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6">NodeType::Map</a>;</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>}</div>
+</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>}  <span class="comment">// namespace detail</span></div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>}  <span class="comment">// namespace YAML</span></div>
+<div class="ttc" id="aclassYAML_1_1BadPushback_html"><div class="ttname"><a href="classYAML_1_1BadPushback.html">YAML::BadPushback</a></div><div class="ttdef"><b>Definition</b> <a href="exceptions_8h_source.html#l00269">exceptions.h:269</a></div></div>
+<div class="ttc" id="aclassYAML_1_1BadSubscript_html"><div class="ttname"><a href="classYAML_1_1BadSubscript.html">YAML::BadSubscript</a></div><div class="ttdef"><b>Definition</b> <a href="exceptions_8h_source.html#l00260">exceptions.h:260</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a0066b18dd5e78f2ebb45a54a870f094b"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a0066b18dd5e78f2ebb45a54a870f094b">YAML::detail::node_data::scalar</a></div><div class="ttdeci">const std::string &amp; scalar() const</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00049">node_data.h:49</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a08349b70401eb84a5cdb2ce060f4f384"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a08349b70401eb84a5cdb2ce060f4f384">YAML::detail::node_data::reset_sequence</a></div><div class="ttdeci">void reset_sequence()</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00272">node_data.cpp:272</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a0a46208a40d696d61c0c543a5ca37818"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a0a46208a40d696d61c0c543a5ca37818">YAML::detail::node_data::m_map</a></div><div class="ttdeci">node_map m_map</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00118">node_data.h:118</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a0aced4e79cdb4e11d98d1122d7c9ed06"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a0aced4e79cdb4e11d98d1122d7c9ed06">YAML::detail::node_data::m_seqSize</a></div><div class="ttdeci">std::size_t m_seqSize</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00114">node_data.h:114</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a19b9980bd4982a385ee72791ce7c63b2"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a19b9980bd4982a385ee72791ce7c63b2">YAML::detail::node_data::m_scalar</a></div><div class="ttdeci">std::string m_scalar</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00108">node_data.h:108</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a21c2d55b5f102d65a4ebcc4fbc92002c"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a21c2d55b5f102d65a4ebcc4fbc92002c">YAML::detail::node_data::push_back</a></div><div class="ttdeci">void push_back(node &amp;node, const shared_memory_holder &amp;pMemory)</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00179">node_data.cpp:179</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a2b64f36a1d6584d9032583fd6b4299e0"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a2b64f36a1d6584d9032583fd6b4299e0">YAML::detail::node_data::size</a></div><div class="ttdeci">std::size_t size() const</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00090">node_data.cpp:90</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a2c9f17dfc482d882694b6ac38cdf9506"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a2c9f17dfc482d882694b6ac38cdf9506">YAML::detail::node_data::m_tag</a></div><div class="ttdeci">std::string m_tag</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00104">node_data.h:104</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a2f80d978fb75e02fdf65353d0685c3af"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a2f80d978fb75e02fdf65353d0685c3af">YAML::detail::node_data::empty_scalar</a></div><div class="ttdeci">static const std::string &amp; empty_scalar()</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00018">node_data.cpp:18</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a3c04d85dc7975981c25f18b351267182"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a3c04d85dc7975981c25f18b351267182">YAML::detail::node_data::m_undefinedPairs</a></div><div class="ttdeci">kv_pairs m_undefinedPairs</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00122">node_data.h:122</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a426ba063be0b0ad4e5a590f966b200b6"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a426ba063be0b0ad4e5a590f966b200b6">YAML::detail::node_data::end</a></div><div class="ttdeci">const_node_iterator end() const</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00150">node_data.cpp:150</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a48988d51fe8aab63dfb1056d92392378"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a48988d51fe8aab63dfb1056d92392378">YAML::detail::node_data::reset_map</a></div><div class="ttdeci">void reset_map()</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00277">node_data.cpp:277</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a56d3d8811e68605b89090bbca2245928"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a56d3d8811e68605b89090bbca2245928">YAML::detail::node_data::m_type</a></div><div class="ttdeci">NodeType::value m_type</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00103">node_data.h:103</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a5d95af82af117629f60af392cc6bcab2"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a5d95af82af117629f60af392cc6bcab2">YAML::detail::node_data::set_type</a></div><div class="ttdeci">void set_type(NodeType::value type)</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00043">node_data.cpp:43</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a5fa6c6ddcd4ffb0db0923e2653125e8b"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a5fa6c6ddcd4ffb0db0923e2653125e8b">YAML::detail::node_data::compute_map_size</a></div><div class="ttdeci">void compute_map_size() const</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00112">node_data.cpp:112</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a68ca2077c28584261880653a4030ac58"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a68ca2077c28584261880653a4030ac58">YAML::detail::node_data::compute_seq_size</a></div><div class="ttdeci">void compute_seq_size() const</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00107">node_data.cpp:107</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a6943f32eb9e9029c533b369286bb5123"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a6943f32eb9e9029c533b369286bb5123">YAML::detail::node_data::get</a></div><div class="ttdeci">node * get(const Key &amp;key, shared_memory_holder pMemory) const</div><div class="ttdef"><b>Definition</b> <a href="detail_2impl_8h_source.html#l00118">impl.h:118</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a746d8a6fb42b9c1dba4b42b9cc620c1d"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a746d8a6fb42b9c1dba4b42b9cc620c1d">YAML::detail::node_data::convert_to_map</a></div><div class="ttdeci">void convert_to_map(const shared_memory_holder &amp;pMemory)</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00289">node_data.cpp:289</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a765300dc8a23d9e5d9d0eccdd4127ee9"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a765300dc8a23d9e5d9d0eccdd4127ee9">YAML::detail::node_data::set_null</a></div><div class="ttdeci">void set_null()</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00078">node_data.cpp:78</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a782ade05c2288e8b6271cc2d39c4a889"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a782ade05c2288e8b6271cc2d39c4a889">YAML::detail::node_data::convert_sequence_to_map</a></div><div class="ttdeci">void convert_sequence_to_map(const shared_memory_holder &amp;pMemory)</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00307">node_data.cpp:307</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a7a2d678873cca6097c00c9b39b790285"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a7a2d678873cca6097c00c9b39b790285">YAML::detail::node_data::set_style</a></div><div class="ttdeci">void set_style(EmitterStyle::value style)</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00076">node_data.cpp:76</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a81e7b0f37c4fc917476ddcd42a25ef7e"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a81e7b0f37c4fc917476ddcd42a25ef7e">YAML::detail::node_data::insert_map_pair</a></div><div class="ttdeci">void insert_map_pair(node &amp;key, node &amp;value)</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00282">node_data.cpp:282</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a85509514e2fb3cab1e55a6e1fead816f"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a85509514e2fb3cab1e55a6e1fead816f">YAML::detail::node_data::set_mark</a></div><div class="ttdeci">void set_mark(const Mark &amp;mark)</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00041">node_data.cpp:41</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_a9c530907b5854aea5fd4bf392fc745af"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#a9c530907b5854aea5fd4bf392fc745af">YAML::detail::node_data::m_isDefined</a></div><div class="ttdeci">bool m_isDefined</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00101">node_data.h:101</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_aba27100ebb9091c8353ee416666f4c24"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#aba27100ebb9091c8353ee416666f4c24">YAML::detail::node_data::node_data</a></div><div class="ttdeci">node_data()</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00023">node_data.cpp:23</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_ac74624533162f0757b1f667da2c7d6ca"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#ac74624533162f0757b1f667da2c7d6ca">YAML::detail::node_data::set_scalar</a></div><div class="ttdeci">void set_scalar(const std::string &amp;scalar)</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00083">node_data.cpp:83</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_ac9e581dc9fb4bedde979bddf3bf1830a"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#ac9e581dc9fb4bedde979bddf3bf1830a">YAML::detail::node_data::set_tag</a></div><div class="ttdeci">void set_tag(const std::string &amp;tag)</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00074">node_data.cpp:74</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_accdbf856c059353d6d74a0302b61130f"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#accdbf856c059353d6d74a0302b61130f">YAML::detail::node_data::insert</a></div><div class="ttdeci">void insert(node &amp;key, node &amp;value, const shared_memory_holder &amp;pMemory)</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00192">node_data.cpp:192</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_ad221be844f0c11bac6c5c3896db05181"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#ad221be844f0c11bac6c5c3896db05181">YAML::detail::node_data::mark_defined</a></div><div class="ttdeci">void mark_defined()</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00035">node_data.cpp:35</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_ad93339c1f76c30de2abeb4b604fcd3d3"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#ad93339c1f76c30de2abeb4b604fcd3d3">YAML::detail::node_data::tag</a></div><div class="ttdeci">const std::string &amp; tag() const</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00050">node_data.h:50</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_adf573248c3251285f91c205f3b820dc6"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#adf573248c3251285f91c205f3b820dc6">YAML::detail::node_data::mark</a></div><div class="ttdeci">const Mark &amp; mark() const</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00045">node_data.h:45</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_ae254b731454c82e359e3ef8924f5d267"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#ae254b731454c82e359e3ef8924f5d267">YAML::detail::node_data::m_mark</a></div><div class="ttdeci">Mark m_mark</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00102">node_data.h:102</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_aec83cdc1932b604c83c76cea09a9e3a1"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#aec83cdc1932b604c83c76cea09a9e3a1">YAML::detail::node_data::remove</a></div><div class="ttdeci">bool remove(const Key &amp;key, shared_memory_holder pMemory)</div><div class="ttdef"><b>Definition</b> <a href="detail_2impl_8h_source.html#l00175">impl.h:175</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_aee8d9e1ee89a512c2df989c513ab5eba"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#aee8d9e1ee89a512c2df989c513ab5eba">YAML::detail::node_data::begin</a></div><div class="ttdeci">const_node_iterator begin() const</div><div class="ttdef"><b>Definition</b> <a href="node__data_8cpp_source.html#l00122">node_data.cpp:122</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_af0ebccbc655a8b1068637bef02ec3fad"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#af0ebccbc655a8b1068637bef02ec3fad">YAML::detail::node_data::m_style</a></div><div class="ttdeci">EmitterStyle::value m_style</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00105">node_data.h:105</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_af1a062a51a54401fbba6ba85f643b059"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#af1a062a51a54401fbba6ba85f643b059">YAML::detail::node_data::style</a></div><div class="ttdeci">EmitterStyle::value style() const</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00051">node_data.h:51</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_af33676e811fe66d78d8befd6b942a50e"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#af33676e811fe66d78d8befd6b942a50e">YAML::detail::node_data::m_sequence</a></div><div class="ttdeci">node_seq m_sequence</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00112">node_data.h:112</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__data_html_aff9369bc7ec59c7a7cf4c8799e11791d"><div class="ttname"><a href="classYAML_1_1detail_1_1node__data.html#aff9369bc7ec59c7a7cf4c8799e11791d">YAML::detail::node_data::type</a></div><div class="ttdeci">NodeType::value type() const</div><div class="ttdef"><b>Definition</b> <a href="node__data_8h_source.html#l00046">node_data.h:46</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node__iterator__base_html"><div class="ttname"><a href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a></div><div class="ttdef"><b>Definition</b> <a href="node__iterator_8h_source.html#l00055">node_iterator.h:55</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node_html"><div class="ttname"><a href="classYAML_1_1detail_1_1node.html">YAML::detail::node</a></div><div class="ttdef"><b>Definition</b> <a href="detail_2node_8h_source.html#l00020">node.h:20</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node_html_a18d5d6bb65a79aa3ea9067e5194167ad"><div class="ttname"><a href="classYAML_1_1detail_1_1node.html#a18d5d6bb65a79aa3ea9067e5194167ad">YAML::detail::node::is_defined</a></div><div class="ttdeci">bool is_defined() const</div><div class="ttdef"><b>Definition</b> <a href="detail_2node_8h_source.html#l00034">node.h:34</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node_html_aacde9a661dc94e3a699f84b975f1306a"><div class="ttname"><a href="classYAML_1_1detail_1_1node.html#aacde9a661dc94e3a699f84b975f1306a">YAML::detail::node::set_scalar</a></div><div class="ttdeci">void set_scalar(const std::string &amp;scalar)</div><div class="ttdef"><b>Definition</b> <a href="detail_2node_8h_source.html#l00085">node.h:85</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node_html_ad4cb2d56142d84d6c5d07c9a65ada1f6"><div class="ttname"><a href="classYAML_1_1detail_1_1node.html#ad4cb2d56142d84d6c5d07c9a65ada1f6">YAML::detail::node::m_amount</a></div><div class="ttdeci">static std::atomic&lt; size_t &gt; m_amount</div><div class="ttdef"><b>Definition</b> <a href="detail_2node_8h_source.html#l00172">node.h:172</a></div></div>
+<div class="ttc" id="adebug_8h_html_acdcc5aaebf3f273c1762f24a6ece2e5e"><div class="ttname"><a href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a></div><div class="ttdeci">#define assert(condition)</div><div class="ttdef"><b>Definition</b> <a href="debug_8h_source.html#l00102">debug.h:102</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_ab7c2d1d8d4198d62c34058543ea7cad3"><div class="ttname"><a href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a></div><div class="ttdeci">ATPAmtType value</div><div class="ttdoc">划拨金额 (必填)</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00125">main.cpp:125</a></div></div>
+<div class="ttc" id="adetail_2node_8h_html"><div class="ttname"><a href="detail_2node_8h.html">node.h</a></div></div>
+<div class="ttc" id="aexceptions_8h_html"><div class="ttname"><a href="exceptions_8h.html">exceptions.h</a></div></div>
+<div class="ttc" id="amemory_8h_html"><div class="ttname"><a href="memory_8h.html">memory.h</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1detail_html_a02dee2ddd5c753bedbd194328e1913c4"><div class="ttname"><a href="namespaceYAML_1_1detail.html#a02dee2ddd5c753bedbd194328e1913c4">YAML::detail::shared_memory_holder</a></div><div class="ttdeci">std::shared_ptr&lt; memory_holder &gt; shared_memory_holder</div><div class="ttdef"><b>Definition</b> <a href="ptr_8h_source.html#l00024">ptr.h:24</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1detail_html_a9983dda5eb65de064d3f41630fef240b"><div class="ttname"><a href="namespaceYAML_1_1detail.html#a9983dda5eb65de064d3f41630fef240b">YAML::detail::node_iterator</a></div><div class="ttdeci">node_iterator_base&lt; node &gt; node_iterator</div><div class="ttdef"><b>Definition</b> <a href="node__iterator_8h_source.html#l00176">node_iterator.h:176</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1detail_html_ad9372e300cc5f278a78231a6729543ce"><div class="ttname"><a href="namespaceYAML_1_1detail.html#ad9372e300cc5f278a78231a6729543ce">YAML::detail::const_node_iterator</a></div><div class="ttdeci">node_iterator_base&lt; const node &gt; const_node_iterator</div><div class="ttdef"><b>Definition</b> <a href="node__iterator_8h_source.html#l00177">node_iterator.h:177</a></div></div>
+<div class="ttc" id="anamespaceYAML_html"><div class="ttname"><a href="namespaceYAML.html">YAML</a></div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00005">binary.cpp:5</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_a783b088b8f0d79385ea8ab59e9da4c8f"><div class="ttname"><a href="namespaceYAML.html#a783b088b8f0d79385ea8ab59e9da4c8f">YAML::Null</a></div><div class="ttdeci">_Null Null</div><div class="ttdef"><b>Definition</b> <a href="null_8cpp_source.html#l00004">null.cpp:4</a></div></div>
+<div class="ttc" id="anamespacedetail_html"><div class="ttname"><a href="namespacedetail.html">detail</a></div><div class="ttdoc">内部实现细节的命名空间</div></div>
+<div class="ttc" id="anode__data_8h_html"><div class="ttname"><a href="node__data_8h.html">node_data.h</a></div></div>
+<div class="ttc" id="anode__iterator_8h_html"><div class="ttname"><a href="node__iterator_8h.html">node_iterator.h</a></div></div>
+<div class="ttc" id="aptr_8h_html"><div class="ttname"><a href="ptr_8h.html">ptr.h</a></div></div>
+<div class="ttc" id="astructYAML_1_1EmitterStyle_html"><div class="ttname"><a href="structYAML_1_1EmitterStyle.html">YAML::EmitterStyle</a></div><div class="ttdef"><b>Definition</b> <a href="emitterstyle_8h_source.html#l00011">emitterstyle.h:11</a></div></div>
+<div class="ttc" id="astructYAML_1_1EmitterStyle_html_ae86640662c85ce6062a37f9636b6959f"><div class="ttname"><a href="structYAML_1_1EmitterStyle.html#ae86640662c85ce6062a37f9636b6959f">YAML::EmitterStyle::value</a></div><div class="ttdeci">value</div><div class="ttdef"><b>Definition</b> <a href="emitterstyle_8h_source.html#l00012">emitterstyle.h:12</a></div></div>
+<div class="ttc" id="astructYAML_1_1Mark_html"><div class="ttname"><a href="structYAML_1_1Mark.html">YAML::Mark</a></div><div class="ttdef"><b>Definition</b> <a href="mark_8h_source.html#l00013">mark.h:13</a></div></div>
+<div class="ttc" id="astructYAML_1_1NodeType_html"><div class="ttname"><a href="structYAML_1_1NodeType.html">YAML::NodeType</a></div><div class="ttdef"><b>Definition</b> <a href="type_8h_source.html#l00011">type.h:11</a></div></div>
+<div class="ttc" id="astructYAML_1_1NodeType_html_af83cf3f3c2eca0bf0eae1bbf981e86c4"><div class="ttname"><a href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4">YAML::NodeType::value</a></div><div class="ttdeci">value</div><div class="ttdef"><b>Definition</b> <a href="type_8h_source.html#l00012">type.h:12</a></div></div>
+<div class="ttc" id="astructYAML_1_1NodeType_html_af83cf3f3c2eca0bf0eae1bbf981e86c4a0c01179d94bd3d4c7776384016b89c1f"><div class="ttname"><a href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a0c01179d94bd3d4c7776384016b89c1f">YAML::NodeType::Scalar</a></div><div class="ttdeci">@ Scalar</div><div class="ttdef"><b>Definition</b> <a href="type_8h_source.html#l00012">type.h:12</a></div></div>
+<div class="ttc" id="astructYAML_1_1NodeType_html_af83cf3f3c2eca0bf0eae1bbf981e86c4a41a3999c88dafc01670232938fa117a6"><div class="ttname"><a href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a41a3999c88dafc01670232938fa117a6">YAML::NodeType::Null</a></div><div class="ttdeci">@ Null</div><div class="ttdef"><b>Definition</b> <a href="type_8h_source.html#l00012">type.h:12</a></div></div>
+<div class="ttc" id="astructYAML_1_1NodeType_html_af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6"><div class="ttname"><a href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4a68e9b8832f166b7490663a46042053b6">YAML::NodeType::Map</a></div><div class="ttdeci">@ Map</div><div class="ttdef"><b>Definition</b> <a href="type_8h_source.html#l00012">type.h:12</a></div></div>
+<div class="ttc" id="astructYAML_1_1NodeType_html_af83cf3f3c2eca0bf0eae1bbf981e86c4ae197fc9c4aad8fe2f58aa35fa908ed5a"><div class="ttname"><a href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4ae197fc9c4aad8fe2f58aa35fa908ed5a">YAML::NodeType::Sequence</a></div><div class="ttdeci">@ Sequence</div><div class="ttdef"><b>Definition</b> <a href="type_8h_source.html#l00012">type.h:12</a></div></div>
+<div class="ttc" id="astructYAML_1_1NodeType_html_af83cf3f3c2eca0bf0eae1bbf981e86c4aeb0d86b144df4896751615d3ec6665a9"><div class="ttname"><a href="structYAML_1_1NodeType.html#af83cf3f3c2eca0bf0eae1bbf981e86c4aeb0d86b144df4896751615d3ec6665a9">YAML::NodeType::Undefined</a></div><div class="ttdeci">@ Undefined</div><div class="ttdef"><b>Definition</b> <a href="type_8h_source.html#l00012">type.h:12</a></div></div>
+<div class="ttc" id="atype_8h_html"><div class="ttname"><a href="type_8h.html">type.h</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="node__data_8cpp.html">node_data.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

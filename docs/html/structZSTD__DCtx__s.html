@@ -1,0 +1,986 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: ZSTD_DCtx_s结构体 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('structZSTD__DCtx__s.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-attribs">Public 属性</a> &#124;
+<a href="structZSTD__DCtx__s-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">ZSTD_DCtx_s结构体 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public 属性</h2></td></tr>
+<tr class="memitem:ae937eb4fe1b8af2fdc475bf5938a0f58" id="r_ae937eb4fe1b8af2fdc475bf5938a0f58"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structZSTD__seqSymbol.html">ZSTD_seqSymbol</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#ae937eb4fe1b8af2fdc475bf5938a0f58">LLTptr</a></td></tr>
+<tr class="separator:ae937eb4fe1b8af2fdc475bf5938a0f58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82b421fe9631d6c1f28b11b5c768e40a" id="r_a82b421fe9631d6c1f28b11b5c768e40a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structZSTD__seqSymbol.html">ZSTD_seqSymbol</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a82b421fe9631d6c1f28b11b5c768e40a">MLTptr</a></td></tr>
+<tr class="separator:a82b421fe9631d6c1f28b11b5c768e40a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9fd0f438cf6f7ba021796e42e5303c91" id="r_a9fd0f438cf6f7ba021796e42e5303c91"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structZSTD__seqSymbol.html">ZSTD_seqSymbol</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a9fd0f438cf6f7ba021796e42e5303c91">OFTptr</a></td></tr>
+<tr class="separator:a9fd0f438cf6f7ba021796e42e5303c91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1115b689e40a05a54ceb32053606c97e" id="r_a1115b689e40a05a54ceb32053606c97e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_DTable *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a1115b689e40a05a54ceb32053606c97e">HUFptr</a></td></tr>
+<tr class="separator:a1115b689e40a05a54ceb32053606c97e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa435d61b40927373a124eca2ff3b44c5" id="r_aa435d61b40927373a124eca2ff3b44c5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structZSTD__entropyDTables__t.html">ZSTD_entropyDTables_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#aa435d61b40927373a124eca2ff3b44c5">entropy</a></td></tr>
+<tr class="separator:aa435d61b40927373a124eca2ff3b44c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71a9e35715a77e8dc56a0d0c56e04559" id="r_a71a9e35715a77e8dc56a0d0c56e04559"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a71a9e35715a77e8dc56a0d0c56e04559">workspace</a> [HUF_DECOMPRESS_WORKSPACE_SIZE_U32]</td></tr>
+<tr class="separator:a71a9e35715a77e8dc56a0d0c56e04559"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac008c5f336a4c34352093f06d4fd8ed4" id="r_ac008c5f336a4c34352093f06d4fd8ed4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#ac008c5f336a4c34352093f06d4fd8ed4">previousDstEnd</a></td></tr>
+<tr class="separator:ac008c5f336a4c34352093f06d4fd8ed4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa310aea1286df0c399635338dd0ed56e" id="r_aa310aea1286df0c399635338dd0ed56e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#aa310aea1286df0c399635338dd0ed56e">prefixStart</a></td></tr>
+<tr class="separator:aa310aea1286df0c399635338dd0ed56e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f34e6512bdd10d67bf2d9c608d2e05d" id="r_a9f34e6512bdd10d67bf2d9c608d2e05d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a9f34e6512bdd10d67bf2d9c608d2e05d">virtualStart</a></td></tr>
+<tr class="separator:a9f34e6512bdd10d67bf2d9c608d2e05d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a936d8dca89313f0ed32746f67c9f741d" id="r_a936d8dca89313f0ed32746f67c9f741d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a936d8dca89313f0ed32746f67c9f741d">dictEnd</a></td></tr>
+<tr class="separator:a936d8dca89313f0ed32746f67c9f741d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75d498877e641bc89aa07949813bf43f" id="r_a75d498877e641bc89aa07949813bf43f"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a75d498877e641bc89aa07949813bf43f">expected</a></td></tr>
+<tr class="separator:a75d498877e641bc89aa07949813bf43f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad17eff095c0d4e78135232bda9b15444" id="r_ad17eff095c0d4e78135232bda9b15444"><td class="memItemLeft" align="right" valign="top">ZSTD_frameHeader&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#ad17eff095c0d4e78135232bda9b15444">fParams</a></td></tr>
+<tr class="separator:ad17eff095c0d4e78135232bda9b15444"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9048b5bc78d31f6bb0601af9b6d97297" id="r_a9048b5bc78d31f6bb0601af9b6d97297"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a9048b5bc78d31f6bb0601af9b6d97297">decodedSize</a></td></tr>
+<tr class="separator:a9048b5bc78d31f6bb0601af9b6d97297"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f6aa6168a65f99b54135ce2c6de2a7a" id="r_a4f6aa6168a65f99b54135ce2c6de2a7a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zstd__internal_8h.html#a781951c5a4951f8bb0ea9e713dfacf80">blockType_e</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a4f6aa6168a65f99b54135ce2c6de2a7a">bType</a></td></tr>
+<tr class="separator:a4f6aa6168a65f99b54135ce2c6de2a7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5aa837de70150924189eddb21d296790" id="r_a5aa837de70150924189eddb21d296790"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zstd__decompress__internal_8h.html#aa282092432324f27d17a518a30a6abf4">ZSTD_dStage</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a5aa837de70150924189eddb21d296790">stage</a></td></tr>
+<tr class="separator:a5aa837de70150924189eddb21d296790"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a9509fae4f907088203c48966a44808" id="r_a8a9509fae4f907088203c48966a44808"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a8a9509fae4f907088203c48966a44808">litEntropy</a></td></tr>
+<tr class="separator:a8a9509fae4f907088203c48966a44808"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9e57a409287687202f70598555da32e" id="r_af9e57a409287687202f70598555da32e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#af9e57a409287687202f70598555da32e">fseEntropy</a></td></tr>
+<tr class="separator:af9e57a409287687202f70598555da32e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a3c0f90dfbb5e5285d206743566b8de" id="r_a8a3c0f90dfbb5e5285d206743566b8de"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a8a3c0f90dfbb5e5285d206743566b8de">xxhState</a></td></tr>
+<tr class="separator:a8a3c0f90dfbb5e5285d206743566b8de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad58897f11c884246dea49ee1e7fe8aee" id="r_ad58897f11c884246dea49ee1e7fe8aee"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#ad58897f11c884246dea49ee1e7fe8aee">headerSize</a></td></tr>
+<tr class="separator:ad58897f11c884246dea49ee1e7fe8aee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ababfbe0d8347c132ba1cdab1361cff55" id="r_ababfbe0d8347c132ba1cdab1361cff55"><td class="memItemLeft" align="right" valign="top">ZSTD_format_e&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#ababfbe0d8347c132ba1cdab1361cff55">format</a></td></tr>
+<tr class="separator:ababfbe0d8347c132ba1cdab1361cff55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0cf2316fc102ab473d1ffe46392f3bd" id="r_ad0cf2316fc102ab473d1ffe46392f3bd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#ad0cf2316fc102ab473d1ffe46392f3bd">litPtr</a></td></tr>
+<tr class="separator:ad0cf2316fc102ab473d1ffe46392f3bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ecd67f512efa5e5ad8d9afb2994cfa3" id="r_a8ecd67f512efa5e5ad8d9afb2994cfa3"><td class="memItemLeft" align="right" valign="top">ZSTD_customMem&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a8ecd67f512efa5e5ad8d9afb2994cfa3">customMem</a></td></tr>
+<tr class="separator:a8ecd67f512efa5e5ad8d9afb2994cfa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a840acd1d251a2c6bac01f9f862dd3ffd" id="r_a840acd1d251a2c6bac01f9f862dd3ffd"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a840acd1d251a2c6bac01f9f862dd3ffd">litSize</a></td></tr>
+<tr class="separator:a840acd1d251a2c6bac01f9f862dd3ffd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8da3a850f2d073cef78bdee67a846ece" id="r_a8da3a850f2d073cef78bdee67a846ece"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a8da3a850f2d073cef78bdee67a846ece">rleSize</a></td></tr>
+<tr class="separator:a8da3a850f2d073cef78bdee67a846ece"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42a5ebe3f94dfdc66920102ec95fba83" id="r_a42a5ebe3f94dfdc66920102ec95fba83"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a42a5ebe3f94dfdc66920102ec95fba83">staticSize</a></td></tr>
+<tr class="separator:a42a5ebe3f94dfdc66920102ec95fba83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aade98705e2bba2b6ca3f6c436b690f33" id="r_aade98705e2bba2b6ca3f6c436b690f33"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#aade98705e2bba2b6ca3f6c436b690f33">bmi2</a></td></tr>
+<tr class="separator:aade98705e2bba2b6ca3f6c436b690f33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b0f3d6e8a1705e35d0ec82b3563cadc" id="r_a0b0f3d6e8a1705e35d0ec82b3563cadc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a0b0f3d6e8a1705e35d0ec82b3563cadc">ddictLocal</a></td></tr>
+<tr class="separator:a0b0f3d6e8a1705e35d0ec82b3563cadc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8760a0c9be2b8d5f36e7158acd30c937" id="r_a8760a0c9be2b8d5f36e7158acd30c937"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a8760a0c9be2b8d5f36e7158acd30c937">ddict</a></td></tr>
+<tr class="separator:a8760a0c9be2b8d5f36e7158acd30c937"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7e522ec9b8f45a631d81e2e2bbcc596" id="r_ab7e522ec9b8f45a631d81e2e2bbcc596"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#ab7e522ec9b8f45a631d81e2e2bbcc596">dictID</a></td></tr>
+<tr class="separator:ab7e522ec9b8f45a631d81e2e2bbcc596"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8a41764b97f2f83c2736b2ab9766e8a" id="r_aa8a41764b97f2f83c2736b2ab9766e8a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#aa8a41764b97f2f83c2736b2ab9766e8a">ddictIsCold</a></td></tr>
+<tr class="separator:aa8a41764b97f2f83c2736b2ab9766e8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96246734118cb32368fb1d46dda7396d" id="r_a96246734118cb32368fb1d46dda7396d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zstd__decompress__internal_8h.html#a361041084c20c9e4df19c910c6aeaca6">ZSTD_dictUses_e</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a96246734118cb32368fb1d46dda7396d">dictUses</a></td></tr>
+<tr class="separator:a96246734118cb32368fb1d46dda7396d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17d65e99dc87bae7ed46aacb823f1e4d" id="r_a17d65e99dc87bae7ed46aacb823f1e4d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zstd__decompress__internal_8h.html#a0b97bf0277c0c76ed923d87a263b68f8">ZSTD_dStreamStage</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a17d65e99dc87bae7ed46aacb823f1e4d">streamStage</a></td></tr>
+<tr class="separator:a17d65e99dc87bae7ed46aacb823f1e4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25e8de46fa280fc21e854545f4e48cba" id="r_a25e8de46fa280fc21e854545f4e48cba"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a25e8de46fa280fc21e854545f4e48cba">inBuff</a></td></tr>
+<tr class="separator:a25e8de46fa280fc21e854545f4e48cba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35c771c6adabe08d0c798bd25f156c4b" id="r_a35c771c6adabe08d0c798bd25f156c4b"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a35c771c6adabe08d0c798bd25f156c4b">inBuffSize</a></td></tr>
+<tr class="separator:a35c771c6adabe08d0c798bd25f156c4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e8e95b2b8d649f1254e64f722bc95b5" id="r_a3e8e95b2b8d649f1254e64f722bc95b5"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a3e8e95b2b8d649f1254e64f722bc95b5">inPos</a></td></tr>
+<tr class="separator:a3e8e95b2b8d649f1254e64f722bc95b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a073ffb8b5e22f890fb56de58233c70a9" id="r_a073ffb8b5e22f890fb56de58233c70a9"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a073ffb8b5e22f890fb56de58233c70a9">maxWindowSize</a></td></tr>
+<tr class="separator:a073ffb8b5e22f890fb56de58233c70a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a555c0dfce2630d47827e65399993c29e" id="r_a555c0dfce2630d47827e65399993c29e"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a555c0dfce2630d47827e65399993c29e">outBuff</a></td></tr>
+<tr class="separator:a555c0dfce2630d47827e65399993c29e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a169389add9d94610ee473e4d372c93cb" id="r_a169389add9d94610ee473e4d372c93cb"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a169389add9d94610ee473e4d372c93cb">outBuffSize</a></td></tr>
+<tr class="separator:a169389add9d94610ee473e4d372c93cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7cb085ca57516b4c6b1ed0f66342658d" id="r_a7cb085ca57516b4c6b1ed0f66342658d"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a7cb085ca57516b4c6b1ed0f66342658d">outStart</a></td></tr>
+<tr class="separator:a7cb085ca57516b4c6b1ed0f66342658d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45fc9493ca211b2361e0df7b25f86c2e" id="r_a45fc9493ca211b2361e0df7b25f86c2e"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a45fc9493ca211b2361e0df7b25f86c2e">outEnd</a></td></tr>
+<tr class="separator:a45fc9493ca211b2361e0df7b25f86c2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21272d81a13ccfe0f24c2c95eb3c258e" id="r_a21272d81a13ccfe0f24c2c95eb3c258e"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a21272d81a13ccfe0f24c2c95eb3c258e">lhSize</a></td></tr>
+<tr class="separator:a21272d81a13ccfe0f24c2c95eb3c258e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd3db486d167b0db434e23bb3123a3b0" id="r_abd3db486d167b0db434e23bb3123a3b0"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#abd3db486d167b0db434e23bb3123a3b0">legacyContext</a></td></tr>
+<tr class="separator:abd3db486d167b0db434e23bb3123a3b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a928cd7be9283e1a843263a70b64e7002" id="r_a928cd7be9283e1a843263a70b64e7002"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a928cd7be9283e1a843263a70b64e7002">previousLegacyVersion</a></td></tr>
+<tr class="separator:a928cd7be9283e1a843263a70b64e7002"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af29a41f65e6967a3433daa6eb1bd54a2" id="r_af29a41f65e6967a3433daa6eb1bd54a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#af29a41f65e6967a3433daa6eb1bd54a2">legacyVersion</a></td></tr>
+<tr class="separator:af29a41f65e6967a3433daa6eb1bd54a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5816d05296b0dce3eaf5d45031d80104" id="r_a5816d05296b0dce3eaf5d45031d80104"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a5816d05296b0dce3eaf5d45031d80104">hostageByte</a></td></tr>
+<tr class="separator:a5816d05296b0dce3eaf5d45031d80104"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e9599c79fd2c07118df425c124952c9" id="r_a9e9599c79fd2c07118df425c124952c9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a9e9599c79fd2c07118df425c124952c9">noForwardProgress</a></td></tr>
+<tr class="separator:a9e9599c79fd2c07118df425c124952c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65efef582497509c80a338d535a1404c" id="r_a65efef582497509c80a338d535a1404c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#a65efef582497509c80a338d535a1404c">litBuffer</a> [<a class="el" href="zstd_8h.html#afcfdbfff9ffbb6fabf009b7ad1d6ccc5">ZSTD_BLOCKSIZE_MAX</a>+<a class="el" href="zstd__internal_8h.html#a4c25b8b5da6a100a9be35a3783cd28ac">WILDCOPY_OVERLENGTH</a>]</td></tr>
+<tr class="separator:a65efef582497509c80a338d535a1404c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abec141a8dcc6812bd61e929c369d2224" id="r_abec141a8dcc6812bd61e929c369d2224"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DCtx__s.html#abec141a8dcc6812bd61e929c369d2224">headerBuffer</a> [ZSTD_FRAMEHEADERSIZE_MAX]</td></tr>
+<tr class="separator:abec141a8dcc6812bd61e929c369d2224"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock">
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00098">98</a> 行定义.</p>
+</div><h2 class="groupheader">类成员变量说明</h2>
+<a id="aade98705e2bba2b6ca3f6c436b690f33" name="aade98705e2bba2b6ca3f6c436b690f33"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aade98705e2bba2b6ca3f6c436b690f33">&#9670;&#160;</a></span>bmi2</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ZSTD_DCtx_s::bmi2</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00125">125</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4f6aa6168a65f99b54135ce2c6de2a7a" name="a4f6aa6168a65f99b54135ce2c6de2a7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f6aa6168a65f99b54135ce2c6de2a7a">&#9670;&#160;</a></span>bType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zstd__internal_8h.html#a781951c5a4951f8bb0ea9e713dfacf80">blockType_e</a> ZSTD_DCtx_s::bType</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00113">113</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8ecd67f512efa5e5ad8d9afb2994cfa3" name="a8ecd67f512efa5e5ad8d9afb2994cfa3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ecd67f512efa5e5ad8d9afb2994cfa3">&#9670;&#160;</a></span>customMem</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZSTD_customMem ZSTD_DCtx_s::customMem</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00121">121</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8760a0c9be2b8d5f36e7158acd30c937" name="a8760a0c9be2b8d5f36e7158acd30c937"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8760a0c9be2b8d5f36e7158acd30c937">&#9670;&#160;</a></span>ddict</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a>* ZSTD_DCtx_s::ddict</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00129">129</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa8a41764b97f2f83c2736b2ab9766e8a" name="aa8a41764b97f2f83c2736b2ab9766e8a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8a41764b97f2f83c2736b2ab9766e8a">&#9670;&#160;</a></span>ddictIsCold</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ZSTD_DCtx_s::ddictIsCold</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00131">131</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0b0f3d6e8a1705e35d0ec82b3563cadc" name="a0b0f3d6e8a1705e35d0ec82b3563cadc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b0f3d6e8a1705e35d0ec82b3563cadc">&#9670;&#160;</a></span>ddictLocal</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a>* ZSTD_DCtx_s::ddictLocal</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00128">128</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9048b5bc78d31f6bb0601af9b6d97297" name="a9048b5bc78d31f6bb0601af9b6d97297"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9048b5bc78d31f6bb0601af9b6d97297">&#9670;&#160;</a></span>decodedSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> ZSTD_DCtx_s::decodedSize</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00112">112</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a936d8dca89313f0ed32746f67c9f741d" name="a936d8dca89313f0ed32746f67c9f741d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a936d8dca89313f0ed32746f67c9f741d">&#9670;&#160;</a></span>dictEnd</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void* ZSTD_DCtx_s::dictEnd</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00109">109</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab7e522ec9b8f45a631d81e2e2bbcc596" name="ab7e522ec9b8f45a631d81e2e2bbcc596"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab7e522ec9b8f45a631d81e2e2bbcc596">&#9670;&#160;</a></span>dictID</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ZSTD_DCtx_s::dictID</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00130">130</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a96246734118cb32368fb1d46dda7396d" name="a96246734118cb32368fb1d46dda7396d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96246734118cb32368fb1d46dda7396d">&#9670;&#160;</a></span>dictUses</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zstd__decompress__internal_8h.html#a361041084c20c9e4df19c910c6aeaca6">ZSTD_dictUses_e</a> ZSTD_DCtx_s::dictUses</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00132">132</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa435d61b40927373a124eca2ff3b44c5" name="aa435d61b40927373a124eca2ff3b44c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa435d61b40927373a124eca2ff3b44c5">&#9670;&#160;</a></span>entropy</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structZSTD__entropyDTables__t.html">ZSTD_entropyDTables_t</a> ZSTD_DCtx_s::entropy</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00104">104</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a75d498877e641bc89aa07949813bf43f" name="a75d498877e641bc89aa07949813bf43f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75d498877e641bc89aa07949813bf43f">&#9670;&#160;</a></span>expected</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_DCtx_s::expected</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00110">110</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ababfbe0d8347c132ba1cdab1361cff55" name="ababfbe0d8347c132ba1cdab1361cff55"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ababfbe0d8347c132ba1cdab1361cff55">&#9670;&#160;</a></span>format</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZSTD_format_e ZSTD_DCtx_s::format</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00119">119</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad17eff095c0d4e78135232bda9b15444" name="ad17eff095c0d4e78135232bda9b15444"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad17eff095c0d4e78135232bda9b15444">&#9670;&#160;</a></span>fParams</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZSTD_frameHeader ZSTD_DCtx_s::fParams</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00111">111</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af9e57a409287687202f70598555da32e" name="af9e57a409287687202f70598555da32e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9e57a409287687202f70598555da32e">&#9670;&#160;</a></span>fseEntropy</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ZSTD_DCtx_s::fseEntropy</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00116">116</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abec141a8dcc6812bd61e929c369d2224" name="abec141a8dcc6812bd61e929c369d2224"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abec141a8dcc6812bd61e929c369d2224">&#9670;&#160;</a></span>headerBuffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> ZSTD_DCtx_s::headerBuffer[ZSTD_FRAMEHEADERSIZE_MAX]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00153">153</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad58897f11c884246dea49ee1e7fe8aee" name="ad58897f11c884246dea49ee1e7fe8aee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad58897f11c884246dea49ee1e7fe8aee">&#9670;&#160;</a></span>headerSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_DCtx_s::headerSize</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00118">118</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5816d05296b0dce3eaf5d45031d80104" name="a5816d05296b0dce3eaf5d45031d80104"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5816d05296b0dce3eaf5d45031d80104">&#9670;&#160;</a></span>hostageByte</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ZSTD_DCtx_s::hostageByte</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00148">148</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1115b689e40a05a54ceb32053606c97e" name="a1115b689e40a05a54ceb32053606c97e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1115b689e40a05a54ceb32053606c97e">&#9670;&#160;</a></span>HUFptr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_DTable* ZSTD_DCtx_s::HUFptr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00103">103</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a25e8de46fa280fc21e854545f4e48cba" name="a25e8de46fa280fc21e854545f4e48cba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a25e8de46fa280fc21e854545f4e48cba">&#9670;&#160;</a></span>inBuff</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* ZSTD_DCtx_s::inBuff</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00136">136</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a35c771c6adabe08d0c798bd25f156c4b" name="a35c771c6adabe08d0c798bd25f156c4b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35c771c6adabe08d0c798bd25f156c4b">&#9670;&#160;</a></span>inBuffSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_DCtx_s::inBuffSize</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00137">137</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3e8e95b2b8d649f1254e64f722bc95b5" name="a3e8e95b2b8d649f1254e64f722bc95b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e8e95b2b8d649f1254e64f722bc95b5">&#9670;&#160;</a></span>inPos</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_DCtx_s::inPos</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00138">138</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abd3db486d167b0db434e23bb3123a3b0" name="abd3db486d167b0db434e23bb3123a3b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd3db486d167b0db434e23bb3123a3b0">&#9670;&#160;</a></span>legacyContext</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void* ZSTD_DCtx_s::legacyContext</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00145">145</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af29a41f65e6967a3433daa6eb1bd54a2" name="af29a41f65e6967a3433daa6eb1bd54a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af29a41f65e6967a3433daa6eb1bd54a2">&#9670;&#160;</a></span>legacyVersion</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ZSTD_DCtx_s::legacyVersion</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00147">147</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a21272d81a13ccfe0f24c2c95eb3c258e" name="a21272d81a13ccfe0f24c2c95eb3c258e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21272d81a13ccfe0f24c2c95eb3c258e">&#9670;&#160;</a></span>lhSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_DCtx_s::lhSize</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00144">144</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a65efef582497509c80a338d535a1404c" name="a65efef582497509c80a338d535a1404c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65efef582497509c80a338d535a1404c">&#9670;&#160;</a></span>litBuffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> ZSTD_DCtx_s::litBuffer[<a class="el" href="zstd_8h.html#afcfdbfff9ffbb6fabf009b7ad1d6ccc5">ZSTD_BLOCKSIZE_MAX</a>+<a class="el" href="zstd__internal_8h.html#a4c25b8b5da6a100a9be35a3783cd28ac">WILDCOPY_OVERLENGTH</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00152">152</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8a9509fae4f907088203c48966a44808" name="a8a9509fae4f907088203c48966a44808"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a9509fae4f907088203c48966a44808">&#9670;&#160;</a></span>litEntropy</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ZSTD_DCtx_s::litEntropy</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00115">115</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad0cf2316fc102ab473d1ffe46392f3bd" name="ad0cf2316fc102ab473d1ffe46392f3bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0cf2316fc102ab473d1ffe46392f3bd">&#9670;&#160;</a></span>litPtr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>* ZSTD_DCtx_s::litPtr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00120">120</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a840acd1d251a2c6bac01f9f862dd3ffd" name="a840acd1d251a2c6bac01f9f862dd3ffd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a840acd1d251a2c6bac01f9f862dd3ffd">&#9670;&#160;</a></span>litSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_DCtx_s::litSize</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00122">122</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae937eb4fe1b8af2fdc475bf5938a0f58" name="ae937eb4fe1b8af2fdc475bf5938a0f58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae937eb4fe1b8af2fdc475bf5938a0f58">&#9670;&#160;</a></span>LLTptr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structZSTD__seqSymbol.html">ZSTD_seqSymbol</a>* ZSTD_DCtx_s::LLTptr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00100">100</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a073ffb8b5e22f890fb56de58233c70a9" name="a073ffb8b5e22f890fb56de58233c70a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a073ffb8b5e22f890fb56de58233c70a9">&#9670;&#160;</a></span>maxWindowSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_DCtx_s::maxWindowSize</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00139">139</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a82b421fe9631d6c1f28b11b5c768e40a" name="a82b421fe9631d6c1f28b11b5c768e40a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82b421fe9631d6c1f28b11b5c768e40a">&#9670;&#160;</a></span>MLTptr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structZSTD__seqSymbol.html">ZSTD_seqSymbol</a>* ZSTD_DCtx_s::MLTptr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00101">101</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9e9599c79fd2c07118df425c124952c9" name="a9e9599c79fd2c07118df425c124952c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e9599c79fd2c07118df425c124952c9">&#9670;&#160;</a></span>noForwardProgress</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ZSTD_DCtx_s::noForwardProgress</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00149">149</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9fd0f438cf6f7ba021796e42e5303c91" name="a9fd0f438cf6f7ba021796e42e5303c91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fd0f438cf6f7ba021796e42e5303c91">&#9670;&#160;</a></span>OFTptr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structZSTD__seqSymbol.html">ZSTD_seqSymbol</a>* ZSTD_DCtx_s::OFTptr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00102">102</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a555c0dfce2630d47827e65399993c29e" name="a555c0dfce2630d47827e65399993c29e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a555c0dfce2630d47827e65399993c29e">&#9670;&#160;</a></span>outBuff</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* ZSTD_DCtx_s::outBuff</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00140">140</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a169389add9d94610ee473e4d372c93cb" name="a169389add9d94610ee473e4d372c93cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a169389add9d94610ee473e4d372c93cb">&#9670;&#160;</a></span>outBuffSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_DCtx_s::outBuffSize</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00141">141</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a45fc9493ca211b2361e0df7b25f86c2e" name="a45fc9493ca211b2361e0df7b25f86c2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45fc9493ca211b2361e0df7b25f86c2e">&#9670;&#160;</a></span>outEnd</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_DCtx_s::outEnd</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00143">143</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7cb085ca57516b4c6b1ed0f66342658d" name="a7cb085ca57516b4c6b1ed0f66342658d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7cb085ca57516b4c6b1ed0f66342658d">&#9670;&#160;</a></span>outStart</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_DCtx_s::outStart</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00142">142</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa310aea1286df0c399635338dd0ed56e" name="aa310aea1286df0c399635338dd0ed56e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa310aea1286df0c399635338dd0ed56e">&#9670;&#160;</a></span>prefixStart</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void* ZSTD_DCtx_s::prefixStart</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00107">107</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac008c5f336a4c34352093f06d4fd8ed4" name="ac008c5f336a4c34352093f06d4fd8ed4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac008c5f336a4c34352093f06d4fd8ed4">&#9670;&#160;</a></span>previousDstEnd</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void* ZSTD_DCtx_s::previousDstEnd</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00106">106</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a928cd7be9283e1a843263a70b64e7002" name="a928cd7be9283e1a843263a70b64e7002"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a928cd7be9283e1a843263a70b64e7002">&#9670;&#160;</a></span>previousLegacyVersion</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ZSTD_DCtx_s::previousLegacyVersion</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00146">146</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8da3a850f2d073cef78bdee67a846ece" name="a8da3a850f2d073cef78bdee67a846ece"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8da3a850f2d073cef78bdee67a846ece">&#9670;&#160;</a></span>rleSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_DCtx_s::rleSize</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00123">123</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5aa837de70150924189eddb21d296790" name="a5aa837de70150924189eddb21d296790"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5aa837de70150924189eddb21d296790">&#9670;&#160;</a></span>stage</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zstd__decompress__internal_8h.html#aa282092432324f27d17a518a30a6abf4">ZSTD_dStage</a> ZSTD_DCtx_s::stage</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00114">114</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a42a5ebe3f94dfdc66920102ec95fba83" name="a42a5ebe3f94dfdc66920102ec95fba83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42a5ebe3f94dfdc66920102ec95fba83">&#9670;&#160;</a></span>staticSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_DCtx_s::staticSize</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00124">124</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a17d65e99dc87bae7ed46aacb823f1e4d" name="a17d65e99dc87bae7ed46aacb823f1e4d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17d65e99dc87bae7ed46aacb823f1e4d">&#9670;&#160;</a></span>streamStage</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zstd__decompress__internal_8h.html#a0b97bf0277c0c76ed923d87a263b68f8">ZSTD_dStreamStage</a> ZSTD_DCtx_s::streamStage</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00135">135</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9f34e6512bdd10d67bf2d9c608d2e05d" name="a9f34e6512bdd10d67bf2d9c608d2e05d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f34e6512bdd10d67bf2d9c608d2e05d">&#9670;&#160;</a></span>virtualStart</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void* ZSTD_DCtx_s::virtualStart</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00108">108</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a71a9e35715a77e8dc56a0d0c56e04559" name="a71a9e35715a77e8dc56a0d0c56e04559"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71a9e35715a77e8dc56a0d0c56e04559">&#9670;&#160;</a></span>workspace</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ZSTD_DCtx_s::workspace[HUF_DECOMPRESS_WORKSPACE_SIZE_U32]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00105">105</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8a3c0f90dfbb5e5285d206743566b8de" name="a8a3c0f90dfbb5e5285d206743566b8de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a3c0f90dfbb5e5285d206743566b8de">&#9670;&#160;</a></span>xxhState</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> ZSTD_DCtx_s::xxhState</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a> 第 <a class="el" href="zstd__decompress__internal_8h_source.html#l00117">117</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该结构体的文档由以下文件生成:<ul>
+<li>src/WTSUtils/zstdlib/<a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="structZSTD__DCtx__s.html">ZSTD_DCtx_s</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

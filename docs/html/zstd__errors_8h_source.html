@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/zstd_errors.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('zstd__errors_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">zstd_errors.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="zstd__errors_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (c) 2016-present, Yann Collet, Facebook, Inc.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * This source code is licensed under both the BSD-style license (found in the</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * LICENSE file in the root directory of this source tree) and the GPLv2 (found</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * in the COPYING file in the root directory of this source tree).</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * You may select, at your option, one of the above-listed licenses.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#ifndef ZSTD_ERRORS_H_398273423</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#define ZSTD_ERRORS_H_398273423</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#if defined (__cplusplus)</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">/*===== dependency =====*/</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;stddef.h&gt;</span>   <span class="comment">/* size_t */</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">/* =====   ZSTDERRORLIB_API : control library symbols visibility   ===== */</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#ifndef ZSTDERRORLIB_VISIBILITY</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#  if defined(__GNUC__) &amp;&amp; (__GNUC__ &gt;= 4)</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#    define ZSTDERRORLIB_VISIBILITY __attribute__ ((visibility (&quot;default&quot;)))</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#  else</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#abd2280cbf96a1b3b523184f4a921070e">   27</a></span><span class="preprocessor">#    define ZSTDERRORLIB_VISIBILITY</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#  endif</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#if defined(ZSTD_DLL_EXPORT) &amp;&amp; (ZSTD_DLL_EXPORT==1)</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#  define ZSTDERRORLIB_API __declspec(dllexport) ZSTDERRORLIB_VISIBILITY</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#elif defined(ZSTD_DLL_IMPORT) &amp;&amp; (ZSTD_DLL_IMPORT==1)</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#  define ZSTDERRORLIB_API __declspec(dllimport) ZSTDERRORLIB_VISIBILITY </span><span class="comment">/* It isn&#39;t required but allows to generate better code, saving a function pointer load from the IAT and an indirect jump.*/</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#aba638ca88c24aaf1c6c1e1250cfee5d3">   35</a></span><span class="preprocessor">#  define ZSTDERRORLIB_API ZSTDERRORLIB_VISIBILITY</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment">/*-*********************************************</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment"> *  Error codes list</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment"> *-*********************************************</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment"> *  Error codes _values_ are pinned down since v1.3.1 only.</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment"> *  Therefore, don&#39;t rely on values if you may link to any version &lt; v1.3.1.</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment"> *  Only values &lt; 100 are considered stable.</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment"> *  note 1 : this API shall be used with static linking only.</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment"> *           dynamic linking is not yet officially supported.</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment"> *  note 2 : Prefer relying on the enum than on its value whenever possible</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment"> *           This is the only supported way to use the error list &lt; v1.3.1</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment"> *  note 3 : ZSTD_isError() is always correct, whatever the library version.</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment"> **********************************************/</span></div>
+<div class="foldopen" id="foldopen00052" data-start="{" data-end="};">
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37">   52</a></span><span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a772de3d1ee688447540f78c6b1371c89">   53</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a772de3d1ee688447540f78c6b1371c89">ZSTD_error_no_error</a> = 0,</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37abc227d32dc7cde66266cead14ca650d7">   54</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37abc227d32dc7cde66266cead14ca650d7">ZSTD_error_GENERIC</a>  = 1,</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a53c2c67ef3d068aabc01f6e3d40098a2">   55</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a53c2c67ef3d068aabc01f6e3d40098a2">ZSTD_error_prefix_unknown</a>                = 10,</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a0a9f0f8895bb47bbeb68974b59a19422">   56</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a0a9f0f8895bb47bbeb68974b59a19422">ZSTD_error_version_unsupported</a>           = 12,</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a1393112fcbe2ab628ca3d2afe3858a3c">   57</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a1393112fcbe2ab628ca3d2afe3858a3c">ZSTD_error_frameParameter_unsupported</a>    = 14,</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a6bc23da35003a39d978026ce4b034bb3">   58</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a6bc23da35003a39d978026ce4b034bb3">ZSTD_error_frameParameter_windowTooLarge</a> = 16,</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a781c5c268ea8d3debcb01faa146997ac">   59</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a781c5c268ea8d3debcb01faa146997ac">ZSTD_error_corruption_detected</a> = 20,</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ab4243df58a97838531ca9c06a44eeaa3">   60</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ab4243df58a97838531ca9c06a44eeaa3">ZSTD_error_checksum_wrong</a>      = 22,</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ae247e41d5fad361406f57c8f72653d49">   61</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ae247e41d5fad361406f57c8f72653d49">ZSTD_error_dictionary_corrupted</a>      = 30,</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37abbc036a50b83b470ace6b3867a7e4da5">   62</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37abbc036a50b83b470ace6b3867a7e4da5">ZSTD_error_dictionary_wrong</a>          = 32,</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37aa929a4cbdfcbf7e5dc073482ebd09365">   63</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37aa929a4cbdfcbf7e5dc073482ebd09365">ZSTD_error_dictionaryCreation_failed</a> = 34,</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37aeefa0dfe6ab35472d779afa6af6bb239">   64</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37aeefa0dfe6ab35472d779afa6af6bb239">ZSTD_error_parameter_unsupported</a>   = 40,</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ae839eba708a06ffd3fe3228b20b670ba">   65</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ae839eba708a06ffd3fe3228b20b670ba">ZSTD_error_parameter_outOfBound</a>    = 42,</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a24cf1f4f900063cda5d6529d36bde33f">   66</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a24cf1f4f900063cda5d6529d36bde33f">ZSTD_error_tableLog_tooLarge</a>       = 44,</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ab16f46e97b43bc4e0c6559e1f752635c">   67</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ab16f46e97b43bc4e0c6559e1f752635c">ZSTD_error_maxSymbolValue_tooLarge</a> = 46,</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a876d94368190fded3bc485daf0a16f67">   68</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a876d94368190fded3bc485daf0a16f67">ZSTD_error_maxSymbolValue_tooSmall</a> = 48,</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a2428b6f538a5d34eb68e8c08bc78ee6b">   69</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a2428b6f538a5d34eb68e8c08bc78ee6b">ZSTD_error_stage_wrong</a>       = 60,</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a5ccf8242f23660203a2386047bfbfd28">   70</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a5ccf8242f23660203a2386047bfbfd28">ZSTD_error_init_missing</a>      = 62,</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a0ea7f43e31ad2e7e7bcdf92059d5fbfb">   71</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a0ea7f43e31ad2e7e7bcdf92059d5fbfb">ZSTD_error_memory_allocation</a> = 64,</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ae6ea12e04d2b13d79a31b8ba72affc52">   72</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ae6ea12e04d2b13d79a31b8ba72affc52">ZSTD_error_workSpace_tooSmall</a>= 66,</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ad8e0e6b5943d77a13cf6d89aed8b3c1f">   73</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ad8e0e6b5943d77a13cf6d89aed8b3c1f">ZSTD_error_dstSize_tooSmall</a> = 70,</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a09bdf64f794359c5ff5dd443533fd83b">   74</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a09bdf64f794359c5ff5dd443533fd83b">ZSTD_error_srcSize_wrong</a>    = 72,</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a8f2b76cac9583c5d5f3c5094c6e888e5">   75</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a8f2b76cac9583c5d5f3c5094c6e888e5">ZSTD_error_dstBuffer_null</a>   = 74,</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  <span class="comment">/* following error codes are __NOT STABLE__, they can be removed or changed in future versions */</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a3e2ad8e6fee52d451d1d62309be3d4db">   77</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a3e2ad8e6fee52d451d1d62309be3d4db">ZSTD_error_frameIndex_tooLarge</a> = 100,</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ad414d9aeeab3b187caabad74c1c97edd">   78</a></span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ad414d9aeeab3b187caabad74c1c97edd">ZSTD_error_seekableIO</a>          = 102,</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <a class="code hl_enumvalue" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a366cf0cb3e27ca1e04c5250d34a7db51">ZSTD_error_maxCode</a> = 120  <span class="comment">/* never EVER use this value directly, it can change in future versions! Use ZSTD_isError() instead */</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a366cf0cb3e27ca1e04c5250d34a7db51">   80</a></span>} <a class="code hl_enumeration" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37">ZSTD_ErrorCode</a>;</div>
+</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><a class="code hl_define" href="zstd__errors_8h.html#aba638ca88c24aaf1c6c1e1250cfee5d3">ZSTDERRORLIB_API</a> <a class="code hl_enumeration" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37">ZSTD_ErrorCode</a> <a class="code hl_function" href="zstd__errors_8h.html#a08b7fe037a62299f5f81e394c280a711">ZSTD_getErrorCode</a>(<span class="keywordtype">size_t</span> functionResult);</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><a class="code hl_define" href="zstd__errors_8h.html#aba638ca88c24aaf1c6c1e1250cfee5d3">ZSTDERRORLIB_API</a> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="zstd__errors_8h.html#ab160f0da4b0f5e5dc01ab99b288172f2">ZSTD_getErrorString</a>(<a class="code hl_enumeration" href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37">ZSTD_ErrorCode</a> code);   </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="preprocessor">#if defined (__cplusplus)</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>}</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="preprocessor">#endif </span><span class="comment">/* ZSTD_ERRORS_H_398273423 */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="azstd__errors_8h_html_a08b7fe037a62299f5f81e394c280a711"><div class="ttname"><a href="zstd__errors_8h.html#a08b7fe037a62299f5f81e394c280a711">ZSTD_getErrorCode</a></div><div class="ttdeci">ZSTDERRORLIB_API ZSTD_ErrorCode ZSTD_getErrorCode(size_t functionResult)</div><div class="ttdef"><b>Definition</b> <a href="zstd__common_8c_source.html#l00045">zstd_common.c:45</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37">ZSTD_ErrorCode</a></div><div class="ttdeci">ZSTD_ErrorCode</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00052">zstd_errors.h:52</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a09bdf64f794359c5ff5dd443533fd83b"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a09bdf64f794359c5ff5dd443533fd83b">ZSTD_error_srcSize_wrong</a></div><div class="ttdeci">@ ZSTD_error_srcSize_wrong</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00074">zstd_errors.h:74</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a0a9f0f8895bb47bbeb68974b59a19422"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a0a9f0f8895bb47bbeb68974b59a19422">ZSTD_error_version_unsupported</a></div><div class="ttdeci">@ ZSTD_error_version_unsupported</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00056">zstd_errors.h:56</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a0ea7f43e31ad2e7e7bcdf92059d5fbfb"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a0ea7f43e31ad2e7e7bcdf92059d5fbfb">ZSTD_error_memory_allocation</a></div><div class="ttdeci">@ ZSTD_error_memory_allocation</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00071">zstd_errors.h:71</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a1393112fcbe2ab628ca3d2afe3858a3c"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a1393112fcbe2ab628ca3d2afe3858a3c">ZSTD_error_frameParameter_unsupported</a></div><div class="ttdeci">@ ZSTD_error_frameParameter_unsupported</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00057">zstd_errors.h:57</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a2428b6f538a5d34eb68e8c08bc78ee6b"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a2428b6f538a5d34eb68e8c08bc78ee6b">ZSTD_error_stage_wrong</a></div><div class="ttdeci">@ ZSTD_error_stage_wrong</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00069">zstd_errors.h:69</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a24cf1f4f900063cda5d6529d36bde33f"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a24cf1f4f900063cda5d6529d36bde33f">ZSTD_error_tableLog_tooLarge</a></div><div class="ttdeci">@ ZSTD_error_tableLog_tooLarge</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00066">zstd_errors.h:66</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a366cf0cb3e27ca1e04c5250d34a7db51"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a366cf0cb3e27ca1e04c5250d34a7db51">ZSTD_error_maxCode</a></div><div class="ttdeci">@ ZSTD_error_maxCode</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00080">zstd_errors.h:79</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a3e2ad8e6fee52d451d1d62309be3d4db"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a3e2ad8e6fee52d451d1d62309be3d4db">ZSTD_error_frameIndex_tooLarge</a></div><div class="ttdeci">@ ZSTD_error_frameIndex_tooLarge</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00077">zstd_errors.h:77</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a53c2c67ef3d068aabc01f6e3d40098a2"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a53c2c67ef3d068aabc01f6e3d40098a2">ZSTD_error_prefix_unknown</a></div><div class="ttdeci">@ ZSTD_error_prefix_unknown</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00055">zstd_errors.h:55</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a5ccf8242f23660203a2386047bfbfd28"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a5ccf8242f23660203a2386047bfbfd28">ZSTD_error_init_missing</a></div><div class="ttdeci">@ ZSTD_error_init_missing</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00070">zstd_errors.h:70</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a6bc23da35003a39d978026ce4b034bb3"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a6bc23da35003a39d978026ce4b034bb3">ZSTD_error_frameParameter_windowTooLarge</a></div><div class="ttdeci">@ ZSTD_error_frameParameter_windowTooLarge</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00058">zstd_errors.h:58</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a772de3d1ee688447540f78c6b1371c89"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a772de3d1ee688447540f78c6b1371c89">ZSTD_error_no_error</a></div><div class="ttdeci">@ ZSTD_error_no_error</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00053">zstd_errors.h:53</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a781c5c268ea8d3debcb01faa146997ac"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a781c5c268ea8d3debcb01faa146997ac">ZSTD_error_corruption_detected</a></div><div class="ttdeci">@ ZSTD_error_corruption_detected</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00059">zstd_errors.h:59</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a876d94368190fded3bc485daf0a16f67"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a876d94368190fded3bc485daf0a16f67">ZSTD_error_maxSymbolValue_tooSmall</a></div><div class="ttdeci">@ ZSTD_error_maxSymbolValue_tooSmall</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00068">zstd_errors.h:68</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37a8f2b76cac9583c5d5f3c5094c6e888e5"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a8f2b76cac9583c5d5f3c5094c6e888e5">ZSTD_error_dstBuffer_null</a></div><div class="ttdeci">@ ZSTD_error_dstBuffer_null</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00075">zstd_errors.h:75</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37aa929a4cbdfcbf7e5dc073482ebd09365"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37aa929a4cbdfcbf7e5dc073482ebd09365">ZSTD_error_dictionaryCreation_failed</a></div><div class="ttdeci">@ ZSTD_error_dictionaryCreation_failed</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00063">zstd_errors.h:63</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37ab16f46e97b43bc4e0c6559e1f752635c"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ab16f46e97b43bc4e0c6559e1f752635c">ZSTD_error_maxSymbolValue_tooLarge</a></div><div class="ttdeci">@ ZSTD_error_maxSymbolValue_tooLarge</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00067">zstd_errors.h:67</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37ab4243df58a97838531ca9c06a44eeaa3"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ab4243df58a97838531ca9c06a44eeaa3">ZSTD_error_checksum_wrong</a></div><div class="ttdeci">@ ZSTD_error_checksum_wrong</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00060">zstd_errors.h:60</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37abbc036a50b83b470ace6b3867a7e4da5"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37abbc036a50b83b470ace6b3867a7e4da5">ZSTD_error_dictionary_wrong</a></div><div class="ttdeci">@ ZSTD_error_dictionary_wrong</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00062">zstd_errors.h:62</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37abc227d32dc7cde66266cead14ca650d7"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37abc227d32dc7cde66266cead14ca650d7">ZSTD_error_GENERIC</a></div><div class="ttdeci">@ ZSTD_error_GENERIC</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00054">zstd_errors.h:54</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37ad414d9aeeab3b187caabad74c1c97edd"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ad414d9aeeab3b187caabad74c1c97edd">ZSTD_error_seekableIO</a></div><div class="ttdeci">@ ZSTD_error_seekableIO</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00078">zstd_errors.h:78</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37ad8e0e6b5943d77a13cf6d89aed8b3c1f"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ad8e0e6b5943d77a13cf6d89aed8b3c1f">ZSTD_error_dstSize_tooSmall</a></div><div class="ttdeci">@ ZSTD_error_dstSize_tooSmall</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00073">zstd_errors.h:73</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37ae247e41d5fad361406f57c8f72653d49"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ae247e41d5fad361406f57c8f72653d49">ZSTD_error_dictionary_corrupted</a></div><div class="ttdeci">@ ZSTD_error_dictionary_corrupted</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00061">zstd_errors.h:61</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37ae6ea12e04d2b13d79a31b8ba72affc52"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ae6ea12e04d2b13d79a31b8ba72affc52">ZSTD_error_workSpace_tooSmall</a></div><div class="ttdeci">@ ZSTD_error_workSpace_tooSmall</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00072">zstd_errors.h:72</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37ae839eba708a06ffd3fe3228b20b670ba"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ae839eba708a06ffd3fe3228b20b670ba">ZSTD_error_parameter_outOfBound</a></div><div class="ttdeci">@ ZSTD_error_parameter_outOfBound</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00065">zstd_errors.h:65</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_a5d61076079b98dcc1fcbe06775e81b37aeefa0dfe6ab35472d779afa6af6bb239"><div class="ttname"><a href="zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37aeefa0dfe6ab35472d779afa6af6bb239">ZSTD_error_parameter_unsupported</a></div><div class="ttdeci">@ ZSTD_error_parameter_unsupported</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00064">zstd_errors.h:64</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_ab160f0da4b0f5e5dc01ab99b288172f2"><div class="ttname"><a href="zstd__errors_8h.html#ab160f0da4b0f5e5dc01ab99b288172f2">ZSTD_getErrorString</a></div><div class="ttdeci">ZSTDERRORLIB_API const char * ZSTD_getErrorString(ZSTD_ErrorCode code)</div><div class="ttdef"><b>Definition</b> <a href="zstd__common_8c_source.html#l00049">zstd_common.c:49</a></div></div>
+<div class="ttc" id="azstd__errors_8h_html_aba638ca88c24aaf1c6c1e1250cfee5d3"><div class="ttname"><a href="zstd__errors_8h.html#aba638ca88c24aaf1c6c1e1250cfee5d3">ZSTDERRORLIB_API</a></div><div class="ttdeci">#define ZSTDERRORLIB_API</div><div class="ttdef"><b>Definition</b> <a href="zstd__errors_8h_source.html#l00035">zstd_errors.h:35</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="zstd__errors_8h.html">zstd_errors.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

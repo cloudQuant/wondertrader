@@ -1,0 +1,28 @@
+var structctp__sopt_1_1CThostFtdcStockDisposalActionField =
+[
+    [ "ActionDate", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#ae2ab54ba5c4f3184412cbecdefa9904d", null ],
+    [ "ActionFlag", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#ae8336c117703ab588a13ca5aebd8c738", null ],
+    [ "ActionLocalID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#adff2cda9805f3a40f3715ed099587d30", null ],
+    [ "ActionTime", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#aa63557821426f47c378d99a1500028cf", null ],
+    [ "ActionType", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#a7052c96ff0011a475309d6cc02a1abc5", null ],
+    [ "BranchID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#a038d0a4e56f624ad1dc557f0b90b4942", null ],
+    [ "BrokerID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#a74a79591bbde41bf81a65880b69bfccb", null ],
+    [ "BusinessUnit", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#a8e9f535c94e5ca50702ff92b96481dab", null ],
+    [ "ClientID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#a85d4d4110bbb874c406bd81a7bac1efa", null ],
+    [ "ExchangeID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#a57a6affa2f61a3c73815f5da5ae6c1cb", null ],
+    [ "FrontID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#a2ab7b244c9bc17fa82e99deb50ccc659", null ],
+    [ "InstallID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#afa42a33d08bc84cfa0b0887ae75af40a", null ],
+    [ "InstrumentID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#aee788cea1c8fdbc70188c30df02a563d", null ],
+    [ "InvestorID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#a4dda258cd52e6a3349a2b04dd9eb2e89", null ],
+    [ "OrderActionStatus", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#a401325f8a1597eb98a8308a75f55e2e6", null ],
+    [ "ParticipantID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#aab0c2c29cfda01e503fbc44b82e998c6", null ],
+    [ "RequestID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#a8b8613fb33ac48d1fccdc5d2ebbaac94", null ],
+    [ "SessionID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#ade934886f9783678e8859547ac0f1e46", null ],
+    [ "StatusMsg", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#ae7dca4a1b314f94777802dd0853d6448", null ],
+    [ "StockDisposalActionRef", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#a11eef1aede4da897f7801ba1a19e6d84", null ],
+    [ "StockDisposalLocalID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#af7cf332b426150e5735c3846cdd7ae27", null ],
+    [ "StockDisposalRef", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#aa9961c49275aab8db6297014624e9734", null ],
+    [ "StockDisposalSysID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#a06c2c251fbdd2bad069625f6893821bc", null ],
+    [ "TraderID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#aed318bbce11343c91edcb655b9c65814", null ],
+    [ "UserID", "structctp__sopt_1_1CThostFtdcStockDisposalActionField.html#ae52d06625b2c595d7c744c5e08d30e46", null ]
+];

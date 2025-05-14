@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/yaml-cpp/eventhandler.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('eventhandler_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">eventhandler.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="eventhandler_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef EVENTHANDLER_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define EVENTHANDLER_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#if defined(_MSC_VER) ||                                            \</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">    (defined(__GNUC__) &amp;&amp; (__GNUC__ == 3 &amp;&amp; __GNUC_MINOR__ &gt;= 4) || \</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">     (__GNUC__ &gt;= 4))  </span><span class="comment">// GCC supports &quot;pragma once&quot; correctly since 3.4</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="anchor_8h.html">yaml-cpp/anchor.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="emitterstyle_8h.html">yaml-cpp/emitterstyle.h</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceYAML.html">YAML</a> {</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">struct </span>Mark;</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="foldopen" id="foldopen00018" data-start="{" data-end="};">
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="classYAML_1_1EventHandler.html">   18</a></span><span class="keyword">class </span><a class="code hl_class" href="classYAML_1_1EventHandler.html">EventHandler</a> {</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="classYAML_1_1EventHandler.html#a5be4216430cb58c554804656d5585cca">   20</a></span>  <span class="keyword">virtual</span> <a class="code hl_function" href="classYAML_1_1EventHandler.html#a5be4216430cb58c554804656d5585cca">~EventHandler</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classYAML_1_1EventHandler.html#adb739beb59e227bd320aab1e61bf42e4">   22</a></span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1EventHandler.html#adb739beb59e227bd320aab1e61bf42e4">OnDocumentStart</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark) = 0;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classYAML_1_1EventHandler.html#afc0d547e87f9c1f63ba8087aabd7e34a">   23</a></span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1EventHandler.html#afc0d547e87f9c1f63ba8087aabd7e34a">OnDocumentEnd</a>() = 0;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classYAML_1_1EventHandler.html#aca632ae43f71b6c4f13252d15191f380">   25</a></span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1EventHandler.html#aca632ae43f71b6c4f13252d15191f380">OnNull</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark, <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> anchor) = 0;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="classYAML_1_1EventHandler.html#a3459009c2aad49b3226e009fc06d33b6">   26</a></span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1EventHandler.html#a3459009c2aad49b3226e009fc06d33b6">OnAlias</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark, <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> anchor) = 0;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classYAML_1_1EventHandler.html#a1f381a132754352eee6b8dcd218e3abc">   27</a></span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1EventHandler.html#a1f381a132754352eee6b8dcd218e3abc">OnScalar</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark, <span class="keyword">const</span> std::string&amp; tag,</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>                        <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> anchor, <span class="keyword">const</span> std::string&amp; <a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>) = 0;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classYAML_1_1EventHandler.html#adf7a5e4ccf638b656009525556412ab5">   30</a></span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1EventHandler.html#adf7a5e4ccf638b656009525556412ab5">OnSequenceStart</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark, <span class="keyword">const</span> std::string&amp; tag,</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>                               <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> anchor, <a class="code hl_enumeration" href="structYAML_1_1EmitterStyle.html#ae86640662c85ce6062a37f9636b6959f">EmitterStyle::value</a> style) = 0;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classYAML_1_1EventHandler.html#a8b36cc36cd7067175b80b5d047aafaf3">   32</a></span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1EventHandler.html#a8b36cc36cd7067175b80b5d047aafaf3">OnSequenceEnd</a>() = 0;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classYAML_1_1EventHandler.html#a57fc2477cb1f4fd3a650e41180e6f9b6">   34</a></span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1EventHandler.html#a57fc2477cb1f4fd3a650e41180e6f9b6">OnMapStart</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark, <span class="keyword">const</span> std::string&amp; tag,</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>                          <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> anchor, <a class="code hl_enumeration" href="structYAML_1_1EmitterStyle.html#ae86640662c85ce6062a37f9636b6959f">EmitterStyle::value</a> style) = 0;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="classYAML_1_1EventHandler.html#a6b8821803de4ecca96a05c3296fb565f">   36</a></span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1EventHandler.html#a6b8821803de4ecca96a05c3296fb565f">OnMapEnd</a>() = 0;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="foldopen" id="foldopen00038" data-start="{" data-end="}">
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="classYAML_1_1EventHandler.html#a6abc848eb0289f32ec97a00ac52b392c">   38</a></span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1EventHandler.html#a6abc848eb0289f32ec97a00ac52b392c">OnAnchor</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; <span class="comment">/*mark*/</span>,</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>                        <span class="keyword">const</span> std::string&amp; <span class="comment">/*anchor_name*/</span>) {</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="comment">// empty default implementation for compatibility</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  }</div>
+</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>};</div>
+</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>}  <span class="comment">// namespace YAML</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#endif  </span><span class="comment">// EVENTHANDLER_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="ttc" id="aanchor_8h_html"><div class="ttname"><a href="anchor_8h.html">anchor.h</a></div></div>
+<div class="ttc" id="aclassYAML_1_1EventHandler_html"><div class="ttname"><a href="classYAML_1_1EventHandler.html">YAML::EventHandler</a></div><div class="ttdef"><b>Definition</b> <a href="eventhandler_8h_source.html#l00018">eventhandler.h:18</a></div></div>
+<div class="ttc" id="aclassYAML_1_1EventHandler_html_a1f381a132754352eee6b8dcd218e3abc"><div class="ttname"><a href="classYAML_1_1EventHandler.html#a1f381a132754352eee6b8dcd218e3abc">YAML::EventHandler::OnScalar</a></div><div class="ttdeci">virtual void OnScalar(const Mark &amp;mark, const std::string &amp;tag, anchor_t anchor, const std::string &amp;value)=0</div></div>
+<div class="ttc" id="aclassYAML_1_1EventHandler_html_a3459009c2aad49b3226e009fc06d33b6"><div class="ttname"><a href="classYAML_1_1EventHandler.html#a3459009c2aad49b3226e009fc06d33b6">YAML::EventHandler::OnAlias</a></div><div class="ttdeci">virtual void OnAlias(const Mark &amp;mark, anchor_t anchor)=0</div></div>
+<div class="ttc" id="aclassYAML_1_1EventHandler_html_a57fc2477cb1f4fd3a650e41180e6f9b6"><div class="ttname"><a href="classYAML_1_1EventHandler.html#a57fc2477cb1f4fd3a650e41180e6f9b6">YAML::EventHandler::OnMapStart</a></div><div class="ttdeci">virtual void OnMapStart(const Mark &amp;mark, const std::string &amp;tag, anchor_t anchor, EmitterStyle::value style)=0</div></div>
+<div class="ttc" id="aclassYAML_1_1EventHandler_html_a5be4216430cb58c554804656d5585cca"><div class="ttname"><a href="classYAML_1_1EventHandler.html#a5be4216430cb58c554804656d5585cca">YAML::EventHandler::~EventHandler</a></div><div class="ttdeci">virtual ~EventHandler()=default</div></div>
+<div class="ttc" id="aclassYAML_1_1EventHandler_html_a6abc848eb0289f32ec97a00ac52b392c"><div class="ttname"><a href="classYAML_1_1EventHandler.html#a6abc848eb0289f32ec97a00ac52b392c">YAML::EventHandler::OnAnchor</a></div><div class="ttdeci">virtual void OnAnchor(const Mark &amp;, const std::string &amp;)</div><div class="ttdef"><b>Definition</b> <a href="eventhandler_8h_source.html#l00038">eventhandler.h:38</a></div></div>
+<div class="ttc" id="aclassYAML_1_1EventHandler_html_a6b8821803de4ecca96a05c3296fb565f"><div class="ttname"><a href="classYAML_1_1EventHandler.html#a6b8821803de4ecca96a05c3296fb565f">YAML::EventHandler::OnMapEnd</a></div><div class="ttdeci">virtual void OnMapEnd()=0</div></div>
+<div class="ttc" id="aclassYAML_1_1EventHandler_html_a8b36cc36cd7067175b80b5d047aafaf3"><div class="ttname"><a href="classYAML_1_1EventHandler.html#a8b36cc36cd7067175b80b5d047aafaf3">YAML::EventHandler::OnSequenceEnd</a></div><div class="ttdeci">virtual void OnSequenceEnd()=0</div></div>
+<div class="ttc" id="aclassYAML_1_1EventHandler_html_aca632ae43f71b6c4f13252d15191f380"><div class="ttname"><a href="classYAML_1_1EventHandler.html#aca632ae43f71b6c4f13252d15191f380">YAML::EventHandler::OnNull</a></div><div class="ttdeci">virtual void OnNull(const Mark &amp;mark, anchor_t anchor)=0</div></div>
+<div class="ttc" id="aclassYAML_1_1EventHandler_html_adb739beb59e227bd320aab1e61bf42e4"><div class="ttname"><a href="classYAML_1_1EventHandler.html#adb739beb59e227bd320aab1e61bf42e4">YAML::EventHandler::OnDocumentStart</a></div><div class="ttdeci">virtual void OnDocumentStart(const Mark &amp;mark)=0</div></div>
+<div class="ttc" id="aclassYAML_1_1EventHandler_html_adf7a5e4ccf638b656009525556412ab5"><div class="ttname"><a href="classYAML_1_1EventHandler.html#adf7a5e4ccf638b656009525556412ab5">YAML::EventHandler::OnSequenceStart</a></div><div class="ttdeci">virtual void OnSequenceStart(const Mark &amp;mark, const std::string &amp;tag, anchor_t anchor, EmitterStyle::value style)=0</div></div>
+<div class="ttc" id="aclassYAML_1_1EventHandler_html_afc0d547e87f9c1f63ba8087aabd7e34a"><div class="ttname"><a href="classYAML_1_1EventHandler.html#afc0d547e87f9c1f63ba8087aabd7e34a">YAML::EventHandler::OnDocumentEnd</a></div><div class="ttdeci">virtual void OnDocumentEnd()=0</div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_ab7c2d1d8d4198d62c34058543ea7cad3"><div class="ttname"><a href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a></div><div class="ttdeci">ATPAmtType value</div><div class="ttdoc">划拨金额 (必填)</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00125">main.cpp:125</a></div></div>
+<div class="ttc" id="aemitterstyle_8h_html"><div class="ttname"><a href="emitterstyle_8h.html">emitterstyle.h</a></div></div>
+<div class="ttc" id="anamespaceYAML_html"><div class="ttname"><a href="namespaceYAML.html">YAML</a></div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00005">binary.cpp:5</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_ab5748184c36c2ff7b8229010c7259a0f"><div class="ttname"><a href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">YAML::anchor_t</a></div><div class="ttdeci">std::size_t anchor_t</div><div class="ttdef"><b>Definition</b> <a href="anchor_8h_source.html#l00013">anchor.h:13</a></div></div>
+<div class="ttc" id="astructYAML_1_1EmitterStyle_html_ae86640662c85ce6062a37f9636b6959f"><div class="ttname"><a href="structYAML_1_1EmitterStyle.html#ae86640662c85ce6062a37f9636b6959f">YAML::EmitterStyle::value</a></div><div class="ttdeci">value</div><div class="ttdef"><b>Definition</b> <a href="emitterstyle_8h_source.html#l00012">emitterstyle.h:12</a></div></div>
+<div class="ttc" id="astructYAML_1_1Mark_html"><div class="ttname"><a href="structYAML_1_1Mark.html">YAML::Mark</a></div><div class="ttdef"><b>Definition</b> <a href="mark_8h_source.html#l00013">mark.h:13</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="dir_8ca95df02d0e181a4cddee9d3a76ea3e.html">yaml-cpp</a></li><li class="navelem"><a class="el" href="eventhandler_8h.html">eventhandler.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,650 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/Share/TimeUtils.hpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('TimeUtils_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">TimeUtils.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="TimeUtils_8hpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;cstddef&gt;</span>  <span class="comment">// 对于 C++ 语言, NULL</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;stddef.h&gt;</span> <span class="comment">// 对于 C 语言, NULL</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;stdint.h&gt;</span>  <span class="comment">// 定义了固定宽度的整数类型（如 int64_t）</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;sys/timeb.h&gt;</span> <span class="comment">// 定义了 ftime 函数，用于获取当前时间（精确到毫秒）。</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#ifdef _MSC_VER</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;time.h&gt;</span>  <span class="comment">// 定义了时间相关的函数和结构体（如 localtime、mktime 等）</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;sys/time.h&gt;</span>  <span class="comment">// 定义了时间相关的函数和结构体（如 localtime、mktime 等）</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;string&gt;</span> <span class="comment">// 提供了 std::string 类型。</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;string.h&gt;</span> <span class="comment">// 提供了字符串操作函数（如 memset、strftime 等）</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;chrono&gt;</span>  <span class="comment">// 提供了高精度时间库（如 std::chrono）。</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;thread&gt;</span>  <span class="comment">// 提供了多线程支持（如 std::thread）。</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;cmath&gt;</span>  <span class="comment">// 提供了数学函数（如 std::pow）。</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#ifdef _MSC_VER   </span><span class="comment">// 定义 Windows 平台相关的时间结构体和宏。</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#define CTIME_BUF_SIZE 64</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#define WIN32_LEAN_AND_MEAN</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#include &lt;windows.h&gt;</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="keyword">typedef</span> <span class="keyword">struct </span>_KSYSTEM_TIME</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>{</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    ULONG LowPart;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    LONG High1Time;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    LONG High2Time;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>} KSYSTEM_TIME, *PKSYSTEM_TIME;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="keyword">struct </span>KUSER_SHARED_DATA</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>{</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    ULONG TickCountLowDeprecated;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    ULONG TickCountMultiplier;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keyword">volatile</span> KSYSTEM_TIME InterruptTime;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keyword">volatile</span> KSYSTEM_TIME SystemTime;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keyword">volatile</span> KSYSTEM_TIME TimeZoneBias;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>};</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#define KI_USER_SHARED_DATA   0x7FFE0000</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#define SharedUserData   ((KUSER_SHARED_DATA * const)KI_USER_SHARED_DATA)</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#define TICKSPERSEC        10000000L</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="foldopen" id="foldopen00086" data-start="{" data-end="};">
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classTimeUtils.html">   86</a></span><span class="keyword">class </span><a class="code hl_class" href="classTimeUtils.html">TimeUtils</a> </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>{</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="comment">//  static inline int64_t getLocalTimeNowOld(void)</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="comment">//  {</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="comment">//      thread_local static timeb now;</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="comment">//      ftime(&amp;now);</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="comment">//      return now.time * 1000 + now.millitm;</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="comment">//  }</span></div>
+<div class="foldopen" id="foldopen00105" data-start="{" data-end="}">
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="classTimeUtils.html#a8d212b72f7dab25403b08a5e72395177">  105</a></span>    <span class="keyword">static</span> <span class="keyword">inline</span> int64_t <a class="code hl_function" href="classTimeUtils.html#a8d212b72f7dab25403b08a5e72395177">getLocalTimeNowOld</a>(<span class="keywordtype">void</span>)</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    {</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        <span class="keyword">thread_local</span> <span class="keyword">static</span> <span class="keyword">struct </span>timespec now;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        clock_gettime(CLOCK_REALTIME, &amp;now);</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>        <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>int64_t<span class="keyword">&gt;</span>(now.tv_sec) * 1000 + now.tv_nsec / 1000000;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    }</div>
+</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="foldopen" id="foldopen00123" data-start="{" data-end="}">
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">  123</a></span>    <span class="keyword">static</span> <span class="keyword">inline</span> int64_t <a class="code hl_function" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">getLocalTimeNow</a>(<span class="keywordtype">void</span>)</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    {</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="preprocessor">#ifdef _MSC_VER</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        LARGE_INTEGER SystemTime;</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        <span class="keywordflow">do</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>        {</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>            SystemTime.HighPart = SharedUserData-&gt;SystemTime.High1Time;</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>            SystemTime.LowPart = SharedUserData-&gt;SystemTime.LowPart;</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>        } <span class="keywordflow">while</span> (SystemTime.HighPart != SharedUserData-&gt;SystemTime.High2Time);</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>        uint64_t t = SystemTime.QuadPart;</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>        t = t - 11644473600L * TICKSPERSEC;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        <span class="keywordflow">return</span> t / 10000;</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        <span class="comment">//timeb now;</span></div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>        <span class="comment">//ftime(&amp;now);</span></div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>        <span class="comment">//return now.time * 1000 + now.millitm;</span></div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>        <span class="comment">/*</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span><span class="comment">         *  clock_gettime比ftime会提升约10%的性能</span></div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span><span class="comment">         */</span></div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        <span class="keyword">thread_local</span> <span class="keyword">static</span> <span class="keyword">struct </span>timespec now;</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>        clock_gettime(CLOCK_REALTIME, &amp;now);</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>        <span class="keywordflow">return</span> now.tv_sec * 1000 + now.tv_nsec / 1000000;</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    }</div>
+</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
+<div class="foldopen" id="foldopen00162" data-start="{" data-end="}">
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno"><a class="line" href="classTimeUtils.html#a80a1ad51ffdcbd9d1fd52330671c3b33">  162</a></span>    <span class="keyword">static</span> <span class="keyword">inline</span> std::string <a class="code hl_function" href="classTimeUtils.html#a80a1ad51ffdcbd9d1fd52330671c3b33">getLocalTime</a>(<span class="keywordtype">bool</span> bIncludeMilliSec = <span class="keyword">true</span>)</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    {</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>        uint64_t ltime = <a class="code hl_function" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">getLocalTimeNow</a>();</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>        time_t now = ltime / 1000;</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>        uint32_t millitm = ltime % 1000;</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>        tm * tNow = localtime(&amp;now);</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>        <span class="keywordtype">char</span> str[64] = {0};</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>        <span class="keywordflow">if</span>(bIncludeMilliSec)</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>            sprintf(str, <span class="stringliteral">&quot;%02d:%02d:%02d,%03d&quot;</span>, tNow-&gt;tm_hour, tNow-&gt;tm_min, tNow-&gt;tm_sec, millitm);</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>            sprintf(str, <span class="stringliteral">&quot;%02d:%02d:%02d&quot;</span>, tNow-&gt;tm_hour, tNow-&gt;tm_min, tNow-&gt;tm_sec);</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        <span class="keywordflow">return</span> str;</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    }</div>
+</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
+<div class="foldopen" id="foldopen00190" data-start="{" data-end="}">
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno"><a class="line" href="classTimeUtils.html#a1bae8c2e5838c4df5b9b62c9b3101575">  190</a></span>    <span class="keyword">static</span> <span class="keyword">inline</span> uint64_t <a class="code hl_function" href="classTimeUtils.html#a1bae8c2e5838c4df5b9b62c9b3101575">getYYYYMMDDhhmmss</a>()</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    {</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        uint64_t ltime = <a class="code hl_function" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">getLocalTimeNow</a>();</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>        time_t now = ltime / 1000;</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        tm * tNow = localtime(&amp;now);</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        uint64_t date = (tNow-&gt;tm_year + 1900) * 10000 + (tNow-&gt;tm_mon + 1) * 100 + tNow-&gt;tm_mday;</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span> </div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        uint64_t time = tNow-&gt;tm_hour * 10000 + tNow-&gt;tm_min * 100 + tNow-&gt;tm_sec;</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        <span class="keywordflow">return</span> date * 1000000 + time;</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    }</div>
+</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span> </div>
+<div class="foldopen" id="foldopen00216" data-start="{" data-end="}">
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno"><a class="line" href="classTimeUtils.html#ac04a739040d6a0d39400c2a74b96583b">  216</a></span>    <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTimeUtils.html#ac04a739040d6a0d39400c2a74b96583b">getDateTime</a>(uint32_t &amp;date, uint32_t &amp;time)</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>    {</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>        uint64_t ltime = <a class="code hl_function" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">getLocalTimeNow</a>();</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>        time_t now = ltime / 1000;</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>        uint32_t millitm = ltime % 1000;</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span> </div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>        tm * tNow = localtime(&amp;now);</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span> </div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        date = (tNow-&gt;tm_year+1900)*10000 + (tNow-&gt;tm_mon+1)*100 + tNow-&gt;tm_mday;</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>        </div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        time = tNow-&gt;tm_hour*10000 + tNow-&gt;tm_min*100 + tNow-&gt;tm_sec;</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        time *= 1000;</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        time += millitm;</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    }</div>
+</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span> </div>
+<div class="foldopen" id="foldopen00239" data-start="{" data-end="}">
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno"><a class="line" href="classTimeUtils.html#adc5c9caadf07e3ae0a732d0851fb56ef">  239</a></span>    <span class="keyword">static</span> <span class="keyword">inline</span> uint32_t <a class="code hl_function" href="classTimeUtils.html#adc5c9caadf07e3ae0a732d0851fb56ef">getCurDate</a>()</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    {</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        uint64_t ltime = <a class="code hl_function" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">getLocalTimeNow</a>();</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>        time_t now = ltime / 1000;</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>        tm * tNow = localtime(&amp;now);</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>        uint32_t date = (tNow-&gt;tm_year+1900)*10000 + (tNow-&gt;tm_mon+1)*100 + tNow-&gt;tm_mday;</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> </div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>        <span class="keywordflow">return</span> date;</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>    }</div>
+</div>
+<div class="foldopen" id="foldopen00259" data-start="{" data-end="}">
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno"><a class="line" href="classTimeUtils.html#ad8c193a473b4ae67cc06e23ebc255d2b">  259</a></span>    <span class="keyword">static</span> <span class="keyword">inline</span> uint32_t <a class="code hl_function" href="classTimeUtils.html#ad8c193a473b4ae67cc06e23ebc255d2b">getWeekDay</a>(uint32_t uDate = 0)</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    {</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>        time_t ts = 0;</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>        <span class="keywordflow">if</span>(uDate == 0)</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>        {</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>            ts = <a class="code hl_function" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">getLocalTimeNow</a>()/1000;</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>        }</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>        {</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>            tm t;   </div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>            memset(&amp;t,0,<span class="keyword">sizeof</span>(tm));</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>            t.tm_year = uDate/10000 - 1900;</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>            t.tm_mon = (uDate%10000)/100 - 1;</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>            t.tm_mday = uDate % 100;</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>            ts = mktime(&amp;t);</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>        }</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span> </div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>        tm * tNow = localtime(&amp;ts);</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>    </div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        <span class="keywordflow">return</span> tNow-&gt;tm_wday;</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>    }</div>
+</div>
+<div class="foldopen" id="foldopen00289" data-start="{" data-end="}">
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno"><a class="line" href="classTimeUtils.html#ae4b03ad036d95ad68f1c7195ddef37df">  289</a></span>    <span class="keyword">static</span> <span class="keyword">inline</span> uint32_t <a class="code hl_function" href="classTimeUtils.html#ae4b03ad036d95ad68f1c7195ddef37df">getCurMin</a>()</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>    {</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>        uint64_t ltime = <a class="code hl_function" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">getLocalTimeNow</a>();</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>        time_t now = ltime / 1000;</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>        tm * tNow = localtime(&amp;now);</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>        uint32_t time = tNow-&gt;tm_hour*10000 + tNow-&gt;tm_min*100 + tNow-&gt;tm_sec;</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span> </div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>        <span class="keywordflow">return</span> time;</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>    }</div>
+</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span> </div>
+<div class="foldopen" id="foldopen00308" data-start="{" data-end="}">
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno"><a class="line" href="classTimeUtils.html#a552ebf2ed65cd9e8ef35207944d19ff8">  308</a></span>    <span class="keyword">static</span> <span class="keyword">inline</span> int32_t <a class="code hl_function" href="classTimeUtils.html#a552ebf2ed65cd9e8ef35207944d19ff8">getTZOffset</a>()</div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>    {</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>        <span class="keyword">static</span> int32_t offset = 99;</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>        <span class="keywordflow">if</span>(offset == 99)</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>        {</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>            time_t now = time(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>);</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>            tm tm_ltm = *localtime(&amp;now);</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>            tm tm_gtm = *gmtime(&amp;now);</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span> </div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>            time_t _gt = mktime(&amp;tm_gtm);</div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>            tm _gtm2 = *localtime(&amp;_gt);</div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span> </div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>            offset = (uint32_t)(((now - _gt) + (_gtm2.tm_isdst ? 3600 : 0)) / 60);</div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>            offset /= 60;</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>        }</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span> </div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>        <span class="keywordflow">return</span> offset;</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>    }</div>
+</div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span> </div>
+<div class="foldopen" id="foldopen00340" data-start="{" data-end="}">
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno"><a class="line" href="classTimeUtils.html#ade8f9d6db3e20f1057aad655a655d6fd">  340</a></span>    <span class="keyword">static</span> <span class="keyword">inline</span> int64_t <a class="code hl_function" href="classTimeUtils.html#ade8f9d6db3e20f1057aad655a655d6fd">makeTime</a>(<span class="keywordtype">long</span> lDate, <span class="keywordtype">long</span> lTimeWithMs, <span class="keywordtype">bool</span> isToUTC = <span class="keyword">false</span>)</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>    {</div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>        tm t;   </div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>        memset(&amp;t,0,<span class="keyword">sizeof</span>(tm));</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>        t.tm_year = lDate/10000 - 1900;</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>        t.tm_mon = (lDate%10000)/100 - 1;</div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>        t.tm_mday = lDate % 100;</div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>        t.tm_hour = lTimeWithMs/10000000;</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>        t.tm_min = (lTimeWithMs%10000000)/100000;</div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>        t.tm_sec = (lTimeWithMs%100000)/1000;</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>        <span class="keywordtype">int</span> millisec = lTimeWithMs%1000;</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>        <span class="comment">//t.tm_isdst    </span></div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>        time_t ts = mktime(&amp;t);</div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>        <span class="keywordflow">if</span> (ts == -1) <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>        <span class="comment">//如果要转成UTC时间，则需要根据时区进行转换</span></div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>        <span class="keywordflow">if</span> (isToUTC)</div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>            ts -= <a class="code hl_function" href="classTimeUtils.html#a552ebf2ed65cd9e8ef35207944d19ff8">getTZOffset</a>() * 3600;</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>        <span class="keywordflow">return</span> ts * 1000+ millisec;</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>    }</div>
+</div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span> </div>
+<div class="foldopen" id="foldopen00372" data-start="{" data-end="}">
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno"><a class="line" href="classTimeUtils.html#a84221fc66f89e74b71e7a43713bc8ba0">  372</a></span>    <span class="keyword">static</span> std::string <a class="code hl_function" href="classTimeUtils.html#a84221fc66f89e74b71e7a43713bc8ba0">timeToString</a>(int64_t mytime)</div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>    {</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>        <span class="keywordflow">if</span> (mytime == 0) <span class="keywordflow">return</span> <span class="stringliteral">&quot;&quot;</span>;</div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>        int64_t sec = mytime/1000;</div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>        <span class="keywordtype">int</span> msec = (int) (mytime - sec * 1000);</div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>        <span class="keywordflow">if</span> (msec &lt; 0) <span class="keywordflow">return</span> <span class="stringliteral">&quot;&quot;</span>;</div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>        time_t tt =  sec;</div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>        <span class="keyword">struct </span>tm t;</div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span><span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>        localtime_s(&amp;t, &amp;tt);</div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>        localtime_r(&amp;tt, &amp;t);</div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>        <span class="keywordtype">char</span> tm_buf[64] = {<span class="charliteral">&#39;\0&#39;</span>};</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>        <span class="keywordflow">if</span> (msec &gt; 0) <span class="comment">//是否有毫秒</span></div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>           sprintf(tm_buf,<span class="stringliteral">&quot;%4d%02d%02d%02d%02d%02d.%03d&quot;</span>,t.tm_year+1900, t.tm_mon+1, t.tm_mday,</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>            t.tm_hour, t.tm_min, t.tm_sec, msec);</div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>        <span class="keywordflow">else</span> </div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>           sprintf(tm_buf,<span class="stringliteral">&quot;%4d%02d%02d%02d%02d%02d&quot;</span>,t.tm_year+1900, t.tm_mon+1, t.tm_mday,</div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>            t.tm_hour, t.tm_min, t.tm_sec);</div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>        <span class="keywordflow">return</span> tm_buf;</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>    };</div>
+</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span> </div>
+<div class="foldopen" id="foldopen00407" data-start="{" data-end="}">
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno"><a class="line" href="classTimeUtils.html#a28a7ae8e5b4e7b2b4ff88b36fe7e1ff2">  407</a></span>    <span class="keyword">static</span> uint32_t <a class="code hl_function" href="classTimeUtils.html#a28a7ae8e5b4e7b2b4ff88b36fe7e1ff2">getNextDate</a>(uint32_t curDate, <span class="keywordtype">int</span> days = 1)</div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>    {</div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>        tm t;   </div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>        memset(&amp;t,0,<span class="keyword">sizeof</span>(tm));</div>
+<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span>        t.tm_year = curDate/10000 - 1900;</div>
+<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>        t.tm_mon = (curDate%10000)/100 - 1;</div>
+<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>        t.tm_mday = curDate % 100;</div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>        <span class="comment">//t.tm_isdst    </span></div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>        time_t ts = mktime(&amp;t);</div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>        ts += days*86400;</div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span> </div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>        tm* newT = localtime(&amp;ts);</div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>        <span class="keywordflow">return</span> (newT-&gt;tm_year+1900)*10000 + (newT-&gt;tm_mon+1)*100 + newT-&gt;tm_mday;</div>
+<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span>    }</div>
+</div>
+<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span> </div>
+<div class="foldopen" id="foldopen00434" data-start="{" data-end="}">
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno"><a class="line" href="classTimeUtils.html#af131976cc8ddf51086e75418ef96b592">  434</a></span>    <span class="keyword">static</span> uint32_t <a class="code hl_function" href="classTimeUtils.html#af131976cc8ddf51086e75418ef96b592">getNextMinute</a>(int32_t curTime, int32_t mins = 1)</div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>    {</div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>        int32_t curHour = curTime / 100;</div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>        int32_t curMin = curTime % 100;</div>
+<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span>        int32_t totalMins = curHour * 60 + curMin;</div>
+<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span>        totalMins += mins;</div>
+<div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span> </div>
+<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span>        <span class="keywordflow">if</span> (totalMins &gt;= 1440)</div>
+<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span>            totalMins -= 1440;</div>
+<div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (totalMins &lt; 0)</div>
+<div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span>            totalMins += 1440;</div>
+<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span> </div>
+<div class="line"><a id="l00446" name="l00446"></a><span class="lineno">  446</span>        int32_t ret = (totalMins / 60) * 100 + totalMins % 60;</div>
+<div class="line"><a id="l00447" name="l00447"></a><span class="lineno">  447</span>        <span class="keywordflow">return</span> (uint32_t)ret;</div>
+<div class="line"><a id="l00448" name="l00448"></a><span class="lineno">  448</span>    }</div>
+</div>
+<div class="line"><a id="l00449" name="l00449"></a><span class="lineno">  449</span> </div>
+<div class="foldopen" id="foldopen00462" data-start="{" data-end="}">
+<div class="line"><a id="l00462" name="l00462"></a><span class="lineno"><a class="line" href="classTimeUtils.html#a30e7a97699073c1a78128d072ae7ccae">  462</a></span>    <span class="keyword">static</span> uint32_t <a class="code hl_function" href="classTimeUtils.html#a30e7a97699073c1a78128d072ae7ccae">getNextMonth</a>(uint32_t curMonth, <span class="keywordtype">int</span> months = 1)</div>
+<div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span>    {</div>
+<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>        int32_t uYear = curMonth / 100;</div>
+<div class="line"><a id="l00465" name="l00465"></a><span class="lineno">  465</span>        int32_t uMonth = curMonth % 100; <span class="comment">// [1, 12]</span></div>
+<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>     </div>
+<div class="line"><a id="l00467" name="l00467"></a><span class="lineno">  467</span>        int32_t uAddYear = months / 12;</div>
+<div class="line"><a id="l00468" name="l00468"></a><span class="lineno">  468</span>        int32_t uAddMon = months % 12;</div>
+<div class="line"><a id="l00469" name="l00469"></a><span class="lineno">  469</span>        <span class="keywordflow">if</span> (uAddMon &lt; 0) uAddMon += 12;  <span class="comment">// math modulus: [0, 11]</span></div>
+<div class="line"><a id="l00470" name="l00470"></a><span class="lineno">  470</span>     </div>
+<div class="line"><a id="l00471" name="l00471"></a><span class="lineno">  471</span>        uYear += uAddYear;</div>
+<div class="line"><a id="l00472" name="l00472"></a><span class="lineno">  472</span>        uMonth += uAddMon;</div>
+<div class="line"><a id="l00473" name="l00473"></a><span class="lineno">  473</span>        <span class="keywordflow">if</span> (uMonth &gt; 12) {</div>
+<div class="line"><a id="l00474" name="l00474"></a><span class="lineno">  474</span>            ++uYear;</div>
+<div class="line"><a id="l00475" name="l00475"></a><span class="lineno">  475</span>            uMonth -= 12;</div>
+<div class="line"><a id="l00476" name="l00476"></a><span class="lineno">  476</span>        }</div>
+<div class="line"><a id="l00477" name="l00477"></a><span class="lineno">  477</span>        <span class="keywordflow">return</span> (uint32_t) (uYear*100 + uMonth);</div>
+<div class="line"><a id="l00478" name="l00478"></a><span class="lineno">  478</span>    }</div>
+</div>
+<div class="line"><a id="l00479" name="l00479"></a><span class="lineno">  479</span> </div>
+<div class="foldopen" id="foldopen00491" data-start="{" data-end="}">
+<div class="line"><a id="l00491" name="l00491"></a><span class="lineno"><a class="line" href="classTimeUtils.html#ab62c2a7f902784bca356980c52407ebb">  491</a></span>    <span class="keyword">static</span> <span class="keyword">inline</span> uint64_t <a class="code hl_function" href="classTimeUtils.html#ab62c2a7f902784bca356980c52407ebb">timeToMinBar</a>(uint32_t uDate, uint32_t uTime)</div>
+<div class="line"><a id="l00492" name="l00492"></a><span class="lineno">  492</span>    {</div>
+<div class="line"><a id="l00493" name="l00493"></a><span class="lineno">  493</span>        <span class="keywordflow">return</span> (uint64_t)((uDate-19900000)*10000) + uTime;</div>
+<div class="line"><a id="l00494" name="l00494"></a><span class="lineno">  494</span>    }</div>
+</div>
+<div class="line"><a id="l00495" name="l00495"></a><span class="lineno">  495</span> </div>
+<div class="foldopen" id="foldopen00506" data-start="{" data-end="}">
+<div class="line"><a id="l00506" name="l00506"></a><span class="lineno"><a class="line" href="classTimeUtils.html#a82c3034202218813e56ca8a816bb946b">  506</a></span>    <span class="keyword">static</span> <span class="keyword">inline</span> uint32_t <a class="code hl_function" href="classTimeUtils.html#a82c3034202218813e56ca8a816bb946b">minBarToDate</a>(uint64_t minTime)</div>
+<div class="line"><a id="l00507" name="l00507"></a><span class="lineno">  507</span>    {</div>
+<div class="line"><a id="l00508" name="l00508"></a><span class="lineno">  508</span>        <span class="keywordflow">return</span> (uint32_t)(minTime/10000 + 19900000);</div>
+<div class="line"><a id="l00509" name="l00509"></a><span class="lineno">  509</span>    }</div>
+</div>
+<div class="line"><a id="l00510" name="l00510"></a><span class="lineno">  510</span> </div>
+<div class="foldopen" id="foldopen00522" data-start="{" data-end="}">
+<div class="line"><a id="l00522" name="l00522"></a><span class="lineno"><a class="line" href="classTimeUtils.html#aea352f72d9603cf1ee4beea704004fdb">  522</a></span>    <span class="keyword">static</span> <span class="keyword">inline</span> uint32_t <a class="code hl_function" href="classTimeUtils.html#aea352f72d9603cf1ee4beea704004fdb">minBarToTime</a>(uint64_t minTime)</div>
+<div class="line"><a id="l00523" name="l00523"></a><span class="lineno">  523</span>    {</div>
+<div class="line"><a id="l00524" name="l00524"></a><span class="lineno">  524</span>        <span class="keywordflow">return</span> (uint32_t)(minTime%10000);</div>
+<div class="line"><a id="l00525" name="l00525"></a><span class="lineno">  525</span>    }</div>
+</div>
+<div class="line"><a id="l00526" name="l00526"></a><span class="lineno">  526</span> </div>
+<div class="foldopen" id="foldopen00539" data-start="{" data-end="}">
+<div class="line"><a id="l00539" name="l00539"></a><span class="lineno"><a class="line" href="classTimeUtils.html#a7d0734e624491846a46e66bbe245c699">  539</a></span>    <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classTimeUtils.html#a7d0734e624491846a46e66bbe245c699">isWeekends</a>(uint32_t uDate)</div>
+<div class="line"><a id="l00540" name="l00540"></a><span class="lineno">  540</span>    {</div>
+<div class="line"><a id="l00541" name="l00541"></a><span class="lineno">  541</span>        tm t;   </div>
+<div class="line"><a id="l00542" name="l00542"></a><span class="lineno">  542</span>        memset(&amp;t,0,<span class="keyword">sizeof</span>(tm));</div>
+<div class="line"><a id="l00543" name="l00543"></a><span class="lineno">  543</span>        t.tm_year = uDate/1/10000 - 1900;</div>
+<div class="line"><a id="l00544" name="l00544"></a><span class="lineno">  544</span>        t.tm_mon = (uDate/1%10000)/100 - 1;</div>
+<div class="line"><a id="l00545" name="l00545"></a><span class="lineno">  545</span>        t.tm_mday = uDate/1 % 100;</div>
+<div class="line"><a id="l00546" name="l00546"></a><span class="lineno">  546</span> </div>
+<div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span>        time_t tt = mktime(&amp;t);</div>
+<div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span>        tm* tmt = localtime(&amp;tt);</div>
+<div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span>        <span class="keywordflow">if</span>(tmt == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00550" name="l00550"></a><span class="lineno">  550</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span>    </div>
+<div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span>        <span class="keywordflow">if</span>(tmt-&gt;tm_wday == 0 || tmt-&gt;tm_wday==6)</div>
+<div class="line"><a id="l00553" name="l00553"></a><span class="lineno">  553</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span> </div>
+<div class="line"><a id="l00555" name="l00555"></a><span class="lineno">  555</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00556" name="l00556"></a><span class="lineno">  556</span>    }</div>
+</div>
+<div class="line"><a id="l00557" name="l00557"></a><span class="lineno">  557</span> </div>
+<div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00566" data-start="{" data-end="};">
+<div class="line"><a id="l00566" name="l00566"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Time32.html">  566</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classTimeUtils_1_1Time32.html">Time32</a></div>
+<div class="line"><a id="l00567" name="l00567"></a><span class="lineno">  567</span>    {</div>
+<div class="line"><a id="l00568" name="l00568"></a><span class="lineno">  568</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00575" name="l00575"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Time32.html#af4b25ea2bbe1bfd8b8f6e4ba10b6043c">  575</a></span>        <a class="code hl_function" href="classTimeUtils_1_1Time32.html#af4b25ea2bbe1bfd8b8f6e4ba10b6043c">Time32</a>():<a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5583911eb59b6b617734ebe92c228328">_msec</a>(0){}</div>
+<div class="line"><a id="l00576" name="l00576"></a><span class="lineno">  576</span> </div>
+<div class="foldopen" id="foldopen00587" data-start="{" data-end="}">
+<div class="line"><a id="l00587" name="l00587"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Time32.html#a197c98d107a1af273e75f1d5f35c4aa5">  587</a></span>        <a class="code hl_function" href="classTimeUtils_1_1Time32.html#a197c98d107a1af273e75f1d5f35c4aa5">Time32</a>(time_t _time, uint32_t msecs = 0)</div>
+<div class="line"><a id="l00588" name="l00588"></a><span class="lineno">  588</span>        {</div>
+<div class="line"><a id="l00589" name="l00589"></a><span class="lineno">  589</span><span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a id="l00590" name="l00590"></a><span class="lineno">  590</span>            localtime_s(&amp;<a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>, &amp;_time);</div>
+<div class="line"><a id="l00591" name="l00591"></a><span class="lineno">  591</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00592" name="l00592"></a><span class="lineno">  592</span>            localtime_r(&amp;_time, &amp;<a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>);</div>
+<div class="line"><a id="l00593" name="l00593"></a><span class="lineno">  593</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00594" name="l00594"></a><span class="lineno">  594</span>            <a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5583911eb59b6b617734ebe92c228328">_msec</a> = msecs;</div>
+<div class="line"><a id="l00595" name="l00595"></a><span class="lineno">  595</span>        }</div>
+</div>
+<div class="line"><a id="l00596" name="l00596"></a><span class="lineno">  596</span> </div>
+<div class="foldopen" id="foldopen00607" data-start="{" data-end="}">
+<div class="line"><a id="l00607" name="l00607"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Time32.html#a92289680c75b8445f9d74bbf1aa8aed1">  607</a></span>        <a class="code hl_function" href="classTimeUtils_1_1Time32.html#a92289680c75b8445f9d74bbf1aa8aed1">Time32</a>(uint64_t _time)</div>
+<div class="line"><a id="l00608" name="l00608"></a><span class="lineno">  608</span>        {</div>
+<div class="line"><a id="l00609" name="l00609"></a><span class="lineno">  609</span>            time_t _t = _time/1000;</div>
+<div class="line"><a id="l00610" name="l00610"></a><span class="lineno">  610</span>            <a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5583911eb59b6b617734ebe92c228328">_msec</a> = (uint32_t)_time%1000;</div>
+<div class="line"><a id="l00611" name="l00611"></a><span class="lineno">  611</span><span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a id="l00612" name="l00612"></a><span class="lineno">  612</span>            localtime_s(&amp;<a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>, &amp;_t);</div>
+<div class="line"><a id="l00613" name="l00613"></a><span class="lineno">  613</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00614" name="l00614"></a><span class="lineno">  614</span>            localtime_r(&amp;_t, &amp;<a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>);</div>
+<div class="line"><a id="l00615" name="l00615"></a><span class="lineno">  615</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00616" name="l00616"></a><span class="lineno">  616</span>        }</div>
+</div>
+<div class="line"><a id="l00617" name="l00617"></a><span class="lineno">  617</span> </div>
+<div class="foldopen" id="foldopen00628" data-start="{" data-end="}">
+<div class="line"><a id="l00628" name="l00628"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Time32.html#a962c8ead514c753e01c5fddbc0931607">  628</a></span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classTimeUtils_1_1Time32.html#a962c8ead514c753e01c5fddbc0931607">from_local_time</a>(uint64_t _time)</div>
+<div class="line"><a id="l00629" name="l00629"></a><span class="lineno">  629</span>        {</div>
+<div class="line"><a id="l00630" name="l00630"></a><span class="lineno">  630</span>            time_t _t = _time/1000;</div>
+<div class="line"><a id="l00631" name="l00631"></a><span class="lineno">  631</span>            <a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5583911eb59b6b617734ebe92c228328">_msec</a> = (uint32_t)(_time%1000);</div>
+<div class="line"><a id="l00632" name="l00632"></a><span class="lineno">  632</span><span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a id="l00633" name="l00633"></a><span class="lineno">  633</span>            localtime_s(&amp;<a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>, &amp;_t);</div>
+<div class="line"><a id="l00634" name="l00634"></a><span class="lineno">  634</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00635" name="l00635"></a><span class="lineno">  635</span>            localtime_r(&amp;_t, &amp;<a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>);</div>
+<div class="line"><a id="l00636" name="l00636"></a><span class="lineno">  636</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00637" name="l00637"></a><span class="lineno">  637</span>        }</div>
+</div>
+<div class="line"><a id="l00638" name="l00638"></a><span class="lineno">  638</span> </div>
+<div class="foldopen" id="foldopen00648" data-start="{" data-end="}">
+<div class="line"><a id="l00648" name="l00648"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Time32.html#aad7b97d068426e90b806ef6a761b154b">  648</a></span>        uint32_t <a class="code hl_function" href="classTimeUtils_1_1Time32.html#aad7b97d068426e90b806ef6a761b154b">date</a>()</div>
+<div class="line"><a id="l00649" name="l00649"></a><span class="lineno">  649</span>        {</div>
+<div class="line"><a id="l00650" name="l00650"></a><span class="lineno">  650</span>            <span class="keywordflow">return</span> (<a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>.tm_year + 1900)*10000 + (<a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>.tm_mon + 1)*100 + <a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>.tm_mday;</div>
+<div class="line"><a id="l00651" name="l00651"></a><span class="lineno">  651</span>        }</div>
+</div>
+<div class="line"><a id="l00652" name="l00652"></a><span class="lineno">  652</span> </div>
+<div class="foldopen" id="foldopen00662" data-start="{" data-end="}">
+<div class="line"><a id="l00662" name="l00662"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Time32.html#a4a77516d5e0ed862ab5d8dd249439776">  662</a></span>        uint32_t <a class="code hl_function" href="classTimeUtils_1_1Time32.html#a4a77516d5e0ed862ab5d8dd249439776">time</a>()</div>
+<div class="line"><a id="l00663" name="l00663"></a><span class="lineno">  663</span>        {</div>
+<div class="line"><a id="l00664" name="l00664"></a><span class="lineno">  664</span>            <span class="keywordflow">return</span> <a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>.tm_hour*10000 + <a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>.tm_min*100 + <a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>.tm_sec;</div>
+<div class="line"><a id="l00665" name="l00665"></a><span class="lineno">  665</span>        }</div>
+</div>
+<div class="line"><a id="l00666" name="l00666"></a><span class="lineno">  666</span> </div>
+<div class="foldopen" id="foldopen00677" data-start="{" data-end="}">
+<div class="line"><a id="l00677" name="l00677"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Time32.html#aa308604012950a0ea756ebb3ee2cd2b3">  677</a></span>        uint32_t <a class="code hl_function" href="classTimeUtils_1_1Time32.html#aa308604012950a0ea756ebb3ee2cd2b3">time_ms</a>()</div>
+<div class="line"><a id="l00678" name="l00678"></a><span class="lineno">  678</span>        {</div>
+<div class="line"><a id="l00679" name="l00679"></a><span class="lineno">  679</span>            <span class="keywordflow">return</span> <a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>.tm_hour*10000000 + <a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>.tm_min*100000 + <a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>.tm_sec*1000 + <a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5583911eb59b6b617734ebe92c228328">_msec</a>;</div>
+<div class="line"><a id="l00680" name="l00680"></a><span class="lineno">  680</span>        }</div>
+</div>
+<div class="line"><a id="l00681" name="l00681"></a><span class="lineno">  681</span> </div>
+<div class="foldopen" id="foldopen00695" data-start="{" data-end="}">
+<div class="line"><a id="l00695" name="l00695"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Time32.html#a9d8286c3ad79a6352503a274141405a0">  695</a></span>        <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classTimeUtils_1_1Time32.html#a9d8286c3ad79a6352503a274141405a0">fmt</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* sfmt = <span class="stringliteral">&quot;%Y.%m.%d %H:%M:%S&quot;</span>, <span class="keywordtype">bool</span> hasMilliSec = <span class="keyword">false</span>)<span class="keyword"> const</span></div>
+<div class="line"><a id="l00696" name="l00696"></a><span class="lineno">  696</span><span class="keyword">        </span>{</div>
+<div class="line"><a id="l00697" name="l00697"></a><span class="lineno">  697</span>            <span class="keyword">static</span> <span class="keywordtype">char</span> buff[1024];</div>
+<div class="line"><a id="l00698" name="l00698"></a><span class="lineno">  698</span>            uint32_t length = (uint32_t)strftime(buff, 1023, sfmt, &amp;<a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>);</div>
+<div class="line"><a id="l00699" name="l00699"></a><span class="lineno">  699</span>            <span class="keywordflow">if</span> (hasMilliSec)</div>
+<div class="line"><a id="l00700" name="l00700"></a><span class="lineno">  700</span>                sprintf(buff + length, <span class="stringliteral">&quot;,%03u&quot;</span>, <a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5583911eb59b6b617734ebe92c228328">_msec</a>);</div>
+<div class="line"><a id="l00701" name="l00701"></a><span class="lineno">  701</span>            <span class="keywordflow">return</span> buff;</div>
+<div class="line"><a id="l00702" name="l00702"></a><span class="lineno">  702</span>        }</div>
+</div>
+<div class="line"><a id="l00703" name="l00703"></a><span class="lineno">  703</span> </div>
+<div class="line"><a id="l00704" name="l00704"></a><span class="lineno">  704</span>    <span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00711" name="l00711"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">  711</a></span>        <span class="keyword">struct </span>tm <a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">t</a>;</div>
+<div class="line"><a id="l00712" name="l00712"></a><span class="lineno">  712</span> </div>
+<div class="line"><a id="l00720" name="l00720"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Time32.html#a5583911eb59b6b617734ebe92c228328">  720</a></span>        uint32_t <a class="code hl_variable" href="classTimeUtils_1_1Time32.html#a5583911eb59b6b617734ebe92c228328">_msec</a>;</div>
+<div class="line"><a id="l00721" name="l00721"></a><span class="lineno">  721</span>    };</div>
+</div>
+<div class="line"><a id="l00722" name="l00722"></a><span class="lineno">  722</span> </div>
+<div class="foldopen" id="foldopen00731" data-start="{" data-end="};">
+<div class="line"><a id="l00731" name="l00731"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Ticker.html">  731</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classTimeUtils_1_1Ticker.html">Ticker</a></div>
+<div class="line"><a id="l00732" name="l00732"></a><span class="lineno">  732</span>    {</div>
+<div class="line"><a id="l00733" name="l00733"></a><span class="lineno">  733</span>    <span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00741" data-start="{" data-end="}">
+<div class="line"><a id="l00741" name="l00741"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Ticker.html#ace883ca76c44c9169ac194dcfebd8604">  741</a></span>        <a class="code hl_function" href="classTimeUtils_1_1Ticker.html#ace883ca76c44c9169ac194dcfebd8604">Ticker</a>()</div>
+<div class="line"><a id="l00742" name="l00742"></a><span class="lineno">  742</span>        {</div>
+<div class="line"><a id="l00743" name="l00743"></a><span class="lineno">  743</span>            <a class="code hl_variable" href="classTimeUtils_1_1Ticker.html#a87fbc5c56ad88b31fdc920e3a4bd0e0c">_tick</a> = std::chrono::high_resolution_clock::now();</div>
+<div class="line"><a id="l00744" name="l00744"></a><span class="lineno">  744</span>        }</div>
+</div>
+<div class="line"><a id="l00745" name="l00745"></a><span class="lineno">  745</span> </div>
+<div class="foldopen" id="foldopen00754" data-start="{" data-end="}">
+<div class="line"><a id="l00754" name="l00754"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Ticker.html#a5b1fae6d474d30f79c9d90a5cd39ada6">  754</a></span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classTimeUtils_1_1Ticker.html#a5b1fae6d474d30f79c9d90a5cd39ada6">reset</a>()</div>
+<div class="line"><a id="l00755" name="l00755"></a><span class="lineno">  755</span>        {</div>
+<div class="line"><a id="l00756" name="l00756"></a><span class="lineno">  756</span>            <a class="code hl_variable" href="classTimeUtils_1_1Ticker.html#a87fbc5c56ad88b31fdc920e3a4bd0e0c">_tick</a> = std::chrono::high_resolution_clock::now();</div>
+<div class="line"><a id="l00757" name="l00757"></a><span class="lineno">  757</span>        }</div>
+</div>
+<div class="line"><a id="l00758" name="l00758"></a><span class="lineno">  758</span> </div>
+<div class="foldopen" id="foldopen00768" data-start="{" data-end="}">
+<div class="line"><a id="l00768" name="l00768"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Ticker.html#a1464780c07addbcff3a804e194b373a3">  768</a></span>        <span class="keyword">inline</span> int64_t <a class="code hl_function" href="classTimeUtils_1_1Ticker.html#a1464780c07addbcff3a804e194b373a3">seconds</a>()<span class="keyword"> const </span></div>
+<div class="line"><a id="l00769" name="l00769"></a><span class="lineno">  769</span><span class="keyword">        </span>{</div>
+<div class="line"><a id="l00770" name="l00770"></a><span class="lineno">  770</span>            <span class="keyword">auto</span> now = std::chrono::high_resolution_clock::now();</div>
+<div class="line"><a id="l00771" name="l00771"></a><span class="lineno">  771</span>            <span class="keyword">auto</span> td = now - <a class="code hl_variable" href="classTimeUtils_1_1Ticker.html#a87fbc5c56ad88b31fdc920e3a4bd0e0c">_tick</a>;</div>
+<div class="line"><a id="l00772" name="l00772"></a><span class="lineno">  772</span>            <span class="keywordflow">return</span> std::chrono::duration_cast&lt;std::chrono::seconds&gt;(td).count();</div>
+<div class="line"><a id="l00773" name="l00773"></a><span class="lineno">  773</span>        }</div>
+</div>
+<div class="line"><a id="l00774" name="l00774"></a><span class="lineno">  774</span> </div>
+<div class="foldopen" id="foldopen00785" data-start="{" data-end="}">
+<div class="line"><a id="l00785" name="l00785"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Ticker.html#a05a6bda0369bf0ea6d70c7ae1f60de92">  785</a></span>        <span class="keyword">inline</span> int64_t <a class="code hl_function" href="classTimeUtils_1_1Ticker.html#a05a6bda0369bf0ea6d70c7ae1f60de92">milli_seconds</a>()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00786" name="l00786"></a><span class="lineno">  786</span><span class="keyword">        </span>{</div>
+<div class="line"><a id="l00787" name="l00787"></a><span class="lineno">  787</span>            <span class="keyword">auto</span> now = std::chrono::high_resolution_clock::now();</div>
+<div class="line"><a id="l00788" name="l00788"></a><span class="lineno">  788</span>            <span class="keyword">auto</span> td = now - <a class="code hl_variable" href="classTimeUtils_1_1Ticker.html#a87fbc5c56ad88b31fdc920e3a4bd0e0c">_tick</a>;</div>
+<div class="line"><a id="l00789" name="l00789"></a><span class="lineno">  789</span>            <span class="keywordflow">return</span> std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(td).count();</div>
+<div class="line"><a id="l00790" name="l00790"></a><span class="lineno">  790</span>        }</div>
+</div>
+<div class="line"><a id="l00791" name="l00791"></a><span class="lineno">  791</span> </div>
+<div class="foldopen" id="foldopen00802" data-start="{" data-end="}">
+<div class="line"><a id="l00802" name="l00802"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Ticker.html#a67918515c2cafa95443880798a33e6d9">  802</a></span>        <span class="keyword">inline</span> int64_t <a class="code hl_function" href="classTimeUtils_1_1Ticker.html#a67918515c2cafa95443880798a33e6d9">micro_seconds</a>()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00803" name="l00803"></a><span class="lineno">  803</span><span class="keyword">        </span>{</div>
+<div class="line"><a id="l00804" name="l00804"></a><span class="lineno">  804</span>            <span class="keyword">auto</span> now = std::chrono::high_resolution_clock::now();</div>
+<div class="line"><a id="l00805" name="l00805"></a><span class="lineno">  805</span>            <span class="keyword">auto</span> td = now - <a class="code hl_variable" href="classTimeUtils_1_1Ticker.html#a87fbc5c56ad88b31fdc920e3a4bd0e0c">_tick</a>;</div>
+<div class="line"><a id="l00806" name="l00806"></a><span class="lineno">  806</span>            <span class="keywordflow">return</span> std::chrono::duration_cast&lt;std::chrono::microseconds&gt;(td).count();</div>
+<div class="line"><a id="l00807" name="l00807"></a><span class="lineno">  807</span>        }</div>
+</div>
+<div class="line"><a id="l00808" name="l00808"></a><span class="lineno">  808</span> </div>
+<div class="foldopen" id="foldopen00819" data-start="{" data-end="}">
+<div class="line"><a id="l00819" name="l00819"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Ticker.html#a9f5a908d00243147bdba73ea43a80fe7">  819</a></span>        <span class="keyword">inline</span> int64_t <a class="code hl_function" href="classTimeUtils_1_1Ticker.html#a9f5a908d00243147bdba73ea43a80fe7">nano_seconds</a>()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00820" name="l00820"></a><span class="lineno">  820</span><span class="keyword">        </span>{</div>
+<div class="line"><a id="l00821" name="l00821"></a><span class="lineno">  821</span>            <span class="keyword">auto</span> now = std::chrono::high_resolution_clock::now();</div>
+<div class="line"><a id="l00822" name="l00822"></a><span class="lineno">  822</span>            <span class="keyword">auto</span> td = now - <a class="code hl_variable" href="classTimeUtils_1_1Ticker.html#a87fbc5c56ad88b31fdc920e3a4bd0e0c">_tick</a>;</div>
+<div class="line"><a id="l00823" name="l00823"></a><span class="lineno">  823</span>            <span class="keywordflow">return</span> std::chrono::duration_cast&lt;std::chrono::nanoseconds&gt;(td).count();</div>
+<div class="line"><a id="l00824" name="l00824"></a><span class="lineno">  824</span>        }</div>
+</div>
+<div class="line"><a id="l00825" name="l00825"></a><span class="lineno">  825</span> </div>
+<div class="line"><a id="l00826" name="l00826"></a><span class="lineno">  826</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00835" name="l00835"></a><span class="lineno"><a class="line" href="classTimeUtils_1_1Ticker.html#a87fbc5c56ad88b31fdc920e3a4bd0e0c">  835</a></span>        std::chrono::time_point&lt;std::chrono::high_resolution_clock&gt; <a class="code hl_variable" href="classTimeUtils_1_1Ticker.html#a87fbc5c56ad88b31fdc920e3a4bd0e0c">_tick</a>;</div>
+<div class="line"><a id="l00836" name="l00836"></a><span class="lineno">  836</span>    };</div>
+</div>
+<div class="line"><a id="l00837" name="l00837"></a><span class="lineno">  837</span>};</div>
+</div>
+<div class="ttc" id="aclassTimeUtils_1_1Ticker_html"><div class="ttname"><a href="classTimeUtils_1_1Ticker.html">TimeUtils::Ticker</a></div><div class="ttdoc">高精度计时器类</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00731">TimeUtils.hpp:732</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Ticker_html_a05a6bda0369bf0ea6d70c7ae1f60de92"><div class="ttname"><a href="classTimeUtils_1_1Ticker.html#a05a6bda0369bf0ea6d70c7ae1f60de92">TimeUtils::Ticker::milli_seconds</a></div><div class="ttdeci">int64_t milli_seconds() const</div><div class="ttdoc">获取从计时器初始化或重置开始经过的毫秒数</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00785">TimeUtils.hpp:785</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Ticker_html_a1464780c07addbcff3a804e194b373a3"><div class="ttname"><a href="classTimeUtils_1_1Ticker.html#a1464780c07addbcff3a804e194b373a3">TimeUtils::Ticker::seconds</a></div><div class="ttdeci">int64_t seconds() const</div><div class="ttdoc">获取从计时器初始化或重置开始经过的秒数</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00768">TimeUtils.hpp:768</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Ticker_html_a5b1fae6d474d30f79c9d90a5cd39ada6"><div class="ttname"><a href="classTimeUtils_1_1Ticker.html#a5b1fae6d474d30f79c9d90a5cd39ada6">TimeUtils::Ticker::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdoc">重置计时器</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00754">TimeUtils.hpp:754</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Ticker_html_a67918515c2cafa95443880798a33e6d9"><div class="ttname"><a href="classTimeUtils_1_1Ticker.html#a67918515c2cafa95443880798a33e6d9">TimeUtils::Ticker::micro_seconds</a></div><div class="ttdeci">int64_t micro_seconds() const</div><div class="ttdoc">获取从计时器初始化或重置开始经过的微秒数</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00802">TimeUtils.hpp:802</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Ticker_html_a87fbc5c56ad88b31fdc920e3a4bd0e0c"><div class="ttname"><a href="classTimeUtils_1_1Ticker.html#a87fbc5c56ad88b31fdc920e3a4bd0e0c">TimeUtils::Ticker::_tick</a></div><div class="ttdeci">std::chrono::time_point&lt; std::chrono::high_resolution_clock &gt; _tick</div><div class="ttdoc">计时器的起始时间点</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00835">TimeUtils.hpp:835</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Ticker_html_a9f5a908d00243147bdba73ea43a80fe7"><div class="ttname"><a href="classTimeUtils_1_1Ticker.html#a9f5a908d00243147bdba73ea43a80fe7">TimeUtils::Ticker::nano_seconds</a></div><div class="ttdeci">int64_t nano_seconds() const</div><div class="ttdoc">获取从计时器初始化或重置开始经过的纳秒数</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00819">TimeUtils.hpp:819</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Ticker_html_ace883ca76c44c9169ac194dcfebd8604"><div class="ttname"><a href="classTimeUtils_1_1Ticker.html#ace883ca76c44c9169ac194dcfebd8604">TimeUtils::Ticker::Ticker</a></div><div class="ttdeci">Ticker()</div><div class="ttdoc">构造函数，创建计时器并开始计时</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00741">TimeUtils.hpp:741</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Time32_html"><div class="ttname"><a href="classTimeUtils_1_1Time32.html">TimeUtils::Time32</a></div><div class="ttdoc">时间处理工具类，用于处理包含毫秒级精度的时间</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00566">TimeUtils.hpp:567</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Time32_html_a197c98d107a1af273e75f1d5f35c4aa5"><div class="ttname"><a href="classTimeUtils_1_1Time32.html#a197c98d107a1af273e75f1d5f35c4aa5">TimeUtils::Time32::Time32</a></div><div class="ttdeci">Time32(time_t _time, uint32_t msecs=0)</div><div class="ttdoc">使用time_t时间戳和毫秒构造时间对象</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00587">TimeUtils.hpp:587</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Time32_html_a4a77516d5e0ed862ab5d8dd249439776"><div class="ttname"><a href="classTimeUtils_1_1Time32.html#a4a77516d5e0ed862ab5d8dd249439776">TimeUtils::Time32::time</a></div><div class="ttdeci">uint32_t time()</div><div class="ttdoc">获取时间部分（不包含毫秒）</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00662">TimeUtils.hpp:662</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Time32_html_a5583911eb59b6b617734ebe92c228328"><div class="ttname"><a href="classTimeUtils_1_1Time32.html#a5583911eb59b6b617734ebe92c228328">TimeUtils::Time32::_msec</a></div><div class="ttdeci">uint32_t _msec</div><div class="ttdoc">毫秒部分</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00720">TimeUtils.hpp:720</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Time32_html_a5c8b9e55501e7f186742f1de2b964888"><div class="ttname"><a href="classTimeUtils_1_1Time32.html#a5c8b9e55501e7f186742f1de2b964888">TimeUtils::Time32::t</a></div><div class="ttdeci">struct tm t</div><div class="ttdoc">时间结构体</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00711">TimeUtils.hpp:711</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Time32_html_a92289680c75b8445f9d74bbf1aa8aed1"><div class="ttname"><a href="classTimeUtils_1_1Time32.html#a92289680c75b8445f9d74bbf1aa8aed1">TimeUtils::Time32::Time32</a></div><div class="ttdeci">Time32(uint64_t _time)</div><div class="ttdoc">使用毫秒级时间戳构造时间对象</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00607">TimeUtils.hpp:607</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Time32_html_a962c8ead514c753e01c5fddbc0931607"><div class="ttname"><a href="classTimeUtils_1_1Time32.html#a962c8ead514c753e01c5fddbc0931607">TimeUtils::Time32::from_local_time</a></div><div class="ttdeci">void from_local_time(uint64_t _time)</div><div class="ttdoc">从毫秒级本地时间戳设置时间对象</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00628">TimeUtils.hpp:628</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Time32_html_a9d8286c3ad79a6352503a274141405a0"><div class="ttname"><a href="classTimeUtils_1_1Time32.html#a9d8286c3ad79a6352503a274141405a0">TimeUtils::Time32::fmt</a></div><div class="ttdeci">const char * fmt(const char *sfmt=&quot;%Y.%m.%d %H:%M:%S&quot;, bool hasMilliSec=false) const</div><div class="ttdoc">格式化时间为字符串</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00695">TimeUtils.hpp:695</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Time32_html_aa308604012950a0ea756ebb3ee2cd2b3"><div class="ttname"><a href="classTimeUtils_1_1Time32.html#aa308604012950a0ea756ebb3ee2cd2b3">TimeUtils::Time32::time_ms</a></div><div class="ttdeci">uint32_t time_ms()</div><div class="ttdoc">获取时间部分（包含毫秒）</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00677">TimeUtils.hpp:677</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Time32_html_aad7b97d068426e90b806ef6a761b154b"><div class="ttname"><a href="classTimeUtils_1_1Time32.html#aad7b97d068426e90b806ef6a761b154b">TimeUtils::Time32::date</a></div><div class="ttdeci">uint32_t date()</div><div class="ttdoc">获取日期部分</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00648">TimeUtils.hpp:648</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Time32_html_af4b25ea2bbe1bfd8b8f6e4ba10b6043c"><div class="ttname"><a href="classTimeUtils_1_1Time32.html#af4b25ea2bbe1bfd8b8f6e4ba10b6043c">TimeUtils::Time32::Time32</a></div><div class="ttdeci">Time32()</div><div class="ttdoc">默认构造函数</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00575">TimeUtils.hpp:575</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html"><div class="ttname"><a href="classTimeUtils.html">TimeUtils</a></div><div class="ttdoc">时间处理工具类</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00086">TimeUtils.hpp:87</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_a1bae8c2e5838c4df5b9b62c9b3101575"><div class="ttname"><a href="classTimeUtils.html#a1bae8c2e5838c4df5b9b62c9b3101575">TimeUtils::getYYYYMMDDhhmmss</a></div><div class="ttdeci">static uint64_t getYYYYMMDDhhmmss()</div><div class="ttdoc">获取当前日期和时间的整数表示</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00190">TimeUtils.hpp:190</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_a28a7ae8e5b4e7b2b4ff88b36fe7e1ff2"><div class="ttname"><a href="classTimeUtils.html#a28a7ae8e5b4e7b2b4ff88b36fe7e1ff2">TimeUtils::getNextDate</a></div><div class="ttdeci">static uint32_t getNextDate(uint32_t curDate, int days=1)</div><div class="ttdoc">获取指定日期后的第 N 天日期</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00407">TimeUtils.hpp:407</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_a30e7a97699073c1a78128d072ae7ccae"><div class="ttname"><a href="classTimeUtils.html#a30e7a97699073c1a78128d072ae7ccae">TimeUtils::getNextMonth</a></div><div class="ttdeci">static uint32_t getNextMonth(uint32_t curMonth, int months=1)</div><div class="ttdoc">获取指定月份后的第 N 个月的年月</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00462">TimeUtils.hpp:462</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_a48644704dd42fbb708a3e8b88b9611a8"><div class="ttname"><a href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">TimeUtils::getLocalTimeNow</a></div><div class="ttdeci">static int64_t getLocalTimeNow(void)</div><div class="ttdoc">获取当前本地时间，精确到毫秒</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00123">TimeUtils.hpp:123</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_a552ebf2ed65cd9e8ef35207944d19ff8"><div class="ttname"><a href="classTimeUtils.html#a552ebf2ed65cd9e8ef35207944d19ff8">TimeUtils::getTZOffset</a></div><div class="ttdeci">static int32_t getTZOffset()</div><div class="ttdoc">获取本地时区相对于UTC的偏移量（小时）</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00308">TimeUtils.hpp:308</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_a7d0734e624491846a46e66bbe245c699"><div class="ttname"><a href="classTimeUtils.html#a7d0734e624491846a46e66bbe245c699">TimeUtils::isWeekends</a></div><div class="ttdeci">static bool isWeekends(uint32_t uDate)</div><div class="ttdoc">判断指定日期是否为周末（周六或周日）</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00539">TimeUtils.hpp:539</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_a80a1ad51ffdcbd9d1fd52330671c3b33"><div class="ttname"><a href="classTimeUtils.html#a80a1ad51ffdcbd9d1fd52330671c3b33">TimeUtils::getLocalTime</a></div><div class="ttdeci">static std::string getLocalTime(bool bIncludeMilliSec=true)</div><div class="ttdoc">获取当前本地时间的字符串表示</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00162">TimeUtils.hpp:162</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_a82c3034202218813e56ca8a816bb946b"><div class="ttname"><a href="classTimeUtils.html#a82c3034202218813e56ca8a816bb946b">TimeUtils::minBarToDate</a></div><div class="ttdeci">static uint32_t minBarToDate(uint64_t minTime)</div><div class="ttdoc">从分钟线ID中提取日期部分</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00506">TimeUtils.hpp:506</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_a84221fc66f89e74b71e7a43713bc8ba0"><div class="ttname"><a href="classTimeUtils.html#a84221fc66f89e74b71e7a43713bc8ba0">TimeUtils::timeToString</a></div><div class="ttdeci">static std::string timeToString(int64_t mytime)</div><div class="ttdoc">将毫秒级时间戳转换为字符串表示</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00372">TimeUtils.hpp:372</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_a8d212b72f7dab25403b08a5e72395177"><div class="ttname"><a href="classTimeUtils.html#a8d212b72f7dab25403b08a5e72395177">TimeUtils::getLocalTimeNowOld</a></div><div class="ttdeci">static int64_t getLocalTimeNowOld(void)</div><div class="ttdoc">获取当前本地时间（旧版方法）</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00105">TimeUtils.hpp:105</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_ab62c2a7f902784bca356980c52407ebb"><div class="ttname"><a href="classTimeUtils.html#ab62c2a7f902784bca356980c52407ebb">TimeUtils::timeToMinBar</a></div><div class="ttdeci">static uint64_t timeToMinBar(uint32_t uDate, uint32_t uTime)</div><div class="ttdoc">将日期和时间转换为分钟线ID</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00491">TimeUtils.hpp:491</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_ac04a739040d6a0d39400c2a74b96583b"><div class="ttname"><a href="classTimeUtils.html#ac04a739040d6a0d39400c2a74b96583b">TimeUtils::getDateTime</a></div><div class="ttdeci">static void getDateTime(uint32_t &amp;date, uint32_t &amp;time)</div><div class="ttdoc">获取当前日期和时间，分别存储到两个参数中</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00216">TimeUtils.hpp:216</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_ad8c193a473b4ae67cc06e23ebc255d2b"><div class="ttname"><a href="classTimeUtils.html#ad8c193a473b4ae67cc06e23ebc255d2b">TimeUtils::getWeekDay</a></div><div class="ttdeci">static uint32_t getWeekDay(uint32_t uDate=0)</div><div class="ttdoc">获取指定日期或当前日期的星期</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00259">TimeUtils.hpp:259</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_adc5c9caadf07e3ae0a732d0851fb56ef"><div class="ttname"><a href="classTimeUtils.html#adc5c9caadf07e3ae0a732d0851fb56ef">TimeUtils::getCurDate</a></div><div class="ttdeci">static uint32_t getCurDate()</div><div class="ttdoc">获取当前日期</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00239">TimeUtils.hpp:239</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_ade8f9d6db3e20f1057aad655a655d6fd"><div class="ttname"><a href="classTimeUtils.html#ade8f9d6db3e20f1057aad655a655d6fd">TimeUtils::makeTime</a></div><div class="ttdeci">static int64_t makeTime(long lDate, long lTimeWithMs, bool isToUTC=false)</div><div class="ttdoc">生成带毫秒的时间戳</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00340">TimeUtils.hpp:340</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_ae4b03ad036d95ad68f1c7195ddef37df"><div class="ttname"><a href="classTimeUtils.html#ae4b03ad036d95ad68f1c7195ddef37df">TimeUtils::getCurMin</a></div><div class="ttdeci">static uint32_t getCurMin()</div><div class="ttdoc">获取当前时间（时分秒）</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00289">TimeUtils.hpp:289</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_aea352f72d9603cf1ee4beea704004fdb"><div class="ttname"><a href="classTimeUtils.html#aea352f72d9603cf1ee4beea704004fdb">TimeUtils::minBarToTime</a></div><div class="ttdeci">static uint32_t minBarToTime(uint64_t minTime)</div><div class="ttdoc">从分钟线ID中提取时间部分</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00522">TimeUtils.hpp:522</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_af131976cc8ddf51086e75418ef96b592"><div class="ttname"><a href="classTimeUtils.html#af131976cc8ddf51086e75418ef96b592">TimeUtils::getNextMinute</a></div><div class="ttdeci">static uint32_t getNextMinute(int32_t curTime, int32_t mins=1)</div><div class="ttdoc">获取指定时间后的第 N 分钟的时间</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00434">TimeUtils.hpp:434</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_b415f7b135736b475386968edd2cefde.html">Share</a></li><li class="navelem"><a class="el" href="TimeUtils_8hpp.html">TimeUtils.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

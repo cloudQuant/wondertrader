@@ -1,0 +1,253 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/Includes/IDataReader.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('IDataReader_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">IDataReader.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="IDataReader_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Includes/WTSMarcos.h&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/WTSTypes.h&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">class </span><a class="code hl_class" href="classWTSKlineData.html">WTSKlineData</a>;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">class </span><a class="code hl_class" href="classWTSKlineSlice.html">WTSKlineSlice</a>;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">class </span><a class="code hl_class" href="classWTSTickSlice.html">WTSTickSlice</a>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">class </span><a class="code hl_class" href="classWTSOrdQueSlice.html">WTSOrdQueSlice</a>;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">class </span><a class="code hl_class" href="classWTSOrdDtlSlice.html">WTSOrdDtlSlice</a>;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">class </span><a class="code hl_class" href="classWTSTransSlice.html">WTSTransSlice</a>;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">struct </span><a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">class </span><a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">class </span><a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">class </span><a class="code hl_class" href="classIHotMgr.html">IHotMgr</a>;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="foldopen" id="foldopen00033" data-start="{" data-end="};">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classIDataReaderSink.html">   33</a></span><span class="keyword">class </span><a class="code hl_class" href="classIDataReaderSink.html">IDataReaderSink</a></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>{</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="classIDataReaderSink.html#aa913fd22de527349dffbe88e46acd254">   44</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classIDataReaderSink.html#aa913fd22de527349dffbe88e46acd254">on_bar</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_typedef" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* newBar) = 0;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="classIDataReaderSink.html#a67325ff35ef2bd664ead8ff42ba2a475">   52</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classIDataReaderSink.html#a67325ff35ef2bd664ead8ff42ba2a475">on_all_bar_updated</a>(uint32_t updateTime) = 0;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="classIDataReaderSink.html#a6bd65af1d47126d0d72776a547cdfcaa">   59</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>* <a class="code hl_function" href="classIDataReaderSink.html#a6bd65af1d47126d0d72776a547cdfcaa">get_basedata_mgr</a>() = 0;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="classIDataReaderSink.html#ae199f4f26f1b8dfbb45f8815fa7519ba">   66</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classIHotMgr.html">IHotMgr</a>* <a class="code hl_function" href="classIDataReaderSink.html#ae199f4f26f1b8dfbb45f8815fa7519ba">get_hot_mgr</a>() = 0;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="classIDataReaderSink.html#ae39581f108cda53e290e81b39de8fce9">   73</a></span>    <span class="keyword">virtual</span> uint32_t <a class="code hl_function" href="classIDataReaderSink.html#ae39581f108cda53e290e81b39de8fce9">get_date</a>() = 0;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="classIDataReaderSink.html#ac4c5c6f30c7797066983228fcc7779bf">   81</a></span>    <span class="keyword">virtual</span> uint32_t <a class="code hl_function" href="classIDataReaderSink.html#ac4c5c6f30c7797066983228fcc7779bf">get_min_time</a>() = 0;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="classIDataReaderSink.html#a1a47e7fab4615f328ce2bcb2aec452c6">   88</a></span>    <span class="keyword">virtual</span> uint32_t <a class="code hl_function" href="classIDataReaderSink.html#a1a47e7fab4615f328ce2bcb2aec452c6">get_secs</a>() = 0;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="classIDataReaderSink.html#a8d10f776e2ca3960b24a5142039e1488">   96</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classIDataReaderSink.html#a8d10f776e2ca3960b24a5142039e1488">reader_log</a>(<a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* message) = 0;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>};</div>
+</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="IDataReader_8h.html#a43abbdfe10448fbcf714e62f97723ddc">  107</a></span><span class="keyword">typedef</span> void(*<a class="code hl_typedef" href="IDataReader_8h.html#a43abbdfe10448fbcf714e62f97723ddc">FuncReadBars</a>)(<span class="keywordtype">void</span>* obj, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* bars, uint32_t count);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno"><a class="line" href="IDataReader_8h.html#a32634b1c7ba2ba38c9089475d02ef1ad">  119</a></span><span class="keyword">typedef</span> void(*<a class="code hl_typedef" href="IDataReader_8h.html#a32634b1c7ba2ba38c9089475d02ef1ad">FuncReadFactors</a>)(<span class="keywordtype">void</span>* obj, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t* dates, <span class="keywordtype">double</span>* factors, uint32_t count);</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="foldopen" id="foldopen00125" data-start="{" data-end="};">
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="classIHisDataLoader.html">  125</a></span><span class="keyword">class </span><a class="code hl_class" href="classIHisDataLoader.html">IHisDataLoader</a></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>{</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno"><a class="line" href="classIHisDataLoader.html#afce3712dd2dbfcf704690e7757050936">  140</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classIHisDataLoader.html#afce3712dd2dbfcf704690e7757050936">loadFinalHisBars</a>(<span class="keywordtype">void</span>* obj, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_typedef" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, <a class="code hl_typedef" href="IDataReader_8h.html#a43abbdfe10448fbcf714e62f97723ddc">FuncReadBars</a> cb) = 0;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span> </div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno"><a class="line" href="classIHisDataLoader.html#a7873ac091a3a1d158a0fc760cb4061dd">  153</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classIHisDataLoader.html#a7873ac091a3a1d158a0fc760cb4061dd">loadRawHisBars</a>(<span class="keywordtype">void</span>* obj, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_typedef" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, <a class="code hl_typedef" href="IDataReader_8h.html#a43abbdfe10448fbcf714e62f97723ddc">FuncReadBars</a> cb) = 0;</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno"><a class="line" href="classIHisDataLoader.html#a0b81286ed6fc33241be2599d550222a1">  163</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classIHisDataLoader.html#a0b81286ed6fc33241be2599d550222a1">loadAllAdjFactors</a>(<span class="keywordtype">void</span>* obj, <a class="code hl_typedef" href="IDataReader_8h.html#a32634b1c7ba2ba38c9089475d02ef1ad">FuncReadFactors</a> cb) = 0;</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno"><a class="line" href="classIHisDataLoader.html#ae49370932d55c31d4d6800472df3bfe7">  174</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classIHisDataLoader.html#ae49370932d55c31d4d6800472df3bfe7">loadAdjFactors</a>(<span class="keywordtype">void</span>* obj, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_typedef" href="IDataReader_8h.html#a32634b1c7ba2ba38c9089475d02ef1ad">FuncReadFactors</a> cb) = 0;</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>};</div>
+</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
+<div class="foldopen" id="foldopen00182" data-start="{" data-end="};">
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno"><a class="line" href="classIDataReader.html">  182</a></span><span class="keyword">class </span><a class="code hl_class" href="classIDataReader.html">IDataReader</a></div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>{</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno"><a class="line" href="classIDataReader.html#aa862141ceffec5bfe15159a76241dd74">  189</a></span>    <a class="code hl_function" href="classIDataReader.html#aa862141ceffec5bfe15159a76241dd74">IDataReader</a>() :<a class="code hl_variable" href="classIDataReader.html#a5793fdeb92c2c6e7fa758424a48361f6">_sink</a>(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>), <a class="code hl_variable" href="classIDataReader.html#a183c9fb325a053338c30ec69ba70b6a4">_loader</a>(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>) {}</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span> </div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno"><a class="line" href="classIDataReader.html#a985902d242a3d0e659604d549929f682">  195</a></span>    <span class="keyword">virtual</span> <a class="code hl_function" href="classIDataReader.html#a985902d242a3d0e659604d549929f682">~IDataReader</a>(){}</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno"><a class="line" href="classIDataReader.html#a40b6b830392806696c9f89799e396ab0">  206</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classIDataReader.html#a40b6b830392806696c9f89799e396ab0">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg, <a class="code hl_class" href="classIDataReaderSink.html">IDataReaderSink</a>* sink, <a class="code hl_class" href="classIHisDataLoader.html">IHisDataLoader</a>* loader = <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>) { <a class="code hl_variable" href="classIDataReader.html#a5793fdeb92c2c6e7fa758424a48361f6">_sink</a> = sink; <a class="code hl_variable" href="classIDataReader.html#a183c9fb325a053338c30ec69ba70b6a4">_loader</a> = loader; }</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span> </div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno"><a class="line" href="classIDataReader.html#afa12b79743b7a86388ef1067babb6925">  216</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classIDataReader.html#afa12b79743b7a86388ef1067babb6925">onMinuteEnd</a>(uint32_t uDate, uint32_t uTime, uint32_t endTDate = 0) = 0;</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span> </div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno"><a class="line" href="classIDataReader.html#a84dac45a85c9f65a5683a221ecfdba78">  227</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSTickSlice.html">WTSTickSlice</a>*   <a class="code hl_function" href="classIDataReader.html#a84dac45a85c9f65a5683a221ecfdba78">readTickSlice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t count, uint64_t etime = 0) = 0;</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span> </div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno"><a class="line" href="classIDataReader.html#a41855a6d24b61fd143daf72a3626da80">  238</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSOrdDtlSlice.html">WTSOrdDtlSlice</a>* <a class="code hl_function" href="classIDataReader.html#a41855a6d24b61fd143daf72a3626da80">readOrdDtlSlice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t count, uint64_t etime = 0) { <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>; }</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno"><a class="line" href="classIDataReader.html#a8ac04a7cfb9e1767040bd403a65cd0db">  248</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSOrdQueSlice.html">WTSOrdQueSlice</a>* <a class="code hl_function" href="classIDataReader.html#a8ac04a7cfb9e1767040bd403a65cd0db">readOrdQueSlice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t count, uint64_t etime = 0) { <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>; }</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span> </div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno"><a class="line" href="classIDataReader.html#a65b238e2eded61c2d7fab35ae9a0f832">  259</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSTransSlice.html">WTSTransSlice</a>*  <a class="code hl_function" href="classIDataReader.html#a65b238e2eded61c2d7fab35ae9a0f832">readTransSlice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t count, uint64_t etime = 0) { <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>; }</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span> </div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno"><a class="line" href="classIDataReader.html#a920676cb7d0bbd47e3e64f7155219503">  271</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSKlineSlice.html">WTSKlineSlice</a>*  <a class="code hl_function" href="classIDataReader.html#a920676cb7d0bbd47e3e64f7155219503">readKlineSlice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_typedef" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, uint32_t count, uint64_t etime = 0) = 0;</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span> </div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno"><a class="line" href="classIDataReader.html#a00af78e7b9dc47695af9ab2154bea387">  281</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">double</span>      <a class="code hl_function" href="classIDataReader.html#a00af78e7b9dc47695af9ab2154bea387">getAdjFactorByDate</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t date = 0) { <span class="keywordflow">return</span> 1.0; }</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span> </div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno"><a class="line" href="classIDataReader.html#aa65fa7afd19e78560aff43f49cc69370">  289</a></span>    <span class="keyword">virtual</span> uint32_t    <a class="code hl_function" href="classIDataReader.html#aa65fa7afd19e78560aff43f49cc69370">getAdjustingFlag</a>() { <span class="keywordflow">return</span> 0; }</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span> </div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span><span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno"><a class="line" href="classIDataReader.html#a5793fdeb92c2c6e7fa758424a48361f6">  292</a></span>    <a class="code hl_class" href="classIDataReaderSink.html">IDataReaderSink</a>*    <a class="code hl_variable" href="classIDataReader.html#a5793fdeb92c2c6e7fa758424a48361f6">_sink</a>;    </div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno"><a class="line" href="classIDataReader.html#a183c9fb325a053338c30ec69ba70b6a4">  293</a></span>    <a class="code hl_class" href="classIHisDataLoader.html">IHisDataLoader</a>*     <a class="code hl_variable" href="classIDataReader.html#a183c9fb325a053338c30ec69ba70b6a4">_loader</a>;  </div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>};</div>
+</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span> </div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno"><a class="line" href="IDataReader_8h.html#aa3b1986abaa355b0e287a96305d59086">  300</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classIDataReader.html">IDataReader</a>* (*FuncCreateDataReader)();</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno"><a class="line" href="IDataReader_8h.html#a03a799bbd81721303eab935c0e97e356">  306</a></span><span class="keyword">typedef</span> void(*<a class="code hl_typedef" href="IDataReader_8h.html#a03a799bbd81721303eab935c0e97e356">FuncDeleteDataReader</a>)(<a class="code hl_class" href="classIDataReader.html">IDataReader</a>* store);</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span> </div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="ttc" id="aIDataReader_8h_html_a03a799bbd81721303eab935c0e97e356"><div class="ttname"><a href="IDataReader_8h.html#a03a799bbd81721303eab935c0e97e356">FuncDeleteDataReader</a></div><div class="ttdeci">void(* FuncDeleteDataReader)(IDataReader *store)</div><div class="ttdoc">删除数据读取器对象的函数指针类型</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00306">IDataReader.h:306</a></div></div>
+<div class="ttc" id="aIDataReader_8h_html_a32634b1c7ba2ba38c9089475d02ef1ad"><div class="ttname"><a href="IDataReader_8h.html#a32634b1c7ba2ba38c9089475d02ef1ad">FuncReadFactors</a></div><div class="ttdeci">void(* FuncReadFactors)(void *obj, const char *stdCode, uint32_t *dates, double *factors, uint32_t count)</div><div class="ttdoc">加载复权因子回调</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00119">IDataReader.h:119</a></div></div>
+<div class="ttc" id="aIDataReader_8h_html_a43abbdfe10448fbcf714e62f97723ddc"><div class="ttname"><a href="IDataReader_8h.html#a43abbdfe10448fbcf714e62f97723ddc">FuncReadBars</a></div><div class="ttdeci">void(* FuncReadBars)(void *obj, WTSBarStruct *bars, uint32_t count)</div><div class="ttdoc">历史数据加载器的回调函数</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00107">IDataReader.h:107</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_a27f5d8bd7208a5fc1d044c6f5961904c"><div class="ttname"><a href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a></div><div class="ttdeci">enum tagKlinePeriod WTSKlinePeriod</div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aa7b93f4aa2259e69e48f27448c247dc8"><div class="ttname"><a href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a></div><div class="ttdeci">enum tagLogLevel WTSLogLevel</div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html"><div class="ttname"><a href="classIBaseDataMgr.html">IBaseDataMgr</a></div><div class="ttdoc">基础数据管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IBaseDataMgr_8h_source.html#l00075">IBaseDataMgr.h:76</a></div></div>
+<div class="ttc" id="aclassIDataReaderSink_html"><div class="ttname"><a href="classIDataReaderSink.html">IDataReaderSink</a></div><div class="ttdoc">数据读取模块回调接口</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00033">IDataReader.h:34</a></div></div>
+<div class="ttc" id="aclassIDataReaderSink_html_a1a47e7fab4615f328ce2bcb2aec452c6"><div class="ttname"><a href="classIDataReaderSink.html#a1a47e7fab4615f328ce2bcb2aec452c6">IDataReaderSink::get_secs</a></div><div class="ttdeci">virtual uint32_t get_secs()=0</div><div class="ttdoc">获取当前的秒数</div></div>
+<div class="ttc" id="aclassIDataReaderSink_html_a67325ff35ef2bd664ead8ff42ba2a475"><div class="ttname"><a href="classIDataReaderSink.html#a67325ff35ef2bd664ead8ff42ba2a475">IDataReaderSink::on_all_bar_updated</a></div><div class="ttdeci">virtual void on_all_bar_updated(uint32_t updateTime)=0</div><div class="ttdoc">所有缓存的K线全部更新的事件回调</div></div>
+<div class="ttc" id="aclassIDataReaderSink_html_a6bd65af1d47126d0d72776a547cdfcaa"><div class="ttname"><a href="classIDataReaderSink.html#a6bd65af1d47126d0d72776a547cdfcaa">IDataReaderSink::get_basedata_mgr</a></div><div class="ttdeci">virtual IBaseDataMgr * get_basedata_mgr()=0</div><div class="ttdoc">获取基础数据管理接口指针</div></div>
+<div class="ttc" id="aclassIDataReaderSink_html_a8d10f776e2ca3960b24a5142039e1488"><div class="ttname"><a href="classIDataReaderSink.html#a8d10f776e2ca3960b24a5142039e1488">IDataReaderSink::reader_log</a></div><div class="ttdeci">virtual void reader_log(WTSLogLevel ll, const char *message)=0</div><div class="ttdoc">输出数据读取模块的日志</div></div>
+<div class="ttc" id="aclassIDataReaderSink_html_aa913fd22de527349dffbe88e46acd254"><div class="ttname"><a href="classIDataReaderSink.html#aa913fd22de527349dffbe88e46acd254">IDataReaderSink::on_bar</a></div><div class="ttdeci">virtual void on_bar(const char *stdCode, WTSKlinePeriod period, WTSBarStruct *newBar)=0</div><div class="ttdoc">K线闭合事件回调</div></div>
+<div class="ttc" id="aclassIDataReaderSink_html_ac4c5c6f30c7797066983228fcc7779bf"><div class="ttname"><a href="classIDataReaderSink.html#ac4c5c6f30c7797066983228fcc7779bf">IDataReaderSink::get_min_time</a></div><div class="ttdeci">virtual uint32_t get_min_time()=0</div><div class="ttdoc">获取当前1分钟线的时间</div></div>
+<div class="ttc" id="aclassIDataReaderSink_html_ae199f4f26f1b8dfbb45f8815fa7519ba"><div class="ttname"><a href="classIDataReaderSink.html#ae199f4f26f1b8dfbb45f8815fa7519ba">IDataReaderSink::get_hot_mgr</a></div><div class="ttdeci">virtual IHotMgr * get_hot_mgr()=0</div><div class="ttdoc">获取主力合约管理接口指针</div></div>
+<div class="ttc" id="aclassIDataReaderSink_html_ae39581f108cda53e290e81b39de8fce9"><div class="ttname"><a href="classIDataReaderSink.html#ae39581f108cda53e290e81b39de8fce9">IDataReaderSink::get_date</a></div><div class="ttdeci">virtual uint32_t get_date()=0</div><div class="ttdoc">获取当前日期</div></div>
+<div class="ttc" id="aclassIDataReader_html"><div class="ttname"><a href="classIDataReader.html">IDataReader</a></div><div class="ttdoc">数据读取接口</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00182">IDataReader.h:183</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_a00af78e7b9dc47695af9ab2154bea387"><div class="ttname"><a href="classIDataReader.html#a00af78e7b9dc47695af9ab2154bea387">IDataReader::getAdjFactorByDate</a></div><div class="ttdeci">virtual double getAdjFactorByDate(const char *stdCode, uint32_t date=0)</div><div class="ttdoc">获取个股指定日期的复权因子</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00281">IDataReader.h:281</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_a183c9fb325a053338c30ec69ba70b6a4"><div class="ttname"><a href="classIDataReader.html#a183c9fb325a053338c30ec69ba70b6a4">IDataReader::_loader</a></div><div class="ttdeci">IHisDataLoader * _loader</div><div class="ttdoc">历史数据加载器，用于加载历史数据</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00293">IDataReader.h:293</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_a40b6b830392806696c9f89799e396ab0"><div class="ttname"><a href="classIDataReader.html#a40b6b830392806696c9f89799e396ab0">IDataReader::init</a></div><div class="ttdeci">virtual void init(WTSVariant *cfg, IDataReaderSink *sink, IHisDataLoader *loader=NULL)</div><div class="ttdoc">初始化数据读取模块</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00206">IDataReader.h:206</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_a41855a6d24b61fd143daf72a3626da80"><div class="ttname"><a href="classIDataReader.html#a41855a6d24b61fd143daf72a3626da80">IDataReader::readOrdDtlSlice</a></div><div class="ttdeci">virtual WTSOrdDtlSlice * readOrdDtlSlice(const char *stdCode, uint32_t count, uint64_t etime=0)</div><div class="ttdoc">读取逐笔委托数据切片</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00238">IDataReader.h:238</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_a5793fdeb92c2c6e7fa758424a48361f6"><div class="ttname"><a href="classIDataReader.html#a5793fdeb92c2c6e7fa758424a48361f6">IDataReader::_sink</a></div><div class="ttdeci">IDataReaderSink * _sink</div><div class="ttdoc">数据读取器回调接口，用于回调事件和获取系统状态</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00292">IDataReader.h:292</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_a65b238e2eded61c2d7fab35ae9a0f832"><div class="ttname"><a href="classIDataReader.html#a65b238e2eded61c2d7fab35ae9a0f832">IDataReader::readTransSlice</a></div><div class="ttdeci">virtual WTSTransSlice * readTransSlice(const char *stdCode, uint32_t count, uint64_t etime=0)</div><div class="ttdoc">读取逐笔成交数据切片</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00259">IDataReader.h:259</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_a84dac45a85c9f65a5683a221ecfdba78"><div class="ttname"><a href="classIDataReader.html#a84dac45a85c9f65a5683a221ecfdba78">IDataReader::readTickSlice</a></div><div class="ttdeci">virtual WTSTickSlice * readTickSlice(const char *stdCode, uint32_t count, uint64_t etime=0)=0</div><div class="ttdoc">读取tick数据切片</div></div>
+<div class="ttc" id="aclassIDataReader_html_a8ac04a7cfb9e1767040bd403a65cd0db"><div class="ttname"><a href="classIDataReader.html#a8ac04a7cfb9e1767040bd403a65cd0db">IDataReader::readOrdQueSlice</a></div><div class="ttdeci">virtual WTSOrdQueSlice * readOrdQueSlice(const char *stdCode, uint32_t count, uint64_t etime=0)</div><div class="ttdoc">读取委托队列数据切片</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00248">IDataReader.h:248</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_a920676cb7d0bbd47e3e64f7155219503"><div class="ttname"><a href="classIDataReader.html#a920676cb7d0bbd47e3e64f7155219503">IDataReader::readKlineSlice</a></div><div class="ttdeci">virtual WTSKlineSlice * readKlineSlice(const char *stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime=0)=0</div><div class="ttdoc">读取K线序列，并返回一个存储容器类</div></div>
+<div class="ttc" id="aclassIDataReader_html_a985902d242a3d0e659604d549929f682"><div class="ttname"><a href="classIDataReader.html#a985902d242a3d0e659604d549929f682">IDataReader::~IDataReader</a></div><div class="ttdeci">virtual ~IDataReader()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00195">IDataReader.h:195</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_aa65fa7afd19e78560aff43f49cc69370"><div class="ttname"><a href="classIDataReader.html#aa65fa7afd19e78560aff43f49cc69370">IDataReader::getAdjustingFlag</a></div><div class="ttdeci">virtual uint32_t getAdjustingFlag()</div><div class="ttdoc">获取复权标记</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00289">IDataReader.h:289</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_aa862141ceffec5bfe15159a76241dd74"><div class="ttname"><a href="classIDataReader.html#aa862141ceffec5bfe15159a76241dd74">IDataReader::IDataReader</a></div><div class="ttdeci">IDataReader()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00189">IDataReader.h:189</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_afa12b79743b7a86388ef1067babb6925"><div class="ttname"><a href="classIDataReader.html#afa12b79743b7a86388ef1067babb6925">IDataReader::onMinuteEnd</a></div><div class="ttdeci">virtual void onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate=0)=0</div><div class="ttdoc">分钟线闭合事件处理接口</div></div>
+<div class="ttc" id="aclassIHisDataLoader_html"><div class="ttname"><a href="classIHisDataLoader.html">IHisDataLoader</a></div><div class="ttdoc">历史数据加载器</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00125">IDataReader.h:126</a></div></div>
+<div class="ttc" id="aclassIHisDataLoader_html_a0b81286ed6fc33241be2599d550222a1"><div class="ttname"><a href="classIHisDataLoader.html#a0b81286ed6fc33241be2599d550222a1">IHisDataLoader::loadAllAdjFactors</a></div><div class="ttdeci">virtual bool loadAllAdjFactors(void *obj, FuncReadFactors cb)=0</div><div class="ttdoc">加载全部除权因子</div></div>
+<div class="ttc" id="aclassIHisDataLoader_html_a7873ac091a3a1d158a0fc760cb4061dd"><div class="ttname"><a href="classIHisDataLoader.html#a7873ac091a3a1d158a0fc760cb4061dd">IHisDataLoader::loadRawHisBars</a></div><div class="ttdeci">virtual bool loadRawHisBars(void *obj, const char *stdCode, WTSKlinePeriod period, FuncReadBars cb)=0</div><div class="ttdoc">加载原始历史K线数据</div></div>
+<div class="ttc" id="aclassIHisDataLoader_html_ae49370932d55c31d4d6800472df3bfe7"><div class="ttname"><a href="classIHisDataLoader.html#ae49370932d55c31d4d6800472df3bfe7">IHisDataLoader::loadAdjFactors</a></div><div class="ttdeci">virtual bool loadAdjFactors(void *obj, const char *stdCode, FuncReadFactors cb)=0</div><div class="ttdoc">加载指定合约的除权因子</div></div>
+<div class="ttc" id="aclassIHisDataLoader_html_afce3712dd2dbfcf704690e7757050936"><div class="ttname"><a href="classIHisDataLoader.html#afce3712dd2dbfcf704690e7757050936">IHisDataLoader::loadFinalHisBars</a></div><div class="ttdeci">virtual bool loadFinalHisBars(void *obj, const char *stdCode, WTSKlinePeriod period, FuncReadBars cb)=0</div><div class="ttdoc">加载最终历史K线数据</div></div>
+<div class="ttc" id="aclassIHotMgr_html"><div class="ttname"><a href="classIHotMgr.html">IHotMgr</a></div><div class="ttdoc">主力合约管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IHotMgr_8h_source.html#l00066">IHotMgr.h:67</a></div></div>
+<div class="ttc" id="aclassWTSKlineData_html"><div class="ttname"><a href="classWTSKlineData.html">WTSKlineData</a></div><div class="ttdoc">K线数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00649">WTSDataDef.hpp:650</a></div></div>
+<div class="ttc" id="aclassWTSKlineSlice_html"><div class="ttname"><a href="classWTSKlineSlice.html">WTSKlineSlice</a></div><div class="ttdoc">K线数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00295">WTSDataDef.hpp:296</a></div></div>
+<div class="ttc" id="aclassWTSOrdDtlSlice_html"><div class="ttname"><a href="classWTSOrdDtlSlice.html">WTSOrdDtlSlice</a></div><div class="ttdoc">委托明细数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02335">WTSDataDef.hpp:2336</a></div></div>
+<div class="ttc" id="aclassWTSOrdQueSlice_html"><div class="ttname"><a href="classWTSOrdQueSlice.html">WTSOrdQueSlice</a></div><div class="ttdoc">委托队列数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02442">WTSDataDef.hpp:2443</a></div></div>
+<div class="ttc" id="aclassWTSTickSlice_html"><div class="ttname"><a href="classWTSTickSlice.html">WTSTickSlice</a></div><div class="ttdoc">Tick数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02128">WTSDataDef.hpp:2129</a></div></div>
+<div class="ttc" id="aclassWTSTransSlice_html"><div class="ttname"><a href="classWTSTransSlice.html">WTSTransSlice</a></div><div class="ttdoc">逐笔成交数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02549">WTSDataDef.hpp:2550</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_2a2e13dd651d9f4dfc9d1ceadd85b622.html">Includes</a></li><li class="navelem"><a class="el" href="IDataReader_8h.html">IDataReader.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

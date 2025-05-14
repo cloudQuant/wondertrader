@@ -1,0 +1,1765 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: WtVWapExeUnit类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classWtVWapExeUnit.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-types">Private 类型</a> &#124;
+<a href="#pri-methods">Private 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classWtVWapExeUnit-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">WtVWapExeUnit类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>VWAP(成交量加权平均价格)执行单元  
+ <a href="classWtVWapExeUnit.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structWtVWapExeUnit_1_1__CalcFlag.html">_CalcFlag</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">计算锁标志结构体，实现RAII模式的原子锁  <a href="structWtVWapExeUnit_1_1__CalcFlag.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a9c8574a47eb0e48270074ce07ea92e06" id="r_a9c8574a47eb0e48270074ce07ea92e06"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a9c8574a47eb0e48270074ce07ea92e06">WtVWapExeUnit</a> ()</td></tr>
+<tr class="memdesc:a9c8574a47eb0e48270074ce07ea92e06"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a9c8574a47eb0e48270074ce07ea92e06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad09154ef2bf81dd1cb4059eddb7ba369" id="r_ad09154ef2bf81dd1cb4059eddb7ba369"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#ad09154ef2bf81dd1cb4059eddb7ba369">~WtVWapExeUnit</a> ()</td></tr>
+<tr class="memdesc:ad09154ef2bf81dd1cb4059eddb7ba369"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:ad09154ef2bf81dd1cb4059eddb7ba369"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49a86bcdfc0c22b81ea8261244752ad5" id="r_a49a86bcdfc0c22b81ea8261244752ad5"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a49a86bcdfc0c22b81ea8261244752ad5">getFactName</a> () override</td></tr>
+<tr class="memdesc:a49a86bcdfc0c22b81ea8261244752ad5"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取所属执行器工厂名称  <br /></td></tr>
+<tr class="separator:a49a86bcdfc0c22b81ea8261244752ad5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89449d92613d7deb964995ac221cad31" id="r_a89449d92613d7deb964995ac221cad31"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a89449d92613d7deb964995ac221cad31">getName</a> () override</td></tr>
+<tr class="memdesc:a89449d92613d7deb964995ac221cad31"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取执行单元名称  <br /></td></tr>
+<tr class="separator:a89449d92613d7deb964995ac221cad31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1c8d49f8e86b1b1d8fc9436150228df" id="r_af1c8d49f8e86b1b1d8fc9436150228df"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#af1c8d49f8e86b1b1d8fc9436150228df">init</a> (<a class="el" href="classExecuteContext.html">ExecuteContext</a> *ctx, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSVariant.html">WTSVariant</a> *cfg) override</td></tr>
+<tr class="memdesc:af1c8d49f8e86b1b1d8fc9436150228df"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化执行单元  <br /></td></tr>
+<tr class="separator:af1c8d49f8e86b1b1d8fc9436150228df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50301701cab854bd6cded8e7cc033c89" id="r_a50301701cab854bd6cded8e7cc033c89"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a50301701cab854bd6cded8e7cc033c89">on_order</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isBuy, double leftover, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, bool isCanceled) override</td></tr>
+<tr class="memdesc:a50301701cab854bd6cded8e7cc033c89"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理订单回报  <br /></td></tr>
+<tr class="separator:a50301701cab854bd6cded8e7cc033c89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65c58f9d7e0321a46873bac2474078a1" id="r_a65c58f9d7e0321a46873bac2474078a1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a65c58f9d7e0321a46873bac2474078a1">on_tick</a> (<a class="el" href="classWTSTickData.html">WTSTickData</a> *newTick) override</td></tr>
+<tr class="memdesc:a65c58f9d7e0321a46873bac2474078a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理行情数据回调  <br /></td></tr>
+<tr class="separator:a65c58f9d7e0321a46873bac2474078a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27fc249ce9cbd2d868e156871d579712" id="r_a27fc249ce9cbd2d868e156871d579712"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a27fc249ce9cbd2d868e156871d579712">on_trade</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isBuy, double vol, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>) override</td></tr>
+<tr class="memdesc:a27fc249ce9cbd2d868e156871d579712"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理成交回报  <br /></td></tr>
+<tr class="separator:a27fc249ce9cbd2d868e156871d579712"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ba8b1549939d102fa29a873c445c487" id="r_a8ba8b1549939d102fa29a873c445c487"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a8ba8b1549939d102fa29a873c445c487">on_entrust</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool bSuccess, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message) override</td></tr>
+<tr class="memdesc:a8ba8b1549939d102fa29a873c445c487"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理委托回报  <br /></td></tr>
+<tr class="separator:a8ba8b1549939d102fa29a873c445c487"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae03fb7b9d8d8ab001d1c4d96c43ea92e" id="r_ae03fb7b9d8d8ab001d1c4d96c43ea92e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#ae03fb7b9d8d8ab001d1c4d96c43ea92e">set_position</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double newVol) override</td></tr>
+<tr class="memdesc:ae03fb7b9d8d8ab001d1c4d96c43ea92e"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置目标仓位  <br /></td></tr>
+<tr class="separator:ae03fb7b9d8d8ab001d1c4d96c43ea92e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9c42fa4c9ea2bf982fdeb502c9a9784" id="r_aa9c42fa4c9ea2bf982fdeb502c9a9784"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#aa9c42fa4c9ea2bf982fdeb502c9a9784">on_channel_ready</a> () override</td></tr>
+<tr class="memdesc:aa9c42fa4c9ea2bf982fdeb502c9a9784"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理交易通道就绪  <br /></td></tr>
+<tr class="separator:aa9c42fa4c9ea2bf982fdeb502c9a9784"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af69f50786eaa648533b5d4674e496e89" id="r_af69f50786eaa648533b5d4674e496e89"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#af69f50786eaa648533b5d4674e496e89">on_channel_lost</a> () override</td></tr>
+<tr class="memdesc:af69f50786eaa648533b5d4674e496e89"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理交易通道丢失  <br /></td></tr>
+<tr class="separator:af69f50786eaa648533b5d4674e496e89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classExecuteUnit"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classExecuteUnit')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classExecuteUnit.html">ExecuteUnit</a></td></tr>
+<tr class="memitem:af0b295bff06be9e7129b2e8bb36a1fb7 inherit pub_methods_classExecuteUnit" id="r_af0b295bff06be9e7129b2e8bb36a1fb7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExecuteUnit.html#af0b295bff06be9e7129b2e8bb36a1fb7">ExecuteUnit</a> (bool bDiffMode=false)</td></tr>
+<tr class="separator:af0b295bff06be9e7129b2e8bb36a1fb7 inherit pub_methods_classExecuteUnit"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3f269919e1c97106fa3a0224360d0f1 inherit pub_methods_classExecuteUnit" id="r_ac3f269919e1c97106fa3a0224360d0f1"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExecuteUnit.html#ac3f269919e1c97106fa3a0224360d0f1">~ExecuteUnit</a> ()</td></tr>
+<tr class="separator:ac3f269919e1c97106fa3a0224360d0f1 inherit pub_methods_classExecuteUnit"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f76f5f38cbbf498f141c3c0f9fbefc6 inherit pub_methods_classExecuteUnit" id="r_a7f76f5f38cbbf498f141c3c0f9fbefc6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExecuteUnit.html#a7f76f5f38cbbf498f141c3c0f9fbefc6">clear_all_position</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode)</td></tr>
+<tr class="separator:a7f76f5f38cbbf498f141c3c0f9fbefc6 inherit pub_methods_classExecuteUnit"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f61cc3a45f63f2e931ecbdb8f8dcd20 inherit pub_methods_classExecuteUnit" id="r_a7f61cc3a45f63f2e931ecbdb8f8dcd20"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExecuteUnit.html#a7f61cc3a45f63f2e931ecbdb8f8dcd20">on_account</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="demo__send__order_8cpp.html#af75f83b1c7d27fcbd5fb60b382330d60">currency</a>, double prebalance, double balance, double dynbalance, double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw)</td></tr>
+<tr class="separator:a7f61cc3a45f63f2e931ecbdb8f8dcd20 inherit pub_methods_classExecuteUnit"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 类型</h2></td></tr>
+<tr class="memitem:a722c959ce507b58d42fbd1a78bfa7132" id="r_a722c959ce507b58d42fbd1a78bfa7132"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structWtVWapExeUnit_1_1__CalcFlag.html">WtVWapExeUnit::_CalcFlag</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a722c959ce507b58d42fbd1a78bfa7132">CalcFlag</a></td></tr>
+<tr class="memdesc:a722c959ce507b58d42fbd1a78bfa7132"><td class="mdescLeft">&#160;</td><td class="mdescRight">计算锁标志结构体，实现RAII模式的原子锁  <br /></td></tr>
+<tr class="separator:a722c959ce507b58d42fbd1a78bfa7132"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 成员函数</h2></td></tr>
+<tr class="memitem:a53f4fe335761105a0492f2ee3144efc3" id="r_a53f4fe335761105a0492f2ee3144efc3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a53f4fe335761105a0492f2ee3144efc3">do_calc</a> ()</td></tr>
+<tr class="memdesc:a53f4fe335761105a0492f2ee3144efc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">执行仓位计算和发单操作  <br /></td></tr>
+<tr class="separator:a53f4fe335761105a0492f2ee3144efc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a950d3c96692c83e09ff38c9866d63bc4" id="r_a950d3c96692c83e09ff38c9866d63bc4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a950d3c96692c83e09ff38c9866d63bc4">fire_at_once</a> (double qty)</td></tr>
+<tr class="memdesc:a950d3c96692c83e09ff38c9866d63bc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">立即发单  <br /></td></tr>
+<tr class="separator:a950d3c96692c83e09ff38c9866d63bc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:a5d52e0df5e4c394b51ace58deff27789" id="r_a5d52e0df5e4c394b51ace58deff27789"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a5d52e0df5e4c394b51ace58deff27789">_last_tick</a></td></tr>
+<tr class="memdesc:a5d52e0df5e4c394b51ace58deff27789"><td class="mdescLeft">&#160;</td><td class="mdescRight">上一笔行情数据指针  <br /></td></tr>
+<tr class="separator:a5d52e0df5e4c394b51ace58deff27789"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f9df8fd465558261beb101826105453" id="r_a3f9df8fd465558261beb101826105453"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a3f9df8fd465558261beb101826105453">_target_pos</a></td></tr>
+<tr class="memdesc:a3f9df8fd465558261beb101826105453"><td class="mdescLeft">&#160;</td><td class="mdescRight">目标仓位，正数表示多头，负数表示空头  <br /></td></tr>
+<tr class="separator:a3f9df8fd465558261beb101826105453"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe8cc87b5b5d9cc542d308345154cc82" id="r_abe8cc87b5b5d9cc542d308345154cc82"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#abe8cc87b5b5d9cc542d308345154cc82">_channel_ready</a></td></tr>
+<tr class="memdesc:abe8cc87b5b5d9cc542d308345154cc82"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易通道是否就绪标志  <br /></td></tr>
+<tr class="separator:abe8cc87b5b5d9cc542d308345154cc82"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6360692a98e8c7e1471be412a5838292" id="r_a6360692a98e8c7e1471be412a5838292"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a6360692a98e8c7e1471be412a5838292">_mtx_calc</a></td></tr>
+<tr class="memdesc:a6360692a98e8c7e1471be412a5838292"><td class="mdescLeft">&#160;</td><td class="mdescRight">计算锁，用于保护do_calc方法的并发调用  <br /></td></tr>
+<tr class="separator:a6360692a98e8c7e1471be412a5838292"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec32109283560095bf8e489bb2cfc5bd" id="r_aec32109283560095bf8e489bb2cfc5bd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSCommodityInfo.html">WTSCommodityInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#aec32109283560095bf8e489bb2cfc5bd">_comm_info</a></td></tr>
+<tr class="memdesc:aec32109283560095bf8e489bb2cfc5bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">品种信息指针，包含合约的交易规则和参数  <br /></td></tr>
+<tr class="separator:aec32109283560095bf8e489bb2cfc5bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8dc45314239812382fbb34f4149a7da" id="r_aa8dc45314239812382fbb34f4149a7da"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#aa8dc45314239812382fbb34f4149a7da">_sess_info</a></td></tr>
+<tr class="memdesc:aa8dc45314239812382fbb34f4149a7da"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易时间信息指针，包含交易时段和休市信息  <br /></td></tr>
+<tr class="separator:aa8dc45314239812382fbb34f4149a7da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fab1553f750a1f63d5cd3bcdd4a0a39" id="r_a8fab1553f750a1f63d5cd3bcdd4a0a39"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a8fab1553f750a1f63d5cd3bcdd4a0a39">_cancel_times</a></td></tr>
+<tr class="memdesc:a8fab1553f750a1f63d5cd3bcdd4a0a39"><td class="mdescLeft">&#160;</td><td class="mdescRight">撤单次数统计  <br /></td></tr>
+<tr class="separator:a8fab1553f750a1f63d5cd3bcdd4a0a39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa56f63346a0777e0a2cc1a6956abc0cd" id="r_aa56f63346a0777e0a2cc1a6956abc0cd"><td class="memItemLeft" align="right" valign="top">std::atomic&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#aa56f63346a0777e0a2cc1a6956abc0cd">_in_calc</a></td></tr>
+<tr class="memdesc:aa56f63346a0777e0a2cc1a6956abc0cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">计算锁标志，用于防止do_calc方法被并发调用  <br /></td></tr>
+<tr class="separator:aa56f63346a0777e0a2cc1a6956abc0cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">执行参数</div></td></tr>
+<tr class="memitem:a6d36706c7d2ed93229128d5fafc231fd" id="r_a6d36706c7d2ed93229128d5fafc231fd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtOrdMon.html">WtOrdMon</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a6d36706c7d2ed93229128d5fafc231fd">_orders_mon</a></td></tr>
+<tr class="memdesc:a6d36706c7d2ed93229128d5fafc231fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">订单监控器，管理所有发出的订单状态  <br /></td></tr>
+<tr class="separator:a6d36706c7d2ed93229128d5fafc231fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0413aaa18802bb8de5d6e1383054dbee" id="r_a0413aaa18802bb8de5d6e1383054dbee"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a0413aaa18802bb8de5d6e1383054dbee">_cancel_cnt</a></td></tr>
+<tr class="memdesc:a0413aaa18802bb8de5d6e1383054dbee"><td class="mdescLeft">&#160;</td><td class="mdescRight">撤单计数器，记录当前执行周期内的撤单次数  <br /></td></tr>
+<tr class="separator:a0413aaa18802bb8de5d6e1383054dbee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e8058cae8ece3d92d0008d78c37d2f7" id="r_a0e8058cae8ece3d92d0008d78c37d2f7"><td class="memItemLeft" align="right" valign="top">vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a0e8058cae8ece3d92d0008d78c37d2f7">VwapAim</a></td></tr>
+<tr class="memdesc:a0e8058cae8ece3d92d0008d78c37d2f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">VWAP目标数组，按分钟记录的目标VWAP预测总报单量  <br /></td></tr>
+<tr class="separator:a0e8058cae8ece3d92d0008d78c37d2f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">配置参数</div></td></tr>
+<tr class="memitem:ab5614b05b74029c522df78c04748ec32" id="r_ab5614b05b74029c522df78c04748ec32"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#ab5614b05b74029c522df78c04748ec32">_total_secs</a></td></tr>
+<tr class="memdesc:ab5614b05b74029c522df78c04748ec32"><td class="mdescLeft">&#160;</td><td class="mdescRight">执行总时间，单位秒，指定完成整个交易的总时间范围  <br /></td></tr>
+<tr class="separator:ab5614b05b74029c522df78c04748ec32"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f3f55c473d010a51dc5297cf5a1fd05" id="r_a5f3f55c473d010a51dc5297cf5a1fd05"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a5f3f55c473d010a51dc5297cf5a1fd05">_total_times</a></td></tr>
+<tr class="memdesc:a5f3f55c473d010a51dc5297cf5a1fd05"><td class="mdescLeft">&#160;</td><td class="mdescRight">总执行次数，指定将订单分拆为多少次执行  <br /></td></tr>
+<tr class="separator:a5f3f55c473d010a51dc5297cf5a1fd05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29f984de19109cdf0124f3f211ed6319" id="r_a29f984de19109cdf0124f3f211ed6319"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a29f984de19109cdf0124f3f211ed6319">_tail_secs</a></td></tr>
+<tr class="memdesc:a29f984de19109cdf0124f3f211ed6319"><td class="mdescLeft">&#160;</td><td class="mdescRight">执行尾部时间，单位秒，用于调整最后阶段的执行策略  <br /></td></tr>
+<tr class="separator:a29f984de19109cdf0124f3f211ed6319"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af30e9469b087da1c1695a130ecca9931" id="r_af30e9469b087da1c1695a130ecca9931"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#af30e9469b087da1c1695a130ecca9931">_ord_sticky</a></td></tr>
+<tr class="memdesc:af30e9469b087da1c1695a130ecca9931"><td class="mdescLeft">&#160;</td><td class="mdescRight">挂单时限，单位秒，指定订单挂单后多长时间未成交则撤单  <br /></td></tr>
+<tr class="separator:af30e9469b087da1c1695a130ecca9931"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a525ca668e218f7bfc30314cd8f45b0" id="r_a8a525ca668e218f7bfc30314cd8f45b0"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a8a525ca668e218f7bfc30314cd8f45b0">_price_mode</a></td></tr>
+<tr class="memdesc:a8a525ca668e218f7bfc30314cd8f45b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">价格模式: 0-最新价, 1-最优价, 2-对手价，决定发单价格的计算方式  <br /></td></tr>
+<tr class="separator:a8a525ca668e218f7bfc30314cd8f45b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afbec0d160bc4626aba92e43dea6044c4" id="r_afbec0d160bc4626aba92e43dea6044c4"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#afbec0d160bc4626aba92e43dea6044c4">_price_offset</a></td></tr>
+<tr class="memdesc:afbec0d160bc4626aba92e43dea6044c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">挂单价格偏移，相对于基准价格的偏移量，买入时为正，卖出时为负  <br /></td></tr>
+<tr class="separator:afbec0d160bc4626aba92e43dea6044c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72cfb8512b0b9f6c83c99f1ec6fed44f" id="r_a72cfb8512b0b9f6c83c99f1ec6fed44f"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a72cfb8512b0b9f6c83c99f1ec6fed44f">_begin_time</a></td></tr>
+<tr class="memdesc:a72cfb8512b0b9f6c83c99f1ec6fed44f"><td class="mdescLeft">&#160;</td><td class="mdescRight">开始时间，格式为HHMM，如1000表示10:00  <br /></td></tr>
+<tr class="separator:a72cfb8512b0b9f6c83c99f1ec6fed44f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb1ebe27f8684edc32504432f7d276aa" id="r_abb1ebe27f8684edc32504432f7d276aa"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#abb1ebe27f8684edc32504432f7d276aa">_end_time</a></td></tr>
+<tr class="memdesc:abb1ebe27f8684edc32504432f7d276aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">结束时间，格式为HHMM，如1030表示10:30  <br /></td></tr>
+<tr class="separator:abb1ebe27f8684edc32504432f7d276aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a136dbb0ace61d6bd535cda0b830c410f" id="r_a136dbb0ace61d6bd535cda0b830c410f"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a136dbb0ace61d6bd535cda0b830c410f">_min_open_lots</a></td></tr>
+<tr class="memdesc:a136dbb0ace61d6bd535cda0b830c410f"><td class="mdescLeft">&#160;</td><td class="mdescRight">最小开仓数量，当需要交易的数量小于此值时不发单  <br /></td></tr>
+<tr class="separator:a136dbb0ace61d6bd535cda0b830c410f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5213f5da403656c3da1f81348a8302b5" id="r_a5213f5da403656c3da1f81348a8302b5"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a5213f5da403656c3da1f81348a8302b5">_order_lots</a></td></tr>
+<tr class="memdesc:a5213f5da403656c3da1f81348a8302b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">单次发单手数，指定每次发单的标准数量  <br /></td></tr>
+<tr class="separator:a5213f5da403656c3da1f81348a8302b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb9425b74af3d11e9f3d5e450b1bf793" id="r_aeb9425b74af3d11e9f3d5e450b1bf793"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#aeb9425b74af3d11e9f3d5e450b1bf793">isCanCancel</a></td></tr>
+<tr class="memdesc:aeb9425b74af3d11e9f3d5e450b1bf793"><td class="mdescLeft">&#160;</td><td class="mdescRight">是否允许撤单标志  <br /></td></tr>
+<tr class="separator:aeb9425b74af3d11e9f3d5e450b1bf793"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">临时变量</div></td></tr>
+<tr class="memitem:acc4318591def78b030f50ac51bef36f5" id="r_acc4318591def78b030f50ac51bef36f5"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#acc4318591def78b030f50ac51bef36f5">_this_target</a></td></tr>
+<tr class="memdesc:acc4318591def78b030f50ac51bef36f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">本轮目标仓位，当前时间点应该达到的仓位量  <br /></td></tr>
+<tr class="separator:acc4318591def78b030f50ac51bef36f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f490b0aacd3ceab82a394f1561a87fd" id="r_a8f490b0aacd3ceab82a394f1561a87fd"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a8f490b0aacd3ceab82a394f1561a87fd">_fire_span</a></td></tr>
+<tr class="memdesc:a8f490b0aacd3ceab82a394f1561a87fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">发单间隔，单位毫秒，根据总执行时间和次数计算得出  <br /></td></tr>
+<tr class="separator:a8f490b0aacd3ceab82a394f1561a87fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e50d13131fdd843d0f789f259041de7" id="r_a1e50d13131fdd843d0f789f259041de7"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a1e50d13131fdd843d0f789f259041de7">_fired_times</a></td></tr>
+<tr class="memdesc:a1e50d13131fdd843d0f789f259041de7"><td class="mdescLeft">&#160;</td><td class="mdescRight">已执行次数，记录当前执行周期内已经发送的订单次数  <br /></td></tr>
+<tr class="separator:a1e50d13131fdd843d0f789f259041de7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fe71c8a342145f2457fa25daa8cc911" id="r_a4fe71c8a342145f2457fa25daa8cc911"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a4fe71c8a342145f2457fa25daa8cc911">_last_fire_time</a></td></tr>
+<tr class="memdesc:a4fe71c8a342145f2457fa25daa8cc911"><td class="mdescLeft">&#160;</td><td class="mdescRight">上次执行的时间戳，单位毫秒，用于计算下次发单时间  <br /></td></tr>
+<tr class="separator:a4fe71c8a342145f2457fa25daa8cc911"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98422f6d53c94f327cd558d7769843a7" id="r_a98422f6d53c94f327cd558d7769843a7"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a98422f6d53c94f327cd558d7769843a7">_last_place_time</a></td></tr>
+<tr class="memdesc:a98422f6d53c94f327cd558d7769843a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">上个下单时间戳，单位毫秒，用于计算订单是否超时需要撤单  <br /></td></tr>
+<tr class="separator:a98422f6d53c94f327cd558d7769843a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a598b256ea2875bd85cc5f55de12cba02" id="r_a598b256ea2875bd85cc5f55de12cba02"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a598b256ea2875bd85cc5f55de12cba02">_last_tick_time</a></td></tr>
+<tr class="memdesc:a598b256ea2875bd85cc5f55de12cba02"><td class="mdescLeft">&#160;</td><td class="mdescRight">上个行情数据的时间戳，单位毫秒，用于判断行情数据是否有效  <br /></td></tr>
+<tr class="separator:a598b256ea2875bd85cc5f55de12cba02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb2dff5ad73c0424a2abf3ba3f975ab5" id="r_afb2dff5ad73c0424a2abf3ba3f975ab5"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#afb2dff5ad73c0424a2abf3ba3f975ab5">_Vwap_vol</a></td></tr>
+<tr class="memdesc:afb2dff5ad73c0424a2abf3ba3f975ab5"><td class="mdescLeft">&#160;</td><td class="mdescRight">VWAP单位时间下单量，根据VWAP算法计算的每个时间单元应发送的订单量  <br /></td></tr>
+<tr class="separator:afb2dff5ad73c0424a2abf3ba3f975ab5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e3350021f9122f512a8849f03263c9d" id="r_a4e3350021f9122f512a8849f03263c9d"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtVWapExeUnit.html#a4e3350021f9122f512a8849f03263c9d">_Vwap_prz</a></td></tr>
+<tr class="memdesc:a4e3350021f9122f512a8849f03263c9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">VWAP价格，当前计算得到的成交量加权平均价格  <br /></td></tr>
+<tr class="separator:a4e3350021f9122f512a8849f03263c9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+额外继承的成员函数</h2></td></tr>
+<tr class="inherit_header pro_attribs_classExecuteUnit"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classExecuteUnit')"><img src="closed.png" alt="-"/>&#160;Protected 属性 继承自 <a class="el" href="classExecuteUnit.html">ExecuteUnit</a></td></tr>
+<tr class="memitem:adcad0deb3cd690a907595ba406a51f52 inherit pro_attribs_classExecuteUnit" id="r_adcad0deb3cd690a907595ba406a51f52"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classExecuteContext.html">ExecuteContext</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExecuteUnit.html#adcad0deb3cd690a907595ba406a51f52">_ctx</a></td></tr>
+<tr class="separator:adcad0deb3cd690a907595ba406a51f52 inherit pro_attribs_classExecuteUnit"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74ac9810daca8c1ae10755db4d2fbd22 inherit pro_attribs_classExecuteUnit" id="r_a74ac9810daca8c1ae10755db4d2fbd22"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExecuteUnit.html#a74ac9810daca8c1ae10755db4d2fbd22">_code</a></td></tr>
+<tr class="separator:a74ac9810daca8c1ae10755db4d2fbd22 inherit pro_attribs_classExecuteUnit"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>VWAP(成交量加权平均价格)执行单元 </p>
+<p>基于VWAP算法的智能交易执行单元，通过预测成交量分布 将大单拆分成多个小单分时段执行，以实现接近VWAP价格的执行效果 主要特点是根据历史成交量分布模式来预测未来成交量，从而优化订单执行 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00022">22</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="a722c959ce507b58d42fbd1a78bfa7132" name="a722c959ce507b58d42fbd1a78bfa7132"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a722c959ce507b58d42fbd1a78bfa7132">&#9670;&#160;</a></span>CalcFlag</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structWtVWapExeUnit_1_1__CalcFlag.html">WtVWapExeUnit::_CalcFlag</a> <a class="el" href="classWtVWapExeUnit.html#a722c959ce507b58d42fbd1a78bfa7132">WtVWapExeUnit::CalcFlag</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>计算锁标志结构体，实现RAII模式的原子锁 </p>
+<p>使用RAII模式实现的原子锁，在构造时获取锁，在析构时自动释放锁 主要用于保护do_calc方法的并发调用，确保同一时刻只有一个线程在执行计算 </p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a9c8574a47eb0e48270074ce07ea92e06" name="a9c8574a47eb0e48270074ce07ea92e06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c8574a47eb0e48270074ce07ea92e06">&#9670;&#160;</a></span>WtVWapExeUnit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">WtVWapExeUnit::WtVWapExeUnit </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>VWAP执行单元的构造函数</p>
+<p>初始化VWAP执行单元对象，设置默认参数和初始状态</p>
+<p>初始化VWAP执行单元对象，设置所有成员变量的默认值 包括行情数据、品种信息、交易参数和状态标记等 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a> 第 <a class="el" href="WtVWapExeUnit_8cpp_source.html#l00025">25</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad09154ef2bf81dd1cb4059eddb7ba369" name="ad09154ef2bf81dd1cb4059eddb7ba369"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad09154ef2bf81dd1cb4059eddb7ba369">&#9670;&#160;</a></span>~WtVWapExeUnit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">WtVWapExeUnit::~WtVWapExeUnit </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>析构函数 </p>
+<p>VWAP执行单元的析构函数</p>
+<p>清理VWAP执行单元对象的资源，释放相关内存</p>
+<p>清理VWAP执行单元对象的资源，释放行情数据和品种信息等内存 释放内存前会检查指针是否为空，避免释放空指针 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a> 第 <a class="el" href="WtVWapExeUnit_8cpp_source.html#l00050">50</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a53f4fe335761105a0492f2ee3144efc3" name="a53f4fe335761105a0492f2ee3144efc3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53f4fe335761105a0492f2ee3144efc3">&#9670;&#160;</a></span>do_calc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtVWapExeUnit::do_calc </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>执行仓位计算和发单操作 </p>
+<p>执行VWAP交易计算和下单逻辑</p>
+<p>根据VWAP算法计算当前时间点应该执行的仓位量，并触发相应的交易操作 包括计算当前时间点的目标仓位、生成订单、管理订单状态等</p>
+<p>这是VWAP执行单元的核心方法，负责计算目标仓位与实际仓位的差异， 并根据VWAP算法确定下单时机、数量和价格 包含多种交易条件检查和价格调整逻辑，确保订单在最优价格执行 同时处理涨跌停限制、最小下单量等交易约束 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a> 第 <a class="el" href="WtVWapExeUnit_8cpp_source.html#l00412">412</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a950d3c96692c83e09ff38c9866d63bc4" name="a950d3c96692c83e09ff38c9866d63bc4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a950d3c96692c83e09ff38c9866d63bc4">&#9670;&#160;</a></span>fire_at_once()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtVWapExeUnit::fire_at_once </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>qty</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>立即发单 </p>
+<p>立即发送交易订单</p>
+<p>根据当前市场状况和配置的价格模式立即发送指定数量的订单 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">qty</td><td>要发送的订单数量，正数表示买入，负数表示卖出</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当需要立即发送订单时调用，例如在订单被撤销后需要重新发送 根据当前市场状况和价格模式设置订单价格，并处理涨跌停限制 这个方法与普通的do_calc方法不同，它会立即发送订单而不考虑VWAP算法 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">qty</td><td>要交易的数量，正数表示买入，负数表示卖出 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a> 第 <a class="el" href="WtVWapExeUnit_8cpp_source.html#l00568">568</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a49a86bcdfc0c22b81ea8261244752ad5" name="a49a86bcdfc0c22b81ea8261244752ad5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49a86bcdfc0c22b81ea8261244752ad5">&#9670;&#160;</a></span>getFactName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * WtVWapExeUnit::getFactName </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取所属执行器工厂名称 </p>
+<p>返回该执行单元所属的工厂名称，用于执行单元的注册和管理 </p><dl class="section return"><dt>返回</dt><dd>工厂名称字符串 </dd></dl>
+
+<p>实现了 <a class="el" href="classExecuteUnit.html#a9926a35133fe08fe9bc8c1c7fcd4646c">ExecuteUnit</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a> 第 <a class="el" href="WtVWapExeUnit_8cpp_source.html#l00134">134</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a89449d92613d7deb964995ac221cad31" name="a89449d92613d7deb964995ac221cad31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89449d92613d7deb964995ac221cad31">&#9670;&#160;</a></span>getName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * WtVWapExeUnit::getName </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取执行单元名称 </p>
+<p>返回该执行单元的名称，用于标识不同类型的执行单元 </p><dl class="section return"><dt>返回</dt><dd>执行单元名称字符串 </dd></dl>
+
+<p>实现了 <a class="el" href="classExecuteUnit.html#abb798a66927eba0d0093741025de7890">ExecuteUnit</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a> 第 <a class="el" href="WtVWapExeUnit_8cpp_source.html#l00144">144</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af1c8d49f8e86b1b1d8fc9436150228df" name="af1c8d49f8e86b1b1d8fc9436150228df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1c8d49f8e86b1b1d8fc9436150228df">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtVWapExeUnit::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classExecuteContext.html">ExecuteContext</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>cfg</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>初始化执行单元 </p>
+<p>初始化VWAP执行单元</p>
+<p>根据提供的执行上下文、合约代码和配置参数初始化VWAP执行单元 设置各种交易参数如执行时间、价格模式、发单间隔等 并加载历史VWAP成交量分布数据用于预测 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>执行单元运行环境，提供交易接口和市场数据 </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码，指定要交易的合约 </td></tr>
+    <tr><td class="paramname">cfg</td><td>配置参数，包含执行单元的各种设置 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classExecuteUnit.html#a581aa0f5a523cedc728d13dfffa5788f">ExecuteUnit</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a> 第 <a class="el" href="WtVWapExeUnit_8cpp_source.html#l00158">158</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af69f50786eaa648533b5d4674e496e89" name="af69f50786eaa648533b5d4674e496e89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af69f50786eaa648533b5d4674e496e89">&#9670;&#160;</a></span>on_channel_lost()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtVWapExeUnit::on_channel_lost </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理交易通道丢失 </p>
+<p>当交易通道断开时调用，重置内部通道状态标记 在当前实现中，仅将通道状态标记设置为关闭</p>
+<p>当交易通道断开连接或发生异常时调用 当前实现中仅作为占位函数，可在此处添加通道丢失时的处理逻辑 例如清理订单状态、记录日志或触发重连机制 </p>
+
+<p>实现了 <a class="el" href="classExecuteUnit.html#a0428e26e1a046b72b408258e127e3300">ExecuteUnit</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a> 第 <a class="el" href="WtVWapExeUnit_8cpp_source.html#l00645">645</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa9c42fa4c9ea2bf982fdeb502c9a9784" name="aa9c42fa4c9ea2bf982fdeb502c9a9784"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9c42fa4c9ea2bf982fdeb502c9a9784">&#9670;&#160;</a></span>on_channel_ready()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtVWapExeUnit::on_channel_ready </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理交易通道就绪 </p>
+<p>当交易通道就绪时调用，设置内部通道状态标记并触发VWAP仓位计算 如果有目标仓位且当前有有效的行情数据，则重新计算并发单</p>
+<p>当交易通道就绪时调用，设置内部通道状态标记并检查未完成订单 处理三种情况：</p><ol type="1">
+<li>有未完成订单但本地无记录：撤销这些外部订单</li>
+<li>无未完成订单但本地有记录：清理本地错误订单</li>
+<li>其他情况：记录日志 最后触发仓位计算和发单操作 </li>
+</ol>
+
+<p>实现了 <a class="el" href="classExecuteUnit.html#a9f4c260a14b55bd4ff28d14de7b90e96">ExecuteUnit</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a> 第 <a class="el" href="WtVWapExeUnit_8cpp_source.html#l00266">266</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8ba8b1549939d102fa29a873c445c487" name="a8ba8b1549939d102fa29a873c445c487"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ba8b1549939d102fa29a873c445c487">&#9670;&#160;</a></span>on_entrust()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtVWapExeUnit::on_entrust </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bSuccess</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理委托回报 </p>
+<p>当收到委托回报时调用，主要处理委托失败的情况 如果委托失败，会从订单监控器中移除该订单并重新计算VWAP执行计划 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">bSuccess</td><td>委托是否成功 </td></tr>
+    <tr><td class="paramname">message</td><td>委托回报消息</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到委托回报时调用，主要处理委托失败的情况 如果委托失败，会从订单监控器中移除该订单并重新计算执行计划 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">bSuccess</td><td>委托是否成功 </td></tr>
+    <tr><td class="paramname">message</td><td>委托回报消息 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>实现了 <a class="el" href="classExecuteUnit.html#a617f4e0ae426ccaed4fae662251e05b2">ExecuteUnit</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a> 第 <a class="el" href="WtVWapExeUnit_8cpp_source.html#l00392">392</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a50301701cab854bd6cded8e7cc033c89" name="a50301701cab854bd6cded8e7cc033c89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50301701cab854bd6cded8e7cc033c89">&#9670;&#160;</a></span>on_order()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtVWapExeUnit::on_order </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isBuy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>leftover</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isCanceled</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理订单回报 </p>
+<p>处理订单状态变化，包括成交、撤销等情况，并更新内部订单管理状态 如果订单被撤销且目标仓位未达到，则会重新发送订单 在VWAP执行策略中，这个方法还会跟踪当前的成交进度以调整执行计划 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否为买入订单 </td></tr>
+    <tr><td class="paramname">leftover</td><td>剩余未成交数量 </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">isCanceled</td><td>是否已撤销 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>实现了 <a class="el" href="classExecuteUnit.html#a3941116e2babb85d87182ec1d5e5056f">ExecuteUnit</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a> 第 <a class="el" href="WtVWapExeUnit_8cpp_source.html#l00220">220</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a65c58f9d7e0321a46873bac2474078a1" name="a65c58f9d7e0321a46873bac2474078a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65c58f9d7e0321a46873bac2474078a1">&#9670;&#160;</a></span>on_tick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtVWapExeUnit::on_tick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>newTick</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理行情数据回调 </p>
+<p>当收到新的行情数据时调用，更新内部行情缓存并触发相关的交易逻辑 包括首次行情处理、交易时间校验、计算VWAP成交量分布、超时撤单等 这是VWAP执行单元的核心方法，负责根据当前市场状况调整执行计划 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">newTick</td><td>新的行情数据指针</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到新的行情数据时调用，更新内部行情缓存并触发相关的交易逻辑 处理两种情况：</p><ol type="1">
+<li>首次行情：检查目标仓位与实际仓位的差异，如有差异则触发计算和发单</li>
+<li>后续行情：检查订单超时情况并撤单，或根据时间间隔触发新一轮计算 这是VWAP执行单元的核心方法，负责根据当前市场状况调整执行计划 <dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">newTick</td><td>新的行情数据指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+</li>
+</ol>
+
+<p>实现了 <a class="el" href="classExecuteUnit.html#aae14fca80e2a9ec990a0f4e2d5513a75">ExecuteUnit</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a> 第 <a class="el" href="WtVWapExeUnit_8cpp_source.html#l00316">316</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a27fc249ce9cbd2d868e156871d579712" name="a27fc249ce9cbd2d868e156871d579712"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27fc249ce9cbd2d868e156871d579712">&#9670;&#160;</a></span>on_trade()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtVWapExeUnit::on_trade </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isBuy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>vol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理成交回报 </p>
+<p>当收到成交回报时调用，更新内部成交状态和VWAP执行进度 在VWAP执行单元中，成交回报用于跟踪实际成交情况并调整后续执行计划 同时计算当前实际的VWAP价格与目标价格的偏差 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否为买入成交 </td></tr>
+    <tr><td class="paramname">vol</td><td>成交数量，这里没有正负，通过isBuy确定买入还是卖出 </td></tr>
+    <tr><td class="paramname">price</td><td>成交价格</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到成交回报时调用，在当前实现中仅作为占位函数 实际的成交处理逻辑在on_tick方法中触发 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否为买入成交 </td></tr>
+    <tr><td class="paramname">vol</td><td>成交数量 </td></tr>
+    <tr><td class="paramname">price</td><td>成交价格 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>实现了 <a class="el" href="classExecuteUnit.html#a60f353b0a5c19a18c95929d6bc364999">ExecuteUnit</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a> 第 <a class="el" href="WtVWapExeUnit_8cpp_source.html#l00380">380</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae03fb7b9d8d8ab001d1c4d96c43ea92e" name="ae03fb7b9d8d8ab001d1c4d96c43ea92e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae03fb7b9d8d8ab001d1c4d96c43ea92e">&#9670;&#160;</a></span>set_position()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtVWapExeUnit::set_position </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>newVol</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>设置目标仓位 </p>
+<p>设置执行单元的目标仓位，并触发VWAP仓位计算和发单操作 当目标仓位与当前目标仓位不同时，重置发单次数并重新计算VWAP执行计划 这是触发VWAP执行策略的入口点 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">newVol</td><td>新的目标仓位，可以使用DBL_MAX表示清仓</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>设置指定合约的目标仓位，并触发交易计算 如果合约代码不匹配或目标仓位与当前目标相同，则不进行操作 否则更新目标仓位并重置执行次数，然后触发交易计算 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">newVol</td><td>新的目标仓位数量 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>实现了 <a class="el" href="classExecuteUnit.html#a84d1f03b16fcd9bbcfbf65d132f2e0c1">ExecuteUnit</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a> 第 <a class="el" href="WtVWapExeUnit_8cpp_source.html#l00624">624</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a72cfb8512b0b9f6c83c99f1ec6fed44f" name="a72cfb8512b0b9f6c83c99f1ec6fed44f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72cfb8512b0b9f6c83c99f1ec6fed44f">&#9670;&#160;</a></span>_begin_time</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtVWapExeUnit::_begin_time</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>开始时间，格式为HHMM，如1000表示10:00 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00194">194</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0413aaa18802bb8de5d6e1383054dbee" name="a0413aaa18802bb8de5d6e1383054dbee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0413aaa18802bb8de5d6e1383054dbee">&#9670;&#160;</a></span>_cancel_cnt</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtVWapExeUnit::_cancel_cnt</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>撤单计数器，记录当前执行周期内的撤单次数 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00174">174</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8fab1553f750a1f63d5cd3bcdd4a0a39" name="a8fab1553f750a1f63d5cd3bcdd4a0a39"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8fab1553f750a1f63d5cd3bcdd4a0a39">&#9670;&#160;</a></span>_cancel_times</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtVWapExeUnit::_cancel_times</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>撤单次数统计 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00164">164</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abe8cc87b5b5d9cc542d308345154cc82" name="abe8cc87b5b5d9cc542d308345154cc82"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe8cc87b5b5d9cc542d308345154cc82">&#9670;&#160;</a></span>_channel_ready</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtVWapExeUnit::_channel_ready</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易通道是否就绪标志 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00155">155</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aec32109283560095bf8e489bb2cfc5bd" name="aec32109283560095bf8e489bb2cfc5bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec32109283560095bf8e489bb2cfc5bd">&#9670;&#160;</a></span>_comm_info</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSCommodityInfo.html">WTSCommodityInfo</a>* WtVWapExeUnit::_comm_info</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>品种信息指针，包含合约的交易规则和参数 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00160">160</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abb1ebe27f8684edc32504432f7d276aa" name="abb1ebe27f8684edc32504432f7d276aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb1ebe27f8684edc32504432f7d276aa">&#9670;&#160;</a></span>_end_time</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtVWapExeUnit::_end_time</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>结束时间，格式为HHMM，如1030表示10:30 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00196">196</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8f490b0aacd3ceab82a394f1561a87fd" name="a8f490b0aacd3ceab82a394f1561a87fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f490b0aacd3ceab82a394f1561a87fd">&#9670;&#160;</a></span>_fire_span</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtVWapExeUnit::_fire_span</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>发单间隔，单位毫秒，根据总执行时间和次数计算得出 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00210">210</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1e50d13131fdd843d0f789f259041de7" name="a1e50d13131fdd843d0f789f259041de7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1e50d13131fdd843d0f789f259041de7">&#9670;&#160;</a></span>_fired_times</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtVWapExeUnit::_fired_times</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>已执行次数，记录当前执行周期内已经发送的订单次数 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00212">212</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa56f63346a0777e0a2cc1a6956abc0cd" name="aa56f63346a0777e0a2cc1a6956abc0cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa56f63346a0777e0a2cc1a6956abc0cd">&#9670;&#160;</a></span>_in_calc</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::atomic&lt;bool&gt; WtVWapExeUnit::_in_calc</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>计算锁标志，用于防止do_calc方法被并发调用 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00226">226</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4fe71c8a342145f2457fa25daa8cc911" name="a4fe71c8a342145f2457fa25daa8cc911"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4fe71c8a342145f2457fa25daa8cc911">&#9670;&#160;</a></span>_last_fire_time</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t WtVWapExeUnit::_last_fire_time</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>上次执行的时间戳，单位毫秒，用于计算下次发单时间 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00214">214</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a98422f6d53c94f327cd558d7769843a7" name="a98422f6d53c94f327cd558d7769843a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98422f6d53c94f327cd558d7769843a7">&#9670;&#160;</a></span>_last_place_time</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t WtVWapExeUnit::_last_place_time</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>上个下单时间戳，单位毫秒，用于计算订单是否超时需要撤单 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00216">216</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5d52e0df5e4c394b51ace58deff27789" name="a5d52e0df5e4c394b51ace58deff27789"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d52e0df5e4c394b51ace58deff27789">&#9670;&#160;</a></span>_last_tick</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSTickData.html">WTSTickData</a>* WtVWapExeUnit::_last_tick</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>上一笔行情数据指针 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00151">151</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a598b256ea2875bd85cc5f55de12cba02" name="a598b256ea2875bd85cc5f55de12cba02"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a598b256ea2875bd85cc5f55de12cba02">&#9670;&#160;</a></span>_last_tick_time</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t WtVWapExeUnit::_last_tick_time</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>上个行情数据的时间戳，单位毫秒，用于判断行情数据是否有效 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00218">218</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a136dbb0ace61d6bd535cda0b830c410f" name="a136dbb0ace61d6bd535cda0b830c410f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a136dbb0ace61d6bd535cda0b830c410f">&#9670;&#160;</a></span>_min_open_lots</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double WtVWapExeUnit::_min_open_lots</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>最小开仓数量，当需要交易的数量小于此值时不发单 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00198">198</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6360692a98e8c7e1471be412a5838292" name="a6360692a98e8c7e1471be412a5838292"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6360692a98e8c7e1471be412a5838292">&#9670;&#160;</a></span>_mtx_calc</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a> WtVWapExeUnit::_mtx_calc</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>计算锁，用于保护do_calc方法的并发调用 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00157">157</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af30e9469b087da1c1695a130ecca9931" name="af30e9469b087da1c1695a130ecca9931"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af30e9469b087da1c1695a130ecca9931">&#9670;&#160;</a></span>_ord_sticky</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtVWapExeUnit::_ord_sticky</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>挂单时限，单位秒，指定订单挂单后多长时间未成交则撤单 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00188">188</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5213f5da403656c3da1f81348a8302b5" name="a5213f5da403656c3da1f81348a8302b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5213f5da403656c3da1f81348a8302b5">&#9670;&#160;</a></span>_order_lots</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double WtVWapExeUnit::_order_lots</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>单次发单手数，指定每次发单的标准数量 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00200">200</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6d36706c7d2ed93229128d5fafc231fd" name="a6d36706c7d2ed93229128d5fafc231fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d36706c7d2ed93229128d5fafc231fd">&#9670;&#160;</a></span>_orders_mon</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtOrdMon.html">WtOrdMon</a> WtVWapExeUnit::_orders_mon</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>订单监控器，管理所有发出的订单状态 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00172">172</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8a525ca668e218f7bfc30314cd8f45b0" name="a8a525ca668e218f7bfc30314cd8f45b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a525ca668e218f7bfc30314cd8f45b0">&#9670;&#160;</a></span>_price_mode</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtVWapExeUnit::_price_mode</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>价格模式: 0-最新价, 1-最优价, 2-对手价，决定发单价格的计算方式 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00190">190</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afbec0d160bc4626aba92e43dea6044c4" name="afbec0d160bc4626aba92e43dea6044c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afbec0d160bc4626aba92e43dea6044c4">&#9670;&#160;</a></span>_price_offset</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtVWapExeUnit::_price_offset</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>挂单价格偏移，相对于基准价格的偏移量，买入时为正，卖出时为负 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00192">192</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa8dc45314239812382fbb34f4149a7da" name="aa8dc45314239812382fbb34f4149a7da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8dc45314239812382fbb34f4149a7da">&#9670;&#160;</a></span>_sess_info</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a>* WtVWapExeUnit::_sess_info</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易时间信息指针，包含交易时段和休市信息 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00162">162</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a29f984de19109cdf0124f3f211ed6319" name="a29f984de19109cdf0124f3f211ed6319"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29f984de19109cdf0124f3f211ed6319">&#9670;&#160;</a></span>_tail_secs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtVWapExeUnit::_tail_secs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>执行尾部时间，单位秒，用于调整最后阶段的执行策略 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00186">186</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3f9df8fd465558261beb101826105453" name="a3f9df8fd465558261beb101826105453"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f9df8fd465558261beb101826105453">&#9670;&#160;</a></span>_target_pos</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double WtVWapExeUnit::_target_pos</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>目标仓位，正数表示多头，负数表示空头 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00153">153</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acc4318591def78b030f50ac51bef36f5" name="acc4318591def78b030f50ac51bef36f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc4318591def78b030f50ac51bef36f5">&#9670;&#160;</a></span>_this_target</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double WtVWapExeUnit::_this_target</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>本轮目标仓位，当前时间点应该达到的仓位量 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00208">208</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab5614b05b74029c522df78c04748ec32" name="ab5614b05b74029c522df78c04748ec32"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5614b05b74029c522df78c04748ec32">&#9670;&#160;</a></span>_total_secs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtVWapExeUnit::_total_secs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>执行总时间，单位秒，指定完成整个交易的总时间范围 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00182">182</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5f3f55c473d010a51dc5297cf5a1fd05" name="a5f3f55c473d010a51dc5297cf5a1fd05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f3f55c473d010a51dc5297cf5a1fd05">&#9670;&#160;</a></span>_total_times</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtVWapExeUnit::_total_times</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>总执行次数，指定将订单分拆为多少次执行 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00184">184</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4e3350021f9122f512a8849f03263c9d" name="a4e3350021f9122f512a8849f03263c9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e3350021f9122f512a8849f03263c9d">&#9670;&#160;</a></span>_Vwap_prz</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double WtVWapExeUnit::_Vwap_prz</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>VWAP价格，当前计算得到的成交量加权平均价格 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00222">222</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afb2dff5ad73c0424a2abf3ba3f975ab5" name="afb2dff5ad73c0424a2abf3ba3f975ab5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb2dff5ad73c0424a2abf3ba3f975ab5">&#9670;&#160;</a></span>_Vwap_vol</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double WtVWapExeUnit::_Vwap_vol</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>VWAP单位时间下单量，根据VWAP算法计算的每个时间单元应发送的订单量 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00220">220</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aeb9425b74af3d11e9f3d5e450b1bf793" name="aeb9425b74af3d11e9f3d5e450b1bf793"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb9425b74af3d11e9f3d5e450b1bf793">&#9670;&#160;</a></span>isCanCancel</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtVWapExeUnit::isCanCancel</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>是否允许撤单标志 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00202">202</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0e8058cae8ece3d92d0008d78c37d2f7" name="a0e8058cae8ece3d92d0008d78c37d2f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e8058cae8ece3d92d0008d78c37d2f7">&#9670;&#160;</a></span>VwapAim</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">vector&lt;double&gt; WtVWapExeUnit::VwapAim</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>VWAP目标数组，按分钟记录的目标VWAP预测总报单量 </p>
+
+<p class="definition">在文件 <a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a> 第 <a class="el" href="WtVWapExeUnit_8h_source.html#l00176">176</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WtExeFact/<a class="el" href="WtVWapExeUnit_8h_source.html">WtVWapExeUnit.h</a></li>
+<li>src/WtExeFact/<a class="el" href="WtVWapExeUnit_8cpp_source.html">WtVWapExeUnit.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classWtVWapExeUnit.html">WtVWapExeUnit</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

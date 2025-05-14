@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/sutil/logger/spk_log_mode.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('spk__log__mode_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">spk_log_mode.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="spk__log__mode_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright 2009-2016 the original author or authors.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * you may not use this file except in compliance with the License.</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * You may obtain a copy of the License at</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *     http://www.apache.org/licenses/LICENSE-2.0</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * Unless required by applicable law or agreed to in writing, software</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * See the License for the specific language governing permissions and</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * limitations under the License.</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#ifndef _SPK_LOG_MODE_H</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#define _SPK_LOG_MODE_H</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include    &lt;<a class="code" href="types_8h.html">sutil/types.h</a>&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include    &lt;<a class="code" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html">sutil/compiler.h</a>&gt;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include    &lt;<a class="code" href="spk__log__type_8h.html">sutil/logger/spk_log_type.h</a>&gt;</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment"> * 常量定义</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="spk__log__mode_8h.html#a8b91b4997f11113da49f22497f15bb35">   45</a></span><span class="preprocessor">#define     SLOG_MAX_INFO_SIZE      (16384)</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment">/* TODO 日志内容的最大长度</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment">#define     SLOG_MAX_INFO_SIZE      (PIPE_BUF)</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">*/</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="spk__log__mode_8h.html#ac128c3ce0d9eebfc9dd5977c3654a569">   51</a></span><span class="preprocessor">#define     SLOG_MAX_MODE_NAME      (32)</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="foldopen" id="foldopen00058" data-start="{" data-end="};">
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="struct__SLogMode.html">   58</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="struct__SLogMode.html">_SLogMode</a> {</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="struct__SLogMode.html#a76cdb06d990501c0e1b213764e10af3f">   59</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>               <a class="code hl_variable" href="struct__SLogMode.html#a76cdb06d990501c0e1b213764e10af3f">mode</a>;                       </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="struct__SLogMode.html#a152afda4c24712f375a9b5a255617cfa">   60</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>               <a class="code hl_variable" href="struct__SLogMode.html#a152afda4c24712f375a9b5a255617cfa">appenderType</a>;               </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="struct__SLogMode.html#a053531c359e3919b86cab77c7c204132">   61</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>               <a class="code hl_variable" href="struct__SLogMode.html#a053531c359e3919b86cab77c7c204132">isAsyncLog</a>;                 </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="struct__SLogMode.html#a76a61f38678b263f3c310e00ed5dba2e">   62</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>               <a class="code hl_variable" href="struct__SLogMode.html#a76a61f38678b263f3c310e00ed5dba2e">__filler1</a>[5];               </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="struct__SLogMode.html#a04cbf2d21f204d1a1dcd6c284f9739ad">   64</a></span>    <span class="keywordtype">void</span>                *<a class="code hl_variable" href="struct__SLogMode.html#a04cbf2d21f204d1a1dcd6c284f9739ad">logFn</a>;                     </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="struct__SLogMode.html#ad8d13de52078a97e5f18f7d3f0b61ba2">   65</a></span>    <span class="keywordtype">void</span>                *<a class="code hl_variable" href="struct__SLogMode.html#ad8d13de52078a97e5f18f7d3f0b61ba2">__filler2</a>;                 </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="struct__SLogMode.html#ad3114fba8eca5987c54ad543aaa3860d">   66</a></span>    <span class="keywordtype">char</span>                <a class="code hl_variable" href="struct__SLogMode.html#ad3114fba8eca5987c54ad543aaa3860d">name</a>[<a class="code hl_define" href="spk__log__mode_8h.html#ac128c3ce0d9eebfc9dd5977c3654a569">SLOG_MAX_MODE_NAME</a>];   </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="spk__log__mode_8h.html#aa97054ef036831dd93be8c7adbf76c91">   67</a></span>} <a class="code hl_typedef" href="spk__log__mode_8h.html#aa97054ef036831dd93be8c7adbf76c91">SLogModeT</a>;</div>
+</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="keyword">extern</span>  <a class="code hl_struct" href="struct__SLogMode.html">SLogModeT</a> <a class="code hl_define" href="types_8h.html#abc49f42868fd93bb79ac63a4023bfc7f">__SPK_DLL_IMPORT</a>      <a class="code hl_variable" href="spk__log__mode_8h.html#acac2662aaa77b4e843303cde2f3a98ee">__SPK_slogModes</a>[];</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="comment"> * 日志级别常量定义</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="spk__log__mode_8h.html#a9f29329ce5957c5fdb8e07567e9b8992">   81</a></span><span class="preprocessor">#define SLOG_MODE_FILE                  (&amp;__SPK_slogModes[0])</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="spk__log__mode_8h.html#aecafb83296c395a82d7bfa7eb72b9f65">   84</a></span><span class="preprocessor">#define SLOG_MODE_FILE_ROLLING          (&amp;__SPK_slogModes[1])</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="spk__log__mode_8h.html#ac834c82b644d7be94bc7c9b693a8f6d5">   87</a></span><span class="preprocessor">#define SLOG_MODE_FILE_DAILY_ROLLING    (&amp;__SPK_slogModes[2])</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="spk__log__mode_8h.html#a0344cf53dfe5d865bc67bcf4655bed33">   90</a></span><span class="preprocessor">#define SLOG_MODE_FILE_DAILY            (&amp;__SPK_slogModes[3])</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="spk__log__mode_8h.html#a6625067413d9ec26f59b61896281ad2c">   93</a></span><span class="preprocessor">#define SLOG_MODE_CONSOLE               (&amp;__SPK_slogModes[4])</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="spk__log__mode_8h.html#a90ae29cf6779cfe0695b0e1f32a7ec0a">   96</a></span><span class="preprocessor">#define SLOG_MODE_CONSOLE_STDOUT        (&amp;__SPK_slogModes[5])</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="spk__log__mode_8h.html#aab012375c747aacb107f0be153f80d03">   99</a></span><span class="preprocessor">#define SLOG_MODE_CONSOLE_STDERR        (&amp;__SPK_slogModes[6])</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="spk__log__mode_8h.html#a90a391e7f0dce036cee87d891d3bf70d">  102</a></span><span class="preprocessor">#define SLOG_MODE_ASYNC_FILE            (&amp;__SPK_slogModes[7])</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="comment"> * 函数定义</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="comment"> * 返回名称对应的日志模式</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="keyword">const</span> <a class="code hl_struct" href="struct__SLogMode.html">SLogModeT</a>*</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="spk__log__mode_8h.html#aaff20dd6ea719f5fa663172a51bf11dc">  114</a></span>        <a class="code hl_function" href="spk__log__mode_8h.html#aaff20dd6ea719f5fa663172a51bf11dc">SLog_GetLogMode</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *modeName);</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="comment"> * 返回日志模式对应的日志记录器类型是否是文件记录器</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno"><a class="line" href="spk__log__mode_8h.html#ab2251a1f5e08cb69d44c7c7b1bd5e085">  119</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>    <a class="code hl_function" href="spk__log__mode_8h.html#ab2251a1f5e08cb69d44c7c7b1bd5e085">SLog_IsFileLogAppender</a>(<span class="keyword">const</span> <a class="code hl_struct" href="struct__SLogMode.html">SLogModeT</a> *logMode);</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="comment"> * 返回日志模式对应的日志记录器类型是否是异步日志记录器</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="spk__log__mode_8h.html#a451f314e7585716b81998c4ead7af1a4">  124</a></span><a class="code hl_define" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>    <a class="code hl_function" href="spk__log__mode_8h.html#a451f314e7585716b81998c4ead7af1a4">SLog_IsAsyncLogAppender</a>(<span class="keyword">const</span> <a class="code hl_struct" href="struct__SLogMode.html">SLogModeT</a> *logMode);</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>}</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span><span class="preprocessor">#endif  </span><span class="comment">/* _SPK_LOG_MODE_H */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
+<div class="ttc" id="aAPI_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_html"><div class="ttname"><a href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html">compiler.h</a></div></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_a1b09856a6463f2bcc4bd8ff0e4e3ee0f"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a></div><div class="ttdeci">unsigned __int8 uint8</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00073">itpdk_typedef.h:73</a></div></div>
+<div class="ttc" id="aspk__log__mode_8h_html_a451f314e7585716b81998c4ead7af1a4"><div class="ttname"><a href="spk__log__mode_8h.html#a451f314e7585716b81998c4ead7af1a4">SLog_IsAsyncLogAppender</a></div><div class="ttdeci">BOOL SLog_IsAsyncLogAppender(const SLogModeT *logMode)</div></div>
+<div class="ttc" id="aspk__log__mode_8h_html_aa97054ef036831dd93be8c7adbf76c91"><div class="ttname"><a href="spk__log__mode_8h.html#aa97054ef036831dd93be8c7adbf76c91">SLogModeT</a></div><div class="ttdeci">struct _SLogMode SLogModeT</div></div>
+<div class="ttc" id="aspk__log__mode_8h_html_aaff20dd6ea719f5fa663172a51bf11dc"><div class="ttname"><a href="spk__log__mode_8h.html#aaff20dd6ea719f5fa663172a51bf11dc">SLog_GetLogMode</a></div><div class="ttdeci">const SLogModeT * SLog_GetLogMode(const char *modeName)</div></div>
+<div class="ttc" id="aspk__log__mode_8h_html_ab2251a1f5e08cb69d44c7c7b1bd5e085"><div class="ttname"><a href="spk__log__mode_8h.html#ab2251a1f5e08cb69d44c7c7b1bd5e085">SLog_IsFileLogAppender</a></div><div class="ttdeci">BOOL SLog_IsFileLogAppender(const SLogModeT *logMode)</div></div>
+<div class="ttc" id="aspk__log__mode_8h_html_ac128c3ce0d9eebfc9dd5977c3654a569"><div class="ttname"><a href="spk__log__mode_8h.html#ac128c3ce0d9eebfc9dd5977c3654a569">SLOG_MAX_MODE_NAME</a></div><div class="ttdeci">#define SLOG_MAX_MODE_NAME</div><div class="ttdef"><b>Definition</b> <a href="spk__log__mode_8h_source.html#l00051">spk_log_mode.h:51</a></div></div>
+<div class="ttc" id="aspk__log__mode_8h_html_acac2662aaa77b4e843303cde2f3a98ee"><div class="ttname"><a href="spk__log__mode_8h.html#acac2662aaa77b4e843303cde2f3a98ee">__SPK_slogModes</a></div><div class="ttdeci">SLogModeT __SPK_DLL_IMPORT __SPK_slogModes[]</div></div>
+<div class="ttc" id="aspk__log__type_8h_html"><div class="ttname"><a href="spk__log__type_8h.html">spk_log_type.h</a></div></div>
+<div class="ttc" id="astruct__SLogMode_html"><div class="ttname"><a href="struct__SLogMode.html">_SLogMode</a></div><div class="ttdef"><b>Definition</b> <a href="spk__log__mode_8h_source.html#l00058">spk_log_mode.h:58</a></div></div>
+<div class="ttc" id="astruct__SLogMode_html_a04cbf2d21f204d1a1dcd6c284f9739ad"><div class="ttname"><a href="struct__SLogMode.html#a04cbf2d21f204d1a1dcd6c284f9739ad">_SLogMode::logFn</a></div><div class="ttdeci">void * logFn</div><div class="ttdef"><b>Definition</b> <a href="spk__log__mode_8h_source.html#l00064">spk_log_mode.h:64</a></div></div>
+<div class="ttc" id="astruct__SLogMode_html_a053531c359e3919b86cab77c7c204132"><div class="ttname"><a href="struct__SLogMode.html#a053531c359e3919b86cab77c7c204132">_SLogMode::isAsyncLog</a></div><div class="ttdeci">uint8 isAsyncLog</div><div class="ttdef"><b>Definition</b> <a href="spk__log__mode_8h_source.html#l00061">spk_log_mode.h:61</a></div></div>
+<div class="ttc" id="astruct__SLogMode_html_a152afda4c24712f375a9b5a255617cfa"><div class="ttname"><a href="struct__SLogMode.html#a152afda4c24712f375a9b5a255617cfa">_SLogMode::appenderType</a></div><div class="ttdeci">uint8 appenderType</div><div class="ttdef"><b>Definition</b> <a href="spk__log__mode_8h_source.html#l00060">spk_log_mode.h:60</a></div></div>
+<div class="ttc" id="astruct__SLogMode_html_a76a61f38678b263f3c310e00ed5dba2e"><div class="ttname"><a href="struct__SLogMode.html#a76a61f38678b263f3c310e00ed5dba2e">_SLogMode::__filler1</a></div><div class="ttdeci">uint8 __filler1[5]</div><div class="ttdef"><b>Definition</b> <a href="spk__log__mode_8h_source.html#l00062">spk_log_mode.h:62</a></div></div>
+<div class="ttc" id="astruct__SLogMode_html_a76cdb06d990501c0e1b213764e10af3f"><div class="ttname"><a href="struct__SLogMode.html#a76cdb06d990501c0e1b213764e10af3f">_SLogMode::mode</a></div><div class="ttdeci">uint8 mode</div><div class="ttdef"><b>Definition</b> <a href="spk__log__mode_8h_source.html#l00059">spk_log_mode.h:59</a></div></div>
+<div class="ttc" id="astruct__SLogMode_html_ad3114fba8eca5987c54ad543aaa3860d"><div class="ttname"><a href="struct__SLogMode.html#ad3114fba8eca5987c54ad543aaa3860d">_SLogMode::name</a></div><div class="ttdeci">char name[SLOG_MAX_MODE_NAME]</div><div class="ttdef"><b>Definition</b> <a href="spk__log__mode_8h_source.html#l00066">spk_log_mode.h:66</a></div></div>
+<div class="ttc" id="astruct__SLogMode_html_ad8d13de52078a97e5f18f7d3f0b61ba2"><div class="ttname"><a href="struct__SLogMode.html#ad8d13de52078a97e5f18f7d3f0b61ba2">_SLogMode::__filler2</a></div><div class="ttdeci">void * __filler2</div><div class="ttdef"><b>Definition</b> <a href="spk__log__mode_8h_source.html#l00065">spk_log_mode.h:65</a></div></div>
+<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div></div>
+<div class="ttc" id="atypes_8h_html_abc49f42868fd93bb79ac63a4023bfc7f"><div class="ttname"><a href="types_8h.html#abc49f42868fd93bb79ac63a4023bfc7f">__SPK_DLL_IMPORT</a></div><div class="ttdeci">#define __SPK_DLL_IMPORT</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00685">types.h:685</a></div></div>
+<div class="ttc" id="atypes_8h_html_ae4cc35dcc70810fa972cc8a5185a28fa"><div class="ttname"><a href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a></div><div class="ttdeci">#define BOOL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00305">types.h:305</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_248d918e0c46523948aef7b06f6106c0.html">sutil</a></li><li class="navelem"><a class="el" href="dir_37fd8358d4a8b050212c9d10a7fd9b79.html">logger</a></li><li class="navelem"><a class="el" href="spk__log__mode_8h.html">spk_log_mode.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/ParserXTP/ParserXTP.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('ParserXTP_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ParserXTP.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="ParserXTP_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;boost/asio/io_service.hpp&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;../Includes/IParserApi.h&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;../API/XTP2.2.32.2/xtp_quote_api.h&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Share/DLLHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">class </span><a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="ParserXTP_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">   24</a></span><a class="code hl_variable" href="ParserXTP_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="foldopen" id="foldopen00026" data-start="{" data-end="};">
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="classParserXTP.html">   26</a></span><span class="keyword">class </span><a class="code hl_class" href="classParserXTP.html">ParserXTP</a> :   <span class="keyword">public</span> <a class="code hl_class" href="classIParserApi.html">IParserApi</a>, <span class="keyword">public</span> <a class="code hl_class" href="classXTP_1_1API_1_1QuoteSpi.html">XTP::API::QuoteSpi</a></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>{</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <a class="code hl_function" href="classParserXTP.html#a8a121043e18f8b9074ae82ae6d539259">ParserXTP</a>();</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keyword">virtual</span> <a class="code hl_function" href="classParserXTP.html#a9fd22550ecfb543042b0d0340a31bb70">~ParserXTP</a>();</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00033" data-start="{" data-end="};">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1d">   33</a></span>    <span class="keyword">enum</span> <a class="code hl_enumeration" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1d">LoginStatus</a></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    {</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1da47a687931fe41663889d2a47e92f7d1f">   35</a></span>        <a class="code hl_enumvalue" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1da47a687931fe41663889d2a47e92f7d1f">LS_NOTLOGIN</a>,</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1da57c574f87fa6417b9545785513c2db42">   36</a></span>        <a class="code hl_enumvalue" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1da57c574f87fa6417b9545785513c2db42">LS_LOGINING</a>,</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <a class="code hl_enumvalue" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1da93a7c079121d50f976f0d3c95b989b36">LS_LOGINED</a></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1da93a7c079121d50f976f0d3c95b989b36">   38</a></span>    };</div>
+</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">//IQuoteParser 接口</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserXTP.html#a9881a8101922c2e3615d9ade88071469">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* <a class="code hl_function" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserXTP.html#a8eefeefe972c99adcf6478234fd755b8">release</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserXTP.html#af114fc3e1bb1b99a4906cac96e92810c">connect</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserXTP.html#a5ef6584652025f901a21d911559557bb">disconnect</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserXTP.html#ac2d5236a23c54926dd51bbe65fe7110c">isConnected</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserXTP.html#a6835709c55d944760fd86e4a871ff57c">subscribe</a>(<span class="keyword">const</span> <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a> &amp;vecSymbols) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserXTP.html#a0375e8539e6aee149f89f6bb68d70d93">unsubscribe</a>(<span class="keyword">const</span> <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a> &amp;vecSymbols) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserXTP.html#a83ddac9dac981b12d3891f14bc84d8eb">registerSpi</a>(<a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>* listener) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">//CThostFtdcMdSpi 接口</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserXTP.html#ae51afb04c142a6677443bb8f0d70e8b6">OnDisconnected</a>(<span class="keywordtype">int</span> reason) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserXTP.html#aec21db60d95403066b11d3cefccae8df">OnError</a>(<a class="code hl_struct" href="structXTPRspInfoStruct.html">XTPRI</a> *error_info) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserXTP.html#aa31c25d9cbf4bb46d399aed33e74c7a1">OnSubTickByTick</a>(<a class="code hl_struct" href="structXTPSpecificTickerStruct.html">XTPST</a> *ticker, <a class="code hl_struct" href="structXTPRspInfoStruct.html">XTPRI</a> *error_info, <span class="keywordtype">bool</span> is_last) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserXTP.html#a2e441e0b0772233d86b9e3ae5bffe3b4">OnSubMarketData</a>(<a class="code hl_struct" href="structXTPSpecificTickerStruct.html">XTPST</a> *ticker, <a class="code hl_struct" href="structXTPRspInfoStruct.html">XTPRI</a> *error_info, <span class="keywordtype">bool</span> is_last) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserXTP.html#adc0fadd6aea0c5a634ab5ede6092c45f">OnUnSubMarketData</a>(<a class="code hl_struct" href="structXTPSpecificTickerStruct.html">XTPST</a> *ticker, <a class="code hl_struct" href="structXTPRspInfoStruct.html">XTPRI</a> *error_info, <span class="keywordtype">bool</span> is_last) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserXTP.html#a030daf8f2d006f42d1af6c828e51d613">OnDepthMarketData</a>(<a class="code hl_struct" href="structXTPMarketDataStruct.html">XTPMD</a> *market_data, int64_t bid1_qty[], int32_t bid1_count, int32_t max_bid1_count, int64_t ask1_qty[], int32_t ask1_count, int32_t max_ask1_count) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserXTP.html#ae8018cdd79a9a4a900aca20a3f83b927">OnTickByTick</a>(<a class="code hl_struct" href="structXTPTickByTickStruct.html">XTPTBT</a> *tbt_data) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="comment">     *  发送登录请求</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classParserXTP.html#a733f409edd796f08d6f1c6e988f42978">DoLogin</a>();</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="comment">     *  订阅品种行情</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classParserXTP.html#ab80f2e1782a515b8fb3981b01b2a323e">DoSubscribeMD</a>();</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="comment">     *  检查错误信息</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserXTP.html#a50bf87f5df884a0c2d3d87002a496402">IsErrorRspInfo</a>(<a class="code hl_struct" href="structXTPRspInfoStruct.html">XTPRI</a> *error_info);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="classParserXTP.html#a91713b519be83de0fdda4f8312d6ff50">   95</a></span>    uint32_t            <a class="code hl_variable" href="classParserXTP.html#a91713b519be83de0fdda4f8312d6ff50">m_uTradingDate</a>;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="classParserXTP.html#a3fac7128271b9c4a3b067eb7aaa2cf11">   96</a></span>    <a class="code hl_enumeration" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1d">LoginStatus</a>         <a class="code hl_variable" href="classParserXTP.html#a3fac7128271b9c4a3b067eb7aaa2cf11">m_loginState</a>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="classParserXTP.html#a826b6fbb252c7192294ecd354648e06b">   97</a></span>    <a class="code hl_class" href="classXTP_1_1API_1_1QuoteApi.html">XTP::API::QuoteApi</a>* <a class="code hl_variable" href="classParserXTP.html#a826b6fbb252c7192294ecd354648e06b">m_pUserAPI</a>;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="classParserXTP.html#acc44a0e0c6ea0dff79a233bd518bcd8b">   99</a></span>    std::string         <a class="code hl_variable" href="classParserXTP.html#acc44a0e0c6ea0dff79a233bd518bcd8b">m_strHost</a>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="classParserXTP.html#aef5b7c056e8eead3237a2d2b95c57de1">  100</a></span>    int32_t             <a class="code hl_variable" href="classParserXTP.html#aef5b7c056e8eead3237a2d2b95c57de1">m_iPort</a>;;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="classParserXTP.html#a988a39fe9facb0174fd4f51df70d7f14">  101</a></span>    uint32_t            <a class="code hl_variable" href="classParserXTP.html#a988a39fe9facb0174fd4f51df70d7f14">m_uClientID</a>;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="classParserXTP.html#a25a4fb4e0f7191b12aebf056443df968">  102</a></span>    std::string         <a class="code hl_variable" href="classParserXTP.html#a25a4fb4e0f7191b12aebf056443df968">m_strUser</a>;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="classParserXTP.html#a1feed73f10416eec679e46744de53c22">  103</a></span>    std::string         <a class="code hl_variable" href="classParserXTP.html#a1feed73f10416eec679e46744de53c22">m_strPass</a>;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="classParserXTP.html#a6b2912b5db84153b184865b1ca0ec6cb">  104</a></span>    std::string         <a class="code hl_variable" href="classParserXTP.html#a6b2912b5db84153b184865b1ca0ec6cb">m_strFlowDir</a>;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="classParserXTP.html#aee00f30f3f9b2067195f61df2f572927">  105</a></span>    std::string         <a class="code hl_variable" href="classParserXTP.html#aee00f30f3f9b2067195f61df2f572927">m_strLocalIP</a>;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="classParserXTP.html#a0d967f571ffca33cc3181b82af6334a3">  107</a></span>    <a class="code hl_enumeration" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a2e2fd9668c3e0dff661965d0425d9109">XTP_PROTOCOL_TYPE</a>   <a class="code hl_variable" href="classParserXTP.html#a0d967f571ffca33cc3181b82af6334a3">m_iProtocol</a>;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="classParserXTP.html#a60a28bf4d38740a4a0ac195ab6aa7285">  108</a></span>    uint32_t            <a class="code hl_variable" href="classParserXTP.html#a60a28bf4d38740a4a0ac195ab6aa7285">m_uHBInterval</a>;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="classParserXTP.html#afbedbceaf890ca91d665033ce3eed248">  109</a></span>    uint32_t            <a class="code hl_variable" href="classParserXTP.html#afbedbceaf890ca91d665033ce3eed248">m_uBuffSize</a>;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="classParserXTP.html#adee515b3c9569362f8f65ffa89893e6a">  111</a></span>    <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a>             <a class="code hl_variable" href="classParserXTP.html#adee515b3c9569362f8f65ffa89893e6a">m_fitSHSubs</a>;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="classParserXTP.html#a7028562a0d080939525837182914823d">  112</a></span>    <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a>             <a class="code hl_variable" href="classParserXTP.html#a7028562a0d080939525837182914823d">m_fitSZSubs</a>;</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="classParserXTP.html#a4cfb8dc5e218b6c9928de451fc9ddaca">  114</a></span>    <span class="keywordtype">int</span>                 <a class="code hl_variable" href="classParserXTP.html#a4cfb8dc5e218b6c9928de451fc9ddaca">m_iRequestID</a>;</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="classParserXTP.html#a235f6ed778973325e36db81676fbd8a9">  116</a></span>    <a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>*         <a class="code hl_variable" href="classParserXTP.html#a235f6ed778973325e36db81676fbd8a9">m_sink</a>;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="classParserXTP.html#a7c2f36b41fdcc69d6980dee079e2e45f">  117</a></span>    <a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>*       <a class="code hl_variable" href="classParserXTP.html#a7c2f36b41fdcc69d6980dee079e2e45f">m_pBaseDataMgr</a>;</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno"><a class="line" href="classParserXTP.html#a87ef881805f59ce7f40c783dba412261">  119</a></span>    <a class="code hl_typedef" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a>       <a class="code hl_variable" href="classParserXTP.html#a87ef881805f59ce7f40c783dba412261">m_hInst</a>;</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno"><a class="line" href="classParserXTP.html#aadeff304aabf9bf8fe698f3839f8121d">  120</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classXTP_1_1API_1_1QuoteApi.html">XTP::API::QuoteApi</a>* (*XTPCreater)(uint8_t, <span class="keyword">const</span> <span class="keywordtype">char</span> *, <a class="code hl_enumeration" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a88235abf8fbc5541e11e53dbc85e192c">XTP_LOG_LEVEL</a> log_level);</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="comment">//typedef CUstpFtdcMduserApi* (*FemasCreator)(const char *);</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="classParserXTP.html#a90d1330ea9212520912bda5a55268869">  122</a></span>    <a class="code hl_typedef" href="classParserXTP.html#aadeff304aabf9bf8fe698f3839f8121d">XTPCreater</a>      <a class="code hl_variable" href="classParserXTP.html#a90d1330ea9212520912bda5a55268869">m_funcCreator</a>;</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="classParserXTP.html#ad7edcf7eab31cfd818699962c7062f9a">  124</a></span>    boost::asio::io_service     <a class="code hl_variable" href="classParserXTP.html#ad7edcf7eab31cfd818699962c7062f9a">_asyncio</a>;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="classParserXTP.html#a8d53dd65d0c50acb5e161f4c7a7c0f3e">  125</a></span>    <a class="code hl_typedef" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>                <a class="code hl_variable" href="classParserXTP.html#a8d53dd65d0c50acb5e161f4c7a7c0f3e">_thrd_worker</a>;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno"><a class="line" href="classParserXTP.html#a2d75b301e9229f65f057167aec8209a2">  126</a></span>    <span class="keyword">typedef</span> std::shared_ptr&lt;boost::asio::io_service::work&gt; <a class="code hl_typedef" href="classParserXTP.html#a2d75b301e9229f65f057167aec8209a2">BoostWorkerPtr</a>;</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="classParserXTP.html#a187c9cdffc5998f35735932f0eeba406">  127</a></span>    <a class="code hl_typedef" href="classParserXTP.html#a2d75b301e9229f65f057167aec8209a2">BoostWorkerPtr</a>              <a class="code hl_variable" href="classParserXTP.html#a187c9cdffc5998f35735932f0eeba406">_worker</a>;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>};</div>
+</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="ttc" id="aDLLHelper_8hpp_html_a40972742af38c16d3ab2f521abf0ca8a"><div class="ttname"><a href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a></div><div class="ttdeci">void * DllHandle</div><div class="ttdoc">动态库句柄类型（非Windows平台）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00032">DLLHelper.hpp:32</a></div></div>
+<div class="ttc" id="aParserXTP_8h_html_a9e1fc31194100ab43bbad77a2f5c12b3"><div class="ttname"><a href="ParserXTP_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a></div><div class="ttdeci">NS_WTP_END USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00024">ParserXTP.h:24</a></div></div>
+<div class="ttc" id="aTraderDumper_8cpp_html_abc68ad0fe9293fb2709e004ffe3fa333"><div class="ttname"><a href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a></div><div class="ttdeci">bool config(const char *cfgfile, bool isFile)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_8cpp_source.html#l00022">TraderDumper.cpp:22</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aXTP2_82_832_82_2xtp__api__data__type_8h_html_a2e2fd9668c3e0dff661965d0425d9109"><div class="ttname"><a href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a2e2fd9668c3e0dff661965d0425d9109">XTP_PROTOCOL_TYPE</a></div><div class="ttdeci">XTP_PROTOCOL_TYPE</div><div class="ttdoc">XTP_PROTOCOL_TYPE是通讯传输协议方式</div><div class="ttdef"><b>Definition</b> <a href="XTP2_82_832_82_2xtp__api__data__type_8h_source.html#l00075">xtp_api_data_type.h:76</a></div></div>
+<div class="ttc" id="aXTP2_82_832_82_2xtp__api__data__type_8h_html_a88235abf8fbc5541e11e53dbc85e192c"><div class="ttname"><a href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a88235abf8fbc5541e11e53dbc85e192c">XTP_LOG_LEVEL</a></div><div class="ttdeci">XTP_LOG_LEVEL</div><div class="ttdoc">XTP_LOG_LEVEL是日志输出级别类型</div><div class="ttdef"><b>Definition</b> <a href="XTP2_82_832_82_2xtp__api__data__type_8h_source.html#l00063">xtp_api_data_type.h:63</a></div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html"><div class="ttname"><a href="classIBaseDataMgr.html">IBaseDataMgr</a></div><div class="ttdoc">基础数据管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IBaseDataMgr_8h_source.html#l00075">IBaseDataMgr.h:76</a></div></div>
+<div class="ttc" id="aclassIParserApi_html"><div class="ttname"><a href="classIParserApi.html">IParserApi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00083">IParserApi.h:84</a></div></div>
+<div class="ttc" id="aclassIParserSpi_html"><div class="ttname"><a href="classIParserSpi.html">IParserSpi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00028">IParserApi.h:29</a></div></div>
+<div class="ttc" id="aclassParserXTP_html"><div class="ttname"><a href="classParserXTP.html">ParserXTP</a></div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00026">ParserXTP.h:27</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a030daf8f2d006f42d1af6c828e51d613"><div class="ttname"><a href="classParserXTP.html#a030daf8f2d006f42d1af6c828e51d613">ParserXTP::OnDepthMarketData</a></div><div class="ttdeci">virtual void OnDepthMarketData(XTPMD *market_data, int64_t bid1_qty[], int32_t bid1_count, int32_t max_bid1_count, int64_t ask1_qty[], int32_t ask1_count, int32_t max_ask1_count) override</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00281">ParserXTP.cpp:281</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a0375e8539e6aee149f89f6bb68d70d93"><div class="ttname"><a href="classParserXTP.html#a0375e8539e6aee149f89f6bb68d70d93">ParserXTP::unsubscribe</a></div><div class="ttdeci">virtual void unsubscribe(const CodeSet &amp;vecSymbols) override</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00677">ParserXTP.cpp:677</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a0d967f571ffca33cc3181b82af6334a3"><div class="ttname"><a href="classParserXTP.html#a0d967f571ffca33cc3181b82af6334a3">ParserXTP::m_iProtocol</a></div><div class="ttdeci">XTP_PROTOCOL_TYPE m_iProtocol</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00107">ParserXTP.h:107</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a187c9cdffc5998f35735932f0eeba406"><div class="ttname"><a href="classParserXTP.html#a187c9cdffc5998f35735932f0eeba406">ParserXTP::_worker</a></div><div class="ttdeci">BoostWorkerPtr _worker</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00127">ParserXTP.h:127</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a1feed73f10416eec679e46744de53c22"><div class="ttname"><a href="classParserXTP.html#a1feed73f10416eec679e46744de53c22">ParserXTP::m_strPass</a></div><div class="ttdeci">std::string m_strPass</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00103">ParserXTP.h:103</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a235f6ed778973325e36db81676fbd8a9"><div class="ttname"><a href="classParserXTP.html#a235f6ed778973325e36db81676fbd8a9">ParserXTP::m_sink</a></div><div class="ttdeci">IParserSpi * m_sink</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00116">ParserXTP.h:116</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a25a4fb4e0f7191b12aebf056443df968"><div class="ttname"><a href="classParserXTP.html#a25a4fb4e0f7191b12aebf056443df968">ParserXTP::m_strUser</a></div><div class="ttdeci">std::string m_strUser</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00102">ParserXTP.h:102</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a2d75b301e9229f65f057167aec8209a2"><div class="ttname"><a href="classParserXTP.html#a2d75b301e9229f65f057167aec8209a2">ParserXTP::BoostWorkerPtr</a></div><div class="ttdeci">std::shared_ptr&lt; boost::asio::io_service::work &gt; BoostWorkerPtr</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00126">ParserXTP.h:126</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a2e441e0b0772233d86b9e3ae5bffe3b4"><div class="ttname"><a href="classParserXTP.html#a2e441e0b0772233d86b9e3ae5bffe3b4">ParserXTP::OnSubMarketData</a></div><div class="ttdeci">virtual void OnSubMarketData(XTPST *ticker, XTPRI *error_info, bool is_last) override</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00415">ParserXTP.cpp:415</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a3fac7128271b9c4a3b067eb7aaa2cf11"><div class="ttname"><a href="classParserXTP.html#a3fac7128271b9c4a3b067eb7aaa2cf11">ParserXTP::m_loginState</a></div><div class="ttdeci">LoginStatus m_loginState</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00096">ParserXTP.h:96</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a43a581d93806942728cfe4ba904abf1d"><div class="ttname"><a href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1d">ParserXTP::LoginStatus</a></div><div class="ttdeci">LoginStatus</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00033">ParserXTP.h:34</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a43a581d93806942728cfe4ba904abf1da47a687931fe41663889d2a47e92f7d1f"><div class="ttname"><a href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1da47a687931fe41663889d2a47e92f7d1f">ParserXTP::LS_NOTLOGIN</a></div><div class="ttdeci">@ LS_NOTLOGIN</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00035">ParserXTP.h:35</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a43a581d93806942728cfe4ba904abf1da57c574f87fa6417b9545785513c2db42"><div class="ttname"><a href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1da57c574f87fa6417b9545785513c2db42">ParserXTP::LS_LOGINING</a></div><div class="ttdeci">@ LS_LOGINING</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00036">ParserXTP.h:36</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a43a581d93806942728cfe4ba904abf1da93a7c079121d50f976f0d3c95b989b36"><div class="ttname"><a href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1da93a7c079121d50f976f0d3c95b989b36">ParserXTP::LS_LOGINED</a></div><div class="ttdeci">@ LS_LOGINED</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00038">ParserXTP.h:37</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a4cfb8dc5e218b6c9928de451fc9ddaca"><div class="ttname"><a href="classParserXTP.html#a4cfb8dc5e218b6c9928de451fc9ddaca">ParserXTP::m_iRequestID</a></div><div class="ttdeci">int m_iRequestID</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00114">ParserXTP.h:114</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a50bf87f5df884a0c2d3d87002a496402"><div class="ttname"><a href="classParserXTP.html#a50bf87f5df884a0c2d3d87002a496402">ParserXTP::IsErrorRspInfo</a></div><div class="ttdeci">bool IsErrorRspInfo(XTPRI *error_info)</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00580">ParserXTP.cpp:580</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a5ef6584652025f901a21d911559557bb"><div class="ttname"><a href="classParserXTP.html#a5ef6584652025f901a21d911559557bb">ParserXTP::disconnect</a></div><div class="ttdeci">virtual bool disconnect() override</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00161">ParserXTP.cpp:161</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a60a28bf4d38740a4a0ac195ab6aa7285"><div class="ttname"><a href="classParserXTP.html#a60a28bf4d38740a4a0ac195ab6aa7285">ParserXTP::m_uHBInterval</a></div><div class="ttdeci">uint32_t m_uHBInterval</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00108">ParserXTP.h:108</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a6835709c55d944760fd86e4a871ff57c"><div class="ttname"><a href="classParserXTP.html#a6835709c55d944760fd86e4a871ff57c">ParserXTP::subscribe</a></div><div class="ttdeci">virtual void subscribe(const CodeSet &amp;vecSymbols) override</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00588">ParserXTP.cpp:588</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a6b2912b5db84153b184865b1ca0ec6cb"><div class="ttname"><a href="classParserXTP.html#a6b2912b5db84153b184865b1ca0ec6cb">ParserXTP::m_strFlowDir</a></div><div class="ttdeci">std::string m_strFlowDir</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00104">ParserXTP.h:104</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a7028562a0d080939525837182914823d"><div class="ttname"><a href="classParserXTP.html#a7028562a0d080939525837182914823d">ParserXTP::m_fitSZSubs</a></div><div class="ttdeci">CodeSet m_fitSZSubs</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00112">ParserXTP.h:112</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a733f409edd796f08d6f1c6e988f42978"><div class="ttname"><a href="classParserXTP.html#a733f409edd796f08d6f1c6e988f42978">ParserXTP::DoLogin</a></div><div class="ttdeci">void DoLogin()</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00441">ParserXTP.cpp:441</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a7c2f36b41fdcc69d6980dee079e2e45f"><div class="ttname"><a href="classParserXTP.html#a7c2f36b41fdcc69d6980dee079e2e45f">ParserXTP::m_pBaseDataMgr</a></div><div class="ttdeci">IBaseDataMgr * m_pBaseDataMgr</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00117">ParserXTP.h:117</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a826b6fbb252c7192294ecd354648e06b"><div class="ttname"><a href="classParserXTP.html#a826b6fbb252c7192294ecd354648e06b">ParserXTP::m_pUserAPI</a></div><div class="ttdeci">XTP::API::QuoteApi * m_pUserAPI</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00097">ParserXTP.h:97</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a83ddac9dac981b12d3891f14bc84d8eb"><div class="ttname"><a href="classParserXTP.html#a83ddac9dac981b12d3891f14bc84d8eb">ParserXTP::registerSpi</a></div><div class="ttdeci">virtual void registerSpi(IParserSpi *listener) override</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00686">ParserXTP.cpp:686</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a87ef881805f59ce7f40c783dba412261"><div class="ttname"><a href="classParserXTP.html#a87ef881805f59ce7f40c783dba412261">ParserXTP::m_hInst</a></div><div class="ttdeci">DllHandle m_hInst</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00119">ParserXTP.h:119</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a8a121043e18f8b9074ae82ae6d539259"><div class="ttname"><a href="classParserXTP.html#a8a121043e18f8b9074ae82ae6d539259">ParserXTP::ParserXTP</a></div><div class="ttdeci">ParserXTP()</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00079">ParserXTP.cpp:79</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a8d53dd65d0c50acb5e161f4c7a7c0f3e"><div class="ttname"><a href="classParserXTP.html#a8d53dd65d0c50acb5e161f4c7a7c0f3e">ParserXTP::_thrd_worker</a></div><div class="ttdeci">StdThreadPtr _thrd_worker</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00125">ParserXTP.h:125</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a8eefeefe972c99adcf6478234fd755b8"><div class="ttname"><a href="classParserXTP.html#a8eefeefe972c99adcf6478234fd755b8">ParserXTP::release</a></div><div class="ttdeci">virtual void release() override</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00135">ParserXTP.cpp:135</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a90d1330ea9212520912bda5a55268869"><div class="ttname"><a href="classParserXTP.html#a90d1330ea9212520912bda5a55268869">ParserXTP::m_funcCreator</a></div><div class="ttdeci">XTPCreater m_funcCreator</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00122">ParserXTP.h:122</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a91713b519be83de0fdda4f8312d6ff50"><div class="ttname"><a href="classParserXTP.html#a91713b519be83de0fdda4f8312d6ff50">ParserXTP::m_uTradingDate</a></div><div class="ttdeci">uint32_t m_uTradingDate</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00095">ParserXTP.h:95</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a9881a8101922c2e3615d9ade88071469"><div class="ttname"><a href="classParserXTP.html#a9881a8101922c2e3615d9ade88071469">ParserXTP::init</a></div><div class="ttdeci">virtual bool init(WTSVariant *config) override</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00092">ParserXTP.cpp:92</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a988a39fe9facb0174fd4f51df70d7f14"><div class="ttname"><a href="classParserXTP.html#a988a39fe9facb0174fd4f51df70d7f14">ParserXTP::m_uClientID</a></div><div class="ttdeci">uint32_t m_uClientID</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00101">ParserXTP.h:101</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_a9fd22550ecfb543042b0d0340a31bb70"><div class="ttname"><a href="classParserXTP.html#a9fd22550ecfb543042b0d0340a31bb70">ParserXTP::~ParserXTP</a></div><div class="ttdeci">virtual ~ParserXTP()</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00087">ParserXTP.cpp:87</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_aa31c25d9cbf4bb46d399aed33e74c7a1"><div class="ttname"><a href="classParserXTP.html#aa31c25d9cbf4bb46d399aed33e74c7a1">ParserXTP::OnSubTickByTick</a></div><div class="ttdeci">virtual void OnSubTickByTick(XTPST *ticker, XTPRI *error_info, bool is_last) override</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00428">ParserXTP.cpp:428</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_aadeff304aabf9bf8fe698f3839f8121d"><div class="ttname"><a href="classParserXTP.html#aadeff304aabf9bf8fe698f3839f8121d">ParserXTP::XTPCreater</a></div><div class="ttdeci">XTP::API::QuoteApi *(* XTPCreater)(uint8_t, const char *, XTP_LOG_LEVEL log_level)</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00120">ParserXTP.h:120</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_ab80f2e1782a515b8fb3981b01b2a323e"><div class="ttname"><a href="classParserXTP.html#ab80f2e1782a515b8fb3981b01b2a323e">ParserXTP::DoSubscribeMD</a></div><div class="ttdeci">void DoSubscribeMD()</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00493">ParserXTP.cpp:493</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_ac2d5236a23c54926dd51bbe65fe7110c"><div class="ttname"><a href="classParserXTP.html#ac2d5236a23c54926dd51bbe65fe7110c">ParserXTP::isConnected</a></div><div class="ttdeci">virtual bool isConnected() override</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00681">ParserXTP.cpp:681</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_acc44a0e0c6ea0dff79a233bd518bcd8b"><div class="ttname"><a href="classParserXTP.html#acc44a0e0c6ea0dff79a233bd518bcd8b">ParserXTP::m_strHost</a></div><div class="ttdeci">std::string m_strHost</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00099">ParserXTP.h:99</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_ad7edcf7eab31cfd818699962c7062f9a"><div class="ttname"><a href="classParserXTP.html#ad7edcf7eab31cfd818699962c7062f9a">ParserXTP::_asyncio</a></div><div class="ttdeci">boost::asio::io_service _asyncio</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00124">ParserXTP.h:124</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_adc0fadd6aea0c5a634ab5ede6092c45f"><div class="ttname"><a href="classParserXTP.html#adc0fadd6aea0c5a634ab5ede6092c45f">ParserXTP::OnUnSubMarketData</a></div><div class="ttdeci">virtual void OnUnSubMarketData(XTPST *ticker, XTPRI *error_info, bool is_last) override</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00196">ParserXTP.cpp:196</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_adee515b3c9569362f8f65ffa89893e6a"><div class="ttname"><a href="classParserXTP.html#adee515b3c9569362f8f65ffa89893e6a">ParserXTP::m_fitSHSubs</a></div><div class="ttdeci">CodeSet m_fitSHSubs</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00111">ParserXTP.h:111</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_ae51afb04c142a6677443bb8f0d70e8b6"><div class="ttname"><a href="classParserXTP.html#ae51afb04c142a6677443bb8f0d70e8b6">ParserXTP::OnDisconnected</a></div><div class="ttdeci">virtual void OnDisconnected(int reason) override</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00181">ParserXTP.cpp:181</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_ae8018cdd79a9a4a900aca20a3f83b927"><div class="ttname"><a href="classParserXTP.html#ae8018cdd79a9a4a900aca20a3f83b927">ParserXTP::OnTickByTick</a></div><div class="ttdeci">virtual void OnTickByTick(XTPTBT *tbt_data) override</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00201">ParserXTP.cpp:201</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_aec21db60d95403066b11d3cefccae8df"><div class="ttname"><a href="classParserXTP.html#aec21db60d95403066b11d3cefccae8df">ParserXTP::OnError</a></div><div class="ttdeci">virtual void OnError(XTPRI *error_info) override</div><div class="ttdoc">错误应答</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00173">ParserXTP.cpp:173</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_aee00f30f3f9b2067195f61df2f572927"><div class="ttname"><a href="classParserXTP.html#aee00f30f3f9b2067195f61df2f572927">ParserXTP::m_strLocalIP</a></div><div class="ttdeci">std::string m_strLocalIP</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00105">ParserXTP.h:105</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_aef5b7c056e8eead3237a2d2b95c57de1"><div class="ttname"><a href="classParserXTP.html#aef5b7c056e8eead3237a2d2b95c57de1">ParserXTP::m_iPort</a></div><div class="ttdeci">int32_t m_iPort</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00100">ParserXTP.h:100</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_af114fc3e1bb1b99a4906cac96e92810c"><div class="ttname"><a href="classParserXTP.html#af114fc3e1bb1b99a4906cac96e92810c">ParserXTP::connect</a></div><div class="ttdeci">virtual bool connect() override</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8cpp_source.html#l00140">ParserXTP.cpp:140</a></div></div>
+<div class="ttc" id="aclassParserXTP_html_afbedbceaf890ca91d665033ce3eed248"><div class="ttname"><a href="classParserXTP.html#afbedbceaf890ca91d665033ce3eed248">ParserXTP::m_uBuffSize</a></div><div class="ttdeci">uint32_t m_uBuffSize</div><div class="ttdef"><b>Definition</b> <a href="ParserXTP_8h_source.html#l00109">ParserXTP.h:109</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassXTP_1_1API_1_1QuoteApi_html"><div class="ttname"><a href="classXTP_1_1API_1_1QuoteApi.html">XTP::API::QuoteApi</a></div><div class="ttdoc">行情订阅接口类</div><div class="ttdef"><b>Definition</b> <a href="XTP2_82_832_82_2xtp__quote__api_8h_source.html#l00222">xtp_quote_api.h:223</a></div></div>
+<div class="ttc" id="aclassXTP_1_1API_1_1QuoteSpi_html"><div class="ttname"><a href="classXTP_1_1API_1_1QuoteSpi.html">XTP::API::QuoteSpi</a></div><div class="ttdoc">行情回调类</div><div class="ttdef"><b>Definition</b> <a href="XTP2_82_832_82_2xtp__quote__api_8h_source.html#l00036">xtp_quote_api.h:37</a></div></div>
+<div class="ttc" id="aclassfastest__hashset_3_01std_1_1string_01_4_html"><div class="ttname"><a href="classfastest__hashset_3_01std_1_1string_01_4.html">fastest_hashset&lt; std::string &gt;</a></div><div class="ttdoc">字符串元素的高性能哈希集合类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00134">FasterDefs.h:135</a></div></div>
+<div class="ttc" id="agroup__ThreadUtils_html_gaf9ea8e1e64d43ab034614d39d0b35776"><div class="ttname"><a href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a></div><div class="ttdeci">std::shared_ptr&lt; StdThread &gt; StdThreadPtr</div><div class="ttdoc">线程智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00042">StdUtils.hpp:42</a></div></div>
+<div class="ttc" id="astructXTPMarketDataStruct_html"><div class="ttname"><a href="structXTPMarketDataStruct.html">XTPMarketDataStruct</a></div><div class="ttdoc">行情</div><div class="ttdef"><b>Definition</b> <a href="XTP2_82_832_82_2xquote__api__struct_8h_source.html#l00183">xquote_api_struct.h:184</a></div></div>
+<div class="ttc" id="astructXTPRspInfoStruct_html"><div class="ttname"><a href="structXTPRspInfoStruct.html">XTPRspInfoStruct</a></div><div class="ttdoc">响应信息</div><div class="ttdef"><b>Definition</b> <a href="XTP2_82_832_82_2xtp__api__struct__common_8h_source.html#l00030">xtp_api_struct_common.h:31</a></div></div>
+<div class="ttc" id="astructXTPSpecificTickerStruct_html"><div class="ttname"><a href="structXTPSpecificTickerStruct.html">XTPSpecificTickerStruct</a></div><div class="ttdoc">指定的合约</div><div class="ttdef"><b>Definition</b> <a href="XTP2_82_832_82_2xquote__api__struct_8h_source.html#l00015">xquote_api_struct.h:16</a></div></div>
+<div class="ttc" id="astructXTPTickByTickStruct_html"><div class="ttname"><a href="structXTPTickByTickStruct.html">XTPTickByTickStruct</a></div><div class="ttdoc">逐笔数据信息</div><div class="ttdef"><b>Definition</b> <a href="XTP2_82_832_82_2xquote__api__struct_8h_source.html#l00377">xquote_api_struct.h:377</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_c4f24993061d953987110db2e3f1b9dc.html">ParserXTP</a></li><li class="navelem"><a class="el" href="ParserXTP_8h.html">ParserXTP.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

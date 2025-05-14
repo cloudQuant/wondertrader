@@ -1,0 +1,1942 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/huf_compress.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('huf__compress_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#enum-members">枚举</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">huf_compress.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;stdio.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="WTSUtils_2zstdlib_2compiler_8h_source.html">compiler.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="bitstream_8h_source.html">bitstream.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="hist_8h_source.html">hist.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="fse_8h_source.html">fse.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="huf_8h_source.html">huf.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="error__private_8h_source.html">error_private.h</a>&quot;</code><br />
+</div>
+<p><a href="huf__compress_8c_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structHUF__CElt__s.html">HUF_CElt_s</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnodeElt__s.html">nodeElt_s</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structrankPos.html">rankPos</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structHUF__compress__tables__t.html">HUF_compress_tables_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a0d2a6fcfd814db079898717019641487" id="r_a0d2a6fcfd814db079898717019641487"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a0d2a6fcfd814db079898717019641487">FSE_STATIC_LINKING_ONLY</a>&#160;&#160;&#160;/* <a class="el" href="fse__compress_8c.html#a5b48bd698b011962206908be5c233e64">FSE_optimalTableLog_internal</a> */</td></tr>
+<tr class="separator:a0d2a6fcfd814db079898717019641487"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7691fd75a0d8bc9d2b1544f0df8e381c" id="r_a7691fd75a0d8bc9d2b1544f0df8e381c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a7691fd75a0d8bc9d2b1544f0df8e381c">HUF_STATIC_LINKING_ONLY</a></td></tr>
+<tr class="separator:a7691fd75a0d8bc9d2b1544f0df8e381c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2de9e4837283ff6a5d5f4e2f43c6fed" id="r_ad2de9e4837283ff6a5d5f4e2f43c6fed"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#ad2de9e4837283ff6a5d5f4e2f43c6fed">HUF_isError</a>&#160;&#160;&#160;<a class="el" href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a></td></tr>
+<tr class="separator:ad2de9e4837283ff6a5d5f4e2f43c6fed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a019f007718bb8712ce4870e02d624810" id="r_a019f007718bb8712ce4870e02d624810"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a019f007718bb8712ce4870e02d624810">HUF_STATIC_ASSERT</a>(c)&#160;&#160;&#160;<a class="el" href="debug_8h.html#a0eb676ca6c75ca5c67f93092d6f39fc0">DEBUG_STATIC_ASSERT</a>(c)   /* use only *after* variable declarations */</td></tr>
+<tr class="separator:a019f007718bb8712ce4870e02d624810"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b01d485e392c08dde3559f5d5b95b7c" id="r_a2b01d485e392c08dde3559f5d5b95b7c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a2b01d485e392c08dde3559f5d5b95b7c">CHECK_V_F</a>(e,  f)&#160;&#160;&#160;size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> e = f; if (<a class="el" href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a>(e)) return e</td></tr>
+<tr class="separator:a2b01d485e392c08dde3559f5d5b95b7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16d46f205af270855cb30ab9c9dd646d" id="r_a16d46f205af270855cb30ab9c9dd646d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a16d46f205af270855cb30ab9c9dd646d">CHECK_F</a>(f)&#160;&#160;&#160;{ <a class="el" href="fse__compress_8c.html#a2b01d485e392c08dde3559f5d5b95b7c">CHECK_V_F</a>(_var_err__, f); }</td></tr>
+<tr class="separator:a16d46f205af270855cb30ab9c9dd646d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae40654b2c641df4dd503108051e9c490" id="r_ae40654b2c641df4dd503108051e9c490"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#ae40654b2c641df4dd503108051e9c490">MAX_FSE_TABLELOG_FOR_HUFF_HEADER</a>&#160;&#160;&#160;6</td></tr>
+<tr class="separator:ae40654b2c641df4dd503108051e9c490"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a427eb005b5e84abd606bccd3e6c0352e" id="r_a427eb005b5e84abd606bccd3e6c0352e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a427eb005b5e84abd606bccd3e6c0352e">STARTNODE</a>&#160;&#160;&#160;(HUF_SYMBOLVALUE_MAX+1)</td></tr>
+<tr class="separator:a427eb005b5e84abd606bccd3e6c0352e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b40bbb49bcc420d051b19b76c1e77c3" id="r_a5b40bbb49bcc420d051b19b76c1e77c3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a5b40bbb49bcc420d051b19b76c1e77c3">HUF_FLUSHBITS</a>(s)&#160;&#160;&#160;<a class="el" href="bitstream_8h.html#a4c839965cf6a86f64d859153451ccab6">BIT_flushBits</a>(s)</td></tr>
+<tr class="separator:a5b40bbb49bcc420d051b19b76c1e77c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a808bf5f7b4669b3b8772f8eaab86d97b" id="r_a808bf5f7b4669b3b8772f8eaab86d97b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a808bf5f7b4669b3b8772f8eaab86d97b">HUF_FLUSHBITS_1</a>(stream)&#160;&#160;&#160;    if (sizeof((stream)-&gt;bitContainer)*8 &lt; HUF_TABLELOG_MAX*2+7) <a class="el" href="huf__compress_8c.html#a5b40bbb49bcc420d051b19b76c1e77c3">HUF_FLUSHBITS</a>(stream)</td></tr>
+<tr class="separator:a808bf5f7b4669b3b8772f8eaab86d97b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e900af8d1a726d2029d713e8847d3ba" id="r_a7e900af8d1a726d2029d713e8847d3ba"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a7e900af8d1a726d2029d713e8847d3ba">HUF_FLUSHBITS_2</a>(stream)&#160;&#160;&#160;    if (sizeof((stream)-&gt;bitContainer)*8 &lt; HUF_TABLELOG_MAX*4+7) <a class="el" href="huf__compress_8c.html#a5b40bbb49bcc420d051b19b76c1e77c3">HUF_FLUSHBITS</a>(stream)</td></tr>
+<tr class="separator:a7e900af8d1a726d2029d713e8847d3ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a939b0b98d55ebe9223751c696292a22f" id="r_a939b0b98d55ebe9223751c696292a22f"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structnodeElt__s.html">nodeElt_s</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a939b0b98d55ebe9223751c696292a22f">nodeElt</a></td></tr>
+<tr class="separator:a939b0b98d55ebe9223751c696292a22f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af36372a02614b3dbe837b45c128b8b9d" id="r_af36372a02614b3dbe837b45c128b8b9d"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="huf__compress_8c.html#a939b0b98d55ebe9223751c696292a22f">nodeElt</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#af36372a02614b3dbe837b45c128b8b9d">huffNodeTable</a>[HUF_CTABLE_WORKSPACE_SIZE_U32]</td></tr>
+<tr class="separator:af36372a02614b3dbe837b45c128b8b9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+枚举</h2></td></tr>
+<tr class="memitem:a54ca0f9a9e0f2c35b44414e65c23191e" id="r_a54ca0f9a9e0f2c35b44414e65c23191e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a54ca0f9a9e0f2c35b44414e65c23191e">HUF_nbStreams_e</a> { <a class="el" href="huf__compress_8c.html#a54ca0f9a9e0f2c35b44414e65c23191ea8ed295e9edc623243ee2c353ee216677">HUF_singleStream</a>
+, <a class="el" href="huf__compress_8c.html#a54ca0f9a9e0f2c35b44414e65c23191ea511695c0e587162407ca135ed208cca4">HUF_fourStreams</a>
+ }</td></tr>
+<tr class="separator:a54ca0f9a9e0f2c35b44414e65c23191e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a522b6c89fdb10f30ac1e5ad627fed930" id="r_a522b6c89fdb10f30ac1e5ad627fed930"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a522b6c89fdb10f30ac1e5ad627fed930">HUF_optimalTableLog</a> (unsigned maxTableLog, size_t srcSize, unsigned maxSymbolValue)</td></tr>
+<tr class="separator:a522b6c89fdb10f30ac1e5ad627fed930"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32f0f417bac6a7ef89fef08e04cf7c19" id="r_a32f0f417bac6a7ef89fef08e04cf7c19"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a32f0f417bac6a7ef89fef08e04cf7c19">HUF_compressWeights</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *weightTable, size_t wtSize)</td></tr>
+<tr class="separator:a32f0f417bac6a7ef89fef08e04cf7c19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61719d18f234f972c136bc36dd7eb784" id="r_a61719d18f234f972c136bc36dd7eb784"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a61719d18f234f972c136bc36dd7eb784">HUF_writeCTable</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t maxDstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *CTable, unsigned maxSymbolValue, unsigned huffLog)</td></tr>
+<tr class="separator:a61719d18f234f972c136bc36dd7eb784"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af54934fceaf8318ba8900a2f315b7ebf" id="r_af54934fceaf8318ba8900a2f315b7ebf"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#af54934fceaf8318ba8900a2f315b7ebf">HUF_readCTable</a> (HUF_CElt *CTable, unsigned *maxSymbolValuePtr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:af54934fceaf8318ba8900a2f315b7ebf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88b3b75d251adba8ea3abcbabdcb9555" id="r_a88b3b75d251adba8ea3abcbabdcb9555"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a88b3b75d251adba8ea3abcbabdcb9555">HUF_getNbBits</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *symbolTable, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> symbolValue)</td></tr>
+<tr class="separator:a88b3b75d251adba8ea3abcbabdcb9555"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aced0df23143129895fd5e4bdb65eff4c" id="r_aced0df23143129895fd5e4bdb65eff4c"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#aced0df23143129895fd5e4bdb65eff4c">HUF_setMaxHeight</a> (<a class="el" href="huf__compress_8c.html#a939b0b98d55ebe9223751c696292a22f">nodeElt</a> *huffNode, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> lastNonNull, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> maxNbBits)</td></tr>
+<tr class="separator:aced0df23143129895fd5e4bdb65eff4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82252015f71c50dd77437915d4b6fdeb" id="r_a82252015f71c50dd77437915d4b6fdeb"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a82252015f71c50dd77437915d4b6fdeb">HUF_sort</a> (<a class="el" href="huf__compress_8c.html#a939b0b98d55ebe9223751c696292a22f">nodeElt</a> *huffNode, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned *count, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> maxSymbolValue)</td></tr>
+<tr class="separator:a82252015f71c50dd77437915d4b6fdeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2bd533c548b31a0c7f4864ef2bf0704" id="r_ad2bd533c548b31a0c7f4864ef2bf0704"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#ad2bd533c548b31a0c7f4864ef2bf0704">HUF_buildCTable_wksp</a> (HUF_CElt *tree, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned *count, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> maxSymbolValue, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> maxNbBits, void *workSpace, size_t wkspSize)</td></tr>
+<tr class="separator:ad2bd533c548b31a0c7f4864ef2bf0704"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55fffd7924bcece0b01ad76aa266e5ea" id="r_a55fffd7924bcece0b01ad76aa266e5ea"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a55fffd7924bcece0b01ad76aa266e5ea">HUF_buildCTable</a> (HUF_CElt *tree, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned *count, unsigned maxSymbolValue, unsigned maxNbBits)</td></tr>
+<tr class="separator:a55fffd7924bcece0b01ad76aa266e5ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b52fd45d234a123250cde1b3bd6a460" id="r_a9b52fd45d234a123250cde1b3bd6a460"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a9b52fd45d234a123250cde1b3bd6a460">HUF_estimateCompressedSize</a> (HUF_CElt *CTable, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned *count, unsigned maxSymbolValue)</td></tr>
+<tr class="separator:a9b52fd45d234a123250cde1b3bd6a460"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9609fadb08fc10b9b1655adad193d0a0" id="r_a9609fadb08fc10b9b1655adad193d0a0"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a9609fadb08fc10b9b1655adad193d0a0">HUF_validateCTable</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *CTable, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned *count, unsigned maxSymbolValue)</td></tr>
+<tr class="separator:a9609fadb08fc10b9b1655adad193d0a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d59eb211fff5bdf33704f563fe93af0" id="r_a1d59eb211fff5bdf33704f563fe93af0"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a1d59eb211fff5bdf33704f563fe93af0">HUF_compressBound</a> (size_t size)</td></tr>
+<tr class="separator:a1d59eb211fff5bdf33704f563fe93af0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5cb547af05782e9d870b2479a7fde0a2" id="r_a5cb547af05782e9d870b2479a7fde0a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a5cb547af05782e9d870b2479a7fde0a2">HUF_encodeSymbol</a> (<a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a> *bitCPtr, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> symbol, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *CTable)</td></tr>
+<tr class="separator:a5cb547af05782e9d870b2479a7fde0a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3c20f58c71b92ed2b0fe074b570641b" id="r_ae3c20f58c71b92ed2b0fe074b570641b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#ae3c20f58c71b92ed2b0fe074b570641b">HUF_compress1X_usingCTable_internal_body</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *CTable)</td></tr>
+<tr class="separator:ae3c20f58c71b92ed2b0fe074b570641b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63240ce59123c2494c0c74a9d24e3f20" id="r_a63240ce59123c2494c0c74a9d24e3f20"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a63240ce59123c2494c0c74a9d24e3f20">HUF_compress1X_usingCTable_internal</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *CTable, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int bmi2)</td></tr>
+<tr class="separator:a63240ce59123c2494c0c74a9d24e3f20"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76488192841aef0079dcc8918a2c8a50" id="r_a76488192841aef0079dcc8918a2c8a50"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a76488192841aef0079dcc8918a2c8a50">HUF_compress1X_usingCTable</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *CTable)</td></tr>
+<tr class="separator:a76488192841aef0079dcc8918a2c8a50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64fe537e6810575676a71ea7e629ea5d" id="r_a64fe537e6810575676a71ea7e629ea5d"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a64fe537e6810575676a71ea7e629ea5d">HUF_compress4X_usingCTable_internal</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *CTable, int bmi2)</td></tr>
+<tr class="separator:a64fe537e6810575676a71ea7e629ea5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24f8ba0c3342389424a242ded64ff721" id="r_a24f8ba0c3342389424a242ded64ff721"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a24f8ba0c3342389424a242ded64ff721">HUF_compress4X_usingCTable</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *CTable)</td></tr>
+<tr class="separator:a24f8ba0c3342389424a242ded64ff721"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb8d4d39076fdcadb93f04d9219dfb67" id="r_aeb8d4d39076fdcadb93f04d9219dfb67"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#aeb8d4d39076fdcadb93f04d9219dfb67">HUF_compressCTable_internal</a> (<a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ostart, <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *op, <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> oend, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, <a class="el" href="huf__compress_8c.html#a54ca0f9a9e0f2c35b44414e65c23191e">HUF_nbStreams_e</a> nbStreams, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *CTable, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int bmi2)</td></tr>
+<tr class="separator:aeb8d4d39076fdcadb93f04d9219dfb67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd53795998bb549d402844a132181658" id="r_afd53795998bb549d402844a132181658"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#afd53795998bb549d402844a132181658">HUF_compress_internal</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, unsigned maxSymbolValue, unsigned huffLog, <a class="el" href="huf__compress_8c.html#a54ca0f9a9e0f2c35b44414e65c23191e">HUF_nbStreams_e</a> nbStreams, void *workSpace, size_t wkspSize, HUF_CElt *oldHufTable, HUF_repeat *repeat, int preferRepeat, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int bmi2)</td></tr>
+<tr class="separator:afd53795998bb549d402844a132181658"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6a3eb6c86d53103cf64c58561cc0bb1" id="r_ac6a3eb6c86d53103cf64c58561cc0bb1"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#ac6a3eb6c86d53103cf64c58561cc0bb1">HUF_compress1X_wksp</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, unsigned maxSymbolValue, unsigned huffLog, void *workSpace, size_t wkspSize)</td></tr>
+<tr class="separator:ac6a3eb6c86d53103cf64c58561cc0bb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0cdadf0a7a85915d976beb1930affbd" id="r_af0cdadf0a7a85915d976beb1930affbd"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#af0cdadf0a7a85915d976beb1930affbd">HUF_compress1X_repeat</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, unsigned maxSymbolValue, unsigned huffLog, void *workSpace, size_t wkspSize, HUF_CElt *hufTable, HUF_repeat *repeat, int preferRepeat, int bmi2)</td></tr>
+<tr class="separator:af0cdadf0a7a85915d976beb1930affbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a043dfecc9e992670479b50274a7d91cc" id="r_a043dfecc9e992670479b50274a7d91cc"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a043dfecc9e992670479b50274a7d91cc">HUF_compress1X</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, unsigned maxSymbolValue, unsigned huffLog)</td></tr>
+<tr class="separator:a043dfecc9e992670479b50274a7d91cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95538cb151b85d5ab3ef5074858ab90b" id="r_a95538cb151b85d5ab3ef5074858ab90b"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a95538cb151b85d5ab3ef5074858ab90b">HUF_compress4X_wksp</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, unsigned maxSymbolValue, unsigned huffLog, void *workSpace, size_t wkspSize)</td></tr>
+<tr class="separator:a95538cb151b85d5ab3ef5074858ab90b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0adc70d1c7df0b0f44891d78f4c4993a" id="r_a0adc70d1c7df0b0f44891d78f4c4993a"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a0adc70d1c7df0b0f44891d78f4c4993a">HUF_compress4X_repeat</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, unsigned maxSymbolValue, unsigned huffLog, void *workSpace, size_t wkspSize, HUF_CElt *hufTable, HUF_repeat *repeat, int preferRepeat, int bmi2)</td></tr>
+<tr class="separator:a0adc70d1c7df0b0f44891d78f4c4993a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fe94c3145c026ff2bad2a0d2e9fcf14" id="r_a1fe94c3145c026ff2bad2a0d2e9fcf14"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#a1fe94c3145c026ff2bad2a0d2e9fcf14">HUF_compress2</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, unsigned maxSymbolValue, unsigned huffLog)</td></tr>
+<tr class="separator:a1fe94c3145c026ff2bad2a0d2e9fcf14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab05ec1f2a19ee7143101569b59371ca4" id="r_ab05ec1f2a19ee7143101569b59371ca4"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf__compress_8c.html#ab05ec1f2a19ee7143101569b59371ca4">HUF_compress</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t maxDstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:ab05ec1f2a19ee7143101569b59371ca4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a16d46f205af270855cb30ab9c9dd646d" name="a16d46f205af270855cb30ab9c9dd646d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16d46f205af270855cb30ab9c9dd646d">&#9670;&#160;</a></span>CHECK_F</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CHECK_F</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">f</td><td>)</td>
+          <td>&#160;&#160;&#160;{ <a class="el" href="fse__compress_8c.html#a2b01d485e392c08dde3559f5d5b95b7c">CHECK_V_F</a>(_var_err__, f); }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00064">64</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2b01d485e392c08dde3559f5d5b95b7c" name="a2b01d485e392c08dde3559f5d5b95b7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b01d485e392c08dde3559f5d5b95b7c">&#9670;&#160;</a></span>CHECK_V_F</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CHECK_V_F</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">f&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> e = f; if (<a class="el" href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a>(e)) return e</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00063">63</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0d2a6fcfd814db079898717019641487" name="a0d2a6fcfd814db079898717019641487"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d2a6fcfd814db079898717019641487">&#9670;&#160;</a></span>FSE_STATIC_LINKING_ONLY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_STATIC_LINKING_ONLY&#160;&#160;&#160;/* <a class="el" href="fse__compress_8c.html#a5b48bd698b011962206908be5c233e64">FSE_optimalTableLog_internal</a> */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00051">51</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5b40bbb49bcc420d051b19b76c1e77c3" name="a5b40bbb49bcc420d051b19b76c1e77c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b40bbb49bcc420d051b19b76c1e77c3">&#9670;&#160;</a></span>HUF_FLUSHBITS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_FLUSHBITS</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">s</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="bitstream_8h.html#a4c839965cf6a86f64d859153451ccab6">BIT_flushBits</a>(s)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00457">457</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a808bf5f7b4669b3b8772f8eaab86d97b" name="a808bf5f7b4669b3b8772f8eaab86d97b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a808bf5f7b4669b3b8772f8eaab86d97b">&#9670;&#160;</a></span>HUF_FLUSHBITS_1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_FLUSHBITS_1</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">stream</td><td>)</td>
+          <td>&#160;&#160;&#160;    if (sizeof((stream)-&gt;bitContainer)*8 &lt; HUF_TABLELOG_MAX*2+7) <a class="el" href="huf__compress_8c.html#a5b40bbb49bcc420d051b19b76c1e77c3">HUF_FLUSHBITS</a>(stream)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00459">459</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7e900af8d1a726d2029d713e8847d3ba" name="a7e900af8d1a726d2029d713e8847d3ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e900af8d1a726d2029d713e8847d3ba">&#9670;&#160;</a></span>HUF_FLUSHBITS_2</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_FLUSHBITS_2</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">stream</td><td>)</td>
+          <td>&#160;&#160;&#160;    if (sizeof((stream)-&gt;bitContainer)*8 &lt; HUF_TABLELOG_MAX*4+7) <a class="el" href="huf__compress_8c.html#a5b40bbb49bcc420d051b19b76c1e77c3">HUF_FLUSHBITS</a>(stream)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00462">462</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad2de9e4837283ff6a5d5f4e2f43c6fed" name="ad2de9e4837283ff6a5d5f4e2f43c6fed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2de9e4837283ff6a5d5f4e2f43c6fed">&#9670;&#160;</a></span>HUF_isError</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_isError&#160;&#160;&#160;<a class="el" href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00061">61</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a019f007718bb8712ce4870e02d624810" name="a019f007718bb8712ce4870e02d624810"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a019f007718bb8712ce4870e02d624810">&#9670;&#160;</a></span>HUF_STATIC_ASSERT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_STATIC_ASSERT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">c</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="debug_8h.html#a0eb676ca6c75ca5c67f93092d6f39fc0">DEBUG_STATIC_ASSERT</a>(c)   /* use only *after* variable declarations */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00062">62</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7691fd75a0d8bc9d2b1544f0df8e381c" name="a7691fd75a0d8bc9d2b1544f0df8e381c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7691fd75a0d8bc9d2b1544f0df8e381c">&#9670;&#160;</a></span>HUF_STATIC_LINKING_ONLY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_STATIC_LINKING_ONLY</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00053">53</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae40654b2c641df4dd503108051e9c490" name="ae40654b2c641df4dd503108051e9c490"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae40654b2c641df4dd503108051e9c490">&#9670;&#160;</a></span>MAX_FSE_TABLELOG_FOR_HUFF_HEADER</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MAX_FSE_TABLELOG_FOR_HUFF_HEADER&#160;&#160;&#160;6</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00084">84</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a427eb005b5e84abd606bccd3e6c0352e" name="a427eb005b5e84abd606bccd3e6c0352e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a427eb005b5e84abd606bccd3e6c0352e">&#9670;&#160;</a></span>STARTNODE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STARTNODE&#160;&#160;&#160;(HUF_SYMBOLVALUE_MAX+1)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="huf__compress_8c.html#ad2bd533c548b31a0c7f4864ef2bf0704">HUF_buildCTable_wksp()</a> : Same as <a class="el" href="huf__compress_8c.html#a55fffd7924bcece0b01ad76aa266e5ea">HUF_buildCTable()</a>, but using externally allocated scratch buffer. <code>workSpace</code> must be aligned on 4-bytes boundaries, and be at least as large as a table of HUF_CTABLE_WORKSPACE_SIZE_U32 unsigned. </p>
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00348">348</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类型定义说明</h2>
+<a id="af36372a02614b3dbe837b45c128b8b9d" name="af36372a02614b3dbe837b45c128b8b9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af36372a02614b3dbe837b45c128b8b9d">&#9670;&#160;</a></span>huffNodeTable</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="huf__compress_8c.html#a939b0b98d55ebe9223751c696292a22f">nodeElt</a> huffNodeTable[HUF_CTABLE_WORKSPACE_SIZE_U32]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00349">349</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a939b0b98d55ebe9223751c696292a22f" name="a939b0b98d55ebe9223751c696292a22f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a939b0b98d55ebe9223751c696292a22f">&#9670;&#160;</a></span>nodeElt</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structnodeElt__s.html">nodeElt_s</a> <a class="el" href="huf__compress_8c.html#a939b0b98d55ebe9223751c696292a22f">nodeElt</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">枚举类型说明</h2>
+<a id="a54ca0f9a9e0f2c35b44414e65c23191e" name="a54ca0f9a9e0f2c35b44414e65c23191e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54ca0f9a9e0f2c35b44414e65c23191e">&#9670;&#160;</a></span>HUF_nbStreams_e</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="huf__compress_8c.html#a54ca0f9a9e0f2c35b44414e65c23191e">HUF_nbStreams_e</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a54ca0f9a9e0f2c35b44414e65c23191ea8ed295e9edc623243ee2c353ee216677" name="a54ca0f9a9e0f2c35b44414e65c23191ea8ed295e9edc623243ee2c353ee216677"></a>HUF_singleStream&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a54ca0f9a9e0f2c35b44414e65c23191ea511695c0e587162407ca135ed208cca4" name="a54ca0f9a9e0f2c35b44414e65c23191ea511695c0e587162407ca135ed208cca4"></a>HUF_fourStreams&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00613">613</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a55fffd7924bcece0b01ad76aa266e5ea" name="a55fffd7924bcece0b01ad76aa266e5ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55fffd7924bcece0b01ad76aa266e5ea">&#9670;&#160;</a></span>HUF_buildCTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_buildCTable </td>
+          <td>(</td>
+          <td class="paramtype">HUF_CElt *&#160;</td>
+          <td class="paramname"><em>tree</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned *&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxNbBits</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="huf__compress_8c.html#a55fffd7924bcece0b01ad76aa266e5ea">HUF_buildCTable()</a> : </p><dl class="section return"><dt>返回</dt><dd>: maxNbBits Note : count is used before tree is written, so they can safely overlap </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00424">424</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad2bd533c548b31a0c7f4864ef2bf0704" name="ad2bd533c548b31a0c7f4864ef2bf0704"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2bd533c548b31a0c7f4864ef2bf0704">&#9670;&#160;</a></span>HUF_buildCTable_wksp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_buildCTable_wksp </td>
+          <td>(</td>
+          <td class="paramtype">HUF_CElt *&#160;</td>
+          <td class="paramname"><em>tree</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned *&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>maxNbBits</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>workSpace</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>wkspSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00350">350</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab05ec1f2a19ee7143101569b59371ca4" name="ab05ec1f2a19ee7143101569b59371ca4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab05ec1f2a19ee7143101569b59371ca4">&#9670;&#160;</a></span>HUF_compress()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_compress </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="huf_8h.html#ad334d7d2d97830ce9b4eef5356fb7b78">HUF_compress()</a> : Compress content from buffer 'src', of size 'srcSize', into buffer 'dst'. 'dst' buffer must be already allocated. Compression runs faster if <code>dstCapacity</code> &gt;= HUF_compressBound(srcSize). <code>srcSize</code> must be &lt;= <code>HUF_BLOCKSIZE_MAX</code> == 128 KB. </p><dl class="section return"><dt>返回</dt><dd>: size of compressed data (&lt;= <code>dstCapacity</code>). Special values : if return == 0, srcData is not compressible =&gt; Nothing is stored within dst !!! if <a class="el" href="huf__compress_8c.html#ad2de9e4837283ff6a5d5f4e2f43c6fed">HUF_isError(return)</a>, compression failed (more details using <a class="el" href="huf_8h.html#aa8486584523cd9c56ed09e056048149a">HUF_getErrorName()</a>) </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00795">795</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a043dfecc9e992670479b50274a7d91cc" name="a043dfecc9e992670479b50274a7d91cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a043dfecc9e992670479b50274a7d91cc">&#9670;&#160;</a></span>HUF_compress1X()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_compress1X </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>huffLog</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00750">750</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af0cdadf0a7a85915d976beb1930affbd" name="af0cdadf0a7a85915d976beb1930affbd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0cdadf0a7a85915d976beb1930affbd">&#9670;&#160;</a></span>HUF_compress1X_repeat()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_compress1X_repeat </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>huffLog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>workSpace</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>wkspSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">HUF_CElt *&#160;</td>
+          <td class="paramname"><em>hufTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">HUF_repeat *&#160;</td>
+          <td class="paramname"><em>repeat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>preferRepeat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bmi2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00738">738</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a76488192841aef0079dcc8918a2c8a50" name="a76488192841aef0079dcc8918a2c8a50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76488192841aef0079dcc8918a2c8a50">&#9670;&#160;</a></span>HUF_compress1X_usingCTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_compress1X_usingCTable </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *&#160;</td>
+          <td class="paramname"><em>CTable</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00554">554</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a63240ce59123c2494c0c74a9d24e3f20" name="a63240ce59123c2494c0c74a9d24e3f20"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a63240ce59123c2494c0c74a9d24e3f20">&#9670;&#160;</a></span>HUF_compress1X_usingCTable_internal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t HUF_compress1X_usingCTable_internal </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *&#160;</td>
+          <td class="paramname"><em>CTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int&#160;</td>
+          <td class="paramname"><em>bmi2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00544">544</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae3c20f58c71b92ed2b0fe074b570641b" name="ae3c20f58c71b92ed2b0fe074b570641b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3c20f58c71b92ed2b0fe074b570641b">&#9670;&#160;</a></span>HUF_compress1X_usingCTable_internal_body()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> size_t HUF_compress1X_usingCTable_internal_body </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *&#160;</td>
+          <td class="paramname"><em>CTable</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00466">466</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac6a3eb6c86d53103cf64c58561cc0bb1" name="ac6a3eb6c86d53103cf64c58561cc0bb1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6a3eb6c86d53103cf64c58561cc0bb1">&#9670;&#160;</a></span>HUF_compress1X_wksp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_compress1X_wksp </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>huffLog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>workSpace</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>wkspSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00727">727</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1fe94c3145c026ff2bad2a0d2e9fcf14" name="a1fe94c3145c026ff2bad2a0d2e9fcf14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fe94c3145c026ff2bad2a0d2e9fcf14">&#9670;&#160;</a></span>HUF_compress2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_compress2 </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>tableLog</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="huf_8h.html#aaa5982936a5754626081cf06319679e4">HUF_compress2()</a> : Same as <a class="el" href="huf_8h.html#ad334d7d2d97830ce9b4eef5356fb7b78">HUF_compress()</a>, but offers control over <code>maxSymbolValue</code> and <code>tableLog</code>. <code>maxSymbolValue</code> must be &lt;= HUF_SYMBOLVALUE_MAX . <code>tableLog</code> must be <code>&lt;= HUF_TABLELOG_MAX</code> . </p>
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00787">787</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0adc70d1c7df0b0f44891d78f4c4993a" name="a0adc70d1c7df0b0f44891d78f4c4993a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0adc70d1c7df0b0f44891d78f4c4993a">&#9670;&#160;</a></span>HUF_compress4X_repeat()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_compress4X_repeat </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>huffLog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>workSpace</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>wkspSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">HUF_CElt *&#160;</td>
+          <td class="paramname"><em>hufTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">HUF_repeat *&#160;</td>
+          <td class="paramname"><em>repeat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>preferRepeat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bmi2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00775">775</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a24f8ba0c3342389424a242ded64ff721" name="a24f8ba0c3342389424a242ded64ff721"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24f8ba0c3342389424a242ded64ff721">&#9670;&#160;</a></span>HUF_compress4X_usingCTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_compress4X_usingCTable </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *&#160;</td>
+          <td class="paramname"><em>CTable</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00608">608</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a64fe537e6810575676a71ea7e629ea5d" name="a64fe537e6810575676a71ea7e629ea5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64fe537e6810575676a71ea7e629ea5d">&#9670;&#160;</a></span>HUF_compress4X_usingCTable_internal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t HUF_compress4X_usingCTable_internal </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *&#160;</td>
+          <td class="paramname"><em>CTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bmi2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00561">561</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a95538cb151b85d5ab3ef5074858ab90b" name="a95538cb151b85d5ab3ef5074858ab90b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95538cb151b85d5ab3ef5074858ab90b">&#9670;&#160;</a></span>HUF_compress4X_wksp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_compress4X_wksp </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>huffLog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>workSpace</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>wkspSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00761">761</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afd53795998bb549d402844a132181658" name="afd53795998bb549d402844a132181658"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd53795998bb549d402844a132181658">&#9670;&#160;</a></span>HUF_compress_internal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t HUF_compress_internal </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>huffLog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="huf__compress_8c.html#a54ca0f9a9e0f2c35b44414e65c23191e">HUF_nbStreams_e</a>&#160;</td>
+          <td class="paramname"><em>nbStreams</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>workSpace</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>wkspSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">HUF_CElt *&#160;</td>
+          <td class="paramname"><em>oldHufTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">HUF_repeat *&#160;</td>
+          <td class="paramname"><em>repeat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>preferRepeat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int&#160;</td>
+          <td class="paramname"><em>bmi2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00640">640</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1d59eb211fff5bdf33704f563fe93af0" name="a1d59eb211fff5bdf33704f563fe93af0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d59eb211fff5bdf33704f563fe93af0">&#9670;&#160;</a></span>HUF_compressBound()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_compressBound </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>maximum compressed size (worst case) </p>
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00449">449</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aeb8d4d39076fdcadb93f04d9219dfb67" name="aeb8d4d39076fdcadb93f04d9219dfb67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb8d4d39076fdcadb93f04d9219dfb67">&#9670;&#160;</a></span>HUF_compressCTable_internal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t HUF_compressCTable_internal </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>ostart</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>op</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>oend</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="huf__compress_8c.html#a54ca0f9a9e0f2c35b44414e65c23191e">HUF_nbStreams_e</a>&#160;</td>
+          <td class="paramname"><em>nbStreams</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *&#160;</td>
+          <td class="paramname"><em>CTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int&#160;</td>
+          <td class="paramname"><em>bmi2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00615">615</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a32f0f417bac6a7ef89fef08e04cf7c19" name="a32f0f417bac6a7ef89fef08e04cf7c19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32f0f417bac6a7ef89fef08e04cf7c19">&#9670;&#160;</a></span>HUF_compressWeights()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t HUF_compressWeights </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>weightTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>wtSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00085">85</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5cb547af05782e9d870b2479a7fde0a2" name="a5cb547af05782e9d870b2479a7fde0a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5cb547af05782e9d870b2479a7fde0a2">&#9670;&#160;</a></span>HUF_encodeSymbol()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> void HUF_encodeSymbol </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a> *&#160;</td>
+          <td class="paramname"><em>bitCPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>symbol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *&#160;</td>
+          <td class="paramname"><em>CTable</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00452">452</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9b52fd45d234a123250cde1b3bd6a460" name="a9b52fd45d234a123250cde1b3bd6a460"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b52fd45d234a123250cde1b3bd6a460">&#9670;&#160;</a></span>HUF_estimateCompressedSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t HUF_estimateCompressedSize </td>
+          <td>(</td>
+          <td class="paramtype">HUF_CElt *&#160;</td>
+          <td class="paramname"><em>CTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned *&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00430">430</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a88b3b75d251adba8ea3abcbabdcb9555" name="a88b3b75d251adba8ea3abcbabdcb9555"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88b3b75d251adba8ea3abcbabdcb9555">&#9670;&#160;</a></span>HUF_getNbBits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> HUF_getNbBits </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>symbolTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>symbolValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00220">220</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a522b6c89fdb10f30ac1e5ad627fed930" name="a522b6c89fdb10f30ac1e5ad627fed930"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a522b6c89fdb10f30ac1e5ad627fed930">&#9670;&#160;</a></span>HUF_optimalTableLog()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned HUF_optimalTableLog </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxTableLog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00070">70</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af54934fceaf8318ba8900a2f315b7ebf" name="af54934fceaf8318ba8900a2f315b7ebf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af54934fceaf8318ba8900a2f315b7ebf">&#9670;&#160;</a></span>HUF_readCTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_readCTable </td>
+          <td>(</td>
+          <td class="paramtype">HUF_CElt *&#160;</td>
+          <td class="paramname"><em>CTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned *&#160;</td>
+          <td class="paramname"><em>maxSymbolValuePtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00172">172</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aced0df23143129895fd5e4bdb65eff4c" name="aced0df23143129895fd5e4bdb65eff4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aced0df23143129895fd5e4bdb65eff4c">&#9670;&#160;</a></span>HUF_setMaxHeight()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> HUF_setMaxHeight </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="huf__compress_8c.html#a939b0b98d55ebe9223751c696292a22f">nodeElt</a> *&#160;</td>
+          <td class="paramname"><em>huffNode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>lastNonNull</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>maxNbBits</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00235">235</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a82252015f71c50dd77437915d4b6fdeb" name="a82252015f71c50dd77437915d4b6fdeb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82252015f71c50dd77437915d4b6fdeb">&#9670;&#160;</a></span>HUF_sort()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void HUF_sort </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="huf__compress_8c.html#a939b0b98d55ebe9223751c696292a22f">nodeElt</a> *&#160;</td>
+          <td class="paramname"><em>huffNode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned *&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00318">318</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9609fadb08fc10b9b1655adad193d0a0" name="a9609fadb08fc10b9b1655adad193d0a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9609fadb08fc10b9b1655adad193d0a0">&#9670;&#160;</a></span>HUF_validateCTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int HUF_validateCTable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *&#160;</td>
+          <td class="paramname"><em>CTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned *&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00440">440</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a61719d18f234f972c136bc36dd7eb784" name="a61719d18f234f972c136bc36dd7eb784"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61719d18f234f972c136bc36dd7eb784">&#9670;&#160;</a></span>HUF_writeCTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_writeCTable </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>maxDstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> HUF_CElt *&#160;</td>
+          <td class="paramname"><em>CTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>huffLog</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="huf__compress_8c.html#a61719d18f234f972c136bc36dd7eb784">HUF_writeCTable()</a> : <code>CTable</code> : Huffman tree to save, using huf representation. </p><dl class="section return"><dt>返回</dt><dd>: size of saved CTable </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00136">136</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="huf__compress_8c.html">huf_compress.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

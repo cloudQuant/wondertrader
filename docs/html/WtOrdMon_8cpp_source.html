@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtExeFact/WtOrdMon.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtOrdMon_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtOrdMon.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtOrdMon_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="WtOrdMon_8h.html">WtOrdMon.h</a>&quot;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="foldopen" id="foldopen00017" data-start="{" data-end="}">
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="classWtOrdMon.html#a572c61356c9c72cc2e5b41dc38c405be">   17</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtOrdMon.html#a572c61356c9c72cc2e5b41dc38c405be">WtOrdMon::push_order</a>(<span class="keyword">const</span> uint32_t* ids, uint32_t cnt, uint64_t curTime, <span class="keywordtype">bool</span> bCanCancel <span class="comment">/* = true */</span>)</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>{</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <a class="code hl_class" href="classStdLocker.html">StdLocker&lt;StdRecurMutex&gt;</a> lock(<a class="code hl_variable" href="classWtOrdMon.html#ad8472f587e8220116eee48c30268e3a8">_mtx_ords</a>);</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keywordflow">for</span> (uint32_t idx = 0; idx &lt; cnt; idx++)</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    {</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        uint32_t localid = ids[idx];</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        <a class="code hl_typedef" href="classWtOrdMon.html#acb1403749d9f1edaf95d185abec6dd5b">OrderPair</a>&amp; ordInfo = <a class="code hl_variable" href="classWtOrdMon.html#aacc93b0ec8fc2357eedf1465192eae70">_orders</a>[localid];</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        ordInfo.first = curTime;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        ordInfo.second = bCanCancel;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    }</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>}</div>
+</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="foldopen" id="foldopen00034" data-start="{" data-end="}">
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classWtOrdMon.html#a0912654d4328fb83b91c07cf2c579623">   34</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtOrdMon.html#a0912654d4328fb83b91c07cf2c579623">WtOrdMon::erase_order</a>(uint32_t localid)</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>{</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <a class="code hl_class" href="classStdLocker.html">StdLocker&lt;StdRecurMutex&gt;</a> lock(<a class="code hl_variable" href="classWtOrdMon.html#ad8472f587e8220116eee48c30268e3a8">_mtx_ords</a>);</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="classWtOrdMon.html#aacc93b0ec8fc2357eedf1465192eae70">_orders</a>.find(localid);</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="classWtOrdMon.html#aacc93b0ec8fc2357eedf1465192eae70">_orders</a>.end())</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <a class="code hl_variable" href="classWtOrdMon.html#aacc93b0ec8fc2357eedf1465192eae70">_orders</a>.erase(it);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}</div>
+</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="foldopen" id="foldopen00051" data-start="{" data-end="}">
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="classWtOrdMon.html#afc6af8f8cb5ce78735bcf12c6e2670f1">   51</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtOrdMon.html#afc6af8f8cb5ce78735bcf12c6e2670f1">WtOrdMon::check_orders</a>(uint32_t expiresecs, uint64_t curTime, <a class="code hl_typedef" href="WtOrdMon_8h.html#a46b691171f1c5adbde58600f25bbd067">EnumOrderCallback</a> callback)</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>{</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtOrdMon.html#aacc93b0ec8fc2357eedf1465192eae70">_orders</a>.empty())</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <a class="code hl_class" href="classStdLocker.html">StdLocker&lt;StdRecurMutex&gt;</a> lock(<a class="code hl_variable" href="classWtOrdMon.html#ad8472f587e8220116eee48c30268e3a8">_mtx_ords</a>);</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; m : <a class="code hl_variable" href="classWtOrdMon.html#aacc93b0ec8fc2357eedf1465192eae70">_orders</a>)</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    {</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        uint32_t localid = m.first;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        <a class="code hl_typedef" href="classWtOrdMon.html#acb1403749d9f1edaf95d185abec6dd5b">OrderPair</a>&amp; ordInfo = m.second;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        <span class="keywordflow">if</span> (!ordInfo.second)    <span class="comment">//如果不能撤单，则直接跳过（一般涨跌停价的挂单是不能撤单的）</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <span class="keyword">auto</span> entertm = ordInfo.first;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keywordflow">if</span> (curTime - entertm &lt; expiresecs * 1000)</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        callback(m.first);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    }</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>}</div>
+</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="foldopen" id="foldopen00078" data-start="{" data-end="}">
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="classWtOrdMon.html#a65832fbcc49602bef7f7388c0cd37898">   78</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtOrdMon.html#a65832fbcc49602bef7f7388c0cd37898">WtOrdMon::enumOrder</a>(<a class="code hl_typedef" href="WtOrdMon_8h.html#a8a4f7ae16259991afe13aaf4861ef1ce">EnumAllOrderCallback</a> cb)</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>{</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtOrdMon.html#aacc93b0ec8fc2357eedf1465192eae70">_orders</a>.empty())</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <a class="code hl_class" href="classStdLocker.html">StdLocker&lt;StdRecurMutex&gt;</a> lock(<a class="code hl_variable" href="classWtOrdMon.html#ad8472f587e8220116eee48c30268e3a8">_mtx_ords</a>);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; m : <a class="code hl_variable" href="classWtOrdMon.html#aacc93b0ec8fc2357eedf1465192eae70">_orders</a>)</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    {</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        uint32_t localid = m.first;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        <a class="code hl_typedef" href="classWtOrdMon.html#acb1403749d9f1edaf95d185abec6dd5b">OrderPair</a>&amp; ordInfo = m.second;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        uint64_t entertm = ordInfo.first;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        <span class="keywordtype">bool</span> cancancel = ordInfo.second;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        cb(localid, entertm, cancancel);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    }</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>}</div>
+</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="ttc" id="aWtOrdMon_8h_html"><div class="ttname"><a href="WtOrdMon_8h.html">WtOrdMon.h</a></div><div class="ttdoc">订单监控器头文件</div></div>
+<div class="ttc" id="aWtOrdMon_8h_html_a46b691171f1c5adbde58600f25bbd067"><div class="ttname"><a href="WtOrdMon_8h.html#a46b691171f1c5adbde58600f25bbd067">EnumOrderCallback</a></div><div class="ttdeci">std::function&lt; void(uint32_t)&gt; EnumOrderCallback</div><div class="ttdoc">订单回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtOrdMon_8h_source.html#l00019">WtOrdMon.h:19</a></div></div>
+<div class="ttc" id="aWtOrdMon_8h_html_a8a4f7ae16259991afe13aaf4861ef1ce"><div class="ttname"><a href="WtOrdMon_8h.html#a8a4f7ae16259991afe13aaf4861ef1ce">EnumAllOrderCallback</a></div><div class="ttdeci">std::function&lt; void(uint32_t, uint64_t, bool)&gt; EnumAllOrderCallback</div><div class="ttdoc">订单详细信息回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtOrdMon_8h_source.html#l00028">WtOrdMon.h:28</a></div></div>
+<div class="ttc" id="aclassStdLocker_html"><div class="ttname"><a href="classStdLocker.html">StdLocker</a></div><div class="ttdoc">通用锁包装器模板类</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00085">StdUtils.hpp:86</a></div></div>
+<div class="ttc" id="aclassWtOrdMon_html_a0912654d4328fb83b91c07cf2c579623"><div class="ttname"><a href="classWtOrdMon.html#a0912654d4328fb83b91c07cf2c579623">WtOrdMon::erase_order</a></div><div class="ttdeci">void erase_order(uint32_t localid)</div><div class="ttdoc">从监控器中移除指定订单</div><div class="ttdef"><b>Definition</b> <a href="WtOrdMon_8cpp_source.html#l00034">WtOrdMon.cpp:34</a></div></div>
+<div class="ttc" id="aclassWtOrdMon_html_a572c61356c9c72cc2e5b41dc38c405be"><div class="ttname"><a href="classWtOrdMon.html#a572c61356c9c72cc2e5b41dc38c405be">WtOrdMon::push_order</a></div><div class="ttdeci">void push_order(const uint32_t *ids, uint32_t cnt, uint64_t curTime, bool bCanCancel=true)</div><div class="ttdoc">添加订单到监控器</div><div class="ttdef"><b>Definition</b> <a href="WtOrdMon_8cpp_source.html#l00017">WtOrdMon.cpp:17</a></div></div>
+<div class="ttc" id="aclassWtOrdMon_html_a65832fbcc49602bef7f7388c0cd37898"><div class="ttname"><a href="classWtOrdMon.html#a65832fbcc49602bef7f7388c0cd37898">WtOrdMon::enumOrder</a></div><div class="ttdeci">void enumOrder(EnumAllOrderCallback cb)</div><div class="ttdoc">枚举所有订单</div><div class="ttdef"><b>Definition</b> <a href="WtOrdMon_8cpp_source.html#l00078">WtOrdMon.cpp:78</a></div></div>
+<div class="ttc" id="aclassWtOrdMon_html_aacc93b0ec8fc2357eedf1465192eae70"><div class="ttname"><a href="classWtOrdMon.html#aacc93b0ec8fc2357eedf1465192eae70">WtOrdMon::_orders</a></div><div class="ttdeci">IDMap _orders</div><div class="ttdoc">订单集合，存储所有被监控的订单</div><div class="ttdef"><b>Definition</b> <a href="WtOrdMon_8h_source.html#l00103">WtOrdMon.h:103</a></div></div>
+<div class="ttc" id="aclassWtOrdMon_html_acb1403749d9f1edaf95d185abec6dd5b"><div class="ttname"><a href="classWtOrdMon.html#acb1403749d9f1edaf95d185abec6dd5b">WtOrdMon::OrderPair</a></div><div class="ttdeci">std::pair&lt; uint64_t, bool &gt; OrderPair</div><div class="ttdoc">订单信息对，包含下单时间和是否可撤销</div><div class="ttdef"><b>Definition</b> <a href="WtOrdMon_8h_source.html#l00099">WtOrdMon.h:99</a></div></div>
+<div class="ttc" id="aclassWtOrdMon_html_ad8472f587e8220116eee48c30268e3a8"><div class="ttname"><a href="classWtOrdMon.html#ad8472f587e8220116eee48c30268e3a8">WtOrdMon::_mtx_ords</a></div><div class="ttdeci">StdRecurMutex _mtx_ords</div><div class="ttdoc">互斥锁，用于保护订单集合的线程安全</div><div class="ttdef"><b>Definition</b> <a href="WtOrdMon_8h_source.html#l00105">WtOrdMon.h:105</a></div></div>
+<div class="ttc" id="aclassWtOrdMon_html_afc6af8f8cb5ce78735bcf12c6e2670f1"><div class="ttname"><a href="classWtOrdMon.html#afc6af8f8cb5ce78735bcf12c6e2670f1">WtOrdMon::check_orders</a></div><div class="ttdeci">void check_orders(uint32_t expiresecs, uint64_t curTime, EnumOrderCallback callback)</div><div class="ttdoc">检查超时订单</div><div class="ttdef"><b>Definition</b> <a href="WtOrdMon_8cpp_source.html#l00051">WtOrdMon.cpp:51</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_35e91bc913ca608ca8aed17ce3ae7d3c.html">WtExeFact</a></li><li class="navelem"><a class="el" href="WtOrdMon_8cpp.html">WtOrdMon.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

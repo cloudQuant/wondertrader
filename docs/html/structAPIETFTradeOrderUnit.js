@@ -1,0 +1,25 @@
+var structAPIETFTradeOrderUnit =
+[
+    [ "APIETFTradeOrderUnit", "structAPIETFTradeOrderUnit.html#aebfef917eaa8b22288bd01a979a74803", null ],
+    [ "APIETFTradeOrderUnit", "structAPIETFTradeOrderUnit.html#aebfef917eaa8b22288bd01a979a74803", null ],
+    [ "account_id", "structAPIETFTradeOrderUnit.html#ae64e27fd4a2beb78ee894833d006b3f1", null ],
+    [ "business_type", "structAPIETFTradeOrderUnit.html#a8c53663d0e570ebfcbba7912ef3edd54", null ],
+    [ "cl_ord_id", "structAPIETFTradeOrderUnit.html#ab80e86d7fca146e6050ade21774d0f34", null ],
+    [ "cl_ord_no", "structAPIETFTradeOrderUnit.html#a219e6003c78624428ccfb05db46d1071", null ],
+    [ "currency", "structAPIETFTradeOrderUnit.html#a2d517f6e7ebfb9ae0f0787ef577cb722", null ],
+    [ "exec_id", "structAPIETFTradeOrderUnit.html#a318190affae236791d86925e33ac295a", null ],
+    [ "exec_type", "structAPIETFTradeOrderUnit.html#a527b9f39600635a4afd0ec7d60b8f117", null ],
+    [ "fee", "structAPIETFTradeOrderUnit.html#a1f85e0636e0d0291f900c50e4dc3ae26", null ],
+    [ "last_px", "structAPIETFTradeOrderUnit.html#ab868d48bedbfb5b8259d03092ac178c1", null ],
+    [ "last_qty", "structAPIETFTradeOrderUnit.html#ae5e98d0f66064021dd2824d2b3065e04", null ],
+    [ "market_id", "structAPIETFTradeOrderUnit.html#aca05afd5f44715896d80e998a59231c5", null ],
+    [ "ord_type", "structAPIETFTradeOrderUnit.html#a748414e399eb7a6f06e25ee19debd9da", null ],
+    [ "order_array", "structAPIETFTradeOrderUnit.html#aaefaaa74774085289c76c78c8e0f990a", null ],
+    [ "order_id", "structAPIETFTradeOrderUnit.html#ab3f48347853af391f49eafcb2ca16c19", null ],
+    [ "security_id", "structAPIETFTradeOrderUnit.html#a5697814bbdeb8ba79eb452133e4d0a96", null ],
+    [ "security_symbol", "structAPIETFTradeOrderUnit.html#a83191671158148a41262136dfad21ba3", null ],
+    [ "security_type", "structAPIETFTradeOrderUnit.html#acb35f4bdb2095ca78b1b8abaf2e335e6", null ],
+    [ "side", "structAPIETFTradeOrderUnit.html#a4ce5b9897629825181f12279ab6d3192", null ],
+    [ "total_value_traded", "structAPIETFTradeOrderUnit.html#ab451e8478c44956db44fc871bc4054dc", null ],
+    [ "transact_time", "structAPIETFTradeOrderUnit.html#af1ae31acddc904cd29402418e3e00a99", null ]
+];

@@ -1,0 +1,415 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSTools/WTSLogger.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WTSLogger_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WTSLogger.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WTSLogger_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/WTSTypes.h&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../Includes/WTSCollection.hpp&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../Share/fmtlib.h&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;sstream&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;thread&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;set&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">//By Wesley @ 2022.01.05</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">//spdlog升级到1.9.2</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment">//同时使用外部的fmt 8.1.0</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;spdlog/spdlog.h&gt;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">   29</a></span><span class="keyword">typedef</span> std::shared_ptr&lt;spdlog::logger&gt; <a class="code hl_typedef" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a>;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">class </span><a class="code hl_class" href="classILogHandler.html">ILogHandler</a>;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">class </span><a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="WTSLogger_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">   36</a></span><a class="code hl_variable" href="WTSLogger_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="WTSLogger_8h.html#ac012774dee1dd97afaf303e841ca46c9">   38</a></span><span class="preprocessor">#define MAX_LOG_BUF_SIZE 2048</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="foldopen" id="foldopen00049" data-start="{" data-end="};">
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="classWTSLogger.html">   49</a></span><span class="keyword">class </span><a class="code hl_class" href="classWTSLogger.html">WTSLogger</a></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>{</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a0c31b9b74f24da14899492880d0e5966">debug_imp</a>(<a class="code hl_typedef" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a> logger, <span class="keyword">const</span> <span class="keywordtype">char</span>* message);</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a0a7b4936f40b40ec071856bcb40bc986">info_imp</a>(<a class="code hl_typedef" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a> logger, <span class="keyword">const</span> <span class="keywordtype">char</span>* message);</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a12f6c55ee4b70927838991b8e440f097">warn_imp</a>(<a class="code hl_typedef" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a> logger, <span class="keyword">const</span> <span class="keywordtype">char</span>* message);</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#ab9f4873ba75225becd83325ad22fde62">error_imp</a>(<a class="code hl_typedef" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a> logger, <span class="keyword">const</span> <span class="keywordtype">char</span>* message);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a3b01eab04d4cea3be7ea7b1652c5a5b7">fatal_imp</a>(<a class="code hl_typedef" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a> logger, <span class="keyword">const</span> <span class="keywordtype">char</span>* message);</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a90b800bc3b450e4d28c5784cc088fde2">initLogger</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* catName, <a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfgLogger);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="keyword">static</span> <a class="code hl_typedef" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a> <a class="code hl_function" href="classWTSLogger.html#a9b69ddb72430c136a1bf736975df1e6e">getLogger</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* logger, <span class="keyword">const</span> <span class="keywordtype">char</span>* pattern = <span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#ad083d911e7c7eb24a4b58081fab7fe9c">print_message</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* buffer);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#aa3257bbd8e5b1db25f65cd936f50025c">log_raw</a>(<a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* message);</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a01fb1b92bf14e993751ce211b00e7dd2">log_raw_by_cat</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* catName, <a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* message);</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#ae4cde1222e609623189a4be2b345680a">log_dyn_raw</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* patttern, <span class="keyword">const</span> <span class="keywordtype">char</span>* catName, <a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* message);</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span> </div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="foldopen" id="foldopen00161" data-start="{" data-end="}">
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno"><a class="line" href="classWTSLogger.html#adcbb6a78b99a8c514a4b55677e5a1a28">  161</a></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#adcbb6a78b99a8c514a4b55677e5a1a28">debug</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* format, <span class="keyword">const</span> Args&amp; ...args)</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    {</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWTSLogger.html#aeafac60eb27e92d3d241432dfd3dbee4">m_logLevel</a> &gt; <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba4739b8d0b3d22bcb07c145601a79c358">LL_DEBUG</a> || <a class="code hl_variable" href="classWTSLogger.html#a71203f56b58d7bce13f5808602be430d">m_bStopped</a>)</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>        <a class="code hl_function" href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a>(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>, format, args...);</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classWTSLogger.html#aa20f88bdea9232804a41470e8e9fd9b8">m_bInited</a>)</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>        {</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>            <a class="code hl_function" href="classWTSLogger.html#ad083d911e7c7eb24a4b58081fab7fe9c">print_message</a>(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>        }</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span> </div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        <a class="code hl_function" href="classWTSLogger.html#a0c31b9b74f24da14899492880d0e5966">debug_imp</a>(<a class="code hl_variable" href="classWTSLogger.html#af5f5ec4d7bf748c8419ba49270443a45">m_rootLogger</a>, <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    }</div>
+</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="foldopen" id="foldopen00187" data-start="{" data-end="}">
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno"><a class="line" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">  187</a></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">info</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* format, <span class="keyword">const</span> Args&amp; ...args)</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    {</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWTSLogger.html#aeafac60eb27e92d3d241432dfd3dbee4">m_logLevel</a> &gt; <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba3d0aabc1a000a1668922ab44aeca5771">LL_INFO</a> || <a class="code hl_variable" href="classWTSLogger.html#a71203f56b58d7bce13f5808602be430d">m_bStopped</a>)</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        <a class="code hl_function" href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a>(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>, format, args...);</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classWTSLogger.html#aa20f88bdea9232804a41470e8e9fd9b8">m_bInited</a>)</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        {</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>            <a class="code hl_function" href="classWTSLogger.html#ad083d911e7c7eb24a4b58081fab7fe9c">print_message</a>(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        }</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span> </div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        <a class="code hl_function" href="classWTSLogger.html#a0a7b4936f40b40ec071856bcb40bc986">info_imp</a>(<a class="code hl_variable" href="classWTSLogger.html#af5f5ec4d7bf748c8419ba49270443a45">m_rootLogger</a>, <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    }</div>
+</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span> </div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="foldopen" id="foldopen00213" data-start="{" data-end="}">
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno"><a class="line" href="classWTSLogger.html#a147defb6e1fb287cc8d95bfb753f6f11">  213</a></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a147defb6e1fb287cc8d95bfb753f6f11">warn</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* format, <span class="keyword">const</span> Args&amp; ...args)</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    {</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWTSLogger.html#aeafac60eb27e92d3d241432dfd3dbee4">m_logLevel</a> &gt; <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba7413c537cbbee6447b4d2a2fd90bd1c9">LL_WARN</a> || <a class="code hl_variable" href="classWTSLogger.html#a71203f56b58d7bce13f5808602be430d">m_bStopped</a>)</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span> </div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>        <a class="code hl_function" href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a>(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>, format, args...);</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span> </div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classWTSLogger.html#aa20f88bdea9232804a41470e8e9fd9b8">m_bInited</a>)</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        {</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>            <a class="code hl_function" href="classWTSLogger.html#ad083d911e7c7eb24a4b58081fab7fe9c">print_message</a>(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        }</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span> </div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        <a class="code hl_function" href="classWTSLogger.html#a12f6c55ee4b70927838991b8e440f097">warn_imp</a>(<a class="code hl_variable" href="classWTSLogger.html#af5f5ec4d7bf748c8419ba49270443a45">m_rootLogger</a>, <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    }</div>
+</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span> </div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="foldopen" id="foldopen00239" data-start="{" data-end="}">
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno"><a class="line" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">  239</a></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">error</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* format, <span class="keyword">const</span> Args&amp; ...args)</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    {</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWTSLogger.html#aeafac60eb27e92d3d241432dfd3dbee4">m_logLevel</a> &gt; <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba50717458baf49c204bb0645418e0da15">LL_ERROR</a> || <a class="code hl_variable" href="classWTSLogger.html#a71203f56b58d7bce13f5808602be430d">m_bStopped</a>)</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span> </div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>        <a class="code hl_function" href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a>(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>, format, args...);</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> </div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classWTSLogger.html#aa20f88bdea9232804a41470e8e9fd9b8">m_bInited</a>)</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>        {</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>            <a class="code hl_function" href="classWTSLogger.html#ad083d911e7c7eb24a4b58081fab7fe9c">print_message</a>(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        }</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span> </div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        <a class="code hl_function" href="classWTSLogger.html#ab9f4873ba75225becd83325ad22fde62">error_imp</a>(<a class="code hl_variable" href="classWTSLogger.html#af5f5ec4d7bf748c8419ba49270443a45">m_rootLogger</a>, <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    }</div>
+</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span> </div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="foldopen" id="foldopen00265" data-start="{" data-end="}">
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno"><a class="line" href="classWTSLogger.html#a8c480a7fbe8d2753e0075ecfd5e4af17">  265</a></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a8c480a7fbe8d2753e0075ecfd5e4af17">fatal</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* format, <span class="keyword">const</span> Args&amp; ...args)</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>    {</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWTSLogger.html#aeafac60eb27e92d3d241432dfd3dbee4">m_logLevel</a> &gt; <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba2f0439a0ccf07a276fa4f235394eecd4">LL_FATAL</a> || <a class="code hl_variable" href="classWTSLogger.html#a71203f56b58d7bce13f5808602be430d">m_bStopped</a>)</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span> </div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>        <a class="code hl_function" href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a>(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>, format, args...);</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span> </div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classWTSLogger.html#aa20f88bdea9232804a41470e8e9fd9b8">m_bInited</a>)</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>        {</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>            <a class="code hl_function" href="classWTSLogger.html#ad083d911e7c7eb24a4b58081fab7fe9c">print_message</a>(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>        }</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span> </div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        <a class="code hl_function" href="classWTSLogger.html#a3b01eab04d4cea3be7ea7b1652c5a5b7">fatal_imp</a>(<a class="code hl_variable" href="classWTSLogger.html#af5f5ec4d7bf748c8419ba49270443a45">m_rootLogger</a>, <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>    }</div>
+</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span> </div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="foldopen" id="foldopen00292" data-start="{" data-end="}">
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno"><a class="line" href="classWTSLogger.html#ac71887d8d8643f4fb3c61cf525e21cb2">  292</a></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#ac71887d8d8643f4fb3c61cf525e21cb2">log</a>(<a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* format, <span class="keyword">const</span> Args&amp; ...args)</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>    {</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWTSLogger.html#aeafac60eb27e92d3d241432dfd3dbee4">m_logLevel</a> &gt; ll || <a class="code hl_variable" href="classWTSLogger.html#a71203f56b58d7bce13f5808602be430d">m_bStopped</a>)</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span> </div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>        <a class="code hl_function" href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a>(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>, format, args...);</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span> </div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>        <a class="code hl_function" href="classWTSLogger.html#aa3257bbd8e5b1db25f65cd936f50025c">log_raw</a>(ll, <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>    }</div>
+</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="foldopen" id="foldopen00314" data-start="{" data-end="}">
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno"><a class="line" href="classWTSLogger.html#a50df3d38d311e4792f52f0a7b0fa205e">  314</a></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a50df3d38d311e4792f52f0a7b0fa205e">log_by_cat</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* catName, <a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* format, <span class="keyword">const</span> Args&amp; ...args)</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>    {</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWTSLogger.html#aeafac60eb27e92d3d241432dfd3dbee4">m_logLevel</a> &gt; ll || <a class="code hl_variable" href="classWTSLogger.html#a71203f56b58d7bce13f5808602be430d">m_bStopped</a>)</div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span> </div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>        <a class="code hl_function" href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a>(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>, format, args...);</div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span> </div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>        <a class="code hl_function" href="classWTSLogger.html#a01fb1b92bf14e993751ce211b00e7dd2">log_raw_by_cat</a>(catName, ll, <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>    }</div>
+</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span> </div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="foldopen" id="foldopen00336" data-start="{" data-end="}">
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno"><a class="line" href="classWTSLogger.html#abd80034e322873b7ebf05d52e2174b15">  336</a></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#abd80034e322873b7ebf05d52e2174b15">log_by_cat_prefix</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* catName, <a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* format, <span class="keyword">const</span> Args&amp; ...args)</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>    {</div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWTSLogger.html#aeafac60eb27e92d3d241432dfd3dbee4">m_logLevel</a> &gt; ll || <a class="code hl_variable" href="classWTSLogger.html#a71203f56b58d7bce13f5808602be430d">m_bStopped</a>)</div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span> </div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>        <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>[0] = <span class="charliteral">&#39;[&#39;</span>;</div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>        strcpy(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a> + 1, catName);</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>        <span class="keyword">auto</span> offset = strlen(catName);</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>        <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>[offset + 1] = <span class="charliteral">&#39;]&#39;</span>;</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>        <span class="keywordtype">char</span>* s = <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a> + offset + 2;</div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>        <a class="code hl_function" href="classWTSLogger.html#a01fb1b92bf14e993751ce211b00e7dd2">log_raw_by_cat</a>(catName, ll, <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>    }</div>
+</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span> </div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="foldopen" id="foldopen00362" data-start="{" data-end="}">
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno"><a class="line" href="classWTSLogger.html#a2696cbfac7e6567192142b5a6d073e65">  362</a></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a2696cbfac7e6567192142b5a6d073e65">log_dyn</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* patttern, <span class="keyword">const</span> <span class="keywordtype">char</span>* catName, <a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* format, <span class="keyword">const</span> Args&amp; ...args)</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>    {</div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWTSLogger.html#aeafac60eb27e92d3d241432dfd3dbee4">m_logLevel</a> &gt; ll || <a class="code hl_variable" href="classWTSLogger.html#a71203f56b58d7bce13f5808602be430d">m_bStopped</a>)</div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span> </div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>        <a class="code hl_function" href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a>(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>, format, args...);</div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span> </div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>        <a class="code hl_function" href="classWTSLogger.html#ae4cde1222e609623189a4be2b345680a">log_dyn_raw</a>(patttern, catName, ll, <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>    }</div>
+</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span> </div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="foldopen" id="foldopen00385" data-start="{" data-end="}">
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno"><a class="line" href="classWTSLogger.html#aa79de9d0d80dc742f23082cf9f08e518">  385</a></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#aa79de9d0d80dc742f23082cf9f08e518">log_dyn_prefix</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* patttern, <span class="keyword">const</span> <span class="keywordtype">char</span>* catName, <a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* format, <span class="keyword">const</span> Args&amp; ...args)</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>    {</div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWTSLogger.html#aeafac60eb27e92d3d241432dfd3dbee4">m_logLevel</a> &gt; ll || <a class="code hl_variable" href="classWTSLogger.html#a71203f56b58d7bce13f5808602be430d">m_bStopped</a>)</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span> </div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>        <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>[0] = <span class="charliteral">&#39;[&#39;</span>;</div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>        strcpy(<a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>+1, catName);</div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>        <span class="keyword">auto</span> offset = strlen(catName);</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>        <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>[offset + 1] = <span class="charliteral">&#39;]&#39;</span>;</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>        <span class="keywordtype">char</span>* s = <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a> + offset + 2;</div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>        <a class="code hl_function" href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a>(s, format, args...);</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>        <a class="code hl_function" href="classWTSLogger.html#ae4cde1222e609623189a4be2b345680a">log_dyn_raw</a>(patttern, catName, ll, <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>);</div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>    }</div>
+</div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span> </div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a316399910d3af4aef6c4a6e85c50c729">init</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* propFile = <span class="stringliteral">&quot;logcfg.json&quot;</span>, <span class="keywordtype">bool</span> isFile = <span class="keyword">true</span>, <a class="code hl_class" href="classILogHandler.html">ILogHandler</a>* handler = <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>);</div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span> </div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a77ce5a61af3730f633708093fdf6671a">registerHandler</a>(<a class="code hl_class" href="classILogHandler.html">ILogHandler</a>* handler = <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>);</div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span> </div>
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#a66085fc4127f10a615a0e5c661f7bdc6">stop</a>();</div>
+<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span> </div>
+<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSLogger.html#aada6defd2e5fb449774e313ecb639555">freeAllDynLoggers</a>();</div>
+<div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span> </div>
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno"><a class="line" href="classWTSLogger.html#aa20f88bdea9232804a41470e8e9fd9b8">  435</a></span>    <span class="keyword">static</span> <span class="keywordtype">bool</span>                 <a class="code hl_variable" href="classWTSLogger.html#aa20f88bdea9232804a41470e8e9fd9b8">m_bInited</a>;</div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno"><a class="line" href="classWTSLogger.html#a2e570032cda24f991f0f65a56f674c00">  436</a></span>    <span class="keyword">static</span> <span class="keywordtype">bool</span>                 <a class="code hl_variable" href="classWTSLogger.html#a2e570032cda24f991f0f65a56f674c00">m_bTpInited</a>;</div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno"><a class="line" href="classWTSLogger.html#a71203f56b58d7bce13f5808602be430d">  437</a></span>    <span class="keyword">static</span> <span class="keywordtype">bool</span>                 <a class="code hl_variable" href="classWTSLogger.html#a71203f56b58d7bce13f5808602be430d">m_bStopped</a>;</div>
+<div class="line"><a id="l00438" name="l00438"></a><span class="lineno"><a class="line" href="classWTSLogger.html#aadd9e32db9294cff72be1b12a444865c">  438</a></span>    <span class="keyword">static</span> <a class="code hl_class" href="classILogHandler.html">ILogHandler</a>*         <a class="code hl_variable" href="classWTSLogger.html#aadd9e32db9294cff72be1b12a444865c">m_logHandler</a>;</div>
+<div class="line"><a id="l00439" name="l00439"></a><span class="lineno"><a class="line" href="classWTSLogger.html#aeafac60eb27e92d3d241432dfd3dbee4">  439</a></span>    <span class="keyword">static</span> <a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>          <a class="code hl_variable" href="classWTSLogger.html#aeafac60eb27e92d3d241432dfd3dbee4">m_logLevel</a>;</div>
+<div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span> </div>
+<div class="line"><a id="l00441" name="l00441"></a><span class="lineno"><a class="line" href="classWTSLogger.html#af5f5ec4d7bf748c8419ba49270443a45">  441</a></span>    <span class="keyword">static</span> <a class="code hl_typedef" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a>         <a class="code hl_variable" href="classWTSLogger.html#af5f5ec4d7bf748c8419ba49270443a45">m_rootLogger</a>;</div>
+<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span> </div>
+<div class="line"><a id="l00443" name="l00443"></a><span class="lineno"><a class="line" href="classWTSLogger.html#a1d8ed6d33f3ad8f2826311334163ce65">  443</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classWTSHashMap.html">WTSHashMap&lt;std::string&gt;</a> <a class="code hl_typedef" href="classWTSLogger.html#a1d8ed6d33f3ad8f2826311334163ce65">LogPatterns</a>;</div>
+<div class="line"><a id="l00444" name="l00444"></a><span class="lineno"><a class="line" href="classWTSLogger.html#ac3182f526cc7e8c2fcfdeed57fcf4d6a">  444</a></span>    <span class="keyword">static</span> <a class="code hl_class" href="classWTSHashMap.html">LogPatterns</a>*             <a class="code hl_variable" href="classWTSLogger.html#ac3182f526cc7e8c2fcfdeed57fcf4d6a">m_mapPatterns</a>;</div>
+<div class="line"><a id="l00445" name="l00445"></a><span class="lineno"><a class="line" href="classWTSLogger.html#ad14436a11fcf1952c3ae3d6c13b63342">  445</a></span>    <span class="keyword">static</span> std::set&lt;std::string&gt;    <a class="code hl_variable" href="classWTSLogger.html#ad14436a11fcf1952c3ae3d6c13b63342">m_setDynLoggers</a>;</div>
+<div class="line"><a id="l00446" name="l00446"></a><span class="lineno">  446</span> </div>
+<div class="line"><a id="l00447" name="l00447"></a><span class="lineno"><a class="line" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">  447</a></span>    <span class="keyword">static</span> <span class="keyword">thread_local</span> <span class="keywordtype">char</span>    <a class="code hl_variable" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a>[<a class="code hl_define" href="WTSLogger_8h.html#ac012774dee1dd97afaf303e841ca46c9">MAX_LOG_BUF_SIZE</a>];</div>
+<div class="line"><a id="l00448" name="l00448"></a><span class="lineno">  448</span>};</div>
+</div>
+<div class="line"><a id="l00449" name="l00449"></a><span class="lineno">  449</span> </div>
+<div class="line"><a id="l00450" name="l00450"></a><span class="lineno">  450</span> </div>
+<div class="ttc" id="aWTSLogger_8h_html_a9e1fc31194100ab43bbad77a2f5c12b3"><div class="ttname"><a href="WTSLogger_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a></div><div class="ttdeci">NS_WTP_END USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00036">WTSLogger.h:36</a></div></div>
+<div class="ttc" id="aWTSLogger_8h_html_aa1e860f1fca62880a96b1fb6719c2968"><div class="ttname"><a href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a></div><div class="ttdeci">std::shared_ptr&lt; spdlog::logger &gt; SpdLoggerPtr</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00029">WTSLogger.h:29</a></div></div>
+<div class="ttc" id="aWTSLogger_8h_html_ac012774dee1dd97afaf303e841ca46c9"><div class="ttname"><a href="WTSLogger_8h.html#ac012774dee1dd97afaf303e841ca46c9">MAX_LOG_BUF_SIZE</a></div><div class="ttdeci">#define MAX_LOG_BUF_SIZE</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00038">WTSLogger.h:38</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aa7b93f4aa2259e69e48f27448c247dc8"><div class="ttname"><a href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a></div><div class="ttdeci">enum tagLogLevel WTSLogLevel</div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aed5503152b508c68a90229e513a8e15ba2f0439a0ccf07a276fa4f235394eecd4"><div class="ttname"><a href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba2f0439a0ccf07a276fa4f235394eecd4">LL_FATAL</a></div><div class="ttdeci">@ LL_FATAL</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00132">WTSTypes.h:132</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aed5503152b508c68a90229e513a8e15ba3d0aabc1a000a1668922ab44aeca5771"><div class="ttname"><a href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba3d0aabc1a000a1668922ab44aeca5771">LL_INFO</a></div><div class="ttdeci">@ LL_INFO</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00129">WTSTypes.h:129</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aed5503152b508c68a90229e513a8e15ba4739b8d0b3d22bcb07c145601a79c358"><div class="ttname"><a href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba4739b8d0b3d22bcb07c145601a79c358">LL_DEBUG</a></div><div class="ttdeci">@ LL_DEBUG</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00128">WTSTypes.h:128</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aed5503152b508c68a90229e513a8e15ba50717458baf49c204bb0645418e0da15"><div class="ttname"><a href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba50717458baf49c204bb0645418e0da15">LL_ERROR</a></div><div class="ttdeci">@ LL_ERROR</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00131">WTSTypes.h:131</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aed5503152b508c68a90229e513a8e15ba7413c537cbbee6447b4d2a2fd90bd1c9"><div class="ttname"><a href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba7413c537cbbee6447b4d2a2fd90bd1c9">LL_WARN</a></div><div class="ttdeci">@ LL_WARN</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00130">WTSTypes.h:130</a></div></div>
+<div class="ttc" id="aclassILogHandler_html"><div class="ttname"><a href="classILogHandler.html">ILogHandler</a></div><div class="ttdef"><b>Definition</b> <a href="ILogHandler_8h_source.html#l00015">ILogHandler.h:16</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html"><div class="ttname"><a href="classWTSHashMap.html">WTSHashMap</a></div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00594">WTSCollection.hpp:595</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html"><div class="ttname"><a href="classWTSLogger.html">WTSLogger</a></div><div class="ttdoc">WonderTrader的日志系统类</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00049">WTSLogger.h:50</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a01fb1b92bf14e993751ce211b00e7dd2"><div class="ttname"><a href="classWTSLogger.html#a01fb1b92bf14e993751ce211b00e7dd2">WTSLogger::log_raw_by_cat</a></div><div class="ttdeci">static void log_raw_by_cat(const char *catName, WTSLogLevel ll, const char *message)</div><div class="ttdoc">按分类输出日志消息</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00446">WTSLogger.cpp:446</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a0a7b4936f40b40ec071856bcb40bc986"><div class="ttname"><a href="classWTSLogger.html#a0a7b4936f40b40ec071856bcb40bc986">WTSLogger::info_imp</a></div><div class="ttdeci">static void info_imp(SpdLoggerPtr logger, const char *message)</div><div class="ttdoc">信息级别日志实现函数</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00339">WTSLogger.cpp:339</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a0c31b9b74f24da14899492880d0e5966"><div class="ttname"><a href="classWTSLogger.html#a0c31b9b74f24da14899492880d0e5966">WTSLogger::debug_imp</a></div><div class="ttdeci">static void debug_imp(SpdLoggerPtr logger, const char *message)</div><div class="ttdoc">调试级别日志实现函数</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00322">WTSLogger.cpp:322</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a12f6c55ee4b70927838991b8e440f097"><div class="ttname"><a href="classWTSLogger.html#a12f6c55ee4b70927838991b8e440f097">WTSLogger::warn_imp</a></div><div class="ttdeci">static void warn_imp(SpdLoggerPtr logger, const char *message)</div><div class="ttdoc">警告级别日志实现函数</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00356">WTSLogger.cpp:356</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a147defb6e1fb287cc8d95bfb753f6f11"><div class="ttname"><a href="classWTSLogger.html#a147defb6e1fb287cc8d95bfb753f6f11">WTSLogger::warn</a></div><div class="ttdeci">static void warn(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出警告级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00213">WTSLogger.h:213</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a1d8ed6d33f3ad8f2826311334163ce65"><div class="ttname"><a href="classWTSLogger.html#a1d8ed6d33f3ad8f2826311334163ce65">WTSLogger::LogPatterns</a></div><div class="ttdeci">WTSHashMap&lt; std::string &gt; LogPatterns</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00443">WTSLogger.h:443</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a20d65255542e3ed5d694b529892a0f57"><div class="ttname"><a href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a></div><div class="ttdeci">static void info(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出信息级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00187">WTSLogger.h:187</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a2696cbfac7e6567192142b5a6d073e65"><div class="ttname"><a href="classWTSLogger.html#a2696cbfac7e6567192142b5a6d073e65">WTSLogger::log_dyn</a></div><div class="ttdeci">static void log_dyn(const char *patttern, const char *catName, WTSLogLevel ll, const char *format, const Args &amp;...args)</div><div class="ttdoc">使用动态日志模式和分类输出格式化日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00362">WTSLogger.h:362</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a2e570032cda24f991f0f65a56f674c00"><div class="ttname"><a href="classWTSLogger.html#a2e570032cda24f991f0f65a56f674c00">WTSLogger::m_bTpInited</a></div><div class="ttdeci">static bool m_bTpInited</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00436">WTSLogger.h:436</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a316399910d3af4aef6c4a6e85c50c729"><div class="ttname"><a href="classWTSLogger.html#a316399910d3af4aef6c4a6e85c50c729">WTSLogger::init</a></div><div class="ttdeci">static void init(const char *propFile=&quot;logcfg.json&quot;, bool isFile=true, ILogHandler *handler=NULL)</div><div class="ttdoc">初始化日志系统</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00249">WTSLogger.cpp:249</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a3b01eab04d4cea3be7ea7b1652c5a5b7"><div class="ttname"><a href="classWTSLogger.html#a3b01eab04d4cea3be7ea7b1652c5a5b7">WTSLogger::fatal_imp</a></div><div class="ttdeci">static void fatal_imp(SpdLoggerPtr logger, const char *message)</div><div class="ttdoc">致命错误级别日志实现函数</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00390">WTSLogger.cpp:390</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a50df3d38d311e4792f52f0a7b0fa205e"><div class="ttname"><a href="classWTSLogger.html#a50df3d38d311e4792f52f0a7b0fa205e">WTSLogger::log_by_cat</a></div><div class="ttdeci">static void log_by_cat(const char *catName, WTSLogLevel ll, const char *format, const Args &amp;...args)</div><div class="ttdoc">使用指定分类和级别输出格式化日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00314">WTSLogger.h:314</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a618c41d0ff3c1f5ce0a70d83c28bc9fc"><div class="ttname"><a href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a></div><div class="ttdeci">static void error(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出错误级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00239">WTSLogger.h:239</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a66085fc4127f10a615a0e5c661f7bdc6"><div class="ttname"><a href="classWTSLogger.html#a66085fc4127f10a615a0e5c661f7bdc6">WTSLogger::stop</a></div><div class="ttdeci">static void stop()</div><div class="ttdoc">停止日志系统</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00309">WTSLogger.cpp:309</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a71203f56b58d7bce13f5808602be430d"><div class="ttname"><a href="classWTSLogger.html#a71203f56b58d7bce13f5808602be430d">WTSLogger::m_bStopped</a></div><div class="ttdeci">static bool m_bStopped</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00437">WTSLogger.h:437</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a77ce5a61af3730f633708093fdf6671a"><div class="ttname"><a href="classWTSLogger.html#a77ce5a61af3730f633708093fdf6671a">WTSLogger::registerHandler</a></div><div class="ttdeci">static void registerHandler(ILogHandler *handler=NULL)</div><div class="ttdoc">注册自定义日志处理器</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00299">WTSLogger.cpp:299</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a7a3c0a39d929f10f6b52f641ed21f0db"><div class="ttname"><a href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">WTSLogger::m_buffer</a></div><div class="ttdeci">static thread_local char m_buffer[MAX_LOG_BUF_SIZE]</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00447">WTSLogger.h:447</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a8c480a7fbe8d2753e0075ecfd5e4af17"><div class="ttname"><a href="classWTSLogger.html#a8c480a7fbe8d2753e0075ecfd5e4af17">WTSLogger::fatal</a></div><div class="ttdeci">static void fatal(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出致命错误级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00265">WTSLogger.h:265</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a90b800bc3b450e4d28c5784cc088fde2"><div class="ttname"><a href="classWTSLogger.html#a90b800bc3b450e4d28c5784cc088fde2">WTSLogger::initLogger</a></div><div class="ttdeci">static void initLogger(const char *catName, WTSVariant *cfgLogger)</div><div class="ttdoc">初始化指定分类的日志器</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00175">WTSLogger.cpp:175</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a9b69ddb72430c136a1bf736975df1e6e"><div class="ttname"><a href="classWTSLogger.html#a9b69ddb72430c136a1bf736975df1e6e">WTSLogger::getLogger</a></div><div class="ttdeci">static SpdLoggerPtr getLogger(const char *logger, const char *pattern=&quot;&quot;)</div><div class="ttdoc">获取指定名称的日志器</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00545">WTSLogger.cpp:545</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_aa20f88bdea9232804a41470e8e9fd9b8"><div class="ttname"><a href="classWTSLogger.html#aa20f88bdea9232804a41470e8e9fd9b8">WTSLogger::m_bInited</a></div><div class="ttdeci">static bool m_bInited</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00435">WTSLogger.h:435</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_aa3257bbd8e5b1db25f65cd936f50025c"><div class="ttname"><a href="classWTSLogger.html#aa3257bbd8e5b1db25f65cd936f50025c">WTSLogger::log_raw</a></div><div class="ttdeci">static void log_raw(WTSLogLevel ll, const char *message)</div><div class="ttdoc">直接输出日志消息</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00407">WTSLogger.cpp:407</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_aa79de9d0d80dc742f23082cf9f08e518"><div class="ttname"><a href="classWTSLogger.html#aa79de9d0d80dc742f23082cf9f08e518">WTSLogger::log_dyn_prefix</a></div><div class="ttdeci">static void log_dyn_prefix(const char *patttern, const char *catName, WTSLogLevel ll, const char *format, const Args &amp;...args)</div><div class="ttdoc">使用动态日志模式和分类输出格式化日志，并添加分类前缀</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00385">WTSLogger.h:385</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_aada6defd2e5fb449774e313ecb639555"><div class="ttname"><a href="classWTSLogger.html#aada6defd2e5fb449774e313ecb639555">WTSLogger::freeAllDynLoggers</a></div><div class="ttdeci">static void freeAllDynLoggers()</div><div class="ttdoc">释放所有动态创建的日志器</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00574">WTSLogger.cpp:574</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_aadd9e32db9294cff72be1b12a444865c"><div class="ttname"><a href="classWTSLogger.html#aadd9e32db9294cff72be1b12a444865c">WTSLogger::m_logHandler</a></div><div class="ttdeci">static ILogHandler * m_logHandler</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00438">WTSLogger.h:438</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_ab9f4873ba75225becd83325ad22fde62"><div class="ttname"><a href="classWTSLogger.html#ab9f4873ba75225becd83325ad22fde62">WTSLogger::error_imp</a></div><div class="ttdeci">static void error_imp(SpdLoggerPtr logger, const char *message)</div><div class="ttdoc">错误级别日志实现函数</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00373">WTSLogger.cpp:373</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_abd80034e322873b7ebf05d52e2174b15"><div class="ttname"><a href="classWTSLogger.html#abd80034e322873b7ebf05d52e2174b15">WTSLogger::log_by_cat_prefix</a></div><div class="ttdeci">static void log_by_cat_prefix(const char *catName, WTSLogLevel ll, const char *format, const Args &amp;...args)</div><div class="ttdoc">使用指定分类和级别输出格式化日志，并添加分类前缀</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00336">WTSLogger.h:336</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_ac3182f526cc7e8c2fcfdeed57fcf4d6a"><div class="ttname"><a href="classWTSLogger.html#ac3182f526cc7e8c2fcfdeed57fcf4d6a">WTSLogger::m_mapPatterns</a></div><div class="ttdeci">static LogPatterns * m_mapPatterns</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00444">WTSLogger.h:444</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_ac71887d8d8643f4fb3c61cf525e21cb2"><div class="ttname"><a href="classWTSLogger.html#ac71887d8d8643f4fb3c61cf525e21cb2">WTSLogger::log</a></div><div class="ttdeci">static void log(WTSLogLevel ll, const char *format, const Args &amp;...args)</div><div class="ttdoc">使用指定级别输出格式化日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00292">WTSLogger.h:292</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_ad083d911e7c7eb24a4b58081fab7fe9c"><div class="ttname"><a href="classWTSLogger.html#ad083d911e7c7eb24a4b58081fab7fe9c">WTSLogger::print_message</a></div><div class="ttdeci">static void print_message(const char *buffer)</div><div class="ttdoc">打印消息到控制台</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00163">WTSLogger.cpp:163</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_ad14436a11fcf1952c3ae3d6c13b63342"><div class="ttname"><a href="classWTSLogger.html#ad14436a11fcf1952c3ae3d6c13b63342">WTSLogger::m_setDynLoggers</a></div><div class="ttdeci">static std::set&lt; std::string &gt; m_setDynLoggers</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00445">WTSLogger.h:445</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_adcbb6a78b99a8c514a4b55677e5a1a28"><div class="ttname"><a href="classWTSLogger.html#adcbb6a78b99a8c514a4b55677e5a1a28">WTSLogger::debug</a></div><div class="ttdeci">static void debug(const char *format, const Args &amp;...args)</div><div class="ttdoc">fmt格式化日志接口</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00161">WTSLogger.h:161</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_ae4cde1222e609623189a4be2b345680a"><div class="ttname"><a href="classWTSLogger.html#ae4cde1222e609623189a4be2b345680a">WTSLogger::log_dyn_raw</a></div><div class="ttdeci">static void log_dyn_raw(const char *patttern, const char *catName, WTSLogLevel ll, const char *message)</div><div class="ttdoc">使用动态分类模式输出日志消息</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00495">WTSLogger.cpp:495</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_aeafac60eb27e92d3d241432dfd3dbee4"><div class="ttname"><a href="classWTSLogger.html#aeafac60eb27e92d3d241432dfd3dbee4">WTSLogger::m_logLevel</a></div><div class="ttdeci">static WTSLogLevel m_logLevel</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00439">WTSLogger.h:439</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_af5f5ec4d7bf748c8419ba49270443a45"><div class="ttname"><a href="classWTSLogger.html#af5f5ec4d7bf748c8419ba49270443a45">WTSLogger::m_rootLogger</a></div><div class="ttdeci">static SpdLoggerPtr m_rootLogger</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00441">WTSLogger.h:441</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="anamespacefmtutil_html_a5bfccdc4da1277f2585e7b31c6395bb3"><div class="ttname"><a href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a></div><div class="ttdeci">char * format_to(char *buffer, const char *format, const Args &amp;...args)</div><div class="ttdoc">格式化字符串并输出到指定缓冲区</div><div class="ttdef"><b>Definition</b> <a href="fmtlib_8h_source.html#l00031">fmtlib.h:31</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_a16605e2dd51d97a5bcc8d8e1bf3d6c6.html">WTSTools</a></li><li class="navelem"><a class="el" href="WTSLogger_8h.html">WTSLogger.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

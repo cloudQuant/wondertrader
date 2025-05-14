@@ -1,0 +1,1282 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: ExpHftMocker类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classExpHftMocker.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="classExpHftMocker-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">ExpHftMocker类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>高频交易策略回测模拟器对外封装类  
+ <a href="classExpHftMocker.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="ExpHftMocker_8h_source.html">ExpHftMocker.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a4c900c96889d4ce7bf097192b9263beb" id="r_a4c900c96889d4ce7bf097192b9263beb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#a4c900c96889d4ce7bf097192b9263beb">ExpHftMocker</a> (<a class="el" href="classHisDataReplayer.html">HisDataReplayer</a> *replayer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="classIHftStraCtx.html#a83f0f0ed8878ced941cf9eab83320273">name</a>)</td></tr>
+<tr class="memdesc:a4c900c96889d4ce7bf097192b9263beb"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a4c900c96889d4ce7bf097192b9263beb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aadeaafd2fa23c61ac330d8620f094e0a" id="r_aadeaafd2fa23c61ac330d8620f094e0a"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#aadeaafd2fa23c61ac330d8620f094e0a">~ExpHftMocker</a> ()</td></tr>
+<tr class="memdesc:aadeaafd2fa23c61ac330d8620f094e0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:aadeaafd2fa23c61ac330d8620f094e0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5d33369fc61f4f1b082908bcdaee4d0" id="r_aa5d33369fc61f4f1b082908bcdaee4d0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#aa5d33369fc61f4f1b082908bcdaee4d0">on_bar</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *period, uint32_t times, <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *newBar) override</td></tr>
+<tr class="memdesc:aa5d33369fc61f4f1b082908bcdaee4d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">K线数据回调函数  <br /></td></tr>
+<tr class="separator:aa5d33369fc61f4f1b082908bcdaee4d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91412edeaa55665ecb595f284d3edf0f" id="r_a91412edeaa55665ecb595f284d3edf0f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#a91412edeaa55665ecb595f284d3edf0f">on_channel_ready</a> () override</td></tr>
+<tr class="memdesc:a91412edeaa55665ecb595f284d3edf0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易通道就绪回调函数  <br /></td></tr>
+<tr class="separator:a91412edeaa55665ecb595f284d3edf0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64b6f794cd71c4ac4c92b8639a29511a" id="r_a64b6f794cd71c4ac4c92b8639a29511a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#a64b6f794cd71c4ac4c92b8639a29511a">on_entrust</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool bSuccess, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag) override</td></tr>
+<tr class="memdesc:a64b6f794cd71c4ac4c92b8639a29511a"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托回报回调函数  <br /></td></tr>
+<tr class="separator:a64b6f794cd71c4ac4c92b8639a29511a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a179ccc00c428877ec88610ace455ab22" id="r_a179ccc00c428877ec88610ace455ab22"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#a179ccc00c428877ec88610ace455ab22">on_init</a> () override</td></tr>
+<tr class="memdesc:a179ccc00c428877ec88610ace455ab22"><td class="mdescLeft">&#160;</td><td class="mdescRight">策略初始化回调函数  <br /></td></tr>
+<tr class="separator:a179ccc00c428877ec88610ace455ab22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f29c3e3e12f472241fc9b1507a57b99" id="r_a2f29c3e3e12f472241fc9b1507a57b99"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#a2f29c3e3e12f472241fc9b1507a57b99">on_session_begin</a> (uint32_t uDate) override</td></tr>
+<tr class="memdesc:a2f29c3e3e12f472241fc9b1507a57b99"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易日开始回调函数  <br /></td></tr>
+<tr class="separator:a2f29c3e3e12f472241fc9b1507a57b99"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a207e5e1f811f5504b3e70992bee3f91f" id="r_a207e5e1f811f5504b3e70992bee3f91f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#a207e5e1f811f5504b3e70992bee3f91f">on_session_end</a> (uint32_t uDate) override</td></tr>
+<tr class="memdesc:a207e5e1f811f5504b3e70992bee3f91f"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易日结束回调函数  <br /></td></tr>
+<tr class="separator:a207e5e1f811f5504b3e70992bee3f91f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4952b213e1f9178d6019f72775f6a209" id="r_a4952b213e1f9178d6019f72775f6a209"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#a4952b213e1f9178d6019f72775f6a209">on_bactest_end</a> () override</td></tr>
+<tr class="memdesc:a4952b213e1f9178d6019f72775f6a209"><td class="mdescLeft">&#160;</td><td class="mdescRight">回测结束回调函数  <br /></td></tr>
+<tr class="separator:a4952b213e1f9178d6019f72775f6a209"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecdfb9ae8f3de32f04145e52c99475f0" id="r_aecdfb9ae8f3de32f04145e52c99475f0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#aecdfb9ae8f3de32f04145e52c99475f0">on_order</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isBuy, double totalQty, double leftQty, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, bool isCanceled, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag) override</td></tr>
+<tr class="memdesc:aecdfb9ae8f3de32f04145e52c99475f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托记录回调函数  <br /></td></tr>
+<tr class="separator:aecdfb9ae8f3de32f04145e52c99475f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ad7ccbe666ddd8e6693305dc665d16f" id="r_a0ad7ccbe666ddd8e6693305dc665d16f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#a0ad7ccbe666ddd8e6693305dc665d16f">on_tick_updated</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTickData.html">WTSTickData</a> *newTick) override</td></tr>
+<tr class="memdesc:a0ad7ccbe666ddd8e6693305dc665d16f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick数据更新回调函数  <br /></td></tr>
+<tr class="separator:a0ad7ccbe666ddd8e6693305dc665d16f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a07f7cff2cab521ebd09b2188709887" id="r_a4a07f7cff2cab521ebd09b2188709887"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#a4a07f7cff2cab521ebd09b2188709887">on_ordque_updated</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrdQueData.html">WTSOrdQueData</a> *newOrdQue) override</td></tr>
+<tr class="memdesc:a4a07f7cff2cab521ebd09b2188709887"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托队列数据更新回调函数  <br /></td></tr>
+<tr class="separator:a4a07f7cff2cab521ebd09b2188709887"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08c48c7e639cb1fb54266d8209a5adf7" id="r_a08c48c7e639cb1fb54266d8209a5adf7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#a08c48c7e639cb1fb54266d8209a5adf7">on_orddtl_updated</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrdDtlData.html">WTSOrdDtlData</a> *newOrdDtl) override</td></tr>
+<tr class="memdesc:a08c48c7e639cb1fb54266d8209a5adf7"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托明细数据更新回调函数  <br /></td></tr>
+<tr class="separator:a08c48c7e639cb1fb54266d8209a5adf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48bb66500f744f529a7accd58dff3e5a" id="r_a48bb66500f744f529a7accd58dff3e5a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#a48bb66500f744f529a7accd58dff3e5a">on_trans_updated</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTransData.html">WTSTransData</a> *newTrans) override</td></tr>
+<tr class="memdesc:a48bb66500f744f529a7accd58dff3e5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">成交明细数据更新回调函数  <br /></td></tr>
+<tr class="separator:a48bb66500f744f529a7accd58dff3e5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7401a29151268d40cde37ca944f520ca" id="r_a7401a29151268d40cde37ca944f520ca"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExpHftMocker.html#a7401a29151268d40cde37ca944f520ca">on_trade</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isBuy, double vol, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag) override</td></tr>
+<tr class="memdesc:a7401a29151268d40cde37ca944f520ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易成交回调函数  <br /></td></tr>
+<tr class="separator:a7401a29151268d40cde37ca944f520ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classHftMocker"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classHftMocker')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classHftMocker.html">HftMocker</a></td></tr>
+<tr class="memitem:a61b7b3644f87bd87ef422e6c27be62ca inherit pub_methods_classHftMocker" id="r_a61b7b3644f87bd87ef422e6c27be62ca"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a61b7b3644f87bd87ef422e6c27be62ca">HftMocker</a> (<a class="el" href="classHisDataReplayer.html">HisDataReplayer</a> *replayer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="classIHftStraCtx.html#a83f0f0ed8878ced941cf9eab83320273">name</a>)</td></tr>
+<tr class="memdesc:a61b7b3644f87bd87ef422e6c27be62ca inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">高频策略模拟器构造函数  <br /></td></tr>
+<tr class="separator:a61b7b3644f87bd87ef422e6c27be62ca inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04aaf542aed7a59a22867c4dd7e06702 inherit pub_methods_classHftMocker" id="r_a04aaf542aed7a59a22867c4dd7e06702"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a04aaf542aed7a59a22867c4dd7e06702">~HftMocker</a> ()</td></tr>
+<tr class="memdesc:a04aaf542aed7a59a22867c4dd7e06702 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">高频策略模拟器析构函数  <br /></td></tr>
+<tr class="separator:a04aaf542aed7a59a22867c4dd7e06702 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18e463735e0a29ff14f6e61a24052eaa inherit pub_methods_classHftMocker" id="r_a18e463735e0a29ff14f6e61a24052eaa"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a18e463735e0a29ff14f6e61a24052eaa">handle_tick</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTickData.html">WTSTickData</a> *curTick, uint32_t pxType) override</td></tr>
+<tr class="memdesc:a18e463735e0a29ff14f6e61a24052eaa inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理Tick行情数据  <br /></td></tr>
+<tr class="separator:a18e463735e0a29ff14f6e61a24052eaa inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afac45105efbee0b89a0d06d7a38e6578 inherit pub_methods_classHftMocker" id="r_afac45105efbee0b89a0d06d7a38e6578"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#afac45105efbee0b89a0d06d7a38e6578">handle_order_queue</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrdQueData.html">WTSOrdQueData</a> *curOrdQue) override</td></tr>
+<tr class="memdesc:afac45105efbee0b89a0d06d7a38e6578 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理委托队列数据  <br /></td></tr>
+<tr class="separator:afac45105efbee0b89a0d06d7a38e6578 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7354d2ace0eb3677b49d41cd5cc13d19 inherit pub_methods_classHftMocker" id="r_a7354d2ace0eb3677b49d41cd5cc13d19"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a7354d2ace0eb3677b49d41cd5cc13d19">handle_order_detail</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrdDtlData.html">WTSOrdDtlData</a> *curOrdDtl) override</td></tr>
+<tr class="memdesc:a7354d2ace0eb3677b49d41cd5cc13d19 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理逐笔委托数据  <br /></td></tr>
+<tr class="separator:a7354d2ace0eb3677b49d41cd5cc13d19 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b0a4809fa4b427c60a55b2e59cf50a6 inherit pub_methods_classHftMocker" id="r_a7b0a4809fa4b427c60a55b2e59cf50a6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a7b0a4809fa4b427c60a55b2e59cf50a6">handle_transaction</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTransData.html">WTSTransData</a> *curTrans) override</td></tr>
+<tr class="memdesc:a7b0a4809fa4b427c60a55b2e59cf50a6 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理逐笔成交数据  <br /></td></tr>
+<tr class="separator:a7b0a4809fa4b427c60a55b2e59cf50a6 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2cd2aa1d1ed4c2c499a12d0213072455 inherit pub_methods_classHftMocker" id="r_a2cd2aa1d1ed4c2c499a12d0213072455"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a2cd2aa1d1ed4c2c499a12d0213072455">handle_bar_close</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *period, uint32_t times, <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *newBar) override</td></tr>
+<tr class="memdesc:a2cd2aa1d1ed4c2c499a12d0213072455 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理K线周期数据收盘  <br /></td></tr>
+<tr class="separator:a2cd2aa1d1ed4c2c499a12d0213072455 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae990a5c2e58cf5750eec3cf6943feb33 inherit pub_methods_classHftMocker" id="r_ae990a5c2e58cf5750eec3cf6943feb33"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#ae990a5c2e58cf5750eec3cf6943feb33">handle_schedule</a> (uint32_t uDate, uint32_t uTime) override</td></tr>
+<tr class="memdesc:ae990a5c2e58cf5750eec3cf6943feb33 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理定时任务  <br /></td></tr>
+<tr class="separator:ae990a5c2e58cf5750eec3cf6943feb33 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9daa29261940a5c85336f4a169817221 inherit pub_methods_classHftMocker" id="r_a9daa29261940a5c85336f4a169817221"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a9daa29261940a5c85336f4a169817221">handle_init</a> () override</td></tr>
+<tr class="memdesc:a9daa29261940a5c85336f4a169817221 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理模拟器初始化  <br /></td></tr>
+<tr class="separator:a9daa29261940a5c85336f4a169817221 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba14d271745db9601e66fcdd63c1d36e inherit pub_methods_classHftMocker" id="r_aba14d271745db9601e66fcdd63c1d36e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#aba14d271745db9601e66fcdd63c1d36e">handle_session_begin</a> (uint32_t curTDate) override</td></tr>
+<tr class="memdesc:aba14d271745db9601e66fcdd63c1d36e inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理交易日开始  <br /></td></tr>
+<tr class="separator:aba14d271745db9601e66fcdd63c1d36e inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab79bb04408c2a7a68e9daf3e4edd0b16 inherit pub_methods_classHftMocker" id="r_ab79bb04408c2a7a68e9daf3e4edd0b16"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#ab79bb04408c2a7a68e9daf3e4edd0b16">handle_session_end</a> (uint32_t curTDate) override</td></tr>
+<tr class="memdesc:ab79bb04408c2a7a68e9daf3e4edd0b16 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理交易日结束  <br /></td></tr>
+<tr class="separator:ab79bb04408c2a7a68e9daf3e4edd0b16 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86669678becea177cf375cc579eaabc6 inherit pub_methods_classHftMocker" id="r_a86669678becea177cf375cc579eaabc6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a86669678becea177cf375cc579eaabc6">handle_replay_done</a> () override</td></tr>
+<tr class="memdesc:a86669678becea177cf375cc579eaabc6 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理回放结束  <br /></td></tr>
+<tr class="separator:a86669678becea177cf375cc579eaabc6 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a275d7ef0a12254062bd8464bb9e80303 inherit pub_methods_classHftMocker" id="r_a275d7ef0a12254062bd8464bb9e80303"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a275d7ef0a12254062bd8464bb9e80303">on_tick</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTickData.html">WTSTickData</a> *newTick) override</td></tr>
+<tr class="memdesc:a275d7ef0a12254062bd8464bb9e80303 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">实现策略收到Tick数据的回调  <br /></td></tr>
+<tr class="separator:a275d7ef0a12254062bd8464bb9e80303 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adba0819569eb4a76b2b75e65a2bf7da1 inherit pub_methods_classHftMocker" id="r_adba0819569eb4a76b2b75e65a2bf7da1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#adba0819569eb4a76b2b75e65a2bf7da1">on_order_queue</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrdQueData.html">WTSOrdQueData</a> *newOrdQue) override</td></tr>
+<tr class="memdesc:adba0819569eb4a76b2b75e65a2bf7da1 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">实现策略收到委托队列数据的回调  <br /></td></tr>
+<tr class="separator:adba0819569eb4a76b2b75e65a2bf7da1 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae33dbec5a1369440522985fbdde8d728 inherit pub_methods_classHftMocker" id="r_ae33dbec5a1369440522985fbdde8d728"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#ae33dbec5a1369440522985fbdde8d728">on_order_detail</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrdDtlData.html">WTSOrdDtlData</a> *newOrdDtl) override</td></tr>
+<tr class="memdesc:ae33dbec5a1369440522985fbdde8d728 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">实现策略收到逐笔委托数据的回调  <br /></td></tr>
+<tr class="separator:ae33dbec5a1369440522985fbdde8d728 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6e014f9189f7b1f2cfe1db61f770faa inherit pub_methods_classHftMocker" id="r_ae6e014f9189f7b1f2cfe1db61f770faa"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#ae6e014f9189f7b1f2cfe1db61f770faa">on_transaction</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTransData.html">WTSTransData</a> *newTrans) override</td></tr>
+<tr class="memdesc:ae6e014f9189f7b1f2cfe1db61f770faa inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">实现策略收到逐笔成交数据的回调  <br /></td></tr>
+<tr class="separator:ae6e014f9189f7b1f2cfe1db61f770faa inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61d06e29c19e648097042912e2e47a4d inherit pub_methods_classHftMocker" id="r_a61d06e29c19e648097042912e2e47a4d"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a61d06e29c19e648097042912e2e47a4d">id</a> () override</td></tr>
+<tr class="memdesc:a61d06e29c19e648097042912e2e47a4d inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取策略ID  <br /></td></tr>
+<tr class="separator:a61d06e29c19e648097042912e2e47a4d inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad707bd83c39287c0c0ac07fa66f23af8 inherit pub_methods_classHftMocker" id="r_ad707bd83c39287c0c0ac07fa66f23af8"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#ad707bd83c39287c0c0ac07fa66f23af8">stra_cancel</a> (uint32_t localid) override</td></tr>
+<tr class="memdesc:ad707bd83c39287c0c0ac07fa66f23af8 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据本地订单ID撤单  <br /></td></tr>
+<tr class="separator:ad707bd83c39287c0c0ac07fa66f23af8 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c21deadc6206531ecebc85e0420bd78 inherit pub_methods_classHftMocker" id="r_a6c21deadc6206531ecebc85e0420bd78"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a6c21deadc6206531ecebc85e0420bd78">stra_cancel</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isBuy, double qty=0) override</td></tr>
+<tr class="memdesc:a6c21deadc6206531ecebc85e0420bd78 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据合约和方向批量撤单  <br /></td></tr>
+<tr class="separator:a6c21deadc6206531ecebc85e0420bd78 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acee5ae15821fd1809d8eccb0ef1976ac inherit pub_methods_classHftMocker" id="r_acee5ae15821fd1809d8eccb0ef1976ac"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#acee5ae15821fd1809d8eccb0ef1976ac">stra_buy</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag, int flag=0, bool bForceClose=false) override</td></tr>
+<tr class="memdesc:acee5ae15821fd1809d8eccb0ef1976ac inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">发送买入订单  <br /></td></tr>
+<tr class="separator:acee5ae15821fd1809d8eccb0ef1976ac inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e0a504cadbeeb05d9d3bfc6ffe991c1 inherit pub_methods_classHftMocker" id="r_a9e0a504cadbeeb05d9d3bfc6ffe991c1"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a9e0a504cadbeeb05d9d3bfc6ffe991c1">stra_sell</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag, int flag=0, bool bForceClose=false) override</td></tr>
+<tr class="memdesc:a9e0a504cadbeeb05d9d3bfc6ffe991c1 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">发送卖出订单  <br /></td></tr>
+<tr class="separator:a9e0a504cadbeeb05d9d3bfc6ffe991c1 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ca39ae2c7e4511fc36d4d041d66c7b7 inherit pub_methods_classHftMocker" id="r_a1ca39ae2c7e4511fc36d4d041d66c7b7"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSCommodityInfo.html">WTSCommodityInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a1ca39ae2c7e4511fc36d4d041d66c7b7">stra_get_comminfo</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a1ca39ae2c7e4511fc36d4d041d66c7b7 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取合约信息  <br /></td></tr>
+<tr class="separator:a1ca39ae2c7e4511fc36d4d041d66c7b7 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9af0513f23e1bb7cb901b79928daa62 inherit pub_methods_classHftMocker" id="r_ae9af0513f23e1bb7cb901b79928daa62"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#ae9af0513f23e1bb7cb901b79928daa62">stra_get_bars</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *period, uint32_t count) override</td></tr>
+<tr class="memdesc:ae9af0513f23e1bb7cb901b79928daa62 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取K线序列数据  <br /></td></tr>
+<tr class="separator:ae9af0513f23e1bb7cb901b79928daa62 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4eb17f55bae6202f4337043eb70ce0c7 inherit pub_methods_classHftMocker" id="r_a4eb17f55bae6202f4337043eb70ce0c7"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a4eb17f55bae6202f4337043eb70ce0c7">stra_get_ticks</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t count) override</td></tr>
+<tr class="memdesc:a4eb17f55bae6202f4337043eb70ce0c7 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取Tick序列数据  <br /></td></tr>
+<tr class="separator:a4eb17f55bae6202f4337043eb70ce0c7 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1a4fef2a1e5ffd191e7b60d05b6a4fa inherit pub_methods_classHftMocker" id="r_ae1a4fef2a1e5ffd191e7b60d05b6a4fa"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSOrdDtlSlice.html">WTSOrdDtlSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#ae1a4fef2a1e5ffd191e7b60d05b6a4fa">stra_get_order_detail</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t count) override</td></tr>
+<tr class="memdesc:ae1a4fef2a1e5ffd191e7b60d05b6a4fa inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取逐笔委托序列数据  <br /></td></tr>
+<tr class="separator:ae1a4fef2a1e5ffd191e7b60d05b6a4fa inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac199e77855db6b88ea9b29215b9e860b inherit pub_methods_classHftMocker" id="r_ac199e77855db6b88ea9b29215b9e860b"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSOrdQueSlice.html">WTSOrdQueSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#ac199e77855db6b88ea9b29215b9e860b">stra_get_order_queue</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t count) override</td></tr>
+<tr class="memdesc:ac199e77855db6b88ea9b29215b9e860b inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取委托队列序列数据  <br /></td></tr>
+<tr class="separator:ac199e77855db6b88ea9b29215b9e860b inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea26718c2a4bf32771db39d2431e6320 inherit pub_methods_classHftMocker" id="r_aea26718c2a4bf32771db39d2431e6320"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTransSlice.html">WTSTransSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#aea26718c2a4bf32771db39d2431e6320">stra_get_transaction</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t count) override</td></tr>
+<tr class="memdesc:aea26718c2a4bf32771db39d2431e6320 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取逐笔成交序列数据  <br /></td></tr>
+<tr class="separator:aea26718c2a4bf32771db39d2431e6320 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49e520aecfd510ce44a23e26418bae6c inherit pub_methods_classHftMocker" id="r_a49e520aecfd510ce44a23e26418bae6c"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a49e520aecfd510ce44a23e26418bae6c">stra_get_last_tick</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a49e520aecfd510ce44a23e26418bae6c inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取最新的Tick数据  <br /></td></tr>
+<tr class="separator:a49e520aecfd510ce44a23e26418bae6c inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abca80698bf51efbf2a919584ee156f05 inherit pub_methods_classHftMocker" id="r_abca80698bf51efbf2a919584ee156f05"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#abca80698bf51efbf2a919584ee156f05">stra_get_rawcode</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:abca80698bf51efbf2a919584ee156f05 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取分月合约代码  <br /></td></tr>
+<tr class="separator:abca80698bf51efbf2a919584ee156f05 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bce905302fb94935472a3a591639f67 inherit pub_methods_classHftMocker" id="r_a1bce905302fb94935472a3a591639f67"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a1bce905302fb94935472a3a591639f67">stra_get_position</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool bOnlyValid=false, int flag=3) override</td></tr>
+<tr class="memdesc:a1bce905302fb94935472a3a591639f67 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取合约持仓量  <br /></td></tr>
+<tr class="separator:a1bce905302fb94935472a3a591639f67 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f4206d6b38801282bae1a8fdf7337f2 inherit pub_methods_classHftMocker" id="r_a7f4206d6b38801282bae1a8fdf7337f2"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a7f4206d6b38801282bae1a8fdf7337f2">stra_get_position_avgpx</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a7f4206d6b38801282bae1a8fdf7337f2 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取合约持仓均价  <br /></td></tr>
+<tr class="separator:a7f4206d6b38801282bae1a8fdf7337f2 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a272f622b0771d2e3265f5045ac284197 inherit pub_methods_classHftMocker" id="r_a272f622b0771d2e3265f5045ac284197"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a272f622b0771d2e3265f5045ac284197">stra_get_position_profit</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a272f622b0771d2e3265f5045ac284197 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取合约持仓盈亏  <br /></td></tr>
+<tr class="separator:a272f622b0771d2e3265f5045ac284197 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae53421109f10c732a70d27d540aaa9d6 inherit pub_methods_classHftMocker" id="r_ae53421109f10c732a70d27d540aaa9d6"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#ae53421109f10c732a70d27d540aaa9d6">stra_get_undone</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:ae53421109f10c732a70d27d540aaa9d6 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取合约未完成数量  <br /></td></tr>
+<tr class="separator:ae53421109f10c732a70d27d540aaa9d6 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10c43361df8fb23f77d8a3dad1f73acc inherit pub_methods_classHftMocker" id="r_a10c43361df8fb23f77d8a3dad1f73acc"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a10c43361df8fb23f77d8a3dad1f73acc">stra_get_price</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a10c43361df8fb23f77d8a3dad1f73acc inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取合约当前价格  <br /></td></tr>
+<tr class="separator:a10c43361df8fb23f77d8a3dad1f73acc inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48c31ace00eecc5d848105202bf37355 inherit pub_methods_classHftMocker" id="r_a48c31ace00eecc5d848105202bf37355"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a48c31ace00eecc5d848105202bf37355">stra_get_date</a> () override</td></tr>
+<tr class="memdesc:a48c31ace00eecc5d848105202bf37355 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取当前交易日期  <br /></td></tr>
+<tr class="separator:a48c31ace00eecc5d848105202bf37355 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b342d9b678ce0031b419f50fbdd06f2 inherit pub_methods_classHftMocker" id="r_a1b342d9b678ce0031b419f50fbdd06f2"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a1b342d9b678ce0031b419f50fbdd06f2">stra_get_time</a> () override</td></tr>
+<tr class="memdesc:a1b342d9b678ce0031b419f50fbdd06f2 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取当前交易时间  <br /></td></tr>
+<tr class="separator:a1b342d9b678ce0031b419f50fbdd06f2 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb712ae4d243e7f83f7e689144734471 inherit pub_methods_classHftMocker" id="r_adb712ae4d243e7f83f7e689144734471"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#adb712ae4d243e7f83f7e689144734471">stra_get_secs</a> () override</td></tr>
+<tr class="memdesc:adb712ae4d243e7f83f7e689144734471 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取当前交易时间（秒）  <br /></td></tr>
+<tr class="separator:adb712ae4d243e7f83f7e689144734471 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57e235606406214513cc6348795cce58 inherit pub_methods_classHftMocker" id="r_a57e235606406214513cc6348795cce58"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a57e235606406214513cc6348795cce58">stra_sub_ticks</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a57e235606406214513cc6348795cce58 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅Tick行情数据  <br /></td></tr>
+<tr class="separator:a57e235606406214513cc6348795cce58 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0723b5832e9acc3d2ef0e6c431b80c9 inherit pub_methods_classHftMocker" id="r_ab0723b5832e9acc3d2ef0e6c431b80c9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#ab0723b5832e9acc3d2ef0e6c431b80c9">stra_sub_order_queues</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:ab0723b5832e9acc3d2ef0e6c431b80c9 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅委托队列数据  <br /></td></tr>
+<tr class="separator:ab0723b5832e9acc3d2ef0e6c431b80c9 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e9ed8d695da919910b8dd00456c3083 inherit pub_methods_classHftMocker" id="r_a5e9ed8d695da919910b8dd00456c3083"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a5e9ed8d695da919910b8dd00456c3083">stra_sub_order_details</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a5e9ed8d695da919910b8dd00456c3083 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅逐笔委托数据  <br /></td></tr>
+<tr class="separator:a5e9ed8d695da919910b8dd00456c3083 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9467db36278bb1aea6262e94cf64d1c2 inherit pub_methods_classHftMocker" id="r_a9467db36278bb1aea6262e94cf64d1c2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a9467db36278bb1aea6262e94cf64d1c2">stra_sub_transactions</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a9467db36278bb1aea6262e94cf64d1c2 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅逐笔成交数据  <br /></td></tr>
+<tr class="separator:a9467db36278bb1aea6262e94cf64d1c2 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bca8aab086a650ad2f83c53a4ac63a8 inherit pub_methods_classHftMocker" id="r_a2bca8aab086a650ad2f83c53a4ac63a8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a2bca8aab086a650ad2f83c53a4ac63a8">stra_log_info</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message) override</td></tr>
+<tr class="memdesc:a2bca8aab086a650ad2f83c53a4ac63a8 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">记录信息级别日志  <br /></td></tr>
+<tr class="separator:a2bca8aab086a650ad2f83c53a4ac63a8 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae826802cdc50af57e7a83fb53e562484 inherit pub_methods_classHftMocker" id="r_ae826802cdc50af57e7a83fb53e562484"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#ae826802cdc50af57e7a83fb53e562484">stra_log_debug</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message) override</td></tr>
+<tr class="memdesc:ae826802cdc50af57e7a83fb53e562484 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">记录调试级别日志  <br /></td></tr>
+<tr class="separator:ae826802cdc50af57e7a83fb53e562484 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb6589c1b6e29ecd9352f470155733f1 inherit pub_methods_classHftMocker" id="r_aeb6589c1b6e29ecd9352f470155733f1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#aeb6589c1b6e29ecd9352f470155733f1">stra_log_warn</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message) override</td></tr>
+<tr class="memdesc:aeb6589c1b6e29ecd9352f470155733f1 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">记录警告级别日志  <br /></td></tr>
+<tr class="separator:aeb6589c1b6e29ecd9352f470155733f1 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a640ca3f4a39103892f18b56a613310 inherit pub_methods_classHftMocker" id="r_a2a640ca3f4a39103892f18b56a613310"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a2a640ca3f4a39103892f18b56a613310">stra_log_error</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message) override</td></tr>
+<tr class="memdesc:a2a640ca3f4a39103892f18b56a613310 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">记录错误级别日志  <br /></td></tr>
+<tr class="separator:a2a640ca3f4a39103892f18b56a613310 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a278328a822b80c2d64ad1f046f8f6d2f inherit pub_methods_classHftMocker" id="r_a278328a822b80c2d64ad1f046f8f6d2f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a278328a822b80c2d64ad1f046f8f6d2f">stra_save_user_data</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *val) override</td></tr>
+<tr class="memdesc:a278328a822b80c2d64ad1f046f8f6d2f inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">保存用户自定义数据  <br /></td></tr>
+<tr class="separator:a278328a822b80c2d64ad1f046f8f6d2f inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b4415991a646c0581534effbaa2c4fc inherit pub_methods_classHftMocker" id="r_a2b4415991a646c0581534effbaa2c4fc"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a2b4415991a646c0581534effbaa2c4fc">stra_load_user_data</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *defVal=&quot;&quot;) override</td></tr>
+<tr class="memdesc:a2b4415991a646c0581534effbaa2c4fc inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">读取用户自定义数据  <br /></td></tr>
+<tr class="separator:a2b4415991a646c0581534effbaa2c4fc inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2dfc9115402558b43383fb7ee310b34a inherit pub_methods_classHftMocker" id="r_a2dfc9115402558b43383fb7ee310b34a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a2dfc9115402558b43383fb7ee310b34a">init_hft_factory</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *cfg)</td></tr>
+<tr class="memdesc:a2dfc9115402558b43383fb7ee310b34a inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化高频策略工厂  <br /></td></tr>
+<tr class="separator:a2dfc9115402558b43383fb7ee310b34a inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abab8a0a44a1f621dd55055b9ac522fa7 inherit pub_methods_classHftMocker" id="r_abab8a0a44a1f621dd55055b9ac522fa7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#abab8a0a44a1f621dd55055b9ac522fa7">install_hook</a> ()</td></tr>
+<tr class="memdesc:abab8a0a44a1f621dd55055b9ac522fa7 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">安装钩子函数  <br /></td></tr>
+<tr class="separator:abab8a0a44a1f621dd55055b9ac522fa7 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8491bb3b4c34634bde9da6ddfae7fa4 inherit pub_methods_classHftMocker" id="r_ad8491bb3b4c34634bde9da6ddfae7fa4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#ad8491bb3b4c34634bde9da6ddfae7fa4">enable_hook</a> (bool bEnabled=true)</td></tr>
+<tr class="memdesc:ad8491bb3b4c34634bde9da6ddfae7fa4 inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">启用或禁用钩子函数  <br /></td></tr>
+<tr class="separator:ad8491bb3b4c34634bde9da6ddfae7fa4 inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1edcdfd9b34dfcc0ed265fd3a8cee6bb inherit pub_methods_classHftMocker" id="r_a1edcdfd9b34dfcc0ed265fd3a8cee6bb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a1edcdfd9b34dfcc0ed265fd3a8cee6bb">step_tick</a> ()</td></tr>
+<tr class="memdesc:a1edcdfd9b34dfcc0ed265fd3a8cee6bb inherit pub_methods_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理下一个Tick  <br /></td></tr>
+<tr class="separator:a1edcdfd9b34dfcc0ed265fd3a8cee6bb inherit pub_methods_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classIDataSink"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classIDataSink')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classIDataSink.html">IDataSink</a></td></tr>
+<tr class="memitem:a484f5ab1b9ea855ddbc56cfedf324312 inherit pub_methods_classIDataSink" id="r_a484f5ab1b9ea855ddbc56cfedf324312"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataSink.html#a484f5ab1b9ea855ddbc56cfedf324312">handle_section_end</a> (uint32_t curTDate, uint32_t curTime)</td></tr>
+<tr class="memdesc:a484f5ab1b9ea855ddbc56cfedf324312 inherit pub_methods_classIDataSink"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理交易时段结束事件  <br /></td></tr>
+<tr class="separator:a484f5ab1b9ea855ddbc56cfedf324312 inherit pub_methods_classIDataSink"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classIHftStraCtx"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classIHftStraCtx')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classIHftStraCtx.html">IHftStraCtx</a></td></tr>
+<tr class="memitem:a83193fab005fe1bbfce6043da2d9b504 inherit pub_methods_classIHftStraCtx" id="r_a83193fab005fe1bbfce6043da2d9b504"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#a83193fab005fe1bbfce6043da2d9b504">IHftStraCtx</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="classIHftStraCtx.html#a83f0f0ed8878ced941cf9eab83320273">name</a>)</td></tr>
+<tr class="memdesc:a83193fab005fe1bbfce6043da2d9b504 inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a83193fab005fe1bbfce6043da2d9b504 inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8acf8795877eb29dc265cca31267d99c inherit pub_methods_classIHftStraCtx" id="r_a8acf8795877eb29dc265cca31267d99c"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#a8acf8795877eb29dc265cca31267d99c">~IHftStraCtx</a> ()</td></tr>
+<tr class="memdesc:a8acf8795877eb29dc265cca31267d99c inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:a8acf8795877eb29dc265cca31267d99c inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83f0f0ed8878ced941cf9eab83320273 inherit pub_methods_classIHftStraCtx" id="r_a83f0f0ed8878ced941cf9eab83320273"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#a83f0f0ed8878ced941cf9eab83320273">name</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a83f0f0ed8878ced941cf9eab83320273 inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取策略名称  <br /></td></tr>
+<tr class="separator:a83f0f0ed8878ced941cf9eab83320273 inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac86ea508ea2226e1fc5b2a17e6b6cf31 inherit pub_methods_classIHftStraCtx" id="r_ac86ea508ea2226e1fc5b2a17e6b6cf31"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#ac86ea508ea2226e1fc5b2a17e6b6cf31">stra_enter_long</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag, int flag=0)</td></tr>
+<tr class="memdesc:ac86ea508ea2226e1fc5b2a17e6b6cf31 inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">下单接口: 开多(买入开仓)  <br /></td></tr>
+<tr class="separator:ac86ea508ea2226e1fc5b2a17e6b6cf31 inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bb0ba7787bfadb956206ec776f6c7b5 inherit pub_methods_classIHftStraCtx" id="r_a8bb0ba7787bfadb956206ec776f6c7b5"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#a8bb0ba7787bfadb956206ec776f6c7b5">stra_enter_short</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag, int flag=0)</td></tr>
+<tr class="memdesc:a8bb0ba7787bfadb956206ec776f6c7b5 inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">下单接口: 开空(卖出开仓)  <br /></td></tr>
+<tr class="separator:a8bb0ba7787bfadb956206ec776f6c7b5 inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7454d4bc12ac127944e5fbd031018909 inherit pub_methods_classIHftStraCtx" id="r_a7454d4bc12ac127944e5fbd031018909"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#a7454d4bc12ac127944e5fbd031018909">stra_exit_long</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag, bool isToday=false, int flag=0)</td></tr>
+<tr class="memdesc:a7454d4bc12ac127944e5fbd031018909 inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">下单接口: 平多(卖出平仓)  <br /></td></tr>
+<tr class="separator:a7454d4bc12ac127944e5fbd031018909 inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d3f83faeba5ca6e221f7dd3c56ca5cb inherit pub_methods_classIHftStraCtx" id="r_a8d3f83faeba5ca6e221f7dd3c56ca5cb"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#a8d3f83faeba5ca6e221f7dd3c56ca5cb">stra_exit_short</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag, bool isToday=false, int flag=0)</td></tr>
+<tr class="memdesc:a8d3f83faeba5ca6e221f7dd3c56ca5cb inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">下单接口: 平空(买入平仓)  <br /></td></tr>
+<tr class="separator:a8d3f83faeba5ca6e221f7dd3c56ca5cb inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+额外继承的成员函数</h2></td></tr>
+<tr class="inherit_header pro_types_classHftMocker"><td colspan="2" onclick="javascript:toggleInherit('pro_types_classHftMocker')"><img src="closed.png" alt="-"/>&#160;Protected 类型 继承自 <a class="el" href="classHftMocker.html">HftMocker</a></td></tr>
+<tr class="memitem:a7ededf4904cc4767a9b13909ca0b1759 inherit pro_types_classHftMocker" id="r_a7ededf4904cc4767a9b13909ca0b1759"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classWTSHashMap.html">WTSHashMap</a>&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a7ededf4904cc4767a9b13909ca0b1759">TickCache</a></td></tr>
+<tr class="memdesc:a7ededf4904cc4767a9b13909ca0b1759 inherit pro_types_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick缓存类型  <br /></td></tr>
+<tr class="separator:a7ededf4904cc4767a9b13909ca0b1759 inherit pro_types_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_attribs_classHftMocker"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classHftMocker')"><img src="closed.png" alt="-"/>&#160;Protected 属性 继承自 <a class="el" href="classHftMocker.html">HftMocker</a></td></tr>
+<tr class="memitem:abdfad05d029695eb56523e8bc7ba8438 inherit pro_attribs_classHftMocker" id="r_abdfad05d029695eb56523e8bc7ba8438"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#abdfad05d029695eb56523e8bc7ba8438">_context_id</a></td></tr>
+<tr class="memdesc:abdfad05d029695eb56523e8bc7ba8438 inherit pro_attribs_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">上下文ID  <br /></td></tr>
+<tr class="separator:abdfad05d029695eb56523e8bc7ba8438 inherit pro_attribs_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9dfcbde27d69ab31bb18b8819832344 inherit pro_attribs_classHftMocker" id="r_aa9dfcbde27d69ab31bb18b8819832344"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#aa9dfcbde27d69ab31bb18b8819832344">_mtx_calc</a></td></tr>
+<tr class="memdesc:aa9dfcbde27d69ab31bb18b8819832344 inherit pro_attribs_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">计算互斥锁  <br /></td></tr>
+<tr class="separator:aa9dfcbde27d69ab31bb18b8819832344 inherit pro_attribs_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e836b7def332c4ca8c905b1e2df71ff inherit pro_attribs_classHftMocker" id="r_a7e836b7def332c4ca8c905b1e2df71ff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__MutexUtils.html#gafaa630f2eecc6c68bc508cb484fcd3a3">StdCondVariable</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a7e836b7def332c4ca8c905b1e2df71ff">_cond_calc</a></td></tr>
+<tr class="memdesc:a7e836b7def332c4ca8c905b1e2df71ff inherit pro_attribs_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">计算条件变量  <br /></td></tr>
+<tr class="separator:a7e836b7def332c4ca8c905b1e2df71ff inherit pro_attribs_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fa8b2faf7f19ba168344d0de752defc inherit pro_attribs_classHftMocker" id="r_a5fa8b2faf7f19ba168344d0de752defc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a5fa8b2faf7f19ba168344d0de752defc">_has_hook</a></td></tr>
+<tr class="memdesc:a5fa8b2faf7f19ba168344d0de752defc inherit pro_attribs_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">是否启用钩子  <br /></td></tr>
+<tr class="separator:a5fa8b2faf7f19ba168344d0de752defc inherit pro_attribs_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3c1d3f8020e88636e92163653b4709a inherit pro_attribs_classHftMocker" id="r_ae3c1d3f8020e88636e92163653b4709a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#ae3c1d3f8020e88636e92163653b4709a">_hook_valid</a></td></tr>
+<tr class="memdesc:ae3c1d3f8020e88636e92163653b4709a inherit pro_attribs_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">钩子是否有效  <br /></td></tr>
+<tr class="separator:ae3c1d3f8020e88636e92163653b4709a inherit pro_attribs_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9cd7701d0e543c7675f90c57095fe450 inherit pro_attribs_classHftMocker" id="r_a9cd7701d0e543c7675f90c57095fe450"><td class="memItemLeft" align="right" valign="top">std::atomic&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a9cd7701d0e543c7675f90c57095fe450">_resumed</a></td></tr>
+<tr class="memdesc:a9cd7701d0e543c7675f90c57095fe450 inherit pro_attribs_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">是否已恢复标志  <br /></td></tr>
+<tr class="separator:a9cd7701d0e543c7675f90c57095fe450 inherit pro_attribs_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdd99f6733f42971519f3ffef4576cad inherit pro_attribs_classHftMocker" id="r_afdd99f6733f42971519f3ffef4576cad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classwt__hashset.html">wt_hashset</a>&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#afdd99f6733f42971519f3ffef4576cad">_tick_subs</a></td></tr>
+<tr class="memdesc:afdd99f6733f42971519f3ffef4576cad inherit pro_attribs_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick数据订阅列表  <br /></td></tr>
+<tr class="separator:afdd99f6733f42971519f3ffef4576cad inherit pro_attribs_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49b286f55446e699340d8cf116cd7fae inherit pro_attribs_classHftMocker" id="r_a49b286f55446e699340d8cf116cd7fae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classHftMocker.html#a7ededf4904cc4767a9b13909ca0b1759">TickCache</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftMocker.html#a49b286f55446e699340d8cf116cd7fae">_ticks</a></td></tr>
+<tr class="memdesc:a49b286f55446e699340d8cf116cd7fae inherit pro_attribs_classHftMocker"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick缓存  <br /></td></tr>
+<tr class="separator:a49b286f55446e699340d8cf116cd7fae inherit pro_attribs_classHftMocker"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_attribs_classIHftStraCtx"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classIHftStraCtx')"><img src="closed.png" alt="-"/>&#160;Protected 属性 继承自 <a class="el" href="classIHftStraCtx.html">IHftStraCtx</a></td></tr>
+<tr class="memitem:ab918b4493ea1270cb1bfd81cf39f6c41 inherit pro_attribs_classIHftStraCtx" id="r_ab918b4493ea1270cb1bfd81cf39f6c41"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#ab918b4493ea1270cb1bfd81cf39f6c41">_name</a></td></tr>
+<tr class="memdesc:ab918b4493ea1270cb1bfd81cf39f6c41 inherit pro_attribs_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">策略名称  <br /></td></tr>
+<tr class="separator:ab918b4493ea1270cb1bfd81cf39f6c41 inherit pro_attribs_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>高频交易策略回测模拟器对外封装类 </p>
+<p>继承自HftMocker，用于在回测系统中模拟高频交易策略的行为和表现 重写了父类的各个虚函数，实现对不同事件的响应处理 该类主要用于对外接口封装，方便与其他系统集成 包含处理行情数据、委托事件、成交事件、交易日事件等高频交易特有的功能 </p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8h_source.html">ExpHftMocker.h</a> 第 <a class="el" href="ExpHftMocker_8h_source.html#l00022">22</a> 行定义.</p>
+</div><h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a4c900c96889d4ce7bf097192b9263beb" name="a4c900c96889d4ce7bf097192b9263beb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c900c96889d4ce7bf097192b9263beb">&#9670;&#160;</a></span>ExpHftMocker()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ExpHftMocker::ExpHftMocker </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classHisDataReplayer.html">HisDataReplayer</a> *&#160;</td>
+          <td class="paramname"><em>replayer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>name</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">replayer</td><td>历史数据回放器指针 </td></tr>
+    <tr><td class="paramname">name</td><td>策略名称</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>创建高频交易策略回测模拟器实例，并传入相关参数</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">replayer</td><td>历史数据回放器指针，用于提供回测所需的各类历史数据 </td></tr>
+    <tr><td class="paramname">name</td><td>策略名称，用于唯一标识策略实例</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>初始化高频交易策略回测模拟器，通过调用父类构造函数来初始化 基类 HftMocker负责大部分策略模拟器的基础功能 ExpHftMocker主要添加了对外部接口的调用和处理 </p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a> 第 <a class="el" href="ExpHftMocker_8cpp_source.html#l00033">33</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aadeaafd2fa23c61ac330d8620f094e0a" name="aadeaafd2fa23c61ac330d8620f094e0a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aadeaafd2fa23c61ac330d8620f094e0a">&#9670;&#160;</a></span>~ExpHftMocker()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual ExpHftMocker::~ExpHftMocker </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>析构函数 </p>
+<p>清理高频交易策略回测模拟器资源 实现为空函数体，因为父类的析构函数会处理资源释放 </p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8h_source.html">ExpHftMocker.h</a> 第 <a class="el" href="ExpHftMocker_8h_source.html#l00038">38</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a4952b213e1f9178d6019f72775f6a209" name="a4952b213e1f9178d6019f72775f6a209"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4952b213e1f9178d6019f72775f6a209">&#9670;&#160;</a></span>on_bactest_end()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExpHftMocker::on_bactest_end </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>回测结束回调函数 </p>
+<p>整个回测过程结束时触发此回调 可以在此函数中进行回测结果汇总、资源释放等操作 这是策略生命周期中的最后一个回调函数</p>
+<p>当整个回测过程结束时触发此回调 直接通过getRunner调用外部引擎的on_backtest_end接口，通知外部系统回测结束 这里与其他函数不同，没有调用父类的相应函数，直接转发事件 在回测结束时，可以进行策略结果汇总、统计分析和资源清理等操作 </p>
+
+<p>重载 <a class="el" href="classIHftStraCtx.html#a58a802daada69d3a7e615d52dc38e7ba">IHftStraCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a> 第 <a class="el" href="ExpHftMocker_8cpp_source.html#l00265">265</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa5d33369fc61f4f1b082908bcdaee4d0" name="aa5d33369fc61f4f1b082908bcdaee4d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5d33369fc61f4f1b082908bcdaee4d0">&#9670;&#160;</a></span>on_bar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExpHftMocker::on_bar </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>times</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td>
+          <td class="paramname"><em>newBar</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>K线数据回调函数 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期，如"m1"、"d1"等 </td></tr>
+    <tr><td class="paramname">times</td><td>重复次数 </td></tr>
+    <tr><td class="paramname">newBar</td><td>新的K线数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到新的K线数据时触发该回调 用于处理K线周期结束时的策略计算和信号生成 在高频交易中，通常也需要结合K线进行分析</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期基础单位，如"d"(日线)、"m"(分钟线) </td></tr>
+    <tr><td class="paramname">times</td><td>周期倍数，结合period使用，如period=d,times=1表示日线 </td></tr>
+    <tr><td class="paramname">newBar</td><td>新的K线数据结构</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当新的K线数据到达时触发此回调</p><ol type="1">
+<li>首先检查newBar是否为空，如果为空则直接返回</li>
+<li>根据period类型和times值构造实际周期名称，如"d1"或"m5"</li>
+<li>调用父类的on_bar函数处理基本逻辑</li>
+<li>通过getRunner调用外部回测引擎的接口，将K线数据传递给外部系统 </li>
+</ol>
+
+<p>重载 <a class="el" href="classHftMocker.html#ae4d8f8c71a2b3c758908d6680a4e1c62">HftMocker</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a> 第 <a class="el" href="ExpHftMocker_8cpp_source.html#l00051">51</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a91412edeaa55665ecb595f284d3edf0f" name="a91412edeaa55665ecb595f284d3edf0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91412edeaa55665ecb595f284d3edf0f">&#9670;&#160;</a></span>on_channel_ready()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExpHftMocker::on_channel_ready </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易通道就绪回调函数 </p>
+<p>当交易通道就绪（可交易）时触发该回调 交易通道就绪后，策略可以开始发送交易指令 高频交易中特有的事件，用于确保交易请求只在通道就绪后发送</p>
+<p>当交易通道准备就绪可以进行交易时触发此回调</p><ol type="1">
+<li>首先调用父类的on_channel_ready函数处理基本需求</li>
+<li>然后通过getRunner调用外部回测引擎的接口，将通道就绪事件通知给外部系统</li>
+<li>通道就绪后，策略可以开始发送交易指令 </li>
+</ol>
+
+<p>重载 <a class="el" href="classHftMocker.html#a34de491dfb14dbe78a67819a93b29294">HftMocker</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a> 第 <a class="el" href="ExpHftMocker_8cpp_source.html#l00074">74</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a64b6f794cd71c4ac4c92b8639a29511a" name="a64b6f794cd71c4ac4c92b8639a29511a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64b6f794cd71c4ac4c92b8639a29511a">&#9670;&#160;</a></span>on_entrust()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExpHftMocker::on_entrust </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bSuccess</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>userTag</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>委托回报回调函数 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">bSuccess</td><td>是否成功，true表示委托成功，false表示委托失败 </td></tr>
+    <tr><td class="paramname">message</td><td>委托回报消息，如错误原因等 </td></tr>
+    <tr><td class="paramname">userTag</td><td>用户自定义标签，用于识别不同的交易标签</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>委托发出后的回报处理 在高频交易中，需要快速响应委托回报，特别是失败的委托 可以根据委托结果调整后续策略行为</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID，用于唯一标识委托 </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">bSuccess</td><td>委托是否成功的标志，true表示成功，false表示失败 </td></tr>
+    <tr><td class="paramname">message</td><td>委托回报消息，包含成功或失败的详细信息 </td></tr>
+    <tr><td class="paramname">userTag</td><td>用户自定义标签，用于识别不同的交易目的</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当委托发出后收到回报时触发此回调</p><ol type="1">
+<li>首先调用父类的on_entrust函数处理基本委托回报逻辑</li>
+<li>然后通过getRunner调用外部回测引擎的接口，将委托回报事件通知给外部系统</li>
+<li>高频交易策略可以根据委托回报结果快速调整后续交易策略 </li>
+</ol>
+
+<p>重载 <a class="el" href="classHftMocker.html#a2b9d7f53110bea5e11a812e58046b18e">HftMocker</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a> 第 <a class="el" href="ExpHftMocker_8cpp_source.html#l00093">93</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a179ccc00c428877ec88610ace455ab22" name="a179ccc00c428877ec88610ace455ab22"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a179ccc00c428877ec88610ace455ab22">&#9670;&#160;</a></span>on_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExpHftMocker::on_init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>策略初始化回调函数 </p>
+<p>策略被创建后的初始化调用 在这里可以进行策略参数设置、数据订阅、变量初始化等操作 这是策略生命周期中的第一个回调函数</p>
+<p>当策略加载后需要进行初始化时触发此回调</p><ol type="1">
+<li>首先调用父类的on_init函数完成基本初始化操作</li>
+<li>然后通过getRunner调用外部回测引擎的ctx_on_init接口，将策略初始化事件通知给外部系统</li>
+<li>最后调用全局初始化事件函数on_initialize_event，完成整个回测系统的初始化 这是策略生命周期中的第一个回调，用于设置参数、数据订阅等 </li>
+</ol>
+
+<p>重载 <a class="el" href="classHftMocker.html#a98d647524e23ac3e67ef68b28a848e67">HftMocker</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a> 第 <a class="el" href="ExpHftMocker_8cpp_source.html#l00108">108</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a08c48c7e639cb1fb54266d8209a5adf7" name="a08c48c7e639cb1fb54266d8209a5adf7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08c48c7e639cb1fb54266d8209a5adf7">&#9670;&#160;</a></span>on_orddtl_updated()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExpHftMocker::on_orddtl_updated </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSOrdDtlData.html">WTSOrdDtlData</a> *&#160;</td>
+          <td class="paramname"><em>newOrdDtl</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>委托明细数据更新回调函数 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">newOrdDtl</td><td>新的委托明细数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到新的委托明细数据时触发该回调 委托明细数据包含市场上全部或部分委托的详细信息 高频策略可以基于委托明细分析市场参与者的行为特征 对于监控市场操纵和高频交易年线非常有价值</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">newOrdDtl</td><td>新的委托明细数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到新的委托明细数据时触发此回调 直接通过getRunner调用外部引擎的hft_on_order_detail接口，将委托明细数据通知给外部系统 委托明细数据包含市场上详细的委托信息，如委托类型、委托时间等 注意这里与其他函数不同，没有调用父类方法，直接转发事件 </p>
+
+<p>重载 <a class="el" href="classHftMocker.html#a7fbbe3f7f0273f5f8d0dd5dbd80156a7">HftMocker</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a> 第 <a class="el" href="ExpHftMocker_8cpp_source.html#l00217">217</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aecdfb9ae8f3de32f04145e52c99475f0" name="aecdfb9ae8f3de32f04145e52c99475f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aecdfb9ae8f3de32f04145e52c99475f0">&#9670;&#160;</a></span>on_order()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExpHftMocker::on_order </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isBuy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>totalQty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>leftQty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isCanceled</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>userTag</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>委托记录回调函数 </p>
+<p>委托状态更新回调函数</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否为买入，true表示买入，false表示卖出 </td></tr>
+    <tr><td class="paramname">totalQty</td><td>委托总数量 </td></tr>
+    <tr><td class="paramname">leftQty</td><td>剩余数量（未成交数量） </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">isCanceled</td><td>是否已撤销 </td></tr>
+    <tr><td class="paramname">userTag</td><td>用户自定义标签</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当委托状态变化时触发此回调 包括委托创建、部分成交、全部成交、撤单等状态变化 高频交易中需要知道委托状态变化以做出相应策略调整</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID，用于唯一标识委托 </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否为买入委托，true表示买入，false表示卖出 </td></tr>
+    <tr><td class="paramname">totalQty</td><td>委托总数量 </td></tr>
+    <tr><td class="paramname">leftQty</td><td>剩余未成交数量 </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">isCanceled</td><td>是否已撤销 </td></tr>
+    <tr><td class="paramname">userTag</td><td>用户自定义标签</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当委托状态发生变化时触发此回调</p><ol type="1">
+<li>首先调用父类的on_order函数完成基本委托状态处理</li>
+<li>然后通过getRunner调用外部引擎的hft_on_order接口，将委托状态更新事件通知给外部系统 在高频交易中，及时跟踪每个委托的状态变化非常重要 包括委托创建、部分成交、全部成交或撤销等状态 </li>
+</ol>
+
+<p>重载 <a class="el" href="classHftMocker.html#a3011ef0f877f49fcf450d12bc29710f1">HftMocker</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a> 第 <a class="el" href="ExpHftMocker_8cpp_source.html#l00167">167</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4a07f7cff2cab521ebd09b2188709887" name="a4a07f7cff2cab521ebd09b2188709887"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a07f7cff2cab521ebd09b2188709887">&#9670;&#160;</a></span>on_ordque_updated()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExpHftMocker::on_ordque_updated </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSOrdQueData.html">WTSOrdQueData</a> *&#160;</td>
+          <td class="paramname"><em>newOrdQue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>委托队列数据更新回调函数 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">newOrdQue</td><td>新的委托队列数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到新的委托队列数据时触发该回调 委托队列数据包含市场上各个价位的委托排队情况 高频策略可以基于委托队列数据分析市场深度和流动性 通常用于监控市场微观结构和对大单的反应</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">newOrdQue</td><td>新的委托队列数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到新的委托队列数据时触发此回调 直接通过getRunner调用外部引擎的hft_on_order_queue接口，将委托队列数据通知给外部系统 委托队列数据包含市场上不同价位的委托排队情况，是分析市场深度的重要数据 注意这里与其他函数不同，没有调用父类方法，直接转发事件 </p>
+
+<p>重载 <a class="el" href="classHftMocker.html#a0cc6649b5858855b5e79efdc9bde58ba">HftMocker</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a> 第 <a class="el" href="ExpHftMocker_8cpp_source.html#l00203">203</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2f29c3e3e12f472241fc9b1507a57b99" name="a2f29c3e3e12f472241fc9b1507a57b99"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f29c3e3e12f472241fc9b1507a57b99">&#9670;&#160;</a></span>on_session_begin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExpHftMocker::on_session_begin </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uDate</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易日开始回调函数 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">uDate</td><td>交易日日期，格式为YYYYMMDD</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>每个交易日开始时触发此回调 可以在此函数中进行交易日开始前的初始化工作 例如重置交易状态、准备每日数据等</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">uDate</td><td>交易日日期，格式为YYYYMMDD</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当每个交易日开始时触发此回调</p><ol type="1">
+<li>首先调用父类的on_session_begin函数完成基本交易日开始处理</li>
+<li>然后通过getRunner调用外部引擎的ctx_on_session_event接口，将交易日开始事件通知给上下文</li>
+<li>最后调用全局交易日事件函数on_session_event，通知整个系统交易日开始 在高频交易中，可以在交易日开始时准备当日策略参数和状态 </li>
+</ol>
+
+<p>重载 <a class="el" href="classHftMocker.html#adb62cffd1f0ab613f104556ed2f3486b">HftMocker</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a> 第 <a class="el" href="ExpHftMocker_8cpp_source.html#l00126">126</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a207e5e1f811f5504b3e70992bee3f91f" name="a207e5e1f811f5504b3e70992bee3f91f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a207e5e1f811f5504b3e70992bee3f91f">&#9670;&#160;</a></span>on_session_end()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExpHftMocker::on_session_end </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uDate</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易日结束回调函数 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">uDate</td><td>交易日日期，格式为YYYYMMDD</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>每个交易日结束时触发此回调 可以在此函数中进行交易日结束后的清理工作 例如结算当日交易、记录统计数据、平仓操作等</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">uDate</td><td>交易日日期，格式为YYYYMMDD</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当每个交易日结束时触发此回调</p><ol type="1">
+<li>首先调用父类的on_session_end函数完成基本交易日结束处理</li>
+<li>然后通过getRunner调用外部引擎的ctx_on_session_event接口，将交易日结束事件通知给上下文</li>
+<li>最后调用全局交易日事件函数on_session_event，通知整个系统交易日结束 在高频交易中，可以在交易日结束时进行当日交易统计、清空所有持仓等操作 </li>
+</ol>
+
+<p>重载 <a class="el" href="classHftMocker.html#a1432ce83a33c5e98d7790ef7eec107f1">HftMocker</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a> 第 <a class="el" href="ExpHftMocker_8cpp_source.html#l00143">143</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0ad7ccbe666ddd8e6693305dc665d16f" name="a0ad7ccbe666ddd8e6693305dc665d16f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ad7ccbe666ddd8e6693305dc665d16f">&#9670;&#160;</a></span>on_tick_updated()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExpHftMocker::on_tick_updated </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>newTick</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tick数据更新回调函数 </p>
+<p>实时行情数据更新回调函数</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">newTick</td><td>新的Tick数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到新的通用Tick数据时触发该回调 Tick数据更新是高频交易策略中最重要的事件 包含市场最新成交价、买一卖一、买卖排队深度等信息 高频策略通常会基于Tick数据生成交易信号</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">newTick</td><td>新的Tick行情数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到新的Tick数据时触发此回调</p><ol type="1">
+<li>首先检查合约是否已订阅(_tick_subs映射中是否存在)，如果未订阅则直接返回</li>
+<li>然后调用父类的on_tick_updated函数完成基本的Tick数据处理</li>
+<li>最后通过getRunner调用外部引擎的ctx_on_tick接口，将Tick数据通知给外部系统 Tick数据是高频交易策略的主要数据来源，包含最新成交价、买卖相关信息等 </li>
+</ol>
+
+<p>重载 <a class="el" href="classHftMocker.html#a6d791cb4eb5f850613ab1900fdd4f0f7">HftMocker</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a> 第 <a class="el" href="ExpHftMocker_8cpp_source.html#l00184">184</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7401a29151268d40cde37ca944f520ca" name="a7401a29151268d40cde37ca944f520ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7401a29151268d40cde37ca944f520ca">&#9670;&#160;</a></span>on_trade()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExpHftMocker::on_trade </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isBuy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>vol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>userTag</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易成交回调函数 </p>
+<p>委托成交回调函数</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否为买入，true表示买入，false表示卖出 </td></tr>
+    <tr><td class="paramname">vol</td><td>成交数量 </td></tr>
+    <tr><td class="paramname">price</td><td>成交价格 </td></tr>
+    <tr><td class="paramname">userTag</td><td>用户自定义标签</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当策略发出的委托成交时触发该回调 与市场成交数据不同，此函数只处理策略自身发出的委托的成交情况 在高频策略中用于跟踪自身交易成交情况并根据成交结果调整后续策略</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID，用于唯一标识委托 </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否为买入，true表示买入，false表示卖出 </td></tr>
+    <tr><td class="paramname">vol</td><td>成交数量 </td></tr>
+    <tr><td class="paramname">price</td><td>成交价格 </td></tr>
+    <tr><td class="paramname">userTag</td><td>用户自定义标签，用于识别不同的交易目的</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当策略发出的委托成交时触发此回调</p><ol type="1">
+<li>首先调用父类的on_trade函数完成基本成交处理逻辑</li>
+<li>然后通过getRunner调用外部引擎的hft_on_trade接口，将成交事件通知给外部系统 在高频交易中，成交回调是策略获取自身交易状态的关键信息来源 注意这与on_trans_updated不同，这里只处理策略自身发出的委托的成交情况 </li>
+</ol>
+
+<p>重载 <a class="el" href="classHftMocker.html#ad029d356e187a5355ad7eddc5af8bb69">HftMocker</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a> 第 <a class="el" href="ExpHftMocker_8cpp_source.html#l00251">251</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a48bb66500f744f529a7accd58dff3e5a" name="a48bb66500f744f529a7accd58dff3e5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48bb66500f744f529a7accd58dff3e5a">&#9670;&#160;</a></span>on_trans_updated()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExpHftMocker::on_trans_updated </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTransData.html">WTSTransData</a> *&#160;</td>
+          <td class="paramname"><em>newTrans</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>成交明细数据更新回调函数 </p>
+<p>逐笔成交数据更新回调函数</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">newTrans</td><td>新的成交明细数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到新的成交明细数据时触发该回调 成交明细数据包含市场上每笔成交的详细信息，如价格、数量、方向等 高频策略可以基于成交明细分析市场的变化趋势和流动性 对做市吧源分析和计算市场冲击指标非常重要</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">newTrans</td><td>新的逐笔成交数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到新的逐笔成交数据时触发此回调 直接通过getRunner调用外部引擎的hft_on_transaction接口，将逐笔成交数据通知给外部系统 逐笔成交数据包含市场上具体的逐笔成交信息，如价格、数量、方向等 在高频交易中，逐笔成交数据是分析市场微观结构的重要数据来源 注意这里与其他函数不同，没有调用父类方法，直接转发事件 </p>
+
+<p>重载 <a class="el" href="classHftMocker.html#a144ca44777f0a573a49e8206ef9df26b">HftMocker</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a> 第 <a class="el" href="ExpHftMocker_8cpp_source.html#l00232">232</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WtBtPorter/<a class="el" href="ExpHftMocker_8h_source.html">ExpHftMocker.h</a></li>
+<li>src/WtBtPorter/<a class="el" href="ExpHftMocker_8cpp_source.html">ExpHftMocker.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classExpHftMocker.html">ExpHftMocker</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

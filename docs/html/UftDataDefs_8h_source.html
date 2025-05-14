@@ -1,0 +1,307 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtUftCore/UftDataDefs.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('UftDataDefs_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">UftDataDefs.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="UftDataDefs_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Includes/WTSMarcos.h&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#pragma warning(disable:4200)</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceuft.html">uft</a> {</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#pragma pack(push, 1)</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="namespaceuft.html#a994a8b6a1169810954232cc9263e51f6">   22</a></span>    <span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="namespaceuft.html#a994a8b6a1169810954232cc9263e51f6">BLK_FLAG</a>[] = <span class="stringliteral">&quot;&amp;^%$#@!\0&quot;</span>;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="namespaceuft.html#ab84126b1a4fdf02a689006bb809a76d7">   24</a></span>    <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code hl_variable" href="namespaceuft.html#ab84126b1a4fdf02a689006bb809a76d7">FLAG_SIZE</a> = 8;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="foldopen" id="foldopen00030" data-start="{" data-end="};">
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="structuft_1_1__BlockHeader.html">   30</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structuft_1_1__BlockHeader.html">_BlockHeader</a></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    {</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="structuft_1_1__BlockHeader.html#af16c2bca5d23ccd1468c881cebd946df">   32</a></span>        <span class="keywordtype">char</span>        <a class="code hl_variable" href="structuft_1_1__BlockHeader.html#af16c2bca5d23ccd1468c881cebd946df">_blk_flag</a>[<a class="code hl_variable" href="namespaceuft.html#ab84126b1a4fdf02a689006bb809a76d7">FLAG_SIZE</a>];  </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="structuft_1_1__BlockHeader.html#a7299f65ee213d78d103b7392ed0061bb">   33</a></span>        uint32_t    <a class="code hl_variable" href="structuft_1_1__BlockHeader.html#a7299f65ee213d78d103b7392ed0061bb">_type</a>;                 </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="structuft_1_1__BlockHeader.html#a6d6536ccf2ef10c960711dbb14c78352">   34</a></span>        uint32_t    <a class="code hl_variable" href="structuft_1_1__BlockHeader.html#a6d6536ccf2ef10c960711dbb14c78352">_date</a>;                 </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="structuft_1_1__BlockHeader.html#ade6dd68e1f5f86ddee3a90da7fc8f3fd">   36</a></span>        uint32_t    <a class="code hl_variable" href="structuft_1_1__BlockHeader.html#ade6dd68e1f5f86ddee3a90da7fc8f3fd">_capacity</a>;             </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="structuft_1_1__BlockHeader.html#ae2951d3a2385a0a296cd20d552e270c0">   37</a></span>        uint32_t    <a class="code hl_variable" href="structuft_1_1__BlockHeader.html#ae2951d3a2385a0a296cd20d552e270c0">_size</a>;                 </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="namespaceuft.html#a8deca25019a755718467932a358b1531">   38</a></span>    } <a class="code hl_typedef" href="namespaceuft.html#a8deca25019a755718467932a358b1531">BlockHeader</a>;</div>
+</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="foldopen" id="foldopen00044" data-start="{" data-end="};">
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="structuft_1_1__DetailStruct.html">   44</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structuft_1_1__DetailStruct.html">_DetailStruct</a></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    {</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="structuft_1_1__DetailStruct.html#abe11f9c29617d1dc3219a4dece79c29c">   46</a></span>        <span class="keywordtype">char</span>        <a class="code hl_variable" href="structuft_1_1__DetailStruct.html#abe11f9c29617d1dc3219a4dece79c29c">_exchg</a>[<a class="code hl_define" href="WTSMarcos_8h.html#a232f14b60209af4d7c2cfd10ebb0c3f4">MAX_EXCHANGE_LENGTH</a>];  </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="structuft_1_1__DetailStruct.html#abdfdc97b368c38305552330251f1988b">   47</a></span>        <span class="keywordtype">char</span>        <a class="code hl_variable" href="structuft_1_1__DetailStruct.html#abdfdc97b368c38305552330251f1988b">_code</a>[<a class="code hl_define" href="WTSMarcos_8h.html#a43110534aa06a6d801f0f875c3cf4f1c">MAX_INSTRUMENT_LENGTH</a>]; </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="structuft_1_1__DetailStruct.html#a03a422112597c3138c8c1308b5432f09">   48</a></span>        uint32_t    <a class="code hl_variable" href="structuft_1_1__DetailStruct.html#a03a422112597c3138c8c1308b5432f09">_direct</a>;    </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="structuft_1_1__DetailStruct.html#ab6ef2c9e2202cff292b4d94edd29a019">   49</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__DetailStruct.html#ab6ef2c9e2202cff292b4d94edd29a019">_volume</a>;                    </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="structuft_1_1__DetailStruct.html#a6bc13378fbb815acfc379ff266089923">   50</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__DetailStruct.html#a6bc13378fbb815acfc379ff266089923">_open_price</a>;                </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="structuft_1_1__DetailStruct.html#a432b62b4f08ecfbd1a98f1a4837c3b92">   51</a></span>        uint64_t    <a class="code hl_variable" href="structuft_1_1__DetailStruct.html#a432b62b4f08ecfbd1a98f1a4837c3b92">_open_time</a>;                 </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="structuft_1_1__DetailStruct.html#a81ed497c8e32cb894ea5d5b95c07ddec">   52</a></span>        uint32_t    <a class="code hl_variable" href="structuft_1_1__DetailStruct.html#a81ed497c8e32cb894ea5d5b95c07ddec">_open_tdate</a>;                </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="structuft_1_1__DetailStruct.html#a56fb180f24f5ead852a27eee893d266b">   53</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__DetailStruct.html#a56fb180f24f5ead852a27eee893d266b">_position_profit</a>;            </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="structuft_1_1__DetailStruct.html#a2760b84e160c6a39fc93c197b9e76b8a">   55</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__DetailStruct.html#a2760b84e160c6a39fc93c197b9e76b8a">_closed_volume</a>;              </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="structuft_1_1__DetailStruct.html#a2bd8a4328f1604ca3bd07925dd6e0599">   56</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__DetailStruct.html#a2bd8a4328f1604ca3bd07925dd6e0599">_closed_profit</a>;              </div>
+<div class="foldopen" id="foldopen00062" data-start="{" data-end="}">
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="structuft_1_1__DetailStruct.html#ac7d8b752958cf12e953f81e1609ca461">   62</a></span>        <a class="code hl_function" href="structuft_1_1__DetailStruct.html#ac7d8b752958cf12e953f81e1609ca461">_DetailStruct</a>()</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        {</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>            memset(<span class="keyword">this</span>, 0, <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structuft_1_1__DetailStruct.html">_DetailStruct</a>));</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        }</div>
+</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="namespaceuft.html#aa81c7fe44ba9f30bcc40a46b71d3345b">   67</a></span>    }<a class="code hl_typedef" href="namespaceuft.html#aa81c7fe44ba9f30bcc40a46b71d3345b">DetailStruct</a>;</div>
+</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="foldopen" id="foldopen00073" data-start="{" data-end="};">
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="structuft_1_1__PositionBlock.html">   73</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structuft_1_1__PositionBlock.html">_PositionBlock</a> : <span class="keyword">public</span> <a class="code hl_struct" href="structuft_1_1__BlockHeader.html">BlockHeader</a></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    {</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="structuft_1_1__PositionBlock.html#ab402c07abda4a6fb6c15074131451169">   75</a></span>        <a class="code hl_struct" href="structuft_1_1__DetailStruct.html">DetailStruct</a>    <a class="code hl_variable" href="structuft_1_1__PositionBlock.html#ab402c07abda4a6fb6c15074131451169">_details</a>[0];  </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="namespaceuft.html#ab0487d62173361c707fac93ba29bacfc">   76</a></span>    }<a class="code hl_typedef" href="namespaceuft.html#ab0487d62173361c707fac93ba29bacfc">PositionBlock</a>;</div>
+</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="foldopen" id="foldopen00082" data-start="{" data-end="};">
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="structuft_1_1__OrderStruct.html">   82</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structuft_1_1__OrderStruct.html">_OrderStruct</a></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    {</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="structuft_1_1__OrderStruct.html#aa60f1d6cf2995568a853003887ee5ace">   84</a></span>        <span class="keywordtype">char</span>        <a class="code hl_variable" href="structuft_1_1__OrderStruct.html#aa60f1d6cf2995568a853003887ee5ace">_exchg</a>[<a class="code hl_define" href="WTSMarcos_8h.html#a232f14b60209af4d7c2cfd10ebb0c3f4">MAX_EXCHANGE_LENGTH</a>];  </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="structuft_1_1__OrderStruct.html#a40d455f84f6dc292a245212dbb8ffb61">   85</a></span>        <span class="keywordtype">char</span>        <a class="code hl_variable" href="structuft_1_1__OrderStruct.html#a40d455f84f6dc292a245212dbb8ffb61">_code</a>[<a class="code hl_define" href="WTSMarcos_8h.html#a43110534aa06a6d801f0f875c3cf4f1c">MAX_INSTRUMENT_LENGTH</a>]; </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="structuft_1_1__OrderStruct.html#a4fc1876838fa91e669f8fdfb5799579c">   86</a></span>        uint32_t    <a class="code hl_variable" href="structuft_1_1__OrderStruct.html#a4fc1876838fa91e669f8fdfb5799579c">_direct</a>;                    </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="structuft_1_1__OrderStruct.html#a8ca13801f36f0408bda557ce22cb7bd2">   87</a></span>        uint32_t    <a class="code hl_variable" href="structuft_1_1__OrderStruct.html#a8ca13801f36f0408bda557ce22cb7bd2">_offset</a>;                    </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="structuft_1_1__OrderStruct.html#acd5dab6c37a95752caf1b6d65f45275b">   89</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__OrderStruct.html#acd5dab6c37a95752caf1b6d65f45275b">_volume</a>;                    </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="structuft_1_1__OrderStruct.html#a7fa31b3d0381fda7feccd01e0572d245">   90</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__OrderStruct.html#a7fa31b3d0381fda7feccd01e0572d245">_price</a>;                     </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="structuft_1_1__OrderStruct.html#acb3280ce27294245e2aa6a743fe60e56">   92</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__OrderStruct.html#acb3280ce27294245e2aa6a743fe60e56">_traded</a>;                    </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="structuft_1_1__OrderStruct.html#a8765f06573a29c667d2055aaaab2f456">   93</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__OrderStruct.html#a8765f06573a29c667d2055aaaab2f456">_left</a>;                      </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="structuft_1_1__OrderStruct.html#ae4fd3a47cbeccd33bf72ae847ba1fe46">   94</a></span>        uint32_t    <a class="code hl_variable" href="structuft_1_1__OrderStruct.html#ae4fd3a47cbeccd33bf72ae847ba1fe46">_state</a>;                     </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="structuft_1_1__OrderStruct.html#a35966c3e3694c39a563078d6c49d1e5f">   95</a></span>        uint64_t    <a class="code hl_variable" href="structuft_1_1__OrderStruct.html#a35966c3e3694c39a563078d6c49d1e5f">_oder_time</a>;                 </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="namespaceuft.html#a21b81727b670d26b3a58f1e6c6e6acdd">   96</a></span>    } <a class="code hl_typedef" href="namespaceuft.html#a21b81727b670d26b3a58f1e6c6e6acdd">OrderStruct</a>;</div>
+</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="foldopen" id="foldopen00102" data-start="{" data-end="};">
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="structuft_1_1__OrderBlock.html">  102</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structuft_1_1__OrderBlock.html">_OrderBlock</a> : <span class="keyword">public</span> <a class="code hl_struct" href="structuft_1_1__BlockHeader.html">BlockHeader</a></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    {</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="structuft_1_1__OrderBlock.html#ab2bd6a4fe50a1ed886f42d26d9b3f943">  104</a></span>        <a class="code hl_struct" href="structuft_1_1__OrderStruct.html">OrderStruct</a> <a class="code hl_variable" href="structuft_1_1__OrderBlock.html#ab2bd6a4fe50a1ed886f42d26d9b3f943">_orders</a>[0];  </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="namespaceuft.html#a16d501ff6dce4e16de6bd22c3893d98c">  105</a></span>    } <a class="code hl_typedef" href="namespaceuft.html#a16d501ff6dce4e16de6bd22c3893d98c">OrderBlock</a>;</div>
+</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="foldopen" id="foldopen00111" data-start="{" data-end="};">
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="structuft_1_1__TradeStruct.html">  111</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structuft_1_1__TradeStruct.html">_TradeStruct</a></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    {</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="structuft_1_1__TradeStruct.html#a9caca01a96a59e7f7223e6600164a673">  113</a></span>        <span class="keywordtype">char</span>        <a class="code hl_variable" href="structuft_1_1__TradeStruct.html#a9caca01a96a59e7f7223e6600164a673">_exchg</a>[<a class="code hl_define" href="WTSMarcos_8h.html#a232f14b60209af4d7c2cfd10ebb0c3f4">MAX_EXCHANGE_LENGTH</a>];  </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="structuft_1_1__TradeStruct.html#a742af3ebe90e896c39be097f8d7f35cd">  114</a></span>        <span class="keywordtype">char</span>        <a class="code hl_variable" href="structuft_1_1__TradeStruct.html#a742af3ebe90e896c39be097f8d7f35cd">_code</a>[<a class="code hl_define" href="WTSMarcos_8h.html#a43110534aa06a6d801f0f875c3cf4f1c">MAX_INSTRUMENT_LENGTH</a>]; </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="structuft_1_1__TradeStruct.html#ad10bf4a8ddfdc2d0ae362ebbc4e01e1b">  115</a></span>        uint32_t    <a class="code hl_variable" href="structuft_1_1__TradeStruct.html#ad10bf4a8ddfdc2d0ae362ebbc4e01e1b">_direct</a>;                    </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="structuft_1_1__TradeStruct.html#a9638dd65c76a1888e9dff4077bd92d6d">  116</a></span>        uint32_t    <a class="code hl_variable" href="structuft_1_1__TradeStruct.html#a9638dd65c76a1888e9dff4077bd92d6d">_offset</a>;                    </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="structuft_1_1__TradeStruct.html#a98767eb1e61e47c1a8d8f2df6598b08c">  117</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__TradeStruct.html#a98767eb1e61e47c1a8d8f2df6598b08c">_volume</a>;                    </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="structuft_1_1__TradeStruct.html#a7ddda823887a8e9f0c356dde0ee4d032">  118</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__TradeStruct.html#a7ddda823887a8e9f0c356dde0ee4d032">_price</a>;                     </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno"><a class="line" href="structuft_1_1__TradeStruct.html#ad26318e458a04bd074daec153babdca7">  119</a></span>        uint32_t    <a class="code hl_variable" href="structuft_1_1__TradeStruct.html#ad26318e458a04bd074daec153babdca7">_trading_date</a>;              </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno"><a class="line" href="structuft_1_1__TradeStruct.html#aaa2cf5ade4c541e68922a383efbbfb26">  120</a></span>        uint64_t    <a class="code hl_variable" href="structuft_1_1__TradeStruct.html#aaa2cf5ade4c541e68922a383efbbfb26">_trading_time</a>;              </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno"><a class="line" href="namespaceuft.html#a84683fd386d15e0821a1c149b823108d">  121</a></span>    } <a class="code hl_typedef" href="namespaceuft.html#a84683fd386d15e0821a1c149b823108d">TradeStruct</a>;</div>
+</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="foldopen" id="foldopen00127" data-start="{" data-end="};">
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="structuft_1_1__TradeBlock.html">  127</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structuft_1_1__TradeBlock.html">_TradeBlock</a> : <span class="keyword">public</span> <a class="code hl_struct" href="structuft_1_1__BlockHeader.html">BlockHeader</a></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    {</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno"><a class="line" href="structuft_1_1__TradeBlock.html#a52bf6c88d0db11cee7ce744c31cb7084">  129</a></span>        <a class="code hl_struct" href="structuft_1_1__TradeStruct.html">TradeStruct</a> <a class="code hl_variable" href="structuft_1_1__TradeBlock.html#a52bf6c88d0db11cee7ce744c31cb7084">_trades</a>[0];  </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="namespaceuft.html#a57537835c54fb4d8b024e67187ea6675">  130</a></span>    } <a class="code hl_typedef" href="namespaceuft.html#a57537835c54fb4d8b024e67187ea6675">TradeBlock</a>;</div>
+</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="foldopen" id="foldopen00136" data-start="{" data-end="};">
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno"><a class="line" href="structuft_1_1__RoundStruct.html">  136</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structuft_1_1__RoundStruct.html">_RoundStruct</a></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    {</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno"><a class="line" href="structuft_1_1__RoundStruct.html#a76d2cce7895633321431bc7702cfa3e0">  138</a></span>        <span class="keywordtype">char</span>        <a class="code hl_variable" href="structuft_1_1__RoundStruct.html#a76d2cce7895633321431bc7702cfa3e0">_exchg</a>[<a class="code hl_define" href="WTSMarcos_8h.html#a232f14b60209af4d7c2cfd10ebb0c3f4">MAX_EXCHANGE_LENGTH</a>];</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="structuft_1_1__RoundStruct.html#af4fd05e712cd021d8bf62b2e4e0c072f">  139</a></span>        <span class="keywordtype">char</span>        <a class="code hl_variable" href="structuft_1_1__RoundStruct.html#af4fd05e712cd021d8bf62b2e4e0c072f">_code</a>[<a class="code hl_define" href="WTSMarcos_8h.html#a43110534aa06a6d801f0f875c3cf4f1c">MAX_INSTRUMENT_LENGTH</a>];</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno"><a class="line" href="structuft_1_1__RoundStruct.html#a78fc544ad576b3295860339474af059c">  140</a></span>        uint32_t    <a class="code hl_variable" href="structuft_1_1__RoundStruct.html#a78fc544ad576b3295860339474af059c">_direct</a>;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="structuft_1_1__RoundStruct.html#a58da2c9304a800e024651457c7b25d2e">  141</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__RoundStruct.html#a58da2c9304a800e024651457c7b25d2e">_open_price</a>;</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="structuft_1_1__RoundStruct.html#a5a4d4bbb9648c3d8d1368e7b76539c8c">  142</a></span>        uint64_t    <a class="code hl_variable" href="structuft_1_1__RoundStruct.html#a5a4d4bbb9648c3d8d1368e7b76539c8c">_open_time</a>;</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="structuft_1_1__RoundStruct.html#a028569f30f5edcde239003f8e3af008e">  143</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__RoundStruct.html#a028569f30f5edcde239003f8e3af008e">_close_price</a>;</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno"><a class="line" href="structuft_1_1__RoundStruct.html#a66b7e5c6eaaaea936d54dc8b8d11b895">  144</a></span>        uint64_t    <a class="code hl_variable" href="structuft_1_1__RoundStruct.html#a66b7e5c6eaaaea936d54dc8b8d11b895">_close_time</a>;</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="structuft_1_1__RoundStruct.html#a1044b2787bb9560f05f69c2065981750">  145</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__RoundStruct.html#a1044b2787bb9560f05f69c2065981750">_volume</a>;</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno"><a class="line" href="structuft_1_1__RoundStruct.html#aa281aee7d5246389aa58d57d34d2b75b">  146</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structuft_1_1__RoundStruct.html#aa281aee7d5246389aa58d57d34d2b75b">_profit</a>;</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno"><a class="line" href="namespaceuft.html#aa56334c65da29b5336c3834c1f69720b">  147</a></span>    } <a class="code hl_typedef" href="namespaceuft.html#aa56334c65da29b5336c3834c1f69720b">RoundStruct</a>;</div>
+</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
+<div class="foldopen" id="foldopen00153" data-start="{" data-end="};">
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno"><a class="line" href="structuft_1_1__RoundBlock.html">  153</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structuft_1_1__RoundBlock.html">_RoundBlock</a> : <span class="keyword">public</span> <a class="code hl_struct" href="structuft_1_1__BlockHeader.html">BlockHeader</a></div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    {</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno"><a class="line" href="structuft_1_1__RoundBlock.html#a8d9473e422caabbbabe5676af820ba21">  155</a></span>        <a class="code hl_struct" href="structuft_1_1__RoundStruct.html">RoundStruct</a> <a class="code hl_variable" href="structuft_1_1__RoundBlock.html#a8d9473e422caabbbabe5676af820ba21">_rounds</a>[0];</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno"><a class="line" href="namespaceuft.html#a637c4cde5ba14e60e72816a59ecfaf16">  156</a></span>    } <a class="code hl_typedef" href="namespaceuft.html#a637c4cde5ba14e60e72816a59ecfaf16">RoundBlock</a>;</div>
+</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span><span class="preprocessor">#pragma pack(pop)</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span> </div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>} <span class="comment">//namespace uft</span></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a232f14b60209af4d7c2cfd10ebb0c3f4"><div class="ttname"><a href="WTSMarcos_8h.html#a232f14b60209af4d7c2cfd10ebb0c3f4">MAX_EXCHANGE_LENGTH</a></div><div class="ttdeci">#define MAX_EXCHANGE_LENGTH</div><div class="ttdoc">交易所代码最大长度限制</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00036">WTSMarcos.h:36</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a43110534aa06a6d801f0f875c3cf4f1c"><div class="ttname"><a href="WTSMarcos_8h.html#a43110534aa06a6d801f0f875c3cf4f1c">MAX_INSTRUMENT_LENGTH</a></div><div class="ttdeci">#define MAX_INSTRUMENT_LENGTH</div><div class="ttdoc">合约代码最大长度限制</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00030">WTSMarcos.h:30</a></div></div>
+<div class="ttc" id="anamespaceuft_html"><div class="ttname"><a href="namespaceuft.html">uft</a></div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00044">UftLatencyTool.cpp:45</a></div></div>
+<div class="ttc" id="anamespaceuft_html_a16d501ff6dce4e16de6bd22c3893d98c"><div class="ttname"><a href="namespaceuft.html#a16d501ff6dce4e16de6bd22c3893d98c">uft::OrderBlock</a></div><div class="ttdeci">uft::_OrderBlock OrderBlock</div><div class="ttdoc">订单数据块</div></div>
+<div class="ttc" id="anamespaceuft_html_a21b81727b670d26b3a58f1e6c6e6acdd"><div class="ttname"><a href="namespaceuft.html#a21b81727b670d26b3a58f1e6c6e6acdd">uft::OrderStruct</a></div><div class="ttdeci">struct uft::_OrderStruct OrderStruct</div><div class="ttdoc">订单结构体</div></div>
+<div class="ttc" id="anamespaceuft_html_a57537835c54fb4d8b024e67187ea6675"><div class="ttname"><a href="namespaceuft.html#a57537835c54fb4d8b024e67187ea6675">uft::TradeBlock</a></div><div class="ttdeci">uft::_TradeBlock TradeBlock</div><div class="ttdoc">成交数据块</div></div>
+<div class="ttc" id="anamespaceuft_html_a637c4cde5ba14e60e72816a59ecfaf16"><div class="ttname"><a href="namespaceuft.html#a637c4cde5ba14e60e72816a59ecfaf16">uft::RoundBlock</a></div><div class="ttdeci">uft::_RoundBlock RoundBlock</div><div class="ttdoc">交易轮次数据块</div></div>
+<div class="ttc" id="anamespaceuft_html_a84683fd386d15e0821a1c149b823108d"><div class="ttname"><a href="namespaceuft.html#a84683fd386d15e0821a1c149b823108d">uft::TradeStruct</a></div><div class="ttdeci">struct uft::_TradeStruct TradeStruct</div><div class="ttdoc">成交结构体</div></div>
+<div class="ttc" id="anamespaceuft_html_a8deca25019a755718467932a358b1531"><div class="ttname"><a href="namespaceuft.html#a8deca25019a755718467932a358b1531">uft::BlockHeader</a></div><div class="ttdeci">struct uft::_BlockHeader BlockHeader</div><div class="ttdoc">数据块头部结构</div></div>
+<div class="ttc" id="anamespaceuft_html_a994a8b6a1169810954232cc9263e51f6"><div class="ttname"><a href="namespaceuft.html#a994a8b6a1169810954232cc9263e51f6">uft::BLK_FLAG</a></div><div class="ttdeci">const char BLK_FLAG[]</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00022">UftDataDefs.h:22</a></div></div>
+<div class="ttc" id="anamespaceuft_html_aa56334c65da29b5336c3834c1f69720b"><div class="ttname"><a href="namespaceuft.html#aa56334c65da29b5336c3834c1f69720b">uft::RoundStruct</a></div><div class="ttdeci">struct uft::_RoundStruct RoundStruct</div><div class="ttdoc">交易轮次结构体</div></div>
+<div class="ttc" id="anamespaceuft_html_aa81c7fe44ba9f30bcc40a46b71d3345b"><div class="ttname"><a href="namespaceuft.html#aa81c7fe44ba9f30bcc40a46b71d3345b">uft::DetailStruct</a></div><div class="ttdeci">struct uft::_DetailStruct DetailStruct</div><div class="ttdoc">持仓详情结构体</div></div>
+<div class="ttc" id="anamespaceuft_html_ab0487d62173361c707fac93ba29bacfc"><div class="ttname"><a href="namespaceuft.html#ab0487d62173361c707fac93ba29bacfc">uft::PositionBlock</a></div><div class="ttdeci">uft::_PositionBlock PositionBlock</div><div class="ttdoc">持仓数据块</div></div>
+<div class="ttc" id="anamespaceuft_html_ab84126b1a4fdf02a689006bb809a76d7"><div class="ttname"><a href="namespaceuft.html#ab84126b1a4fdf02a689006bb809a76d7">uft::FLAG_SIZE</a></div><div class="ttdeci">const int FLAG_SIZE</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00024">UftDataDefs.h:24</a></div></div>
+<div class="ttc" id="astructuft_1_1__BlockHeader_html"><div class="ttname"><a href="structuft_1_1__BlockHeader.html">uft::_BlockHeader</a></div><div class="ttdoc">数据块头部结构</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00030">UftDataDefs.h:31</a></div></div>
+<div class="ttc" id="astructuft_1_1__BlockHeader_html_a6d6536ccf2ef10c960711dbb14c78352"><div class="ttname"><a href="structuft_1_1__BlockHeader.html#a6d6536ccf2ef10c960711dbb14c78352">uft::_BlockHeader::_date</a></div><div class="ttdeci">uint32_t _date</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00034">UftDataDefs.h:34</a></div></div>
+<div class="ttc" id="astructuft_1_1__BlockHeader_html_a7299f65ee213d78d103b7392ed0061bb"><div class="ttname"><a href="structuft_1_1__BlockHeader.html#a7299f65ee213d78d103b7392ed0061bb">uft::_BlockHeader::_type</a></div><div class="ttdeci">uint32_t _type</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00033">UftDataDefs.h:33</a></div></div>
+<div class="ttc" id="astructuft_1_1__BlockHeader_html_ade6dd68e1f5f86ddee3a90da7fc8f3fd"><div class="ttname"><a href="structuft_1_1__BlockHeader.html#ade6dd68e1f5f86ddee3a90da7fc8f3fd">uft::_BlockHeader::_capacity</a></div><div class="ttdeci">uint32_t _capacity</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00036">UftDataDefs.h:36</a></div></div>
+<div class="ttc" id="astructuft_1_1__BlockHeader_html_ae2951d3a2385a0a296cd20d552e270c0"><div class="ttname"><a href="structuft_1_1__BlockHeader.html#ae2951d3a2385a0a296cd20d552e270c0">uft::_BlockHeader::_size</a></div><div class="ttdeci">uint32_t _size</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00037">UftDataDefs.h:37</a></div></div>
+<div class="ttc" id="astructuft_1_1__BlockHeader_html_af16c2bca5d23ccd1468c881cebd946df"><div class="ttname"><a href="structuft_1_1__BlockHeader.html#af16c2bca5d23ccd1468c881cebd946df">uft::_BlockHeader::_blk_flag</a></div><div class="ttdeci">char _blk_flag[FLAG_SIZE]</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00032">UftDataDefs.h:32</a></div></div>
+<div class="ttc" id="astructuft_1_1__DetailStruct_html"><div class="ttname"><a href="structuft_1_1__DetailStruct.html">uft::_DetailStruct</a></div><div class="ttdoc">持仓详情结构体</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00044">UftDataDefs.h:45</a></div></div>
+<div class="ttc" id="astructuft_1_1__DetailStruct_html_a03a422112597c3138c8c1308b5432f09"><div class="ttname"><a href="structuft_1_1__DetailStruct.html#a03a422112597c3138c8c1308b5432f09">uft::_DetailStruct::_direct</a></div><div class="ttdeci">uint32_t _direct</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00048">UftDataDefs.h:48</a></div></div>
+<div class="ttc" id="astructuft_1_1__DetailStruct_html_a2760b84e160c6a39fc93c197b9e76b8a"><div class="ttname"><a href="structuft_1_1__DetailStruct.html#a2760b84e160c6a39fc93c197b9e76b8a">uft::_DetailStruct::_closed_volume</a></div><div class="ttdeci">double _closed_volume</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00055">UftDataDefs.h:55</a></div></div>
+<div class="ttc" id="astructuft_1_1__DetailStruct_html_a2bd8a4328f1604ca3bd07925dd6e0599"><div class="ttname"><a href="structuft_1_1__DetailStruct.html#a2bd8a4328f1604ca3bd07925dd6e0599">uft::_DetailStruct::_closed_profit</a></div><div class="ttdeci">double _closed_profit</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00056">UftDataDefs.h:56</a></div></div>
+<div class="ttc" id="astructuft_1_1__DetailStruct_html_a432b62b4f08ecfbd1a98f1a4837c3b92"><div class="ttname"><a href="structuft_1_1__DetailStruct.html#a432b62b4f08ecfbd1a98f1a4837c3b92">uft::_DetailStruct::_open_time</a></div><div class="ttdeci">uint64_t _open_time</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00051">UftDataDefs.h:51</a></div></div>
+<div class="ttc" id="astructuft_1_1__DetailStruct_html_a56fb180f24f5ead852a27eee893d266b"><div class="ttname"><a href="structuft_1_1__DetailStruct.html#a56fb180f24f5ead852a27eee893d266b">uft::_DetailStruct::_position_profit</a></div><div class="ttdeci">double _position_profit</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00053">UftDataDefs.h:53</a></div></div>
+<div class="ttc" id="astructuft_1_1__DetailStruct_html_a6bc13378fbb815acfc379ff266089923"><div class="ttname"><a href="structuft_1_1__DetailStruct.html#a6bc13378fbb815acfc379ff266089923">uft::_DetailStruct::_open_price</a></div><div class="ttdeci">double _open_price</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00050">UftDataDefs.h:50</a></div></div>
+<div class="ttc" id="astructuft_1_1__DetailStruct_html_a81ed497c8e32cb894ea5d5b95c07ddec"><div class="ttname"><a href="structuft_1_1__DetailStruct.html#a81ed497c8e32cb894ea5d5b95c07ddec">uft::_DetailStruct::_open_tdate</a></div><div class="ttdeci">uint32_t _open_tdate</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00052">UftDataDefs.h:52</a></div></div>
+<div class="ttc" id="astructuft_1_1__DetailStruct_html_ab6ef2c9e2202cff292b4d94edd29a019"><div class="ttname"><a href="structuft_1_1__DetailStruct.html#ab6ef2c9e2202cff292b4d94edd29a019">uft::_DetailStruct::_volume</a></div><div class="ttdeci">double _volume</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00049">UftDataDefs.h:49</a></div></div>
+<div class="ttc" id="astructuft_1_1__DetailStruct_html_abdfdc97b368c38305552330251f1988b"><div class="ttname"><a href="structuft_1_1__DetailStruct.html#abdfdc97b368c38305552330251f1988b">uft::_DetailStruct::_code</a></div><div class="ttdeci">char _code[MAX_INSTRUMENT_LENGTH]</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00047">UftDataDefs.h:47</a></div></div>
+<div class="ttc" id="astructuft_1_1__DetailStruct_html_abe11f9c29617d1dc3219a4dece79c29c"><div class="ttname"><a href="structuft_1_1__DetailStruct.html#abe11f9c29617d1dc3219a4dece79c29c">uft::_DetailStruct::_exchg</a></div><div class="ttdeci">char _exchg[MAX_EXCHANGE_LENGTH]</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00046">UftDataDefs.h:46</a></div></div>
+<div class="ttc" id="astructuft_1_1__DetailStruct_html_ac7d8b752958cf12e953f81e1609ca461"><div class="ttname"><a href="structuft_1_1__DetailStruct.html#ac7d8b752958cf12e953f81e1609ca461">uft::_DetailStruct::_DetailStruct</a></div><div class="ttdeci">_DetailStruct()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00062">UftDataDefs.h:62</a></div></div>
+<div class="ttc" id="astructuft_1_1__OrderBlock_html"><div class="ttname"><a href="structuft_1_1__OrderBlock.html">uft::_OrderBlock</a></div><div class="ttdoc">订单数据块</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00102">UftDataDefs.h:103</a></div></div>
+<div class="ttc" id="astructuft_1_1__OrderBlock_html_ab2bd6a4fe50a1ed886f42d26d9b3f943"><div class="ttname"><a href="structuft_1_1__OrderBlock.html#ab2bd6a4fe50a1ed886f42d26d9b3f943">uft::_OrderBlock::_orders</a></div><div class="ttdeci">OrderStruct _orders[0]</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00104">UftDataDefs.h:104</a></div></div>
+<div class="ttc" id="astructuft_1_1__OrderStruct_html"><div class="ttname"><a href="structuft_1_1__OrderStruct.html">uft::_OrderStruct</a></div><div class="ttdoc">订单结构体</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00082">UftDataDefs.h:83</a></div></div>
+<div class="ttc" id="astructuft_1_1__OrderStruct_html_a35966c3e3694c39a563078d6c49d1e5f"><div class="ttname"><a href="structuft_1_1__OrderStruct.html#a35966c3e3694c39a563078d6c49d1e5f">uft::_OrderStruct::_oder_time</a></div><div class="ttdeci">uint64_t _oder_time</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00095">UftDataDefs.h:95</a></div></div>
+<div class="ttc" id="astructuft_1_1__OrderStruct_html_a40d455f84f6dc292a245212dbb8ffb61"><div class="ttname"><a href="structuft_1_1__OrderStruct.html#a40d455f84f6dc292a245212dbb8ffb61">uft::_OrderStruct::_code</a></div><div class="ttdeci">char _code[MAX_INSTRUMENT_LENGTH]</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00085">UftDataDefs.h:85</a></div></div>
+<div class="ttc" id="astructuft_1_1__OrderStruct_html_a4fc1876838fa91e669f8fdfb5799579c"><div class="ttname"><a href="structuft_1_1__OrderStruct.html#a4fc1876838fa91e669f8fdfb5799579c">uft::_OrderStruct::_direct</a></div><div class="ttdeci">uint32_t _direct</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00086">UftDataDefs.h:86</a></div></div>
+<div class="ttc" id="astructuft_1_1__OrderStruct_html_a7fa31b3d0381fda7feccd01e0572d245"><div class="ttname"><a href="structuft_1_1__OrderStruct.html#a7fa31b3d0381fda7feccd01e0572d245">uft::_OrderStruct::_price</a></div><div class="ttdeci">double _price</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00090">UftDataDefs.h:90</a></div></div>
+<div class="ttc" id="astructuft_1_1__OrderStruct_html_a8765f06573a29c667d2055aaaab2f456"><div class="ttname"><a href="structuft_1_1__OrderStruct.html#a8765f06573a29c667d2055aaaab2f456">uft::_OrderStruct::_left</a></div><div class="ttdeci">double _left</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00093">UftDataDefs.h:93</a></div></div>
+<div class="ttc" id="astructuft_1_1__OrderStruct_html_a8ca13801f36f0408bda557ce22cb7bd2"><div class="ttname"><a href="structuft_1_1__OrderStruct.html#a8ca13801f36f0408bda557ce22cb7bd2">uft::_OrderStruct::_offset</a></div><div class="ttdeci">uint32_t _offset</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00087">UftDataDefs.h:87</a></div></div>
+<div class="ttc" id="astructuft_1_1__OrderStruct_html_aa60f1d6cf2995568a853003887ee5ace"><div class="ttname"><a href="structuft_1_1__OrderStruct.html#aa60f1d6cf2995568a853003887ee5ace">uft::_OrderStruct::_exchg</a></div><div class="ttdeci">char _exchg[MAX_EXCHANGE_LENGTH]</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00084">UftDataDefs.h:84</a></div></div>
+<div class="ttc" id="astructuft_1_1__OrderStruct_html_acb3280ce27294245e2aa6a743fe60e56"><div class="ttname"><a href="structuft_1_1__OrderStruct.html#acb3280ce27294245e2aa6a743fe60e56">uft::_OrderStruct::_traded</a></div><div class="ttdeci">double _traded</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00092">UftDataDefs.h:92</a></div></div>
+<div class="ttc" id="astructuft_1_1__OrderStruct_html_acd5dab6c37a95752caf1b6d65f45275b"><div class="ttname"><a href="structuft_1_1__OrderStruct.html#acd5dab6c37a95752caf1b6d65f45275b">uft::_OrderStruct::_volume</a></div><div class="ttdeci">double _volume</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00089">UftDataDefs.h:89</a></div></div>
+<div class="ttc" id="astructuft_1_1__OrderStruct_html_ae4fd3a47cbeccd33bf72ae847ba1fe46"><div class="ttname"><a href="structuft_1_1__OrderStruct.html#ae4fd3a47cbeccd33bf72ae847ba1fe46">uft::_OrderStruct::_state</a></div><div class="ttdeci">uint32_t _state</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00094">UftDataDefs.h:94</a></div></div>
+<div class="ttc" id="astructuft_1_1__PositionBlock_html"><div class="ttname"><a href="structuft_1_1__PositionBlock.html">uft::_PositionBlock</a></div><div class="ttdoc">持仓数据块</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00073">UftDataDefs.h:74</a></div></div>
+<div class="ttc" id="astructuft_1_1__PositionBlock_html_ab402c07abda4a6fb6c15074131451169"><div class="ttname"><a href="structuft_1_1__PositionBlock.html#ab402c07abda4a6fb6c15074131451169">uft::_PositionBlock::_details</a></div><div class="ttdeci">DetailStruct _details[0]</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00075">UftDataDefs.h:75</a></div></div>
+<div class="ttc" id="astructuft_1_1__RoundBlock_html"><div class="ttname"><a href="structuft_1_1__RoundBlock.html">uft::_RoundBlock</a></div><div class="ttdoc">交易轮次数据块</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00153">UftDataDefs.h:154</a></div></div>
+<div class="ttc" id="astructuft_1_1__RoundBlock_html_a8d9473e422caabbbabe5676af820ba21"><div class="ttname"><a href="structuft_1_1__RoundBlock.html#a8d9473e422caabbbabe5676af820ba21">uft::_RoundBlock::_rounds</a></div><div class="ttdeci">RoundStruct _rounds[0]</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00155">UftDataDefs.h:155</a></div></div>
+<div class="ttc" id="astructuft_1_1__RoundStruct_html"><div class="ttname"><a href="structuft_1_1__RoundStruct.html">uft::_RoundStruct</a></div><div class="ttdoc">交易轮次结构体</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00136">UftDataDefs.h:137</a></div></div>
+<div class="ttc" id="astructuft_1_1__RoundStruct_html_a028569f30f5edcde239003f8e3af008e"><div class="ttname"><a href="structuft_1_1__RoundStruct.html#a028569f30f5edcde239003f8e3af008e">uft::_RoundStruct::_close_price</a></div><div class="ttdeci">double _close_price</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00143">UftDataDefs.h:143</a></div></div>
+<div class="ttc" id="astructuft_1_1__RoundStruct_html_a1044b2787bb9560f05f69c2065981750"><div class="ttname"><a href="structuft_1_1__RoundStruct.html#a1044b2787bb9560f05f69c2065981750">uft::_RoundStruct::_volume</a></div><div class="ttdeci">double _volume</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00145">UftDataDefs.h:145</a></div></div>
+<div class="ttc" id="astructuft_1_1__RoundStruct_html_a58da2c9304a800e024651457c7b25d2e"><div class="ttname"><a href="structuft_1_1__RoundStruct.html#a58da2c9304a800e024651457c7b25d2e">uft::_RoundStruct::_open_price</a></div><div class="ttdeci">double _open_price</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00141">UftDataDefs.h:141</a></div></div>
+<div class="ttc" id="astructuft_1_1__RoundStruct_html_a5a4d4bbb9648c3d8d1368e7b76539c8c"><div class="ttname"><a href="structuft_1_1__RoundStruct.html#a5a4d4bbb9648c3d8d1368e7b76539c8c">uft::_RoundStruct::_open_time</a></div><div class="ttdeci">uint64_t _open_time</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00142">UftDataDefs.h:142</a></div></div>
+<div class="ttc" id="astructuft_1_1__RoundStruct_html_a66b7e5c6eaaaea936d54dc8b8d11b895"><div class="ttname"><a href="structuft_1_1__RoundStruct.html#a66b7e5c6eaaaea936d54dc8b8d11b895">uft::_RoundStruct::_close_time</a></div><div class="ttdeci">uint64_t _close_time</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00144">UftDataDefs.h:144</a></div></div>
+<div class="ttc" id="astructuft_1_1__RoundStruct_html_a76d2cce7895633321431bc7702cfa3e0"><div class="ttname"><a href="structuft_1_1__RoundStruct.html#a76d2cce7895633321431bc7702cfa3e0">uft::_RoundStruct::_exchg</a></div><div class="ttdeci">char _exchg[MAX_EXCHANGE_LENGTH]</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00138">UftDataDefs.h:138</a></div></div>
+<div class="ttc" id="astructuft_1_1__RoundStruct_html_a78fc544ad576b3295860339474af059c"><div class="ttname"><a href="structuft_1_1__RoundStruct.html#a78fc544ad576b3295860339474af059c">uft::_RoundStruct::_direct</a></div><div class="ttdeci">uint32_t _direct</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00140">UftDataDefs.h:140</a></div></div>
+<div class="ttc" id="astructuft_1_1__RoundStruct_html_aa281aee7d5246389aa58d57d34d2b75b"><div class="ttname"><a href="structuft_1_1__RoundStruct.html#aa281aee7d5246389aa58d57d34d2b75b">uft::_RoundStruct::_profit</a></div><div class="ttdeci">double _profit</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00146">UftDataDefs.h:146</a></div></div>
+<div class="ttc" id="astructuft_1_1__RoundStruct_html_af4fd05e712cd021d8bf62b2e4e0c072f"><div class="ttname"><a href="structuft_1_1__RoundStruct.html#af4fd05e712cd021d8bf62b2e4e0c072f">uft::_RoundStruct::_code</a></div><div class="ttdeci">char _code[MAX_INSTRUMENT_LENGTH]</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00139">UftDataDefs.h:139</a></div></div>
+<div class="ttc" id="astructuft_1_1__TradeBlock_html"><div class="ttname"><a href="structuft_1_1__TradeBlock.html">uft::_TradeBlock</a></div><div class="ttdoc">成交数据块</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00127">UftDataDefs.h:128</a></div></div>
+<div class="ttc" id="astructuft_1_1__TradeBlock_html_a52bf6c88d0db11cee7ce744c31cb7084"><div class="ttname"><a href="structuft_1_1__TradeBlock.html#a52bf6c88d0db11cee7ce744c31cb7084">uft::_TradeBlock::_trades</a></div><div class="ttdeci">TradeStruct _trades[0]</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00129">UftDataDefs.h:129</a></div></div>
+<div class="ttc" id="astructuft_1_1__TradeStruct_html"><div class="ttname"><a href="structuft_1_1__TradeStruct.html">uft::_TradeStruct</a></div><div class="ttdoc">成交结构体</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00111">UftDataDefs.h:112</a></div></div>
+<div class="ttc" id="astructuft_1_1__TradeStruct_html_a742af3ebe90e896c39be097f8d7f35cd"><div class="ttname"><a href="structuft_1_1__TradeStruct.html#a742af3ebe90e896c39be097f8d7f35cd">uft::_TradeStruct::_code</a></div><div class="ttdeci">char _code[MAX_INSTRUMENT_LENGTH]</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00114">UftDataDefs.h:114</a></div></div>
+<div class="ttc" id="astructuft_1_1__TradeStruct_html_a7ddda823887a8e9f0c356dde0ee4d032"><div class="ttname"><a href="structuft_1_1__TradeStruct.html#a7ddda823887a8e9f0c356dde0ee4d032">uft::_TradeStruct::_price</a></div><div class="ttdeci">double _price</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00118">UftDataDefs.h:118</a></div></div>
+<div class="ttc" id="astructuft_1_1__TradeStruct_html_a9638dd65c76a1888e9dff4077bd92d6d"><div class="ttname"><a href="structuft_1_1__TradeStruct.html#a9638dd65c76a1888e9dff4077bd92d6d">uft::_TradeStruct::_offset</a></div><div class="ttdeci">uint32_t _offset</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00116">UftDataDefs.h:116</a></div></div>
+<div class="ttc" id="astructuft_1_1__TradeStruct_html_a98767eb1e61e47c1a8d8f2df6598b08c"><div class="ttname"><a href="structuft_1_1__TradeStruct.html#a98767eb1e61e47c1a8d8f2df6598b08c">uft::_TradeStruct::_volume</a></div><div class="ttdeci">double _volume</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00117">UftDataDefs.h:117</a></div></div>
+<div class="ttc" id="astructuft_1_1__TradeStruct_html_a9caca01a96a59e7f7223e6600164a673"><div class="ttname"><a href="structuft_1_1__TradeStruct.html#a9caca01a96a59e7f7223e6600164a673">uft::_TradeStruct::_exchg</a></div><div class="ttdeci">char _exchg[MAX_EXCHANGE_LENGTH]</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00113">UftDataDefs.h:113</a></div></div>
+<div class="ttc" id="astructuft_1_1__TradeStruct_html_aaa2cf5ade4c541e68922a383efbbfb26"><div class="ttname"><a href="structuft_1_1__TradeStruct.html#aaa2cf5ade4c541e68922a383efbbfb26">uft::_TradeStruct::_trading_time</a></div><div class="ttdeci">uint64_t _trading_time</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00120">UftDataDefs.h:120</a></div></div>
+<div class="ttc" id="astructuft_1_1__TradeStruct_html_ad10bf4a8ddfdc2d0ae362ebbc4e01e1b"><div class="ttname"><a href="structuft_1_1__TradeStruct.html#ad10bf4a8ddfdc2d0ae362ebbc4e01e1b">uft::_TradeStruct::_direct</a></div><div class="ttdeci">uint32_t _direct</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00115">UftDataDefs.h:115</a></div></div>
+<div class="ttc" id="astructuft_1_1__TradeStruct_html_ad26318e458a04bd074daec153babdca7"><div class="ttname"><a href="structuft_1_1__TradeStruct.html#ad26318e458a04bd074daec153babdca7">uft::_TradeStruct::_trading_date</a></div><div class="ttdeci">uint32_t _trading_date</div><div class="ttdef"><b>Definition</b> <a href="UftDataDefs_8h_source.html#l00119">UftDataDefs.h:119</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_d8cf3075eb9e2bed05522e3b08b8e887.html">WtUftCore</a></li><li class="navelem"><a class="el" href="UftDataDefs_8h.html">UftDataDefs.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

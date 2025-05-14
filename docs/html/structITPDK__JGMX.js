@@ -1,0 +1,27 @@
+var structITPDK__JGMX =
+[
+    [ "AccountId", "structITPDK__JGMX.html#a2d57abffb7f964a55ff7fdd512a768c6", null ],
+    [ "browindex", "structITPDK__JGMX.html#a5b407858afe37d9e23eb6fd71fd30034", null ],
+    [ "clearBalance", "structITPDK__JGMX.html#a0a26c77c1dd3659f133c5ee9896248ce", null ],
+    [ "ClearingFee", "structITPDK__JGMX.html#ade74a3b6bc1d94ed1242999df29043ee", null ],
+    [ "EntrustType", "structITPDK__JGMX.html#a2dafd6f313c9ad276f8b3ed2d8789bf3", null ],
+    [ "FinalValueFee", "structITPDK__JGMX.html#a2a952f8c552dba8fffc041a8b4d23403", null ],
+    [ "FundBalance", "structITPDK__JGMX.html#ab6b76aa982126bd18eff6df6deeb7b2f", null ],
+    [ "HandingFee", "structITPDK__JGMX.html#a7e175802c982c66c90799076beb35afc", null ],
+    [ "HolderQty", "structITPDK__JGMX.html#a24f9c9b62b3d23f379d86806e26859fa", null ],
+    [ "Market", "structITPDK__JGMX.html#aad7bd76251ce81944b6f2549b2e5abc6", null ],
+    [ "MatchAmt", "structITPDK__JGMX.html#a14867b62f856e1f5e559bc80c5928b88", null ],
+    [ "MatchPrice", "structITPDK__JGMX.html#a72ee264fb0e2da6e7f700fc5347172d5", null ],
+    [ "MatchQty", "structITPDK__JGMX.html#aea7c379c00a64abc66494f1dd821aefb", null ],
+    [ "MatchSerialNo", "structITPDK__JGMX.html#a5c9ee74f393d2f7f5eadb6384874a3ed", null ],
+    [ "MatchTime", "structITPDK__JGMX.html#a6ac7873693221d2636f841497c05ce08", null ],
+    [ "MoneyType", "structITPDK__JGMX.html#a1ecaca955e638dcacc6c0a0213fc0e2c", null ],
+    [ "OccurDate", "structITPDK__JGMX.html#a063a7f9957447eba8a3363c8ebd0d151", null ],
+    [ "OrderId", "structITPDK__JGMX.html#a0c8a7b125b137d2966b5dcf1592f5c0d", null ],
+    [ "RegulatoryFee", "structITPDK__JGMX.html#af3001daa709aecde1442644a7c6ddc21", null ],
+    [ "SecuAccount", "structITPDK__JGMX.html#a6cf92a855e4c88f2e40ed0fcab7f9d60", null ],
+    [ "StampTax", "structITPDK__JGMX.html#a7f9a881bee5d1fc199ffcee7897923dd", null ],
+    [ "StockCode", "structITPDK__JGMX.html#a5eb4cb9683cbd0e3df16c721ea39a91a", null ],
+    [ "StockName", "structITPDK__JGMX.html#a627fa131af85d764598b65529ef1fadb", null ],
+    [ "TransferFee", "structITPDK__JGMX.html#a8a3ab16963daf0b7df436a5d9597915f", null ]
+];

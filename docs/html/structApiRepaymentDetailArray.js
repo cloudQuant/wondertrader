@@ -1,0 +1,25 @@
+var structApiRepaymentDetailArray =
+[
+    [ "ApiRepaymentDetailArray", "structApiRepaymentDetailArray.html#a3158fc57e7bb88767e0e079abaa683b7", null ],
+    [ "account_id", "structApiRepaymentDetailArray.html#a322504ee5a7a74841f372a34b0a2d0d7", null ],
+    [ "amt", "structApiRepaymentDetailArray.html#aa9b6ac0e4e993b4be49272a9c7668613", null ],
+    [ "associate_date", "structApiRepaymentDetailArray.html#ac6c8d6a4684f8663d525c02ccb8681df", null ],
+    [ "associate_serial_num", "structApiRepaymentDetailArray.html#a0db9704de0e12a425735c57d5d1b3258", null ],
+    [ "cl_ord_no", "structApiRepaymentDetailArray.html#a035f7fa95f43237969eeffb4c00361ce", null ],
+    [ "comments", "structApiRepaymentDetailArray.html#a1a2250ecea52804d217d6e6e745b2e38", null ],
+    [ "contract_bail_serial_num", "structApiRepaymentDetailArray.html#a8eedf5c56ecaf82080a91f4216d797b1", null ],
+    [ "contract_serial_no", "structApiRepaymentDetailArray.html#a962ae7293ba3e4a6721d20bb13900a6f", null ],
+    [ "credit_id", "structApiRepaymentDetailArray.html#ac313ed3f098535fc4d77db6b7d92ad50", null ],
+    [ "detail_date", "structApiRepaymentDetailArray.html#a70a93edba19ffac535546264b16870c0", null ],
+    [ "detail_type", "structApiRepaymentDetailArray.html#a38c2eb2c19b5015d232af5afd367739d", null ],
+    [ "exec_id", "structApiRepaymentDetailArray.html#aeb6c18f1782dff07509fc90f0887fae1", null ],
+    [ "item", "structApiRepaymentDetailArray.html#a85c66942edcb85ad25a7d1a504671d14", null ],
+    [ "market_id", "structApiRepaymentDetailArray.html#a6b598d904899c57cb0b95241668f2ea6", null ],
+    [ "opening_amt", "structApiRepaymentDetailArray.html#ab7468b69c2bfb8cafd25d506995541b5", null ],
+    [ "opening_date", "structApiRepaymentDetailArray.html#ad70380f00ecdc398ddfc9736f08bdaac", null ],
+    [ "opening_qty", "structApiRepaymentDetailArray.html#a350f512ed4f8f3bb941eb06a6ca98bf1", null ],
+    [ "qty", "structApiRepaymentDetailArray.html#a188d6c5473ad1d193d38c4739804bb9a", null ],
+    [ "repayment_amt", "structApiRepaymentDetailArray.html#ad49dd178f7860779354dd33df3d93bea", null ],
+    [ "repayment_qty", "structApiRepaymentDetailArray.html#a3d8e2363828c98838b83dd486374fdfc", null ],
+    [ "security_id", "structApiRepaymentDetailArray.html#af6b19143dcceaa0dafb219cf00817ce1", null ]
+];

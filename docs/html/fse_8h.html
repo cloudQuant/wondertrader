@@ -1,0 +1,1125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/fse.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('fse_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#define-members">宏定义</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">fse.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;stddef.h&gt;</code><br />
+</div>
+<p><a href="fse_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a1cec868b238deb86970e093aae8d6b38" id="r_a1cec868b238deb86970e093aae8d6b38"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a1cec868b238deb86970e093aae8d6b38">FSE_H</a></td></tr>
+<tr class="separator:a1cec868b238deb86970e093aae8d6b38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af64c31fdae2f9c52905c234c012876f2" id="r_af64c31fdae2f9c52905c234c012876f2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a></td></tr>
+<tr class="separator:af64c31fdae2f9c52905c234c012876f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5af5f622dcc34fd0a33b98c66fd358ff" id="r_a5af5f622dcc34fd0a33b98c66fd358ff"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a5af5f622dcc34fd0a33b98c66fd358ff">FSE_VERSION_MAJOR</a>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:a5af5f622dcc34fd0a33b98c66fd358ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac47997dfd178c4bf77ac40ffade1d24b" id="r_ac47997dfd178c4bf77ac40ffade1d24b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#ac47997dfd178c4bf77ac40ffade1d24b">FSE_VERSION_MINOR</a>&#160;&#160;&#160;9</td></tr>
+<tr class="separator:ac47997dfd178c4bf77ac40ffade1d24b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f7b5e77328e0f234a846d7cb6d1692a" id="r_a8f7b5e77328e0f234a846d7cb6d1692a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a8f7b5e77328e0f234a846d7cb6d1692a">FSE_VERSION_RELEASE</a>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:a8f7b5e77328e0f234a846d7cb6d1692a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0951d8b4dc1c667d953f9d60a8ba27a" id="r_af0951d8b4dc1c667d953f9d60a8ba27a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#af0951d8b4dc1c667d953f9d60a8ba27a">FSE_LIB_VERSION</a>&#160;&#160;&#160;<a class="el" href="fse_8h.html#a8f7b5e77328e0f234a846d7cb6d1692a">FSE_VERSION_MAJOR.FSE_VERSION_MINOR.FSE_VERSION_RELEASE</a></td></tr>
+<tr class="separator:af0951d8b4dc1c667d953f9d60a8ba27a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1b19a697d63cebe17a2e6962e83595f" id="r_aa1b19a697d63cebe17a2e6962e83595f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#aa1b19a697d63cebe17a2e6962e83595f">FSE_QUOTE</a>(str)&#160;&#160;&#160;#str</td></tr>
+<tr class="separator:aa1b19a697d63cebe17a2e6962e83595f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a230320373751af9c40ec6d15a91e6e82" id="r_a230320373751af9c40ec6d15a91e6e82"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a230320373751af9c40ec6d15a91e6e82">FSE_EXPAND_AND_QUOTE</a>(str)&#160;&#160;&#160;<a class="el" href="fse_8h.html#aa1b19a697d63cebe17a2e6962e83595f">FSE_QUOTE</a>(str)</td></tr>
+<tr class="separator:a230320373751af9c40ec6d15a91e6e82"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6659b5c04342f9cadda7d69494384b26" id="r_a6659b5c04342f9cadda7d69494384b26"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a6659b5c04342f9cadda7d69494384b26">FSE_VERSION_STRING</a>&#160;&#160;&#160;<a class="el" href="fse_8h.html#a230320373751af9c40ec6d15a91e6e82">FSE_EXPAND_AND_QUOTE</a>(<a class="el" href="fse_8h.html#af0951d8b4dc1c667d953f9d60a8ba27a">FSE_LIB_VERSION</a>)</td></tr>
+<tr class="separator:a6659b5c04342f9cadda7d69494384b26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada8e8fc30886fab320168bcd278ce33f" id="r_ada8e8fc30886fab320168bcd278ce33f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#ada8e8fc30886fab320168bcd278ce33f">FSE_VERSION_NUMBER</a>&#160;&#160;&#160;(<a class="el" href="fse_8h.html#a5af5f622dcc34fd0a33b98c66fd358ff">FSE_VERSION_MAJOR</a> *100*100 + <a class="el" href="fse_8h.html#ac47997dfd178c4bf77ac40ffade1d24b">FSE_VERSION_MINOR</a> *100 + <a class="el" href="fse_8h.html#a8f7b5e77328e0f234a846d7cb6d1692a">FSE_VERSION_RELEASE</a>)</td></tr>
+<tr class="separator:ada8e8fc30886fab320168bcd278ce33f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a54dd08a75764e9f6058b47735da04eea" id="r_a54dd08a75764e9f6058b47735da04eea"><td class="memItemLeft" align="right" valign="top">typedef unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a></td></tr>
+<tr class="separator:a54dd08a75764e9f6058b47735da04eea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae791b5272655c08c187054dde72b8aa4" id="r_ae791b5272655c08c187054dde72b8aa4"><td class="memItemLeft" align="right" valign="top">typedef unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a></td></tr>
+<tr class="separator:ae791b5272655c08c187054dde72b8aa4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:aa33652489acfb4285e8dff7280a1b1a1" id="r_aa33652489acfb4285e8dff7280a1b1a1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#aa33652489acfb4285e8dff7280a1b1a1">FSE_versionNumber</a> (void)</td></tr>
+<tr class="separator:aa33652489acfb4285e8dff7280a1b1a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b86255881cbf4a6871cdd3d99a7fb8b" id="r_a2b86255881cbf4a6871cdd3d99a7fb8b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a2b86255881cbf4a6871cdd3d99a7fb8b">FSE_compress</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:a2b86255881cbf4a6871cdd3d99a7fb8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b46224799b8207ebd31ab088ab7597e" id="r_a9b46224799b8207ebd31ab088ab7597e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a9b46224799b8207ebd31ab088ab7597e">FSE_decompress</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *cSrc, size_t cSrcSize)</td></tr>
+<tr class="separator:a9b46224799b8207ebd31ab088ab7597e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae740e04e6a7422f50a249fe2c0425101" id="r_ae740e04e6a7422f50a249fe2c0425101"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#ae740e04e6a7422f50a249fe2c0425101">FSE_compressBound</a> (size_t size)</td></tr>
+<tr class="separator:ae740e04e6a7422f50a249fe2c0425101"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9eb3f90b9f7215f90237c7700d2ba66a" id="r_a9eb3f90b9f7215f90237c7700d2ba66a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a9eb3f90b9f7215f90237c7700d2ba66a">FSE_isError</a> (size_t code)</td></tr>
+<tr class="separator:a9eb3f90b9f7215f90237c7700d2ba66a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30d9f19efc67ff932a9eadeeddbcd88e" id="r_a30d9f19efc67ff932a9eadeeddbcd88e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a30d9f19efc67ff932a9eadeeddbcd88e">FSE_getErrorName</a> (size_t code)</td></tr>
+<tr class="separator:a30d9f19efc67ff932a9eadeeddbcd88e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac20f5d7b7f2833ce6c78bfa50302db7b" id="r_ac20f5d7b7f2833ce6c78bfa50302db7b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#ac20f5d7b7f2833ce6c78bfa50302db7b">FSE_compress2</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, unsigned maxSymbolValue, unsigned tableLog)</td></tr>
+<tr class="separator:ac20f5d7b7f2833ce6c78bfa50302db7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf5c46f2ea45dd9838896af2574818ad" id="r_acf5c46f2ea45dd9838896af2574818ad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#acf5c46f2ea45dd9838896af2574818ad">FSE_optimalTableLog</a> (unsigned maxTableLog, size_t srcSize, unsigned maxSymbolValue)</td></tr>
+<tr class="separator:acf5c46f2ea45dd9838896af2574818ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaca3dda2d78980dbaaf7bf9139193299" id="r_aaca3dda2d78980dbaaf7bf9139193299"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#aaca3dda2d78980dbaaf7bf9139193299">FSE_normalizeCount</a> (short *normalizedCounter, unsigned tableLog, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned *count, size_t srcSize, unsigned maxSymbolValue)</td></tr>
+<tr class="separator:aaca3dda2d78980dbaaf7bf9139193299"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe35c7de9117f8e367d3bc27072a7676" id="r_abe35c7de9117f8e367d3bc27072a7676"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#abe35c7de9117f8e367d3bc27072a7676">FSE_NCountWriteBound</a> (unsigned maxSymbolValue, unsigned tableLog)</td></tr>
+<tr class="separator:abe35c7de9117f8e367d3bc27072a7676"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ed0b96f6184614c4d3ecded9d8e6c80" id="r_a1ed0b96f6184614c4d3ecded9d8e6c80"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a1ed0b96f6184614c4d3ecded9d8e6c80">FSE_writeNCount</a> (void *buffer, size_t bufferSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> short *normalizedCounter, unsigned maxSymbolValue, unsigned tableLog)</td></tr>
+<tr class="separator:a1ed0b96f6184614c4d3ecded9d8e6c80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a275e277a2eb5c2368860dca80c749f7b" id="r_a275e277a2eb5c2368860dca80c749f7b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a275e277a2eb5c2368860dca80c749f7b">FSE_createCTable</a> (unsigned maxSymbolValue, unsigned tableLog)</td></tr>
+<tr class="separator:a275e277a2eb5c2368860dca80c749f7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b33c74a7862ed197cb58bfe3d31da36" id="r_a6b33c74a7862ed197cb58bfe3d31da36"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a6b33c74a7862ed197cb58bfe3d31da36">FSE_freeCTable</a> (<a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> *ct)</td></tr>
+<tr class="separator:a6b33c74a7862ed197cb58bfe3d31da36"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79a83bf378068974a320feded073de7f" id="r_a79a83bf378068974a320feded073de7f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a79a83bf378068974a320feded073de7f">FSE_buildCTable</a> (<a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> *ct, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> short *normalizedCounter, unsigned maxSymbolValue, unsigned tableLog)</td></tr>
+<tr class="separator:a79a83bf378068974a320feded073de7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae88873b11d0ddea3ebe5a8750edccfdc" id="r_ae88873b11d0ddea3ebe5a8750edccfdc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#ae88873b11d0ddea3ebe5a8750edccfdc">FSE_compress_usingCTable</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> *ct)</td></tr>
+<tr class="separator:ae88873b11d0ddea3ebe5a8750edccfdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d5d0fb669087c8407f572d86bd6c87a" id="r_a1d5d0fb669087c8407f572d86bd6c87a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a1d5d0fb669087c8407f572d86bd6c87a">FSE_readNCount</a> (short *normalizedCounter, unsigned *maxSymbolValuePtr, unsigned *tableLogPtr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *rBuffer, size_t rBuffSize)</td></tr>
+<tr class="separator:a1d5d0fb669087c8407f572d86bd6c87a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfc3f310dd87128762c1141edccef01c" id="r_adfc3f310dd87128762c1141edccef01c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <a class="el" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#adfc3f310dd87128762c1141edccef01c">FSE_createDTable</a> (unsigned tableLog)</td></tr>
+<tr class="separator:adfc3f310dd87128762c1141edccef01c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae58fa772f25077f189caa819822c467b" id="r_ae58fa772f25077f189caa819822c467b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#ae58fa772f25077f189caa819822c467b">FSE_freeDTable</a> (<a class="el" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a> *dt)</td></tr>
+<tr class="separator:ae58fa772f25077f189caa819822c467b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a056c0865d3ba1e7e65bc950d6b980334" id="r_a056c0865d3ba1e7e65bc950d6b980334"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a056c0865d3ba1e7e65bc950d6b980334">FSE_buildDTable</a> (<a class="el" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a> *dt, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> short *normalizedCounter, unsigned maxSymbolValue, unsigned tableLog)</td></tr>
+<tr class="separator:a056c0865d3ba1e7e65bc950d6b980334"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a911ee2b9e134c3767a504447da7e2123" id="r_a911ee2b9e134c3767a504447da7e2123"><td class="memItemLeft" align="right" valign="top"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fse_8h.html#a911ee2b9e134c3767a504447da7e2123">FSE_decompress_usingDTable</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *cSrc, size_t cSrcSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a> *dt)</td></tr>
+<tr class="separator:a911ee2b9e134c3767a504447da7e2123"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a230320373751af9c40ec6d15a91e6e82" name="a230320373751af9c40ec6d15a91e6e82"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a230320373751af9c40ec6d15a91e6e82">&#9670;&#160;</a></span>FSE_EXPAND_AND_QUOTE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_EXPAND_AND_QUOTE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">str</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="fse_8h.html#aa1b19a697d63cebe17a2e6962e83595f">FSE_QUOTE</a>(str)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse_8h_source.html">fse.h</a> 第 <a class="el" href="fse_8h_source.html#l00069">69</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1cec868b238deb86970e093aae8d6b38" name="a1cec868b238deb86970e093aae8d6b38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1cec868b238deb86970e093aae8d6b38">&#9670;&#160;</a></span>FSE_H</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_H</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse_8h_source.html">fse.h</a> 第 <a class="el" href="fse_8h_source.html#l00040">40</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af0951d8b4dc1c667d953f9d60a8ba27a" name="af0951d8b4dc1c667d953f9d60a8ba27a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0951d8b4dc1c667d953f9d60a8ba27a">&#9670;&#160;</a></span>FSE_LIB_VERSION</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_LIB_VERSION&#160;&#160;&#160;<a class="el" href="fse_8h.html#a8f7b5e77328e0f234a846d7cb6d1692a">FSE_VERSION_MAJOR.FSE_VERSION_MINOR.FSE_VERSION_RELEASE</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse_8h_source.html">fse.h</a> 第 <a class="el" href="fse_8h_source.html#l00067">67</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af64c31fdae2f9c52905c234c012876f2" name="af64c31fdae2f9c52905c234c012876f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af64c31fdae2f9c52905c234c012876f2">&#9670;&#160;</a></span>FSE_PUBLIC_API</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_PUBLIC_API</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse_8h_source.html">fse.h</a> 第 <a class="el" href="fse_8h_source.html#l00059">59</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa1b19a697d63cebe17a2e6962e83595f" name="aa1b19a697d63cebe17a2e6962e83595f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1b19a697d63cebe17a2e6962e83595f">&#9670;&#160;</a></span>FSE_QUOTE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_QUOTE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">str</td><td>)</td>
+          <td>&#160;&#160;&#160;#str</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse_8h_source.html">fse.h</a> 第 <a class="el" href="fse_8h_source.html#l00068">68</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5af5f622dcc34fd0a33b98c66fd358ff" name="a5af5f622dcc34fd0a33b98c66fd358ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5af5f622dcc34fd0a33b98c66fd358ff">&#9670;&#160;</a></span>FSE_VERSION_MAJOR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_VERSION_MAJOR&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse_8h_source.html">fse.h</a> 第 <a class="el" href="fse_8h_source.html#l00063">63</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac47997dfd178c4bf77ac40ffade1d24b" name="ac47997dfd178c4bf77ac40ffade1d24b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac47997dfd178c4bf77ac40ffade1d24b">&#9670;&#160;</a></span>FSE_VERSION_MINOR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_VERSION_MINOR&#160;&#160;&#160;9</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse_8h_source.html">fse.h</a> 第 <a class="el" href="fse_8h_source.html#l00064">64</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ada8e8fc30886fab320168bcd278ce33f" name="ada8e8fc30886fab320168bcd278ce33f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada8e8fc30886fab320168bcd278ce33f">&#9670;&#160;</a></span>FSE_VERSION_NUMBER</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_VERSION_NUMBER&#160;&#160;&#160;(<a class="el" href="fse_8h.html#a5af5f622dcc34fd0a33b98c66fd358ff">FSE_VERSION_MAJOR</a> *100*100 + <a class="el" href="fse_8h.html#ac47997dfd178c4bf77ac40ffade1d24b">FSE_VERSION_MINOR</a> *100 + <a class="el" href="fse_8h.html#a8f7b5e77328e0f234a846d7cb6d1692a">FSE_VERSION_RELEASE</a>)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse_8h_source.html">fse.h</a> 第 <a class="el" href="fse_8h_source.html#l00072">72</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8f7b5e77328e0f234a846d7cb6d1692a" name="a8f7b5e77328e0f234a846d7cb6d1692a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f7b5e77328e0f234a846d7cb6d1692a">&#9670;&#160;</a></span>FSE_VERSION_RELEASE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_VERSION_RELEASE&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse_8h_source.html">fse.h</a> 第 <a class="el" href="fse_8h_source.html#l00065">65</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6659b5c04342f9cadda7d69494384b26" name="a6659b5c04342f9cadda7d69494384b26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6659b5c04342f9cadda7d69494384b26">&#9670;&#160;</a></span>FSE_VERSION_STRING</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_VERSION_STRING&#160;&#160;&#160;<a class="el" href="fse_8h.html#a230320373751af9c40ec6d15a91e6e82">FSE_EXPAND_AND_QUOTE</a>(<a class="el" href="fse_8h.html#af0951d8b4dc1c667d953f9d60a8ba27a">FSE_LIB_VERSION</a>)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse_8h_source.html">fse.h</a> 第 <a class="el" href="fse_8h_source.html#l00070">70</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类型定义说明</h2>
+<a id="a54dd08a75764e9f6058b47735da04eea" name="a54dd08a75764e9f6058b47735da04eea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54dd08a75764e9f6058b47735da04eea">&#9670;&#160;</a></span>FSE_CTable</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef unsigned <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Constructor and Destructor of FSE_CTable. Note that FSE_CTable size depends on 'tableLog' and 'maxSymbolValue' </p>
+
+<p class="definition">在文件 <a class="el" href="fse_8h_source.html">fse.h</a> 第 <a class="el" href="fse_8h_source.html#l00180">180</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae791b5272655c08c187054dde72b8aa4" name="ae791b5272655c08c187054dde72b8aa4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae791b5272655c08c187054dde72b8aa4">&#9670;&#160;</a></span>FSE_DTable</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef unsigned <a class="el" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Constructor and Destructor of FSE_DTable. Note that its size depends on 'tableLog' </p>
+
+<p class="definition">在文件 <a class="el" href="fse_8h_source.html">fse.h</a> 第 <a class="el" href="fse_8h_source.html#l00253">253</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a79a83bf378068974a320feded073de7f" name="a79a83bf378068974a320feded073de7f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79a83bf378068974a320feded073de7f">&#9670;&#160;</a></span>FSE_buildCTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t FSE_buildCTable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> *&#160;</td>
+          <td class="paramname"><em>ct</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> short *&#160;</td>
+          <td class="paramname"><em>normalizedCounter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>tableLog</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="fse_8h.html#a79a83bf378068974a320feded073de7f">FSE_buildCTable()</a>: Builds <code>ct</code>, which must be already allocated, using <a class="el" href="fse_8h.html#a275e277a2eb5c2368860dca80c749f7b">FSE_createCTable()</a>. </p><dl class="section return"><dt>返回</dt><dd>: 0, or an errorCode, which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a> </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="fse__compress_8c_source.html">fse_compress.c</a> 第 <a class="el" href="fse__compress_8c_source.html#l00192">192</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a056c0865d3ba1e7e65bc950d6b980334" name="a056c0865d3ba1e7e65bc950d6b980334"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a056c0865d3ba1e7e65bc950d6b980334">&#9670;&#160;</a></span>FSE_buildDTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t FSE_buildDTable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a> *&#160;</td>
+          <td class="paramname"><em>dt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> short *&#160;</td>
+          <td class="paramname"><em>normalizedCounter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>tableLog</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="fse_8h.html#a056c0865d3ba1e7e65bc950d6b980334">FSE_buildDTable()</a>: Builds 'dt', which must be already allocated, using <a class="el" href="fse_8h.html#adfc3f310dd87128762c1141edccef01c">FSE_createDTable()</a>. return : 0, or an errorCode, which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a> </p>
+
+<p class="definition">在文件 <a class="el" href="fse__decompress_8c_source.html">fse_decompress.c</a> 第 <a class="el" href="fse__decompress_8c_source.html#l00095">95</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2b86255881cbf4a6871cdd3d99a7fb8b" name="a2b86255881cbf4a6871cdd3d99a7fb8b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b86255881cbf4a6871cdd3d99a7fb8b">&#9670;&#160;</a></span>FSE_compress()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t FSE_compress </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="fse_8h.html#a2b86255881cbf4a6871cdd3d99a7fb8b">FSE_compress()</a> : Compress content of buffer 'src', of size 'srcSize', into destination buffer 'dst'. 'dst' buffer must be already allocated. Compression runs faster is dstCapacity &gt;= FSE_compressBound(srcSize). </p><dl class="section return"><dt>返回</dt><dd>: size of compressed data (&lt;= dstCapacity). Special values : if return == 0, srcData is not compressible =&gt; Nothing is stored within dst !!! if return == 1, srcData is a single byte symbol * srcSize times. Use RLE compression instead. if <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError(return)</a>, compression failed (more details using <a class="el" href="fse_8h.html#a30d9f19efc67ff932a9eadeeddbcd88e">FSE_getErrorName()</a>) </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="fse__compress_8c_source.html">fse_compress.c</a> 第 <a class="el" href="fse__compress_8c_source.html#l00715">715</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac20f5d7b7f2833ce6c78bfa50302db7b" name="ac20f5d7b7f2833ce6c78bfa50302db7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac20f5d7b7f2833ce6c78bfa50302db7b">&#9670;&#160;</a></span>FSE_compress2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t FSE_compress2 </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>tableLog</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="fse_8h.html#ac20f5d7b7f2833ce6c78bfa50302db7b">FSE_compress2()</a> : Same as <a class="el" href="fse_8h.html#a2b86255881cbf4a6871cdd3d99a7fb8b">FSE_compress()</a>, but allows the selection of 'maxSymbolValue' and 'tableLog' Both parameters can be defined as '0' to mean : use default value </p><dl class="section return"><dt>返回</dt><dd>: size of compressed data Special values : if return == 0, srcData is not compressible =&gt; Nothing is stored within cSrc !!! if return == 1, srcData is a single byte symbol * srcSize times. Use RLE compression. if <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError(return)</a>, it's an error code. </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="fse__compress_8c_source.html">fse_compress.c</a> 第 <a class="el" href="fse__compress_8c_source.html#l00707">707</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae88873b11d0ddea3ebe5a8750edccfdc" name="ae88873b11d0ddea3ebe5a8750edccfdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae88873b11d0ddea3ebe5a8750edccfdc">&#9670;&#160;</a></span>FSE_compress_usingCTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t FSE_compress_usingCTable </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> *&#160;</td>
+          <td class="paramname"><em>ct</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="fse_8h.html#ae88873b11d0ddea3ebe5a8750edccfdc">FSE_compress_usingCTable()</a>: Compress <code>src</code> using <code>ct</code> into <code>dst</code> which must be already allocated. </p><dl class="section return"><dt>返回</dt><dd>: size of compressed data (&lt;= <code>dstCapacity</code>), or 0 if compressed data could not fit into <code>dst</code>, or an errorCode, which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a> </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="fse__compress_8c_source.html">fse_compress.c</a> 第 <a class="el" href="fse__compress_8c_source.html#l00633">633</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae740e04e6a7422f50a249fe2c0425101" name="ae740e04e6a7422f50a249fe2c0425101"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae740e04e6a7422f50a249fe2c0425101">&#9670;&#160;</a></span>FSE_compressBound()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t FSE_compressBound </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse__compress_8c_source.html">fse_compress.c</a> 第 <a class="el" href="fse__compress_8c_source.html#l00646">646</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a275e277a2eb5c2368860dca80c749f7b" name="a275e277a2eb5c2368860dca80c749f7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a275e277a2eb5c2368860dca80c749f7b">&#9670;&#160;</a></span>FSE_createCTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> * FSE_createCTable </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>tableLog</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse__compress_8c_source.html">fse_compress.c</a> 第 <a class="el" href="fse__compress_8c_source.html#l00325">325</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adfc3f310dd87128762c1141edccef01c" name="adfc3f310dd87128762c1141edccef01c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adfc3f310dd87128762c1141edccef01c">&#9670;&#160;</a></span>FSE_createDTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <a class="el" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a> * FSE_createDTable </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>tableLog</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse__decompress_8c_source.html">fse_decompress.c</a> 第 <a class="el" href="fse__decompress_8c_source.html#l00084">84</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9b46224799b8207ebd31ab088ab7597e" name="a9b46224799b8207ebd31ab088ab7597e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b46224799b8207ebd31ab088ab7597e">&#9670;&#160;</a></span>FSE_decompress()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t FSE_decompress </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>cSrc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>cSrcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="fse_8h.html#a9b46224799b8207ebd31ab088ab7597e">FSE_decompress()</a>: Decompress FSE data from buffer 'cSrc', of size 'cSrcSize', into already allocated destination buffer 'dst', of size 'dstCapacity'. </p><dl class="section return"><dt>返回</dt><dd>: size of regenerated data (&lt;= maxDstSize), or an error code, which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a> .</dd></dl>
+<p>Important ** : <a class="el" href="fse_8h.html#a9b46224799b8207ebd31ab088ab7597e">FSE_decompress()</a> does not decompress non-compressible nor RLE data !!! Why ? : making this distinction requires a header. Header management is intentionally delegated to the user layer, which can better manage special cases. </p>
+
+<p class="definition">在文件 <a class="el" href="fse__decompress_8c_source.html">fse_decompress.c</a> 第 <a class="el" href="fse__decompress_8c_source.html#l00303">303</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a911ee2b9e134c3767a504447da7e2123" name="a911ee2b9e134c3767a504447da7e2123"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a911ee2b9e134c3767a504447da7e2123">&#9670;&#160;</a></span>FSE_decompress_usingDTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t FSE_decompress_usingDTable </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>cSrc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>cSrcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a> *&#160;</td>
+          <td class="paramname"><em>dt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="fse_8h.html#a911ee2b9e134c3767a504447da7e2123">FSE_decompress_usingDTable()</a>: Decompress compressed source <code>cSrc</code> of size <code>cSrcSize</code> using <code>dt</code> into <code>dst</code> which must be already allocated. </p><dl class="section return"><dt>返回</dt><dd>: size of regenerated data (necessarily &lt;= <code>dstCapacity</code>), or an errorCode, which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a> </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="fse__decompress_8c_source.html">fse_decompress.c</a> 第 <a class="el" href="fse__decompress_8c_source.html#l00265">265</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6b33c74a7862ed197cb58bfe3d31da36" name="a6b33c74a7862ed197cb58bfe3d31da36"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b33c74a7862ed197cb58bfe3d31da36">&#9670;&#160;</a></span>FSE_freeCTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> void FSE_freeCTable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> *&#160;</td>
+          <td class="paramname"><em>ct</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse__compress_8c_source.html">fse_compress.c</a> 第 <a class="el" href="fse__compress_8c_source.html#l00333">333</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae58fa772f25077f189caa819822c467b" name="ae58fa772f25077f189caa819822c467b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae58fa772f25077f189caa819822c467b">&#9670;&#160;</a></span>FSE_freeDTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> void FSE_freeDTable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a> *&#160;</td>
+          <td class="paramname"><em>dt</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fse__decompress_8c_source.html">fse_decompress.c</a> 第 <a class="el" href="fse__decompress_8c_source.html#l00090">90</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a30d9f19efc67ff932a9eadeeddbcd88e" name="a30d9f19efc67ff932a9eadeeddbcd88e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30d9f19efc67ff932a9eadeeddbcd88e">&#9670;&#160;</a></span>FSE_getErrorName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * FSE_getErrorName </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>code</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00052">52</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9eb3f90b9f7215f90237c7700d2ba66a" name="a9eb3f90b9f7215f90237c7700d2ba66a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9eb3f90b9f7215f90237c7700d2ba66a">&#9670;&#160;</a></span>FSE_isError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> unsigned FSE_isError </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>code</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00051">51</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abe35c7de9117f8e367d3bc27072a7676" name="abe35c7de9117f8e367d3bc27072a7676"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe35c7de9117f8e367d3bc27072a7676">&#9670;&#160;</a></span>FSE_NCountWriteBound()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t FSE_NCountWriteBound </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>tableLog</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="fse_8h.html#abe35c7de9117f8e367d3bc27072a7676">FSE_NCountWriteBound()</a>: Provides the maximum possible size of an FSE normalized table, given 'maxSymbolValue' and 'tableLog'. Typically useful for allocation purpose. </p>
+
+<p class="definition">在文件 <a class="el" href="fse__compress_8c_source.html">fse_compress.c</a> 第 <a class="el" href="fse__compress_8c_source.html#l00206">206</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaca3dda2d78980dbaaf7bf9139193299" name="aaca3dda2d78980dbaaf7bf9139193299"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaca3dda2d78980dbaaf7bf9139193299">&#9670;&#160;</a></span>FSE_normalizeCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t FSE_normalizeCount </td>
+          <td>(</td>
+          <td class="paramtype">short *&#160;</td>
+          <td class="paramname"><em>normalizedCounter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>tableLog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned *&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="fse_8h.html#aaca3dda2d78980dbaaf7bf9139193299">FSE_normalizeCount()</a>: normalize counts so that sum(count[]) == Power_of_2 (2^tableLog) 'normalizedCounter' is a table of short, of minimum size (maxSymbolValue+1). </p><dl class="section return"><dt>返回</dt><dd>: tableLog, or an errorCode, which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a> </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="fse__compress_8c_source.html">fse_compress.c</a> 第 <a class="el" href="fse__compress_8c_source.html#l00455">455</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acf5c46f2ea45dd9838896af2574818ad" name="acf5c46f2ea45dd9838896af2574818ad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf5c46f2ea45dd9838896af2574818ad">&#9670;&#160;</a></span>FSE_optimalTableLog()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> unsigned FSE_optimalTableLog </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxTableLog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="fse_8h.html#a2b86255881cbf4a6871cdd3d99a7fb8b">FSE_compress()</a> does the following:</p><ol type="1">
+<li>count symbol occurrence from source[] into table count[] (see <a class="el" href="hist_8h.html">hist.h</a>)</li>
+<li>normalize counters so that sum(count[]) == Power_of_2 (2^tableLog)</li>
+<li>save normalized counters to memory buffer using writeNCount()</li>
+<li>build encoding table 'CTable' from normalized counters</li>
+<li>encode the data stream using encoding table 'CTable'</li>
+</ol>
+<p><a class="el" href="fse_8h.html#a9b46224799b8207ebd31ab088ab7597e">FSE_decompress()</a> does the following:</p><ol type="1">
+<li>read normalized counters with readNCount()</li>
+<li>build decoding table 'DTable' from normalized counters</li>
+<li>decode the data stream using decoding table 'DTable'</li>
+</ol>
+<p>The following API allows targeting specific sub-functions for advanced tasks. For example, it's possible to compress several blocks using the same 'CTable', or to save and provide normalized distribution using external method.</p>
+<p><a class="el" href="fse_8h.html#acf5c46f2ea45dd9838896af2574818ad">FSE_optimalTableLog()</a>: dynamically downsize 'tableLog' when conditions are met. It saves CPU time, by using smaller tables, while preserving or even improving compression ratio. </p><dl class="section return"><dt>返回</dt><dd>: recommended tableLog (necessarily &lt;= 'maxTableLog') </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="fse__compress_8c_source.html">fse_compress.c</a> 第 <a class="el" href="fse__compress_8c_source.html#l00359">359</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1d5d0fb669087c8407f572d86bd6c87a" name="a1d5d0fb669087c8407f572d86bd6c87a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d5d0fb669087c8407f572d86bd6c87a">&#9670;&#160;</a></span>FSE_readNCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t FSE_readNCount </td>
+          <td>(</td>
+          <td class="paramtype">short *&#160;</td>
+          <td class="paramname"><em>normalizedCounter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned *&#160;</td>
+          <td class="paramname"><em>maxSymbolValuePtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned *&#160;</td>
+          <td class="paramname"><em>tableLogPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>rBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>rBuffSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<h2><a class="anchor" id="autotoc_md3"></a>
+Tutorial :</h2>
+<p>The first step is to count all symbols. FSE_count() does this job very fast. Result will be saved into 'count', a table of unsigned int, which must be already allocated, and have 'maxSymbolValuePtr[0]+1' cells. 'src' is a table of bytes of size 'srcSize'. All values within 'src' MUST be &lt;= maxSymbolValuePtr[0] maxSymbolValuePtr[0] will be updated, with its real value (necessarily &lt;= original value) FSE_count() will return the number of occurrence of the most frequent symbol. This can be used to know if there is a single symbol within 'src', and to quickly evaluate its compressibility. If there is an error, the function will return an ErrorCode (which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a>).</p>
+<p>The next step is to normalize the frequencies. <a class="el" href="fse_8h.html#aaca3dda2d78980dbaaf7bf9139193299">FSE_normalizeCount()</a> will ensure that sum of frequencies is == 2 ^'tableLog'. It also guarantees a minimum of 1 to any Symbol with frequency &gt;= 1. You can use 'tableLog'==0 to mean "use default tableLog value". If you are unsure of which tableLog value to use, you can ask <a class="el" href="fse_8h.html#acf5c46f2ea45dd9838896af2574818ad">FSE_optimalTableLog()</a>, which will provide the optimal valid tableLog given sourceSize, maxSymbolValue, and a user-defined maximum (0 means "default").</p>
+<p>The result of <a class="el" href="fse_8h.html#aaca3dda2d78980dbaaf7bf9139193299">FSE_normalizeCount()</a> will be saved into a table, called 'normalizedCounter', which is a table of signed short. 'normalizedCounter' must be already allocated, and have at least 'maxSymbolValue+1' cells. The return value is tableLog if everything proceeded as expected. It is 0 if there is a single symbol within distribution. If there is an error (ex: invalid tableLog value), the function will return an ErrorCode (which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a>).</p>
+<p>'normalizedCounter' can be saved in a compact manner to a memory area using <a class="el" href="fse_8h.html#a1ed0b96f6184614c4d3ecded9d8e6c80">FSE_writeNCount()</a>. 'buffer' must be already allocated. For guaranteed success, buffer size must be at least FSE_headerBound(). The result of the function is the number of bytes written into 'buffer'. If there is an error, the function will return an ErrorCode (which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a>; ex : buffer size too small).</p>
+<p>'normalizedCounter' can then be used to create the compression table 'CTable'. The space required by 'CTable' must be already allocated, using <a class="el" href="fse_8h.html#a275e277a2eb5c2368860dca80c749f7b">FSE_createCTable()</a>. You can then use <a class="el" href="fse_8h.html#a79a83bf378068974a320feded073de7f">FSE_buildCTable()</a> to fill 'CTable'. If there is an error, both functions will return an ErrorCode (which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a>).</p>
+<p>'CTable' can then be used to compress 'src', with <a class="el" href="fse_8h.html#ae88873b11d0ddea3ebe5a8750edccfdc">FSE_compress_usingCTable()</a>. Similar to FSE_count(), the convention is that 'src' is assumed to be a table of char of size 'srcSize' The function returns the size of compressed data (without header), necessarily &lt;= <code>dstCapacity</code>. If it returns '0', compressed data could not fit into 'dst'. If there is an error, the function will return an ErrorCode (which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a>).</p>
+<p><a class="el" href="fse_8h.html#a1d5d0fb669087c8407f572d86bd6c87a">FSE_readNCount()</a>: Read compactly saved 'normalizedCounter' from 'rBuffer'. </p><dl class="section return"><dt>返回</dt><dd>: size read from 'rBuffer', or an errorCode, which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a>. maxSymbolValuePtr[0] and tableLogPtr[0] will also be updated with their respective values </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00061">61</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa33652489acfb4285e8dff7280a1b1a1" name="aa33652489acfb4285e8dff7280a1b1a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa33652489acfb4285e8dff7280a1b1a1">&#9670;&#160;</a></span>FSE_versionNumber()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> unsigned FSE_versionNumber </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>library version number; to be used when checking dll version </p>
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00047">47</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1ed0b96f6184614c4d3ecded9d8e6c80" name="a1ed0b96f6184614c4d3ecded9d8e6c80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ed0b96f6184614c4d3ecded9d8e6c80">&#9670;&#160;</a></span>FSE_writeNCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> size_t FSE_writeNCount </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>bufferSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> short *&#160;</td>
+          <td class="paramname"><em>normalizedCounter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>tableLog</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="fse_8h.html#a1ed0b96f6184614c4d3ecded9d8e6c80">FSE_writeNCount()</a>: Compactly save 'normalizedCounter' into 'buffer'. </p><dl class="section return"><dt>返回</dt><dd>: size of the compressed table, or an errorCode, which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a>. </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="fse__compress_8c_source.html">fse_compress.c</a> 第 <a class="el" href="fse__compress_8c_source.html#l00308">308</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="fse_8h.html">fse.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

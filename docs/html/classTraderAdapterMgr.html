@@ -1,0 +1,823 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: TraderAdapterMgr类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classTraderAdapterMgr.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classTraderAdapterMgr-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">TraderAdapterMgr类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>交易适配器管理器  
+ <a href="classTraderAdapterMgr.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="TraderDumper_2TraderAdapter_8h_source.html">TraderAdapter.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a50fb856c38636f102c775ee9ea8114ce" id="r_a50fb856c38636f102c775ee9ea8114ce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#a50fb856c38636f102c775ee9ea8114ce">release</a> ()</td></tr>
+<tr class="memdesc:a50fb856c38636f102c775ee9ea8114ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">释放所有交易适配器资源  <br /></td></tr>
+<tr class="separator:a50fb856c38636f102c775ee9ea8114ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d321839dfa13802f208eb0a31f81cd8" id="r_a6d321839dfa13802f208eb0a31f81cd8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#a6d321839dfa13802f208eb0a31f81cd8">run</a> ()</td></tr>
+<tr class="memdesc:a6d321839dfa13802f208eb0a31f81cd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">运行所有交易适配器  <br /></td></tr>
+<tr class="separator:a6d321839dfa13802f208eb0a31f81cd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca16245f071de6facaea6dd53b56f43d" id="r_aca16245f071de6facaea6dd53b56f43d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WtUftCore_2TraderAdapter_8h.html#a77ec4dce57c29cd9dc558aed5d992152">TraderAdapterMap</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#aca16245f071de6facaea6dd53b56f43d">getAdapters</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:aca16245f071de6facaea6dd53b56f43d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af72c5f78898d2990528fce49c91cb9a3" id="r_af72c5f78898d2990528fce49c91cb9a3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WtUftCore_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#af72c5f78898d2990528fce49c91cb9a3">getAdapter</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *tname)</td></tr>
+<tr class="memdesc:af72c5f78898d2990528fce49c91cb9a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取交易适配器  <br /></td></tr>
+<tr class="separator:af72c5f78898d2990528fce49c91cb9a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba592f7b9755d6a0855729528e22e44e" id="r_aba592f7b9755d6a0855729528e22e44e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#aba592f7b9755d6a0855729528e22e44e">addAdapter</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *tname, <a class="el" href="WtUftCore_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a> &amp;adapter)</td></tr>
+<tr class="memdesc:aba592f7b9755d6a0855729528e22e44e"><td class="mdescLeft">&#160;</td><td class="mdescRight">添加交易适配器  <br /></td></tr>
+<tr class="separator:aba592f7b9755d6a0855729528e22e44e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0c4bd970c04c92bc221c30ed99a9e62" id="r_ab0c4bd970c04c92bc221c30ed99a9e62"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#ab0c4bd970c04c92bc221c30ed99a9e62">isAnyAlive</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:ab0c4bd970c04c92bc221c30ed99a9e62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48c4267cee24ce2a0b22bc4d2af4f58c" id="r_a48c4267cee24ce2a0b22bc4d2af4f58c"><td class="memItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#a48c4267cee24ce2a0b22bc4d2af4f58c">size</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:a48c4267cee24ce2a0b22bc4d2af4f58c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac76c227be1a6a574380209a48c3e42fa" id="r_ac76c227be1a6a574380209a48c3e42fa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#ac76c227be1a6a574380209a48c3e42fa">decAlive</a> ()</td></tr>
+<tr class="separator:ac76c227be1a6a574380209a48c3e42fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a890fd1dee5279482487922e41e736b08" id="r_a890fd1dee5279482487922e41e736b08"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#a890fd1dee5279482487922e41e736b08">refresh</a> ()</td></tr>
+<tr class="separator:a890fd1dee5279482487922e41e736b08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50fb856c38636f102c775ee9ea8114ce" id="r_a50fb856c38636f102c775ee9ea8114ce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#a50fb856c38636f102c775ee9ea8114ce">release</a> ()</td></tr>
+<tr class="memdesc:a50fb856c38636f102c775ee9ea8114ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">释放所有适配器资源  <br /></td></tr>
+<tr class="separator:a50fb856c38636f102c775ee9ea8114ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d321839dfa13802f208eb0a31f81cd8" id="r_a6d321839dfa13802f208eb0a31f81cd8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#a6d321839dfa13802f208eb0a31f81cd8">run</a> ()</td></tr>
+<tr class="memdesc:a6d321839dfa13802f208eb0a31f81cd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">运行所有适配器  <br /></td></tr>
+<tr class="separator:a6d321839dfa13802f208eb0a31f81cd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca16245f071de6facaea6dd53b56f43d" id="r_aca16245f071de6facaea6dd53b56f43d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WtUftCore_2TraderAdapter_8h.html#a77ec4dce57c29cd9dc558aed5d992152">TraderAdapterMap</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#aca16245f071de6facaea6dd53b56f43d">getAdapters</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:aca16245f071de6facaea6dd53b56f43d"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取所有适配器  <br /></td></tr>
+<tr class="separator:aca16245f071de6facaea6dd53b56f43d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af72c5f78898d2990528fce49c91cb9a3" id="r_af72c5f78898d2990528fce49c91cb9a3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WtUftCore_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#af72c5f78898d2990528fce49c91cb9a3">getAdapter</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *tname)</td></tr>
+<tr class="memdesc:af72c5f78898d2990528fce49c91cb9a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定适配器  <br /></td></tr>
+<tr class="separator:af72c5f78898d2990528fce49c91cb9a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba592f7b9755d6a0855729528e22e44e" id="r_aba592f7b9755d6a0855729528e22e44e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#aba592f7b9755d6a0855729528e22e44e">addAdapter</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *tname, <a class="el" href="WtUftCore_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a> &amp;adapter)</td></tr>
+<tr class="memdesc:aba592f7b9755d6a0855729528e22e44e"><td class="mdescLeft">&#160;</td><td class="mdescRight">添加交易适配器  <br /></td></tr>
+<tr class="separator:aba592f7b9755d6a0855729528e22e44e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1010a2c06210d7dc995ddf7da593cb74" id="r_a1010a2c06210d7dc995ddf7da593cb74"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#a1010a2c06210d7dc995ddf7da593cb74">refresh_funds</a> ()</td></tr>
+<tr class="memdesc:a1010a2c06210d7dc995ddf7da593cb74"><td class="mdescLeft">&#160;</td><td class="mdescRight">刷新资金信息  <br /></td></tr>
+<tr class="separator:a1010a2c06210d7dc995ddf7da593cb74"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50fb856c38636f102c775ee9ea8114ce" id="r_a50fb856c38636f102c775ee9ea8114ce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#a50fb856c38636f102c775ee9ea8114ce">release</a> ()</td></tr>
+<tr class="memdesc:a50fb856c38636f102c775ee9ea8114ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">释放所有交易适配器资源  <br /></td></tr>
+<tr class="separator:a50fb856c38636f102c775ee9ea8114ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d321839dfa13802f208eb0a31f81cd8" id="r_a6d321839dfa13802f208eb0a31f81cd8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#a6d321839dfa13802f208eb0a31f81cd8">run</a> ()</td></tr>
+<tr class="memdesc:a6d321839dfa13802f208eb0a31f81cd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">运行所有交易适配器  <br /></td></tr>
+<tr class="separator:a6d321839dfa13802f208eb0a31f81cd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca16245f071de6facaea6dd53b56f43d" id="r_aca16245f071de6facaea6dd53b56f43d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WtUftCore_2TraderAdapter_8h.html#a77ec4dce57c29cd9dc558aed5d992152">TraderAdapterMap</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#aca16245f071de6facaea6dd53b56f43d">getAdapters</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:aca16245f071de6facaea6dd53b56f43d"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取所有交易适配器  <br /></td></tr>
+<tr class="separator:aca16245f071de6facaea6dd53b56f43d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af72c5f78898d2990528fce49c91cb9a3" id="r_af72c5f78898d2990528fce49c91cb9a3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WtUftCore_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#af72c5f78898d2990528fce49c91cb9a3">getAdapter</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *tname)</td></tr>
+<tr class="memdesc:af72c5f78898d2990528fce49c91cb9a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定名称的交易适配器  <br /></td></tr>
+<tr class="separator:af72c5f78898d2990528fce49c91cb9a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba592f7b9755d6a0855729528e22e44e" id="r_aba592f7b9755d6a0855729528e22e44e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#aba592f7b9755d6a0855729528e22e44e">addAdapter</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *tname, <a class="el" href="WtUftCore_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a> &amp;adapter)</td></tr>
+<tr class="memdesc:aba592f7b9755d6a0855729528e22e44e"><td class="mdescLeft">&#160;</td><td class="mdescRight">添加交易适配器  <br /></td></tr>
+<tr class="separator:aba592f7b9755d6a0855729528e22e44e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:af78036180b2e5e383f2194825e1ca213" id="r_af78036180b2e5e383f2194825e1ca213"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WtUftCore_2TraderAdapter_8h.html#a77ec4dce57c29cd9dc558aed5d992152">TraderAdapterMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#af78036180b2e5e383f2194825e1ca213">_adapters</a></td></tr>
+<tr class="memdesc:af78036180b2e5e383f2194825e1ca213"><td class="mdescLeft">&#160;</td><td class="mdescRight">适配器映射表  <br /></td></tr>
+<tr class="separator:af78036180b2e5e383f2194825e1ca213"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d6ee607bce8028183d0173a39017c5f" id="r_a3d6ee607bce8028183d0173a39017c5f"><td class="memItemLeft" align="right" valign="top">std::mutex&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#a3d6ee607bce8028183d0173a39017c5f">_mutex</a></td></tr>
+<tr class="separator:a3d6ee607bce8028183d0173a39017c5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8afa9fa2ae9e6d9f5aab45d72c0851f5" id="r_a8afa9fa2ae9e6d9f5aab45d72c0851f5"><td class="memItemLeft" align="right" valign="top">std::atomic&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderAdapterMgr.html#a8afa9fa2ae9e6d9f5aab45d72c0851f5">_live_cnt</a></td></tr>
+<tr class="separator:a8afa9fa2ae9e6d9f5aab45d72c0851f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>交易适配器管理器 </p>
+<p>适配器管理器类</p>
+<p>管理多个交易适配器实例，提供适配器的添加、获取等功能</p>
+<p>管理多个交易适配器实例，提供添加、获取、启动和释放等操作 </p>
+
+<p class="definition">在文件 <a class="el" href="TraderDumper_2TraderAdapter_8h_source.html">TraderAdapter.h</a> 第 <a class="el" href="TraderDumper_2TraderAdapter_8h_source.html#l00097">97</a> 行定义.</p>
+</div><h2 class="groupheader">成员函数说明</h2>
+<a id="aba592f7b9755d6a0855729528e22e44e" name="aba592f7b9755d6a0855729528e22e44e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba592f7b9755d6a0855729528e22e44e">&#9670;&#160;</a></span>addAdapter() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TraderAdapterMgr::addAdapter </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>tname</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtUftCore_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a> &amp;&#160;</td>
+          <td class="paramname"><em>adapter</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>添加交易适配器 </p>
+<p>将交易适配器添加到管理器中，并检查名称是否重复 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tname</td><td>交易适配器名称 </td></tr>
+    <tr><td class="paramname">adapter</td><td>交易适配器指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否添加成功</dd></dl>
+<p>将交易适配器添加到管理器中，使用交易适配器名称作为键</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tname</td><td>交易适配器名称 </td></tr>
+    <tr><td class="paramname">adapter</td><td>交易适配器指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>添加成功返回true，否则返回false </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="TraderDumper_2TraderAdapter_8cpp_source.html">TraderAdapter.cpp</a> 第 <a class="el" href="TraderDumper_2TraderAdapter_8cpp_source.html#l00334">334</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aba592f7b9755d6a0855729528e22e44e" name="aba592f7b9755d6a0855729528e22e44e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba592f7b9755d6a0855729528e22e44e">&#9670;&#160;</a></span>addAdapter() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TraderAdapterMgr::addAdapter </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>tname</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtUftCore_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a> &amp;&#160;</td>
+          <td class="paramname"><em>adapter</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>添加交易适配器 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tname</td><td>适配器名称 </td></tr>
+    <tr><td class="paramname">adapter</td><td>适配器指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否添加成功 </dd></dl>
+
+</div>
+</div>
+<a id="aba592f7b9755d6a0855729528e22e44e" name="aba592f7b9755d6a0855729528e22e44e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba592f7b9755d6a0855729528e22e44e">&#9670;&#160;</a></span>addAdapter() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TraderAdapterMgr::addAdapter </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>tname</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtUftCore_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a> &amp;&#160;</td>
+          <td class="paramname"><em>adapter</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>添加交易适配器 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tname</td><td>交易适配器名称 </td></tr>
+    <tr><td class="paramname">adapter</td><td>交易适配器指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否添加成功</dd></dl>
+<p>将交易适配器注册到管理器中，如果名称已存在则添加失败 </p>
+
+</div>
+</div>
+<a id="ac76c227be1a6a574380209a48c3e42fa" name="ac76c227be1a6a574380209a48c3e42fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac76c227be1a6a574380209a48c3e42fa">&#9670;&#160;</a></span>decAlive()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderAdapterMgr::decAlive </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDumper_2TraderAdapter_8cpp_source.html">TraderAdapter.cpp</a> 第 <a class="el" href="TraderDumper_2TraderAdapter_8cpp_source.html#l00383">383</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af72c5f78898d2990528fce49c91cb9a3" name="af72c5f78898d2990528fce49c91cb9a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af72c5f78898d2990528fce49c91cb9a3">&#9670;&#160;</a></span>getAdapter() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WtUftCore_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a> TraderAdapterMgr::getAdapter </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>tname</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取交易适配器 </p>
+<p>根据名称获取对应的交易适配器 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tname</td><td>交易适配器名称 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>交易适配器指针，如果不存在则返回空指针</dd></dl>
+<p>根据交易适配器名称获取对应的交易适配器对象</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tname</td><td>交易适配器名称 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>交易适配器指针，如果没有找到则返回空指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="TraderDumper_2TraderAdapter_8cpp_source.html">TraderAdapter.cpp</a> 第 <a class="el" href="TraderDumper_2TraderAdapter_8cpp_source.html#l00351">351</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af72c5f78898d2990528fce49c91cb9a3" name="af72c5f78898d2990528fce49c91cb9a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af72c5f78898d2990528fce49c91cb9a3">&#9670;&#160;</a></span>getAdapter() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WtUftCore_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a> TraderAdapterMgr::getAdapter </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>tname</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取指定适配器 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tname</td><td>适配器名称 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>适配器指针 </dd></dl>
+
+</div>
+</div>
+<a id="af72c5f78898d2990528fce49c91cb9a3" name="af72c5f78898d2990528fce49c91cb9a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af72c5f78898d2990528fce49c91cb9a3">&#9670;&#160;</a></span>getAdapter() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WtUftCore_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a> TraderAdapterMgr::getAdapter </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>tname</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取指定名称的交易适配器 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tname</td><td>交易适配器名称 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>交易适配器指针</dd></dl>
+<p>根据名称从注册表中获取对应的交易适配器 </p>
+
+</div>
+</div>
+<a id="aca16245f071de6facaea6dd53b56f43d" name="aca16245f071de6facaea6dd53b56f43d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca16245f071de6facaea6dd53b56f43d">&#9670;&#160;</a></span>getAdapters() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WtUftCore_2TraderAdapter_8h.html#a77ec4dce57c29cd9dc558aed5d992152">TraderAdapterMap</a> &amp; TraderAdapterMgr::getAdapters </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDumper_2TraderAdapter_8h_source.html">TraderAdapter.h</a> 第 <a class="el" href="TraderDumper_2TraderAdapter_8h_source.html#l00104">104</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aca16245f071de6facaea6dd53b56f43d" name="aca16245f071de6facaea6dd53b56f43d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca16245f071de6facaea6dd53b56f43d">&#9670;&#160;</a></span>getAdapters() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WtUftCore_2TraderAdapter_8h.html#a77ec4dce57c29cd9dc558aed5d992152">TraderAdapterMap</a> &amp; TraderAdapterMgr::getAdapters </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取所有适配器 </p>
+<dl class="section return"><dt>返回</dt><dd>适配器映射表引用 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2TraderAdapter_8h_source.html">TraderAdapter.h</a> 第 <a class="el" href="WtCore_2TraderAdapter_8h_source.html#l00584">584</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aca16245f071de6facaea6dd53b56f43d" name="aca16245f071de6facaea6dd53b56f43d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca16245f071de6facaea6dd53b56f43d">&#9670;&#160;</a></span>getAdapters() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WtUftCore_2TraderAdapter_8h.html#a77ec4dce57c29cd9dc558aed5d992152">TraderAdapterMap</a> &amp; TraderAdapterMgr::getAdapters </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取所有交易适配器 </p>
+<dl class="section return"><dt>返回</dt><dd>交易适配器映射对象</dd></dl>
+<p>返回所有注册的交易适配器集合 </p>
+
+<p class="definition">在文件 <a class="el" href="WtUftCore_2TraderAdapter_8h_source.html">TraderAdapter.h</a> 第 <a class="el" href="WtUftCore_2TraderAdapter_8h_source.html#l00701">701</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab0c4bd970c04c92bc221c30ed99a9e62" name="ab0c4bd970c04c92bc221c30ed99a9e62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0c4bd970c04c92bc221c30ed99a9e62">&#9670;&#160;</a></span>isAnyAlive()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TraderAdapterMgr::isAnyAlive </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDumper_2TraderAdapter_8h_source.html">TraderAdapter.h</a> 第 <a class="el" href="TraderDumper_2TraderAdapter_8h_source.html#l00110">110</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a890fd1dee5279482487922e41e736b08" name="a890fd1dee5279482487922e41e736b08"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a890fd1dee5279482487922e41e736b08">&#9670;&#160;</a></span>refresh()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderAdapterMgr::refresh </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDumper_2TraderAdapter_8cpp_source.html">TraderAdapter.cpp</a> 第 <a class="el" href="TraderDumper_2TraderAdapter_8cpp_source.html#l00403">403</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1010a2c06210d7dc995ddf7da593cb74" name="a1010a2c06210d7dc995ddf7da593cb74"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1010a2c06210d7dc995ddf7da593cb74">&#9670;&#160;</a></span>refresh_funds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderAdapterMgr::refresh_funds </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>刷新资金信息 </p>
+<p>刷新所有交易适配器的资金信息</p>
+<p>对所有交易适配器执行资金查询操作 </p>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2TraderAdapter_8cpp_source.html">TraderAdapter.cpp</a> 第 <a class="el" href="WtCore_2TraderAdapter_8cpp_source.html#l02677">2677</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a50fb856c38636f102c775ee9ea8114ce" name="a50fb856c38636f102c775ee9ea8114ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50fb856c38636f102c775ee9ea8114ce">&#9670;&#160;</a></span>release() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderAdapterMgr::release </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>释放所有交易适配器资源 </p>
+<p>释放所有交易适配器并清空适配器列表</p>
+<p>遍历并释放管理器中的所有交易适配器资源 </p>
+
+<p class="definition">在文件 <a class="el" href="TraderDumper_2TraderAdapter_8cpp_source.html">TraderAdapter.cpp</a> 第 <a class="el" href="TraderDumper_2TraderAdapter_8cpp_source.html#l00373">373</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a50fb856c38636f102c775ee9ea8114ce" name="a50fb856c38636f102c775ee9ea8114ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50fb856c38636f102c775ee9ea8114ce">&#9670;&#160;</a></span>release() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderAdapterMgr::release </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>释放所有适配器资源 </p>
+
+</div>
+</div>
+<a id="a50fb856c38636f102c775ee9ea8114ce" name="a50fb856c38636f102c775ee9ea8114ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50fb856c38636f102c775ee9ea8114ce">&#9670;&#160;</a></span>release() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderAdapterMgr::release </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>释放所有交易适配器资源 </p>
+<p>清理并释放所有交易适配器占用的资源 </p>
+
+</div>
+</div>
+<a id="a6d321839dfa13802f208eb0a31f81cd8" name="a6d321839dfa13802f208eb0a31f81cd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d321839dfa13802f208eb0a31f81cd8">&#9670;&#160;</a></span>run() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderAdapterMgr::run </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>运行所有交易适配器 </p>
+<p>启动所有交易适配器</p>
+<p>启动所有交易适配器并输出日志</p>
+<p>遍历并启动管理器中的所有交易适配器 </p>
+
+<p class="definition">在文件 <a class="el" href="TraderDumper_2TraderAdapter_8cpp_source.html">TraderAdapter.cpp</a> 第 <a class="el" href="TraderDumper_2TraderAdapter_8cpp_source.html#l00362">362</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6d321839dfa13802f208eb0a31f81cd8" name="a6d321839dfa13802f208eb0a31f81cd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d321839dfa13802f208eb0a31f81cd8">&#9670;&#160;</a></span>run() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderAdapterMgr::run </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>运行所有适配器 </p>
+
+</div>
+</div>
+<a id="a6d321839dfa13802f208eb0a31f81cd8" name="a6d321839dfa13802f208eb0a31f81cd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d321839dfa13802f208eb0a31f81cd8">&#9670;&#160;</a></span>run() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderAdapterMgr::run </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>运行所有交易适配器 </p>
+<p>启动所有交易适配器，建立交易连接 </p>
+
+</div>
+</div>
+<a id="a48c4267cee24ce2a0b22bc4d2af4f58c" name="a48c4267cee24ce2a0b22bc4d2af4f58c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48c4267cee24ce2a0b22bc4d2af4f58c">&#9670;&#160;</a></span>size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::size_t TraderAdapterMgr::size </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDumper_2TraderAdapter_8h_source.html">TraderAdapter.h</a> 第 <a class="el" href="TraderDumper_2TraderAdapter_8h_source.html#l00114">114</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="af78036180b2e5e383f2194825e1ca213" name="af78036180b2e5e383f2194825e1ca213"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af78036180b2e5e383f2194825e1ca213">&#9670;&#160;</a></span>_adapters</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WtUftCore_2TraderAdapter_8h.html#a77ec4dce57c29cd9dc558aed5d992152">TraderAdapterMap</a> TraderAdapterMgr::_adapters</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>适配器映射表 </p>
+<p>交易适配器集合</p>
+<p>存储所有注册的交易适配器，以名称为键 </p>
+
+<p class="definition">在文件 <a class="el" href="TraderDumper_2TraderAdapter_8h_source.html">TraderAdapter.h</a> 第 <a class="el" href="TraderDumper_2TraderAdapter_8h_source.html#l00121">121</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8afa9fa2ae9e6d9f5aab45d72c0851f5" name="a8afa9fa2ae9e6d9f5aab45d72c0851f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8afa9fa2ae9e6d9f5aab45d72c0851f5">&#9670;&#160;</a></span>_live_cnt</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::atomic&lt;uint32_t&gt; TraderAdapterMgr::_live_cnt</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDumper_2TraderAdapter_8h_source.html">TraderAdapter.h</a> 第 <a class="el" href="TraderDumper_2TraderAdapter_8h_source.html#l00123">123</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3d6ee607bce8028183d0173a39017c5f" name="a3d6ee607bce8028183d0173a39017c5f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d6ee607bce8028183d0173a39017c5f">&#9670;&#160;</a></span>_mutex</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::mutex TraderAdapterMgr::_mutex</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDumper_2TraderAdapter_8h_source.html">TraderAdapter.h</a> 第 <a class="el" href="TraderDumper_2TraderAdapter_8h_source.html#l00122">122</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/TraderDumper/<a class="el" href="TraderDumper_2TraderAdapter_8h_source.html">TraderAdapter.h</a></li>
+<li>src/WtCore/<a class="el" href="WtCore_2TraderAdapter_8h_source.html">TraderAdapter.h</a></li>
+<li>src/WtUftCore/<a class="el" href="WtUftCore_2TraderAdapter_8h_source.html">TraderAdapter.h</a></li>
+<li>src/TraderDumper/<a class="el" href="TraderDumper_2TraderAdapter_8cpp_source.html">TraderAdapter.cpp</a></li>
+<li>src/WtCore/<a class="el" href="WtCore_2TraderAdapter_8cpp_source.html">TraderAdapter.cpp</a></li>
+<li>src/WtUftCore/<a class="el" href="WtUftCore_2TraderAdapter_8cpp_source.html">TraderAdapter.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classTraderAdapterMgr.html">TraderAdapterMgr</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,2504 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: TraderXTP类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classTraderXTP.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Public 类型</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-types">Private 类型</a> &#124;
+<a href="#pri-methods">Private 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classTraderXTP-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">TraderXTP类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public 类型</h2></td></tr>
+<tr class="memitem:a1250adf552c98eec0be400abb6b9cc66" id="r_a1250adf552c98eec0be400abb6b9cc66"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a1250adf552c98eec0be400abb6b9cc66">TraderState</a> { <br />
+&#160;&#160;<a class="el" href="classTraderXTP.html#a1250adf552c98eec0be400abb6b9cc66a4b360d980b6996c905fb08d0a6a6cfca">TS_NOTLOGIN</a>
+, <a class="el" href="classTraderXTP.html#a1250adf552c98eec0be400abb6b9cc66af9e19b105938e6bbf421e1e57034f26b">TS_LOGINING</a>
+, <a class="el" href="classTraderXTP.html#a1250adf552c98eec0be400abb6b9cc66a625587e6fdbdf2e65fe61cdfcb2121de">TS_LOGINED</a>
+, <a class="el" href="classTraderXTP.html#a1250adf552c98eec0be400abb6b9cc66af8e59020130f2768dc04b4c5ada724c0">TS_LOGINFAILED</a>
+, <br />
+&#160;&#160;<a class="el" href="classTraderXTP.html#a1250adf552c98eec0be400abb6b9cc66ad2bc64bfd7fc26dc6b94d757b3027a83">TS_ALLREADY</a>
+<br />
+ }</td></tr>
+<tr class="separator:a1250adf552c98eec0be400abb6b9cc66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a6ce780aa42dc4bed34ff085957d4b230" id="r_a6ce780aa42dc4bed34ff085957d4b230"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a6ce780aa42dc4bed34ff085957d4b230">TraderXTP</a> ()</td></tr>
+<tr class="separator:a6ce780aa42dc4bed34ff085957d4b230"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d81e0b41560a40d2ae226aa4e25a475" id="r_a5d81e0b41560a40d2ae226aa4e25a475"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a5d81e0b41560a40d2ae226aa4e25a475">~TraderXTP</a> ()</td></tr>
+<tr class="separator:a5d81e0b41560a40d2ae226aa4e25a475"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45a78d8932d8c28090fb48aea596910c" id="r_a45a78d8932d8c28090fb48aea596910c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a45a78d8932d8c28090fb48aea596910c">OnDisconnected</a> (uint64_t session_id, int reason) override</td></tr>
+<tr class="separator:a45a78d8932d8c28090fb48aea596910c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16759b2108504d2b071d0e43ec061223" id="r_a16759b2108504d2b071d0e43ec061223"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a16759b2108504d2b071d0e43ec061223">OnError</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info) override</td></tr>
+<tr class="separator:a16759b2108504d2b071d0e43ec061223"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4343e14b1e766a288d36ad7775a7ddc8" id="r_a4343e14b1e766a288d36ad7775a7ddc8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a4343e14b1e766a288d36ad7775a7ddc8">OnOrderEvent</a> (<a class="el" href="structXTPOrderInfo.html">XTPOrderInfo</a> *order_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id) override</td></tr>
+<tr class="separator:a4343e14b1e766a288d36ad7775a7ddc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a926c9c4ecc4924c69abd96609efe9bed" id="r_a926c9c4ecc4924c69abd96609efe9bed"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a926c9c4ecc4924c69abd96609efe9bed">OnTradeEvent</a> (<a class="el" href="structXTPTradeReport.html">XTPTradeReport</a> *trade_info, uint64_t session_id) override</td></tr>
+<tr class="separator:a926c9c4ecc4924c69abd96609efe9bed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d24bca2a4fb45c6f3aecda3df6f6e92" id="r_a9d24bca2a4fb45c6f3aecda3df6f6e92"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a9d24bca2a4fb45c6f3aecda3df6f6e92">OnCancelOrderError</a> (<a class="el" href="structXTPOrderCancelInfo.html">XTPOrderCancelInfo</a> *cancel_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id) override</td></tr>
+<tr class="separator:a9d24bca2a4fb45c6f3aecda3df6f6e92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a270f5fe43f4b18caa4899aeec3cb02d2" id="r_a270f5fe43f4b18caa4899aeec3cb02d2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a270f5fe43f4b18caa4899aeec3cb02d2">OnQueryOrder</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a5b58151f6301804cf4e293f9f919263d">XTPQueryOrderRsp</a> *order_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id) override</td></tr>
+<tr class="separator:a270f5fe43f4b18caa4899aeec3cb02d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89e4ac105184112c6af9959822b98564" id="r_a89e4ac105184112c6af9959822b98564"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a89e4ac105184112c6af9959822b98564">OnQueryTrade</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#ad336fb94f5589874c2c4469d6ef249d6">XTPQueryTradeRsp</a> *trade_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id) override</td></tr>
+<tr class="separator:a89e4ac105184112c6af9959822b98564"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82e4a06da7dce8850d5b2cfca3790fb2" id="r_a82e4a06da7dce8850d5b2cfca3790fb2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a82e4a06da7dce8850d5b2cfca3790fb2">OnQueryPosition</a> (<a class="el" href="structXTPQueryStkPositionRsp.html">XTPQueryStkPositionRsp</a> *position, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id) override</td></tr>
+<tr class="separator:a82e4a06da7dce8850d5b2cfca3790fb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad741742f00e98b9abec86451df44e18c" id="r_ad741742f00e98b9abec86451df44e18c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#ad741742f00e98b9abec86451df44e18c">OnQueryAsset</a> (<a class="el" href="structXTPQueryAssetRsp.html">XTPQueryAssetRsp</a> *asset, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id) override</td></tr>
+<tr class="separator:ad741742f00e98b9abec86451df44e18c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36889a067394c4d7f5384f2f67205bfc" id="r_a36889a067394c4d7f5384f2f67205bfc"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a36889a067394c4d7f5384f2f67205bfc">init</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *params) override</td></tr>
+<tr class="separator:a36889a067394c4d7f5384f2f67205bfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f5e33fddc52d09dd5a22408cb8403f1" id="r_a7f5e33fddc52d09dd5a22408cb8403f1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a7f5e33fddc52d09dd5a22408cb8403f1">release</a> () override</td></tr>
+<tr class="separator:a7f5e33fddc52d09dd5a22408cb8403f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4487e25aed42dbfbd8ef5608e628757" id="r_af4487e25aed42dbfbd8ef5608e628757"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#af4487e25aed42dbfbd8ef5608e628757">registerSpi</a> (<a class="el" href="classITraderSpi.html">ITraderSpi</a> *listener) override</td></tr>
+<tr class="separator:af4487e25aed42dbfbd8ef5608e628757"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abafec5cb8efb3d7b253acb1db030be63" id="r_abafec5cb8efb3d7b253acb1db030be63"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#abafec5cb8efb3d7b253acb1db030be63">connect</a> () override</td></tr>
+<tr class="separator:abafec5cb8efb3d7b253acb1db030be63"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a949724d8f59bab1e086b975ce754c8bc" id="r_a949724d8f59bab1e086b975ce754c8bc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a949724d8f59bab1e086b975ce754c8bc">disconnect</a> () override</td></tr>
+<tr class="separator:a949724d8f59bab1e086b975ce754c8bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68c8fed4466a768218680d79a1e0933d" id="r_a68c8fed4466a768218680d79a1e0933d"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a68c8fed4466a768218680d79a1e0933d">isConnected</a> () override</td></tr>
+<tr class="separator:a68c8fed4466a768218680d79a1e0933d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4aa2acff6ca1ddf82c9d9877f5fa7550" id="r_a4aa2acff6ca1ddf82c9d9877f5fa7550"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a4aa2acff6ca1ddf82c9d9877f5fa7550">makeEntrustID</a> (char *buffer, int length) override</td></tr>
+<tr class="separator:a4aa2acff6ca1ddf82c9d9877f5fa7550"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d772d328f4c50ec00833d22bc4ec4ad" id="r_a1d772d328f4c50ec00833d22bc4ec4ad"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a1d772d328f4c50ec00833d22bc4ec4ad">login</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="demo__send__order_8cpp.html#a6dfa0071362986f2680867cd51fa2ea8">user</a>, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pass, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *productInfo) override</td></tr>
+<tr class="separator:a1d772d328f4c50ec00833d22bc4ec4ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73dc7006ea814a0491cbe6d96f970633" id="r_a73dc7006ea814a0491cbe6d96f970633"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a73dc7006ea814a0491cbe6d96f970633">logout</a> () override</td></tr>
+<tr class="separator:a73dc7006ea814a0491cbe6d96f970633"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0111f956ed721197afb46cac672f82c0" id="r_a0111f956ed721197afb46cac672f82c0"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a0111f956ed721197afb46cac672f82c0">orderInsert</a> (<a class="el" href="classWTSEntrust.html">WTSEntrust</a> *eutrust) override</td></tr>
+<tr class="separator:a0111f956ed721197afb46cac672f82c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54b4feca9719c93043d58c372e122b1e" id="r_a54b4feca9719c93043d58c372e122b1e"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a54b4feca9719c93043d58c372e122b1e">orderAction</a> (<a class="el" href="classWTSEntrustAction.html">WTSEntrustAction</a> *action) override</td></tr>
+<tr class="separator:a54b4feca9719c93043d58c372e122b1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9388b535996ebf94a19d04fb0afca33d" id="r_a9388b535996ebf94a19d04fb0afca33d"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a9388b535996ebf94a19d04fb0afca33d">queryAccount</a> () override</td></tr>
+<tr class="separator:a9388b535996ebf94a19d04fb0afca33d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac375b9e4fbecc5507cbba1ebfba891b9" id="r_ac375b9e4fbecc5507cbba1ebfba891b9"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#ac375b9e4fbecc5507cbba1ebfba891b9">queryPositions</a> () override</td></tr>
+<tr class="separator:ac375b9e4fbecc5507cbba1ebfba891b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7efec0a8007acbce1e34e70eea19c7c4" id="r_a7efec0a8007acbce1e34e70eea19c7c4"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a7efec0a8007acbce1e34e70eea19c7c4">queryOrders</a> () override</td></tr>
+<tr class="separator:a7efec0a8007acbce1e34e70eea19c7c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1a0a91b20d6fad3b07699f103a45a05" id="r_af1a0a91b20d6fad3b07699f103a45a05"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#af1a0a91b20d6fad3b07699f103a45a05">queryTrades</a> () override</td></tr>
+<tr class="separator:af1a0a91b20d6fad3b07699f103a45a05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classXTP_1_1API_1_1TraderSpi"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classXTP_1_1API_1_1TraderSpi')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classXTP_1_1API_1_1TraderSpi.html">XTP::API::TraderSpi</a></td></tr>
+<tr class="memitem:aeabc4d338eaddb101b7ae3934a6ab6da inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_aeabc4d338eaddb101b7ae3934a6ab6da"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#aeabc4d338eaddb101b7ae3934a6ab6da">OnQueryOrderEx</a> (<a class="el" href="structXTPOrderInfoEx.html">XTPOrderInfoEx</a> *order_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:aeabc4d338eaddb101b7ae3934a6ab6da inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9353d9aa19a43388c3299aa73508eef5 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a9353d9aa19a43388c3299aa73508eef5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a9353d9aa19a43388c3299aa73508eef5">OnQueryOrderByPage</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a5b58151f6301804cf4e293f9f919263d">XTPQueryOrderRsp</a> *order_info, int64_t req_count, int64_t order_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a9353d9aa19a43388c3299aa73508eef5 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef7f9beb13d87d79bb87be904ce0cdea inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_aef7f9beb13d87d79bb87be904ce0cdea"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#aef7f9beb13d87d79bb87be904ce0cdea">OnQueryOrderByPageEx</a> (<a class="el" href="structXTPOrderInfoEx.html">XTPOrderInfoEx</a> *order_info, int64_t req_count, int64_t order_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:aef7f9beb13d87d79bb87be904ce0cdea inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a427c328b11487aa194367222814e11b6 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a427c328b11487aa194367222814e11b6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a427c328b11487aa194367222814e11b6">OnQueryTradeByPage</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#ad336fb94f5589874c2c4469d6ef249d6">XTPQueryTradeRsp</a> *trade_info, int64_t req_count, int64_t trade_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a427c328b11487aa194367222814e11b6 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9738ac0274a8122192d80d89465ac538 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a9738ac0274a8122192d80d89465ac538"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a9738ac0274a8122192d80d89465ac538">OnQueryStructuredFund</a> (<a class="el" href="structXTPStructuredFundInfo.html">XTPStructuredFundInfo</a> *fund_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a9738ac0274a8122192d80d89465ac538 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2507f27f58bdfb65d4448d9a5d8447e inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_ab2507f27f58bdfb65d4448d9a5d8447e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ab2507f27f58bdfb65d4448d9a5d8447e">OnQueryFundTransfer</a> (<a class="el" href="structXTPFundTransferNotice.html">XTPFundTransferNotice</a> *fund_transfer_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:ab2507f27f58bdfb65d4448d9a5d8447e inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a177929dd9a3c592c6792bab3de7d1824 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a177929dd9a3c592c6792bab3de7d1824"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a177929dd9a3c592c6792bab3de7d1824">OnFundTransfer</a> (<a class="el" href="structXTPFundTransferNotice.html">XTPFundTransferNotice</a> *fund_transfer_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:a177929dd9a3c592c6792bab3de7d1824 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5bcf26bfcec91fb56617665a63a2c26 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_aa5bcf26bfcec91fb56617665a63a2c26"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#aa5bcf26bfcec91fb56617665a63a2c26">OnQueryOtherServerFund</a> (<a class="el" href="structXTPFundQueryRsp.html">XTPFundQueryRsp</a> *fund_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, uint64_t session_id)</td></tr>
+<tr class="separator:aa5bcf26bfcec91fb56617665a63a2c26 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9216359c7af2a47b20851b6f8e1b5ab3 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a9216359c7af2a47b20851b6f8e1b5ab3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a9216359c7af2a47b20851b6f8e1b5ab3">OnQueryETF</a> (<a class="el" href="structXTPQueryETFBaseRsp.html">XTPQueryETFBaseRsp</a> *etf_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a9216359c7af2a47b20851b6f8e1b5ab3 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac648cf7048b840378bbe10307605892b inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_ac648cf7048b840378bbe10307605892b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ac648cf7048b840378bbe10307605892b">OnQueryETFBasket</a> (<a class="el" href="structXTPQueryETFComponentRsp.html">XTPQueryETFComponentRsp</a> *etf_component_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:ac648cf7048b840378bbe10307605892b inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63fd4ffeaef3f2db241ec87d981079a1 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a63fd4ffeaef3f2db241ec87d981079a1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a63fd4ffeaef3f2db241ec87d981079a1">OnQueryIPOInfoList</a> (<a class="el" href="structXTPQueryIPOTickerRsp.html">XTPQueryIPOTickerRsp</a> *ipo_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a63fd4ffeaef3f2db241ec87d981079a1 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e9c7f5c92bf102109262776faf37bd8 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a9e9c7f5c92bf102109262776faf37bd8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a9e9c7f5c92bf102109262776faf37bd8">OnQueryIPOQuotaInfo</a> (<a class="el" href="structXTPQueryIPOQuotaRsp.html">XTPQueryIPOQuotaRsp</a> *quota_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a9e9c7f5c92bf102109262776faf37bd8 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b41fa838db1c2a250ab8d23f0b3bea8 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a0b41fa838db1c2a250ab8d23f0b3bea8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a0b41fa838db1c2a250ab8d23f0b3bea8">OnQueryOptionAuctionInfo</a> (<a class="el" href="structXTPQueryOptionAuctionInfoRsp.html">XTPQueryOptionAuctionInfoRsp</a> *option_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a0b41fa838db1c2a250ab8d23f0b3bea8 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abff6dbc72b2ff5b09c6014a16c351a72 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_abff6dbc72b2ff5b09c6014a16c351a72"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#abff6dbc72b2ff5b09c6014a16c351a72">OnCreditCashRepay</a> (<a class="el" href="structXTPCrdCashRepayRsp.html">XTPCrdCashRepayRsp</a> *cash_repay_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:abff6dbc72b2ff5b09c6014a16c351a72 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9df11f9586c48e18c34f2f3994509808 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a9df11f9586c48e18c34f2f3994509808"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a9df11f9586c48e18c34f2f3994509808">OnCreditCashRepayDebtInterestFee</a> (<a class="el" href="structXTPCrdCashRepayDebtInterestFeeRsp.html">XTPCrdCashRepayDebtInterestFeeRsp</a> *cash_repay_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:a9df11f9586c48e18c34f2f3994509808 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b3e13f332a1356e8ca2b5bb52dd1610 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a3b3e13f332a1356e8ca2b5bb52dd1610"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a3b3e13f332a1356e8ca2b5bb52dd1610">OnQueryCreditCashRepayInfo</a> (<a class="el" href="structXTPCrdCashRepayInfo.html">XTPCrdCashRepayInfo</a> *cash_repay_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a3b3e13f332a1356e8ca2b5bb52dd1610 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab12985fc6da7ad5cd4fea19ba50c3a2a inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_ab12985fc6da7ad5cd4fea19ba50c3a2a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ab12985fc6da7ad5cd4fea19ba50c3a2a">OnQueryCreditFundInfo</a> (<a class="el" href="structXTPCrdFundInfo.html">XTPCrdFundInfo</a> *fund_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, uint64_t session_id)</td></tr>
+<tr class="separator:ab12985fc6da7ad5cd4fea19ba50c3a2a inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc8d8552e743980d56c6822b9cfddeff inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_adc8d8552e743980d56c6822b9cfddeff"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#adc8d8552e743980d56c6822b9cfddeff">OnQueryCreditDebtInfo</a> (<a class="el" href="structXTPCrdDebtInfo.html">XTPCrdDebtInfo</a> *debt_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:adc8d8552e743980d56c6822b9cfddeff inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1bd5b47c50da5d34045285cfcee5421 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_ac1bd5b47c50da5d34045285cfcee5421"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ac1bd5b47c50da5d34045285cfcee5421">OnQueryCreditTickerDebtInfo</a> (<a class="el" href="structXTPCrdDebtStockInfo.html">XTPCrdDebtStockInfo</a> *debt_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:ac1bd5b47c50da5d34045285cfcee5421 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc88e812194ad34cff1842f9c5aae494 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_adc88e812194ad34cff1842f9c5aae494"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#adc88e812194ad34cff1842f9c5aae494">OnQueryCreditAssetDebtInfo</a> (double remain_amount, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, uint64_t session_id)</td></tr>
+<tr class="separator:adc88e812194ad34cff1842f9c5aae494 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addbfb70a461a311a594bbf62d48b975d inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_addbfb70a461a311a594bbf62d48b975d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#addbfb70a461a311a594bbf62d48b975d">OnQueryCreditTickerAssignInfo</a> (<a class="el" href="structXTPClientQueryCrdPositionStkInfo.html">XTPClientQueryCrdPositionStkInfo</a> *assign_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:addbfb70a461a311a594bbf62d48b975d inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79a81879ce4dd4de770cf9424ee8b628 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a79a81879ce4dd4de770cf9424ee8b628"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a79a81879ce4dd4de770cf9424ee8b628">OnQueryCreditExcessStock</a> (<a class="el" href="structXTPClientQueryCrdSurplusStkRspInfo.html">XTPClientQueryCrdSurplusStkRspInfo</a> *stock_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, uint64_t session_id)</td></tr>
+<tr class="separator:a79a81879ce4dd4de770cf9424ee8b628 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a4af815ca451b5a924a660c220df942 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a1a4af815ca451b5a924a660c220df942"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a1a4af815ca451b5a924a660c220df942">OnQueryMulCreditExcessStock</a> (<a class="el" href="structXTPClientQueryCrdSurplusStkRspInfo.html">XTPClientQueryCrdSurplusStkRspInfo</a> *stock_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, uint64_t session_id, bool is_last)</td></tr>
+<tr class="separator:a1a4af815ca451b5a924a660c220df942 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af779906ce118cfd2a0fd0586c8757755 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_af779906ce118cfd2a0fd0586c8757755"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#af779906ce118cfd2a0fd0586c8757755">OnCreditExtendDebtDate</a> (<a class="el" href="structXTPCreditDebtExtendNotice.html">XTPCreditDebtExtendNotice</a> *debt_extend_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:af779906ce118cfd2a0fd0586c8757755 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1cf51ea0516c5284d01637d64fce5c3 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_ac1cf51ea0516c5284d01637d64fce5c3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ac1cf51ea0516c5284d01637d64fce5c3">OnQueryCreditExtendDebtDateOrders</a> (<a class="el" href="structXTPCreditDebtExtendNotice.html">XTPCreditDebtExtendNotice</a> *debt_extend_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:ac1cf51ea0516c5284d01637d64fce5c3 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19fefc1f06dc35aa63bdc6977802a047 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a19fefc1f06dc35aa63bdc6977802a047"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a19fefc1f06dc35aa63bdc6977802a047">OnQueryCreditFundExtraInfo</a> (<a class="el" href="structXTPCrdFundExtraInfo.html">XTPCrdFundExtraInfo</a> *fund_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, uint64_t session_id)</td></tr>
+<tr class="separator:a19fefc1f06dc35aa63bdc6977802a047 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa50b00fea53f6d5b293b1aa4d3b553a5 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_aa50b00fea53f6d5b293b1aa4d3b553a5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#aa50b00fea53f6d5b293b1aa4d3b553a5">OnQueryCreditPositionExtraInfo</a> (<a class="el" href="structXTPCrdPositionExtraInfo.html">XTPCrdPositionExtraInfo</a> *fund_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:aa50b00fea53f6d5b293b1aa4d3b553a5 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a506eed13e5c00d461ab5de9c7aa18d72 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a506eed13e5c00d461ab5de9c7aa18d72"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a506eed13e5c00d461ab5de9c7aa18d72">OnOptionCombinedOrderEvent</a> (<a class="el" href="structXTPOptCombOrderInfo.html">XTPOptCombOrderInfo</a> *order_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:a506eed13e5c00d461ab5de9c7aa18d72 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08271e77a696e7bde968c83c64ce41fc inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a08271e77a696e7bde968c83c64ce41fc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a08271e77a696e7bde968c83c64ce41fc">OnOptionCombinedTradeEvent</a> (<a class="el" href="structXTPOptCombTradeReport.html">XTPOptCombTradeReport</a> *trade_info, uint64_t session_id)</td></tr>
+<tr class="separator:a08271e77a696e7bde968c83c64ce41fc inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49aecfab017d4549707427e784a4df3d inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a49aecfab017d4549707427e784a4df3d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a49aecfab017d4549707427e784a4df3d">OnCancelOptionCombinedOrderError</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a15a44284c4c4ddbaf0de42425d69a79a">XTPOptCombOrderCancelInfo</a> *cancel_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:a49aecfab017d4549707427e784a4df3d inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabcbc0b4316007b46c1a2be8ef031839 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_aabcbc0b4316007b46c1a2be8ef031839"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#aabcbc0b4316007b46c1a2be8ef031839">OnQueryOptionCombinedOrders</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a9aabc8d3b502ec48d6fa99c29e631e6b">XTPQueryOptCombOrderRsp</a> *order_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:aabcbc0b4316007b46c1a2be8ef031839 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a480eb3bb85444c94a69b6befddbf9ac0 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a480eb3bb85444c94a69b6befddbf9ac0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a480eb3bb85444c94a69b6befddbf9ac0">OnQueryOptionCombinedOrdersEx</a> (<a class="el" href="structXTPOptCombOrderInfoEx.html">XTPOptCombOrderInfoEx</a> *order_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a480eb3bb85444c94a69b6befddbf9ac0 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9326fc509d25d4b2b50101d0eac5071 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_ae9326fc509d25d4b2b50101d0eac5071"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ae9326fc509d25d4b2b50101d0eac5071">OnQueryOptionCombinedOrdersByPage</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a9aabc8d3b502ec48d6fa99c29e631e6b">XTPQueryOptCombOrderRsp</a> *order_info, int64_t req_count, int64_t order_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:ae9326fc509d25d4b2b50101d0eac5071 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a884cdb4d943647a8b056f8b942fc6352 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a884cdb4d943647a8b056f8b942fc6352"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a884cdb4d943647a8b056f8b942fc6352">OnQueryOptionCombinedOrdersByPageEx</a> (<a class="el" href="structXTPOptCombOrderInfoEx.html">XTPOptCombOrderInfoEx</a> *order_info, int64_t req_count, int64_t order_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a884cdb4d943647a8b056f8b942fc6352 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abcc62fef8da4ee5a2b81bce349e7c7ae inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_abcc62fef8da4ee5a2b81bce349e7c7ae"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#abcc62fef8da4ee5a2b81bce349e7c7ae">OnQueryOptionCombinedTrades</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a890f3b4206d449faf32db36aea77a8f9">XTPQueryOptCombTradeRsp</a> *trade_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:abcc62fef8da4ee5a2b81bce349e7c7ae inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8636d28289ea16d611a5a9a9298d8a9b inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a8636d28289ea16d611a5a9a9298d8a9b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a8636d28289ea16d611a5a9a9298d8a9b">OnQueryOptionCombinedTradesByPage</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a890f3b4206d449faf32db36aea77a8f9">XTPQueryOptCombTradeRsp</a> *trade_info, int64_t req_count, int64_t trade_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a8636d28289ea16d611a5a9a9298d8a9b inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66aed4726172d09055159f66b94a01f8 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a66aed4726172d09055159f66b94a01f8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a66aed4726172d09055159f66b94a01f8">OnQueryOptionCombinedPosition</a> (<a class="el" href="structXTPQueryOptCombPositionRsp.html">XTPQueryOptCombPositionRsp</a> *position_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a66aed4726172d09055159f66b94a01f8 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e8d5e920d040eef96a011026a04471b inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a3e8d5e920d040eef96a011026a04471b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a3e8d5e920d040eef96a011026a04471b">OnQueryOptionCombinedStrategyInfo</a> (<a class="el" href="structXTPQueryCombineStrategyInfoRsp.html">XTPQueryCombineStrategyInfoRsp</a> *strategy_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a3e8d5e920d040eef96a011026a04471b inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6db698288630fab857fc2f8a413e751d inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a6db698288630fab857fc2f8a413e751d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a6db698288630fab857fc2f8a413e751d">OnQueryOptionCombinedExecPosition</a> (<a class="el" href="structXTPQueryOptCombExecPosRsp.html">XTPQueryOptCombExecPosRsp</a> *position_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a6db698288630fab857fc2f8a413e751d inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeabc4d338eaddb101b7ae3934a6ab6da inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_aeabc4d338eaddb101b7ae3934a6ab6da"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#aeabc4d338eaddb101b7ae3934a6ab6da">OnQueryOrderEx</a> (<a class="el" href="structXTPOrderInfoEx.html">XTPOrderInfoEx</a> *order_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:aeabc4d338eaddb101b7ae3934a6ab6da inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9353d9aa19a43388c3299aa73508eef5 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a9353d9aa19a43388c3299aa73508eef5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a9353d9aa19a43388c3299aa73508eef5">OnQueryOrderByPage</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a5b58151f6301804cf4e293f9f919263d">XTPQueryOrderRsp</a> *order_info, int64_t req_count, int64_t order_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a9353d9aa19a43388c3299aa73508eef5 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef7f9beb13d87d79bb87be904ce0cdea inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_aef7f9beb13d87d79bb87be904ce0cdea"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#aef7f9beb13d87d79bb87be904ce0cdea">OnQueryOrderByPageEx</a> (<a class="el" href="structXTPOrderInfoEx.html">XTPOrderInfoEx</a> *order_info, int64_t req_count, int64_t order_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:aef7f9beb13d87d79bb87be904ce0cdea inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a427c328b11487aa194367222814e11b6 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a427c328b11487aa194367222814e11b6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a427c328b11487aa194367222814e11b6">OnQueryTradeByPage</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#ad336fb94f5589874c2c4469d6ef249d6">XTPQueryTradeRsp</a> *trade_info, int64_t req_count, int64_t trade_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a427c328b11487aa194367222814e11b6 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9738ac0274a8122192d80d89465ac538 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a9738ac0274a8122192d80d89465ac538"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a9738ac0274a8122192d80d89465ac538">OnQueryStructuredFund</a> (<a class="el" href="structXTPStructuredFundInfo.html">XTPStructuredFundInfo</a> *fund_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a9738ac0274a8122192d80d89465ac538 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2507f27f58bdfb65d4448d9a5d8447e inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_ab2507f27f58bdfb65d4448d9a5d8447e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ab2507f27f58bdfb65d4448d9a5d8447e">OnQueryFundTransfer</a> (<a class="el" href="structXTPFundTransferNotice.html">XTPFundTransferNotice</a> *fund_transfer_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:ab2507f27f58bdfb65d4448d9a5d8447e inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a177929dd9a3c592c6792bab3de7d1824 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a177929dd9a3c592c6792bab3de7d1824"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a177929dd9a3c592c6792bab3de7d1824">OnFundTransfer</a> (<a class="el" href="structXTPFundTransferNotice.html">XTPFundTransferNotice</a> *fund_transfer_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:a177929dd9a3c592c6792bab3de7d1824 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5bcf26bfcec91fb56617665a63a2c26 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_aa5bcf26bfcec91fb56617665a63a2c26"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#aa5bcf26bfcec91fb56617665a63a2c26">OnQueryOtherServerFund</a> (<a class="el" href="structXTPFundQueryRsp.html">XTPFundQueryRsp</a> *fund_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, uint64_t session_id)</td></tr>
+<tr class="separator:aa5bcf26bfcec91fb56617665a63a2c26 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9216359c7af2a47b20851b6f8e1b5ab3 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a9216359c7af2a47b20851b6f8e1b5ab3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a9216359c7af2a47b20851b6f8e1b5ab3">OnQueryETF</a> (<a class="el" href="structXTPQueryETFBaseRsp.html">XTPQueryETFBaseRsp</a> *etf_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a9216359c7af2a47b20851b6f8e1b5ab3 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac648cf7048b840378bbe10307605892b inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_ac648cf7048b840378bbe10307605892b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ac648cf7048b840378bbe10307605892b">OnQueryETFBasket</a> (<a class="el" href="structXTPQueryETFComponentRsp.html">XTPQueryETFComponentRsp</a> *etf_component_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:ac648cf7048b840378bbe10307605892b inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63fd4ffeaef3f2db241ec87d981079a1 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a63fd4ffeaef3f2db241ec87d981079a1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a63fd4ffeaef3f2db241ec87d981079a1">OnQueryIPOInfoList</a> (<a class="el" href="structXTPQueryIPOTickerRsp.html">XTPQueryIPOTickerRsp</a> *ipo_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a63fd4ffeaef3f2db241ec87d981079a1 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e9c7f5c92bf102109262776faf37bd8 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a9e9c7f5c92bf102109262776faf37bd8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a9e9c7f5c92bf102109262776faf37bd8">OnQueryIPOQuotaInfo</a> (<a class="el" href="structXTPQueryIPOQuotaRsp.html">XTPQueryIPOQuotaRsp</a> *quota_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a9e9c7f5c92bf102109262776faf37bd8 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b41fa838db1c2a250ab8d23f0b3bea8 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a0b41fa838db1c2a250ab8d23f0b3bea8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a0b41fa838db1c2a250ab8d23f0b3bea8">OnQueryOptionAuctionInfo</a> (<a class="el" href="structXTPQueryOptionAuctionInfoRsp.html">XTPQueryOptionAuctionInfoRsp</a> *option_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a0b41fa838db1c2a250ab8d23f0b3bea8 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abff6dbc72b2ff5b09c6014a16c351a72 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_abff6dbc72b2ff5b09c6014a16c351a72"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#abff6dbc72b2ff5b09c6014a16c351a72">OnCreditCashRepay</a> (<a class="el" href="structXTPCrdCashRepayRsp.html">XTPCrdCashRepayRsp</a> *cash_repay_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:abff6dbc72b2ff5b09c6014a16c351a72 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9df11f9586c48e18c34f2f3994509808 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a9df11f9586c48e18c34f2f3994509808"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a9df11f9586c48e18c34f2f3994509808">OnCreditCashRepayDebtInterestFee</a> (<a class="el" href="structXTPCrdCashRepayDebtInterestFeeRsp.html">XTPCrdCashRepayDebtInterestFeeRsp</a> *cash_repay_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:a9df11f9586c48e18c34f2f3994509808 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b3e13f332a1356e8ca2b5bb52dd1610 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a3b3e13f332a1356e8ca2b5bb52dd1610"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a3b3e13f332a1356e8ca2b5bb52dd1610">OnQueryCreditCashRepayInfo</a> (<a class="el" href="structXTPCrdCashRepayInfo.html">XTPCrdCashRepayInfo</a> *cash_repay_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a3b3e13f332a1356e8ca2b5bb52dd1610 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab12985fc6da7ad5cd4fea19ba50c3a2a inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_ab12985fc6da7ad5cd4fea19ba50c3a2a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ab12985fc6da7ad5cd4fea19ba50c3a2a">OnQueryCreditFundInfo</a> (<a class="el" href="structXTPCrdFundInfo.html">XTPCrdFundInfo</a> *fund_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, uint64_t session_id)</td></tr>
+<tr class="separator:ab12985fc6da7ad5cd4fea19ba50c3a2a inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc8d8552e743980d56c6822b9cfddeff inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_adc8d8552e743980d56c6822b9cfddeff"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#adc8d8552e743980d56c6822b9cfddeff">OnQueryCreditDebtInfo</a> (<a class="el" href="structXTPCrdDebtInfo.html">XTPCrdDebtInfo</a> *debt_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:adc8d8552e743980d56c6822b9cfddeff inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1bd5b47c50da5d34045285cfcee5421 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_ac1bd5b47c50da5d34045285cfcee5421"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ac1bd5b47c50da5d34045285cfcee5421">OnQueryCreditTickerDebtInfo</a> (<a class="el" href="structXTPCrdDebtStockInfo.html">XTPCrdDebtStockInfo</a> *debt_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:ac1bd5b47c50da5d34045285cfcee5421 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc88e812194ad34cff1842f9c5aae494 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_adc88e812194ad34cff1842f9c5aae494"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#adc88e812194ad34cff1842f9c5aae494">OnQueryCreditAssetDebtInfo</a> (double remain_amount, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, uint64_t session_id)</td></tr>
+<tr class="separator:adc88e812194ad34cff1842f9c5aae494 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addbfb70a461a311a594bbf62d48b975d inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_addbfb70a461a311a594bbf62d48b975d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#addbfb70a461a311a594bbf62d48b975d">OnQueryCreditTickerAssignInfo</a> (<a class="el" href="structXTPClientQueryCrdPositionStkInfo.html">XTPClientQueryCrdPositionStkInfo</a> *assign_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:addbfb70a461a311a594bbf62d48b975d inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79a81879ce4dd4de770cf9424ee8b628 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a79a81879ce4dd4de770cf9424ee8b628"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a79a81879ce4dd4de770cf9424ee8b628">OnQueryCreditExcessStock</a> (<a class="el" href="structXTPClientQueryCrdSurplusStkRspInfo.html">XTPClientQueryCrdSurplusStkRspInfo</a> *stock_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, uint64_t session_id)</td></tr>
+<tr class="separator:a79a81879ce4dd4de770cf9424ee8b628 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a4af815ca451b5a924a660c220df942 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a1a4af815ca451b5a924a660c220df942"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a1a4af815ca451b5a924a660c220df942">OnQueryMulCreditExcessStock</a> (<a class="el" href="structXTPClientQueryCrdSurplusStkRspInfo.html">XTPClientQueryCrdSurplusStkRspInfo</a> *stock_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, uint64_t session_id, bool is_last)</td></tr>
+<tr class="separator:a1a4af815ca451b5a924a660c220df942 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af779906ce118cfd2a0fd0586c8757755 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_af779906ce118cfd2a0fd0586c8757755"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#af779906ce118cfd2a0fd0586c8757755">OnCreditExtendDebtDate</a> (<a class="el" href="structXTPCreditDebtExtendNotice.html">XTPCreditDebtExtendNotice</a> *debt_extend_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:af779906ce118cfd2a0fd0586c8757755 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1cf51ea0516c5284d01637d64fce5c3 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_ac1cf51ea0516c5284d01637d64fce5c3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ac1cf51ea0516c5284d01637d64fce5c3">OnQueryCreditExtendDebtDateOrders</a> (<a class="el" href="structXTPCreditDebtExtendNotice.html">XTPCreditDebtExtendNotice</a> *debt_extend_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:ac1cf51ea0516c5284d01637d64fce5c3 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19fefc1f06dc35aa63bdc6977802a047 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a19fefc1f06dc35aa63bdc6977802a047"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a19fefc1f06dc35aa63bdc6977802a047">OnQueryCreditFundExtraInfo</a> (<a class="el" href="structXTPCrdFundExtraInfo.html">XTPCrdFundExtraInfo</a> *fund_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, uint64_t session_id)</td></tr>
+<tr class="separator:a19fefc1f06dc35aa63bdc6977802a047 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa50b00fea53f6d5b293b1aa4d3b553a5 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_aa50b00fea53f6d5b293b1aa4d3b553a5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#aa50b00fea53f6d5b293b1aa4d3b553a5">OnQueryCreditPositionExtraInfo</a> (<a class="el" href="structXTPCrdPositionExtraInfo.html">XTPCrdPositionExtraInfo</a> *fund_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:aa50b00fea53f6d5b293b1aa4d3b553a5 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a506eed13e5c00d461ab5de9c7aa18d72 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a506eed13e5c00d461ab5de9c7aa18d72"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a506eed13e5c00d461ab5de9c7aa18d72">OnOptionCombinedOrderEvent</a> (<a class="el" href="structXTPOptCombOrderInfo.html">XTPOptCombOrderInfo</a> *order_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:a506eed13e5c00d461ab5de9c7aa18d72 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08271e77a696e7bde968c83c64ce41fc inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a08271e77a696e7bde968c83c64ce41fc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a08271e77a696e7bde968c83c64ce41fc">OnOptionCombinedTradeEvent</a> (<a class="el" href="structXTPOptCombTradeReport.html">XTPOptCombTradeReport</a> *trade_info, uint64_t session_id)</td></tr>
+<tr class="separator:a08271e77a696e7bde968c83c64ce41fc inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49aecfab017d4549707427e784a4df3d inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a49aecfab017d4549707427e784a4df3d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a49aecfab017d4549707427e784a4df3d">OnCancelOptionCombinedOrderError</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a15a44284c4c4ddbaf0de42425d69a79a">XTPOptCombOrderCancelInfo</a> *cancel_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:a49aecfab017d4549707427e784a4df3d inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabcbc0b4316007b46c1a2be8ef031839 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_aabcbc0b4316007b46c1a2be8ef031839"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#aabcbc0b4316007b46c1a2be8ef031839">OnQueryOptionCombinedOrders</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a9aabc8d3b502ec48d6fa99c29e631e6b">XTPQueryOptCombOrderRsp</a> *order_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:aabcbc0b4316007b46c1a2be8ef031839 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a480eb3bb85444c94a69b6befddbf9ac0 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a480eb3bb85444c94a69b6befddbf9ac0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a480eb3bb85444c94a69b6befddbf9ac0">OnQueryOptionCombinedOrdersEx</a> (<a class="el" href="structXTPOptCombOrderInfoEx.html">XTPOptCombOrderInfoEx</a> *order_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a480eb3bb85444c94a69b6befddbf9ac0 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9326fc509d25d4b2b50101d0eac5071 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_ae9326fc509d25d4b2b50101d0eac5071"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ae9326fc509d25d4b2b50101d0eac5071">OnQueryOptionCombinedOrdersByPage</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a9aabc8d3b502ec48d6fa99c29e631e6b">XTPQueryOptCombOrderRsp</a> *order_info, int64_t req_count, int64_t order_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:ae9326fc509d25d4b2b50101d0eac5071 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a884cdb4d943647a8b056f8b942fc6352 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a884cdb4d943647a8b056f8b942fc6352"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a884cdb4d943647a8b056f8b942fc6352">OnQueryOptionCombinedOrdersByPageEx</a> (<a class="el" href="structXTPOptCombOrderInfoEx.html">XTPOptCombOrderInfoEx</a> *order_info, int64_t req_count, int64_t order_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a884cdb4d943647a8b056f8b942fc6352 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abcc62fef8da4ee5a2b81bce349e7c7ae inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_abcc62fef8da4ee5a2b81bce349e7c7ae"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#abcc62fef8da4ee5a2b81bce349e7c7ae">OnQueryOptionCombinedTrades</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a890f3b4206d449faf32db36aea77a8f9">XTPQueryOptCombTradeRsp</a> *trade_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:abcc62fef8da4ee5a2b81bce349e7c7ae inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8636d28289ea16d611a5a9a9298d8a9b inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a8636d28289ea16d611a5a9a9298d8a9b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a8636d28289ea16d611a5a9a9298d8a9b">OnQueryOptionCombinedTradesByPage</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a890f3b4206d449faf32db36aea77a8f9">XTPQueryOptCombTradeRsp</a> *trade_info, int64_t req_count, int64_t trade_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a8636d28289ea16d611a5a9a9298d8a9b inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66aed4726172d09055159f66b94a01f8 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a66aed4726172d09055159f66b94a01f8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a66aed4726172d09055159f66b94a01f8">OnQueryOptionCombinedPosition</a> (<a class="el" href="structXTPQueryOptCombPositionRsp.html">XTPQueryOptCombPositionRsp</a> *position_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a66aed4726172d09055159f66b94a01f8 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e8d5e920d040eef96a011026a04471b inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a3e8d5e920d040eef96a011026a04471b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a3e8d5e920d040eef96a011026a04471b">OnQueryOptionCombinedStrategyInfo</a> (<a class="el" href="structXTPQueryCombineStrategyInfoRsp.html">XTPQueryCombineStrategyInfoRsp</a> *strategy_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a3e8d5e920d040eef96a011026a04471b inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6db698288630fab857fc2f8a413e751d inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a6db698288630fab857fc2f8a413e751d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a6db698288630fab857fc2f8a413e751d">OnQueryOptionCombinedExecPosition</a> (<a class="el" href="structXTPQueryOptCombExecPosRsp.html">XTPQueryOptCombExecPosRsp</a> *position_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:a6db698288630fab857fc2f8a413e751d inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2149a345d9d98193822424e5608d725 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_ac2149a345d9d98193822424e5608d725"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ac2149a345d9d98193822424e5608d725">OnQueryStrategy</a> (<a class="el" href="structXTPStrategyInfoStruct.html">XTPStrategyInfoStruct</a> *strategy_info, char *strategy_param, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, int32_t request_id, bool is_last, uint64_t session_id)</td></tr>
+<tr class="separator:ac2149a345d9d98193822424e5608d725 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a2ac255cbf11017396faea220c2eef6 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a6a2ac255cbf11017396faea220c2eef6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a6a2ac255cbf11017396faea220c2eef6">OnStrategyStateReport</a> (<a class="el" href="structXTPStrategyStateReportStruct.html">XTPStrategyStateReportStruct</a> *strategy_state, uint64_t session_id)</td></tr>
+<tr class="separator:a6a2ac255cbf11017396faea220c2eef6 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a994429722a50aaa1fce982855e0f67bd inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a994429722a50aaa1fce982855e0f67bd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a994429722a50aaa1fce982855e0f67bd">OnALGOUserEstablishChannel</a> (char *<a class="el" href="demo__send__order_8cpp.html#a6dfa0071362986f2680867cd51fa2ea8">user</a>, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:a994429722a50aaa1fce982855e0f67bd inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e97cfda425bd0da9ae1edf06e85c780 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a4e97cfda425bd0da9ae1edf06e85c780"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a4e97cfda425bd0da9ae1edf06e85c780">OnInsertAlgoOrder</a> (<a class="el" href="structXTPStrategyInfoStruct.html">XTPStrategyInfoStruct</a> *strategy_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:a4e97cfda425bd0da9ae1edf06e85c780 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae207f7dd85a7e078c0cff7e1bcaa081f inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_ae207f7dd85a7e078c0cff7e1bcaa081f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ae207f7dd85a7e078c0cff7e1bcaa081f">OnCancelAlgoOrder</a> (<a class="el" href="structXTPStrategyInfoStruct.html">XTPStrategyInfoStruct</a> *strategy_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, uint64_t session_id)</td></tr>
+<tr class="separator:ae207f7dd85a7e078c0cff7e1bcaa081f inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc946601e5c42099a1461f1d19086061 inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_acc946601e5c42099a1461f1d19086061"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#acc946601e5c42099a1461f1d19086061">OnAlgoDisconnected</a> (int reason)</td></tr>
+<tr class="separator:acc946601e5c42099a1461f1d19086061 inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d899368133d5235c5216e0932e8dcac inherit pub_methods_classXTP_1_1API_1_1TraderSpi" id="r_a3d899368133d5235c5216e0932e8dcac"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a3d899368133d5235c5216e0932e8dcac">OnAlgoConnected</a> ()</td></tr>
+<tr class="memdesc:a3d899368133d5235c5216e0932e8dcac inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="mdescLeft">&#160;</td><td class="mdescRight">当客户端与AlgoBus断线后重新连接时，该方法被调用，仅在断线重连成功后会被调用。  <br /></td></tr>
+<tr class="separator:a3d899368133d5235c5216e0932e8dcac inherit pub_methods_classXTP_1_1API_1_1TraderSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classITraderApi"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classITraderApi')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classITraderApi.html">ITraderApi</a></td></tr>
+<tr class="memitem:a3c9fbb974fc0c2a248290448f3bfe4c4 inherit pub_methods_classITraderApi" id="r_a3c9fbb974fc0c2a248290448f3bfe4c4"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderApi.html#a3c9fbb974fc0c2a248290448f3bfe4c4">~ITraderApi</a> ()</td></tr>
+<tr class="separator:a3c9fbb974fc0c2a248290448f3bfe4c4 inherit pub_methods_classITraderApi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a008374139717e7e6dd86b7f117ec8dc1 inherit pub_methods_classITraderApi" id="r_a008374139717e7e6dd86b7f117ec8dc1"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classIStkTraderApi.html">IStkTraderApi</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderApi.html#a008374139717e7e6dd86b7f117ec8dc1">getStkTrader</a> ()</td></tr>
+<tr class="separator:a008374139717e7e6dd86b7f117ec8dc1 inherit pub_methods_classITraderApi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85ba593d89855f87b64b535eeda88117 inherit pub_methods_classITraderApi" id="r_a85ba593d89855f87b64b535eeda88117"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classIOptTraderApi.html">IOptTraderApi</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderApi.html#a85ba593d89855f87b64b535eeda88117">getOptTrader</a> ()</td></tr>
+<tr class="separator:a85ba593d89855f87b64b535eeda88117 inherit pub_methods_classITraderApi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca40d1a215642cb3942aca5043c6d46b inherit pub_methods_classITraderApi" id="r_aca40d1a215642cb3942aca5043c6d46b"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderApi.html#aca40d1a215642cb3942aca5043c6d46b">querySettlement</a> (uint32_t uDate)</td></tr>
+<tr class="separator:aca40d1a215642cb3942aca5043c6d46b inherit pub_methods_classITraderApi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 类型</h2></td></tr>
+<tr class="memitem:aff33ef4445706b9514451ade02ec2f5e" id="r_aff33ef4445706b9514451ade02ec2f5e"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classWTSHashMap.html">WTSHashMap</a>&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#aff33ef4445706b9514451ade02ec2f5e">PositionMap</a></td></tr>
+<tr class="separator:aff33ef4445706b9514451ade02ec2f5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a1fdabbe42ecbba22be2894a4c1ac24" id="r_a9a1fdabbe42ecbba22be2894a4c1ac24"><td class="memItemLeft" align="right" valign="top">typedef std::shared_ptr&lt; boost::asio::io_service::work &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a9a1fdabbe42ecbba22be2894a4c1ac24">BoostWorkerPtr</a></td></tr>
+<tr class="separator:a9a1fdabbe42ecbba22be2894a4c1ac24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7958c9f74abdaf54e53f97bd68f79bd3" id="r_a7958c9f74abdaf54e53f97bd68f79bd3"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classXTP_1_1API_1_1TraderApi.html">XTP::API::TraderApi</a> *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a7958c9f74abdaf54e53f97bd68f79bd3">XTPCreator</a>) (uint8_t, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a88235abf8fbc5541e11e53dbc85e192c">XTP_LOG_LEVEL</a>)</td></tr>
+<tr class="separator:a7958c9f74abdaf54e53f97bd68f79bd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 成员函数</h2></td></tr>
+<tr class="memitem:a3d7d4857d802b11d0a5adb6b3e8cc9ef" id="r_a3d7d4857d802b11d0a5adb6b3e8cc9ef"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a3d7d4857d802b11d0a5adb6b3e8cc9ef">reconnect</a> ()</td></tr>
+<tr class="separator:a3d7d4857d802b11d0a5adb6b3e8cc9ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93df768462406e283fbe5290b1b39525" id="r_a93df768462406e283fbe5290b1b39525"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a93df768462406e283fbe5290b1b39525">genRequestID</a> ()</td></tr>
+<tr class="separator:a93df768462406e283fbe5290b1b39525"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0993740dfa485c5ae08c1f1a927d60e7" id="r_a0993740dfa485c5ae08c1f1a927d60e7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a0993740dfa485c5ae08c1f1a927d60e7">doLogin</a> ()</td></tr>
+<tr class="separator:a0993740dfa485c5ae08c1f1a927d60e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d734d60803d4de80d80c016f6684bbe" id="r_a6d734d60803d4de80d80c016f6684bbe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSOrderInfo.html">WTSOrderInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a6d734d60803d4de80d80c016f6684bbe">makeOrderInfo</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a5b58151f6301804cf4e293f9f919263d">XTPQueryOrderRsp</a> *orderField)</td></tr>
+<tr class="separator:a6d734d60803d4de80d80c016f6684bbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6c4a5dd7758c1f4ca67049e0ff786c9" id="r_ab6c4a5dd7758c1f4ca67049e0ff786c9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSEntrust.html">WTSEntrust</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#ab6c4a5dd7758c1f4ca67049e0ff786c9">makeEntrust</a> (<a class="el" href="structXTPOrderInfo.html">XTPOrderInfo</a> *entrustField)</td></tr>
+<tr class="separator:ab6c4a5dd7758c1f4ca67049e0ff786c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e237b769c599fbf4229cdeeb0bce6e9" id="r_a1e237b769c599fbf4229cdeeb0bce6e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSTradeInfo.html">WTSTradeInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a1e237b769c599fbf4229cdeeb0bce6e9">makeTradeInfo</a> (<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#ad336fb94f5589874c2c4469d6ef249d6">XTPQueryTradeRsp</a> *tradeField)</td></tr>
+<tr class="separator:a1e237b769c599fbf4229cdeeb0bce6e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12ea2a0b901cd047ee33810af9f061a0" id="r_a12ea2a0b901cd047ee33810af9f061a0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a12ea2a0b901cd047ee33810af9f061a0">extractEntrustID</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *entrustid, uint32_t &amp;orderRef)</td></tr>
+<tr class="separator:a12ea2a0b901cd047ee33810af9f061a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abcd5c7dde9a7fbd985e483d587c92ebf" id="r_abcd5c7dde9a7fbd985e483d587c92ebf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#abcd5c7dde9a7fbd985e483d587c92ebf">genEntrustID</a> (char *buffer, uint32_t orderRef)</td></tr>
+<tr class="separator:abcd5c7dde9a7fbd985e483d587c92ebf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:aa2e8a6ec0f82e9d8be4507d67a46eb44" id="r_aa2e8a6ec0f82e9d8be4507d67a46eb44"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classXTP_1_1API_1_1TraderApi.html">XTP::API::TraderApi</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#aa2e8a6ec0f82e9d8be4507d67a46eb44">_api</a></td></tr>
+<tr class="separator:aa2e8a6ec0f82e9d8be4507d67a46eb44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab6b3e1b7dd3926a0e9a758ee020130d" id="r_aab6b3e1b7dd3926a0e9a758ee020130d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classITraderSpi.html">ITraderSpi</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#aab6b3e1b7dd3926a0e9a758ee020130d">_sink</a></td></tr>
+<tr class="separator:aab6b3e1b7dd3926a0e9a758ee020130d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8256ce44b3c8c6cfc2f2a8c3a9e7b437" id="r_a8256ce44b3c8c6cfc2f2a8c3a9e7b437"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTraderXTP.html#aff33ef4445706b9514451ade02ec2f5e">PositionMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a8256ce44b3c8c6cfc2f2a8c3a9e7b437">_positions</a></td></tr>
+<tr class="separator:a8256ce44b3c8c6cfc2f2a8c3a9e7b437"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a059b82189ff845f27ef4394ced3f3e71" id="r_a059b82189ff845f27ef4394ced3f3e71"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSArray.html">WTSArray</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a059b82189ff845f27ef4394ced3f3e71">_trades</a></td></tr>
+<tr class="separator:a059b82189ff845f27ef4394ced3f3e71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff30f5cd4e37daa317ba507bc3f1d5df" id="r_aff30f5cd4e37daa317ba507bc3f1d5df"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSArray.html">WTSArray</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#aff30f5cd4e37daa317ba507bc3f1d5df">_orders</a></td></tr>
+<tr class="separator:aff30f5cd4e37daa317ba507bc3f1d5df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f0ed1d543c06ec8dfb760939915a0c4" id="r_a9f0ed1d543c06ec8dfb760939915a0c4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a9f0ed1d543c06ec8dfb760939915a0c4">_bd_mgr</a></td></tr>
+<tr class="separator:a9f0ed1d543c06ec8dfb760939915a0c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51208a850efb0f7152a7f1af83cc5b5f" id="r_a51208a850efb0f7152a7f1af83cc5b5f"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a51208a850efb0f7152a7f1af83cc5b5f">_user</a></td></tr>
+<tr class="separator:a51208a850efb0f7152a7f1af83cc5b5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30ece1f37d6273cfb6046d9d2db8a4ea" id="r_a30ece1f37d6273cfb6046d9d2db8a4ea"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a30ece1f37d6273cfb6046d9d2db8a4ea">_pass</a></td></tr>
+<tr class="separator:a30ece1f37d6273cfb6046d9d2db8a4ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0daf6f2998b2941d955b1864b0d4f8a" id="r_ab0daf6f2998b2941d955b1864b0d4f8a"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#ab0daf6f2998b2941d955b1864b0d4f8a">_flowdir</a></td></tr>
+<tr class="separator:ab0daf6f2998b2941d955b1864b0d4f8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6288a26ec08fd53b89845d5ed1ca5d37" id="r_a6288a26ec08fd53b89845d5ed1ca5d37"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a6288a26ec08fd53b89845d5ed1ca5d37">_acckey</a></td></tr>
+<tr class="separator:a6288a26ec08fd53b89845d5ed1ca5d37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a970d17a4626ad025ece112535237e050" id="r_a970d17a4626ad025ece112535237e050"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a970d17a4626ad025ece112535237e050">_host</a></td></tr>
+<tr class="separator:a970d17a4626ad025ece112535237e050"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd1e41d67e44aae41da80ebad18e1aa1" id="r_acd1e41d67e44aae41da80ebad18e1aa1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#acd1e41d67e44aae41da80ebad18e1aa1">_port</a></td></tr>
+<tr class="separator:acd1e41d67e44aae41da80ebad18e1aa1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70e61a15daa3ad402e6a8531af48c8c4" id="r_a70e61a15daa3ad402e6a8531af48c8c4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a70e61a15daa3ad402e6a8531af48c8c4">_client</a></td></tr>
+<tr class="separator:a70e61a15daa3ad402e6a8531af48c8c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7e9d875b1c947dffaada69bd2348533" id="r_ad7e9d875b1c947dffaada69bd2348533"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#ad7e9d875b1c947dffaada69bd2348533">_quick</a></td></tr>
+<tr class="separator:ad7e9d875b1c947dffaada69bd2348533"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13b46fb253b09eb9fd6c65642646b8ba" id="r_a13b46fb253b09eb9fd6c65642646b8ba"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a13b46fb253b09eb9fd6c65642646b8ba">_inited</a></td></tr>
+<tr class="separator:a13b46fb253b09eb9fd6c65642646b8ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b9649ac4921df53d31488194d759e37" id="r_a7b9649ac4921df53d31488194d759e37"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a7b9649ac4921df53d31488194d759e37">_hbInterval</a></td></tr>
+<tr class="separator:a7b9649ac4921df53d31488194d759e37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd579fd94300788f0ec7d7c136c7202e" id="r_abd579fd94300788f0ec7d7c136c7202e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTraderXTP.html#a1250adf552c98eec0be400abb6b9cc66">TraderState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#abd579fd94300788f0ec7d7c136c7202e">_state</a></td></tr>
+<tr class="separator:abd579fd94300788f0ec7d7c136c7202e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e580aedde0198a96ab5a73cf5f4bef7" id="r_a9e580aedde0198a96ab5a73cf5f4bef7"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a9e580aedde0198a96ab5a73cf5f4bef7">_sessionid</a></td></tr>
+<tr class="separator:a9e580aedde0198a96ab5a73cf5f4bef7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec1ec42d6fc19cbf6cb32e340a3af724" id="r_aec1ec42d6fc19cbf6cb32e340a3af724"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#aec1ec42d6fc19cbf6cb32e340a3af724">_tradingday</a></td></tr>
+<tr class="separator:aec1ec42d6fc19cbf6cb32e340a3af724"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ef476fdd32ea82410bf79c9bf343ee7" id="r_a6ef476fdd32ea82410bf79c9bf343ee7"><td class="memItemLeft" align="right" valign="top">std::atomic&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a6ef476fdd32ea82410bf79c9bf343ee7">_reqid</a></td></tr>
+<tr class="separator:a6ef476fdd32ea82410bf79c9bf343ee7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6790058723ddb23af7087debf889f81" id="r_ab6790058723ddb23af7087debf889f81"><td class="memItemLeft" align="right" valign="top">std::atomic&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#ab6790058723ddb23af7087debf889f81">_ordref</a></td></tr>
+<tr class="separator:ab6790058723ddb23af7087debf889f81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a379a274b1f057b109dfb907e8b221aa6" id="r_a379a274b1f057b109dfb907e8b221aa6"><td class="memItemLeft" align="right" valign="top">boost::asio::io_service&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a379a274b1f057b109dfb907e8b221aa6">_asyncio</a></td></tr>
+<tr class="separator:a379a274b1f057b109dfb907e8b221aa6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bedbd84321b121406496ad1ba21874b" id="r_a3bedbd84321b121406496ad1ba21874b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a3bedbd84321b121406496ad1ba21874b">_thrd_worker</a></td></tr>
+<tr class="separator:a3bedbd84321b121406496ad1ba21874b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa26f096edd862193542157508ea47b12" id="r_aa26f096edd862193542157508ea47b12"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTraderXTP.html#a9a1fdabbe42ecbba22be2894a4c1ac24">BoostWorkerPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#aa26f096edd862193542157508ea47b12">_worker</a></td></tr>
+<tr class="separator:aa26f096edd862193542157508ea47b12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a701e606c88b5f554f4347f99d61c71" id="r_a4a701e606c88b5f554f4347f99d61c71"><td class="memItemLeft" align="right" valign="top"><a class="el" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a4a701e606c88b5f554f4347f99d61c71">m_hInstXTP</a></td></tr>
+<tr class="separator:a4a701e606c88b5f554f4347f99d61c71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d4eae7e97ca795df5142f937ceea2eb" id="r_a0d4eae7e97ca795df5142f937ceea2eb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTraderXTP.html#a7958c9f74abdaf54e53f97bd68f79bd3">XTPCreator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#a0d4eae7e97ca795df5142f937ceea2eb">m_funcCreator</a></td></tr>
+<tr class="separator:a0d4eae7e97ca795df5142f937ceea2eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa86e66004891e187f8f3c3869a3de41" id="r_aaa86e66004891e187f8f3c3869a3de41"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtKVCache.html">WtKVCache</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#aaa86e66004891e187f8f3c3869a3de41">m_eidCache</a></td></tr>
+<tr class="separator:aaa86e66004891e187f8f3c3869a3de41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa6766ed79a6c5b946b4b800de42d0b6" id="r_afa6766ed79a6c5b946b4b800de42d0b6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtKVCache.html">WtKVCache</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderXTP.html#afa6766ed79a6c5b946b4b800de42d0b6">m_oidCache</a></td></tr>
+<tr class="separator:afa6766ed79a6c5b946b4b800de42d0b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock">
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00026">26</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="a9a1fdabbe42ecbba22be2894a4c1ac24" name="a9a1fdabbe42ecbba22be2894a4c1ac24"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a1fdabbe42ecbba22be2894a4c1ac24">&#9670;&#160;</a></span>BoostWorkerPtr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::shared_ptr&lt;boost::asio::io_service::work&gt; <a class="el" href="classTraderXTP.html#a9a1fdabbe42ecbba22be2894a4c1ac24">TraderXTP::BoostWorkerPtr</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00142">142</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aff33ef4445706b9514451ade02ec2f5e" name="aff33ef4445706b9514451ade02ec2f5e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff33ef4445706b9514451ade02ec2f5e">&#9670;&#160;</a></span>PositionMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="classWTSHashMap.html">WTSHashMap</a>&lt;std::string&gt; <a class="el" href="classTraderXTP.html#aff33ef4445706b9514451ade02ec2f5e">TraderXTP::PositionMap</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00111">111</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7958c9f74abdaf54e53f97bd68f79bd3" name="a7958c9f74abdaf54e53f97bd68f79bd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7958c9f74abdaf54e53f97bd68f79bd3">&#9670;&#160;</a></span>XTPCreator</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="classXTP_1_1API_1_1TraderApi.html">XTP::API::TraderApi</a> *(* TraderXTP::XTPCreator) (uint8_t, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a88235abf8fbc5541e11e53dbc85e192c">XTP_LOG_LEVEL</a>)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00146">146</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员枚举类型说明</h2>
+<a id="a1250adf552c98eec0be400abb6b9cc66" name="a1250adf552c98eec0be400abb6b9cc66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1250adf552c98eec0be400abb6b9cc66">&#9670;&#160;</a></span>TraderState</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classTraderXTP.html#a1250adf552c98eec0be400abb6b9cc66">TraderXTP::TraderState</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a1250adf552c98eec0be400abb6b9cc66a4b360d980b6996c905fb08d0a6a6cfca" name="a1250adf552c98eec0be400abb6b9cc66a4b360d980b6996c905fb08d0a6a6cfca"></a>TS_NOTLOGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a1250adf552c98eec0be400abb6b9cc66af9e19b105938e6bbf421e1e57034f26b" name="a1250adf552c98eec0be400abb6b9cc66af9e19b105938e6bbf421e1e57034f26b"></a>TS_LOGINING&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a1250adf552c98eec0be400abb6b9cc66a625587e6fdbdf2e65fe61cdfcb2121de" name="a1250adf552c98eec0be400abb6b9cc66a625587e6fdbdf2e65fe61cdfcb2121de"></a>TS_LOGINED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a1250adf552c98eec0be400abb6b9cc66af8e59020130f2768dc04b4c5ada724c0" name="a1250adf552c98eec0be400abb6b9cc66af8e59020130f2768dc04b4c5ada724c0"></a>TS_LOGINFAILED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a1250adf552c98eec0be400abb6b9cc66ad2bc64bfd7fc26dc6b94d757b3027a83" name="a1250adf552c98eec0be400abb6b9cc66ad2bc64bfd7fc26dc6b94d757b3027a83"></a>TS_ALLREADY&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00032">32</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a6ce780aa42dc4bed34ff085957d4b230" name="a6ce780aa42dc4bed34ff085957d4b230"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ce780aa42dc4bed34ff085957d4b230">&#9670;&#160;</a></span>TraderXTP()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">TraderXTP::TraderXTP </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00168">168</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5d81e0b41560a40d2ae226aa4e25a475" name="a5d81e0b41560a40d2ae226aa4e25a475"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d81e0b41560a40d2ae226aa4e25a475">&#9670;&#160;</a></span>~TraderXTP()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">TraderXTP::~TraderXTP </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00183">183</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="abafec5cb8efb3d7b253acb1db030be63" name="abafec5cb8efb3d7b253acb1db030be63"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abafec5cb8efb3d7b253acb1db030be63">&#9670;&#160;</a></span>connect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::connect </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a11c094c1c14154bb4891c293a07deabf">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00689">689</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a949724d8f59bab1e086b975ce754c8bc" name="a949724d8f59bab1e086b975ce754c8bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a949724d8f59bab1e086b975ce754c8bc">&#9670;&#160;</a></span>disconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::disconnect </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a7c246697b25277da2d9fbb58c30913d0">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00708">708</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0993740dfa485c5ae08c1f1a927d60e7" name="a0993740dfa485c5ae08c1f1a927d60e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0993740dfa485c5ae08c1f1a927d60e7">&#9670;&#160;</a></span>doLogin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::doLogin </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00754">754</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a12ea2a0b901cd047ee33810af9f061a0" name="a12ea2a0b901cd047ee33810af9f061a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12ea2a0b901cd047ee33810af9f061a0">&#9670;&#160;</a></span>extractEntrustID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TraderXTP::extractEntrustID </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>entrustid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t &amp;&#160;</td>
+          <td class="paramname"><em>orderRef</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00724">724</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abcd5c7dde9a7fbd985e483d587c92ebf" name="abcd5c7dde9a7fbd985e483d587c92ebf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abcd5c7dde9a7fbd985e483d587c92ebf">&#9670;&#160;</a></span>genEntrustID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::genEntrustID </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>orderRef</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00718">718</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a93df768462406e283fbe5290b1b39525" name="a93df768462406e283fbe5290b1b39525"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a93df768462406e283fbe5290b1b39525">&#9670;&#160;</a></span>genRequestID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t TraderXTP::genRequestID </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00899">899</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a36889a067394c4d7f5384f2f67205bfc" name="a36889a067394c4d7f5384f2f67205bfc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36889a067394c4d7f5384f2f67205bfc">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TraderXTP::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>params</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a80a978e6a1bd9d058cb4b48c7044177a">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00583">583</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a68c8fed4466a768218680d79a1e0933d" name="a68c8fed4466a768218680d79a1e0933d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a68c8fed4466a768218680d79a1e0933d">&#9670;&#160;</a></span>isConnected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TraderXTP::isConnected </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a6a394d7c8f262a4a1ddf98c802eca6b6">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00713">713</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1d772d328f4c50ec00833d22bc4ec4ad" name="a1d772d328f4c50ec00833d22bc4ec4ad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d772d328f4c50ec00833d22bc4ec4ad">&#9670;&#160;</a></span>login()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderXTP::login </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>user</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pass</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>productInfo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#af7b094f6e60e77d4bce04dbe12b5eadf">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00820">820</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a73dc7006ea814a0491cbe6d96f970633" name="a73dc7006ea814a0491cbe6d96f970633"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73dc7006ea814a0491cbe6d96f970633">&#9670;&#160;</a></span>logout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderXTP::logout </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a59fc8bf49c09920ced220d2c000f6b38">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00834">834</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab6c4a5dd7758c1f4ca67049e0ff786c9" name="ab6c4a5dd7758c1f4ca67049e0ff786c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6c4a5dd7758c1f4ca67049e0ff786c9">&#9670;&#160;</a></span>makeEntrust()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSEntrust.html">WTSEntrust</a> * TraderXTP::makeEntrust </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structXTPOrderInfo.html">XTPOrderInfo</a> *&#160;</td>
+          <td class="paramname"><em>entrustField</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00189">189</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4aa2acff6ca1ddf82c9d9877f5fa7550" name="a4aa2acff6ca1ddf82c9d9877f5fa7550"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4aa2acff6ca1ddf82c9d9877f5fa7550">&#9670;&#160;</a></span>makeEntrustID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TraderXTP::makeEntrustID </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a68e6d3df33d58bffede1250b693e3a83">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00735">735</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6d734d60803d4de80d80c016f6684bbe" name="a6d734d60803d4de80d80c016f6684bbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d734d60803d4de80d80c016f6684bbe">&#9670;&#160;</a></span>makeOrderInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSOrderInfo.html">WTSOrderInfo</a> * TraderXTP::makeOrderInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a5b58151f6301804cf4e293f9f919263d">XTPQueryOrderRsp</a> *&#160;</td>
+          <td class="paramname"><em>orderField</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00229">229</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1e237b769c599fbf4229cdeeb0bce6e9" name="a1e237b769c599fbf4229cdeeb0bce6e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1e237b769c599fbf4229cdeeb0bce6e9">&#9670;&#160;</a></span>makeTradeInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSTradeInfo.html">WTSTradeInfo</a> * TraderXTP::makeTradeInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#ad336fb94f5589874c2c4469d6ef249d6">XTPQueryTradeRsp</a> *&#160;</td>
+          <td class="paramname"><em>tradeField</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00298">298</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9d24bca2a4fb45c6f3aecda3df6f6e92" name="a9d24bca2a4fb45c6f3aecda3df6f6e92"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d24bca2a4fb45c6f3aecda3df6f6e92">&#9670;&#160;</a></span>OnCancelOrderError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::OnCancelOrderError </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structXTPOrderCancelInfo.html">XTPOrderCancelInfo</a> *&#160;</td>
+          <td class="paramname"><em>cancel_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *&#160;</td>
+          <td class="paramname"><em>error_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>session_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>撤单出错响应 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cancel_info</td><td>撤单具体信息，包括撤单的order_cancel_xtp_id和待撤单的order_xtp_id </td></tr>
+    <tr><td class="paramname">error_info</td><td>撤单被拒绝或者发生错误时错误代码和错误信息，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线，当error_info为空，或者error_info.error_id为0时，表明没有错误 </td></tr>
+    <tr><td class="paramname">session_id</td><td>资金账户对应的session_id，登录时得到 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>备注</dt><dd>此响应只会在撤单发生错误时被回调 </dd></dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ae9544f1968385a42f5d384e522f9750f">XTP::API::TraderSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00401">401</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a45a78d8932d8c28090fb48aea596910c" name="a45a78d8932d8c28090fb48aea596910c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45a78d8932d8c28090fb48aea596910c">&#9670;&#160;</a></span>OnDisconnected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::OnDisconnected </td>
+          <td>(</td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>session_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>reason</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>当客户端的某个连接与交易后台通信连接断开时，该方法被调用。 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">reason</td><td>错误原因，请与错误代码表对应 </td></tr>
+    <tr><td class="paramname">session_id</td><td>资金账户对应的session_id，登录时得到 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>备注</dt><dd>用户主动调用logout导致的断线，不会触发此函数。api不会自动重连，当断线发生时，请用户自行选择后续操作，可以在此函数中调用Login重新登录，并更新session_id，此时用户收到的数据跟断线之前是连续的 </dd></dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1TraderSpi.html#ad138f572fe652e3ce4cb4299ecd8c9db">XTP::API::TraderSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00346">346</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a16759b2108504d2b071d0e43ec061223" name="a16759b2108504d2b071d0e43ec061223"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16759b2108504d2b071d0e43ec061223">&#9670;&#160;</a></span>OnError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::OnError </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *&#160;</td>
+          <td class="paramname"><em>error_info</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>错误应答 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">error_info</td><td>当服务器响应发生错误时的具体的错误代码和错误信息,当error_info为空，或者error_info.error_id为0时，表明没有错误 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>备注</dt><dd>此函数只有在服务器发生错误时才会调用，一般无需用户处理 </dd></dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a941b7b6bc3bb0b532e0d5f62ce318709">XTP::API::TraderSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00358">358</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4343e14b1e766a288d36ad7775a7ddc8" name="a4343e14b1e766a288d36ad7775a7ddc8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4343e14b1e766a288d36ad7775a7ddc8">&#9670;&#160;</a></span>OnOrderEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::OnOrderEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structXTPOrderInfo.html">XTPOrderInfo</a> *&#160;</td>
+          <td class="paramname"><em>order_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *&#160;</td>
+          <td class="paramname"><em>error_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>session_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>报单通知 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">order_info</td><td>订单响应具体信息，用户可以通过order_info.order_xtp_id来管理订单，通过GetClientIDByXTPID() == client_id来过滤自己的订单，order_info.qty_left字段在订单为未成交、部成、全成、废单状态时，表示此订单还没有成交的数量，在部撤、全撤状态时，表示此订单被撤的数量。order_info.order_cancel_xtp_id为其所对应的撤单ID，不为0时表示此单被撤成功 </td></tr>
+    <tr><td class="paramname">error_info</td><td>订单被拒绝或者发生错误时错误代码和错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误 </td></tr>
+    <tr><td class="paramname">session_id</td><td>资金账户对应的session_id，登录时得到 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>备注</dt><dd>每次订单状态更新时，都会被调用，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线，在订单未成交、全部成交、全部撤单、部分撤单、已拒绝这些状态时会有响应，对于部分成交的情况，请由订单的成交回报来自行确认。所有登录了此用户的客户端都将收到此用户的订单响应 </dd></dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a7f28ca6da309f7238d634d11ffecaad7">XTP::API::TraderSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00364">364</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad741742f00e98b9abec86451df44e18c" name="ad741742f00e98b9abec86451df44e18c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad741742f00e98b9abec86451df44e18c">&#9670;&#160;</a></span>OnQueryAsset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::OnQueryAsset </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structXTPQueryAssetRsp.html">XTPQueryAssetRsp</a> *&#160;</td>
+          <td class="paramname"><em>asset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *&#160;</td>
+          <td class="paramname"><em>error_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>request_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_last</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>session_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>请求查询资金账户响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">asset</td><td>查询到的资金账户情况 </td></tr>
+    <tr><td class="paramname">error_info</td><td>查询资金账户发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误 </td></tr>
+    <tr><td class="paramname">request_id</td><td>此消息响应函数对应的请求ID </td></tr>
+    <tr><td class="paramname">is_last</td><td>此消息响应函数是否为request_id这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应 </td></tr>
+    <tr><td class="paramname">session_id</td><td>资金账户对应的session_id，登录时得到 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>备注</dt><dd>需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线 </dd></dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1TraderSpi.html#af48091e3287d85ea254229587cf35b52">XTP::API::TraderSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00545">545</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a270f5fe43f4b18caa4899aeec3cb02d2" name="a270f5fe43f4b18caa4899aeec3cb02d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a270f5fe43f4b18caa4899aeec3cb02d2">&#9670;&#160;</a></span>OnQueryOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::OnQueryOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#a5b58151f6301804cf4e293f9f919263d">XTPQueryOrderRsp</a> *&#160;</td>
+          <td class="paramname"><em>order_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *&#160;</td>
+          <td class="paramname"><em>error_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>request_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_last</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>session_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>请求查询报单响应-旧版本接口 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">order_info</td><td>查询到的一个报单 </td></tr>
+    <tr><td class="paramname">error_info</td><td>查询报单时发生错误时，返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误 </td></tr>
+    <tr><td class="paramname">request_id</td><td>此消息响应函数对应的请求ID </td></tr>
+    <tr><td class="paramname">is_last</td><td>此消息响应函数是否为request_id这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应 </td></tr>
+    <tr><td class="paramname">session_id</td><td>资金账户对应的session_id，登录时得到 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>备注</dt><dd>由于支持分时段查询，一个查询请求可能对应多个响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线 </dd></dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a7b147b979e594d878e04f876b76c32ea">XTP::API::TraderSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00412">412</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a82e4a06da7dce8850d5b2cfca3790fb2" name="a82e4a06da7dce8850d5b2cfca3790fb2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82e4a06da7dce8850d5b2cfca3790fb2">&#9670;&#160;</a></span>OnQueryPosition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::OnQueryPosition </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structXTPQueryStkPositionRsp.html">XTPQueryStkPositionRsp</a> *&#160;</td>
+          <td class="paramname"><em>position</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *&#160;</td>
+          <td class="paramname"><em>error_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>request_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_last</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>session_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>请求查询投资者持仓响应 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">position</td><td>查询到的一只股票的持仓情况 </td></tr>
+    <tr><td class="paramname">error_info</td><td>查询账户持仓发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误 </td></tr>
+    <tr><td class="paramname">request_id</td><td>此消息响应函数对应的请求ID </td></tr>
+    <tr><td class="paramname">is_last</td><td>此消息响应函数是否为request_id这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应 </td></tr>
+    <tr><td class="paramname">session_id</td><td>资金账户对应的session_id，登录时得到 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>备注</dt><dd>由于用户可能持有多个股票，一个查询请求可能对应多个响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线 </dd></dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a04a6353318bfb320ce2c19b717277711">XTP::API::TraderSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00472">472</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a89e4ac105184112c6af9959822b98564" name="a89e4ac105184112c6af9959822b98564"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89e4ac105184112c6af9959822b98564">&#9670;&#160;</a></span>OnQueryTrade()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::OnQueryTrade </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h.html#ad336fb94f5589874c2c4469d6ef249d6">XTPQueryTradeRsp</a> *&#160;</td>
+          <td class="paramname"><em>trade_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *&#160;</td>
+          <td class="paramname"><em>error_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>request_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_last</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>session_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>请求查询成交响应 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trade_info</td><td>查询到的一个成交回报 </td></tr>
+    <tr><td class="paramname">error_info</td><td>查询成交回报发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误 </td></tr>
+    <tr><td class="paramname">request_id</td><td>此消息响应函数对应的请求ID </td></tr>
+    <tr><td class="paramname">is_last</td><td>此消息响应函数是否为request_id这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应 </td></tr>
+    <tr><td class="paramname">session_id</td><td>资金账户对应的session_id，登录时得到 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>备注</dt><dd>由于支持分时段查询，一个查询请求可能对应多个响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线 </dd></dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a7f821b69e9b522c68326c52b966719a0">XTP::API::TraderSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00442">442</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a926c9c4ecc4924c69abd96609efe9bed" name="a926c9c4ecc4924c69abd96609efe9bed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a926c9c4ecc4924c69abd96609efe9bed">&#9670;&#160;</a></span>OnTradeEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::OnTradeEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structXTPTradeReport.html">XTPTradeReport</a> *&#160;</td>
+          <td class="paramname"><em>trade_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>session_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>成交通知 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trade_info</td><td>成交回报的具体信息，用户可以通过trade_info.order_xtp_id来管理订单，通过GetClientIDByXTPID() == client_id来过滤自己的订单。对于上交所，exec_id可以唯一标识一笔成交。当发现2笔成交回报拥有相同的exec_id，则可以认为此笔交易自成交了。对于深交所，exec_id是唯一的，暂时无此判断机制。report_index+market字段可以组成唯一标识表示成交回报。 </td></tr>
+    <tr><td class="paramname">session_id</td><td>资金账户对应的session_id，登录时得到 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>备注</dt><dd>订单有成交发生的时候，会被调用，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线。所有登录了此用户的客户端都将收到此用户的成交回报。相关订单为部成状态，需要用户通过成交回报的成交数量来确定，OnOrderEvent()不会推送部成状态。 </dd></dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1TraderSpi.html#a966fc5c590507eadc390009b220a20b6">XTP::API::TraderSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00389">389</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a54b4feca9719c93043d58c372e122b1e" name="a54b4feca9719c93043d58c372e122b1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54b4feca9719c93043d58c372e122b1e">&#9670;&#160;</a></span>orderAction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderXTP::orderAction </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSEntrustAction.html">WTSEntrustAction</a> *&#160;</td>
+          <td class="paramname"><em>action</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a0954196bff87c1feda39a35d6c7b0755">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00882">882</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0111f956ed721197afb46cac672f82c0" name="a0111f956ed721197afb46cac672f82c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0111f956ed721197afb46cac672f82c0">&#9670;&#160;</a></span>orderInsert()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderXTP::orderInsert </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSEntrust.html">WTSEntrust</a> *&#160;</td>
+          <td class="paramname"><em>eutrust</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a78748c281d107a7d9c78e345df60de91">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00843">843</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9388b535996ebf94a19d04fb0afca33d" name="a9388b535996ebf94a19d04fb0afca33d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9388b535996ebf94a19d04fb0afca33d">&#9670;&#160;</a></span>queryAccount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderXTP::queryAccount </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#ad7b357520a344762ac0933405805d843">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00904">904</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7efec0a8007acbce1e34e70eea19c7c4" name="a7efec0a8007acbce1e34e70eea19c7c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7efec0a8007acbce1e34e70eea19c7c4">&#9670;&#160;</a></span>queryOrders()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderXTP::queryOrders </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#aac2cac3062d153b79e10fa1f0a47690f">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00928">928</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac375b9e4fbecc5507cbba1ebfba891b9" name="ac375b9e4fbecc5507cbba1ebfba891b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac375b9e4fbecc5507cbba1ebfba891b9">&#9670;&#160;</a></span>queryPositions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderXTP::queryPositions </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#aff24ec83af307f5031b4deb40e16df88">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00916">916</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af1a0a91b20d6fad3b07699f103a45a05" name="af1a0a91b20d6fad3b07699f103a45a05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1a0a91b20d6fad3b07699f103a45a05">&#9670;&#160;</a></span>queryTrades()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderXTP::queryTrades </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a97f0206848bdc00cf467e899743d4515">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00942">942</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3d7d4857d802b11d0a5adb6b3e8cc9ef" name="a3d7d4857d802b11d0a5adb6b3e8cc9ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d7d4857d802b11d0a5adb6b3e8cc9ef">&#9670;&#160;</a></span>reconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::reconnect </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00652">652</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af4487e25aed42dbfbd8ef5608e628757" name="af4487e25aed42dbfbd8ef5608e628757"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4487e25aed42dbfbd8ef5608e628757">&#9670;&#160;</a></span>registerSpi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::registerSpi </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classITraderSpi.html">ITraderSpi</a> *&#160;</td>
+          <td class="paramname"><em>listener</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#aa41e08712aa6135febb746404efe4840">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00643">643</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7f5e33fddc52d09dd5a22408cb8403f1" name="a7f5e33fddc52d09dd5a22408cb8403f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f5e33fddc52d09dd5a22408cb8403f1">&#9670;&#160;</a></span>release()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderXTP::release </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a1aa9fabb60e4c5e70dd4eed8e8e200ce">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a> 第 <a class="el" href="TraderXTP_8cpp_source.html#l00624">624</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a6288a26ec08fd53b89845d5ed1ca5d37" name="a6288a26ec08fd53b89845d5ed1ca5d37"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6288a26ec08fd53b89845d5ed1ca5d37">&#9670;&#160;</a></span>_acckey</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderXTP::_acckey</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00122">122</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa2e8a6ec0f82e9d8be4507d67a46eb44" name="aa2e8a6ec0f82e9d8be4507d67a46eb44"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2e8a6ec0f82e9d8be4507d67a46eb44">&#9670;&#160;</a></span>_api</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classXTP_1_1API_1_1TraderApi.html">XTP::API::TraderApi</a>* TraderXTP::_api</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00108">108</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a379a274b1f057b109dfb907e8b221aa6" name="a379a274b1f057b109dfb907e8b221aa6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a379a274b1f057b109dfb907e8b221aa6">&#9670;&#160;</a></span>_asyncio</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">boost::asio::io_service TraderXTP::_asyncio</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00140">140</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9f0ed1d543c06ec8dfb760939915a0c4" name="a9f0ed1d543c06ec8dfb760939915a0c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f0ed1d543c06ec8dfb760939915a0c4">&#9670;&#160;</a></span>_bd_mgr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a>* TraderXTP::_bd_mgr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00116">116</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a70e61a15daa3ad402e6a8531af48c8c4" name="a70e61a15daa3ad402e6a8531af48c8c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70e61a15daa3ad402e6a8531af48c8c4">&#9670;&#160;</a></span>_client</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderXTP::_client</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00126">126</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab0daf6f2998b2941d955b1864b0d4f8a" name="ab0daf6f2998b2941d955b1864b0d4f8a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0daf6f2998b2941d955b1864b0d4f8a">&#9670;&#160;</a></span>_flowdir</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderXTP::_flowdir</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00120">120</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7b9649ac4921df53d31488194d759e37" name="a7b9649ac4921df53d31488194d759e37"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b9649ac4921df53d31488194d759e37">&#9670;&#160;</a></span>_hbInterval</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t TraderXTP::_hbInterval</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00131">131</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a970d17a4626ad025ece112535237e050" name="a970d17a4626ad025ece112535237e050"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a970d17a4626ad025ece112535237e050">&#9670;&#160;</a></span>_host</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderXTP::_host</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00124">124</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a13b46fb253b09eb9fd6c65642646b8ba" name="a13b46fb253b09eb9fd6c65642646b8ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13b46fb253b09eb9fd6c65642646b8ba">&#9670;&#160;</a></span>_inited</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TraderXTP::_inited</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00129">129</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aff30f5cd4e37daa317ba507bc3f1d5df" name="aff30f5cd4e37daa317ba507bc3f1d5df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff30f5cd4e37daa317ba507bc3f1d5df">&#9670;&#160;</a></span>_orders</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSArray.html">WTSArray</a>* TraderXTP::_orders</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00114">114</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab6790058723ddb23af7087debf889f81" name="ab6790058723ddb23af7087debf889f81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6790058723ddb23af7087debf889f81">&#9670;&#160;</a></span>_ordref</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::atomic&lt;uint32_t&gt; TraderXTP::_ordref</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00138">138</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a30ece1f37d6273cfb6046d9d2db8a4ea" name="a30ece1f37d6273cfb6046d9d2db8a4ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30ece1f37d6273cfb6046d9d2db8a4ea">&#9670;&#160;</a></span>_pass</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderXTP::_pass</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00119">119</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acd1e41d67e44aae41da80ebad18e1aa1" name="acd1e41d67e44aae41da80ebad18e1aa1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd1e41d67e44aae41da80ebad18e1aa1">&#9670;&#160;</a></span>_port</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderXTP::_port</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00125">125</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8256ce44b3c8c6cfc2f2a8c3a9e7b437" name="a8256ce44b3c8c6cfc2f2a8c3a9e7b437"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8256ce44b3c8c6cfc2f2a8c3a9e7b437">&#9670;&#160;</a></span>_positions</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTraderXTP.html#aff33ef4445706b9514451ade02ec2f5e">PositionMap</a>* TraderXTP::_positions</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00112">112</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad7e9d875b1c947dffaada69bd2348533" name="ad7e9d875b1c947dffaada69bd2348533"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7e9d875b1c947dffaada69bd2348533">&#9670;&#160;</a></span>_quick</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TraderXTP::_quick</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00128">128</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6ef476fdd32ea82410bf79c9bf343ee7" name="a6ef476fdd32ea82410bf79c9bf343ee7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ef476fdd32ea82410bf79c9bf343ee7">&#9670;&#160;</a></span>_reqid</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::atomic&lt;uint32_t&gt; TraderXTP::_reqid</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00137">137</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9e580aedde0198a96ab5a73cf5f4bef7" name="a9e580aedde0198a96ab5a73cf5f4bef7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e580aedde0198a96ab5a73cf5f4bef7">&#9670;&#160;</a></span>_sessionid</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t TraderXTP::_sessionid</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00135">135</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aab6b3e1b7dd3926a0e9a758ee020130d" name="aab6b3e1b7dd3926a0e9a758ee020130d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab6b3e1b7dd3926a0e9a758ee020130d">&#9670;&#160;</a></span>_sink</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classITraderSpi.html">ITraderSpi</a>* TraderXTP::_sink</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00109">109</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abd579fd94300788f0ec7d7c136c7202e" name="abd579fd94300788f0ec7d7c136c7202e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd579fd94300788f0ec7d7c136c7202e">&#9670;&#160;</a></span>_state</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTraderXTP.html#a1250adf552c98eec0be400abb6b9cc66">TraderState</a> TraderXTP::_state</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00133">133</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3bedbd84321b121406496ad1ba21874b" name="a3bedbd84321b121406496ad1ba21874b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bedbd84321b121406496ad1ba21874b">&#9670;&#160;</a></span>_thrd_worker</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a> TraderXTP::_thrd_worker</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00141">141</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a059b82189ff845f27ef4394ced3f3e71" name="a059b82189ff845f27ef4394ced3f3e71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a059b82189ff845f27ef4394ced3f3e71">&#9670;&#160;</a></span>_trades</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSArray.html">WTSArray</a>* TraderXTP::_trades</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00113">113</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aec1ec42d6fc19cbf6cb32e340a3af724" name="aec1ec42d6fc19cbf6cb32e340a3af724"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec1ec42d6fc19cbf6cb32e340a3af724">&#9670;&#160;</a></span>_tradingday</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t TraderXTP::_tradingday</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00136">136</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a51208a850efb0f7152a7f1af83cc5b5f" name="a51208a850efb0f7152a7f1af83cc5b5f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51208a850efb0f7152a7f1af83cc5b5f">&#9670;&#160;</a></span>_user</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderXTP::_user</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00118">118</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa26f096edd862193542157508ea47b12" name="aa26f096edd862193542157508ea47b12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa26f096edd862193542157508ea47b12">&#9670;&#160;</a></span>_worker</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTraderXTP.html#a9a1fdabbe42ecbba22be2894a4c1ac24">BoostWorkerPtr</a> TraderXTP::_worker</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00143">143</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaa86e66004891e187f8f3c3869a3de41" name="aaa86e66004891e187f8f3c3869a3de41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa86e66004891e187f8f3c3869a3de41">&#9670;&#160;</a></span>m_eidCache</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtKVCache.html">WtKVCache</a> TraderXTP::m_eidCache</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00150">150</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0d4eae7e97ca795df5142f937ceea2eb" name="a0d4eae7e97ca795df5142f937ceea2eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d4eae7e97ca795df5142f937ceea2eb">&#9670;&#160;</a></span>m_funcCreator</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTraderXTP.html#a7958c9f74abdaf54e53f97bd68f79bd3">XTPCreator</a> TraderXTP::m_funcCreator</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00147">147</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4a701e606c88b5f554f4347f99d61c71" name="a4a701e606c88b5f554f4347f99d61c71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a701e606c88b5f554f4347f99d61c71">&#9670;&#160;</a></span>m_hInstXTP</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a> TraderXTP::m_hInstXTP</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00145">145</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afa6766ed79a6c5b946b4b800de42d0b6" name="afa6766ed79a6c5b946b4b800de42d0b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa6766ed79a6c5b946b4b800de42d0b6">&#9670;&#160;</a></span>m_oidCache</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtKVCache.html">WtKVCache</a> TraderXTP::m_oidCache</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a> 第 <a class="el" href="TraderXTP_8h_source.html#l00152">152</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/TraderXTP/<a class="el" href="TraderXTP_8h_source.html">TraderXTP.h</a></li>
+<li>src/TraderXTP/<a class="el" href="TraderXTP_8cpp_source.html">TraderXTP.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classTraderXTP.html">TraderXTP</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

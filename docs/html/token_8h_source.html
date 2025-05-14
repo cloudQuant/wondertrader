@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/token.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('token_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">token.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="token_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef TOKEN_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define TOKEN_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#if defined(_MSC_VER) ||                                            \</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">    (defined(__GNUC__) &amp;&amp; (__GNUC__ == 3 &amp;&amp; __GNUC_MINOR__ &gt;= 4) || \</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">     (__GNUC__ &gt;= 4))  </span><span class="comment">// GCC supports &quot;pragma once&quot; correctly since 3.4</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="mark_8h.html">yaml-cpp/mark.h</a>&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceYAML.html">YAML</a> {</div>
+<div class="foldopen" id="foldopen00016" data-start="{" data-end="};">
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="namespaceYAML.html#aec9756e666626c422c695eeb4250fbf9">   16</a></span><span class="keyword">const</span> std::string <a class="code hl_variable" href="namespaceYAML.html#aec9756e666626c422c695eeb4250fbf9">TokenNames</a>[] = {</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <span class="stringliteral">&quot;DIRECTIVE&quot;</span>,        <span class="stringliteral">&quot;DOC_START&quot;</span>,      <span class="stringliteral">&quot;DOC_END&quot;</span>,       <span class="stringliteral">&quot;BLOCK_SEQ_START&quot;</span>,</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <span class="stringliteral">&quot;BLOCK_MAP_START&quot;</span>,  <span class="stringliteral">&quot;BLOCK_SEQ_END&quot;</span>,  <span class="stringliteral">&quot;BLOCK_MAP_END&quot;</span>, <span class="stringliteral">&quot;BLOCK_ENTRY&quot;</span>,</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <span class="stringliteral">&quot;FLOW_SEQ_START&quot;</span>,   <span class="stringliteral">&quot;FLOW_MAP_START&quot;</span>, <span class="stringliteral">&quot;FLOW_SEQ_END&quot;</span>,  <span class="stringliteral">&quot;FLOW_MAP_END&quot;</span>,</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="stringliteral">&quot;FLOW_MAP_COMPACT&quot;</span>, <span class="stringliteral">&quot;FLOW_ENTRY&quot;</span>,     <span class="stringliteral">&quot;KEY&quot;</span>,           <span class="stringliteral">&quot;VALUE&quot;</span>,</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <span class="stringliteral">&quot;ANCHOR&quot;</span>,           <span class="stringliteral">&quot;ALIAS&quot;</span>,          <span class="stringliteral">&quot;TAG&quot;</span>,           <span class="stringliteral">&quot;SCALAR&quot;</span>};</div>
+</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="foldopen" id="foldopen00023" data-start="{" data-end="};">
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html">   23</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structYAML_1_1Token.html">Token</a> {</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>  <span class="comment">// enums</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#af37af1a3129a5f1c36f08d41f668f7e5a4922ef1ede10671caec1755ae423fa42">   25</a></span>  <span class="keyword">enum</span> <a class="code hl_enumeration" href="structYAML_1_1Token.html#af37af1a3129a5f1c36f08d41f668f7e5">STATUS</a> { <a class="code hl_enumvalue" href="structYAML_1_1Token.html#af37af1a3129a5f1c36f08d41f668f7e5a31a1f1c77031ef02257845680298d02b">VALID</a>, <a class="code hl_enumvalue" href="structYAML_1_1Token.html#af37af1a3129a5f1c36f08d41f668f7e5a4922ef1ede10671caec1755ae423fa42">INVALID</a>, <a class="code hl_enumvalue" href="structYAML_1_1Token.html#af37af1a3129a5f1c36f08d41f668f7e5a1e411ae78745f3c865c9fadcd2ef7bf1">UNVERIFIED</a> };</div>
+<div class="foldopen" id="foldopen00026" data-start="{" data-end="};">
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14">   26</a></span>  <span class="keyword">enum</span> <a class="code hl_enumeration" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14">TYPE</a> {</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14ace8938d900653e3989c4d25f815b9065">   27</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14ace8938d900653e3989c4d25f815b9065">DIRECTIVE</a>,</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a9994af7e78c14fedaa12fde86afcc078">   28</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a9994af7e78c14fedaa12fde86afcc078">DOC_START</a>,</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a01237441381b11b0fe1c13fc6d8ab124">   29</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a01237441381b11b0fe1c13fc6d8ab124">DOC_END</a>,</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a39ddd967e839945abaf0635717500ef3">   30</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a39ddd967e839945abaf0635717500ef3">BLOCK_SEQ_START</a>,</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14ae3ec9e625c71bd59b379fca4d24e5a3a">   31</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14ae3ec9e625c71bd59b379fca4d24e5a3a">BLOCK_MAP_START</a>,</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a1ded63235cc1fbb446c6ce302ae10f06">   32</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a1ded63235cc1fbb446c6ce302ae10f06">BLOCK_SEQ_END</a>,</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a6086d425f7bd70ec4366f490f1d7da30">   33</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a6086d425f7bd70ec4366f490f1d7da30">BLOCK_MAP_END</a>,</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a08420a33254ad0b921fd174d893a4aca">   34</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a08420a33254ad0b921fd174d893a4aca">BLOCK_ENTRY</a>,</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a52964d98b58436a13a8d014d2ba64871">   35</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a52964d98b58436a13a8d014d2ba64871">FLOW_SEQ_START</a>,</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14af4fffabb5113ca79d8481afa7659ba8f">   36</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14af4fffabb5113ca79d8481afa7659ba8f">FLOW_MAP_START</a>,</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14ae6bdec6d08e69384c1bac095bc4b8291">   37</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14ae6bdec6d08e69384c1bac095bc4b8291">FLOW_SEQ_END</a>,</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a9b127736b46aa0f87064b543404e3400">   38</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a9b127736b46aa0f87064b543404e3400">FLOW_MAP_END</a>,</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a470c4db0f6209d47aa0db7e28216d298">   39</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a470c4db0f6209d47aa0db7e28216d298">FLOW_MAP_COMPACT</a>,</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a26fb466edeb8556d65fffbff8e953a42">   40</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a26fb466edeb8556d65fffbff8e953a42">FLOW_ENTRY</a>,</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a6237594c0bb1bee2a65f6ed8cd7fac36">   41</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a6237594c0bb1bee2a65f6ed8cd7fac36">KEY</a>,</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a6cce6757db812eb1f0a9080313b4e1ec">   42</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a6cce6757db812eb1f0a9080313b4e1ec">VALUE</a>,</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14aa06d58158b7525493283f45ee7cdc302">   43</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14aa06d58158b7525493283f45ee7cdc302">ANCHOR</a>,</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a41283d047a6f0402841faffcdd933825">   44</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a41283d047a6f0402841faffcdd933825">ALIAS</a>,</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a7c895329dc71900a85db185716eec125">   45</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a7c895329dc71900a85db185716eec125">TAG</a>,</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a4f70a407175bf7eaed483fc822a05302">   46</a></span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a4f70a407175bf7eaed483fc822a05302">PLAIN_SCALAR</a>,</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <a class="code hl_enumvalue" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14aabfc443eb2936f5061d0138e1db5cd1a">NON_PLAIN_SCALAR</a></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14aabfc443eb2936f5061d0138e1db5cd1a">   48</a></span>  };</div>
+</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <span class="comment">// data</span></div>
+<div class="foldopen" id="foldopen00051" data-start="{" data-end="}">
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a81d9480ef0af677c01e66fb148e18370">   51</a></span>  <a class="code hl_function" href="structYAML_1_1Token.html#a81d9480ef0af677c01e66fb148e18370">Token</a>(<a class="code hl_enumeration" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14">TYPE</a> type_, <span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark_)</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>      : <a class="code hl_variable" href="structYAML_1_1Token.html#a32ffa6eef8b549f2cd2b566dc399d219">status</a>(<a class="code hl_enumvalue" href="structYAML_1_1Token.html#af37af1a3129a5f1c36f08d41f668f7e5a31a1f1c77031ef02257845680298d02b">VALID</a>), <a class="code hl_variable" href="structYAML_1_1Token.html#a0c2fb43511afadcfcd0169bfc4838cf6">type</a>(type_), <a class="code hl_variable" href="structYAML_1_1Token.html#aba98ab67567c733fd1f9c792d0d819d6">mark</a>(mark_), <a class="code hl_variable" href="structYAML_1_1Token.html#a95b3680bf58a94bd7b9b2dca41dc0fd9">value</a>{}, <a class="code hl_variable" href="structYAML_1_1Token.html#a15b0ad4a1c7f27f5284a48216f7c3464">params</a>{}, <a class="code hl_variable" href="structYAML_1_1Token.html#a858351d3136d14fcacd890f4974da8b2">data</a>(0) {}</div>
+</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="foldopen" id="foldopen00054" data-start="{" data-end="};">
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#acc8a511b7f5b18f87960fa5f95be7c94">   54</a></span>  <span class="keyword">friend</span> std::ostream&amp; <a class="code hl_friend" href="structYAML_1_1Token.html#acc8a511b7f5b18f87960fa5f95be7c94">operator&lt;&lt;</a>(std::ostream&amp; out, <span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Token.html">Token</a>&amp; token) {</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    out &lt;&lt; <a class="code hl_variable" href="namespaceYAML.html#aec9756e666626c422c695eeb4250fbf9">TokenNames</a>[token.<a class="code hl_variable" href="structYAML_1_1Token.html#a0c2fb43511afadcfcd0169bfc4838cf6">type</a>] &lt;&lt; std::string(<span class="stringliteral">&quot;: &quot;</span>) &lt;&lt; token.<a class="code hl_variable" href="structYAML_1_1Token.html#a95b3680bf58a94bd7b9b2dca41dc0fd9">value</a>;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> std::string&amp; param : token.<a class="code hl_variable" href="structYAML_1_1Token.html#a15b0ad4a1c7f27f5284a48216f7c3464">params</a>)</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>      out &lt;&lt; std::string(<span class="stringliteral">&quot; &quot;</span>) &lt;&lt; param;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordflow">return</span> out;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>  }</div>
+</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a32ffa6eef8b549f2cd2b566dc399d219">   61</a></span>  <a class="code hl_enumeration" href="structYAML_1_1Token.html#af37af1a3129a5f1c36f08d41f668f7e5">STATUS</a> <a class="code hl_variable" href="structYAML_1_1Token.html#a32ffa6eef8b549f2cd2b566dc399d219">status</a>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a0c2fb43511afadcfcd0169bfc4838cf6">   62</a></span>  <a class="code hl_enumeration" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14">TYPE</a> <a class="code hl_variable" href="structYAML_1_1Token.html#a0c2fb43511afadcfcd0169bfc4838cf6">type</a>;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#aba98ab67567c733fd1f9c792d0d819d6">   63</a></span>  <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a> <a class="code hl_variable" href="structYAML_1_1Token.html#aba98ab67567c733fd1f9c792d0d819d6">mark</a>;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a95b3680bf58a94bd7b9b2dca41dc0fd9">   64</a></span>  std::string <a class="code hl_variable" href="structYAML_1_1Token.html#a95b3680bf58a94bd7b9b2dca41dc0fd9">value</a>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a15b0ad4a1c7f27f5284a48216f7c3464">   65</a></span>  std::vector&lt;std::string&gt; <a class="code hl_variable" href="structYAML_1_1Token.html#a15b0ad4a1c7f27f5284a48216f7c3464">params</a>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="structYAML_1_1Token.html#a858351d3136d14fcacd890f4974da8b2">   66</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structYAML_1_1Token.html#a858351d3136d14fcacd890f4974da8b2">data</a>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>};</div>
+</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>}  <span class="comment">// namespace YAML</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">#endif  </span><span class="comment">// TOKEN_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="ttc" id="amark_8h_html"><div class="ttname"><a href="mark_8h.html">mark.h</a></div></div>
+<div class="ttc" id="anamespaceYAML_html"><div class="ttname"><a href="namespaceYAML.html">YAML</a></div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00005">binary.cpp:5</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_aec9756e666626c422c695eeb4250fbf9"><div class="ttname"><a href="namespaceYAML.html#aec9756e666626c422c695eeb4250fbf9">YAML::TokenNames</a></div><div class="ttdeci">const std::string TokenNames[]</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00016">token.h:16</a></div></div>
+<div class="ttc" id="astructYAML_1_1Mark_html"><div class="ttname"><a href="structYAML_1_1Mark.html">YAML::Mark</a></div><div class="ttdef"><b>Definition</b> <a href="mark_8h_source.html#l00013">mark.h:13</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html"><div class="ttname"><a href="structYAML_1_1Token.html">YAML::Token</a></div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00023">token.h:23</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a0c2fb43511afadcfcd0169bfc4838cf6"><div class="ttname"><a href="structYAML_1_1Token.html#a0c2fb43511afadcfcd0169bfc4838cf6">YAML::Token::type</a></div><div class="ttdeci">TYPE type</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00062">token.h:62</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a15b0ad4a1c7f27f5284a48216f7c3464"><div class="ttname"><a href="structYAML_1_1Token.html#a15b0ad4a1c7f27f5284a48216f7c3464">YAML::Token::params</a></div><div class="ttdeci">std::vector&lt; std::string &gt; params</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00065">token.h:65</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a32ffa6eef8b549f2cd2b566dc399d219"><div class="ttname"><a href="structYAML_1_1Token.html#a32ffa6eef8b549f2cd2b566dc399d219">YAML::Token::status</a></div><div class="ttdeci">STATUS status</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00061">token.h:61</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14">YAML::Token::TYPE</a></div><div class="ttdeci">TYPE</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00026">token.h:26</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a01237441381b11b0fe1c13fc6d8ab124"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a01237441381b11b0fe1c13fc6d8ab124">YAML::Token::DOC_END</a></div><div class="ttdeci">@ DOC_END</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00029">token.h:29</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a08420a33254ad0b921fd174d893a4aca"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a08420a33254ad0b921fd174d893a4aca">YAML::Token::BLOCK_ENTRY</a></div><div class="ttdeci">@ BLOCK_ENTRY</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00034">token.h:34</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a1ded63235cc1fbb446c6ce302ae10f06"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a1ded63235cc1fbb446c6ce302ae10f06">YAML::Token::BLOCK_SEQ_END</a></div><div class="ttdeci">@ BLOCK_SEQ_END</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00032">token.h:32</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a26fb466edeb8556d65fffbff8e953a42"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a26fb466edeb8556d65fffbff8e953a42">YAML::Token::FLOW_ENTRY</a></div><div class="ttdeci">@ FLOW_ENTRY</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00040">token.h:40</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a39ddd967e839945abaf0635717500ef3"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a39ddd967e839945abaf0635717500ef3">YAML::Token::BLOCK_SEQ_START</a></div><div class="ttdeci">@ BLOCK_SEQ_START</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00030">token.h:30</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a41283d047a6f0402841faffcdd933825"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a41283d047a6f0402841faffcdd933825">YAML::Token::ALIAS</a></div><div class="ttdeci">@ ALIAS</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00044">token.h:44</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a470c4db0f6209d47aa0db7e28216d298"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a470c4db0f6209d47aa0db7e28216d298">YAML::Token::FLOW_MAP_COMPACT</a></div><div class="ttdeci">@ FLOW_MAP_COMPACT</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00039">token.h:39</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a4f70a407175bf7eaed483fc822a05302"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a4f70a407175bf7eaed483fc822a05302">YAML::Token::PLAIN_SCALAR</a></div><div class="ttdeci">@ PLAIN_SCALAR</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00046">token.h:46</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a52964d98b58436a13a8d014d2ba64871"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a52964d98b58436a13a8d014d2ba64871">YAML::Token::FLOW_SEQ_START</a></div><div class="ttdeci">@ FLOW_SEQ_START</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00035">token.h:35</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a6086d425f7bd70ec4366f490f1d7da30"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a6086d425f7bd70ec4366f490f1d7da30">YAML::Token::BLOCK_MAP_END</a></div><div class="ttdeci">@ BLOCK_MAP_END</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00033">token.h:33</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a6237594c0bb1bee2a65f6ed8cd7fac36"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a6237594c0bb1bee2a65f6ed8cd7fac36">YAML::Token::KEY</a></div><div class="ttdeci">@ KEY</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00041">token.h:41</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a6cce6757db812eb1f0a9080313b4e1ec"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a6cce6757db812eb1f0a9080313b4e1ec">YAML::Token::VALUE</a></div><div class="ttdeci">@ VALUE</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00042">token.h:42</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a7c895329dc71900a85db185716eec125"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a7c895329dc71900a85db185716eec125">YAML::Token::TAG</a></div><div class="ttdeci">@ TAG</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00045">token.h:45</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a9994af7e78c14fedaa12fde86afcc078"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a9994af7e78c14fedaa12fde86afcc078">YAML::Token::DOC_START</a></div><div class="ttdeci">@ DOC_START</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00028">token.h:28</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14a9b127736b46aa0f87064b543404e3400"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14a9b127736b46aa0f87064b543404e3400">YAML::Token::FLOW_MAP_END</a></div><div class="ttdeci">@ FLOW_MAP_END</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00038">token.h:38</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14aa06d58158b7525493283f45ee7cdc302"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14aa06d58158b7525493283f45ee7cdc302">YAML::Token::ANCHOR</a></div><div class="ttdeci">@ ANCHOR</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00043">token.h:43</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14aabfc443eb2936f5061d0138e1db5cd1a"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14aabfc443eb2936f5061d0138e1db5cd1a">YAML::Token::NON_PLAIN_SCALAR</a></div><div class="ttdeci">@ NON_PLAIN_SCALAR</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00048">token.h:47</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14ace8938d900653e3989c4d25f815b9065"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14ace8938d900653e3989c4d25f815b9065">YAML::Token::DIRECTIVE</a></div><div class="ttdeci">@ DIRECTIVE</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00027">token.h:27</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14ae3ec9e625c71bd59b379fca4d24e5a3a"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14ae3ec9e625c71bd59b379fca4d24e5a3a">YAML::Token::BLOCK_MAP_START</a></div><div class="ttdeci">@ BLOCK_MAP_START</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00031">token.h:31</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14ae6bdec6d08e69384c1bac095bc4b8291"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14ae6bdec6d08e69384c1bac095bc4b8291">YAML::Token::FLOW_SEQ_END</a></div><div class="ttdeci">@ FLOW_SEQ_END</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00037">token.h:37</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a60bcc6615b60f00ae9bce3aaeebf6d14af4fffabb5113ca79d8481afa7659ba8f"><div class="ttname"><a href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14af4fffabb5113ca79d8481afa7659ba8f">YAML::Token::FLOW_MAP_START</a></div><div class="ttdeci">@ FLOW_MAP_START</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00036">token.h:36</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a81d9480ef0af677c01e66fb148e18370"><div class="ttname"><a href="structYAML_1_1Token.html#a81d9480ef0af677c01e66fb148e18370">YAML::Token::Token</a></div><div class="ttdeci">Token(TYPE type_, const Mark &amp;mark_)</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00051">token.h:51</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a858351d3136d14fcacd890f4974da8b2"><div class="ttname"><a href="structYAML_1_1Token.html#a858351d3136d14fcacd890f4974da8b2">YAML::Token::data</a></div><div class="ttdeci">int data</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00066">token.h:66</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_a95b3680bf58a94bd7b9b2dca41dc0fd9"><div class="ttname"><a href="structYAML_1_1Token.html#a95b3680bf58a94bd7b9b2dca41dc0fd9">YAML::Token::value</a></div><div class="ttdeci">std::string value</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00064">token.h:64</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_aba98ab67567c733fd1f9c792d0d819d6"><div class="ttname"><a href="structYAML_1_1Token.html#aba98ab67567c733fd1f9c792d0d819d6">YAML::Token::mark</a></div><div class="ttdeci">Mark mark</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00063">token.h:63</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_acc8a511b7f5b18f87960fa5f95be7c94"><div class="ttname"><a href="structYAML_1_1Token.html#acc8a511b7f5b18f87960fa5f95be7c94">YAML::Token::operator&lt;&lt;</a></div><div class="ttdeci">friend std::ostream &amp; operator&lt;&lt;(std::ostream &amp;out, const Token &amp;token)</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00054">token.h:54</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_af37af1a3129a5f1c36f08d41f668f7e5"><div class="ttname"><a href="structYAML_1_1Token.html#af37af1a3129a5f1c36f08d41f668f7e5">YAML::Token::STATUS</a></div><div class="ttdeci">STATUS</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00025">token.h:25</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_af37af1a3129a5f1c36f08d41f668f7e5a1e411ae78745f3c865c9fadcd2ef7bf1"><div class="ttname"><a href="structYAML_1_1Token.html#af37af1a3129a5f1c36f08d41f668f7e5a1e411ae78745f3c865c9fadcd2ef7bf1">YAML::Token::UNVERIFIED</a></div><div class="ttdeci">@ UNVERIFIED</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00025">token.h:25</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_af37af1a3129a5f1c36f08d41f668f7e5a31a1f1c77031ef02257845680298d02b"><div class="ttname"><a href="structYAML_1_1Token.html#af37af1a3129a5f1c36f08d41f668f7e5a31a1f1c77031ef02257845680298d02b">YAML::Token::VALID</a></div><div class="ttdeci">@ VALID</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00025">token.h:25</a></div></div>
+<div class="ttc" id="astructYAML_1_1Token_html_af37af1a3129a5f1c36f08d41f668f7e5a4922ef1ede10671caec1755ae423fa42"><div class="ttname"><a href="structYAML_1_1Token.html#af37af1a3129a5f1c36f08d41f668f7e5a4922ef1ede10671caec1755ae423fa42">YAML::Token::INVALID</a></div><div class="ttdeci">@ INVALID</div><div class="ttdef"><b>Definition</b> <a href="token_8h_source.html#l00025">token.h:25</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="token_8h.html">token.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

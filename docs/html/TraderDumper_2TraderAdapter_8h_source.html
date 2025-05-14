@@ -1,0 +1,298 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/TraderDumper/TraderAdapter.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('TraderDumper_2TraderAdapter_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">TraderAdapter.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="TraderDumper_2TraderAdapter_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;atomic&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;unordered_map&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;boost/noncopyable.hpp&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/ExecuteDefs.h&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../Includes/ITraderApi.h&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">class </span><a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">class </span><a class="code hl_class" href="classActionPolicyMgr.html">ActionPolicyMgr</a>;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">class </span><a class="code hl_class" href="classWTSContractInfo.html">WTSContractInfo</a>;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">class </span><a class="code hl_class" href="classWTSCommodityInfo.html">WTSCommodityInfo</a>;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">class </span>WtExecuter;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">class </span><a class="code hl_class" href="classEventNotifier.html">EventNotifier</a>;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">class </span><a class="code hl_class" href="classITrdNotifySink.html">ITrdNotifySink</a>;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keyword">class </span><a class="code hl_class" href="classTraderAdapterMgr.html">TraderAdapterMgr</a>;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="foldopen" id="foldopen00031" data-start="{" data-end="};">
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classTraderAdapter.html">   31</a></span><span class="keyword">class </span><a class="code hl_class" href="classTraderAdapter.html">TraderAdapter</a> : <span class="keyword">public</span> <a class="code hl_class" href="classITraderSpi.html">ITraderSpi</a></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>{</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <a class="code hl_function" href="classTraderAdapter.html#aafe63a9df47305fabd4484172d6a6f58">TraderAdapter</a>(<a class="code hl_class" href="classTraderAdapterMgr.html">TraderAdapterMgr</a>* mgr);</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <a class="code hl_function" href="classTraderAdapter.html#a793d2b0d39198d04b989fa4a134ebfde">~TraderAdapter</a>();</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classTraderAdapter.html#a7a2518cbc6cda174e932a68e3870ed00">init</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>, <a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* params, <a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>* bdMgr);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapter.html#a3f0907c94235f6292cb241d392bca9c1">release</a>();</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classTraderAdapter.html#a2a809a9e32994824ddf1f7478dfe3c49">run</a>();</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="classTraderAdapter.html#a1d2ee2070639f9e34fa368f5b3f73a90">   44</a></span>    <span class="keyword">inline</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classTraderAdapter.html#a1d2ee2070639f9e34fa368f5b3f73a90">id</a>()<span class="keyword"> const</span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classTraderAdapter.html#a12c8d3201dd135662b00af432b7fc182">_id</a>.c_str(); }</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classTraderAdapter.html#a77992a4a8530961b6852dfcf96182cbf">   46</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classTraderAdapter.html#a77992a4a8530961b6852dfcf96182cbf">isDone</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classTraderAdapter.html#a0c6ca42444ccb7b86086ea348749bee1">_done</a>; }</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapter.html#a74d5b5d7dac7db2ec83a0f70d7a2b9ef">queryFund</a>();</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapter.html#a5f7d53f0271dfbd42a59faf18d6ea7b4">queryPosition</a>();</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="comment">//ITraderSpi½Ó¿Ú</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapter.html#a4b6846ef3dcd89060095eaf89a3805d9">handleEvent</a>(<a class="code hl_typedef" href="WTSTypes_8h.html#a7179e66efb00dde86885670a06fd8303">WTSTraderEvent</a> e, int32_t ec) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapter.html#a64c27afc22490b96ac2d846c468802de">onLoginResult</a>(<span class="keywordtype">bool</span> bSucc, <span class="keyword">const</span> <span class="keywordtype">char</span>* msg, uint32_t tradingdate) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapter.html#a0f1b3a8d652134fbac2a805d5ae51f27">onLogout</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapter.html#a260b11892406acc9fdcff8ff8c45e274">onRspAccount</a>(<a class="code hl_class" href="classWTSArray.html">WTSArray</a>* ayAccounts) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapter.html#a7a85e00a6bb208dfc68e57256dbc35b5">onRspPosition</a>(<span class="keyword">const</span> <a class="code hl_class" href="classWTSArray.html">WTSArray</a>* ayPositions) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapter.html#a8f2a210b19de3571834c06b71d01dc89">onRspTrades</a>(<span class="keyword">const</span> <a class="code hl_class" href="classWTSArray.html">WTSArray</a>* ayTrades) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapter.html#acb3a5adbef8fbbbcb6b886ffbc6d4706">onRspOrders</a>(<span class="keyword">const</span> <a class="code hl_class" href="classWTSArray.html">WTSArray</a>* ayOrders) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapter.html#a2f1adec1772d4bad9142f48894e2c6ef">onPushTrade</a>(<a class="code hl_class" href="classWTSTradeInfo.html">WTSTradeInfo</a>* tradeRecord) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapter.html#af6892b38b932fdd80d3e183560e91b02">onPushOrder</a>(<a class="code hl_class" href="classWTSOrderInfo.html">WTSOrderInfo</a>* orderInfo) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapter.html#a453f57f944279c055fb4b4280b3e4cf3">onTraderError</a>(<a class="code hl_class" href="classWTSError.html">WTSError</a>* err, <span class="keywordtype">void</span>* pData = <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>* <a class="code hl_function" href="classTraderAdapter.html#af36c057011a4a2bd307e7a21c4983db1">getBaseDataMgr</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapter.html#a90b22e0373c641b3b70a44620b9a64d5">handleTraderLog</a>(<a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* message) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="classTraderAdapter.html#a1f20a2d91b7736dc7d017d1fb328939c">   79</a></span>    <a class="code hl_class" href="classTraderAdapterMgr.html">TraderAdapterMgr</a>*   <a class="code hl_variable" href="classTraderAdapter.html#a1f20a2d91b7736dc7d017d1fb328939c">_mgr</a>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="classTraderAdapter.html#a86c8c23fd673a1554565854f4dfea04d">   80</a></span>    <a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>*         <a class="code hl_variable" href="classTraderAdapter.html#a86c8c23fd673a1554565854f4dfea04d">_cfg</a>;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="classTraderAdapter.html#a12c8d3201dd135662b00af432b7fc182">   81</a></span>    std::string         <a class="code hl_variable" href="classTraderAdapter.html#a12c8d3201dd135662b00af432b7fc182">_id</a>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="classTraderAdapter.html#acfb41f71faab31f991c6dba122693a00">   83</a></span>    <a class="code hl_class" href="classITraderApi.html">ITraderApi</a>*         <a class="code hl_variable" href="classTraderAdapter.html#acfb41f71faab31f991c6dba122693a00">_trader_api</a>;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="classTraderAdapter.html#a992ba67b126c83b4a2851bb043100ab3">   84</a></span>    <a class="code hl_typedef" href="ITraderApi_8h.html#a5c0fee4a7fb74dd7496983b1c394058a">FuncDeleteTrader</a>    <a class="code hl_variable" href="classTraderAdapter.html#a992ba67b126c83b4a2851bb043100ab3">_remover</a>;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classTraderAdapter.html#add6984085c73d4d5a9b8763b62a99d29">   86</a></span>    <a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>*       <a class="code hl_variable" href="classTraderAdapter.html#add6984085c73d4d5a9b8763b62a99d29">_bd_mgr</a>;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="classTraderAdapter.html#a9f38300391266afdaf6b11332b4ca6b0">   87</a></span>    uint32_t            <a class="code hl_variable" href="classTraderAdapter.html#a9f38300391266afdaf6b11332b4ca6b0">_date</a>;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="classTraderAdapter.html#a0c6ca42444ccb7b86086ea348749bee1">   89</a></span>    <span class="keywordtype">bool</span>                <a class="code hl_variable" href="classTraderAdapter.html#a0c6ca42444ccb7b86086ea348749bee1">_done</a>;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>};</div>
+</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="TraderDumper_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">   92</a></span><span class="keyword">typedef</span> std::shared_ptr&lt;TraderAdapter&gt;              <a class="code hl_typedef" href="TraderDumper_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a>;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="TraderDumper_2TraderAdapter_8h.html#a4bfef72cf3fc654e75028bd241241259">   93</a></span><span class="keyword">typedef</span> std::unordered_map&lt;std::string, TraderAdapterPtr&gt;   <a class="code hl_typedef" href="TraderDumper_2TraderAdapter_8h.html#a4bfef72cf3fc654e75028bd241241259">TraderAdapterMap</a>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="comment">//TraderAdapterMgr</span></div>
+<div class="foldopen" id="foldopen00097" data-start="{" data-end="};">
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="classTraderAdapterMgr.html">   97</a></span><span class="keyword">class </span><a class="code hl_class" href="classTraderAdapterMgr.html">TraderAdapterMgr</a> : <span class="keyword">private</span> boost::noncopyable</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>{</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classTraderAdapterMgr.html#a50fb856c38636f102c775ee9ea8114ce">release</a>();</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classTraderAdapterMgr.html#a6d321839dfa13802f208eb0a31f81cd8">run</a>();</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="classTraderAdapterMgr.html#aca16245f071de6facaea6dd53b56f43d">  104</a></span>    <span class="keyword">const</span> <a class="code hl_class" href="classwt__hashmap.html">TraderAdapterMap</a>&amp; <a class="code hl_function" href="classTraderAdapterMgr.html#aca16245f071de6facaea6dd53b56f43d">getAdapters</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classTraderAdapterMgr.html#af78036180b2e5e383f2194825e1ca213">_adapters</a>; }</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <a class="code hl_typedef" href="TraderDumper_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a> <a class="code hl_function" href="classTraderAdapterMgr.html#af72c5f78898d2990528fce49c91cb9a3">getAdapter</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* tname);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classTraderAdapterMgr.html#aba592f7b9755d6a0855729528e22e44e">addAdapter</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* tname, <a class="code hl_typedef" href="TraderDumper_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a>&amp; adapter);</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
+<div class="foldopen" id="foldopen00110" data-start="{" data-end="}">
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno"><a class="line" href="classTraderAdapterMgr.html#ab0c4bd970c04c92bc221c30ed99a9e62">  110</a></span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classTraderAdapterMgr.html#ab0c4bd970c04c92bc221c30ed99a9e62">isAnyAlive</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classTraderAdapterMgr.html#a8afa9fa2ae9e6d9f5aab45d72c0851f5">_live_cnt</a> != 0;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    }</div>
+</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="classTraderAdapterMgr.html#a48c4267cee24ce2a0b22bc4d2af4f58c">  114</a></span>    std::size_t <a class="code hl_function" href="classTraderAdapterMgr.html#a48c4267cee24ce2a0b22bc4d2af4f58c">size</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classTraderAdapterMgr.html#af78036180b2e5e383f2194825e1ca213">_adapters</a>.size(); }</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapterMgr.html#ac76c227be1a6a574380209a48c3e42fa">decAlive</a>();</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderAdapterMgr.html#a890fd1dee5279482487922e41e736b08">refresh</a>();</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno"><a class="line" href="classTraderAdapterMgr.html#af78036180b2e5e383f2194825e1ca213">  121</a></span>    <a class="code hl_class" href="classwt__hashmap.html">TraderAdapterMap</a>        <a class="code hl_variable" href="classTraderAdapterMgr.html#af78036180b2e5e383f2194825e1ca213">_adapters</a>;</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="classTraderAdapterMgr.html#a3d6ee607bce8028183d0173a39017c5f">  122</a></span>    std::mutex              <a class="code hl_variable" href="classTraderAdapterMgr.html#a3d6ee607bce8028183d0173a39017c5f">_mutex</a>;</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="classTraderAdapterMgr.html#a8afa9fa2ae9e6d9f5aab45d72c0851f5">  123</a></span>    std::atomic&lt;uint32_t&gt;   <a class="code hl_variable" href="classTraderAdapterMgr.html#a8afa9fa2ae9e6d9f5aab45d72c0851f5">_live_cnt</a>;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>};</div>
+</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="ttc" id="aITraderApi_8h_html_a5c0fee4a7fb74dd7496983b1c394058a"><div class="ttname"><a href="ITraderApi_8h.html#a5c0fee4a7fb74dd7496983b1c394058a">FuncDeleteTrader</a></div><div class="ttdeci">void(* FuncDeleteTrader)(wtp::ITraderApi *&amp;trader)</div><div class="ttdef"><b>Definition</b> <a href="ITraderApi_8h_source.html#l00287">ITraderApi.h:287</a></div></div>
+<div class="ttc" id="aTraderDumper_2TraderAdapter_8h_html_a4bfef72cf3fc654e75028bd241241259"><div class="ttname"><a href="TraderDumper_2TraderAdapter_8h.html#a4bfef72cf3fc654e75028bd241241259">TraderAdapterMap</a></div><div class="ttdeci">std::unordered_map&lt; std::string, TraderAdapterPtr &gt; TraderAdapterMap</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00093">TraderAdapter.h:93</a></div></div>
+<div class="ttc" id="aTraderDumper_2TraderAdapter_8h_html_a70ae93302ae4750baca7a9677556b0fc"><div class="ttname"><a href="TraderDumper_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a></div><div class="ttdeci">std::shared_ptr&lt; TraderAdapter &gt; TraderAdapterPtr</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00092">TraderAdapter.h:92</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_a7179e66efb00dde86885670a06fd8303"><div class="ttname"><a href="WTSTypes_8h.html#a7179e66efb00dde86885670a06fd8303">WTSTraderEvent</a></div><div class="ttdeci">enum tagTraderEvent WTSTraderEvent</div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aa7b93f4aa2259e69e48f27448c247dc8"><div class="ttname"><a href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a></div><div class="ttdeci">enum tagLogLevel WTSLogLevel</div></div>
+<div class="ttc" id="aclassActionPolicyMgr_html"><div class="ttname"><a href="classActionPolicyMgr.html">ActionPolicyMgr</a></div><div class="ttdoc">行为策略管理器类</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00071">ActionPolicyMgr.h:72</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html"><div class="ttname"><a href="classEventNotifier.html">EventNotifier</a></div><div class="ttdoc">事件通知器类，用于回测过程中的事件、数据和资金信息广播</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00063">EventNotifier.h:64</a></div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html"><div class="ttname"><a href="classIBaseDataMgr.html">IBaseDataMgr</a></div><div class="ttdoc">基础数据管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IBaseDataMgr_8h_source.html#l00075">IBaseDataMgr.h:76</a></div></div>
+<div class="ttc" id="aclassITraderApi_html"><div class="ttname"><a href="classITraderApi.html">ITraderApi</a></div><div class="ttdef"><b>Definition</b> <a href="ITraderApi_8h_source.html#l00189">ITraderApi.h:190</a></div></div>
+<div class="ttc" id="aclassITraderSpi_html"><div class="ttname"><a href="classITraderSpi.html">ITraderSpi</a></div><div class="ttdef"><b>Definition</b> <a href="ITraderApi_8h_source.html#l00098">ITraderApi.h:99</a></div></div>
+<div class="ttc" id="aclassITrdNotifySink_html"><div class="ttname"><a href="classITrdNotifySink.html">ITrdNotifySink</a></div><div class="ttdoc">交易通知接收器接口</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ITrdNotifySink_8h_source.html#l00021">ITrdNotifySink.h:22</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html"><div class="ttname"><a href="classTraderAdapterMgr.html">TraderAdapterMgr</a></div><div class="ttdoc">交易适配器管理器</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00097">TraderAdapter.h:98</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_a3d6ee607bce8028183d0173a39017c5f"><div class="ttname"><a href="classTraderAdapterMgr.html#a3d6ee607bce8028183d0173a39017c5f">TraderAdapterMgr::_mutex</a></div><div class="ttdeci">std::mutex _mutex</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00122">TraderAdapter.h:122</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_a48c4267cee24ce2a0b22bc4d2af4f58c"><div class="ttname"><a href="classTraderAdapterMgr.html#a48c4267cee24ce2a0b22bc4d2af4f58c">TraderAdapterMgr::size</a></div><div class="ttdeci">std::size_t size() const</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00114">TraderAdapter.h:114</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_a50fb856c38636f102c775ee9ea8114ce"><div class="ttname"><a href="classTraderAdapterMgr.html#a50fb856c38636f102c775ee9ea8114ce">TraderAdapterMgr::release</a></div><div class="ttdeci">void release()</div><div class="ttdoc">释放所有交易适配器资源</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00373">TraderAdapter.cpp:373</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_a6d321839dfa13802f208eb0a31f81cd8"><div class="ttname"><a href="classTraderAdapterMgr.html#a6d321839dfa13802f208eb0a31f81cd8">TraderAdapterMgr::run</a></div><div class="ttdeci">void run()</div><div class="ttdoc">运行所有交易适配器</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00362">TraderAdapter.cpp:362</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_a890fd1dee5279482487922e41e736b08"><div class="ttname"><a href="classTraderAdapterMgr.html#a890fd1dee5279482487922e41e736b08">TraderAdapterMgr::refresh</a></div><div class="ttdeci">void refresh()</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00403">TraderAdapter.cpp:403</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_a8afa9fa2ae9e6d9f5aab45d72c0851f5"><div class="ttname"><a href="classTraderAdapterMgr.html#a8afa9fa2ae9e6d9f5aab45d72c0851f5">TraderAdapterMgr::_live_cnt</a></div><div class="ttdeci">std::atomic&lt; uint32_t &gt; _live_cnt</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00123">TraderAdapter.h:123</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_ab0c4bd970c04c92bc221c30ed99a9e62"><div class="ttname"><a href="classTraderAdapterMgr.html#ab0c4bd970c04c92bc221c30ed99a9e62">TraderAdapterMgr::isAnyAlive</a></div><div class="ttdeci">bool isAnyAlive() const</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00110">TraderAdapter.h:110</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_aba592f7b9755d6a0855729528e22e44e"><div class="ttname"><a href="classTraderAdapterMgr.html#aba592f7b9755d6a0855729528e22e44e">TraderAdapterMgr::addAdapter</a></div><div class="ttdeci">bool addAdapter(const char *tname, TraderAdapterPtr &amp;adapter)</div><div class="ttdoc">添加交易适配器</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00334">TraderAdapter.cpp:334</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_ac76c227be1a6a574380209a48c3e42fa"><div class="ttname"><a href="classTraderAdapterMgr.html#ac76c227be1a6a574380209a48c3e42fa">TraderAdapterMgr::decAlive</a></div><div class="ttdeci">void decAlive()</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00383">TraderAdapter.cpp:383</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_aca16245f071de6facaea6dd53b56f43d"><div class="ttname"><a href="classTraderAdapterMgr.html#aca16245f071de6facaea6dd53b56f43d">TraderAdapterMgr::getAdapters</a></div><div class="ttdeci">const TraderAdapterMap &amp; getAdapters() const</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00104">TraderAdapter.h:104</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_af72c5f78898d2990528fce49c91cb9a3"><div class="ttname"><a href="classTraderAdapterMgr.html#af72c5f78898d2990528fce49c91cb9a3">TraderAdapterMgr::getAdapter</a></div><div class="ttdeci">TraderAdapterPtr getAdapter(const char *tname)</div><div class="ttdoc">获取交易适配器</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00351">TraderAdapter.cpp:351</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_af78036180b2e5e383f2194825e1ca213"><div class="ttname"><a href="classTraderAdapterMgr.html#af78036180b2e5e383f2194825e1ca213">TraderAdapterMgr::_adapters</a></div><div class="ttdeci">TraderAdapterMap _adapters</div><div class="ttdoc">适配器映射表</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00121">TraderAdapter.h:121</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html"><div class="ttname"><a href="classTraderAdapter.html">TraderAdapter</a></div><div class="ttdoc">交易适配器类</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00031">TraderAdapter.h:32</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a0c6ca42444ccb7b86086ea348749bee1"><div class="ttname"><a href="classTraderAdapter.html#a0c6ca42444ccb7b86086ea348749bee1">TraderAdapter::_done</a></div><div class="ttdeci">bool _done</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00089">TraderAdapter.h:89</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a0f1b3a8d652134fbac2a805d5ae51f27"><div class="ttname"><a href="classTraderAdapter.html#a0f1b3a8d652134fbac2a805d5ae51f27">TraderAdapter::onLogout</a></div><div class="ttdeci">virtual void onLogout() override</div><div class="ttdoc">登出回调</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00176">TraderAdapter.cpp:176</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a12c8d3201dd135662b00af432b7fc182"><div class="ttname"><a href="classTraderAdapter.html#a12c8d3201dd135662b00af432b7fc182">TraderAdapter::_id</a></div><div class="ttdeci">std::string _id</div><div class="ttdoc">适配器ID</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00081">TraderAdapter.h:81</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a1d2ee2070639f9e34fa368f5b3f73a90"><div class="ttname"><a href="classTraderAdapter.html#a1d2ee2070639f9e34fa368f5b3f73a90">TraderAdapter::id</a></div><div class="ttdeci">const char * id() const</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00044">TraderAdapter.h:44</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a1f20a2d91b7736dc7d017d1fb328939c"><div class="ttname"><a href="classTraderAdapter.html#a1f20a2d91b7736dc7d017d1fb328939c">TraderAdapter::_mgr</a></div><div class="ttdeci">TraderAdapterMgr * _mgr</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00079">TraderAdapter.h:79</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a260b11892406acc9fdcff8ff8c45e274"><div class="ttname"><a href="classTraderAdapter.html#a260b11892406acc9fdcff8ff8c45e274">TraderAdapter::onRspAccount</a></div><div class="ttdeci">virtual void onRspAccount(WTSArray *ayAccounts) override</div><div class="ttdoc">账户资金响应回调</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00197">TraderAdapter.cpp:197</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a2a809a9e32994824ddf1f7478dfe3c49"><div class="ttname"><a href="classTraderAdapter.html#a2a809a9e32994824ddf1f7478dfe3c49">TraderAdapter::run</a></div><div class="ttdeci">bool run()</div><div class="ttdoc">运行交易适配器</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00117">TraderAdapter.cpp:117</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a2f1adec1772d4bad9142f48894e2c6ef"><div class="ttname"><a href="classTraderAdapter.html#a2f1adec1772d4bad9142f48894e2c6ef">TraderAdapter::onPushTrade</a></div><div class="ttdeci">virtual void onPushTrade(WTSTradeInfo *tradeRecord) override</div><div class="ttdoc">成交推送回调</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00216">TraderAdapter.cpp:216</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a3f0907c94235f6292cb241d392bca9c1"><div class="ttname"><a href="classTraderAdapter.html#a3f0907c94235f6292cb241d392bca9c1">TraderAdapter::release</a></div><div class="ttdeci">void release()</div><div class="ttdoc">释放交易适配器资源</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00128">TraderAdapter.cpp:128</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a453f57f944279c055fb4b4280b3e4cf3"><div class="ttname"><a href="classTraderAdapter.html#a453f57f944279c055fb4b4280b3e4cf3">TraderAdapter::onTraderError</a></div><div class="ttdeci">virtual void onTraderError(WTSError *err, void *pData=NULL) override</div><div class="ttdoc">交易错误回调</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00313">TraderAdapter.cpp:313</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a4b6846ef3dcd89060095eaf89a3805d9"><div class="ttname"><a href="classTraderAdapter.html#a4b6846ef3dcd89060095eaf89a3805d9">TraderAdapter::handleEvent</a></div><div class="ttdeci">virtual void handleEvent(WTSTraderEvent e, int32_t ec) override</div><div class="ttdoc">处理交易事件</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00138">TraderAdapter.cpp:138</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a5f7d53f0271dfbd42a59faf18d6ea7b4"><div class="ttname"><a href="classTraderAdapter.html#a5f7d53f0271dfbd42a59faf18d6ea7b4">TraderAdapter::queryPosition</a></div><div class="ttdeci">void queryPosition()</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00189">TraderAdapter.cpp:189</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a64c27afc22490b96ac2d846c468802de"><div class="ttname"><a href="classTraderAdapter.html#a64c27afc22490b96ac2d846c468802de">TraderAdapter::onLoginResult</a></div><div class="ttdeci">virtual void onLoginResult(bool bSucc, const char *msg, uint32_t tradingdate) override</div><div class="ttdoc">登录结果回调</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00159">TraderAdapter.cpp:159</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a74d5b5d7dac7db2ec83a0f70d7a2b9ef"><div class="ttname"><a href="classTraderAdapter.html#a74d5b5d7dac7db2ec83a0f70d7a2b9ef">TraderAdapter::queryFund</a></div><div class="ttdeci">void queryFund()</div><div class="ttdoc">查询资金</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00181">TraderAdapter.cpp:181</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a77992a4a8530961b6852dfcf96182cbf"><div class="ttname"><a href="classTraderAdapter.html#a77992a4a8530961b6852dfcf96182cbf">TraderAdapter::isDone</a></div><div class="ttdeci">bool isDone() const</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00046">TraderAdapter.h:46</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a793d2b0d39198d04b989fa4a134ebfde"><div class="ttname"><a href="classTraderAdapter.html#a793d2b0d39198d04b989fa4a134ebfde">TraderAdapter::~TraderAdapter</a></div><div class="ttdeci">~TraderAdapter()</div><div class="ttdoc">交易适配器析构函数</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00049">TraderAdapter.cpp:49</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a7a2518cbc6cda174e932a68e3870ed00"><div class="ttname"><a href="classTraderAdapter.html#a7a2518cbc6cda174e932a68e3870ed00">TraderAdapter::init</a></div><div class="ttdeci">bool init(const char *id, WTSVariant *params, IBaseDataMgr *bdMgr)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00053">TraderAdapter.cpp:53</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a7a85e00a6bb208dfc68e57256dbc35b5"><div class="ttname"><a href="classTraderAdapter.html#a7a85e00a6bb208dfc68e57256dbc35b5">TraderAdapter::onRspPosition</a></div><div class="ttdeci">virtual void onRspPosition(const WTSArray *ayPositions) override</div><div class="ttdoc">持仓响应回调</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00289">TraderAdapter.cpp:289</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a86c8c23fd673a1554565854f4dfea04d"><div class="ttname"><a href="classTraderAdapter.html#a86c8c23fd673a1554565854f4dfea04d">TraderAdapter::_cfg</a></div><div class="ttdeci">WTSVariant * _cfg</div><div class="ttdoc">配置项</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00080">TraderAdapter.h:80</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a8f2a210b19de3571834c06b71d01dc89"><div class="ttname"><a href="classTraderAdapter.html#a8f2a210b19de3571834c06b71d01dc89">TraderAdapter::onRspTrades</a></div><div class="ttdeci">virtual void onRspTrades(const WTSArray *ayTrades) override</div><div class="ttdoc">成交响应回调</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00227">TraderAdapter.cpp:227</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a90b22e0373c641b3b70a44620b9a64d5"><div class="ttname"><a href="classTraderAdapter.html#a90b22e0373c641b3b70a44620b9a64d5">TraderAdapter::handleTraderLog</a></div><div class="ttdeci">virtual void handleTraderLog(WTSLogLevel ll, const char *message) override</div><div class="ttdoc">处理交易日志</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00324">TraderAdapter.cpp:324</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a992ba67b126c83b4a2851bb043100ab3"><div class="ttname"><a href="classTraderAdapter.html#a992ba67b126c83b4a2851bb043100ab3">TraderAdapter::_remover</a></div><div class="ttdeci">FuncDeleteTrader _remover</div><div class="ttdoc">交易实例删除器</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00084">TraderAdapter.h:84</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a9f38300391266afdaf6b11332b4ca6b0"><div class="ttname"><a href="classTraderAdapter.html#a9f38300391266afdaf6b11332b4ca6b0">TraderAdapter::_date</a></div><div class="ttdeci">uint32_t _date</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00087">TraderAdapter.h:87</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_aafe63a9df47305fabd4484172d6a6f58"><div class="ttname"><a href="classTraderAdapter.html#aafe63a9df47305fabd4484172d6a6f58">TraderAdapter::TraderAdapter</a></div><div class="ttdeci">TraderAdapter()</div><div class="ttdoc">交易适配器构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtUftCore_2TraderAdapter_8cpp_source.html#l00091">TraderAdapter.cpp:91</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_acb3a5adbef8fbbbcb6b886ffbc6d4706"><div class="ttname"><a href="classTraderAdapter.html#acb3a5adbef8fbbbcb6b886ffbc6d4706">TraderAdapter::onRspOrders</a></div><div class="ttdeci">virtual void onRspOrders(const WTSArray *ayOrders) override</div><div class="ttdoc">订单响应回调</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00249">TraderAdapter.cpp:249</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_acfb41f71faab31f991c6dba122693a00"><div class="ttname"><a href="classTraderAdapter.html#acfb41f71faab31f991c6dba122693a00">TraderAdapter::_trader_api</a></div><div class="ttdeci">ITraderApi * _trader_api</div><div class="ttdoc">交易API接口</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00083">TraderAdapter.h:83</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_add6984085c73d4d5a9b8763b62a99d29"><div class="ttname"><a href="classTraderAdapter.html#add6984085c73d4d5a9b8763b62a99d29">TraderAdapter::_bd_mgr</a></div><div class="ttdeci">IBaseDataMgr * _bd_mgr</div><div class="ttdoc">基础数据管理器</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00086">TraderAdapter.h:86</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_af36c057011a4a2bd307e7a21c4983db1"><div class="ttname"><a href="classTraderAdapter.html#af36c057011a4a2bd307e7a21c4983db1">TraderAdapter::getBaseDataMgr</a></div><div class="ttdeci">virtual IBaseDataMgr * getBaseDataMgr() override</div><div class="ttdoc">获取基础数据管理器</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00319">TraderAdapter.cpp:319</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_af6892b38b932fdd80d3e183560e91b02"><div class="ttname"><a href="classTraderAdapter.html#af6892b38b932fdd80d3e183560e91b02">TraderAdapter::onPushOrder</a></div><div class="ttdeci">virtual void onPushOrder(WTSOrderInfo *orderInfo) override</div><div class="ttdoc">订单推送回调</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00271">TraderAdapter.cpp:271</a></div></div>
+<div class="ttc" id="aclassWTSArray_html"><div class="ttname"><a href="classWTSArray.html">WTSArray</a></div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00032">WTSCollection.hpp:33</a></div></div>
+<div class="ttc" id="aclassWTSCommodityInfo_html"><div class="ttname"><a href="classWTSCommodityInfo.html">WTSCommodityInfo</a></div><div class="ttdoc">品种信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00020">WTSContractInfo.hpp:21</a></div></div>
+<div class="ttc" id="aclassWTSContractInfo_html"><div class="ttname"><a href="classWTSContractInfo.html">WTSContractInfo</a></div><div class="ttdoc">合约信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00171">WTSContractInfo.hpp:172</a></div></div>
+<div class="ttc" id="aclassWTSError_html"><div class="ttname"><a href="classWTSError.html">WTSError</a></div><div class="ttdef"><b>Definition</b> <a href="WTSError_8hpp_source.html#l00016">WTSError.hpp:17</a></div></div>
+<div class="ttc" id="aclassWTSOrderInfo_html"><div class="ttname"><a href="classWTSOrderInfo.html">WTSOrderInfo</a></div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00235">WTSTradeDef.hpp:236</a></div></div>
+<div class="ttc" id="aclassWTSTradeInfo_html"><div class="ttname"><a href="classWTSTradeInfo.html">WTSTradeInfo</a></div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00406">WTSTradeDef.hpp:407</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclasswt__hashmap_html"><div class="ttname"><a href="classwt__hashmap.html">wt_hashmap</a></div><div class="ttdoc">WonderTrader通用高性能哈希表模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00162">FasterDefs.h:163</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_e196f49eb960f9cca6fb56ba1a2ade26.html">TraderDumper</a></li><li class="navelem"><a class="el" href="TraderDumper_2TraderAdapter_8h.html">TraderAdapter.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

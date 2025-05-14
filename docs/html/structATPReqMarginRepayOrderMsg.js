@@ -1,0 +1,26 @@
+var structATPReqMarginRepayOrderMsg =
+[
+    [ "ATPReqMarginRepayOrderMsg", "structATPReqMarginRepayOrderMsg.html#a915cc89b080614d53d0c52290a0c1b15", null ],
+    [ "ATPReqMarginRepayOrderMsg", "structATPReqMarginRepayOrderMsg.html#a915cc89b080614d53d0c52290a0c1b15", null ],
+    [ "account_id", "structATPReqMarginRepayOrderMsg.html#abbf0e0aa53bbfbde009ba580f1c64207", null ],
+    [ "branch_id", "structATPReqMarginRepayOrderMsg.html#ab476958e8765cfdf233701a807fd4bc8", null ],
+    [ "client_feature_code", "structATPReqMarginRepayOrderMsg.html#aa5cb8b1112ec43610a92fa6eadc81d52", null ],
+    [ "client_seq_id", "structATPReqMarginRepayOrderMsg.html#ada7948bdbbae1da8f9b493883f116dce", null ],
+    [ "cust_id", "structATPReqMarginRepayOrderMsg.html#a793b979d3b1d674028ba5fca9ac231b0", null ],
+    [ "enforce_flag", "structATPReqMarginRepayOrderMsg.html#a658a058416bac028a66058381b65de78", null ],
+    [ "extra_data", "structATPReqMarginRepayOrderMsg.html#a6c85dea3dd447b2faa069ed66c80d79d", null ],
+    [ "fund_account_id", "structATPReqMarginRepayOrderMsg.html#aa57fd34d9ad814f0e3d7d59d472ad0f8", null ],
+    [ "market_id", "structATPReqMarginRepayOrderMsg.html#a98c5bd19af8985cb951d921039d33b18", null ],
+    [ "max_price_levels", "structATPReqMarginRepayOrderMsg.html#a6c25ebf1b1f17b3b724c0aa223eb8fc4", null ],
+    [ "min_qty", "structATPReqMarginRepayOrderMsg.html#abc94daddb086fbb6abf3abce83971f56", null ],
+    [ "order_qty", "structATPReqMarginRepayOrderMsg.html#a0c645c9d6d75c80f7a5e6de74d7f048e", null ],
+    [ "order_type", "structATPReqMarginRepayOrderMsg.html#af75c526d610e50f738e28c047196585c", null ],
+    [ "order_way", "structATPReqMarginRepayOrderMsg.html#a526dda8253910d6fc8f6cec88d3571c6", null ],
+    [ "password", "structATPReqMarginRepayOrderMsg.html#afc26415d89679c791d12ff4b37fca052", null ],
+    [ "price", "structATPReqMarginRepayOrderMsg.html#a3e945cbdc90e9e85106a3d7426075cb5", null ],
+    [ "security_id", "structATPReqMarginRepayOrderMsg.html#a1cfef76677edada75418c569da3b4e17", null ],
+    [ "side", "structATPReqMarginRepayOrderMsg.html#ae879f7ea029a5bb046242d843cc283b9", null ],
+    [ "stop_px", "structATPReqMarginRepayOrderMsg.html#aaae291c565d97b9de0c32efdb8be6713", null ],
+    [ "time_in_force", "structATPReqMarginRepayOrderMsg.html#a38147a9180f7afd228be99c9526eca3a", null ],
+    [ "user_info", "structATPReqMarginRepayOrderMsg.html#a793497074aa083347dc804a8ee55a126", null ]
+];

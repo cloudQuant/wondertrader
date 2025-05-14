@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/sutil/net/spk_errmsg_base_define.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('spk__errmsg__base__define_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">spk_errmsg_base_define.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="spk__errmsg__base__define_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright 2009-2016 the original author or authors.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * you may not use this file except in compliance with the License.</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * You may obtain a copy of the License at</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *     http://www.apache.org/licenses/LICENSE-2.0</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * Unless required by applicable law or agreed to in writing, software</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * See the License for the specific language governing permissions and</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * limitations under the License.</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#ifndef _SPK_ERRMSG_BASE_DEFINE_H</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#define _SPK_ERRMSG_BASE_DEFINE_H</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include    &lt;<a class="code" href="types_8h.html">sutil/types.h</a>&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment"> * 常量定义</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="spk__errmsg__base__define_8h.html#a519c1f53fc28e423f45d169b5529cc49">   44</a></span><span class="preprocessor">#define SPK_MAX_ERRMSG_LEN                  (96)</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment"> * 结构体定义</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="foldopen" id="foldopen00055" data-start="{" data-end="};">
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="struct__SErrMsg.html">   55</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="struct__SErrMsg.html">_SErrMsg</a> {</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="struct__SErrMsg.html#ac6b26d5f1d598fbb6f522c720ebbd2c0">   56</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a8d62856ddcc3b33af5e7ac690128275d">int16</a>           <a class="code hl_variable" href="struct__SErrMsg.html#ac6b26d5f1d598fbb6f522c720ebbd2c0">__index</a>;                </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="struct__SErrMsg.html#a5297338c8d927d298d1dc4b037e28f49">   57</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>           <a class="code hl_variable" href="struct__SErrMsg.html#a5297338c8d927d298d1dc4b037e28f49">MODULE</a>;                 </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="struct__SErrMsg.html#a92bdbe534a12d3c7c20b6d96a479f041">   58</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>           <a class="code hl_variable" href="struct__SErrMsg.html#a92bdbe534a12d3c7c20b6d96a479f041">CODE</a>;                   </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="struct__SErrMsg.html#a04ca92a14e4e4192a8ef15727ca0f40c">   59</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aa2af87dc3681cf517e4b9e14c6f0244e">uint16</a>          <a class="code hl_variable" href="struct__SErrMsg.html#a04ca92a14e4e4192a8ef15727ca0f40c">__errCode</a>;              </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="struct__SErrMsg.html#a45b59c6c50a1650f63e6ebf6e3dc9eed">   60</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a8d62856ddcc3b33af5e7ac690128275d">int16</a>           <a class="code hl_variable" href="struct__SErrMsg.html#a45b59c6c50a1650f63e6ebf6e3dc9eed">__msgSize</a>;              </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="struct__SErrMsg.html#a388e3d9ce21977ef2c5df2571f87f393">   63</a></span>    <span class="keywordtype">char</span>            <a class="code hl_variable" href="struct__SErrMsg.html#a388e3d9ce21977ef2c5df2571f87f393">MSG</a>[<a class="code hl_define" href="spk__errmsg__base__define_8h.html#a519c1f53fc28e423f45d169b5529cc49">SPK_MAX_ERRMSG_LEN</a>];</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="spk__errmsg__base__define_8h.html#a2cce036dc31c191977380d8da0535ae3">   64</a></span>} <a class="code hl_typedef" href="spk__errmsg__base__define_8h.html#a2cce036dc31c191977380d8da0535ae3">SErrMsgT</a>;</div>
+</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="comment">/* 结构体初始化值定义 */</span></div>
+<div class="foldopen" id="foldopen00068" data-start="" data-end="">
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="spk__errmsg__base__define_8h.html#a05f5a5c4eb5b65f877ee27e14ee4e46a">   68</a></span><span class="preprocessor">#define NULLOBJ_SPK_ERRMSG                  \</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">        0, 0, 0, 0, 0, \</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">        {0}</span></div>
+</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>}</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="preprocessor">#endif  </span><span class="comment">/* _SPK_ERRMSG_BASE_DEFINE_H */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_a1b09856a6463f2bcc4bd8ff0e4e3ee0f"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a></div><div class="ttdeci">unsigned __int8 uint8</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00073">itpdk_typedef.h:73</a></div></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_a8d62856ddcc3b33af5e7ac690128275d"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a8d62856ddcc3b33af5e7ac690128275d">int16</a></div><div class="ttdeci">__int16 int16</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00069">itpdk_typedef.h:69</a></div></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_aa2af87dc3681cf517e4b9e14c6f0244e"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aa2af87dc3681cf517e4b9e14c6f0244e">uint16</a></div><div class="ttdeci">unsigned __int16 uint16</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00074">itpdk_typedef.h:74</a></div></div>
+<div class="ttc" id="aspk__errmsg__base__define_8h_html_a2cce036dc31c191977380d8da0535ae3"><div class="ttname"><a href="spk__errmsg__base__define_8h.html#a2cce036dc31c191977380d8da0535ae3">SErrMsgT</a></div><div class="ttdeci">struct _SErrMsg SErrMsgT</div></div>
+<div class="ttc" id="aspk__errmsg__base__define_8h_html_a519c1f53fc28e423f45d169b5529cc49"><div class="ttname"><a href="spk__errmsg__base__define_8h.html#a519c1f53fc28e423f45d169b5529cc49">SPK_MAX_ERRMSG_LEN</a></div><div class="ttdeci">#define SPK_MAX_ERRMSG_LEN</div><div class="ttdef"><b>Definition</b> <a href="spk__errmsg__base__define_8h_source.html#l00044">spk_errmsg_base_define.h:44</a></div></div>
+<div class="ttc" id="astruct__SErrMsg_html"><div class="ttname"><a href="struct__SErrMsg.html">_SErrMsg</a></div><div class="ttdef"><b>Definition</b> <a href="spk__errmsg__base__define_8h_source.html#l00055">spk_errmsg_base_define.h:55</a></div></div>
+<div class="ttc" id="astruct__SErrMsg_html_a04ca92a14e4e4192a8ef15727ca0f40c"><div class="ttname"><a href="struct__SErrMsg.html#a04ca92a14e4e4192a8ef15727ca0f40c">_SErrMsg::__errCode</a></div><div class="ttdeci">uint16 __errCode</div><div class="ttdef"><b>Definition</b> <a href="spk__errmsg__base__define_8h_source.html#l00059">spk_errmsg_base_define.h:59</a></div></div>
+<div class="ttc" id="astruct__SErrMsg_html_a388e3d9ce21977ef2c5df2571f87f393"><div class="ttname"><a href="struct__SErrMsg.html#a388e3d9ce21977ef2c5df2571f87f393">_SErrMsg::MSG</a></div><div class="ttdeci">char MSG[SPK_MAX_ERRMSG_LEN]</div><div class="ttdef"><b>Definition</b> <a href="spk__errmsg__base__define_8h_source.html#l00063">spk_errmsg_base_define.h:63</a></div></div>
+<div class="ttc" id="astruct__SErrMsg_html_a45b59c6c50a1650f63e6ebf6e3dc9eed"><div class="ttname"><a href="struct__SErrMsg.html#a45b59c6c50a1650f63e6ebf6e3dc9eed">_SErrMsg::__msgSize</a></div><div class="ttdeci">int16 __msgSize</div><div class="ttdef"><b>Definition</b> <a href="spk__errmsg__base__define_8h_source.html#l00060">spk_errmsg_base_define.h:60</a></div></div>
+<div class="ttc" id="astruct__SErrMsg_html_a5297338c8d927d298d1dc4b037e28f49"><div class="ttname"><a href="struct__SErrMsg.html#a5297338c8d927d298d1dc4b037e28f49">_SErrMsg::MODULE</a></div><div class="ttdeci">uint8 MODULE</div><div class="ttdef"><b>Definition</b> <a href="spk__errmsg__base__define_8h_source.html#l00057">spk_errmsg_base_define.h:57</a></div></div>
+<div class="ttc" id="astruct__SErrMsg_html_a92bdbe534a12d3c7c20b6d96a479f041"><div class="ttname"><a href="struct__SErrMsg.html#a92bdbe534a12d3c7c20b6d96a479f041">_SErrMsg::CODE</a></div><div class="ttdeci">uint8 CODE</div><div class="ttdef"><b>Definition</b> <a href="spk__errmsg__base__define_8h_source.html#l00058">spk_errmsg_base_define.h:58</a></div></div>
+<div class="ttc" id="astruct__SErrMsg_html_ac6b26d5f1d598fbb6f522c720ebbd2c0"><div class="ttname"><a href="struct__SErrMsg.html#ac6b26d5f1d598fbb6f522c720ebbd2c0">_SErrMsg::__index</a></div><div class="ttdeci">int16 __index</div><div class="ttdef"><b>Definition</b> <a href="spk__errmsg__base__define_8h_source.html#l00056">spk_errmsg_base_define.h:56</a></div></div>
+<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_248d918e0c46523948aef7b06f6106c0.html">sutil</a></li><li class="navelem"><a class="el" href="dir_c987e70cbc9e5d3b2eeb9e681bd06b56.html">net</a></li><li class="navelem"><a class="el" href="spk__errmsg__base__define_8h.html">spk_errmsg_base_define.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtRunner/WtRunner.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtRunner_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtRunner.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtRunner_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;unordered_map&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/ILogHandler.h&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../WtCore/EventNotifier.h&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;../WtCore/CtaStrategyMgr.h&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;../WtCore/HftStrategyMgr.h&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;../WtCore/SelStrategyMgr.h&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;../WtCore/WtCtaEngine.h&quot;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;../WtCore/WtHftEngine.h&quot;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;../WtCore/WtSelEngine.h&quot;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;../WtCore/WtLocalExecuter.h&quot;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;../WtCore/WtDistExecuter.h&quot;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;../WtCore/TraderAdapter.h&quot;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;../WtCore/ParserAdapter.h&quot;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;../WtCore/WtDtMgr.h&quot;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;../WtCore/ActionPolicyMgr.h&quot;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;../WTSTools/WTSHotMgr.h&quot;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;../WTSTools/WTSBaseDataMgr.h&quot;</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="keyword">class </span><a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">class </span>WtDataStorage;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="WtRunner_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">   40</a></span><a class="code hl_variable" href="WtRunner_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="foldopen" id="foldopen00046" data-start="{" data-end="};">
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classWtRunner.html">   46</a></span><span class="keyword">class </span><a class="code hl_class" href="classWtRunner.html">WtRunner</a> : <span class="keyword">public</span> <a class="code hl_class" href="classILogHandler.html">ILogHandler</a></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>{</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <a class="code hl_class" href="classWtRunner.html">WtRunner</a>();</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <a class="code hl_class" href="classWtRunner.html">~WtRunner</a>();</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="API_2AtpTradeApi_2demo_2simple__demo_2main_8cpp.html#a347fd65fce8f2409e533eb1badd110e0">init</a>(<span class="keyword">const</span> std::string&amp; filename);</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>(<span class="keyword">const</span> std::string&amp; filename);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="CTPLoader_8cpp.html#aa8f8675052ff82b5ae5b06eead6000eb">run</a>(<span class="keywordtype">bool</span> bAsync = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtRunner.html#afe234fb874b3b935e26b4c649a3dd151">initTraders</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfgTrader);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="QuoteFactory_2main_8cpp.html#adbb89153aef628913827f49123bbd936">initParsers</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfgParser);</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtRunner.html#ac3419d7817d2384ed6be7b339d4010db">initExecuters</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfgExecuter);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="QuoteFactory_2main_8cpp.html#a144d9ac5d7f1b6767f8ff9642e0dcb6d">initDataMgr</a>();</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtRunner.html#a53084704423f03068e0e4e4bed0884fd">initEvtNotifier</a>();</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtRunner.html#a546ff45d0300286f5866cb865cc3420e">initCtaStrategies</a>();</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtRunner.html#a445de2f83275ab4e97ffe918865c9a3c">initHftStrategies</a>();</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtRunner.html#ac538065b35887ea8df2a4c9bf8276e84">initActionPolicy</a>();</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtRunner.html#a27a5a23fba2022690da1e63337438276">initEngine</a>();</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span><span class="comment">//ILogHandler</span></div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtRunner.html#ac0d99439d31f437d72521c1fefa74319">handleLogAppend</a>(<a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* msg) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno"><a class="line" href="classWtRunner.html#a207b24c2cbf0d4d4671bae722ba272f9">  162</a></span>    <a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>*         <a class="code hl_variable" href="classWtRunner.html#a207b24c2cbf0d4d4671bae722ba272f9">_config</a>;                </div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno"><a class="line" href="classWtRunner.html#a9747d16c10e28192aaa49cb0c557aed7">  163</a></span>    <a class="code hl_class" href="classTraderAdapterMgr.html">TraderAdapterMgr</a>    <a class="code hl_variable" href="classWtRunner.html#a9747d16c10e28192aaa49cb0c557aed7">_traders</a>;           </div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno"><a class="line" href="classWtRunner.html#a508a0a70b816562a23b0987717ef110b">  164</a></span>    <a class="code hl_class" href="classParserAdapterMgr.html">ParserAdapterMgr</a>    <a class="code hl_variable" href="classWtRunner.html#a508a0a70b816562a23b0987717ef110b">_parsers</a>;           </div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno"><a class="line" href="classWtRunner.html#a128f173d93a52f3fc3484936c6e9de07">  165</a></span>    <a class="code hl_class" href="classWtExecuterFactory.html">WtExecuterFactory</a>   <a class="code hl_variable" href="classWtRunner.html#a128f173d93a52f3fc3484936c6e9de07">_exe_factory</a>;       </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno"><a class="line" href="classWtRunner.html#afebaea956b931c03ba7443826982f1c1">  167</a></span>    <a class="code hl_class" href="classWtCtaEngine.html">WtCtaEngine</a>         <a class="code hl_variable" href="classWtRunner.html#afebaea956b931c03ba7443826982f1c1">_cta_engine</a>;            </div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno"><a class="line" href="classWtRunner.html#a265da13c85487d225c22e4fedf50ca9b">  168</a></span>    <a class="code hl_class" href="classWtHftEngine.html">WtHftEngine</a>         <a class="code hl_variable" href="classWtRunner.html#a265da13c85487d225c22e4fedf50ca9b">_hft_engine</a>;            </div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno"><a class="line" href="classWtRunner.html#a6a577df6032e7673cc2eb90d6f1b90c5">  169</a></span>    <a class="code hl_class" href="classWtSelEngine.html">WtSelEngine</a>         <a class="code hl_variable" href="classWtRunner.html#a6a577df6032e7673cc2eb90d6f1b90c5">_sel_engine</a>;            </div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno"><a class="line" href="classWtRunner.html#a45b8e9995380cfaa2bc5be2438506755">  170</a></span>    <a class="code hl_class" href="classWtEngine.html">WtEngine</a>*           <a class="code hl_variable" href="classWtRunner.html#a45b8e9995380cfaa2bc5be2438506755">_engine</a>;                </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno"><a class="line" href="classWtRunner.html#a918d081c76930c9df61515dfb894b9b0">  172</a></span>    WtDataStorage*      <a class="code hl_variable" href="classWtRunner.html#a918d081c76930c9df61515dfb894b9b0">_data_store</a>;            </div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span> </div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno"><a class="line" href="classWtRunner.html#a1dfe5bd23447e69acd51b342eab4c30b">  174</a></span>    <a class="code hl_class" href="classWtDtMgr.html">WtDtMgr</a>             <a class="code hl_variable" href="classWtRunner.html#a1dfe5bd23447e69acd51b342eab4c30b">_data_mgr</a>;          </div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno"><a class="line" href="classWtRunner.html#a34a96498fac6770fda2d6ca222af58f0">  176</a></span>    <a class="code hl_class" href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a>      <a class="code hl_variable" href="classWtRunner.html#a34a96498fac6770fda2d6ca222af58f0">_bd_mgr</a>;                </div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno"><a class="line" href="classWtRunner.html#ac690acdaaccf07f589b5a18e6315f911">  177</a></span>    <a class="code hl_class" href="classWTSHotMgr.html">WTSHotMgr</a>           <a class="code hl_variable" href="classWtRunner.html#ac690acdaaccf07f589b5a18e6315f911">_hot_mgr</a>;               </div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno"><a class="line" href="classWtRunner.html#a91f114d119611319ca4bbbd559a4014a">  178</a></span>    <a class="code hl_class" href="classEventNotifier.html">EventNotifier</a>       <a class="code hl_variable" href="classWtRunner.html#a91f114d119611319ca4bbbd559a4014a">_notifier</a>;          </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno"><a class="line" href="classWtRunner.html#a76ceb3201f862e72c744d1f4251daadd">  180</a></span>    <a class="code hl_class" href="classCtaStrategyMgr.html">CtaStrategyMgr</a>      <a class="code hl_variable" href="classWtRunner.html#a76ceb3201f862e72c744d1f4251daadd">_cta_stra_mgr</a>;      </div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno"><a class="line" href="classWtRunner.html#a06c93e69dd3bb2e6ca636930aaa3b2ad">  181</a></span>    <a class="code hl_class" href="classHftStrategyMgr.html">HftStrategyMgr</a>      <a class="code hl_variable" href="classWtRunner.html#a06c93e69dd3bb2e6ca636930aaa3b2ad">_hft_stra_mgr</a>;      </div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno"><a class="line" href="classWtRunner.html#a19adbb4b829350cdf0083736bdea059c">  182</a></span>    <a class="code hl_class" href="classSelStrategyMgr.html">SelStrategyMgr</a>      <a class="code hl_variable" href="classWtRunner.html#a19adbb4b829350cdf0083736bdea059c">_sel_stra_mgr</a>;      </div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno"><a class="line" href="classWtRunner.html#a0412a0d94d09253ac481aec23bc2bc97">  183</a></span>    <a class="code hl_class" href="classActionPolicyMgr.html">ActionPolicyMgr</a>     <a class="code hl_variable" href="classWtRunner.html#a0412a0d94d09253ac481aec23bc2bc97">_act_policy</a>;            </div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno"><a class="line" href="classWtRunner.html#aad2e2242aea7415612a41e2d6caa3c9c">  185</a></span>    <span class="keywordtype">bool</span>                <a class="code hl_variable" href="classWtRunner.html#aad2e2242aea7415612a41e2d6caa3c9c">_is_hft</a>;                </div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno"><a class="line" href="classWtRunner.html#a7ead121a4111c27141203e63512a2030">  186</a></span>    <span class="keywordtype">bool</span>                <a class="code hl_variable" href="classWtRunner.html#a7ead121a4111c27141203e63512a2030">_is_sel</a>;                </div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno"><a class="line" href="classWtRunner.html#a123ab0a97ff3c5b11b603d5642506884">  188</a></span>    <span class="keywordtype">bool</span>                <a class="code hl_variable" href="classWtRunner.html#a123ab0a97ff3c5b11b603d5642506884">_to_exit</a>;               </div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>};</div>
+</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span> </div>
+<div class="ttc" id="aAPI_2AtpTradeApi_2demo_2simple__demo_2main_8cpp_html_a347fd65fce8f2409e533eb1badd110e0"><div class="ttname"><a href="API_2AtpTradeApi_2demo_2simple__demo_2main_8cpp.html#a347fd65fce8f2409e533eb1badd110e0">init</a></div><div class="ttdeci">bool init(ATPTradeAPI *client, ATPTradeHandler *handler)</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2simple__demo_2main_8cpp_source.html#l00386">main.cpp:386</a></div></div>
+<div class="ttc" id="aCTPLoader_8cpp_html_aa8f8675052ff82b5ae5b06eead6000eb"><div class="ttname"><a href="CTPLoader_8cpp.html#aa8f8675052ff82b5ae5b06eead6000eb">run</a></div><div class="ttdeci">EXPORT_FLAG int run(const char *cfgfile, bool bAsync, bool isFile)</div><div class="ttdoc">运行CTP合约信息加载器</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_8cpp_source.html#l00124">CTPLoader.cpp:124</a></div></div>
+<div class="ttc" id="aQuoteFactory_2main_8cpp_html_a144d9ac5d7f1b6767f8ff9642e0dcb6d"><div class="ttname"><a href="QuoteFactory_2main_8cpp.html#a144d9ac5d7f1b6767f8ff9642e0dcb6d">initDataMgr</a></div><div class="ttdeci">void initDataMgr(WTSVariant *config, bool bAlldayMode=false)</div><div class="ttdoc">初始化数据管理器</div><div class="ttdef"><b>Definition</b> <a href="QuoteFactory_2main_8cpp_source.html#l00106">main.cpp:106</a></div></div>
+<div class="ttc" id="aQuoteFactory_2main_8cpp_html_adbb89153aef628913827f49123bbd936"><div class="ttname"><a href="QuoteFactory_2main_8cpp.html#adbb89153aef628913827f49123bbd936">initParsers</a></div><div class="ttdeci">void initParsers(WTSVariant *cfg)</div><div class="ttdoc">初始化行情解析器</div><div class="ttdef"><b>Definition</b> <a href="QuoteFactory_2main_8cpp_source.html#l00120">main.cpp:120</a></div></div>
+<div class="ttc" id="aTraderDumper_8cpp_html_abc68ad0fe9293fb2709e004ffe3fa333"><div class="ttname"><a href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a></div><div class="ttdeci">bool config(const char *cfgfile, bool isFile)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_8cpp_source.html#l00022">TraderDumper.cpp:22</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aa7b93f4aa2259e69e48f27448c247dc8"><div class="ttname"><a href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a></div><div class="ttdeci">enum tagLogLevel WTSLogLevel</div></div>
+<div class="ttc" id="aWtRunner_8h_html_a9e1fc31194100ab43bbad77a2f5c12b3"><div class="ttname"><a href="WtRunner_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a></div><div class="ttdeci">NS_WTP_END USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00040">WtRunner.h:40</a></div></div>
+<div class="ttc" id="aclassActionPolicyMgr_html"><div class="ttname"><a href="classActionPolicyMgr.html">ActionPolicyMgr</a></div><div class="ttdoc">行为策略管理器类</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00071">ActionPolicyMgr.h:72</a></div></div>
+<div class="ttc" id="aclassCtaStrategyMgr_html"><div class="ttname"><a href="classCtaStrategyMgr.html">CtaStrategyMgr</a></div><div class="ttdoc">CTA策略管理器</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8h_source.html#l00069">CtaStrategyMgr.h:70</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html"><div class="ttname"><a href="classEventNotifier.html">EventNotifier</a></div><div class="ttdoc">事件通知器类，用于回测过程中的事件、数据和资金信息广播</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00063">EventNotifier.h:64</a></div></div>
+<div class="ttc" id="aclassHftStrategyMgr_html"><div class="ttname"><a href="classHftStrategyMgr.html">HftStrategyMgr</a></div><div class="ttdoc">高频交易策略管理器</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00067">HftStrategyMgr.h:68</a></div></div>
+<div class="ttc" id="aclassILogHandler_html"><div class="ttname"><a href="classILogHandler.html">ILogHandler</a></div><div class="ttdef"><b>Definition</b> <a href="ILogHandler_8h_source.html#l00015">ILogHandler.h:16</a></div></div>
+<div class="ttc" id="aclassParserAdapterMgr_html"><div class="ttname"><a href="classParserAdapterMgr.html">ParserAdapterMgr</a></div><div class="ttdoc">解析器适配器管理器类</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ParserAdapter_8h_source.html#l00268">ParserAdapter.h:269</a></div></div>
+<div class="ttc" id="aclassSelStrategyMgr_html"><div class="ttname"><a href="classSelStrategyMgr.html">SelStrategyMgr</a></div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00041">SelStrategyMgr.h:42</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html"><div class="ttname"><a href="classTraderAdapterMgr.html">TraderAdapterMgr</a></div><div class="ttdoc">交易适配器管理器</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00097">TraderAdapter.h:98</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html"><div class="ttname"><a href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a></div><div class="ttdoc">基础数据管理器类</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00073">WTSBaseDataMgr.h:74</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html"><div class="ttname"><a href="classWTSHotMgr.html">WTSHotMgr</a></div><div class="ttdoc">主力合约管理器类</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8h_source.html#l00044">WTSHotMgr.h:45</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWtCtaEngine_html"><div class="ttname"><a href="classWtCtaEngine.html">WtCtaEngine</a></div><div class="ttdoc">CTA策略引擎类</div><div class="ttdef"><b>Definition</b> <a href="WtCtaEngine_8h_source.html#l00033">WtCtaEngine.h:34</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html"><div class="ttname"><a href="classWtDtMgr.html">WtDtMgr</a></div><div class="ttdoc">数据管理器类</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8h_source.html#l00038">WtDtMgr.h:39</a></div></div>
+<div class="ttc" id="aclassWtEngine_html"><div class="ttname"><a href="classWtEngine.html">WtEngine</a></div><div class="ttdoc">WonderTrader核心交易引擎类</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8h_source.html#l00189">WtEngine.h:190</a></div></div>
+<div class="ttc" id="aclassWtExecuterFactory_html"><div class="ttname"><a href="classWtExecuterFactory.html">WtExecuterFactory</a></div><div class="ttdoc">执行器工厂类</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00077">WtExecuterFactory.h:78</a></div></div>
+<div class="ttc" id="aclassWtHftEngine_html"><div class="ttname"><a href="classWtHftEngine.html">WtHftEngine</a></div><div class="ttdoc">高频交易引擎类</div><div class="ttdef"><b>Definition</b> <a href="WtHftEngine_8h_source.html#l00039">WtHftEngine.h:40</a></div></div>
+<div class="ttc" id="aclassWtRunner_html"><div class="ttname"><a href="classWtRunner.html">WtRunner</a></div><div class="ttdoc">WonderTrader运行器类</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00046">WtRunner.h:47</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a0412a0d94d09253ac481aec23bc2bc97"><div class="ttname"><a href="classWtRunner.html#a0412a0d94d09253ac481aec23bc2bc97">WtRunner::_act_policy</a></div><div class="ttdeci">ActionPolicyMgr _act_policy</div><div class="ttdoc">交易行为策略管理器</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00183">WtRunner.h:183</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a06c93e69dd3bb2e6ca636930aaa3b2ad"><div class="ttname"><a href="classWtRunner.html#a06c93e69dd3bb2e6ca636930aaa3b2ad">WtRunner::_hft_stra_mgr</a></div><div class="ttdeci">HftStrategyMgr _hft_stra_mgr</div><div class="ttdoc">HFT高频策略管理器</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00181">WtRunner.h:181</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a123ab0a97ff3c5b11b603d5642506884"><div class="ttname"><a href="classWtRunner.html#a123ab0a97ff3c5b11b603d5642506884">WtRunner::_to_exit</a></div><div class="ttdeci">bool _to_exit</div><div class="ttdoc">是否退出标志</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00188">WtRunner.h:188</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a128f173d93a52f3fc3484936c6e9de07"><div class="ttname"><a href="classWtRunner.html#a128f173d93a52f3fc3484936c6e9de07">WtRunner::_exe_factory</a></div><div class="ttdeci">WtExecuterFactory _exe_factory</div><div class="ttdoc">执行器工厂</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00165">WtRunner.h:165</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a19adbb4b829350cdf0083736bdea059c"><div class="ttname"><a href="classWtRunner.html#a19adbb4b829350cdf0083736bdea059c">WtRunner::_sel_stra_mgr</a></div><div class="ttdeci">SelStrategyMgr _sel_stra_mgr</div><div class="ttdoc">选股策略管理器</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00182">WtRunner.h:182</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a1dfe5bd23447e69acd51b342eab4c30b"><div class="ttname"><a href="classWtRunner.html#a1dfe5bd23447e69acd51b342eab4c30b">WtRunner::_data_mgr</a></div><div class="ttdeci">WtDtMgr _data_mgr</div><div class="ttdoc">数据管理器</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00174">WtRunner.h:174</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a207b24c2cbf0d4d4671bae722ba272f9"><div class="ttname"><a href="classWtRunner.html#a207b24c2cbf0d4d4671bae722ba272f9">WtRunner::_config</a></div><div class="ttdeci">WTSVariant * _config</div><div class="ttdoc">配置对象</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00162">WtRunner.h:162</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a265da13c85487d225c22e4fedf50ca9b"><div class="ttname"><a href="classWtRunner.html#a265da13c85487d225c22e4fedf50ca9b">WtRunner::_hft_engine</a></div><div class="ttdeci">WtHftEngine _hft_engine</div><div class="ttdoc">HFT高频交易引擎</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00168">WtRunner.h:168</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a27a5a23fba2022690da1e63337438276"><div class="ttname"><a href="classWtRunner.html#a27a5a23fba2022690da1e63337438276">WtRunner::initEngine</a></div><div class="ttdeci">bool initEngine()</div><div class="ttdoc">初始化交易引擎</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8cpp_source.html#l00407">WtRunner.cpp:407</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a34a96498fac6770fda2d6ca222af58f0"><div class="ttname"><a href="classWtRunner.html#a34a96498fac6770fda2d6ca222af58f0">WtRunner::_bd_mgr</a></div><div class="ttdeci">WTSBaseDataMgr _bd_mgr</div><div class="ttdoc">基础数据管理器</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00176">WtRunner.h:176</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a445de2f83275ab4e97ffe918865c9a3c"><div class="ttname"><a href="classWtRunner.html#a445de2f83275ab4e97ffe918865c9a3c">WtRunner::initHftStrategies</a></div><div class="ttdeci">bool initHftStrategies()</div><div class="ttdoc">初始化HFT高频策略</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8cpp_source.html#l00352">WtRunner.cpp:352</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a45b8e9995380cfaa2bc5be2438506755"><div class="ttname"><a href="classWtRunner.html#a45b8e9995380cfaa2bc5be2438506755">WtRunner::_engine</a></div><div class="ttdeci">WtEngine * _engine</div><div class="ttdoc">当前使用的交易引擎指针</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00170">WtRunner.h:170</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a508a0a70b816562a23b0987717ef110b"><div class="ttname"><a href="classWtRunner.html#a508a0a70b816562a23b0987717ef110b">WtRunner::_parsers</a></div><div class="ttdeci">ParserAdapterMgr _parsers</div><div class="ttdoc">解析器适配器管理器</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00164">WtRunner.h:164</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a53084704423f03068e0e4e4bed0884fd"><div class="ttname"><a href="classWtRunner.html#a53084704423f03068e0e4e4bed0884fd">WtRunner::initEvtNotifier</a></div><div class="ttdeci">bool initEvtNotifier()</div><div class="ttdoc">初始化事件通知器</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8cpp_source.html#l00704">WtRunner.cpp:704</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a546ff45d0300286f5866cb865cc3420e"><div class="ttname"><a href="classWtRunner.html#a546ff45d0300286f5866cb865cc3420e">WtRunner::initCtaStrategies</a></div><div class="ttdeci">bool initCtaStrategies()</div><div class="ttdoc">初始化CTA策略</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8cpp_source.html#l00315">WtRunner.cpp:315</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a6a577df6032e7673cc2eb90d6f1b90c5"><div class="ttname"><a href="classWtRunner.html#a6a577df6032e7673cc2eb90d6f1b90c5">WtRunner::_sel_engine</a></div><div class="ttdeci">WtSelEngine _sel_engine</div><div class="ttdoc">选股交易引擎</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00169">WtRunner.h:169</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a76ceb3201f862e72c744d1f4251daadd"><div class="ttname"><a href="classWtRunner.html#a76ceb3201f862e72c744d1f4251daadd">WtRunner::_cta_stra_mgr</a></div><div class="ttdeci">CtaStrategyMgr _cta_stra_mgr</div><div class="ttdoc">CTA策略管理器</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00180">WtRunner.h:180</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a7ead121a4111c27141203e63512a2030"><div class="ttname"><a href="classWtRunner.html#a7ead121a4111c27141203e63512a2030">WtRunner::_is_sel</a></div><div class="ttdeci">bool _is_sel</div><div class="ttdoc">是否为选股模式</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00186">WtRunner.h:186</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a918d081c76930c9df61515dfb894b9b0"><div class="ttname"><a href="classWtRunner.html#a918d081c76930c9df61515dfb894b9b0">WtRunner::_data_store</a></div><div class="ttdeci">WtDataStorage * _data_store</div><div class="ttdoc">数据存储对象</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00172">WtRunner.h:172</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a91f114d119611319ca4bbbd559a4014a"><div class="ttname"><a href="classWtRunner.html#a91f114d119611319ca4bbbd559a4014a">WtRunner::_notifier</a></div><div class="ttdeci">EventNotifier _notifier</div><div class="ttdoc">事件通知器</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00178">WtRunner.h:178</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_a9747d16c10e28192aaa49cb0c557aed7"><div class="ttname"><a href="classWtRunner.html#a9747d16c10e28192aaa49cb0c557aed7">WtRunner::_traders</a></div><div class="ttdeci">TraderAdapterMgr _traders</div><div class="ttdoc">交易适配器管理器</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00163">WtRunner.h:163</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_aad2e2242aea7415612a41e2d6caa3c9c"><div class="ttname"><a href="classWtRunner.html#aad2e2242aea7415612a41e2d6caa3c9c">WtRunner::_is_hft</a></div><div class="ttdeci">bool _is_hft</div><div class="ttdoc">是否为高频交易模式</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00185">WtRunner.h:185</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_ac0d99439d31f437d72521c1fefa74319"><div class="ttname"><a href="classWtRunner.html#ac0d99439d31f437d72521c1fefa74319">WtRunner::handleLogAppend</a></div><div class="ttdeci">virtual void handleLogAppend(WTSLogLevel ll, const char *msg) override</div><div class="ttdoc">处理日志追加</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8cpp_source.html#l00694">WtRunner.cpp:694</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_ac3419d7817d2384ed6be7b339d4010db"><div class="ttname"><a href="classWtRunner.html#ac3419d7817d2384ed6be7b339d4010db">WtRunner::initExecuters</a></div><div class="ttdeci">bool initExecuters(WTSVariant *cfgExecuter)</div><div class="ttdoc">初始化执行器</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8cpp_source.html#l00525">WtRunner.cpp:525</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_ac538065b35887ea8df2a4c9bf8276e84"><div class="ttname"><a href="classWtRunner.html#ac538065b35887ea8df2a4c9bf8276e84">WtRunner::initActionPolicy</a></div><div class="ttdeci">bool initActionPolicy()</div><div class="ttdoc">初始化交易行为策略</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8cpp_source.html#l00458">WtRunner.cpp:458</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_ac690acdaaccf07f589b5a18e6315f911"><div class="ttname"><a href="classWtRunner.html#ac690acdaaccf07f589b5a18e6315f911">WtRunner::_hot_mgr</a></div><div class="ttdeci">WTSHotMgr _hot_mgr</div><div class="ttdoc">主力合约管理器</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00177">WtRunner.h:177</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_afe234fb874b3b935e26b4c649a3dd151"><div class="ttname"><a href="classWtRunner.html#afe234fb874b3b935e26b4c649a3dd151">WtRunner::initTraders</a></div><div class="ttdeci">bool initTraders(WTSVariant *cfgTrader)</div><div class="ttdoc">初始化交易适配器</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8cpp_source.html#l00621">WtRunner.cpp:621</a></div></div>
+<div class="ttc" id="aclassWtRunner_html_afebaea956b931c03ba7443826982f1c1"><div class="ttname"><a href="classWtRunner.html#afebaea956b931c03ba7443826982f1c1">WtRunner::_cta_engine</a></div><div class="ttdeci">WtCtaEngine _cta_engine</div><div class="ttdoc">CTA交易引擎</div><div class="ttdef"><b>Definition</b> <a href="WtRunner_8h_source.html#l00167">WtRunner.h:167</a></div></div>
+<div class="ttc" id="aclassWtSelEngine_html"><div class="ttname"><a href="classWtSelEngine.html">WtSelEngine</a></div><div class="ttdoc">选股策略引擎类</div><div class="ttdef"><b>Definition</b> <a href="WtSelEngine_8h_source.html#l00081">WtSelEngine.h:82</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_73cdf6dad113b2175efae0abac9d1861.html">WtRunner</a></li><li class="navelem"><a class="el" href="WtRunner_8h.html">WtRunner.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

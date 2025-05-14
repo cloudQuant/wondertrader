@@ -9,6 +9,7 @@
  * \details 本文件实现了WonderTrader回测引擎的独立运行器，用于执行各类策略的回测测试
  * 支持CTA策略、SEL选股策略、HFT高频策略、UFT策略和Exec执行器策略的回测
  */
+#include <iostream>
 #include "../WtBtCore/HisDataReplayer.h"
 #include "../WtBtCore/CtaMocker.h"
 #include "../WtBtCore/ExecMocker.h"
@@ -39,10 +40,12 @@
  */
 int main(int argc, char* argv[])
 {
+
 #ifdef _MSC_VER
     CMiniDumper::Enable("WtBtRunner.exe", true, WtHelper::getCWD().c_str());
 #endif
-
+	//std::cout << "WtBtRunner begins" << std::endl;
+	fmt::print("---WtBtRunner begins---\n");
 	cppcli::Option opt(argc, argv);
 
 	auto cParam = opt("-c", "--config", "configure filepath, dtcfg.yaml as default", false);
@@ -59,9 +62,10 @@ int main(int argc, char* argv[])
 	if (lParam->exists())
 		filename = lParam->get<std::string>();
 	else
-		filename = "./logcfgdt.yaml";
+		filename = "./logcfgbt.yaml";
 	WTSLogger::init(filename.c_str());
-
+	//std::cout << " logger initialized" << std::endl;
+	fmt::print("---logger initialized---\n");
 	install_signal_hooks([](const char* message) {
 		WTSLogger::error(message);
 	});
@@ -90,18 +94,29 @@ int main(int argc, char* argv[])
 	WTSVariant* cfgEnv = cfg->get("env");
 	const char* mode = cfgEnv->getCString("mocker");
 	int32_t slippage = cfgEnv->getInt32("slippage");
+	//std::cout << "cfg initialized" << std::endl;
+	fmt::print("---cfg initialized---\n");
+
 	if (strcmp(mode, "cta") == 0)
 	{
+		fmt::print("---cta initialized---\n");
 		CtaMocker* mocker = new CtaMocker(&replayer, "cta", slippage);
+		fmt::print("---mocker initialized---\n");
 		mocker->init_cta_factory(cfg->get("cta"));
+		//mocker->init_cta_factory(cfg);
+		fmt::print("---cta_factory initialized---\n");
 		const char* stra_id = cfg->get("cta")->get("strategy")->getCString("id");
+		fmt::print("---stra_id = {} initialized---\n", stra_id);
 		// 加载增量回测的基础历史回测数据
 		const char* incremental_backtest_base = cfg->get("env")->getCString("incremental_backtest_base");
+		fmt::print("---incremental_backtest_base initialized---\n");
 		if (strlen(incremental_backtest_base) > 0)
 		{
 			mocker->load_incremental_data(incremental_backtest_base);
 		}
+		fmt::print("---load_incremental_data ends---\n");
 		replayer.register_sink(mocker, stra_id);
+		fmt::print("---cta ends---\n");
 	}
 	else if (strcmp(mode, "hft") == 0)
 	{

@@ -1,0 +1,330 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: boost::threadpool::looped_task_func类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classboost_1_1threadpool_1_1looped__task__func.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Public 类型</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classboost_1_1threadpool_1_1looped__task__func-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">boost::threadpool::looped_task_func类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>循环任务函数对象  
+ <a href="classboost_1_1threadpool_1_1looped__task__func.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="task__adaptors_8hpp_source.html">task_adaptors.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public 类型</h2></td></tr>
+<tr class="memitem:a0de81e4d23aed52a73fe5ee2d11deaf6" id="r_a0de81e4d23aed52a73fe5ee2d11deaf6"><td class="memItemLeft" align="right" valign="top">typedef void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1looped__task__func.html#a0de81e4d23aed52a73fe5ee2d11deaf6">result_type</a></td></tr>
+<tr class="memdesc:a0de81e4d23aed52a73fe5ee2d11deaf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates the functor's result type.  <br /></td></tr>
+<tr class="separator:a0de81e4d23aed52a73fe5ee2d11deaf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a46f85a3e3bbde3eaf0e2a186dfbd6e16" id="r_a46f85a3e3bbde3eaf0e2a186dfbd6e16"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1looped__task__func.html#a46f85a3e3bbde3eaf0e2a186dfbd6e16">looped_task_func</a> (function0&lt; bool &gt; <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;function, unsigned int <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> interval=0)</td></tr>
+<tr class="memdesc:a46f85a3e3bbde3eaf0e2a186dfbd6e16"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a46f85a3e3bbde3eaf0e2a186dfbd6e16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9d3c52aae5bc74265c0f08b171f0077" id="r_ad9d3c52aae5bc74265c0f08b171f0077"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1looped__task__func.html#ad9d3c52aae5bc74265c0f08b171f0077">operator()</a> (void) <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:ad9d3c52aae5bc74265c0f08b171f0077"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:ab458f6c81f11f53e9b96a3b1a33c74d8" id="r_ab458f6c81f11f53e9b96a3b1a33c74d8"><td class="memItemLeft" align="right" valign="top">function0&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1looped__task__func.html#ab458f6c81f11f53e9b96a3b1a33c74d8">m_function</a></td></tr>
+<tr class="memdesc:ab458f6c81f11f53e9b96a3b1a33c74d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">任务的函数对象  <br /></td></tr>
+<tr class="separator:ab458f6c81f11f53e9b96a3b1a33c74d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f774ee49d5ee8dfc39c93fb24b8f101" id="r_a8f774ee49d5ee8dfc39c93fb24b8f101"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1looped__task__func.html#a8f774ee49d5ee8dfc39c93fb24b8f101">m_break_s</a></td></tr>
+<tr class="memdesc:a8f774ee49d5ee8dfc39c93fb24b8f101"><td class="mdescLeft">&#160;</td><td class="mdescRight">休息时间的秒数部分  <br /></td></tr>
+<tr class="separator:a8f774ee49d5ee8dfc39c93fb24b8f101"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a361853a236b2706a778e3313a108a1e6" id="r_a361853a236b2706a778e3313a108a1e6"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1looped__task__func.html#a361853a236b2706a778e3313a108a1e6">m_break_ns</a></td></tr>
+<tr class="memdesc:a361853a236b2706a778e3313a108a1e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">休息时间的纳秒部分  <br /></td></tr>
+<tr class="separator:a361853a236b2706a778e3313a108a1e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>循环任务函数对象 </p>
+<p>此函数对象封装了一个返回布尔值的线程函数对象。 被封装的任务函数通过调用操作符 () 来执行，并且它会在定期的时间间隔内执行， 直到返回 false 为止。间隔长度可以为零。 请注意，只要任务处于循环状态，线程池的线程就会一直被占用。 这种任务类型适用于需要定期执行的操作，如定时检查或监控。 </p>
+
+<p class="definition">在文件 <a class="el" href="task__adaptors_8hpp_source.html">task_adaptors.hpp</a> 第 <a class="el" href="task__adaptors_8hpp_source.html#l00131">131</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="a0de81e4d23aed52a73fe5ee2d11deaf6" name="a0de81e4d23aed52a73fe5ee2d11deaf6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0de81e4d23aed52a73fe5ee2d11deaf6">&#9670;&#160;</a></span>result_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void <a class="el" href="classboost_1_1threadpool_1_1looped__task__func.html#a0de81e4d23aed52a73fe5ee2d11deaf6">boost::threadpool::looped_task_func::result_type</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Indicates the functor's result type. </p>
+
+<p class="definition">在文件 <a class="el" href="task__adaptors_8hpp_source.html">task_adaptors.hpp</a> 第 <a class="el" href="task__adaptors_8hpp_source.html#l00153">153</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a46f85a3e3bbde3eaf0e2a186dfbd6e16" name="a46f85a3e3bbde3eaf0e2a186dfbd6e16"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46f85a3e3bbde3eaf0e2a186dfbd6e16">&#9670;&#160;</a></span>looped_task_func()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">boost::threadpool::looped_task_func::looped_task_func </td>
+          <td>(</td>
+          <td class="paramtype">function0&lt; bool &gt; <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;&#160;</td>
+          <td class="paramname"><em>function</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>interval</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>创建一个循环任务函数对象，它会定期执行函数直到函数返回 false </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">function</td><td>要循环执行的任务函数对象，当返回 false 时循环结束 </td></tr>
+    <tr><td class="paramname">interval</td><td>任务函数首次执行前和后续执行之间的最小休息时间（毫秒），默认为 0 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="task__adaptors_8hpp_source.html">task_adaptors.hpp</a> 第 <a class="el" href="task__adaptors_8hpp_source.html#l00162">162</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="ad9d3c52aae5bc74265c0f08b171f0077" name="ad9d3c52aae5bc74265c0f08b171f0077"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9d3c52aae5bc74265c0f08b171f0077">&#9670;&#160;</a></span>operator()()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void boost::threadpool::looped_task_func::operator() </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Executes the task function. </p>
+
+<p class="definition">在文件 <a class="el" href="task__adaptors_8hpp_source.html">task_adaptors.hpp</a> 第 <a class="el" href="task__adaptors_8hpp_source.html#l00171">171</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a361853a236b2706a778e3313a108a1e6" name="a361853a236b2706a778e3313a108a1e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a361853a236b2706a778e3313a108a1e6">&#9670;&#160;</a></span>m_break_ns</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int boost::threadpool::looped_task_func::m_break_ns</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>休息时间的纳秒部分 </p>
+<p>每次任务执行间的休息时间（纳秒） </p>
+
+<p class="definition">在文件 <a class="el" href="task__adaptors_8hpp_source.html">task_adaptors.hpp</a> 第 <a class="el" href="task__adaptors_8hpp_source.html#l00150">150</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8f774ee49d5ee8dfc39c93fb24b8f101" name="a8f774ee49d5ee8dfc39c93fb24b8f101"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f774ee49d5ee8dfc39c93fb24b8f101">&#9670;&#160;</a></span>m_break_s</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int boost::threadpool::looped_task_func::m_break_s</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>休息时间的秒数部分 </p>
+<p>每次任务执行间的休息时间（秒） </p>
+
+<p class="definition">在文件 <a class="el" href="task__adaptors_8hpp_source.html">task_adaptors.hpp</a> 第 <a class="el" href="task__adaptors_8hpp_source.html#l00144">144</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab458f6c81f11f53e9b96a3b1a33c74d8" name="ab458f6c81f11f53e9b96a3b1a33c74d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab458f6c81f11f53e9b96a3b1a33c74d8">&#9670;&#160;</a></span>m_function</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">function0&lt;bool&gt; boost::threadpool::looped_task_func::m_function</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>任务的函数对象 </p>
+<p>返回布尔值的函数，定期执行直到返回 false </p>
+
+<p class="definition">在文件 <a class="el" href="task__adaptors_8hpp_source.html">task_adaptors.hpp</a> 第 <a class="el" href="task__adaptors_8hpp_source.html#l00138">138</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/Share/threadpool/<a class="el" href="task__adaptors_8hpp_source.html">task_adaptors.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespaceboost.html">boost</a></li><li class="navelem"><a class="el" href="namespaceboost_1_1threadpool.html">threadpool</a></li><li class="navelem"><a class="el" href="classboost_1_1threadpool_1_1looped__task__func.html">looped_task_func</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

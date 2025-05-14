@@ -1,0 +1,326 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtBtCore/HftMocker.cpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('HftMocker_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">HftMocker.cpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>高频交易策略回测模拟器实现文件  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="HftMocker_8h_source.html">HftMocker.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WtBtCore_2WtHelper_8h_source.html">WtHelper.h</a>&quot;</code><br />
+<code>#include &lt;stdarg.h&gt;</code><br />
+<code>#include &lt;boost/filesystem.hpp&gt;</code><br />
+<code>#include &quot;<a class="el" href="WTSVariant_8hpp_source.html">../Includes/WTSVariant.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSContractInfo_8hpp_source.html">../Includes/WTSContractInfo.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="decimal_8h_source.html">../Share/decimal.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="TimeUtils_8hpp_source.html">../Share/TimeUtils.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="StrUtil_8hpp_source.html">../Share/StrUtil.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="StdUtils_8hpp_source.html">../Share/StdUtils.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSLogger_8h_source.html">../WTSTools/WTSLogger.h</a>&quot;</code><br />
+<code>#include &lt;rapidjson/document.h&gt;</code><br />
+<code>#include &lt;rapidjson/prettywriter.h&gt;</code><br />
+</div>
+<p><a href="HftMocker_8cpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a53cef3aa4a728448c19e95d927d87329" id="r_a53cef3aa4a728448c19e95d927d87329"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="HftMocker_8cpp.html#a53cef3aa4a728448c19e95d927d87329">makeLocalOrderID</a> ()</td></tr>
+<tr class="memdesc:a53cef3aa4a728448c19e95d927d87329"><td class="mdescLeft">&#160;</td><td class="mdescRight">生成序列号自增的本地订单ID  <br /></td></tr>
+<tr class="separator:a53cef3aa4a728448c19e95d927d87329"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb6e1032b880b336183cbcbe7384b4d4" id="r_aeb6e1032b880b336183cbcbe7384b4d4"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="HftMocker_8cpp.html#aeb6e1032b880b336183cbcbe7384b4d4">splitVolume</a> (uint32_t vol)</td></tr>
+<tr class="memdesc:aeb6e1032b880b336183cbcbe7384b4d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">将交易量随机分拆为多个订单量  <br /></td></tr>
+<tr class="separator:aeb6e1032b880b336183cbcbe7384b4d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a965f474ca5873f56f523e2a0f0c58e67" id="r_a965f474ca5873f56f523e2a0f0c58e67"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="HftMocker_8cpp.html#a965f474ca5873f56f523e2a0f0c58e67">splitVolume</a> (double vol, double minQty=1.0, double maxQty=100.0, double qtyTick=1.0)</td></tr>
+<tr class="memdesc:a965f474ca5873f56f523e2a0f0c58e67"><td class="mdescLeft">&#160;</td><td class="mdescRight">将浮点型交易量随机分拆为多个订单量  <br /></td></tr>
+<tr class="separator:a965f474ca5873f56f523e2a0f0c58e67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f0f810d84c27185f9ec1851c8eac82b" id="r_a3f0f810d84c27185f9ec1851c8eac82b"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="HftMocker_8cpp.html#a3f0f810d84c27185f9ec1851c8eac82b">genRand</a> (uint32_t maxVal=10000)</td></tr>
+<tr class="memdesc:a3f0f810d84c27185f9ec1851c8eac82b"><td class="mdescLeft">&#160;</td><td class="mdescRight">生成随机数  <br /></td></tr>
+<tr class="separator:a3f0f810d84c27185f9ec1851c8eac82b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecb73fb5324c083dc47092fc823c7de2" id="r_aecb73fb5324c083dc47092fc823c7de2"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="HftMocker_8cpp.html#aecb73fb5324c083dc47092fc823c7de2">makeHftCtxId</a> ()</td></tr>
+<tr class="memdesc:aecb73fb5324c083dc47092fc823c7de2"><td class="mdescLeft">&#160;</td><td class="mdescRight">生成高频策略上下文ID  <br /></td></tr>
+<tr class="separator:aecb73fb5324c083dc47092fc823c7de2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>高频交易策略回测模拟器实现文件 </p>
+<p>\project WonderTrader</p>
+<dl class="section author"><dt>作者</dt><dd>Wesley </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2020/03/30</dd></dl>
+<p>实现了高频交易策略回测模拟器，包括订单处理、成交模拟、持仓管理等功能 提供了高频策略多品种、多合约的回测功能，实现了完整的交易模拟和策略运行环境 </p>
+
+<p class="definition">在文件 <a class="el" href="HftMocker_8cpp_source.html">HftMocker.cpp</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="a3f0f810d84c27185f9ec1851c8eac82b" name="a3f0f810d84c27185f9ec1851c8eac82b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f0f810d84c27185f9ec1851c8eac82b">&#9670;&#160;</a></span>genRand()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t genRand </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>maxVal</em> = <code>10000</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>生成随机数 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">maxVal</td><td>随机数的最大值，默认为10000 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>生成的随机数值</dd></dl>
+<p>基于当前分钟数设置随机种子，生成一个0到maxVal-1之间的随机整数 用于在回测中模拟各种随机事件 </p>
+
+<p class="definition">在文件 <a class="el" href="HftMocker_8cpp_source.html">HftMocker.cpp</a> 第 <a class="el" href="HftMocker_8cpp_source.html#l00138">138</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aecb73fb5324c083dc47092fc823c7de2" name="aecb73fb5324c083dc47092fc823c7de2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aecb73fb5324c083dc47092fc823c7de2">&#9670;&#160;</a></span>makeHftCtxId()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t makeHftCtxId </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>生成高频策略上下文ID </p>
+<dl class="section return"><dt>返回</dt><dd>新生成的上下文ID</dd></dl>
+<p>基于原子操作生成递增的高频策略上下文ID，起始值为6000 用于区分不同的高频策略实例 </p>
+
+<p class="definition">在文件 <a class="el" href="HftMocker_8cpp_source.html">HftMocker.cpp</a> 第 <a class="el" href="HftMocker_8cpp_source.html#l00150">150</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a53cef3aa4a728448c19e95d927d87329" name="a53cef3aa4a728448c19e95d927d87329"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53cef3aa4a728448c19e95d927d87329">&#9670;&#160;</a></span>makeLocalOrderID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t makeLocalOrderID </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>生成序列号自增的本地订单ID </p>
+<p>生成本地订单ID</p>
+<dl class="section return"><dt>返回</dt><dd>新生成的订单ID</dd></dl>
+<p>基于当前时间和原子操作生成唯一的序列号递增的订单ID 第一次调用时会初始化基准值，之后每次调用递增返回 </p>
+
+<p class="definition">在文件 <a class="el" href="HftMocker_8cpp_source.html">HftMocker.cpp</a> 第 <a class="el" href="HftMocker_8cpp_source.html#l00038">38</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a965f474ca5873f56f523e2a0f0c58e67" name="a965f474ca5873f56f523e2a0f0c58e67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a965f474ca5873f56f523e2a0f0c58e67">&#9670;&#160;</a></span>splitVolume() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; splitVolume </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>vol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>minQty</em> = <code>1.0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>maxQty</em> = <code>100.0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>qtyTick</em> = <code>1.0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将浮点型交易量随机分拆为多个订单量 </p>
+<p>将交易量分拆成多个小单</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vol</td><td>要分拆的总交易量 </td></tr>
+    <tr><td class="paramname">minQty</td><td>最小分拆量，默认为1.0 </td></tr>
+    <tr><td class="paramname">maxQty</td><td>最大分拆量，默认为100.0 </td></tr>
+    <tr><td class="paramname">qtyTick</td><td>交易量单位进位，默认为1.0 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分拆后的交易量列表</dd></dl>
+<p>将浮点型交易量随机分拆为多个小单，支持自定义最小最大交易量及进位数 分拆量在最小交易量到最大交易量之间随机生成，并按照进位单位取整 </p>
+
+<p class="definition">在文件 <a class="el" href="HftMocker_8cpp_source.html">HftMocker.cpp</a> 第 <a class="el" href="HftMocker_8cpp_source.html#l00101">101</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aeb6e1032b880b336183cbcbe7384b4d4" name="aeb6e1032b880b336183cbcbe7384b4d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb6e1032b880b336183cbcbe7384b4d4">&#9670;&#160;</a></span>splitVolume() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; uint32_t &gt; splitVolume </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>vol</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将交易量随机分拆为多个订单量 </p>
+<p>将交易量分拆成多个小单</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vol</td><td>要分拆的总交易量 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分拆后的交易量列表</dd></dl>
+<p>将指定的交易量随机分拆为多个小单，模拟实际交易中的拆单行为 分拆量在最小交易量到最大交易量之间随机生成。如果总量小于等于最小量则不分拆 </p>
+
+<p class="definition">在文件 <a class="el" href="HftMocker_8cpp_source.html">HftMocker.cpp</a> 第 <a class="el" href="HftMocker_8cpp_source.html#l00057">57</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_e0a6b04728b7bc818baf88501da85ff3.html">WtBtCore</a></li><li class="navelem"><a class="el" href="HftMocker_8cpp.html">HftMocker.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtBtCore/HisDataReplayer.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('HisDataReplayer_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">HisDataReplayer.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>历史数据回放器声明  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &lt;string&gt;</code><br />
+<code>#include &lt;set&gt;</code><br />
+<code>#include &quot;<a class="el" href="HisDataMgr_8h_source.html">HisDataMgr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="DataDefine_8h_source.html">../WtDataStorage/DataDefine.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="FasterDefs_8h_source.html">../Includes/FasterDefs.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSMarcos_8h_source.html">../Includes/WTSMarcos.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSTypes_8h_source.html">../Includes/WTSTypes.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSHotMgr_8h_source.html">../WTSTools/WTSHotMgr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSBaseDataMgr_8h_source.html">../WTSTools/WTSBaseDataMgr.h</a>&quot;</code><br />
+</div>
+<p><a href="HisDataReplayer_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataSink.html">IDataSink</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">数据接收器接口  <a href="classIDataSink.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBtDataLoader.html">IBtDataLoader</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">回测数据加载器接口  <a href="classIBtDataLoader.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHisDataReplayer.html">HisDataReplayer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">历史数据回放器类  <a href="classHisDataReplayer.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHisDataReplayer_1_1HftDataList.html">HisDataReplayer::HftDataList&lt; T &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">高频数据列表模板类  <a href="classHisDataReplayer_1_1HftDataList.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structHisDataReplayer_1_1__BarsList.html">HisDataReplayer::_BarsList</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structHisDataReplayer_1_1__TaskInfo.html">HisDataReplayer::_TaskInfo</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">任务信息结构体  <a href="structHisDataReplayer_1_1__TaskInfo.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structHisDataReplayer_1_1__FeeItem.html">HisDataReplayer::_FeeItem</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">手续费模板结构  <a href="structHisDataReplayer_1_1__FeeItem.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structHisDataReplayer_1_1__AdjFactor.html">HisDataReplayer::_AdjFactor</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">除权因子结构  <a href="structHisDataReplayer_1_1__AdjFactor.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a6986215e7baa89c786b9103bc948ab45" id="r_a6986215e7baa89c786b9103bc948ab45"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="HisDataReplayer_8h.html#a6986215e7baa89c786b9103bc948ab45">FuncReadBars</a>) (void *obj, <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *firstBar, uint32_t count)</td></tr>
+<tr class="memdesc:a6986215e7baa89c786b9103bc948ab45"><td class="mdescLeft">&#160;</td><td class="mdescRight">历史K线数据加载回调函数类型  <br /></td></tr>
+<tr class="separator:a6986215e7baa89c786b9103bc948ab45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32634b1c7ba2ba38c9089475d02ef1ad" id="r_a32634b1c7ba2ba38c9089475d02ef1ad"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="HisDataReplayer_8h.html#a32634b1c7ba2ba38c9089475d02ef1ad">FuncReadFactors</a>) (void *obj, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t *dates, double *factors, uint32_t count)</td></tr>
+<tr class="memdesc:a32634b1c7ba2ba38c9089475d02ef1ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">复权因子加载回调函数类型  <br /></td></tr>
+<tr class="separator:a32634b1c7ba2ba38c9089475d02ef1ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6240277e302ddc6aadbdbafcd5756f35" id="r_a6240277e302ddc6aadbdbafcd5756f35"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="HisDataReplayer_8h.html#a6240277e302ddc6aadbdbafcd5756f35">FuncReadTicks</a>) (void *obj, <a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *firstItem, uint32_t count)</td></tr>
+<tr class="memdesc:a6240277e302ddc6aadbdbafcd5756f35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick数据加载回调函数类型  <br /></td></tr>
+<tr class="separator:a6240277e302ddc6aadbdbafcd5756f35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48f4e63aa9c89eb49c62020d0c7f2f73" id="r_a48f4e63aa9c89eb49c62020d0c7f2f73"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="HisDataReplayer_8h.html#a48f4e63aa9c89eb49c62020d0c7f2f73">FuncReadOrdDtl</a>) (void *obj, <a class="el" href="structWTSOrdDtlStruct.html">WTSOrdDtlStruct</a> *firstItem, uint32_t count)</td></tr>
+<tr class="memdesc:a48f4e63aa9c89eb49c62020d0c7f2f73"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托明细数据加载回调函数类型  <br /></td></tr>
+<tr class="separator:a48f4e63aa9c89eb49c62020d0c7f2f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac059e3fbe1d72f0162fb1924bdea1ef7" id="r_ac059e3fbe1d72f0162fb1924bdea1ef7"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="HisDataReplayer_8h.html#ac059e3fbe1d72f0162fb1924bdea1ef7">FuncReadOrdQue</a>) (void *obj, <a class="el" href="structWTSOrdQueStruct.html">WTSOrdQueStruct</a> *firstItem, uint32_t count)</td></tr>
+<tr class="memdesc:ac059e3fbe1d72f0162fb1924bdea1ef7"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托队列数据加载回调函数类型  <br /></td></tr>
+<tr class="separator:ac059e3fbe1d72f0162fb1924bdea1ef7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8aacdddbe17378776892527368a4a126" id="r_a8aacdddbe17378776892527368a4a126"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="HisDataReplayer_8h.html#a8aacdddbe17378776892527368a4a126">FuncReadTrans</a>) (void *obj, <a class="el" href="structWTSTransStruct.html">WTSTransStruct</a> *firstItem, uint32_t count)</td></tr>
+<tr class="memdesc:a8aacdddbe17378776892527368a4a126"><td class="mdescLeft">&#160;</td><td class="mdescRight">逐笔成交数据加载回调函数类型  <br /></td></tr>
+<tr class="separator:a8aacdddbe17378776892527368a4a126"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a9e1fc31194100ab43bbad77a2f5c12b3" id="r_a9e1fc31194100ab43bbad77a2f5c12b3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="HisDataReplayer_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a></td></tr>
+<tr class="separator:a9e1fc31194100ab43bbad77a2f5c12b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>历史数据回放器声明 </p>
+<p>\project WonderTrader</p>
+<dl class="section author"><dt>作者</dt><dd>Wesley </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2020/03/30</dd></dl>
+<p>定义了历史数据回放器类，用于重放历史行情数据并接收策略回调。 包含了回放各种周期的历史K线、Tick数据等，可以快速模拟交易全过程。 </p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 中定义.</p>
+</div><h2 class="groupheader">类型定义说明</h2>
+<a id="a6986215e7baa89c786b9103bc948ab45" name="a6986215e7baa89c786b9103bc948ab45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6986215e7baa89c786b9103bc948ab45">&#9670;&#160;</a></span>FuncReadBars</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(* FuncReadBars) (void *obj, <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *firstBar, uint32_t count)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>历史K线数据加载回调函数类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj</td><td>回传用的对象指针，原样返回即可 </td></tr>
+    <tr><td class="paramname">firstBar</td><td>第一个K线数据指针，连续内存中的数据结构数组 </td></tr>
+    <tr><td class="paramname">count</td><td>数据条数</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>用于加载历史K线数据并传递给回放器 </p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00131">131</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a32634b1c7ba2ba38c9089475d02ef1ad" name="a32634b1c7ba2ba38c9089475d02ef1ad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32634b1c7ba2ba38c9089475d02ef1ad">&#9670;&#160;</a></span>FuncReadFactors</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(* FuncReadFactors) (void *obj, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t *dates, double *factors, uint32_t count)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>复权因子加载回调函数类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj</td><td>回传用的对象指针，原样返回即可 </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">dates</td><td>日期数组，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">factors</td><td>复权因子数组 </td></tr>
+    <tr><td class="paramname">count</td><td>因子数量</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>用于加载股票复权因子，进行前复权或后复权计算 </p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00142">142</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a48f4e63aa9c89eb49c62020d0c7f2f73" name="a48f4e63aa9c89eb49c62020d0c7f2f73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48f4e63aa9c89eb49c62020d0c7f2f73">&#9670;&#160;</a></span>FuncReadOrdDtl</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(* FuncReadOrdDtl) (void *obj, <a class="el" href="structWTSOrdDtlStruct.html">WTSOrdDtlStruct</a> *firstItem, uint32_t count)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>委托明细数据加载回调函数类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj</td><td>回传用的对象指针，原样返回即可 </td></tr>
+    <tr><td class="paramname">firstItem</td><td>第一个委托明细数据指针，连续内存中的数据结构数组 </td></tr>
+    <tr><td class="paramname">count</td><td>数据条数</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>用于加载高频委托明细数据，提供更精确的市场循边信息 </p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00160">160</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac059e3fbe1d72f0162fb1924bdea1ef7" name="ac059e3fbe1d72f0162fb1924bdea1ef7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac059e3fbe1d72f0162fb1924bdea1ef7">&#9670;&#160;</a></span>FuncReadOrdQue</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(* FuncReadOrdQue) (void *obj, <a class="el" href="structWTSOrdQueStruct.html">WTSOrdQueStruct</a> *firstItem, uint32_t count)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>委托队列数据加载回调函数类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj</td><td>回传用的对象指针，原样返回即可 </td></tr>
+    <tr><td class="paramname">firstItem</td><td>第一个委托队列数据指针，连续内存中的数据结构数组 </td></tr>
+    <tr><td class="paramname">count</td><td>数据条数</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>用于加载高频委托队列数据，可以观察市场深度 </p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00169">169</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6240277e302ddc6aadbdbafcd5756f35" name="a6240277e302ddc6aadbdbafcd5756f35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6240277e302ddc6aadbdbafcd5756f35">&#9670;&#160;</a></span>FuncReadTicks</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(* FuncReadTicks) (void *obj, <a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *firstItem, uint32_t count)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Tick数据加载回调函数类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj</td><td>回传用的对象指针，原样返回即可 </td></tr>
+    <tr><td class="paramname">firstItem</td><td>第一个Tick数据指针，连续内存中的数据结构数组 </td></tr>
+    <tr><td class="paramname">count</td><td>数据条数</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>用于加载逐笔行情数据，提供更高精度的回测 </p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00151">151</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8aacdddbe17378776892527368a4a126" name="a8aacdddbe17378776892527368a4a126"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8aacdddbe17378776892527368a4a126">&#9670;&#160;</a></span>FuncReadTrans</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(* FuncReadTrans) (void *obj, <a class="el" href="structWTSTransStruct.html">WTSTransStruct</a> *firstItem, uint32_t count)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>逐笔成交数据加载回调函数类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj</td><td>回传用的对象指针，原样返回即可 </td></tr>
+    <tr><td class="paramname">firstItem</td><td>第一个逐笔成交数据指针，连续内存中的数据结构数组 </td></tr>
+    <tr><td class="paramname">count</td><td>数据条数</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>用于加载高频逐笔成交数据，提供更精确的市场成交信息 </p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00178">178</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a9e1fc31194100ab43bbad77a2f5c12b3" name="a9e1fc31194100ab43bbad77a2f5c12b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e1fc31194100ab43bbad77a2f5c12b3">&#9670;&#160;</a></span>USING_NS_WTP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a> USING_NS_WTP</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00043">43</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_e0a6b04728b7bc818baf88501da85ff3.html">WtBtCore</a></li><li class="navelem"><a class="el" href="HisDataReplayer_8h.html">HisDataReplayer.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,2053 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/cover.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('cover_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">cover.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;stdio.h&gt;</code><br />
+<code>#include &lt;stdlib.h&gt;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;time.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="mem_8h_source.html">mem.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="pool_8h_source.html">pool.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="threading_8h_source.html">threading.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="cover_8h_source.html">cover.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="zdict_8h_source.html">zdict.h</a>&quot;</code><br />
+</div>
+<p><a href="cover_8c_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structCOVER__map__pair__t__s.html">COVER_map_pair_t_s</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structCOVER__map__s.html">COVER_map_s</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structCOVER__tryParameters__data__s.html">COVER_tryParameters_data_s</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:aa8ef013382bb52ccf53195231c5f5383" id="r_aa8ef013382bb52ccf53195231c5f5383"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#aa8ef013382bb52ccf53195231c5f5383">COVER_MAX_SAMPLES_SIZE</a>&#160;&#160;&#160;(sizeof(size_t) == 8 ? ((unsigned)-1) : ((unsigned)1 <a class="el" href="zdict_8c.html#a44172ac633c517cb4c9e278cef36b000">GB</a>))</td></tr>
+<tr class="separator:aa8ef013382bb52ccf53195231c5f5383"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1caf4c33d101eb66c87d336aed6cb52" id="r_af1caf4c33d101eb66c87d336aed6cb52"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#af1caf4c33d101eb66c87d336aed6cb52">DEFAULT_SPLITPOINT</a>&#160;&#160;&#160;1.0</td></tr>
+<tr class="separator:af1caf4c33d101eb66c87d336aed6cb52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a5fbd7a78051c2134b21324e5c74bdc" id="r_a5a5fbd7a78051c2134b21324e5c74bdc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a5a5fbd7a78051c2134b21324e5c74bdc">DISPLAY</a>(...)</td></tr>
+<tr class="separator:a5a5fbd7a78051c2134b21324e5c74bdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed3edb401d7feb70e609cff1a2956f1e" id="r_aed3edb401d7feb70e609cff1a2956f1e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#aed3edb401d7feb70e609cff1a2956f1e">LOCALDISPLAYLEVEL</a>(displayLevel,  l, ...)</td></tr>
+<tr class="separator:aed3edb401d7feb70e609cff1a2956f1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9200da68a37a9ae33332f82599d00e67" id="r_a9200da68a37a9ae33332f82599d00e67"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a9200da68a37a9ae33332f82599d00e67">DISPLAYLEVEL</a>(l, ...)&#160;&#160;&#160;<a class="el" href="cover_8c.html#aed3edb401d7feb70e609cff1a2956f1e">LOCALDISPLAYLEVEL</a>(<a class="el" href="cover_8c.html#acc504051bdf74b2bba3326a56ed566c6">g_displayLevel</a>, l, __VA_ARGS__)</td></tr>
+<tr class="separator:a9200da68a37a9ae33332f82599d00e67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0683103c0036daae676e99dff5def66f" id="r_a0683103c0036daae676e99dff5def66f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a0683103c0036daae676e99dff5def66f">LOCALDISPLAYUPDATE</a>(displayLevel,  l, ...)</td></tr>
+<tr class="separator:a0683103c0036daae676e99dff5def66f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40fa793cc466bb4f03748de2352e8e8c" id="r_a40fa793cc466bb4f03748de2352e8e8c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a40fa793cc466bb4f03748de2352e8e8c">DISPLAYUPDATE</a>(l, ...)&#160;&#160;&#160;<a class="el" href="cover_8c.html#a0683103c0036daae676e99dff5def66f">LOCALDISPLAYUPDATE</a>(<a class="el" href="cover_8c.html#acc504051bdf74b2bba3326a56ed566c6">g_displayLevel</a>, l, __VA_ARGS__)</td></tr>
+<tr class="separator:a40fa793cc466bb4f03748de2352e8e8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77b4996591f7bb7fd5977a1d05397246" id="r_a77b4996591f7bb7fd5977a1d05397246"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a77b4996591f7bb7fd5977a1d05397246">MAP_EMPTY_VALUE</a>&#160;&#160;&#160;((<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)-1)</td></tr>
+<tr class="separator:a77b4996591f7bb7fd5977a1d05397246"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a5683d2dff3f41cc717c7fdd679def965" id="r_a5683d2dff3f41cc717c7fdd679def965"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structCOVER__map__pair__t__s.html">COVER_map_pair_t_s</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a5683d2dff3f41cc717c7fdd679def965">COVER_map_pair_t</a></td></tr>
+<tr class="separator:a5683d2dff3f41cc717c7fdd679def965"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6fdcb02eaf422a09ffa37243637357f1" id="r_a6fdcb02eaf422a09ffa37243637357f1"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structCOVER__map__s.html">COVER_map_s</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a></td></tr>
+<tr class="separator:a6fdcb02eaf422a09ffa37243637357f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0bcadb99c1e3d4210367ddf706e2c10e" id="r_a0bcadb99c1e3d4210367ddf706e2c10e"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structCOVER__tryParameters__data__s.html">COVER_tryParameters_data_s</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a0bcadb99c1e3d4210367ddf706e2c10e">COVER_tryParameters_data_t</a></td></tr>
+<tr class="separator:a0bcadb99c1e3d4210367ddf706e2c10e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a8118e9386f13fb11d5d8a5ce87a9a957" id="r_a8118e9386f13fb11d5d8a5ce87a9a957"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a8118e9386f13fb11d5d8a5ce87a9a957">COVER_map_clear</a> (<a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *map)</td></tr>
+<tr class="separator:a8118e9386f13fb11d5d8a5ce87a9a957"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae56820ae0fa7352fde55a26192e531e8" id="r_ae56820ae0fa7352fde55a26192e531e8"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#ae56820ae0fa7352fde55a26192e531e8">COVER_map_init</a> (<a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *map, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> size)</td></tr>
+<tr class="separator:ae56820ae0fa7352fde55a26192e531e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34c99fe502ba8eb28744f99ae34a9635" id="r_a34c99fe502ba8eb28744f99ae34a9635"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a34c99fe502ba8eb28744f99ae34a9635">COVER_map_hash</a> (<a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *map, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> key)</td></tr>
+<tr class="separator:a34c99fe502ba8eb28744f99ae34a9635"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a021dab95660fa61516c95f555f1ac4a9" id="r_a021dab95660fa61516c95f555f1ac4a9"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a021dab95660fa61516c95f555f1ac4a9">COVER_map_index</a> (<a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *map, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> key)</td></tr>
+<tr class="separator:a021dab95660fa61516c95f555f1ac4a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fd77c5e5b439882dbcd2b0690c691b8" id="r_a8fd77c5e5b439882dbcd2b0690c691b8"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a8fd77c5e5b439882dbcd2b0690c691b8">COVER_map_at</a> (<a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *map, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> key)</td></tr>
+<tr class="separator:a8fd77c5e5b439882dbcd2b0690c691b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9ade8658b441831403a2783e8b7d63c" id="r_ae9ade8658b441831403a2783e8b7d63c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#ae9ade8658b441831403a2783e8b7d63c">COVER_map_remove</a> (<a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *map, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> key)</td></tr>
+<tr class="separator:ae9ade8658b441831403a2783e8b7d63c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b5d4ab0e900eccf8e04b022f0c70c03" id="r_a7b5d4ab0e900eccf8e04b022f0c70c03"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a7b5d4ab0e900eccf8e04b022f0c70c03">COVER_map_destroy</a> (<a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *map)</td></tr>
+<tr class="separator:a7b5d4ab0e900eccf8e04b022f0c70c03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d08abe6ce8f3b3af95b93193b46524f" id="r_a8d08abe6ce8f3b3af95b93193b46524f"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a8d08abe6ce8f3b3af95b93193b46524f">COVER_sum</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, unsigned nbSamples)</td></tr>
+<tr class="separator:a8d08abe6ce8f3b3af95b93193b46524f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e1619ce40b7ea85cd7b3ee649c08fbc" id="r_a4e1619ce40b7ea85cd7b3ee649c08fbc"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a4e1619ce40b7ea85cd7b3ee649c08fbc">COVER_cmp</a> (<a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *ctx, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *lp, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *rp)</td></tr>
+<tr class="separator:a4e1619ce40b7ea85cd7b3ee649c08fbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07f7d57b7a3bc214c9e817873704eb27" id="r_a07f7d57b7a3bc214c9e817873704eb27"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a07f7d57b7a3bc214c9e817873704eb27">COVER_cmp8</a> (<a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *ctx, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *lp, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *rp)</td></tr>
+<tr class="separator:a07f7d57b7a3bc214c9e817873704eb27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8cef286dfd0c3d8fb05a362d1eb59082" id="r_a8cef286dfd0c3d8fb05a362d1eb59082"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a8cef286dfd0c3d8fb05a362d1eb59082">COVER_strict_cmp</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *lp, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *rp)</td></tr>
+<tr class="separator:a8cef286dfd0c3d8fb05a362d1eb59082"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ff37517181be68895bbf4ec446a6814" id="r_a1ff37517181be68895bbf4ec446a6814"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a1ff37517181be68895bbf4ec446a6814">COVER_strict_cmp8</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *lp, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *rp)</td></tr>
+<tr class="separator:a1ff37517181be68895bbf4ec446a6814"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71546da7fc3c289c3ee84786fc4c7a34" id="r_a71546da7fc3c289c3ee84786fc4c7a34"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a71546da7fc3c289c3ee84786fc4c7a34">COVER_lower_bound</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *first, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *last, size_t <a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>)</td></tr>
+<tr class="separator:a71546da7fc3c289c3ee84786fc4c7a34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7810fa852f815e30ab90a4052362f41" id="r_aa7810fa852f815e30ab90a4052362f41"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#aa7810fa852f815e30ab90a4052362f41">COVER_groupBy</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *data, size_t count, size_t size, <a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *ctx, int(*cmp)(<a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *), void(*grp)(<a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *))</td></tr>
+<tr class="separator:aa7810fa852f815e30ab90a4052362f41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f8db3897a7c4f1f8df3eac2fe7598e0" id="r_a8f8db3897a7c4f1f8df3eac2fe7598e0"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a8f8db3897a7c4f1f8df3eac2fe7598e0">COVER_group</a> (<a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *ctx, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *group, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *groupEnd)</td></tr>
+<tr class="separator:a8f8db3897a7c4f1f8df3eac2fe7598e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6369cf8166bbf928dd777783941eec0c" id="r_a6369cf8166bbf928dd777783941eec0c"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structCOVER__segment__t.html">COVER_segment_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a6369cf8166bbf928dd777783941eec0c">COVER_selectSegment</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *ctx, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *freqs, <a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *activeDmers, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> begin, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> end, ZDICT_cover_params_t parameters)</td></tr>
+<tr class="separator:a6369cf8166bbf928dd777783941eec0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7ddf03626ebe8edf3914d550ade01b6" id="r_ad7ddf03626ebe8edf3914d550ade01b6"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#ad7ddf03626ebe8edf3914d550ade01b6">COVER_checkParameters</a> (ZDICT_cover_params_t parameters, size_t maxDictSize)</td></tr>
+<tr class="separator:ad7ddf03626ebe8edf3914d550ade01b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba4cfcede5da810e8a5951bb8988c6d8" id="r_aba4cfcede5da810e8a5951bb8988c6d8"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#aba4cfcede5da810e8a5951bb8988c6d8">COVER_ctx_destroy</a> (<a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *ctx)</td></tr>
+<tr class="separator:aba4cfcede5da810e8a5951bb8988c6d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9c0e41be64394aaa794e8b67dff77e9" id="r_af9c0e41be64394aaa794e8b67dff77e9"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#af9c0e41be64394aaa794e8b67dff77e9">COVER_ctx_init</a> (<a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *ctx, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *samplesBuffer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, unsigned nbSamples, unsigned d, double splitPoint)</td></tr>
+<tr class="separator:af9c0e41be64394aaa794e8b67dff77e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a418b0fa9785bd766c31ae41e34ce3ebe" id="r_a418b0fa9785bd766c31ae41e34ce3ebe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a418b0fa9785bd766c31ae41e34ce3ebe">COVER_warnOnSmallCorpus</a> (size_t maxDictSize, size_t nbDmers, int displayLevel)</td></tr>
+<tr class="separator:a418b0fa9785bd766c31ae41e34ce3ebe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e20e2a51007d245a12b3cdff905ef6a" id="r_a2e20e2a51007d245a12b3cdff905ef6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structCOVER__epoch__info__t.html">COVER_epoch_info_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a2e20e2a51007d245a12b3cdff905ef6a">COVER_computeEpochs</a> (<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> maxDictSize, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> nbDmers, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> k, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> passes)</td></tr>
+<tr class="separator:a2e20e2a51007d245a12b3cdff905ef6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e5cc836862c9a623fbf14f3d1ad3b7a" id="r_a9e5cc836862c9a623fbf14f3d1ad3b7a"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a9e5cc836862c9a623fbf14f3d1ad3b7a">COVER_buildDictionary</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *ctx, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *freqs, <a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *activeDmers, void *dictBuffer, size_t dictBufferCapacity, ZDICT_cover_params_t parameters)</td></tr>
+<tr class="separator:a9e5cc836862c9a623fbf14f3d1ad3b7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1feb77811ee14d7b5ef0510551e3e399" id="r_a1feb77811ee14d7b5ef0510551e3e399"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a1feb77811ee14d7b5ef0510551e3e399">ZDICT_trainFromBuffer_cover</a> (void *dictBuffer, size_t dictBufferCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *samplesBuffer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, unsigned nbSamples, ZDICT_cover_params_t parameters)</td></tr>
+<tr class="separator:a1feb77811ee14d7b5ef0510551e3e399"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7aac36c878428b22365706e321184fa3" id="r_a7aac36c878428b22365706e321184fa3"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a7aac36c878428b22365706e321184fa3">COVER_checkTotalCompressedSize</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ZDICT_cover_params_t parameters, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *samples, size_t *offsets, size_t nbTrainSamples, size_t nbSamples, <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a>, size_t dictBufferCapacity)</td></tr>
+<tr class="separator:a7aac36c878428b22365706e321184fa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0e0964587f6d04e93bd019b9cfc6d4e" id="r_ad0e0964587f6d04e93bd019b9cfc6d4e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#ad0e0964587f6d04e93bd019b9cfc6d4e">COVER_best_init</a> (<a class="el" href="cover_8h.html#aaf2609966f31111ad988e3c226013dc2">COVER_best_t</a> *best)</td></tr>
+<tr class="separator:ad0e0964587f6d04e93bd019b9cfc6d4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7fc9631879075e9bc967691e50d591d9" id="r_a7fc9631879075e9bc967691e50d591d9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a7fc9631879075e9bc967691e50d591d9">COVER_best_wait</a> (<a class="el" href="cover_8h.html#aaf2609966f31111ad988e3c226013dc2">COVER_best_t</a> *best)</td></tr>
+<tr class="separator:a7fc9631879075e9bc967691e50d591d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb56a3f59a5490db6fa1b9641d1bbc92" id="r_afb56a3f59a5490db6fa1b9641d1bbc92"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#afb56a3f59a5490db6fa1b9641d1bbc92">COVER_best_destroy</a> (<a class="el" href="cover_8h.html#aaf2609966f31111ad988e3c226013dc2">COVER_best_t</a> *best)</td></tr>
+<tr class="separator:afb56a3f59a5490db6fa1b9641d1bbc92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96921521d4c290f9f3b76100f9e4b8aa" id="r_a96921521d4c290f9f3b76100f9e4b8aa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a96921521d4c290f9f3b76100f9e4b8aa">COVER_best_start</a> (<a class="el" href="cover_8h.html#aaf2609966f31111ad988e3c226013dc2">COVER_best_t</a> *best)</td></tr>
+<tr class="separator:a96921521d4c290f9f3b76100f9e4b8aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4495a68384f7dcbb049f9880e417bcd9" id="r_a4495a68384f7dcbb049f9880e417bcd9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a4495a68384f7dcbb049f9880e417bcd9">COVER_best_finish</a> (<a class="el" href="cover_8h.html#aaf2609966f31111ad988e3c226013dc2">COVER_best_t</a> *best, ZDICT_cover_params_t parameters, <a class="el" href="cover_8h.html#a3668acc1d146e3367f7f17ea2fb9b10c">COVER_dictSelection_t</a> selection)</td></tr>
+<tr class="separator:a4495a68384f7dcbb049f9880e417bcd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bc2ca47eb799aa732a25920b6a89ed5" id="r_a1bc2ca47eb799aa732a25920b6a89ed5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cover_8h.html#a3668acc1d146e3367f7f17ea2fb9b10c">COVER_dictSelection_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a1bc2ca47eb799aa732a25920b6a89ed5">COVER_dictSelectionError</a> (size_t error)</td></tr>
+<tr class="separator:a1bc2ca47eb799aa732a25920b6a89ed5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80a65ca984f14545558e223f36996497" id="r_a80a65ca984f14545558e223f36996497"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a80a65ca984f14545558e223f36996497">COVER_dictSelectionIsError</a> (<a class="el" href="cover_8h.html#a3668acc1d146e3367f7f17ea2fb9b10c">COVER_dictSelection_t</a> selection)</td></tr>
+<tr class="separator:a80a65ca984f14545558e223f36996497"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7cfba6966b1c889991b9e5f4b1f0b5d6" id="r_a7cfba6966b1c889991b9e5f4b1f0b5d6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a7cfba6966b1c889991b9e5f4b1f0b5d6">COVER_dictSelectionFree</a> (<a class="el" href="cover_8h.html#a3668acc1d146e3367f7f17ea2fb9b10c">COVER_dictSelection_t</a> selection)</td></tr>
+<tr class="separator:a7cfba6966b1c889991b9e5f4b1f0b5d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17c0fe7004c8c5f23653c082e47a6aad" id="r_a17c0fe7004c8c5f23653c082e47a6aad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cover_8h.html#a3668acc1d146e3367f7f17ea2fb9b10c">COVER_dictSelection_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a17c0fe7004c8c5f23653c082e47a6aad">COVER_selectDict</a> (<a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *customDictContent, size_t dictContentSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *samplesBuffer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, unsigned nbFinalizeSamples, size_t nbCheckSamples, size_t nbSamples, ZDICT_cover_params_t params, size_t *offsets, size_t totalCompressedSize)</td></tr>
+<tr class="separator:a17c0fe7004c8c5f23653c082e47a6aad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe1f432f634bf700f64dacd021f4aff5" id="r_abe1f432f634bf700f64dacd021f4aff5"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#abe1f432f634bf700f64dacd021f4aff5">COVER_tryParameters</a> (void *opaque)</td></tr>
+<tr class="separator:abe1f432f634bf700f64dacd021f4aff5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaac7e74c4d23c193ea1ec5a44de6672c" id="r_aaac7e74c4d23c193ea1ec5a44de6672c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#aaac7e74c4d23c193ea1ec5a44de6672c">ZDICT_optimizeTrainFromBuffer_cover</a> (void *dictBuffer, size_t dictBufferCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *samplesBuffer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, unsigned nbSamples, ZDICT_cover_params_t *parameters)</td></tr>
+<tr class="separator:aaac7e74c4d23c193ea1ec5a44de6672c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:acc504051bdf74b2bba3326a56ed566c6" id="r_acc504051bdf74b2bba3326a56ed566c6"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#acc504051bdf74b2bba3326a56ed566c6">g_displayLevel</a> = 2</td></tr>
+<tr class="separator:acc504051bdf74b2bba3326a56ed566c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefc094acd97c214655e20602823c224a" id="r_aefc094acd97c214655e20602823c224a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> clock_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#aefc094acd97c214655e20602823c224a">refreshRate</a> = CLOCKS_PER_SEC * 15 / 100</td></tr>
+<tr class="separator:aefc094acd97c214655e20602823c224a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aacaf904c2035258561ef34f18706a638" id="r_aacaf904c2035258561ef34f18706a638"><td class="memItemLeft" align="right" valign="top">static clock_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#aacaf904c2035258561ef34f18706a638">g_time</a> = 0</td></tr>
+<tr class="separator:aacaf904c2035258561ef34f18706a638"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a293d7b34702fd1d0ef9242305cc70222" id="r_a293d7b34702fd1d0ef9242305cc70222"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a293d7b34702fd1d0ef9242305cc70222">prime4bytes</a> = 2654435761U</td></tr>
+<tr class="separator:a293d7b34702fd1d0ef9242305cc70222"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34a24e5e5a23569182ad6d114cd5724f" id="r_a34a24e5e5a23569182ad6d114cd5724f"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cover_8c.html#a34a24e5e5a23569182ad6d114cd5724f">g_ctx</a> = <a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></td></tr>
+<tr class="separator:a34a24e5e5a23569182ad6d114cd5724f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="aa8ef013382bb52ccf53195231c5f5383" name="aa8ef013382bb52ccf53195231c5f5383"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8ef013382bb52ccf53195231c5f5383">&#9670;&#160;</a></span>COVER_MAX_SAMPLES_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define COVER_MAX_SAMPLES_SIZE&#160;&#160;&#160;(sizeof(size_t) == 8 ? ((unsigned)-1) : ((unsigned)1 <a class="el" href="zdict_8c.html#a44172ac633c517cb4c9e278cef36b000">GB</a>))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00042">42</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af1caf4c33d101eb66c87d336aed6cb52" name="af1caf4c33d101eb66c87d336aed6cb52"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1caf4c33d101eb66c87d336aed6cb52">&#9670;&#160;</a></span>DEFAULT_SPLITPOINT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DEFAULT_SPLITPOINT&#160;&#160;&#160;1.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00043">43</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5a5fbd7a78051c2134b21324e5c74bdc" name="a5a5fbd7a78051c2134b21324e5c74bdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a5fbd7a78051c2134b21324e5c74bdc">&#9670;&#160;</a></span>DISPLAY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DISPLAY</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">  {                                                                            \</div>
+<div class="line">    fprintf(stderr, __VA_ARGS__);                                              \</div>
+<div class="line">    fflush(stderr);                                                            \</div>
+<div class="line">  }</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00049">49</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9200da68a37a9ae33332f82599d00e67" name="a9200da68a37a9ae33332f82599d00e67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9200da68a37a9ae33332f82599d00e67">&#9670;&#160;</a></span>DISPLAYLEVEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DISPLAYLEVEL</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">l, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="cover_8c.html#aed3edb401d7feb70e609cff1a2956f1e">LOCALDISPLAYLEVEL</a>(<a class="el" href="cover_8c.html#acc504051bdf74b2bba3326a56ed566c6">g_displayLevel</a>, l, __VA_ARGS__)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00058">58</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a40fa793cc466bb4f03748de2352e8e8c" name="a40fa793cc466bb4f03748de2352e8e8c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40fa793cc466bb4f03748de2352e8e8c">&#9670;&#160;</a></span>DISPLAYUPDATE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DISPLAYUPDATE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">l, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="cover_8c.html#a0683103c0036daae676e99dff5def66f">LOCALDISPLAYUPDATE</a>(<a class="el" href="cover_8c.html#acc504051bdf74b2bba3326a56ed566c6">g_displayLevel</a>, l, __VA_ARGS__)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00067">67</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aed3edb401d7feb70e609cff1a2956f1e" name="aed3edb401d7feb70e609cff1a2956f1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed3edb401d7feb70e609cff1a2956f1e">&#9670;&#160;</a></span>LOCALDISPLAYLEVEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LOCALDISPLAYLEVEL</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">displayLevel, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">l, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">  <span class="keywordflow">if</span> (displayLevel &gt;= l) {                                                     \</div>
+<div class="line">    DISPLAY(__VA_ARGS__);                                                      \</div>
+<div class="line">  } <span class="comment">/* 0 : no display;   1: errors;   2: default;  3: details;  4: debug */</span></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00054">54</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0683103c0036daae676e99dff5def66f" name="a0683103c0036daae676e99dff5def66f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0683103c0036daae676e99dff5def66f">&#9670;&#160;</a></span>LOCALDISPLAYUPDATE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LOCALDISPLAYUPDATE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">displayLevel, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">l, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">  <span class="keywordflow">if</span> (displayLevel &gt;= l) {                                                     \</div>
+<div class="line">    if ((clock() - <a class="code hl_variable" href="cover_8c.html#aacaf904c2035258561ef34f18706a638">g_time</a> &gt; <a class="code hl_variable" href="cover_8c.html#aefc094acd97c214655e20602823c224a">refreshRate</a>) || (displayLevel &gt;= 4)) {             \</div>
+<div class="line">      <a class="code hl_variable" href="cover_8c.html#aacaf904c2035258561ef34f18706a638">g_time</a> = clock();                                                        \</div>
+<div class="line">      DISPLAY(__VA_ARGS__);                                                    \</div>
+<div class="line">    }                                                                          \</div>
+<div class="line">  }</div>
+<div class="ttc" id="acover_8c_html_aacaf904c2035258561ef34f18706a638"><div class="ttname"><a href="cover_8c.html#aacaf904c2035258561ef34f18706a638">g_time</a></div><div class="ttdeci">static clock_t g_time</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00069">cover.c:69</a></div></div>
+<div class="ttc" id="acover_8c_html_aefc094acd97c214655e20602823c224a"><div class="ttname"><a href="cover_8c.html#aefc094acd97c214655e20602823c224a">refreshRate</a></div><div class="ttdeci">static const clock_t refreshRate</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00068">cover.c:68</a></div></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00060">60</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a77b4996591f7bb7fd5977a1d05397246" name="a77b4996591f7bb7fd5977a1d05397246"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77b4996591f7bb7fd5977a1d05397246">&#9670;&#160;</a></span>MAP_EMPTY_VALUE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MAP_EMPTY_VALUE&#160;&#160;&#160;((<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)-1)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00080">80</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类型定义说明</h2>
+<a id="a5683d2dff3f41cc717c7fdd679def965" name="a5683d2dff3f41cc717c7fdd679def965"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5683d2dff3f41cc717c7fdd679def965">&#9670;&#160;</a></span>COVER_map_pair_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structCOVER__map__pair__t__s.html">COVER_map_pair_t_s</a> <a class="el" href="cover_8c.html#a5683d2dff3f41cc717c7fdd679def965">COVER_map_pair_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6fdcb02eaf422a09ffa37243637357f1" name="a6fdcb02eaf422a09ffa37243637357f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6fdcb02eaf422a09ffa37243637357f1">&#9670;&#160;</a></span>COVER_map_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structCOVER__map__s.html">COVER_map_s</a> <a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0bcadb99c1e3d4210367ddf706e2c10e" name="a0bcadb99c1e3d4210367ddf706e2c10e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0bcadb99c1e3d4210367ddf706e2c10e">&#9670;&#160;</a></span>COVER_tryParameters_data_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structCOVER__tryParameters__data__s.html">COVER_tryParameters_data_s</a> <a class="el" href="cover_8c.html#a0bcadb99c1e3d4210367ddf706e2c10e">COVER_tryParameters_data_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Parameters for <a class="el" href="cover_8c.html#abe1f432f634bf700f64dacd021f4aff5">COVER_tryParameters()</a>. </p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="afb56a3f59a5490db6fa1b9641d1bbc92" name="afb56a3f59a5490db6fa1b9641d1bbc92"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb56a3f59a5490db6fa1b9641d1bbc92">&#9670;&#160;</a></span>COVER_best_destroy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void COVER_best_destroy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cover_8h.html#aaf2609966f31111ad988e3c226013dc2">COVER_best_t</a> *&#160;</td>
+          <td class="paramname"><em>best</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Call <a class="el" href="cover_8c.html#a7fc9631879075e9bc967691e50d591d9">COVER_best_wait()</a> and then destroy the COVER_best_t. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00862">862</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4495a68384f7dcbb049f9880e417bcd9" name="a4495a68384f7dcbb049f9880e417bcd9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4495a68384f7dcbb049f9880e417bcd9">&#9670;&#160;</a></span>COVER_best_finish()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void COVER_best_finish </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cover_8h.html#aaf2609966f31111ad988e3c226013dc2">COVER_best_t</a> *&#160;</td>
+          <td class="paramname"><em>best</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_cover_params_t&#160;</td>
+          <td class="paramname"><em>parameters</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cover_8h.html#a3668acc1d146e3367f7f17ea2fb9b10c">COVER_dictSelection_t</a>&#160;</td>
+          <td class="paramname"><em>selection</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Called when a thread finishes executing, both on error or success. Decrements liveJobs and signals any waiting threads if liveJobs == 0. If this dictionary is the best so far save it and its parameters. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00892">892</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad0e0964587f6d04e93bd019b9cfc6d4e" name="ad0e0964587f6d04e93bd019b9cfc6d4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0e0964587f6d04e93bd019b9cfc6d4e">&#9670;&#160;</a></span>COVER_best_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void COVER_best_init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cover_8h.html#aaf2609966f31111ad988e3c226013dc2">COVER_best_t</a> *&#160;</td>
+          <td class="paramname"><em>best</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Initialize the <code>COVER_best_t</code>. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00834">834</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a96921521d4c290f9f3b76100f9e4b8aa" name="a96921521d4c290f9f3b76100f9e4b8aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96921521d4c290f9f3b76100f9e4b8aa">&#9670;&#160;</a></span>COVER_best_start()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void COVER_best_start </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cover_8h.html#aaf2609966f31111ad988e3c226013dc2">COVER_best_t</a> *&#160;</td>
+          <td class="paramname"><em>best</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Called when a thread is about to be launched. Increments liveJobs. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00878">878</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7fc9631879075e9bc967691e50d591d9" name="a7fc9631879075e9bc967691e50d591d9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7fc9631879075e9bc967691e50d591d9">&#9670;&#160;</a></span>COVER_best_wait()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void COVER_best_wait </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cover_8h.html#aaf2609966f31111ad988e3c226013dc2">COVER_best_t</a> *&#160;</td>
+          <td class="paramname"><em>best</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Wait until liveJobs == 0. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00848">848</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9e5cc836862c9a623fbf14f3d1ad3b7a" name="a9e5cc836862c9a623fbf14f3d1ad3b7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e5cc836862c9a623fbf14f3d1ad3b7a">&#9670;&#160;</a></span>COVER_buildDictionary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t COVER_buildDictionary </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *&#160;</td>
+          <td class="paramname"><em>freqs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *&#160;</td>
+          <td class="paramname"><em>activeDmers</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictBufferCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_cover_params_t&#160;</td>
+          <td class="paramname"><em>parameters</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Given the prepared context build the dictionary. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00666">666</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad7ddf03626ebe8edf3914d550ade01b6" name="ad7ddf03626ebe8edf3914d550ade01b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7ddf03626ebe8edf3914d550ade01b6">&#9670;&#160;</a></span>COVER_checkParameters()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int COVER_checkParameters </td>
+          <td>(</td>
+          <td class="paramtype">ZDICT_cover_params_t&#160;</td>
+          <td class="paramname"><em>parameters</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>maxDictSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Check the validity of the parameters. Returns non-zero if the parameters are valid and 0 otherwise. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00479">479</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7aac36c878428b22365706e321184fa3" name="a7aac36c878428b22365706e321184fa3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7aac36c878428b22365706e321184fa3">&#9670;&#160;</a></span>COVER_checkTotalCompressedSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t COVER_checkTotalCompressedSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ZDICT_cover_params_t&#160;</td>
+          <td class="paramname"><em>parameters</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>samples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>offsets</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>nbTrainSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>nbSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>dict</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictBufferCapacity</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Checks total compressed size of a dictionary </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00778">778</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4e1619ce40b7ea85cd7b3ee649c08fbc" name="a4e1619ce40b7ea85cd7b3ee649c08fbc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e1619ce40b7ea85cd7b3ee649c08fbc">&#9670;&#160;</a></span>COVER_cmp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int COVER_cmp </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>lp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>rp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns -1 if the dmer at lp is less than the dmer at rp. Return 0 if the dmers at lp and rp are equal. Returns 1 if the dmer at lp is greater than the dmer at rp. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00241">241</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a07f7d57b7a3bc214c9e817873704eb27" name="a07f7d57b7a3bc214c9e817873704eb27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07f7d57b7a3bc214c9e817873704eb27">&#9670;&#160;</a></span>COVER_cmp8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int COVER_cmp8 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>lp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>rp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Faster version for d &lt;= 8. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00249">249</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2e20e2a51007d245a12b3cdff905ef6a" name="a2e20e2a51007d245a12b3cdff905ef6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e20e2a51007d245a12b3cdff905ef6a">&#9670;&#160;</a></span>COVER_computeEpochs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structCOVER__epoch__info__t.html">COVER_epoch_info_t</a> COVER_computeEpochs </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>maxDictSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>nbDmers</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>k</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>passes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Computes the number of epochs and the size of each epoch. We will make sure that each epoch gets at least 10 * k bytes.</p>
+<p>The COVER algorithms divide the data up into epochs of equal size and select one segment from each epoch.</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">maxDictSize</td><td>The maximum allowed dictionary size. </td></tr>
+    <tr><td class="paramname">nbDmers</td><td>The number of dmers we are training on. </td></tr>
+    <tr><td class="paramname">k</td><td>The parameter k (segment size). </td></tr>
+    <tr><td class="paramname">passes</td><td>The target number of passes over the dmer corpus. More passes means a better dictionary. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00646">646</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aba4cfcede5da810e8a5951bb8988c6d8" name="aba4cfcede5da810e8a5951bb8988c6d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba4cfcede5da810e8a5951bb8988c6d8">&#9670;&#160;</a></span>COVER_ctx_destroy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void COVER_ctx_destroy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Clean up a context initialized with <code><a class="el" href="cover_8c.html#af9c0e41be64394aaa794e8b67dff77e9">COVER_ctx_init()</a></code>. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00503">503</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af9c0e41be64394aaa794e8b67dff77e9" name="af9c0e41be64394aaa794e8b67dff77e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9c0e41be64394aaa794e8b67dff77e9">&#9670;&#160;</a></span>COVER_ctx_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t COVER_ctx_init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>samplesBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>d</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>splitPoint</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Prepare a context for dictionary building. The context is only dependent on the parameter <code>d</code> and can used multiple times. Returns 0 on success or error code on error. The context must be destroyed with <code><a class="el" href="cover_8c.html#aba4cfcede5da810e8a5951bb8988c6d8">COVER_ctx_destroy()</a></code>. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00532">532</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1bc2ca47eb799aa732a25920b6a89ed5" name="a1bc2ca47eb799aa732a25920b6a89ed5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bc2ca47eb799aa732a25920b6a89ed5">&#9670;&#160;</a></span>COVER_dictSelectionError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cover_8h.html#a3668acc1d146e3367f7f17ea2fb9b10c">COVER_dictSelection_t</a> COVER_dictSelectionError </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>error</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Error function for COVER_selectDict function. Returns a struct where return.totalCompressedSize is a ZSTD error. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00936">936</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7cfba6966b1c889991b9e5f4b1f0b5d6" name="a7cfba6966b1c889991b9e5f4b1f0b5d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7cfba6966b1c889991b9e5f4b1f0b5d6">&#9670;&#160;</a></span>COVER_dictSelectionFree()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void COVER_dictSelectionFree </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cover_8h.html#a3668acc1d146e3367f7f17ea2fb9b10c">COVER_dictSelection_t</a>&#160;</td>
+          <td class="paramname"><em>selection</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Always call after selectDict is called to free up used memory from newly created dictionary. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00945">945</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a80a65ca984f14545558e223f36996497" name="a80a65ca984f14545558e223f36996497"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80a65ca984f14545558e223f36996497">&#9670;&#160;</a></span>COVER_dictSelectionIsError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned COVER_dictSelectionIsError </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cover_8h.html#a3668acc1d146e3367f7f17ea2fb9b10c">COVER_dictSelection_t</a>&#160;</td>
+          <td class="paramname"><em>selection</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Error function for COVER_selectDict function. Checks if the return value is an error. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00941">941</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8f8db3897a7c4f1f8df3eac2fe7598e0" name="a8f8db3897a7c4f1f8df3eac2fe7598e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f8db3897a7c4f1f8df3eac2fe7598e0">&#9670;&#160;</a></span>COVER_group()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void COVER_group </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>group</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>groupEnd</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Called on each group of positions with the same dmer. Counts the frequency of each dmer and saves it in the suffix array. Fills <code>ctx-&gt;dmerAt</code>. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00335">335</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa7810fa852f815e30ab90a4052362f41" name="aa7810fa852f815e30ab90a4052362f41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa7810fa852f815e30ab90a4052362f41">&#9670;&#160;</a></span>COVER_groupBy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void COVER_groupBy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int(*)(<a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *)&#160;</td>
+          <td class="paramname"><em>cmp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void(*)(<a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *)&#160;</td>
+          <td class="paramname"><em>grp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Generic groupBy function. Groups an array sorted by cmp into groups with equivalent values. Calls grp for each group. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00309">309</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a71546da7fc3c289c3ee84786fc4c7a34" name="a71546da7fc3c289c3ee84786fc4c7a34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71546da7fc3c289c3ee84786fc4c7a34">&#9670;&#160;</a></span>COVER_lower_bound()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t * COVER_lower_bound </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>first</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>last</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns the first pointer in [first, last) whose element does not compare less than value. If no such element exists it returns last. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00286">286</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8fd77c5e5b439882dbcd2b0690c691b8" name="a8fd77c5e5b439882dbcd2b0690c691b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8fd77c5e5b439882dbcd2b0690c691b8">&#9670;&#160;</a></span>COVER_map_at()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> * COVER_map_at </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *&#160;</td>
+          <td class="paramname"><em>map</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>key</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns the pointer to the value for key. If key is not in the map, it is inserted and the value is set to 0. The map must not be full. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00150">150</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8118e9386f13fb11d5d8a5ce87a9a957" name="a8118e9386f13fb11d5d8a5ce87a9a957"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8118e9386f13fb11d5d8a5ce87a9a957">&#9670;&#160;</a></span>COVER_map_clear()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void COVER_map_clear </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *&#160;</td>
+          <td class="paramname"><em>map</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Clear the map. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00096">96</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7b5d4ab0e900eccf8e04b022f0c70c03" name="a7b5d4ab0e900eccf8e04b022f0c70c03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b5d4ab0e900eccf8e04b022f0c70c03">&#9670;&#160;</a></span>COVER_map_destroy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void COVER_map_destroy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *&#160;</td>
+          <td class="paramname"><em>map</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Destroys a map that is inited with <a class="el" href="cover_8c.html#ae56820ae0fa7352fde55a26192e531e8">COVER_map_init()</a>. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00191">191</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a34c99fe502ba8eb28744f99ae34a9635" name="a34c99fe502ba8eb28744f99ae34a9635"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34c99fe502ba8eb28744f99ae34a9635">&#9670;&#160;</a></span>COVER_map_hash()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> COVER_map_hash </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *&#160;</td>
+          <td class="paramname"><em>map</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>key</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00124">124</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a021dab95660fa61516c95f555f1ac4a9" name="a021dab95660fa61516c95f555f1ac4a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a021dab95660fa61516c95f555f1ac4a9">&#9670;&#160;</a></span>COVER_map_index()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> COVER_map_index </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *&#160;</td>
+          <td class="paramname"><em>map</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>key</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Helper function that returns the index that a key should be placed into. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00131">131</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae56820ae0fa7352fde55a26192e531e8" name="ae56820ae0fa7352fde55a26192e531e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae56820ae0fa7352fde55a26192e531e8">&#9670;&#160;</a></span>COVER_map_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int COVER_map_init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *&#160;</td>
+          <td class="paramname"><em>map</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Initializes a map of the given size. Returns 1 on success and 0 on failure. The map must be destroyed with <a class="el" href="cover_8c.html#a7b5d4ab0e900eccf8e04b022f0c70c03">COVER_map_destroy()</a>. The map is only guaranteed to be large enough to hold size elements. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00106">106</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae9ade8658b441831403a2783e8b7d63c" name="ae9ade8658b441831403a2783e8b7d63c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9ade8658b441831403a2783e8b7d63c">&#9670;&#160;</a></span>COVER_map_remove()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void COVER_map_remove </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *&#160;</td>
+          <td class="paramname"><em>map</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>key</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Deletes key from the map if present. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00162">162</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a17c0fe7004c8c5f23653c082e47a6aad" name="a17c0fe7004c8c5f23653c082e47a6aad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17c0fe7004c8c5f23653c082e47a6aad">&#9670;&#160;</a></span>COVER_selectDict()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cover_8h.html#a3668acc1d146e3367f7f17ea2fb9b10c">COVER_dictSelection_t</a> COVER_selectDict </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>customDictContent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictContentSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>samplesBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbFinalizeSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>nbCheckSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>nbSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_cover_params_t&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>offsets</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>totalCompressedSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Called to finalize the dictionary and select one based on whether or not the shrink-dict flag was enabled. If enabled the dictionary used is the smallest dictionary within a specified regression of the compressed size from the largest dictionary. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00949">949</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6369cf8166bbf928dd777783941eec0c" name="a6369cf8166bbf928dd777783941eec0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6369cf8166bbf928dd777783941eec0c">&#9670;&#160;</a></span>COVER_selectSegment()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structCOVER__segment__t.html">COVER_segment_t</a> COVER_selectSegment </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *&#160;</td>
+          <td class="paramname"><em>freqs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cover_8c.html#a6fdcb02eaf422a09ffa37243637357f1">COVER_map_t</a> *&#160;</td>
+          <td class="paramname"><em>activeDmers</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>begin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_cover_params_t&#160;</td>
+          <td class="paramname"><em>parameters</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Selects the best segment in an epoch. Segments of are scored according to the function:</p>
+<p>Let F(d) be the frequency of dmer d. Let S_i be the dmer at position i of segment S which has length k. </p><pre class="fragment">Score(S) = F(S_1) + F(S_2) + ... + F(S_{k-d+1})
+</pre><p> Once the dmer d is in the dictionary we set F(d) = 0. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00396">396</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8cef286dfd0c3d8fb05a362d1eb59082" name="a8cef286dfd0c3d8fb05a362d1eb59082"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8cef286dfd0c3d8fb05a362d1eb59082">&#9670;&#160;</a></span>COVER_strict_cmp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int COVER_strict_cmp </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>lp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>rp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Same as <a class="el" href="cover_8c.html#a4e1619ce40b7ea85cd7b3ee649c08fbc">COVER_cmp()</a> except ties are broken by pointer value NOTE: g_ctx must be set to call this function. <a class="el" href="classA.html">A</a> global is required because qsort doesn't take an opaque pointer. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00264">264</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1ff37517181be68895bbf4ec446a6814" name="a1ff37517181be68895bbf4ec446a6814"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ff37517181be68895bbf4ec446a6814">&#9670;&#160;</a></span>COVER_strict_cmp8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int COVER_strict_cmp8 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>lp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>rp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Faster version for d &lt;= 8. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00274">274</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8d08abe6ce8f3b3af95b93193b46524f" name="a8d08abe6ce8f3b3af95b93193b46524f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d08abe6ce8f3b3af95b93193b46524f">&#9670;&#160;</a></span>COVER_sum()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t COVER_sum </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbSamples</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Returns the sum of the sample sizes. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00227">227</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abe1f432f634bf700f64dacd021f4aff5" name="abe1f432f634bf700f64dacd021f4aff5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe1f432f634bf700f64dacd021f4aff5">&#9670;&#160;</a></span>COVER_tryParameters()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void COVER_tryParameters </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>opaque</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Tries a set of parameters and updates the COVER_best_t with the results. This function is thread safe if zstd is compiled with multithreaded support. It takes its parameters as an <em>OWNING</em> opaque pointer to support threading. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l01056">1056</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a418b0fa9785bd766c31ae41e34ce3ebe" name="a418b0fa9785bd766c31ae41e34ce3ebe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a418b0fa9785bd766c31ae41e34ce3ebe">&#9670;&#160;</a></span>COVER_warnOnSmallCorpus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void COVER_warnOnSmallCorpus </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>maxDictSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>nbDmers</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>displayLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Warns the user when their corpus is too small. </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00630">630</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaac7e74c4d23c193ea1ec5a44de6672c" name="aaac7e74c4d23c193ea1ec5a44de6672c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaac7e74c4d23c193ea1ec5a44de6672c">&#9670;&#160;</a></span>ZDICT_optimizeTrainFromBuffer_cover()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> size_t ZDICT_optimizeTrainFromBuffer_cover </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictBufferCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>samplesBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_cover_params_t *&#160;</td>
+          <td class="paramname"><em>parameters</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l01102">1102</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1feb77811ee14d7b5ef0510551e3e399" name="a1feb77811ee14d7b5ef0510551e3e399"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1feb77811ee14d7b5ef0510551e3e399">&#9670;&#160;</a></span>ZDICT_trainFromBuffer_cover()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> size_t ZDICT_trainFromBuffer_cover </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictBufferCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>samplesBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_cover_params_t&#160;</td>
+          <td class="paramname"><em>parameters</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00718">718</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a34a24e5e5a23569182ad6d114cd5724f" name="a34a24e5e5a23569182ad6d114cd5724f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34a24e5e5a23569182ad6d114cd5724f">&#9670;&#160;</a></span>g_ctx</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structCOVER__ctx__t.html">COVER_ctx_t</a>* g_ctx = <a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00218">218</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acc504051bdf74b2bba3326a56ed566c6" name="acc504051bdf74b2bba3326a56ed566c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc504051bdf74b2bba3326a56ed566c6">&#9670;&#160;</a></span>g_displayLevel</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int g_displayLevel = 2</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00048">48</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aacaf904c2035258561ef34f18706a638" name="aacaf904c2035258561ef34f18706a638"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aacaf904c2035258561ef34f18706a638">&#9670;&#160;</a></span>g_time</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">clock_t g_time = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00069">69</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a293d7b34702fd1d0ef9242305cc70222" name="a293d7b34702fd1d0ef9242305cc70222"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a293d7b34702fd1d0ef9242305cc70222">&#9670;&#160;</a></span>prime4bytes</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> prime4bytes = 2654435761U</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Internal hash function </p>
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00123">123</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aefc094acd97c214655e20602823c224a" name="aefc094acd97c214655e20602823c224a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aefc094acd97c214655e20602823c224a">&#9670;&#160;</a></span>refreshRate</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> clock_t refreshRate = CLOCKS_PER_SEC * 15 / 100</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cover_8c_source.html">cover.c</a> 第 <a class="el" href="cover_8c_source.html#l00068">68</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="cover_8c.html">cover.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

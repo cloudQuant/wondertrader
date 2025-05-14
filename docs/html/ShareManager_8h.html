@@ -1,0 +1,809 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtUftCore/ShareManager.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('ShareManager_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">ShareManager.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>共享数据管理器头文件  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &lt;stdint.h&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &quot;<a class="el" href="StdUtils_8hpp_source.html">../Share/StdUtils.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="FasterDefs_8h_source.html">../Includes/FasterDefs.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="DLLHelper_8hpp_source.html">../Share/DLLHelper.hpp</a>&quot;</code><br />
+</div>
+<p><a href="ShareManager_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classShareManager.html">ShareManager</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">共享数据管理器类  <a href="classShareManager.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a4c0fdacc0e3df5f2d5ebaf63df35be58" id="r_a4c0fdacc0e3df5f2d5ebaf63df35be58"><td class="memItemLeft" align="right" valign="top">typedef bool(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#a4c0fdacc0e3df5f2d5ebaf63df35be58">func_init_master</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *)</td></tr>
+<tr class="memdesc:a4c0fdacc0e3df5f2d5ebaf63df35be58"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化主域的函数指针类型  <br /></td></tr>
+<tr class="separator:a4c0fdacc0e3df5f2d5ebaf63df35be58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa028b501dfb285299565320cdc33c428" id="r_aa028b501dfb285299565320cdc33c428"><td class="memItemLeft" align="right" valign="top">typedef uint64_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#aa028b501dfb285299565320cdc33c428">func_get_section_updatetime</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *)</td></tr>
+<tr class="memdesc:aa028b501dfb285299565320cdc33c428"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定图片更新时间的函数指针类型  <br /></td></tr>
+<tr class="separator:aa028b501dfb285299565320cdc33c428"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad07fe09fcedf462d299e0f4c3c64d022" id="r_ad07fe09fcedf462d299e0f4c3c64d022"><td class="memItemLeft" align="right" valign="top">typedef bool(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#ad07fe09fcedf462d299e0f4c3c64d022">func_commit_section</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *)</td></tr>
+<tr class="memdesc:ad07fe09fcedf462d299e0f4c3c64d022"><td class="mdescLeft">&#160;</td><td class="mdescRight">提交图片的函数指针类型  <br /></td></tr>
+<tr class="separator:ad07fe09fcedf462d299e0f4c3c64d022"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04f32d2d25d8c80d0eb63255c6d4aa54" id="r_a04f32d2d25d8c80d0eb63255c6d4aa54"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#a04f32d2d25d8c80d0eb63255c6d4aa54">func_allocate_string</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, bool)</td></tr>
+<tr class="memdesc:a04f32d2d25d8c80d0eb63255c6d4aa54"><td class="mdescLeft">&#160;</td><td class="mdescRight">分配字符串类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:a04f32d2d25d8c80d0eb63255c6d4aa54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1118e0d703745cf58d495c799773078e" id="r_a1118e0d703745cf58d495c799773078e"><td class="memItemLeft" align="right" valign="top">typedef int32_t *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#a1118e0d703745cf58d495c799773078e">func_allocate_int32</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, int32_t, bool)</td></tr>
+<tr class="memdesc:a1118e0d703745cf58d495c799773078e"><td class="mdescLeft">&#160;</td><td class="mdescRight">分配32位整型类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:a1118e0d703745cf58d495c799773078e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aceb92d7381c2a86875f1dd8a116d5fd4" id="r_aceb92d7381c2a86875f1dd8a116d5fd4"><td class="memItemLeft" align="right" valign="top">typedef int64_t *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#aceb92d7381c2a86875f1dd8a116d5fd4">func_allocate_int64</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, int64_t, bool)</td></tr>
+<tr class="memdesc:aceb92d7381c2a86875f1dd8a116d5fd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">分配64位整型类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:aceb92d7381c2a86875f1dd8a116d5fd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c18ca0be307ad8e81ef8410ad2a1d00" id="r_a1c18ca0be307ad8e81ef8410ad2a1d00"><td class="memItemLeft" align="right" valign="top">typedef uint32_t *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#a1c18ca0be307ad8e81ef8410ad2a1d00">func_allocate_uint32</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, uint32_t, bool)</td></tr>
+<tr class="memdesc:a1c18ca0be307ad8e81ef8410ad2a1d00"><td class="mdescLeft">&#160;</td><td class="mdescRight">分配无符32位整型类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:a1c18ca0be307ad8e81ef8410ad2a1d00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe0ce32ef446f2ab7a85404fd40df21d" id="r_abe0ce32ef446f2ab7a85404fd40df21d"><td class="memItemLeft" align="right" valign="top">typedef uint64_t *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#abe0ce32ef446f2ab7a85404fd40df21d">func_allocate_uint64</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, uint64_t, bool)</td></tr>
+<tr class="memdesc:abe0ce32ef446f2ab7a85404fd40df21d"><td class="mdescLeft">&#160;</td><td class="mdescRight">分配无符64位整型类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:abe0ce32ef446f2ab7a85404fd40df21d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af780ab44a09ee34fd891ce25f1e77067" id="r_af780ab44a09ee34fd891ce25f1e77067"><td class="memItemLeft" align="right" valign="top">typedef double *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#af780ab44a09ee34fd891ce25f1e77067">func_allocate_double</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, double, bool)</td></tr>
+<tr class="memdesc:af780ab44a09ee34fd891ce25f1e77067"><td class="mdescLeft">&#160;</td><td class="mdescRight">分配浮点型值的函数指针类型  <br /></td></tr>
+<tr class="separator:af780ab44a09ee34fd891ce25f1e77067"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f889d38b284ab28512d670913dffe3a" id="r_a2f889d38b284ab28512d670913dffe3a"><td class="memItemLeft" align="right" valign="top">typedef bool(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#a2f889d38b284ab28512d670913dffe3a">func_set_string</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *)</td></tr>
+<tr class="memdesc:a2f889d38b284ab28512d670913dffe3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置字符串类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:a2f889d38b284ab28512d670913dffe3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ababc3e4c04a989b3776f1aebab55b181" id="r_ababc3e4c04a989b3776f1aebab55b181"><td class="memItemLeft" align="right" valign="top">typedef bool(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#ababc3e4c04a989b3776f1aebab55b181">func_set_int32</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, int32_t)</td></tr>
+<tr class="memdesc:ababc3e4c04a989b3776f1aebab55b181"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置32位整型类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:ababc3e4c04a989b3776f1aebab55b181"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6dbe56dd8d9e8611f4b3c95efb457c0d" id="r_a6dbe56dd8d9e8611f4b3c95efb457c0d"><td class="memItemLeft" align="right" valign="top">typedef bool(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#a6dbe56dd8d9e8611f4b3c95efb457c0d">func_set_int64</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, int64_t)</td></tr>
+<tr class="memdesc:a6dbe56dd8d9e8611f4b3c95efb457c0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置64位整型类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:a6dbe56dd8d9e8611f4b3c95efb457c0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af467e6aab055e3b6ff095683a0b1935d" id="r_af467e6aab055e3b6ff095683a0b1935d"><td class="memItemLeft" align="right" valign="top">typedef bool(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#af467e6aab055e3b6ff095683a0b1935d">func_set_uint32</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, uint32_t)</td></tr>
+<tr class="memdesc:af467e6aab055e3b6ff095683a0b1935d"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置无符32位整型类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:af467e6aab055e3b6ff095683a0b1935d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0aeacadeeb9177275a036c7d9b44560" id="r_ae0aeacadeeb9177275a036c7d9b44560"><td class="memItemLeft" align="right" valign="top">typedef bool(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#ae0aeacadeeb9177275a036c7d9b44560">func_set_uint64</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, uint64_t)</td></tr>
+<tr class="memdesc:ae0aeacadeeb9177275a036c7d9b44560"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置无符64位整型类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:ae0aeacadeeb9177275a036c7d9b44560"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a059c90722c8432c20e4b6a1de6bdb677" id="r_a059c90722c8432c20e4b6a1de6bdb677"><td class="memItemLeft" align="right" valign="top">typedef bool(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#a059c90722c8432c20e4b6a1de6bdb677">func_set_double</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, double)</td></tr>
+<tr class="memdesc:a059c90722c8432c20e4b6a1de6bdb677"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置浮点型值的函数指针类型  <br /></td></tr>
+<tr class="separator:a059c90722c8432c20e4b6a1de6bdb677"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9baeb60ca68755047dda8c6902a16d97" id="r_a9baeb60ca68755047dda8c6902a16d97"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#a9baeb60ca68755047dda8c6902a16d97">func_get_string</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *)</td></tr>
+<tr class="memdesc:a9baeb60ca68755047dda8c6902a16d97"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取字符串类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:a9baeb60ca68755047dda8c6902a16d97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a542b68b10f514ccbec7e571d57983bcf" id="r_a542b68b10f514ccbec7e571d57983bcf"><td class="memItemLeft" align="right" valign="top">typedef int32_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#a542b68b10f514ccbec7e571d57983bcf">func_get_int32</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, int32_t)</td></tr>
+<tr class="memdesc:a542b68b10f514ccbec7e571d57983bcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取32位整型类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:a542b68b10f514ccbec7e571d57983bcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9a892bd39ad2defe3532cf539eb501a" id="r_ae9a892bd39ad2defe3532cf539eb501a"><td class="memItemLeft" align="right" valign="top">typedef int64_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#ae9a892bd39ad2defe3532cf539eb501a">func_get_int64</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, int64_t)</td></tr>
+<tr class="memdesc:ae9a892bd39ad2defe3532cf539eb501a"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取64位整型类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:ae9a892bd39ad2defe3532cf539eb501a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85a1e48b556ba600e4bd0c7fa1a5d0de" id="r_a85a1e48b556ba600e4bd0c7fa1a5d0de"><td class="memItemLeft" align="right" valign="top">typedef uint32_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#a85a1e48b556ba600e4bd0c7fa1a5d0de">func_get_uint32</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, uint32_t)</td></tr>
+<tr class="memdesc:a85a1e48b556ba600e4bd0c7fa1a5d0de"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取无符32位整型类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:a85a1e48b556ba600e4bd0c7fa1a5d0de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab09cc8bb7e662ad32a9c672406f54fef" id="r_ab09cc8bb7e662ad32a9c672406f54fef"><td class="memItemLeft" align="right" valign="top">typedef uint64_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#ab09cc8bb7e662ad32a9c672406f54fef">func_get_uint64</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, uint64_t)</td></tr>
+<tr class="memdesc:ab09cc8bb7e662ad32a9c672406f54fef"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取无符64位整型类型值的函数指针类型  <br /></td></tr>
+<tr class="separator:ab09cc8bb7e662ad32a9c672406f54fef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1c70234e36c1e516c6db6ea3b907e0f" id="r_ac1c70234e36c1e516c6db6ea3b907e0f"><td class="memItemLeft" align="right" valign="top">typedef double(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#ac1c70234e36c1e516c6db6ea3b907e0f">func_get_double</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, double)</td></tr>
+<tr class="memdesc:ac1c70234e36c1e516c6db6ea3b907e0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取浮点型值的函数指针类型  <br /></td></tr>
+<tr class="separator:ac1c70234e36c1e516c6db6ea3b907e0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a9e1fc31194100ab43bbad77a2f5c12b3" id="r_a9e1fc31194100ab43bbad77a2f5c12b3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ShareManager_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a></td></tr>
+<tr class="separator:a9e1fc31194100ab43bbad77a2f5c12b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>共享数据管理器头文件 </p>
+<p>定义了ShareManager类，用于管理多进程间的共享数据。 支持不同类型的参数存取和分配，并提供监控参数变更的机制。 </p>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 中定义.</p>
+</div><h2 class="groupheader">类型定义说明</h2>
+<a id="af780ab44a09ee34fd891ce25f1e77067" name="af780ab44a09ee34fd891ce25f1e77067"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af780ab44a09ee34fd891ce25f1e77067">&#9670;&#160;</a></span>func_allocate_double</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef double *(* func_allocate_double) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, double, bool)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>分配浮点型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">initVal</td><td>初始值 </td></tr>
+    <tr><td class="paramname">bForceWrite</td><td>是否强制写入 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分配的浮点型指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00109">109</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1118e0d703745cf58d495c799773078e" name="a1118e0d703745cf58d495c799773078e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1118e0d703745cf58d495c799773078e">&#9670;&#160;</a></span>func_allocate_int32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef int32_t *(* func_allocate_int32) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, int32_t, bool)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>分配32位整型类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">initVal</td><td>初始值 </td></tr>
+    <tr><td class="paramname">bForceWrite</td><td>是否强制写入 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分配的整型指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00065">65</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aceb92d7381c2a86875f1dd8a116d5fd4" name="aceb92d7381c2a86875f1dd8a116d5fd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aceb92d7381c2a86875f1dd8a116d5fd4">&#9670;&#160;</a></span>func_allocate_int64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef int64_t *(* func_allocate_int64) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, int64_t, bool)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>分配64位整型类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">initVal</td><td>初始值 </td></tr>
+    <tr><td class="paramname">bForceWrite</td><td>是否强制写入 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分配的整型指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00076">76</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a04f32d2d25d8c80d0eb63255c6d4aa54" name="a04f32d2d25d8c80d0eb63255c6d4aa54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04f32d2d25d8c80d0eb63255c6d4aa54">&#9670;&#160;</a></span>func_allocate_string</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *(* func_allocate_string) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, bool)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>分配字符串类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">initVal</td><td>初始值 </td></tr>
+    <tr><td class="paramname">bForceWrite</td><td>是否强制写入 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分配的字符串指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00054">54</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1c18ca0be307ad8e81ef8410ad2a1d00" name="a1c18ca0be307ad8e81ef8410ad2a1d00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c18ca0be307ad8e81ef8410ad2a1d00">&#9670;&#160;</a></span>func_allocate_uint32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef uint32_t *(* func_allocate_uint32) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, uint32_t, bool)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>分配无符32位整型类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">initVal</td><td>初始值 </td></tr>
+    <tr><td class="paramname">bForceWrite</td><td>是否强制写入 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分配的整型指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00087">87</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abe0ce32ef446f2ab7a85404fd40df21d" name="abe0ce32ef446f2ab7a85404fd40df21d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe0ce32ef446f2ab7a85404fd40df21d">&#9670;&#160;</a></span>func_allocate_uint64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef uint64_t *(* func_allocate_uint64) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, uint64_t, bool)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>分配无符64位整型类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">initVal</td><td>初始值 </td></tr>
+    <tr><td class="paramname">bForceWrite</td><td>是否强制写入 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分配的整型指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00098">98</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad07fe09fcedf462d299e0f4c3c64d022" name="ad07fe09fcedf462d299e0f4c3c64d022"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad07fe09fcedf462d299e0f4c3c64d022">&#9670;&#160;</a></span>func_commit_section</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef bool(* func_commit_section) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>提交图片的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否提交成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00043">43</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac1c70234e36c1e516c6db6ea3b907e0f" name="ac1c70234e36c1e516c6db6ea3b907e0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1c70234e36c1e516c6db6ea3b907e0f">&#9670;&#160;</a></span>func_get_double</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef double(* func_get_double) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, double)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取浮点型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">defVal</td><td>默认值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>获取的浮点数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00228">228</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a542b68b10f514ccbec7e571d57983bcf" name="a542b68b10f514ccbec7e571d57983bcf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a542b68b10f514ccbec7e571d57983bcf">&#9670;&#160;</a></span>func_get_int32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef int32_t(* func_get_int32) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, int32_t)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取32位整型类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">defVal</td><td>默认值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>获取的整型值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00188">188</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae9a892bd39ad2defe3532cf539eb501a" name="ae9a892bd39ad2defe3532cf539eb501a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9a892bd39ad2defe3532cf539eb501a">&#9670;&#160;</a></span>func_get_int64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef int64_t(* func_get_int64) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, int64_t)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取64位整型类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">defVal</td><td>默认值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>获取的整型值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00198">198</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa028b501dfb285299565320cdc33c428" name="aa028b501dfb285299565320cdc33c428"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa028b501dfb285299565320cdc33c428">&#9670;&#160;</a></span>func_get_section_updatetime</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef uint64_t(* func_get_section_updatetime) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取指定图片更新时间的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>更新时间戳 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00035">35</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9baeb60ca68755047dda8c6902a16d97" name="a9baeb60ca68755047dda8c6902a16d97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9baeb60ca68755047dda8c6902a16d97">&#9670;&#160;</a></span>func_get_string</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *(* func_get_string) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取字符串类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">defVal</td><td>默认值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>获取的字符串值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00178">178</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a85a1e48b556ba600e4bd0c7fa1a5d0de" name="a85a1e48b556ba600e4bd0c7fa1a5d0de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85a1e48b556ba600e4bd0c7fa1a5d0de">&#9670;&#160;</a></span>func_get_uint32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef uint32_t(* func_get_uint32) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, uint32_t)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取无符32位整型类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">defVal</td><td>默认值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>获取的整型值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00208">208</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab09cc8bb7e662ad32a9c672406f54fef" name="ab09cc8bb7e662ad32a9c672406f54fef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab09cc8bb7e662ad32a9c672406f54fef">&#9670;&#160;</a></span>func_get_uint64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef uint64_t(* func_get_uint64) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, uint64_t)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取无符64位整型类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">defVal</td><td>默认值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>获取的整型值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00218">218</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4c0fdacc0e3df5f2d5ebaf63df35be58" name="a4c0fdacc0e3df5f2d5ebaf63df35be58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c0fdacc0e3df5f2d5ebaf63df35be58">&#9670;&#160;</a></span>func_init_master</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef bool(* func_init_master) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化主域的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">suffix</td><td>后缀 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否初始化成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00027">27</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a059c90722c8432c20e4b6a1de6bdb677" name="a059c90722c8432c20e4b6a1de6bdb677"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a059c90722c8432c20e4b6a1de6bdb677">&#9670;&#160;</a></span>func_set_double</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef bool(* func_set_double) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, double)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置浮点型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">val</td><td>要设置的值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否设置成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00169">169</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ababc3e4c04a989b3776f1aebab55b181" name="ababc3e4c04a989b3776f1aebab55b181"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ababc3e4c04a989b3776f1aebab55b181">&#9670;&#160;</a></span>func_set_int32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef bool(* func_set_int32) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, int32_t)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置32位整型类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">val</td><td>要设置的值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否设置成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00129">129</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6dbe56dd8d9e8611f4b3c95efb457c0d" name="a6dbe56dd8d9e8611f4b3c95efb457c0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6dbe56dd8d9e8611f4b3c95efb457c0d">&#9670;&#160;</a></span>func_set_int64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef bool(* func_set_int64) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, int64_t)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置64位整型类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">val</td><td>要设置的值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否设置成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00139">139</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2f889d38b284ab28512d670913dffe3a" name="a2f889d38b284ab28512d670913dffe3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f889d38b284ab28512d670913dffe3a">&#9670;&#160;</a></span>func_set_string</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef bool(* func_set_string) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置字符串类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">val</td><td>要设置的值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否设置成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00119">119</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af467e6aab055e3b6ff095683a0b1935d" name="af467e6aab055e3b6ff095683a0b1935d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af467e6aab055e3b6ff095683a0b1935d">&#9670;&#160;</a></span>func_set_uint32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef bool(* func_set_uint32) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, uint32_t)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置无符32位整型类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">val</td><td>要设置的值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否设置成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00149">149</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae0aeacadeeb9177275a036c7d9b44560" name="ae0aeacadeeb9177275a036c7d9b44560"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0aeacadeeb9177275a036c7d9b44560">&#9670;&#160;</a></span>func_set_uint64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef bool(* func_set_uint64) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, uint64_t)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置无符64位整型类型值的函数指针类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>图片名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名 </td></tr>
+    <tr><td class="paramname">val</td><td>要设置的值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否设置成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00159">159</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a9e1fc31194100ab43bbad77a2f5c12b3" name="a9e1fc31194100ab43bbad77a2f5c12b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e1fc31194100ab43bbad77a2f5c12b3">&#9670;&#160;</a></span>USING_NS_WTP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a> USING_NS_WTP</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ShareManager_8h_source.html">ShareManager.h</a> 第 <a class="el" href="ShareManager_8h_source.html#l00019">19</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_d8cf3075eb9e2bed05522e3b08b8e887.html">WtUftCore</a></li><li class="navelem"><a class="el" href="ShareManager_8h.html">ShareManager.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

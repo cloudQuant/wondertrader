@@ -1,0 +1,27 @@
+var structCThostFtdcInputQuoteField =
+[
+    [ "AskHedgeFlag", "structCThostFtdcInputQuoteField.html#a5ebf47490250c0a3d2c59c8b4bf77faa", null ],
+    [ "AskOffsetFlag", "structCThostFtdcInputQuoteField.html#a073713aa8927b09a90af46a000fddd07", null ],
+    [ "AskOrderRef", "structCThostFtdcInputQuoteField.html#a0e43cca90bf6e623a721c2a988af6660", null ],
+    [ "AskPrice", "structCThostFtdcInputQuoteField.html#a02be939e17d9ae32eede5428bbee6c04", null ],
+    [ "AskVolume", "structCThostFtdcInputQuoteField.html#a9b04dbe6587fb8b471b45fafab30ee43", null ],
+    [ "BidHedgeFlag", "structCThostFtdcInputQuoteField.html#aae2ac8aceccab0fd0474c3f1ebf81ac5", null ],
+    [ "BidOffsetFlag", "structCThostFtdcInputQuoteField.html#ac01e3307ee97af4fb5228bce61e827de", null ],
+    [ "BidOrderRef", "structCThostFtdcInputQuoteField.html#a174b10bab95c69a0e1ff8a560429a515", null ],
+    [ "BidPrice", "structCThostFtdcInputQuoteField.html#a3dabd470dd81cf08d7e3e63ff4ccf4fc", null ],
+    [ "BidVolume", "structCThostFtdcInputQuoteField.html#a5d9d7a0eb292797603dae4e57d08ea56", null ],
+    [ "BrokerID", "structCThostFtdcInputQuoteField.html#a65e454e5fd3a7ddf71a4180f901ed357", null ],
+    [ "BusinessUnit", "structCThostFtdcInputQuoteField.html#abcaa80a39bdf353eefe43f33f28fc113", null ],
+    [ "ClientID", "structCThostFtdcInputQuoteField.html#aa64449e10352e6c2229990238646965b", null ],
+    [ "ExchangeID", "structCThostFtdcInputQuoteField.html#ace1182b931e2fad7cdcd46ef31189109", null ],
+    [ "ForQuoteSysID", "structCThostFtdcInputQuoteField.html#a0e7ba5d4b24b8e1bde9801a809f2dbe5", null ],
+    [ "InstrumentID", "structCThostFtdcInputQuoteField.html#a2528cb7575f791d9216baf58a46a8967", null ],
+    [ "InvestorID", "structCThostFtdcInputQuoteField.html#aed96896eb206159cf63ef2b290ca2fb0", null ],
+    [ "InvestUnitID", "structCThostFtdcInputQuoteField.html#a4482742f7e5788651144b2c7bc225c7e", null ],
+    [ "IPAddress", "structCThostFtdcInputQuoteField.html#ae823daa4ff3c069486b22a0dd22112f8", null ],
+    [ "MacAddress", "structCThostFtdcInputQuoteField.html#a5478e0d22e99657c0edf310e75b3f873", null ],
+    [ "QuoteRef", "structCThostFtdcInputQuoteField.html#a12c0c7c5fb7d898d3e33fe5daaa7e5ad", null ],
+    [ "ReplaceSysID", "structCThostFtdcInputQuoteField.html#a3c28006692f6cf35c8b4afee7db723c2", null ],
+    [ "RequestID", "structCThostFtdcInputQuoteField.html#af8bace8dbf060d0f9e2f3e3b5e88b2c1", null ],
+    [ "UserID", "structCThostFtdcInputQuoteField.html#a56896fb49dc32d05b80095a86234a219", null ]
+];

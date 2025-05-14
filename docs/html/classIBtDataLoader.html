@@ -1,0 +1,472 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: IBtDataLoader类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classIBtDataLoader.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="classIBtDataLoader-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">IBtDataLoader类 参考<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>回测数据加载器接口  
+ <a href="classIBtDataLoader.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:ab3b713180f170abc9931933c590b6197" id="r_ab3b713180f170abc9931933c590b6197"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBtDataLoader.html#ab3b713180f170abc9931933c590b6197">loadFinalHisBars</a> (void *obj, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, <a class="el" href="HisDataReplayer_8h.html#a6986215e7baa89c786b9103bc948ab45">FuncReadBars</a> cb)=0</td></tr>
+<tr class="memdesc:ab3b713180f170abc9931933c590b6197"><td class="mdescLeft">&#160;</td><td class="mdescRight">加载最终历史K线数据  <br /></td></tr>
+<tr class="separator:ab3b713180f170abc9931933c590b6197"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6d33e058bc065fbabedbb92756e94ec" id="r_aa6d33e058bc065fbabedbb92756e94ec"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBtDataLoader.html#aa6d33e058bc065fbabedbb92756e94ec">loadRawHisBars</a> (void *obj, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, <a class="el" href="HisDataReplayer_8h.html#a6986215e7baa89c786b9103bc948ab45">FuncReadBars</a> cb)=0</td></tr>
+<tr class="memdesc:aa6d33e058bc065fbabedbb92756e94ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">加载原始历史K线数据  <br /></td></tr>
+<tr class="separator:aa6d33e058bc065fbabedbb92756e94ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a638f8b1f8eb50e8a12d58877954410b8" id="r_a638f8b1f8eb50e8a12d58877954410b8"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBtDataLoader.html#a638f8b1f8eb50e8a12d58877954410b8">loadAllAdjFactors</a> (void *obj, <a class="el" href="HisDataReplayer_8h.html#a32634b1c7ba2ba38c9089475d02ef1ad">FuncReadFactors</a> cb)=0</td></tr>
+<tr class="memdesc:a638f8b1f8eb50e8a12d58877954410b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">加载全部除权因子  <br /></td></tr>
+<tr class="separator:a638f8b1f8eb50e8a12d58877954410b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaca629862963249ca91d938084f7b101" id="r_aaca629862963249ca91d938084f7b101"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBtDataLoader.html#aaca629862963249ca91d938084f7b101">loadAdjFactors</a> (void *obj, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="HisDataReplayer_8h.html#a32634b1c7ba2ba38c9089475d02ef1ad">FuncReadFactors</a> cb)=0</td></tr>
+<tr class="memdesc:aaca629862963249ca91d938084f7b101"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据合约加载除权因子  <br /></td></tr>
+<tr class="separator:aaca629862963249ca91d938084f7b101"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac885e097f393967ae7f4bf170beca642" id="r_ac885e097f393967ae7f4bf170beca642"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBtDataLoader.html#ac885e097f393967ae7f4bf170beca642">loadRawHisTicks</a> (void *obj, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t uDate, <a class="el" href="HisDataReplayer_8h.html#a6240277e302ddc6aadbdbafcd5756f35">FuncReadTicks</a> cb)=0</td></tr>
+<tr class="memdesc:ac885e097f393967ae7f4bf170beca642"><td class="mdescLeft">&#160;</td><td class="mdescRight">加载历史Tick数据  <br /></td></tr>
+<tr class="separator:ac885e097f393967ae7f4bf170beca642"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6183a8733eb4fa83ec226020c39d59e" id="r_ad6183a8733eb4fa83ec226020c39d59e"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBtDataLoader.html#ad6183a8733eb4fa83ec226020c39d59e">isAutoTrans</a> ()</td></tr>
+<tr class="memdesc:ad6183a8733eb4fa83ec226020c39d59e"><td class="mdescLeft">&#160;</td><td class="mdescRight">是否自动转存为DSB格式  <br /></td></tr>
+<tr class="separator:ad6183a8733eb4fa83ec226020c39d59e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>回测数据加载器接口 </p>
+<p>用于自定义数据源的加载器接口，实现了加载各种历史数据的方法 包括K线数据、Tick数据、复权因子等 </p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00185">185</a> 行定义.</p>
+</div><h2 class="groupheader">成员函数说明</h2>
+<a id="ad6183a8733eb4fa83ec226020c39d59e" name="ad6183a8733eb4fa83ec226020c39d59e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6183a8733eb4fa83ec226020c39d59e">&#9670;&#160;</a></span>isAutoTrans()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool IBtDataLoader::isAutoTrans </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>是否自动转存为DSB格式 </p>
+<dl class="section return"><dt>返回</dt><dd>默认返回true</dd></dl>
+<p>控制数据是否自动转存为高效的二进制DSB格式，加快下次读取速度 </p>
+
+<p>被 <a class="el" href="classWtBtRunner.html#a0ca3de381c2e54d27d0cbc810b4243e2">WtBtRunner</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00246">246</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaca629862963249ca91d938084f7b101" name="aaca629862963249ca91d938084f7b101"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaca629862963249ca91d938084f7b101">&#9670;&#160;</a></span>loadAdjFactors()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool IBtDataLoader::loadAdjFactors </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>obj</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="HisDataReplayer_8h.html#a32634b1c7ba2ba38c9089475d02ef1ad">FuncReadFactors</a>&#160;</td>
+          <td class="paramname"><em>cb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>根据合约加载除权因子 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj</td><td>回传用的对象指针，原样返回即可 </td></tr>
+    <tr><td class="paramname">stdCode</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">cb</td><td>回调函数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否成功加载数据</dd></dl>
+<p>加载指定股票的除权因子数据，用于该股票数据的前复权或后复权处理 </p>
+
+<p>在 <a class="el" href="classWtBtRunner.html#a6dafce027ab50ee55e4984ecc7abd299">WtBtRunner</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a638f8b1f8eb50e8a12d58877954410b8" name="a638f8b1f8eb50e8a12d58877954410b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a638f8b1f8eb50e8a12d58877954410b8">&#9670;&#160;</a></span>loadAllAdjFactors()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool IBtDataLoader::loadAllAdjFactors </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>obj</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="HisDataReplayer_8h.html#a32634b1c7ba2ba38c9089475d02ef1ad">FuncReadFactors</a>&#160;</td>
+          <td class="paramname"><em>cb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>加载全部除权因子 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj</td><td>回传用的对象指针，原样返回即可 </td></tr>
+    <tr><td class="paramname">cb</td><td>回调函数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否成功加载数据</dd></dl>
+<p>加载所有股票的除权因子数据，用于股票数据的前复权或后复权处理 </p>
+
+<p>在 <a class="el" href="classWtBtRunner.html#a19b9aa098d81c64854ffeeb38b57f6e9">WtBtRunner</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="ab3b713180f170abc9931933c590b6197" name="ab3b713180f170abc9931933c590b6197"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3b713180f170abc9931933c590b6197">&#9670;&#160;</a></span>loadFinalHisBars()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool IBtDataLoader::loadFinalHisBars </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>obj</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a>&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="HisDataReplayer_8h.html#a6986215e7baa89c786b9103bc948ab45">FuncReadBars</a>&#160;</td>
+          <td class="paramname"><em>cb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>加载最终历史K线数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj</td><td>回传用的对象指针，原样返回即可 </td></tr>
+    <tr><td class="paramname">stdCode</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期 </td></tr>
+    <tr><td class="paramname">cb</td><td>回调函数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否成功加载数据</dd></dl>
+<p>加载已经处理好的最终数据，如复权后的股票数据、主力合约连续数据等 与loadRawHisBars的区别在于，loadFinalHisBars返回的数据直接使用，不再进行加工 </p>
+
+<p>在 <a class="el" href="classWtBtRunner.html#aed29ca25321003a4a913f45dded227fc">WtBtRunner</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="aa6d33e058bc065fbabedbb92756e94ec" name="aa6d33e058bc065fbabedbb92756e94ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6d33e058bc065fbabedbb92756e94ec">&#9670;&#160;</a></span>loadRawHisBars()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool IBtDataLoader::loadRawHisBars </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>obj</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a>&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="HisDataReplayer_8h.html#a6986215e7baa89c786b9103bc948ab45">FuncReadBars</a>&#160;</td>
+          <td class="paramname"><em>cb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>加载原始历史K线数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj</td><td>回传用的对象指针，原样返回即可 </td></tr>
+    <tr><td class="paramname">stdCode</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期 </td></tr>
+    <tr><td class="paramname">cb</td><td>回调函数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否成功加载数据</dd></dl>
+<p>加载未经处理的原始K线数据，加载后可能需要进一步处理，如复权、连续合约生成等 </p>
+
+<p>在 <a class="el" href="classWtBtRunner.html#aef9b93b7f7d9808a899cf5b9f81a250f">WtBtRunner</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="ac885e097f393967ae7f4bf170beca642" name="ac885e097f393967ae7f4bf170beca642"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac885e097f393967ae7f4bf170beca642">&#9670;&#160;</a></span>loadRawHisTicks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool IBtDataLoader::loadRawHisTicks </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>obj</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uDate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="HisDataReplayer_8h.html#a6240277e302ddc6aadbdbafcd5756f35">FuncReadTicks</a>&#160;</td>
+          <td class="paramname"><em>cb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>加载历史Tick数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj</td><td>回传用的对象指针，原样返回即可 </td></tr>
+    <tr><td class="paramname">stdCode</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">uDate</td><td>日期，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">cb</td><td>回调函数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否成功加载数据</dd></dl>
+<p>加载指定日期的历史Tick数据，用于高精度回测或模拟交易 </p>
+
+<p>在 <a class="el" href="classWtBtRunner.html#af048911e895ce0bde908191071708435">WtBtRunner</a> 内被实现.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WtBtCore/<a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classIBtDataLoader.html">IBtDataLoader</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtPorter/ExpHftContext.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('ExpHftContext_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ExpHftContext.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="ExpHftContext_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="ExpHftContext_8h.html">ExpHftContext.h</a>&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="WtRtRunner_8h.html">WtRtRunner.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;../Share/StrUtil.hpp&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">extern</span> <a class="code hl_class" href="classWtRtRunner.html">WtRtRunner</a>&amp; <a class="code hl_function" href="ExpHftContext_8cpp.html#a164379edb99407462130854b52be63f6">getRunner</a>();</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="}">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classExpHftContext.html#aef5bf07fb55b50c70a7c0283af109438">   29</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftContext.html#aef5bf07fb55b50c70a7c0283af109438">ExpHftContext::on_bar</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* code, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, uint32_t times, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* newBar)</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>{</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="comment">// 如果K线数据为空，直接返回</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keywordflow">if</span> (newBar == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="comment">// 线程本地静态变量，用于存储真实周期（周期+倍数）</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">thread_local</span> <span class="keyword">static</span> <span class="keywordtype">char</span> realPeriod[8] = { 0 };</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <a class="code hl_function" href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a>(realPeriod, <span class="stringliteral">&quot;{}{}&quot;</span>, period, times);</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="comment">// 将K线数据转发给外部接口</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a60337635dfbc52484aefb74f9cfc54e4">ctx_on_bar</a>(<a class="code hl_variable" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a>, code, realPeriod, newBar, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67a7be9e5a52a4546148592c1415f8ba4c1">ET_HFT</a>);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="comment">// 调用基类的K线闭合回调</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <a class="code hl_function" href="classHftStraBaseCtx.html#a3648b3a7b748af47831556953b43ca46">HftStraBaseCtx::on_bar</a>(code, period, times, newBar);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>}</div>
+</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="foldopen" id="foldopen00050" data-start="{" data-end="}">
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="classExpHftContext.html#a1fe4f863a322c0645c5ec18bbb0fed0c">   50</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftContext.html#a1fe4f863a322c0645c5ec18bbb0fed0c">ExpHftContext::on_channel_lost</a>()</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>{</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="comment">// 将交易通道丢失事件转发给外部接口</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().hft_on_channel_lost(<a class="code hl_variable" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a>, <a class="code hl_variable" href="classHftStraBaseCtx.html#aef49471db010049dd94c59c5a6eb4fd8">_trader</a>-&gt;<a class="code hl_function" href="classTraderAdapter.html#a1d2ee2070639f9e34fa368f5b3f73a90">id</a>());</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="comment">// 调用基类的交易通道丢失回调</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <a class="code hl_function" href="classHftStraBaseCtx.html#a4b30e29c5ad9bc93af4d06b855d28136">HftStraBaseCtx::on_channel_lost</a>();</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>}</div>
+</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="foldopen" id="foldopen00063" data-start="{" data-end="}">
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="classExpHftContext.html#a57ed35ab4d052c40bd8cae92095ef6cd">   63</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftContext.html#a57ed35ab4d052c40bd8cae92095ef6cd">ExpHftContext::on_channel_ready</a>()</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>{</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="comment">// 将交易通道就绪事件转发给外部接口</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a20f8007959fd841aff75d1420fa4723f">hft_on_channel_ready</a>(<a class="code hl_variable" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a>, <a class="code hl_variable" href="classHftStraBaseCtx.html#aef49471db010049dd94c59c5a6eb4fd8">_trader</a>-&gt;<a class="code hl_function" href="classTraderAdapter.html#a1d2ee2070639f9e34fa368f5b3f73a90">id</a>());</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="comment">// 调用基类的交易通道就绪回调</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <a class="code hl_function" href="classHftStraBaseCtx.html#a0ca1b6038f7e2df933044a0cd3c16e81">HftStraBaseCtx::on_channel_ready</a>();</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>}</div>
+</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="foldopen" id="foldopen00080" data-start="{" data-end="}">
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="classExpHftContext.html#a57c2916e89f0fc5a4028f2bfc43b2831">   80</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftContext.html#a57c2916e89f0fc5a4028f2bfc43b2831">ExpHftContext::on_entrust</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> bSuccess, <span class="keyword">const</span> <span class="keywordtype">char</span>* message)</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>{</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="comment">// 将委托回报转发给外部接口，并包含订单标签</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#aa2a17e9c16659684b3bde024d809e996">hft_on_entrust</a>(<a class="code hl_variable" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a>, localid, stdCode, bSuccess, message, <a class="code hl_function" href="classHftStraBaseCtx.html#a669cedaedd59283946ee33503faa0f06">getOrderTag</a>(localid));</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="comment">// 调用基类的委托回报回调</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <a class="code hl_function" href="classHftStraBaseCtx.html#a15b0b37f4ca72bfc74e8cf99d46cffa0">HftStraBaseCtx::on_entrust</a>(localid, stdCode, bSuccess, message);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>}</div>
+</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="foldopen" id="foldopen00093" data-start="{" data-end="}">
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="classExpHftContext.html#a22ddd0a79cc21caaca184ed250274ed4">   93</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftContext.html#a22ddd0a79cc21caaca184ed250274ed4">ExpHftContext::on_init</a>()</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>{</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="comment">// 调用基类的初始化方法</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <a class="code hl_function" href="classHftStraBaseCtx.html#afe09a02ad15d61664ac9d288c71fdb65">HftStraBaseCtx::on_init</a>();</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="comment">// 向外部接口回调初始化事件</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a38a0585c00d54c623c75f620897e5f5d">ctx_on_init</a>(<a class="code hl_variable" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a>, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67a7be9e5a52a4546148592c1415f8ba4c1">ET_HFT</a>);</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>}</div>
+</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="foldopen" id="foldopen00107" data-start="{" data-end="}">
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="classExpHftContext.html#a634f014112fd63736c16cc6753b6c22c">  107</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftContext.html#a634f014112fd63736c16cc6753b6c22c">ExpHftContext::on_session_begin</a>(uint32_t uTDate)</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>{</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="comment">// 调用基类的交易日开始方法</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <a class="code hl_function" href="classHftStraBaseCtx.html#a79ae2a815ebb9f20f68e091f4afa2744">HftStraBaseCtx::on_session_begin</a>(uTDate);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <span class="comment">// 向外部接口回调交易日开始事件，true表示开始</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#ab5b1d4f5fb31efdc7e30844690f4a312">ctx_on_session_event</a>(<a class="code hl_variable" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a>, uTDate, <span class="keyword">true</span>, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67a7be9e5a52a4546148592c1415f8ba4c1">ET_HFT</a>);</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>}</div>
+</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="foldopen" id="foldopen00121" data-start="{" data-end="}">
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno"><a class="line" href="classExpHftContext.html#a0d1d0156355c52168c46af961df4a3f7">  121</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftContext.html#a0d1d0156355c52168c46af961df4a3f7">ExpHftContext::on_session_end</a>(uint32_t uTDate)</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>{</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="comment">// 向外部接口回调交易日结束事件，false表示结束</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#ab5b1d4f5fb31efdc7e30844690f4a312">ctx_on_session_event</a>(<a class="code hl_variable" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a>, uTDate, <span class="keyword">false</span>, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67a7be9e5a52a4546148592c1415f8ba4c1">ET_HFT</a>);</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="comment">// 调用基类的交易日结束方法</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <a class="code hl_function" href="classHftStraBaseCtx.html#abe57f055fe8a91b88f08336c9d444386">HftStraBaseCtx::on_session_end</a>(uTDate);</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>}</div>
+</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="foldopen" id="foldopen00141" data-start="{" data-end="}">
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="classExpHftContext.html#aa2b4e840be86ef145d18a31d0ca5ccc2">  141</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftContext.html#aa2b4e840be86ef145d18a31d0ca5ccc2">ExpHftContext::on_order</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> totalQty, <span class="keywordtype">double</span> leftQty, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <span class="keywordtype">bool</span> isCanceled)</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>{</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>    <span class="comment">// 将订单回报转发给外部接口，并包含订单标签</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#ae4c01208ff4d3e1405e2ac0cb0a1fd75">hft_on_order</a>(<a class="code hl_variable" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a>, localid, stdCode, isBuy, totalQty, leftQty, <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, isCanceled, <a class="code hl_function" href="classHftStraBaseCtx.html#a669cedaedd59283946ee33503faa0f06">getOrderTag</a>(localid));</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span> </div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>    <span class="comment">// 调用基类的订单回报回调</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    <a class="code hl_function" href="classHftStraBaseCtx.html#a8218c4def0f463bd75b94dcb6547a46b">HftStraBaseCtx::on_order</a>(localid, stdCode, isBuy, totalQty, leftQty, <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, isCanceled);</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>}</div>
+</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="foldopen" id="foldopen00161" data-start="{" data-end="}">
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno"><a class="line" href="classExpHftContext.html#ae2c3cd760e38b66d7fd319e62c994542">  161</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftContext.html#ae2c3cd760e38b66d7fd319e62c994542">ExpHftContext::on_position</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isLong, <span class="keywordtype">double</span> prevol, <span class="keywordtype">double</span> preavail, <span class="keywordtype">double</span> newvol, <span class="keywordtype">double</span> newavail, uint32_t tradingday)</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>{</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    <span class="comment">// 将持仓回报转发给外部接口</span></div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().hft_on_position(<a class="code hl_variable" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a>, stdCode, isLong, prevol, preavail, newvol, newavail);</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>}</div>
+</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
+<div class="foldopen" id="foldopen00173" data-start="{" data-end="}">
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno"><a class="line" href="classExpHftContext.html#a7ecbf0297e8e59e9f4ab486261dfae9f">  173</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftContext.html#a7ecbf0297e8e59e9f4ab486261dfae9f">ExpHftContext::on_tick</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* code, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick)</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>{</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    <span class="comment">// 更新动态收益</span></div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    <a class="code hl_function" href="classHftStraBaseCtx.html#a28fbbabc9d01a4055b9d0862031c14d0">update_dyn_profit</a>(code, newTick);</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    <span class="comment">// 检查是否订阅了该合约的Tick数据</span></div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="classHftStraBaseCtx.html#ac4573d70964b9e95bc548611cc19966d">_tick_subs</a>.find(code);</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>    <span class="keywordflow">if</span> (it != <a class="code hl_variable" href="classHftStraBaseCtx.html#ac4573d70964b9e95bc548611cc19966d">_tick_subs</a>.end())</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>    {</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>        <span class="comment">// 将Tick数据转发给外部接口</span></div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>        <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a70a32e8718b7663a7001a835d9c4e871">ctx_on_tick</a>(<a class="code hl_variable" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a>, code, newTick, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67a7be9e5a52a4546148592c1415f8ba4c1">ET_HFT</a>);</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>    }</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    <span class="comment">// 调用基类的Tick数据回调</span></div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>    <a class="code hl_function" href="classHftStraBaseCtx.html#a2989da4ef76abbff5d4a324ed4478bba">HftStraBaseCtx::on_tick</a>(code, newTick);</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>}</div>
+</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span> </div>
+<div class="foldopen" id="foldopen00196" data-start="{" data-end="}">
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno"><a class="line" href="classExpHftContext.html#abd49aeeeac8c91029c1f1cf8d8678298">  196</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftContext.html#abd49aeeeac8c91029c1f1cf8d8678298">ExpHftContext::on_order_queue</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSOrdQueData.html">WTSOrdQueData</a>* newOrdQue)</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>{</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    <span class="comment">// 将委托队列数据转发给外部接口</span></div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#ac5695a5fef05b663a1d6622928b8e197">hft_on_order_queue</a>(<a class="code hl_variable" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a>, stdCode, newOrdQue);</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>}</div>
+</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
+<div class="foldopen" id="foldopen00208" data-start="{" data-end="}">
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno"><a class="line" href="classExpHftContext.html#ae5f8a2ff861ee58db001f19177cca690">  208</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftContext.html#ae5f8a2ff861ee58db001f19177cca690">ExpHftContext::on_order_detail</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSOrdDtlData.html">WTSOrdDtlData</a>* newOrdDtl)</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>{</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>    <span class="comment">// 将委托明细数据转发给外部接口</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a96563531aa24378ae0ffbb90d5717487">hft_on_order_detail</a>(<a class="code hl_variable" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a>, stdCode, newOrdDtl);</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>}</div>
+</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span> </div>
+<div class="foldopen" id="foldopen00220" data-start="{" data-end="}">
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno"><a class="line" href="classExpHftContext.html#ab3da4240579ca87aea1f1da1b6a4f375">  220</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftContext.html#ab3da4240579ca87aea1f1da1b6a4f375">ExpHftContext::on_transaction</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTransData.html">WTSTransData</a>* newTrans)</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>{</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    <span class="comment">// 将逐笔成交数据转发给外部接口</span></div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#ae7a1693253eb7d2cdb15b491552926e3">hft_on_transaction</a>(<a class="code hl_variable" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a>, stdCode, newTrans);</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>}</div>
+</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span> </div>
+<div class="foldopen" id="foldopen00235" data-start="{" data-end="}">
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno"><a class="line" href="classExpHftContext.html#a1cd24c736154a9d288cf71cedd684d36">  235</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftContext.html#a1cd24c736154a9d288cf71cedd684d36">ExpHftContext::on_trade</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> vol, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>)</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>{</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    <span class="comment">// 将成交回报转发给外部接口，并包含订单标签</span></div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a1885a954838885b8a4719035e8c02c94">hft_on_trade</a>(<a class="code hl_variable" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a>, localid, stdCode, isBuy, vol, <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <a class="code hl_function" href="classHftStraBaseCtx.html#a669cedaedd59283946ee33503faa0f06">getOrderTag</a>(localid));</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span> </div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    <span class="comment">// 调用基类的成交回报回调</span></div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    <a class="code hl_function" href="classHftStraBaseCtx.html#af0112009eddd57cfb0ad4387d073bc78">HftStraBaseCtx::on_trade</a>(localid, stdCode, isBuy, vol, <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>);</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>}</div>
+</div>
+<div class="ttc" id="aExpCtaMocker_8cpp_html_aeae7c7722f120a5b990f96dfced42ff0"><div class="ttname"><a href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a></div><div class="ttdeci">WtBtRunner &amp; getRunner()</div><div class="ttdoc">获取全局回测引擎实例</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_8cpp_source.html#l00040">WtBtPorter.cpp:40</a></div></div>
+<div class="ttc" id="aExpHftContext_8cpp_html_a164379edb99407462130854b52be63f6"><div class="ttname"><a href="ExpHftContext_8cpp.html#a164379edb99407462130854b52be63f6">getRunner</a></div><div class="ttdeci">WtRtRunner &amp; getRunner()</div><div class="ttdoc">获取运行器实例的外部函数声明</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_8cpp_source.html#l00040">WtBtPorter.cpp:40</a></div></div>
+<div class="ttc" id="aExpHftContext_8h_html"><div class="ttname"><a href="ExpHftContext_8h.html">ExpHftContext.h</a></div><div class="ttdoc">HFT策略导出上下文定义</div></div>
+<div class="ttc" id="aWtBtRunner_8h_html_ad6bae4b8ec2ac5001b85aa4992e22d67a7be9e5a52a4546148592c1415f8ba4c1"><div class="ttname"><a href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67a7be9e5a52a4546148592c1415f8ba4c1">ET_HFT</a></div><div class="ttdeci">@ ET_HFT</div><div class="ttdef"><b>Definition</b> <a href="WtBtRunner_8h_source.html#l00031">WtBtRunner.h:31</a></div></div>
+<div class="ttc" id="aWtRtRunner_8h_html"><div class="ttname"><a href="WtRtRunner_8h.html">WtRtRunner.h</a></div><div class="ttdoc">WonderTrader实时交易运行器定义</div></div>
+<div class="ttc" id="aclassExpHftContext_html_a0d1d0156355c52168c46af961df4a3f7"><div class="ttname"><a href="classExpHftContext.html#a0d1d0156355c52168c46af961df4a3f7">ExpHftContext::on_session_end</a></div><div class="ttdeci">virtual void on_session_end(uint32_t uTDate) override</div><div class="ttdoc">交易日结束回调</div><div class="ttdef"><b>Definition</b> <a href="ExpHftContext_8cpp_source.html#l00121">ExpHftContext.cpp:121</a></div></div>
+<div class="ttc" id="aclassExpHftContext_html_a1cd24c736154a9d288cf71cedd684d36"><div class="ttname"><a href="classExpHftContext.html#a1cd24c736154a9d288cf71cedd684d36">ExpHftContext::on_trade</a></div><div class="ttdeci">virtual void on_trade(uint32_t localid, const char *stdCode, bool isBuy, double vol, double price) override</div><div class="ttdoc">成交回报回调</div><div class="ttdef"><b>Definition</b> <a href="ExpHftContext_8cpp_source.html#l00235">ExpHftContext.cpp:235</a></div></div>
+<div class="ttc" id="aclassExpHftContext_html_a1fe4f863a322c0645c5ec18bbb0fed0c"><div class="ttname"><a href="classExpHftContext.html#a1fe4f863a322c0645c5ec18bbb0fed0c">ExpHftContext::on_channel_lost</a></div><div class="ttdeci">virtual void on_channel_lost() override</div><div class="ttdoc">交易通道丢失回调</div><div class="ttdef"><b>Definition</b> <a href="ExpHftContext_8cpp_source.html#l00050">ExpHftContext.cpp:50</a></div></div>
+<div class="ttc" id="aclassExpHftContext_html_a22ddd0a79cc21caaca184ed250274ed4"><div class="ttname"><a href="classExpHftContext.html#a22ddd0a79cc21caaca184ed250274ed4">ExpHftContext::on_init</a></div><div class="ttdeci">virtual void on_init() override</div><div class="ttdoc">初始化回调</div><div class="ttdef"><b>Definition</b> <a href="ExpHftContext_8cpp_source.html#l00093">ExpHftContext.cpp:93</a></div></div>
+<div class="ttc" id="aclassExpHftContext_html_a57c2916e89f0fc5a4028f2bfc43b2831"><div class="ttname"><a href="classExpHftContext.html#a57c2916e89f0fc5a4028f2bfc43b2831">ExpHftContext::on_entrust</a></div><div class="ttdeci">virtual void on_entrust(uint32_t localid, const char *stdCode, bool bSuccess, const char *message) override</div><div class="ttdoc">委托回报回调</div><div class="ttdef"><b>Definition</b> <a href="ExpHftContext_8cpp_source.html#l00080">ExpHftContext.cpp:80</a></div></div>
+<div class="ttc" id="aclassExpHftContext_html_a57ed35ab4d052c40bd8cae92095ef6cd"><div class="ttname"><a href="classExpHftContext.html#a57ed35ab4d052c40bd8cae92095ef6cd">ExpHftContext::on_channel_ready</a></div><div class="ttdeci">virtual void on_channel_ready() override</div><div class="ttdoc">交易通道就绪回调</div><div class="ttdef"><b>Definition</b> <a href="ExpHftContext_8cpp_source.html#l00063">ExpHftContext.cpp:63</a></div></div>
+<div class="ttc" id="aclassExpHftContext_html_a634f014112fd63736c16cc6753b6c22c"><div class="ttname"><a href="classExpHftContext.html#a634f014112fd63736c16cc6753b6c22c">ExpHftContext::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin(uint32_t uTDate) override</div><div class="ttdoc">交易日开始回调</div><div class="ttdef"><b>Definition</b> <a href="ExpHftContext_8cpp_source.html#l00107">ExpHftContext.cpp:107</a></div></div>
+<div class="ttc" id="aclassExpHftContext_html_a7ecbf0297e8e59e9f4ab486261dfae9f"><div class="ttname"><a href="classExpHftContext.html#a7ecbf0297e8e59e9f4ab486261dfae9f">ExpHftContext::on_tick</a></div><div class="ttdeci">virtual void on_tick(const char *code, WTSTickData *newTick) override</div><div class="ttdoc">Tick数据回调</div><div class="ttdef"><b>Definition</b> <a href="ExpHftContext_8cpp_source.html#l00173">ExpHftContext.cpp:173</a></div></div>
+<div class="ttc" id="aclassExpHftContext_html_aa2b4e840be86ef145d18a31d0ca5ccc2"><div class="ttname"><a href="classExpHftContext.html#aa2b4e840be86ef145d18a31d0ca5ccc2">ExpHftContext::on_order</a></div><div class="ttdeci">virtual void on_order(uint32_t localid, const char *stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled) override</div><div class="ttdoc">订单回报回调</div><div class="ttdef"><b>Definition</b> <a href="ExpHftContext_8cpp_source.html#l00141">ExpHftContext.cpp:141</a></div></div>
+<div class="ttc" id="aclassExpHftContext_html_ab3da4240579ca87aea1f1da1b6a4f375"><div class="ttname"><a href="classExpHftContext.html#ab3da4240579ca87aea1f1da1b6a4f375">ExpHftContext::on_transaction</a></div><div class="ttdeci">virtual void on_transaction(const char *stdCode, WTSTransData *newTrans) override</div><div class="ttdoc">逐笔成交回调</div><div class="ttdef"><b>Definition</b> <a href="ExpHftContext_8cpp_source.html#l00220">ExpHftContext.cpp:220</a></div></div>
+<div class="ttc" id="aclassExpHftContext_html_abd49aeeeac8c91029c1f1cf8d8678298"><div class="ttname"><a href="classExpHftContext.html#abd49aeeeac8c91029c1f1cf8d8678298">ExpHftContext::on_order_queue</a></div><div class="ttdeci">virtual void on_order_queue(const char *stdCode, WTSOrdQueData *newOrdQue) override</div><div class="ttdoc">委托队列数据回调</div><div class="ttdef"><b>Definition</b> <a href="ExpHftContext_8cpp_source.html#l00196">ExpHftContext.cpp:196</a></div></div>
+<div class="ttc" id="aclassExpHftContext_html_ae2c3cd760e38b66d7fd319e62c994542"><div class="ttname"><a href="classExpHftContext.html#ae2c3cd760e38b66d7fd319e62c994542">ExpHftContext::on_position</a></div><div class="ttdeci">virtual void on_position(const char *stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday) override</div><div class="ttdoc">持仓回报回调</div><div class="ttdef"><b>Definition</b> <a href="ExpHftContext_8cpp_source.html#l00161">ExpHftContext.cpp:161</a></div></div>
+<div class="ttc" id="aclassExpHftContext_html_ae5f8a2ff861ee58db001f19177cca690"><div class="ttname"><a href="classExpHftContext.html#ae5f8a2ff861ee58db001f19177cca690">ExpHftContext::on_order_detail</a></div><div class="ttdeci">virtual void on_order_detail(const char *stdCode, WTSOrdDtlData *newOrdDtl) override</div><div class="ttdoc">委托明细数据回调</div><div class="ttdef"><b>Definition</b> <a href="ExpHftContext_8cpp_source.html#l00208">ExpHftContext.cpp:208</a></div></div>
+<div class="ttc" id="aclassExpHftContext_html_aef5bf07fb55b50c70a7c0283af109438"><div class="ttname"><a href="classExpHftContext.html#aef5bf07fb55b50c70a7c0283af109438">ExpHftContext::on_bar</a></div><div class="ttdeci">virtual void on_bar(const char *code, const char *period, uint32_t times, WTSBarStruct *newBar) override</div><div class="ttdoc">K线闭合回调</div><div class="ttdef"><b>Definition</b> <a href="ExpHftContext_8cpp_source.html#l00029">ExpHftContext.cpp:29</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_a0ca1b6038f7e2df933044a0cd3c16e81"><div class="ttname"><a href="classHftStraBaseCtx.html#a0ca1b6038f7e2df933044a0cd3c16e81">HftStraBaseCtx::on_channel_ready</a></div><div class="ttdeci">virtual void on_channel_ready() override</div><div class="ttdoc">交易通道就绪回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8cpp_source.html#l00906">HftStraBaseCtx.cpp:906</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_a15b0b37f4ca72bfc74e8cf99d46cffa0"><div class="ttname"><a href="classHftStraBaseCtx.html#a15b0b37f4ca72bfc74e8cf99d46cffa0">HftStraBaseCtx::on_entrust</a></div><div class="ttdeci">virtual void on_entrust(uint32_t localid, const char *stdCode, bool bSuccess, const char *message) override</div><div class="ttdoc">委托回报回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8cpp_source.html#l00944">HftStraBaseCtx.cpp:944</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_a28fbbabc9d01a4055b9d0862031c14d0"><div class="ttname"><a href="classHftStraBaseCtx.html#a28fbbabc9d01a4055b9d0862031c14d0">HftStraBaseCtx::update_dyn_profit</a></div><div class="ttdeci">void update_dyn_profit(const char *stdCode, WTSTickData *newTick)</div><div class="ttdoc">更新动态盈亏</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8cpp_source.html#l01425">HftStraBaseCtx.cpp:1425</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_a2989da4ef76abbff5d4a324ed4478bba"><div class="ttname"><a href="classHftStraBaseCtx.html#a2989da4ef76abbff5d4a324ed4478bba">HftStraBaseCtx::on_tick</a></div><div class="ttdeci">virtual void on_tick(const char *stdCode, WTSTickData *newTick) override</div><div class="ttdoc">Tick数据回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8cpp_source.html#l00189">HftStraBaseCtx.cpp:189</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_a34792793ba5798c9b265ea695c3e4428"><div class="ttname"><a href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">HftStraBaseCtx::_context_id</a></div><div class="ttdeci">uint32_t _context_id</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8h_source.html#l00671">HftStraBaseCtx.h:671</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_a3648b3a7b748af47831556953b43ca46"><div class="ttname"><a href="classHftStraBaseCtx.html#a3648b3a7b748af47831556953b43ca46">HftStraBaseCtx::on_bar</a></div><div class="ttdeci">virtual void on_bar(const char *stdCode, const char *period, uint32_t times, WTSBarStruct *newBar) override</div><div class="ttdoc">K线数据回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8cpp_source.html#l00255">HftStraBaseCtx.cpp:255</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_a4b30e29c5ad9bc93af4d06b855d28136"><div class="ttname"><a href="classHftStraBaseCtx.html#a4b30e29c5ad9bc93af4d06b855d28136">HftStraBaseCtx::on_channel_lost</a></div><div class="ttdeci">virtual void on_channel_lost() override</div><div class="ttdoc">交易通道断开回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8cpp_source.html#l00923">HftStraBaseCtx.cpp:923</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_a669cedaedd59283946ee33503faa0f06"><div class="ttname"><a href="classHftStraBaseCtx.html#a669cedaedd59283946ee33503faa0f06">HftStraBaseCtx::getOrderTag</a></div><div class="ttdeci">const char * getOrderTag(uint32_t localid)</div><div class="ttdoc">获取订单标签</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8h_source.html#l00625">HftStraBaseCtx.h:625</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_a79ae2a815ebb9f20f68e091f4afa2744"><div class="ttname"><a href="classHftStraBaseCtx.html#a79ae2a815ebb9f20f68e091f4afa2744">HftStraBaseCtx::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin(uint32_t uTDate) override</div><div class="ttdoc">交易日开始回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8cpp_source.html#l01480">HftStraBaseCtx.cpp:1480</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_a8218c4def0f463bd75b94dcb6547a46b"><div class="ttname"><a href="classHftStraBaseCtx.html#a8218c4def0f463bd75b94dcb6547a46b">HftStraBaseCtx::on_order</a></div><div class="ttdeci">virtual void on_order(uint32_t localid, const char *stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled) override</div><div class="ttdoc">订单状态回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8cpp_source.html#l00883">HftStraBaseCtx.cpp:883</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_abe57f055fe8a91b88f08336c9d444386"><div class="ttname"><a href="classHftStraBaseCtx.html#abe57f055fe8a91b88f08336c9d444386">HftStraBaseCtx::on_session_end</a></div><div class="ttdeci">virtual void on_session_end(uint32_t uTDate) override</div><div class="ttdoc">交易日结束回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8cpp_source.html#l01491">HftStraBaseCtx.cpp:1491</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_ac4573d70964b9e95bc548611cc19966d"><div class="ttname"><a href="classHftStraBaseCtx.html#ac4573d70964b9e95bc548611cc19966d">HftStraBaseCtx::_tick_subs</a></div><div class="ttdeci">wt_hashset&lt; std::string &gt; _tick_subs</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8h_source.html#l00691">HftStraBaseCtx.h:691</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_aef49471db010049dd94c59c5a6eb4fd8"><div class="ttname"><a href="classHftStraBaseCtx.html#aef49471db010049dd94c59c5a6eb4fd8">HftStraBaseCtx::_trader</a></div><div class="ttdeci">TraderAdapter * _trader</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8h_source.html#l00673">HftStraBaseCtx.h:673</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_af0112009eddd57cfb0ad4387d073bc78"><div class="ttname"><a href="classHftStraBaseCtx.html#af0112009eddd57cfb0ad4387d073bc78">HftStraBaseCtx::on_trade</a></div><div class="ttdeci">virtual void on_trade(uint32_t localid, const char *stdCode, bool isBuy, double vol, double price) override</div><div class="ttdoc">成交回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8cpp_source.html#l00848">HftStraBaseCtx.cpp:848</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html_afe09a02ad15d61664ac9d288c71fdb65"><div class="ttname"><a href="classHftStraBaseCtx.html#afe09a02ad15d61664ac9d288c71fdb65">HftStraBaseCtx::on_init</a></div><div class="ttdeci">virtual void on_init() override</div><div class="ttdoc">策略初始化回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8cpp_source.html#l00175">HftStraBaseCtx.cpp:175</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html_a1d2ee2070639f9e34fa368f5b3f73a90"><div class="ttname"><a href="classTraderAdapter.html#a1d2ee2070639f9e34fa368f5b3f73a90">TraderAdapter::id</a></div><div class="ttdeci">const char * id() const</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00044">TraderAdapter.h:44</a></div></div>
+<div class="ttc" id="aclassWTSOrdDtlData_html"><div class="ttname"><a href="classWTSOrdDtlData.html">WTSOrdDtlData</a></div><div class="ttdoc">委托明细数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01726">WTSDataDef.hpp:1727</a></div></div>
+<div class="ttc" id="aclassWTSOrdQueData_html"><div class="ttname"><a href="classWTSOrdQueData.html">WTSOrdQueData</a></div><div class="ttdoc">委托队列数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01613">WTSDataDef.hpp:1614</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSTransData_html"><div class="ttname"><a href="classWTSTransData.html">WTSTransData</a></div><div class="ttdoc">成交数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01840">WTSDataDef.hpp:1841</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a1885a954838885b8a4719035e8c02c94"><div class="ttname"><a href="classWtBtRunner.html#a1885a954838885b8a4719035e8c02c94">WtBtRunner::hft_on_trade</a></div><div class="ttdeci">void hft_on_trade(uint32_t cHandle, WtUInt32 localid, const char *stdCode, bool isBuy, double vol, double price, const char *userTag)</div><div class="ttdoc">高频成交回报事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00768">WtBtRunner.cpp:768</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a20f8007959fd841aff75d1420fa4723f"><div class="ttname"><a href="classWtBtRunner.html#a20f8007959fd841aff75d1420fa4723f">WtBtRunner::hft_on_channel_ready</a></div><div class="ttdeci">void hft_on_channel_ready(uint32_t cHandle, const char *trader)</div><div class="ttdoc">高频交易通道就绪事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00707">WtBtRunner.cpp:707</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a38a0585c00d54c623c75f620897e5f5d"><div class="ttname"><a href="classWtBtRunner.html#a38a0585c00d54c623c75f620897e5f5d">WtBtRunner::ctx_on_init</a></div><div class="ttdeci">void ctx_on_init(uint32_t id, EngineType eType)</div><div class="ttdoc">策略上下文初始化事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00569">WtBtRunner.cpp:569</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a60337635dfbc52484aefb74f9cfc54e4"><div class="ttname"><a href="classWtBtRunner.html#a60337635dfbc52484aefb74f9cfc54e4">WtBtRunner::ctx_on_bar</a></div><div class="ttdeci">void ctx_on_bar(uint32_t id, const char *stdCode, const char *period, WTSBarStruct *newBar, EngineType eType)</div><div class="ttdoc">K线周期数据事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00505">WtBtRunner.cpp:505</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a70a32e8718b7663a7001a835d9c4e871"><div class="ttname"><a href="classWtBtRunner.html#a70a32e8718b7663a7001a835d9c4e871">WtBtRunner::ctx_on_tick</a></div><div class="ttdeci">void ctx_on_tick(uint32_t id, const char *stdCode, WTSTickData *newTick, EngineType eType)</div><div class="ttdoc">实时行情数据事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00638">WtBtRunner.cpp:638</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a96563531aa24378ae0ffbb90d5717487"><div class="ttname"><a href="classWtBtRunner.html#a96563531aa24378ae0ffbb90d5717487">WtBtRunner::hft_on_order_detail</a></div><div class="ttdeci">void hft_on_order_detail(uint32_t id, const char *stdCode, WTSOrdDtlData *newOrdDtl)</div><div class="ttdoc">高频委托明细数据事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00676">WtBtRunner.cpp:676</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_aa2a17e9c16659684b3bde024d809e996"><div class="ttname"><a href="classWtBtRunner.html#aa2a17e9c16659684b3bde024d809e996">WtBtRunner::hft_on_entrust</a></div><div class="ttdeci">void hft_on_entrust(uint32_t cHandle, WtUInt32 localid, const char *stdCode, bool bSuccess, const char *message, const char *userTag)</div><div class="ttdoc">高频委托回报响应事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00726">WtBtRunner.cpp:726</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_ab5b1d4f5fb31efdc7e30844690f4a312"><div class="ttname"><a href="classWtBtRunner.html#ab5b1d4f5fb31efdc7e30844690f4a312">WtBtRunner::ctx_on_session_event</a></div><div class="ttdeci">void ctx_on_session_event(uint32_t id, uint32_t curTDate, bool isBegin=true, EngineType eType=ET_CTA)</div><div class="ttdoc">交易日事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00615">WtBtRunner.cpp:615</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_ac5695a5fef05b663a1d6622928b8e197"><div class="ttname"><a href="classWtBtRunner.html#ac5695a5fef05b663a1d6622928b8e197">WtBtRunner::hft_on_order_queue</a></div><div class="ttdeci">void hft_on_order_queue(uint32_t id, const char *stdCode, WTSOrdQueData *newOrdQue)</div><div class="ttdoc">高频委托队列数据事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00660">WtBtRunner.cpp:660</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_ae4c01208ff4d3e1405e2ac0cb0a1fd75"><div class="ttname"><a href="classWtBtRunner.html#ae4c01208ff4d3e1405e2ac0cb0a1fd75">WtBtRunner::hft_on_order</a></div><div class="ttdeci">void hft_on_order(uint32_t cHandle, WtUInt32 localid, const char *stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled, const char *userTag)</div><div class="ttdoc">高频委托回报事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00748">WtBtRunner.cpp:748</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_ae7a1693253eb7d2cdb15b491552926e3"><div class="ttname"><a href="classWtBtRunner.html#ae7a1693253eb7d2cdb15b491552926e3">WtBtRunner::hft_on_transaction</a></div><div class="ttdeci">void hft_on_transaction(uint32_t id, const char *stdCode, WTSTransData *newTranns)</div><div class="ttdoc">高频逐笔成交数据事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00692">WtBtRunner.cpp:692</a></div></div>
+<div class="ttc" id="aclassWtRtRunner_html"><div class="ttname"><a href="classWtRtRunner.html">WtRtRunner</a></div><div class="ttdoc">WonderTrader实时交易运行器类</div><div class="ttdef"><b>Definition</b> <a href="WtRtRunner_8h_source.html#l00062">WtRtRunner.h:63</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_a04f887fc8800d4727971dbb8eb550132"><div class="ttname"><a href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a></div><div class="ttdeci">ATPPriceType price</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00040">main.cpp:40</a></div></div>
+<div class="ttc" id="anamespacefmtutil_html_a5bfccdc4da1277f2585e7b31c6395bb3"><div class="ttname"><a href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a></div><div class="ttdeci">char * format_to(char *buffer, const char *format, const Args &amp;...args)</div><div class="ttdoc">格式化字符串并输出到指定缓冲区</div><div class="ttdef"><b>Definition</b> <a href="fmtlib_8h_source.html#l00031">fmtlib.h:31</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_dc27b00ee5bce5a7f56bbfd467e9d584.html">WtPorter</a></li><li class="navelem"><a class="el" href="ExpHftContext_8cpp.html">ExpHftContext.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

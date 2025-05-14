@@ -1,0 +1,367 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/entropy_common.c 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('entropy__common_8c_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">entropy_common.c</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="entropy__common_8c.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">   Common functions of New Generation Entropy library</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">   Copyright (C) 2016, Yann Collet.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"></span> </div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">   BSD 2-Clause License (http://www.opensource.org/licenses/bsd-license.php)</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"></span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">   Redistribution and use in source and binary forms, with or without</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">   modification, are permitted provided that the following conditions are</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">   met:</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"></span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">       * Redistributions of source code must retain the above copyright</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">   notice, this list of conditions and the following disclaimer.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">       * Redistributions in binary form must reproduce the above</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">   copyright notice, this list of conditions and the following disclaimer</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">   in the documentation and/or other materials provided with the</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">   distribution.</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"></span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">   &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment">   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment">   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment"></span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">    You can contact the author at :</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">    - FSE+HUF source repository : https://github.com/Cyan4973/FiniteStateEntropy</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">    - Public forum : https://groups.google.com/forum/#!forum/lz4c</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment">*************************************************************************** */</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment">/* *************************************</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment">*  Dependencies</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment">***************************************/</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#include &quot;<a class="code" href="mem_8h.html">mem.h</a>&quot;</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#include &quot;<a class="code" href="error__private_8h.html">error_private.h</a>&quot;</span>       <span class="comment">/* ERR_*, ERROR */</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="entropy__common_8c.html#a0d2a6fcfd814db079898717019641487">   40</a></span><span class="preprocessor">#define FSE_STATIC_LINKING_ONLY  </span><span class="comment">/* FSE_MIN_TABLELOG */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#include &quot;<a class="code" href="fse_8h.html">fse.h</a>&quot;</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="entropy__common_8c.html#a7691fd75a0d8bc9d2b1544f0df8e381c">   42</a></span><span class="preprocessor">#define HUF_STATIC_LINKING_ONLY  </span><span class="comment">/* HUF_TABLELOG_ABSOLUTEMAX */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#include &quot;<a class="code" href="huf_8h.html">huf.h</a>&quot;</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment">/*===   Version   ===*/</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="entropy__common_8c.html#aadd4435599681e40d938131f35b71208">   47</a></span><span class="keywordtype">unsigned</span> <a class="code hl_function" href="entropy__common_8c.html#aadd4435599681e40d938131f35b71208">FSE_versionNumber</a>(<span class="keywordtype">void</span>) { <span class="keywordflow">return</span> <a class="code hl_define" href="fse_8h.html#ada8e8fc30886fab320168bcd278ce33f">FSE_VERSION_NUMBER</a>; }</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">/*===   Error Management   ===*/</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="entropy__common_8c.html#a3b72bf1d6ebac556c0bcb7e5eafd72f7">   51</a></span><span class="keywordtype">unsigned</span> <a class="code hl_define" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError</a>(<span class="keywordtype">size_t</span> code) { <span class="keywordflow">return</span> <a class="code hl_function" href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a>(code); }</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="entropy__common_8c.html#af7363e311b8ac13bf80e0f458415727b">   52</a></span><span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="entropy__common_8c.html#af7363e311b8ac13bf80e0f458415727b">FSE_getErrorName</a>(<span class="keywordtype">size_t</span> code) { <span class="keywordflow">return</span> <a class="code hl_function" href="error__private_8h.html#abc6626d7ae7f1d68f00b53c1bbdd368a">ERR_getErrorName</a>(code); }</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="entropy__common_8c.html#abd113fa90a875ceddf133a530db912bc">   54</a></span><span class="keywordtype">unsigned</span> <a class="code hl_define" href="huf__compress_8c.html#ad2de9e4837283ff6a5d5f4e2f43c6fed">HUF_isError</a>(<span class="keywordtype">size_t</span> code) { <span class="keywordflow">return</span> <a class="code hl_function" href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a>(code); }</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="entropy__common_8c.html#a2058676a94d9959e656bd0024e7fde97">   55</a></span><span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="entropy__common_8c.html#a2058676a94d9959e656bd0024e7fde97">HUF_getErrorName</a>(<span class="keywordtype">size_t</span> code) { <span class="keywordflow">return</span> <a class="code hl_function" href="error__private_8h.html#abc6626d7ae7f1d68f00b53c1bbdd368a">ERR_getErrorName</a>(code); }</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">/*-**************************************************************</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">*  FSE NCount encoding-decoding</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment">****************************************************************/</span></div>
+<div class="foldopen" id="foldopen00061" data-start="{" data-end="}">
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="entropy__common_8c.html#abd8f1367fec27b3d559c18a2dbcb7de9">   61</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="entropy__common_8c.html#abd8f1367fec27b3d559c18a2dbcb7de9">FSE_readNCount</a> (<span class="keywordtype">short</span>* normalizedCounter, <span class="keywordtype">unsigned</span>* maxSVPtr, <span class="keywordtype">unsigned</span>* tableLogPtr,</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>                 <span class="keyword">const</span> <span class="keywordtype">void</span>* headerBuffer, <span class="keywordtype">size_t</span> hbSize)</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>{</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>* <span class="keyword">const</span> istart = (<span class="keyword">const</span> <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*) headerBuffer;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>* <span class="keyword">const</span> iend = istart + hbSize;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>* ip = istart;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keywordtype">int</span> nbBits;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keywordtype">int</span> remaining;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keywordtype">int</span> threshold;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> bitStream;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keywordtype">int</span> bitCount;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <span class="keywordtype">unsigned</span> charnum = 0;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keywordtype">int</span> previous0 = 0;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keywordflow">if</span> (hbSize &lt; 4) {</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        <span class="comment">/* This function only works when hbSize &gt;= 4 */</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordtype">char</span> buffer[4];</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        memset(buffer, 0, <span class="keyword">sizeof</span>(buffer));</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        memcpy(buffer, headerBuffer, hbSize);</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        {   <span class="keywordtype">size_t</span> <span class="keyword">const</span> countSize = <a class="code hl_function" href="entropy__common_8c.html#abd8f1367fec27b3d559c18a2dbcb7de9">FSE_readNCount</a>(normalizedCounter, maxSVPtr, tableLogPtr,</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>                                                    buffer, <span class="keyword">sizeof</span>(buffer));</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>            <span class="keywordflow">if</span> (<a class="code hl_define" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError</a>(countSize)) <span class="keywordflow">return</span> countSize;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>            <span class="keywordflow">if</span> (countSize &gt; hbSize) <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(corruption_detected);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>            <span class="keywordflow">return</span> countSize;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    }   }</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(hbSize &gt;= 4);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="comment">/* init */</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    memset(normalizedCounter, 0, (*maxSVPtr+1) * <span class="keyword">sizeof</span>(normalizedCounter[0]));   <span class="comment">/* all symbols not present in NCount have a frequency of 0 */</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    bitStream = <a class="code hl_function" href="mem_8h.html#ae961ae5bbdbb98421b173c05a67c1cec">MEM_readLE32</a>(ip);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    nbBits = (bitStream &amp; 0xF) + FSE_MIN_TABLELOG;   <span class="comment">/* extract tableLog */</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keywordflow">if</span> (nbBits &gt; FSE_TABLELOG_ABSOLUTE_MAX) <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(tableLog_tooLarge);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    bitStream &gt;&gt;= 4;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    bitCount = 4;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    *tableLogPtr = nbBits;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    remaining = (1&lt;&lt;nbBits)+1;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    threshold = 1&lt;&lt;nbBits;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    nbBits++;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="keywordflow">while</span> ((remaining&gt;1) &amp; (charnum&lt;=*maxSVPtr)) {</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <span class="keywordflow">if</span> (previous0) {</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>            <span class="keywordtype">unsigned</span> n0 = charnum;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>            <span class="keywordflow">while</span> ((bitStream &amp; 0xFFFF) == 0xFFFF) {</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>                n0 += 24;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>                <span class="keywordflow">if</span> (ip &lt; iend-5) {</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>                    ip += 2;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>                    bitStream = <a class="code hl_function" href="mem_8h.html#ae961ae5bbdbb98421b173c05a67c1cec">MEM_readLE32</a>(ip) &gt;&gt; bitCount;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>                } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>                    bitStream &gt;&gt;= 16;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>                    bitCount   += 16;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>            }   }</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>            <span class="keywordflow">while</span> ((bitStream &amp; 3) == 3) {</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>                n0 += 3;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>                bitStream &gt;&gt;= 2;</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>                bitCount += 2;</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>            }</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>            n0 += bitStream &amp; 3;</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>            bitCount += 2;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>            <span class="keywordflow">if</span> (n0 &gt; *maxSVPtr) <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(maxSymbolValue_tooSmall);</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>            <span class="keywordflow">while</span> (charnum &lt; n0) normalizedCounter[charnum++] = 0;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>            <span class="keywordflow">if</span> ((ip &lt;= iend-7) || (ip + (bitCount&gt;&gt;3) &lt;= iend-4)) {</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>                <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>((bitCount &gt;&gt; 3) &lt;= 3); <span class="comment">/* For first condition to work */</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>                ip += bitCount&gt;&gt;3;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>                bitCount &amp;= 7;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>                bitStream = <a class="code hl_function" href="mem_8h.html#ae961ae5bbdbb98421b173c05a67c1cec">MEM_readLE32</a>(ip) &gt;&gt; bitCount;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>                bitStream &gt;&gt;= 2;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>        }   }</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>        {   <span class="keywordtype">int</span> <span class="keyword">const</span> max = (2*threshold-1) - remaining;</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>            <span class="keywordtype">int</span> count;</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>            <span class="keywordflow">if</span> ((bitStream &amp; (threshold-1)) &lt; (<a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)max) {</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>                count = bitStream &amp; (threshold-1);</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>                bitCount += nbBits-1;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>                count = bitStream &amp; (2*threshold-1);</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>                <span class="keywordflow">if</span> (count &gt;= threshold) count -= max;</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>                bitCount += nbBits;</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>            }</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>            count--;   <span class="comment">/* extra accuracy */</span></div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>            remaining -= count &lt; 0 ? -count : count;   <span class="comment">/* -1 means +1 */</span></div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>            normalizedCounter[charnum++] = (short)count;</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>            previous0 = !count;</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>            <span class="keywordflow">while</span> (remaining &lt; threshold) {</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>                nbBits--;</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>                threshold &gt;&gt;= 1;</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>            }</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>            <span class="keywordflow">if</span> ((ip &lt;= iend-7) || (ip + (bitCount&gt;&gt;3) &lt;= iend-4)) {</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>                ip += bitCount&gt;&gt;3;</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>                bitCount &amp;= 7;</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>                bitCount -= (int)(8 * (iend - 4 - ip));</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>                ip = iend - 4;</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>            }</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>            bitStream = <a class="code hl_function" href="mem_8h.html#ae961ae5bbdbb98421b173c05a67c1cec">MEM_readLE32</a>(ip) &gt;&gt; (bitCount &amp; 31);</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    }   }   <span class="comment">/* while ((remaining&gt;1) &amp; (charnum&lt;=*maxSVPtr)) */</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="keywordflow">if</span> (remaining != 1) <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(corruption_detected);</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    <span class="keywordflow">if</span> (bitCount &gt; 32) <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(corruption_detected);</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    *maxSVPtr = charnum-1;</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span> </div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    ip += (bitCount+7)&gt;&gt;3;</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <span class="keywordflow">return</span> ip-istart;</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>}</div>
+</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
+<div class="foldopen" id="foldopen00175" data-start="{" data-end="}">
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno"><a class="line" href="entropy__common_8c.html#abe44467e2590965c0dafba8df4d206c0">  175</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="entropy__common_8c.html#abe44467e2590965c0dafba8df4d206c0">HUF_readStats</a>(<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>* huffWeight, <span class="keywordtype">size_t</span> hwSize, <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>* rankStats,</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>                     <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>* nbSymbolsPtr, <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>* tableLogPtr,</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>                     <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, <span class="keywordtype">size_t</span> srcSize)</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>{</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> weightTotal;</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>* ip = (<span class="keyword">const</span> <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*) <a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>;</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>    <span class="keywordtype">size_t</span> iSize;</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    <span class="keywordtype">size_t</span> oSize;</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span> </div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>    <span class="keywordflow">if</span> (!srcSize) <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(srcSize_wrong);</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>    iSize = ip[0];</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    <span class="comment">/* memset(huffWeight, 0, hwSize);   */</span><span class="comment">/* is not necessary, even though some analyzer complain ... */</span></div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    <span class="keywordflow">if</span> (iSize &gt;= 128) {  <span class="comment">/* special header */</span></div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>        oSize = iSize - 127;</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        iSize = ((oSize+1)/2);</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>        <span class="keywordflow">if</span> (iSize+1 &gt; srcSize) <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(srcSize_wrong);</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        <span class="keywordflow">if</span> (oSize &gt;= hwSize) <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(corruption_detected);</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>        ip += 1;</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        {   <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> n;</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>            <span class="keywordflow">for</span> (n=0; n&lt;oSize; n+=2) {</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>                huffWeight[n]   = ip[n/2] &gt;&gt; 4;</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>                huffWeight[n+1] = ip[n/2] &amp; 15;</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    }   }   }</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    <span class="keywordflow">else</span>  {   <span class="comment">/* header compressed with FSE (normal case) */</span></div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        <a class="code hl_typedef" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a> fseWorkspace[FSE_DTABLE_SIZE_U32(6)];  <span class="comment">/* 6 is max possible tableLog for HUF header (maybe even 5, to be tested) */</span></div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        <span class="keywordflow">if</span> (iSize+1 &gt; srcSize) <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(srcSize_wrong);</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        oSize = <a class="code hl_function" href="fse__decompress_8c.html#a01b92286773782c30e204fe8e36e7850">FSE_decompress_wksp</a>(huffWeight, hwSize-1, ip+1, iSize, fseWorkspace, 6);   <span class="comment">/* max (hwSize-1) values decoded, as last one is implied */</span></div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>        <span class="keywordflow">if</span> (<a class="code hl_define" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError</a>(oSize)) <span class="keywordflow">return</span> oSize;</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>    }</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>    <span class="comment">/* collect weight stats */</span></div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    memset(rankStats, 0, (HUF_TABLELOG_MAX + 1) * <span class="keyword">sizeof</span>(<a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>));</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>    weightTotal = 0;</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>    {   <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> n; <span class="keywordflow">for</span> (n=0; n&lt;oSize; n++) {</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>            <span class="keywordflow">if</span> (huffWeight[n] &gt;= HUF_TABLELOG_MAX) <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(corruption_detected);</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>            rankStats[huffWeight[n]]++;</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>            weightTotal += (1 &lt;&lt; huffWeight[n]) &gt;&gt; 1;</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    }   }</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    <span class="keywordflow">if</span> (weightTotal == 0) <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(corruption_detected);</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span> </div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    <span class="comment">/* get last non-null symbol weight (implied, total must be 2^n) */</span></div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>    {   <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> tableLog = <a class="code hl_function" href="bitstream_8h.html#a093beeb126444a982e92b58d069d62fe">BIT_highbit32</a>(weightTotal) + 1;</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>        <span class="keywordflow">if</span> (tableLog &gt; HUF_TABLELOG_MAX) <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(corruption_detected);</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>        *tableLogPtr = tableLog;</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>        <span class="comment">/* determine last weight */</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        {   <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> total = 1 &lt;&lt; tableLog;</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>            <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> rest = total - weightTotal;</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>            <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> verif = 1 &lt;&lt; <a class="code hl_function" href="bitstream_8h.html#a093beeb126444a982e92b58d069d62fe">BIT_highbit32</a>(rest);</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>            <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> lastWeight = <a class="code hl_function" href="bitstream_8h.html#a093beeb126444a982e92b58d069d62fe">BIT_highbit32</a>(rest) + 1;</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>            <span class="keywordflow">if</span> (verif != rest) <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(corruption_detected);    <span class="comment">/* last value must be a clean power of 2 */</span></div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>            huffWeight[oSize] = (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>)lastWeight;</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>            rankStats[lastWeight]++;</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    }   }</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span> </div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    <span class="comment">/* check tree construction validity */</span></div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    <span class="keywordflow">if</span> ((rankStats[1] &lt; 2) || (rankStats[1] &amp; 1)) <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(corruption_detected);   <span class="comment">/* by construction : at least 2 elts of rank 1, must be even */</span></div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span> </div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>    <span class="comment">/* results */</span></div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    *nbSymbolsPtr = (<a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)(oSize+1);</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    <span class="keywordflow">return</span> iSize+1;</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>}</div>
+</div>
+<div class="ttc" id="aWTSExpressData_8hpp_html_a4ae1dab0fb4b072a66584546209e7d58"><div class="ttname"><a href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a></div><div class="ttdeci">unsigned char BYTE</div><div class="ttdef"><b>Definition</b> <a href="WTSExpressData_8hpp_source.html#l00019">WTSExpressData.hpp:19</a></div></div>
+<div class="ttc" id="abitstream_8h_html_a093beeb126444a982e92b58d069d62fe"><div class="ttname"><a href="bitstream_8h.html#a093beeb126444a982e92b58d069d62fe">BIT_highbit32</a></div><div class="ttdeci">MEM_STATIC unsigned BIT_highbit32(U32 val)</div><div class="ttdef"><b>Definition</b> <a href="bitstream_8h_source.html#l00158">bitstream.h:158</a></div></div>
+<div class="ttc" id="adebug_8h_html_acdcc5aaebf3f273c1762f24a6ece2e5e"><div class="ttname"><a href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a></div><div class="ttdeci">#define assert(condition)</div><div class="ttdef"><b>Definition</b> <a href="debug_8h_source.html#l00102">debug.h:102</a></div></div>
+<div class="ttc" id="aentropy__common_8c_html_a2058676a94d9959e656bd0024e7fde97"><div class="ttname"><a href="entropy__common_8c.html#a2058676a94d9959e656bd0024e7fde97">HUF_getErrorName</a></div><div class="ttdeci">const char * HUF_getErrorName(size_t code)</div><div class="ttdef"><b>Definition</b> <a href="entropy__common_8c_source.html#l00055">entropy_common.c:55</a></div></div>
+<div class="ttc" id="aentropy__common_8c_html_aadd4435599681e40d938131f35b71208"><div class="ttname"><a href="entropy__common_8c.html#aadd4435599681e40d938131f35b71208">FSE_versionNumber</a></div><div class="ttdeci">unsigned FSE_versionNumber(void)</div><div class="ttdef"><b>Definition</b> <a href="entropy__common_8c_source.html#l00047">entropy_common.c:47</a></div></div>
+<div class="ttc" id="aentropy__common_8c_html_abd8f1367fec27b3d559c18a2dbcb7de9"><div class="ttname"><a href="entropy__common_8c.html#abd8f1367fec27b3d559c18a2dbcb7de9">FSE_readNCount</a></div><div class="ttdeci">size_t FSE_readNCount(short *normalizedCounter, unsigned *maxSVPtr, unsigned *tableLogPtr, const void *headerBuffer, size_t hbSize)</div><div class="ttdef"><b>Definition</b> <a href="entropy__common_8c_source.html#l00061">entropy_common.c:61</a></div></div>
+<div class="ttc" id="aentropy__common_8c_html_abe44467e2590965c0dafba8df4d206c0"><div class="ttname"><a href="entropy__common_8c.html#abe44467e2590965c0dafba8df4d206c0">HUF_readStats</a></div><div class="ttdeci">size_t HUF_readStats(BYTE *huffWeight, size_t hwSize, U32 *rankStats, U32 *nbSymbolsPtr, U32 *tableLogPtr, const void *src, size_t srcSize)</div><div class="ttdef"><b>Definition</b> <a href="entropy__common_8c_source.html#l00175">entropy_common.c:175</a></div></div>
+<div class="ttc" id="aentropy__common_8c_html_af7363e311b8ac13bf80e0f458415727b"><div class="ttname"><a href="entropy__common_8c.html#af7363e311b8ac13bf80e0f458415727b">FSE_getErrorName</a></div><div class="ttdeci">const char * FSE_getErrorName(size_t code)</div><div class="ttdef"><b>Definition</b> <a href="entropy__common_8c_source.html#l00052">entropy_common.c:52</a></div></div>
+<div class="ttc" id="aerror__private_8h_html"><div class="ttname"><a href="error__private_8h.html">error_private.h</a></div></div>
+<div class="ttc" id="aerror__private_8h_html_a24803eff45eace63df5ec3f331e3fccc"><div class="ttname"><a href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a></div><div class="ttdeci">#define ERROR(name)</div><div class="ttdef"><b>Definition</b> <a href="error__private_8h_source.html#l00053">error_private.h:53</a></div></div>
+<div class="ttc" id="aerror__private_8h_html_a5af8533d1342b5eedad6e03a82c3b1fe"><div class="ttname"><a href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a></div><div class="ttdeci">ERR_STATIC unsigned ERR_isError(size_t code)</div><div class="ttdef"><b>Definition</b> <a href="error__private_8h_source.html#l00056">error_private.h:56</a></div></div>
+<div class="ttc" id="aerror__private_8h_html_abc6626d7ae7f1d68f00b53c1bbdd368a"><div class="ttname"><a href="error__private_8h.html#abc6626d7ae7f1d68f00b53c1bbdd368a">ERR_getErrorName</a></div><div class="ttdeci">ERR_STATIC const char * ERR_getErrorName(size_t code)</div><div class="ttdef"><b>Definition</b> <a href="error__private_8h_source.html#l00067">error_private.h:67</a></div></div>
+<div class="ttc" id="afse_8h_html"><div class="ttname"><a href="fse_8h.html">fse.h</a></div></div>
+<div class="ttc" id="afse_8h_html_ada8e8fc30886fab320168bcd278ce33f"><div class="ttname"><a href="fse_8h.html#ada8e8fc30886fab320168bcd278ce33f">FSE_VERSION_NUMBER</a></div><div class="ttdeci">#define FSE_VERSION_NUMBER</div><div class="ttdef"><b>Definition</b> <a href="fse_8h_source.html#l00072">fse.h:72</a></div></div>
+<div class="ttc" id="afse_8h_html_ae791b5272655c08c187054dde72b8aa4"><div class="ttname"><a href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a></div><div class="ttdeci">unsigned FSE_DTable</div><div class="ttdef"><b>Definition</b> <a href="fse_8h_source.html#l00253">fse.h:253</a></div></div>
+<div class="ttc" id="afse__compress_8c_html_a7ab2ee8300d3fe2724cf97953dac66d0"><div class="ttname"><a href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError</a></div><div class="ttdeci">#define FSE_isError</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00053">fse_compress.c:53</a></div></div>
+<div class="ttc" id="afse__decompress_8c_html_a01b92286773782c30e204fe8e36e7850"><div class="ttname"><a href="fse__decompress_8c.html#a01b92286773782c30e204fe8e36e7850">FSE_decompress_wksp</a></div><div class="ttdeci">size_t FSE_decompress_wksp(void *dst, size_t dstCapacity, const void *cSrc, size_t cSrcSize, FSE_DTable *workSpace, unsigned maxLog)</div><div class="ttdef"><b>Definition</b> <a href="fse__decompress_8c_source.html#l00279">fse_decompress.c:279</a></div></div>
+<div class="ttc" id="ahuf_8h_html"><div class="ttname"><a href="huf_8h.html">huf.h</a></div></div>
+<div class="ttc" id="ahuf__compress_8c_html_ad2de9e4837283ff6a5d5f4e2f43c6fed"><div class="ttname"><a href="huf__compress_8c.html#ad2de9e4837283ff6a5d5f4e2f43c6fed">HUF_isError</a></div><div class="ttdeci">#define HUF_isError</div><div class="ttdef"><b>Definition</b> <a href="huf__compress_8c_source.html#l00061">huf_compress.c:61</a></div></div>
+<div class="ttc" id="amem_8h_html"><div class="ttname"><a href="mem_8h.html">mem.h</a></div></div>
+<div class="ttc" id="amem_8h_html_ac3df7cf3c8cb172a588adec881447d68"><div class="ttname"><a href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a></div><div class="ttdeci">unsigned int U32</div><div class="ttdef"><b>Definition</b> <a href="mem_8h_source.html#l00150">mem.h:150</a></div></div>
+<div class="ttc" id="amem_8h_html_ae961ae5bbdbb98421b173c05a67c1cec"><div class="ttname"><a href="mem_8h.html#ae961ae5bbdbb98421b173c05a67c1cec">MEM_readLE32</a></div><div class="ttdeci">MEM_STATIC U32 MEM_readLE32(const void *memPtr)</div><div class="ttdef"><b>Definition</b> <a href="mem_8h_source.html#l00350">mem.h:350</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a49286b6a0dd3728961b8ff1f1730a982"><div class="ttname"><a href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a></div><div class="ttdeci">void size_t const void * src</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00078">zbuff.h:78</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="entropy__common_8c.html">entropy_common.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

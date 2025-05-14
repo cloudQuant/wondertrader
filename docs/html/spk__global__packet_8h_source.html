@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/sutil/net/spk_global_packet.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('spk__global__packet_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">spk_global_packet.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="spk__global__packet_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright 2009-2016 the original author or authors.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * you may not use this file except in compliance with the License.</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * You may obtain a copy of the License at</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *     http://www.apache.org/licenses/LICENSE-2.0</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * Unless required by applicable law or agreed to in writing, software</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * See the License for the specific language governing permissions and</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * limitations under the License.</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#ifndef _SPK_GLOBAL_PACKET_H</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#define _SPK_GLOBAL_PACKET_H</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include    &lt;<a class="code" href="types_8h.html">sutil/types.h</a>&gt;</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment"> * 消息标志定义</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="foldopen" id="foldopen00051" data-start="{" data-end="};">
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364">   51</a></span><span class="keyword">typedef</span> <span class="keyword">enum</span> <a class="code hl_enumeration" href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364">_eSMsgProtocolType</a> {</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a1c2459543432ad5d408f679b0324e914">   52</a></span>    <a class="code hl_enumvalue" href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a1c2459543432ad5d408f679b0324e914">SMSG_PROTO_BINARY</a>           = 0x00,     </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a55919a3bb4320542d0650ec704997779">   53</a></span>    <a class="code hl_enumvalue" href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a55919a3bb4320542d0650ec704997779">SMSG_PROTO_JSON</a>             = 0x01,     </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a07aa6d3b1bc0d3d95232d02fdc198e3f">   54</a></span>    <a class="code hl_enumvalue" href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a07aa6d3b1bc0d3d95232d02fdc198e3f">SMSG_PROTO_FIX</a>              = 0x02,     </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a8f1ee43f48db22fbd3acff7261e7001e">   55</a></span>    <a class="code hl_enumvalue" href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a8f1ee43f48db22fbd3acff7261e7001e">SMSG_PROTO_PROTOBUF</a>         = 0x03,     </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <a class="code hl_enumvalue" href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a2bc4f5d37f35748286afdcb29dd7bf5c">__MAX_SMSG_PROTO_TYPE</a></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a2bc4f5d37f35748286afdcb29dd7bf5c">   57</a></span>} <a class="code hl_typedef" href="spk__global__packet_8h.html#a883f9a21ee7673d7186efba108c82da2">eSMsgProtocolTypeT</a>;</div>
+</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="foldopen" id="foldopen00065" data-start="{" data-end="};">
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1">   65</a></span><span class="keyword">typedef</span> <span class="keyword">enum</span> <a class="code hl_enumeration" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1">_eSMsgFlag</a> {</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1a71cfaed264824bab186d3f06d55b40a4">   66</a></span>    <a class="code hl_enumvalue" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1a71cfaed264824bab186d3f06d55b40a4">SMSG_MSGFLAG_NONE</a>           = 0x00,     </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1ae526800a1fa814e23d278e4d386af969">   67</a></span>    <a class="code hl_enumvalue" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1ae526800a1fa814e23d278e4d386af969">SMSG_MSGFLAG_REQ</a>            = 0x00,     </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1aa914c4f8beb93e3ec3541bf322afb309">   68</a></span>    <a class="code hl_enumvalue" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1aa914c4f8beb93e3ec3541bf322afb309">SMSG_MSGFLAG_RSP</a>            = 0x50,     </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1a941b0da599b813335f62681b242bee85">   69</a></span>    <a class="code hl_enumvalue" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1a941b0da599b813335f62681b242bee85">SMSG_MSGFLAG_NESTED</a>         = 0x20,     </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1a9e1ec053cdb57b1192f892ca5fc1116b">   70</a></span>    <a class="code hl_enumvalue" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1a9e1ec053cdb57b1192f892ca5fc1116b">SMSG_MSGFLAG_COMPRESSED</a>     = 0x80,     </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1a09ce862414303eb5a576413e466a081b">   72</a></span>    <a class="code hl_enumvalue" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1a09ce862414303eb5a576413e466a081b">SMSG_MSGFLAG_MASK_RSPFLAG</a>   = 0xF0,     </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <a class="code hl_enumvalue" href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1ad9bebc0b1b2db91d584f8715929e0e2e">SMSG_MSGFLAG_MASK_PROTOCOL</a>  = 0x0F      </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#a09be0ec03c73eaafa761eebeb8df4f72">   74</a></span>} <a class="code hl_typedef" href="spk__global__packet_8h.html#a09be0ec03c73eaafa761eebeb8df4f72">eSMsgFlagT</a>;</div>
+</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="comment"> * 通用消息头定义</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="foldopen" id="foldopen00086" data-start="{" data-end="};">
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="struct__SMsgHead.html">   86</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="struct__SMsgHead.html">_SMsgHead</a> {</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="struct__SMsgHead.html#aab0f5d5d2cae311b2c97d8251af5b79c">   87</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>               <a class="code hl_variable" href="struct__SMsgHead.html#aab0f5d5d2cae311b2c97d8251af5b79c">msgFlag</a>;            </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="struct__SMsgHead.html#a4c7932cf5300ea13f448e82385085fb5">   88</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>               <a class="code hl_variable" href="struct__SMsgHead.html#a4c7932cf5300ea13f448e82385085fb5">msgId</a>;              </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="struct__SMsgHead.html#afb0d3bd49f96d83131b8da13a3917afd">   89</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>               <a class="code hl_variable" href="struct__SMsgHead.html#afb0d3bd49f96d83131b8da13a3917afd">status</a>;             </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="struct__SMsgHead.html#a58ba1ac3e6fafa304dbe5e50b229273b">   90</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>               <a class="code hl_variable" href="struct__SMsgHead.html#a58ba1ac3e6fafa304dbe5e50b229273b">detailStatus</a>;       </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="struct__SMsgHead.html#aeac603b1ac872b719e872b0ac74fcc96">   91</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>               <a class="code hl_variable" href="struct__SMsgHead.html#aeac603b1ac872b719e872b0ac74fcc96">msgSize</a>;            </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">   92</a></span>} <a class="code hl_typedef" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a>;</div>
+</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="comment">/* 消息头尾部填充字段的初始化值定义 (@deprecated 已废弃, 为了兼容而暂时保留) */</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#a5a55caf41188b738004f5a4a3ea71956">   96</a></span><span class="preprocessor">#define __NULLOBJ_SPK_MSG_HEAD_TAILER</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="comment">/* 结构体初始化值定义 */</span></div>
+<div class="foldopen" id="foldopen00100" data-start="" data-end="">
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#ad1f05c88f5645d8dff373f9fdde16774">  100</a></span><span class="preprocessor">#define NULLOBJ_SPK_MSG_HEAD                                            \</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="preprocessor">        0, 0, 0, 0, 0</span></div>
+</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="comment"> * 通用的辅助宏定义</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="foldopen" id="foldopen00115" data-start="" data-end="">
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#a939a060d3d36f0013411c8bf3dfb73f6">  115</a></span><span class="preprocessor">#define SPK_GET_MSG_PROTOCOL_TYPE(msgFlag)                              \</span></div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="preprocessor">        ( (msgFlag) &amp; SMSG_MSGFLAG_MASK_PROTOCOL )</span></div>
+</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="foldopen" id="foldopen00125" data-start="" data-end="">
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#ac96ec6e99eac63bc90231c0d4fc36b95">  125</a></span><span class="preprocessor">#define SPK_IS_MSG_PROTOCOL_BINARY(msgFlag)                             \</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="preprocessor">        ( SPK_GET_MSG_PROTOCOL_TYPE(msgFlag) == SMSG_PROTO_BINARY )</span></div>
+</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="foldopen" id="foldopen00135" data-start="" data-end="">
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#ab9dbe194dbb186c28c24bb099f12897b">  135</a></span><span class="preprocessor">#define SPK_IS_MSG_PROTOCOL_JSON(msgFlag)                               \</span></div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span><span class="preprocessor">        ( SPK_GET_MSG_PROTOCOL_TYPE(msgFlag) == SMSG_PROTO_JSON )</span></div>
+</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span> </div>
+<div class="foldopen" id="foldopen00146" data-start="" data-end="">
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#a495109b56ddf2ffb21423144ac6f5e2b">  146</a></span><span class="preprocessor">#define SPK_HAS_MSG_FLAG_RSP(msgFlag)                                   \</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="preprocessor">        ( ((msgFlag) &amp; SMSG_MSGFLAG_RSP) == SMSG_MSGFLAG_RSP )</span></div>
+</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="foldopen" id="foldopen00156" data-start="" data-end="">
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#a2dccc1d51ddce7d5a1f878bc83919428">  156</a></span><span class="preprocessor">#define SPK_HAS_MSG_FLAG_NESTED(msgFlag)                                \</span></div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span><span class="preprocessor">        ( ((msgFlag) &amp; SMSG_MSGFLAG_NESTED) == SMSG_MSGFLAG_NESTED )</span></div>
+</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span> </div>
+<div class="foldopen" id="foldopen00166" data-start="" data-end="">
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno"><a class="line" href="spk__global__packet_8h.html#ade0fce500920f4b3ca9ad8b651e17eb2">  166</a></span><span class="preprocessor">#define SPK_HAS_MSG_FLAG_COMPRESSED(msgFlag)                            \</span></div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span><span class="preprocessor">        ( ((msgFlag) &amp; SMSG_MSGFLAG_COMPRESSED) == SMSG_MSGFLAG_COMPRESSED )</span></div>
+</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>}</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span><span class="preprocessor">#endif  </span><span class="comment">/* _SPK_GLOBAL_PACKET_H */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_a1b09856a6463f2bcc4bd8ff0e4e3ee0f"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a></div><div class="ttdeci">unsigned __int8 uint8</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00073">itpdk_typedef.h:73</a></div></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_ad3ce9f24199b79b2629169eebf59489b"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a></div><div class="ttdeci">__int32 int32</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00070">itpdk_typedef.h:70</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_a0840af14b1bbe4cb7838c246fb6773aa"><div class="ttname"><a href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a></div><div class="ttdeci">struct _SMsgHead SMsgHeadT</div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_a09be0ec03c73eaafa761eebeb8df4f72"><div class="ttname"><a href="spk__global__packet_8h.html#a09be0ec03c73eaafa761eebeb8df4f72">eSMsgFlagT</a></div><div class="ttdeci">enum _eSMsgFlag eSMsgFlagT</div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_a4ce43b1b54602ad96b12647d7654c364"><div class="ttname"><a href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364">_eSMsgProtocolType</a></div><div class="ttdeci">_eSMsgProtocolType</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00051">spk_global_packet.h:51</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_a4ce43b1b54602ad96b12647d7654c364a07aa6d3b1bc0d3d95232d02fdc198e3f"><div class="ttname"><a href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a07aa6d3b1bc0d3d95232d02fdc198e3f">SMSG_PROTO_FIX</a></div><div class="ttdeci">@ SMSG_PROTO_FIX</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00054">spk_global_packet.h:54</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_a4ce43b1b54602ad96b12647d7654c364a1c2459543432ad5d408f679b0324e914"><div class="ttname"><a href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a1c2459543432ad5d408f679b0324e914">SMSG_PROTO_BINARY</a></div><div class="ttdeci">@ SMSG_PROTO_BINARY</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00052">spk_global_packet.h:52</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_a4ce43b1b54602ad96b12647d7654c364a2bc4f5d37f35748286afdcb29dd7bf5c"><div class="ttname"><a href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a2bc4f5d37f35748286afdcb29dd7bf5c">__MAX_SMSG_PROTO_TYPE</a></div><div class="ttdeci">@ __MAX_SMSG_PROTO_TYPE</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00057">spk_global_packet.h:56</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_a4ce43b1b54602ad96b12647d7654c364a55919a3bb4320542d0650ec704997779"><div class="ttname"><a href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a55919a3bb4320542d0650ec704997779">SMSG_PROTO_JSON</a></div><div class="ttdeci">@ SMSG_PROTO_JSON</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00053">spk_global_packet.h:53</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_a4ce43b1b54602ad96b12647d7654c364a8f1ee43f48db22fbd3acff7261e7001e"><div class="ttname"><a href="spk__global__packet_8h.html#a4ce43b1b54602ad96b12647d7654c364a8f1ee43f48db22fbd3acff7261e7001e">SMSG_PROTO_PROTOBUF</a></div><div class="ttdeci">@ SMSG_PROTO_PROTOBUF</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00055">spk_global_packet.h:55</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_a883f9a21ee7673d7186efba108c82da2"><div class="ttname"><a href="spk__global__packet_8h.html#a883f9a21ee7673d7186efba108c82da2">eSMsgProtocolTypeT</a></div><div class="ttdeci">enum _eSMsgProtocolType eSMsgProtocolTypeT</div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_ae3529e31f5f4b61c3c6b00be04bc59e1"><div class="ttname"><a href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1">_eSMsgFlag</a></div><div class="ttdeci">_eSMsgFlag</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00065">spk_global_packet.h:65</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_ae3529e31f5f4b61c3c6b00be04bc59e1a09ce862414303eb5a576413e466a081b"><div class="ttname"><a href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1a09ce862414303eb5a576413e466a081b">SMSG_MSGFLAG_MASK_RSPFLAG</a></div><div class="ttdeci">@ SMSG_MSGFLAG_MASK_RSPFLAG</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00072">spk_global_packet.h:72</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_ae3529e31f5f4b61c3c6b00be04bc59e1a71cfaed264824bab186d3f06d55b40a4"><div class="ttname"><a href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1a71cfaed264824bab186d3f06d55b40a4">SMSG_MSGFLAG_NONE</a></div><div class="ttdeci">@ SMSG_MSGFLAG_NONE</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00066">spk_global_packet.h:66</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_ae3529e31f5f4b61c3c6b00be04bc59e1a941b0da599b813335f62681b242bee85"><div class="ttname"><a href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1a941b0da599b813335f62681b242bee85">SMSG_MSGFLAG_NESTED</a></div><div class="ttdeci">@ SMSG_MSGFLAG_NESTED</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00069">spk_global_packet.h:69</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_ae3529e31f5f4b61c3c6b00be04bc59e1a9e1ec053cdb57b1192f892ca5fc1116b"><div class="ttname"><a href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1a9e1ec053cdb57b1192f892ca5fc1116b">SMSG_MSGFLAG_COMPRESSED</a></div><div class="ttdeci">@ SMSG_MSGFLAG_COMPRESSED</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00070">spk_global_packet.h:70</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_ae3529e31f5f4b61c3c6b00be04bc59e1aa914c4f8beb93e3ec3541bf322afb309"><div class="ttname"><a href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1aa914c4f8beb93e3ec3541bf322afb309">SMSG_MSGFLAG_RSP</a></div><div class="ttdeci">@ SMSG_MSGFLAG_RSP</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00068">spk_global_packet.h:68</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_ae3529e31f5f4b61c3c6b00be04bc59e1ad9bebc0b1b2db91d584f8715929e0e2e"><div class="ttname"><a href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1ad9bebc0b1b2db91d584f8715929e0e2e">SMSG_MSGFLAG_MASK_PROTOCOL</a></div><div class="ttdeci">@ SMSG_MSGFLAG_MASK_PROTOCOL</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00074">spk_global_packet.h:73</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html_ae3529e31f5f4b61c3c6b00be04bc59e1ae526800a1fa814e23d278e4d386af969"><div class="ttname"><a href="spk__global__packet_8h.html#ae3529e31f5f4b61c3c6b00be04bc59e1ae526800a1fa814e23d278e4d386af969">SMSG_MSGFLAG_REQ</a></div><div class="ttdeci">@ SMSG_MSGFLAG_REQ</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00067">spk_global_packet.h:67</a></div></div>
+<div class="ttc" id="astruct__SMsgHead_html"><div class="ttname"><a href="struct__SMsgHead.html">_SMsgHead</a></div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00086">spk_global_packet.h:86</a></div></div>
+<div class="ttc" id="astruct__SMsgHead_html_a4c7932cf5300ea13f448e82385085fb5"><div class="ttname"><a href="struct__SMsgHead.html#a4c7932cf5300ea13f448e82385085fb5">_SMsgHead::msgId</a></div><div class="ttdeci">uint8 msgId</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00088">spk_global_packet.h:88</a></div></div>
+<div class="ttc" id="astruct__SMsgHead_html_a58ba1ac3e6fafa304dbe5e50b229273b"><div class="ttname"><a href="struct__SMsgHead.html#a58ba1ac3e6fafa304dbe5e50b229273b">_SMsgHead::detailStatus</a></div><div class="ttdeci">uint8 detailStatus</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00090">spk_global_packet.h:90</a></div></div>
+<div class="ttc" id="astruct__SMsgHead_html_aab0f5d5d2cae311b2c97d8251af5b79c"><div class="ttname"><a href="struct__SMsgHead.html#aab0f5d5d2cae311b2c97d8251af5b79c">_SMsgHead::msgFlag</a></div><div class="ttdeci">uint8 msgFlag</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00087">spk_global_packet.h:87</a></div></div>
+<div class="ttc" id="astruct__SMsgHead_html_aeac603b1ac872b719e872b0ac74fcc96"><div class="ttname"><a href="struct__SMsgHead.html#aeac603b1ac872b719e872b0ac74fcc96">_SMsgHead::msgSize</a></div><div class="ttdeci">int32 msgSize</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00091">spk_global_packet.h:91</a></div></div>
+<div class="ttc" id="astruct__SMsgHead_html_afb0d3bd49f96d83131b8da13a3917afd"><div class="ttname"><a href="struct__SMsgHead.html#afb0d3bd49f96d83131b8da13a3917afd">_SMsgHead::status</a></div><div class="ttdeci">uint8 status</div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00089">spk_global_packet.h:89</a></div></div>
+<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_248d918e0c46523948aef7b06f6106c0.html">sutil</a></li><li class="navelem"><a class="el" href="dir_c987e70cbc9e5d3b2eeb9e681bd06b56.html">net</a></li><li class="navelem"><a class="el" href="spk__global__packet_8h.html">spk_global_packet.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

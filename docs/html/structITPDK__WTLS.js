@@ -1,0 +1,25 @@
+var structITPDK__WTLS =
+[
+    [ "AccountId", "structITPDK__WTLS.html#a5669799f9655b83cfa8fe0b92ca184f5", null ],
+    [ "browindex", "structITPDK__WTLS.html#ad4f0cc76231391ab7161cbe0543b8a86", null ],
+    [ "EntrustNode", "structITPDK__WTLS.html#a3f8f8e7ec9bea1277d863f169185249b", null ],
+    [ "EntrustTime", "structITPDK__WTLS.html#a18adc483615ff1b998f5a01dde3040c5", null ],
+    [ "EntrustType", "structITPDK__WTLS.html#ab5f6318100fc2d8063501e053e38bdd1", null ],
+    [ "Market", "structITPDK__WTLS.html#a6b3dfb00a7e9271c7b005158dfcfb80b", null ],
+    [ "MatchPrice", "structITPDK__WTLS.html#a46dfe1345f85b42acf07f09f2e57a8b4", null ],
+    [ "MatchQty", "structITPDK__WTLS.html#a72bc4c634d8915550e079d7f88bc12ee", null ],
+    [ "OccurDate", "structITPDK__WTLS.html#ac3d0b32d05f696851560706f90c70baf", null ],
+    [ "OrderId", "structITPDK__WTLS.html#a85dde35b82153863a53f21d8bd2873c8", null ],
+    [ "OrderPrice", "structITPDK__WTLS.html#a37191665008a6b06d2ed02c5d1be4041", null ],
+    [ "OrderQty", "structITPDK__WTLS.html#a59150e211c091f4a7183ed25725da643", null ],
+    [ "OrderStatus", "structITPDK__WTLS.html#a5a0d1ed0289f3f5ee653c3a17b251076", null ],
+    [ "OrderType", "structITPDK__WTLS.html#afb093c3b48ac2d0cec204e2614b0bb91", null ],
+    [ "OrderType_HK", "structITPDK__WTLS.html#a73432cefa6e126a64cb101e93cff9f97", null ],
+    [ "ResultInfo", "structITPDK__WTLS.html#a2ec00cb7846dbacea3c329ff3556bbca", null ],
+    [ "SecuAccount", "structITPDK__WTLS.html#a1fe6d019fa9852b5ae36cee302160658", null ],
+    [ "StockCode", "structITPDK__WTLS.html#ab95a603e21faa2853f4e5d9b38a4528f", null ],
+    [ "StockName", "structITPDK__WTLS.html#a56f04b2b8d7e5d573a7cfaf485c70afd", null ],
+    [ "StopPrice", "structITPDK__WTLS.html#a5773b48c4a5d62d0c633a39be85a1919", null ],
+    [ "WithdrawFlag", "structITPDK__WTLS.html#ac6e1e3d0f5d5f24c8cec9299dd86e3a9", null ],
+    [ "WithdrawQty", "structITPDK__WTLS.html#ac59c718a3aa36dc0bb7673e1164029c1", null ]
+];

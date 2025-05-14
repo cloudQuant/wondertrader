@@ -1,0 +1,352 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/TestTrader/main.cpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('TestTrader_2main_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">main.cpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;iostream&gt;</code><br />
+<code>#include &lt;boost/filesystem.hpp&gt;</code><br />
+<code>#include &quot;<a class="el" href="ITraderApi_8h_source.html">../Includes/ITraderApi.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSVariant_8hpp_source.html">../Includes/WTSVariant.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSTradeDef_8hpp_source.html">../Includes/WTSTradeDef.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSError_8hpp_source.html">../Includes/WTSError.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSCollection_8hpp_source.html">../Includes/WTSCollection.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="TimeUtils_8hpp_source.html">../Share/TimeUtils.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="StdUtils_8hpp_source.html">../Share/StdUtils.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="DLLHelper_8hpp_source.html">../Share/DLLHelper.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="StrUtil_8hpp_source.html">../Share/StrUtil.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="charconv_8hpp_source.html">../Share/charconv.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSBaseDataMgr_8h_source.html">../WTSTools/WTSBaseDataMgr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSLogger_8h_source.html">../WTSTools/WTSLogger.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSCfgLoader_8h_source.html">../WTSUtils/WTSCfgLoader.h</a>&quot;</code><br />
+</div>
+<p><a href="TestTrader_2main_8cpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderSpi.html">TraderSpi</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a8c313e7f0b617a0a25a89e4b2c6bb484" id="r_a8c313e7f0b617a0a25a89e4b2c6bb484"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a8c313e7f0b617a0a25a89e4b2c6bb484"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="TestTrader_2main_8cpp.html#a8c313e7f0b617a0a25a89e4b2c6bb484">encoding_print</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...args)</td></tr>
+<tr class="separator:a8c313e7f0b617a0a25a89e4b2c6bb484"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac594b3f4124c84f707df45a2e35457cd" id="r_ac594b3f4124c84f707df45a2e35457cd"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TestTrader_2main_8cpp.html#ac594b3f4124c84f707df45a2e35457cd">getBaseFolder</a> ()</td></tr>
+<tr class="separator:ac594b3f4124c84f707df45a2e35457cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae66f6b31b5ad750f1fe042a706a4e3d4" id="r_ae66f6b31b5ad750f1fe042a706a4e3d4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TestTrader_2main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main</a> ()</td></tr>
+<tr class="separator:ae66f6b31b5ad750f1fe042a706a4e3d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:af06f4d6c756835f0f06a723e266d59cc" id="r_af06f4d6c756835f0f06a723e266d59cc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TestTrader_2main_8cpp.html#af06f4d6c756835f0f06a723e266d59cc">g_bdMgr</a></td></tr>
+<tr class="separator:af06f4d6c756835f0f06a723e266d59cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a453166fd9438ec4f73039fb804c69a9c" id="r_a453166fd9438ec4f73039fb804c69a9c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TestTrader_2main_8cpp.html#a453166fd9438ec4f73039fb804c69a9c">g_mtxOpt</a></td></tr>
+<tr class="separator:a453166fd9438ec4f73039fb804c69a9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5640781ae55a8ba42959b422fad596c0" id="r_a5640781ae55a8ba42959b422fad596c0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__MutexUtils.html#gafaa630f2eecc6c68bc508cb484fcd3a3">StdCondVariable</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TestTrader_2main_8cpp.html#a5640781ae55a8ba42959b422fad596c0">g_condOpt</a></td></tr>
+<tr class="separator:a5640781ae55a8ba42959b422fad596c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a806402df25b11a255d5c144bcdcfc486" id="r_a806402df25b11a255d5c144bcdcfc486"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TestTrader_2main_8cpp.html#a806402df25b11a255d5c144bcdcfc486">g_exitNow</a> = false</td></tr>
+<tr class="separator:a806402df25b11a255d5c144bcdcfc486"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af33a6013c7f5d92c7e8af859c178475b" id="r_af33a6013c7f5d92c7e8af859c178475b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TestTrader_2main_8cpp.html#af33a6013c7f5d92c7e8af859c178475b">g_riskAct</a> = false</td></tr>
+<tr class="separator:af33a6013c7f5d92c7e8af859c178475b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ab81fdb2f58ee8b80c57080ba6418ba" id="r_a9ab81fdb2f58ee8b80c57080ba6418ba"><td class="memItemLeft" align="right" valign="top">std::set&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TestTrader_2main_8cpp.html#a9ab81fdb2f58ee8b80c57080ba6418ba">g_blkList</a></td></tr>
+<tr class="separator:a9ab81fdb2f58ee8b80c57080ba6418ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17226795848decb565e90624584e5c0f" id="r_a17226795848decb565e90624584e5c0f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TestTrader_2main_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></td></tr>
+<tr class="separator:a17226795848decb565e90624584e5c0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">函数说明</h2>
+<a id="a8c313e7f0b617a0a25a89e4b2c6bb484" name="a8c313e7f0b617a0a25a89e4b2c6bb484"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c313e7f0b617a0a25a89e4b2c6bb484">&#9670;&#160;</a></span>encoding_print()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void encoding_print </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TestTrader_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="TestTrader_2main_8cpp_source.html#l00029">29</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac594b3f4124c84f707df45a2e35457cd" name="ac594b3f4124c84f707df45a2e35457cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac594b3f4124c84f707df45a2e35457cd">&#9670;&#160;</a></span>getBaseFolder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string getBaseFolder </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TestTrader_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="TestTrader_2main_8cpp_source.html#l00572">572</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae66f6b31b5ad750f1fe042a706a4e3d4" name="ae66f6b31b5ad750f1fe042a706a4e3d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae66f6b31b5ad750f1fe042a706a4e3d4">&#9670;&#160;</a></span>main()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int main </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TestTrader_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="TestTrader_2main_8cpp_source.html#l00585">585</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="af06f4d6c756835f0f06a723e266d59cc" name="af06f4d6c756835f0f06a723e266d59cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af06f4d6c756835f0f06a723e266d59cc">&#9670;&#160;</a></span>g_bdMgr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a> g_bdMgr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TestTrader_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="TestTrader_2main_8cpp_source.html#l00021">21</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9ab81fdb2f58ee8b80c57080ba6418ba" name="a9ab81fdb2f58ee8b80c57080ba6418ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ab81fdb2f58ee8b80c57080ba6418ba">&#9670;&#160;</a></span>g_blkList</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::set&lt;std::string&gt; g_blkList</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TestTrader_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="TestTrader_2main_8cpp_source.html#l00026">26</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5640781ae55a8ba42959b422fad596c0" name="a5640781ae55a8ba42959b422fad596c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5640781ae55a8ba42959b422fad596c0">&#9670;&#160;</a></span>g_condOpt</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__MutexUtils.html#gafaa630f2eecc6c68bc508cb484fcd3a3">StdCondVariable</a> g_condOpt</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TestTrader_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="TestTrader_2main_8cpp_source.html#l00023">23</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a806402df25b11a255d5c144bcdcfc486" name="a806402df25b11a255d5c144bcdcfc486"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a806402df25b11a255d5c144bcdcfc486">&#9670;&#160;</a></span>g_exitNow</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool g_exitNow = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TestTrader_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="TestTrader_2main_8cpp_source.html#l00024">24</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a453166fd9438ec4f73039fb804c69a9c" name="a453166fd9438ec4f73039fb804c69a9c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a453166fd9438ec4f73039fb804c69a9c">&#9670;&#160;</a></span>g_mtxOpt</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a> g_mtxOpt</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TestTrader_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="TestTrader_2main_8cpp_source.html#l00022">22</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af33a6013c7f5d92c7e8af859c178475b" name="af33a6013c7f5d92c7e8af859c178475b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af33a6013c7f5d92c7e8af859c178475b">&#9670;&#160;</a></span>g_riskAct</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool g_riskAct = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TestTrader_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="TestTrader_2main_8cpp_source.html#l00025">25</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a17226795848decb565e90624584e5c0f" name="a17226795848decb565e90624584e5c0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17226795848decb565e90624584e5c0f">&#9670;&#160;</a></span>USING_NS_WTP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">USING_NS_WTP</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TestTrader_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="TestTrader_2main_8cpp_source.html#l00040">40</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_541811c7b50a4c385aa2e08f1d8f8525.html">TestTrader</a></li><li class="navelem"><a class="el" href="TestTrader_2main_8cpp.html">main.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

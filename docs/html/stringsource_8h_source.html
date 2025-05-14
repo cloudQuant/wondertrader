@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/stringsource.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('stringsource_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">stringsource.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="stringsource_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef STRINGSOURCE_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define STRINGSOURCE_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#if defined(_MSC_VER) ||                                            \</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">    (defined(__GNUC__) &amp;&amp; (__GNUC__ == 3 &amp;&amp; __GNUC_MINOR__ &gt;= 4) || \</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">     (__GNUC__ &gt;= 4))  </span><span class="comment">// GCC supports &quot;pragma once&quot; correctly since 3.4</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;cstddef&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceYAML.html">YAML</a> {</div>
+<div class="foldopen" id="foldopen00013" data-start="{" data-end="};">
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="classYAML_1_1StringCharSource.html">   13</a></span><span class="keyword">class </span><a class="code hl_class" href="classYAML_1_1StringCharSource.html">StringCharSource</a> {</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> <span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00015" data-start="{" data-end="}">
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="classYAML_1_1StringCharSource.html#a6af978ba0ac95df336bcd017b2be10a2">   15</a></span>  <a class="code hl_function" href="classYAML_1_1StringCharSource.html#a6af978ba0ac95df336bcd017b2be10a2">StringCharSource</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* str, std::size_t size)</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>      : <a class="code hl_variable" href="classYAML_1_1StringCharSource.html#aeedbd6fe1a544b7a7dc9b4cfc2742bc1">m_str</a>(str), <a class="code hl_variable" href="classYAML_1_1StringCharSource.html#abec82e1f00451a504bee4ada333d16bb">m_size</a>(size), <a class="code hl_variable" href="classYAML_1_1StringCharSource.html#a5c1af2626c2cf345ed981151ab6b8d68">m_offset</a>(0) {}</div>
+</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="classYAML_1_1StringCharSource.html#af34e46ac69934f0848916f145c7e097d">   18</a></span>  <span class="keyword">operator</span> bool()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classYAML_1_1StringCharSource.html#a5c1af2626c2cf345ed981151ab6b8d68">m_offset</a> &lt; <a class="code hl_variable" href="classYAML_1_1StringCharSource.html#abec82e1f00451a504bee4ada333d16bb">m_size</a>; }</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="classYAML_1_1StringCharSource.html#a6d01c00ab4757c64a7bc71f6183e3523">   19</a></span>  <span class="keywordtype">char</span> <a class="code hl_function" href="classYAML_1_1StringCharSource.html#a6d01c00ab4757c64a7bc71f6183e3523">operator[]</a>(std::size_t i)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classYAML_1_1StringCharSource.html#aeedbd6fe1a544b7a7dc9b4cfc2742bc1">m_str</a>[<a class="code hl_variable" href="classYAML_1_1StringCharSource.html#a5c1af2626c2cf345ed981151ab6b8d68">m_offset</a> + i]; }</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="classYAML_1_1StringCharSource.html#aa0fb3acf86a734c0a0de0759a47398c6">   20</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classYAML_1_1StringCharSource.html#aa0fb3acf86a734c0a0de0759a47398c6">operator!</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> !<span class="keyword">static_cast&lt;</span><span class="keywordtype">bool</span><span class="keyword">&gt;</span>(*this); }</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="foldopen" id="foldopen00022" data-start="{" data-end="}">
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classYAML_1_1StringCharSource.html#a5e5ff972b0bb13ff47a5213b284e1a16">   22</a></span>  <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1StringCharSource.html">StringCharSource</a> <a class="code hl_function" href="classYAML_1_1StringCharSource.html#a5e5ff972b0bb13ff47a5213b284e1a16">operator+</a>(<span class="keywordtype">int</span> i)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <a class="code hl_class" href="classYAML_1_1StringCharSource.html">StringCharSource</a> source(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keywordflow">if</span> (<span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(source.<a class="code hl_variable" href="classYAML_1_1StringCharSource.html#a5c1af2626c2cf345ed981151ab6b8d68">m_offset</a>) + i &gt;= 0)</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>      source.<a class="code hl_variable" href="classYAML_1_1StringCharSource.html#a5c1af2626c2cf345ed981151ab6b8d68">m_offset</a> += i;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>      source.<a class="code hl_variable" href="classYAML_1_1StringCharSource.html#a5c1af2626c2cf345ed981151ab6b8d68">m_offset</a> = 0;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keywordflow">return</span> source;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  }</div>
+</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="foldopen" id="foldopen00031" data-start="{" data-end="}">
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classYAML_1_1StringCharSource.html#aa5bc6d7163a3cf778efbdc38ea165416">   31</a></span>  <a class="code hl_class" href="classYAML_1_1StringCharSource.html">StringCharSource</a>&amp; <a class="code hl_function" href="classYAML_1_1StringCharSource.html#aa5bc6d7163a3cf778efbdc38ea165416">operator++</a>() {</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    ++<a class="code hl_variable" href="classYAML_1_1StringCharSource.html#a5c1af2626c2cf345ed981151ab6b8d68">m_offset</a>;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  }</div>
+</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="foldopen" id="foldopen00036" data-start="{" data-end="}">
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="classYAML_1_1StringCharSource.html#a411f804f2369fae726b98f536ae0ba99">   36</a></span>  <a class="code hl_class" href="classYAML_1_1StringCharSource.html">StringCharSource</a>&amp; <a class="code hl_function" href="classYAML_1_1StringCharSource.html#a411f804f2369fae726b98f536ae0ba99">operator+=</a>(std::size_t offset) {</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <a class="code hl_variable" href="classYAML_1_1StringCharSource.html#a5c1af2626c2cf345ed981151ab6b8d68">m_offset</a> += offset;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  }</div>
+</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="classYAML_1_1StringCharSource.html#aeedbd6fe1a544b7a7dc9b4cfc2742bc1">   42</a></span>  <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_variable" href="classYAML_1_1StringCharSource.html#aeedbd6fe1a544b7a7dc9b4cfc2742bc1">m_str</a>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="classYAML_1_1StringCharSource.html#abec82e1f00451a504bee4ada333d16bb">   43</a></span>  std::size_t <a class="code hl_variable" href="classYAML_1_1StringCharSource.html#abec82e1f00451a504bee4ada333d16bb">m_size</a>;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="classYAML_1_1StringCharSource.html#a5c1af2626c2cf345ed981151ab6b8d68">   44</a></span>  std::size_t <a class="code hl_variable" href="classYAML_1_1StringCharSource.html#a5c1af2626c2cf345ed981151ab6b8d68">m_offset</a>;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>};</div>
+</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>}</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#endif  </span><span class="comment">// STRINGSOURCE_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="ttc" id="aclassYAML_1_1StringCharSource_html"><div class="ttname"><a href="classYAML_1_1StringCharSource.html">YAML::StringCharSource</a></div><div class="ttdef"><b>Definition</b> <a href="stringsource_8h_source.html#l00013">stringsource.h:13</a></div></div>
+<div class="ttc" id="aclassYAML_1_1StringCharSource_html_a411f804f2369fae726b98f536ae0ba99"><div class="ttname"><a href="classYAML_1_1StringCharSource.html#a411f804f2369fae726b98f536ae0ba99">YAML::StringCharSource::operator+=</a></div><div class="ttdeci">StringCharSource &amp; operator+=(std::size_t offset)</div><div class="ttdef"><b>Definition</b> <a href="stringsource_8h_source.html#l00036">stringsource.h:36</a></div></div>
+<div class="ttc" id="aclassYAML_1_1StringCharSource_html_a5c1af2626c2cf345ed981151ab6b8d68"><div class="ttname"><a href="classYAML_1_1StringCharSource.html#a5c1af2626c2cf345ed981151ab6b8d68">YAML::StringCharSource::m_offset</a></div><div class="ttdeci">std::size_t m_offset</div><div class="ttdef"><b>Definition</b> <a href="stringsource_8h_source.html#l00044">stringsource.h:44</a></div></div>
+<div class="ttc" id="aclassYAML_1_1StringCharSource_html_a5e5ff972b0bb13ff47a5213b284e1a16"><div class="ttname"><a href="classYAML_1_1StringCharSource.html#a5e5ff972b0bb13ff47a5213b284e1a16">YAML::StringCharSource::operator+</a></div><div class="ttdeci">const StringCharSource operator+(int i) const</div><div class="ttdef"><b>Definition</b> <a href="stringsource_8h_source.html#l00022">stringsource.h:22</a></div></div>
+<div class="ttc" id="aclassYAML_1_1StringCharSource_html_a6af978ba0ac95df336bcd017b2be10a2"><div class="ttname"><a href="classYAML_1_1StringCharSource.html#a6af978ba0ac95df336bcd017b2be10a2">YAML::StringCharSource::StringCharSource</a></div><div class="ttdeci">StringCharSource(const char *str, std::size_t size)</div><div class="ttdef"><b>Definition</b> <a href="stringsource_8h_source.html#l00015">stringsource.h:15</a></div></div>
+<div class="ttc" id="aclassYAML_1_1StringCharSource_html_a6d01c00ab4757c64a7bc71f6183e3523"><div class="ttname"><a href="classYAML_1_1StringCharSource.html#a6d01c00ab4757c64a7bc71f6183e3523">YAML::StringCharSource::operator[]</a></div><div class="ttdeci">char operator[](std::size_t i) const</div><div class="ttdef"><b>Definition</b> <a href="stringsource_8h_source.html#l00019">stringsource.h:19</a></div></div>
+<div class="ttc" id="aclassYAML_1_1StringCharSource_html_aa0fb3acf86a734c0a0de0759a47398c6"><div class="ttname"><a href="classYAML_1_1StringCharSource.html#aa0fb3acf86a734c0a0de0759a47398c6">YAML::StringCharSource::operator!</a></div><div class="ttdeci">bool operator!() const</div><div class="ttdef"><b>Definition</b> <a href="stringsource_8h_source.html#l00020">stringsource.h:20</a></div></div>
+<div class="ttc" id="aclassYAML_1_1StringCharSource_html_aa5bc6d7163a3cf778efbdc38ea165416"><div class="ttname"><a href="classYAML_1_1StringCharSource.html#aa5bc6d7163a3cf778efbdc38ea165416">YAML::StringCharSource::operator++</a></div><div class="ttdeci">StringCharSource &amp; operator++()</div><div class="ttdef"><b>Definition</b> <a href="stringsource_8h_source.html#l00031">stringsource.h:31</a></div></div>
+<div class="ttc" id="aclassYAML_1_1StringCharSource_html_abec82e1f00451a504bee4ada333d16bb"><div class="ttname"><a href="classYAML_1_1StringCharSource.html#abec82e1f00451a504bee4ada333d16bb">YAML::StringCharSource::m_size</a></div><div class="ttdeci">std::size_t m_size</div><div class="ttdef"><b>Definition</b> <a href="stringsource_8h_source.html#l00043">stringsource.h:43</a></div></div>
+<div class="ttc" id="aclassYAML_1_1StringCharSource_html_aeedbd6fe1a544b7a7dc9b4cfc2742bc1"><div class="ttname"><a href="classYAML_1_1StringCharSource.html#aeedbd6fe1a544b7a7dc9b4cfc2742bc1">YAML::StringCharSource::m_str</a></div><div class="ttdeci">const char * m_str</div><div class="ttdef"><b>Definition</b> <a href="stringsource_8h_source.html#l00042">stringsource.h:42</a></div></div>
+<div class="ttc" id="anamespaceYAML_html"><div class="ttname"><a href="namespaceYAML.html">YAML</a></div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00005">binary.cpp:5</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="stringsource_8h.html">stringsource.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

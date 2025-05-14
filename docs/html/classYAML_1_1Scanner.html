@@ -1,0 +1,1796 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: YAML::Scanner类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classYAML_1_1Scanner.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-types">Private 类型</a> &#124;
+<a href="#pri-methods">Private 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classYAML_1_1Scanner-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">YAML::Scanner类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="scanner_8h_source.html">scanner.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1Scanner_1_1IndentMarker.html">IndentMarker</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1Scanner_1_1SimpleKey.html">SimpleKey</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:aea23d10585c1509e61ab0bd488d3fde2" id="r_aea23d10585c1509e61ab0bd488d3fde2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#aea23d10585c1509e61ab0bd488d3fde2">Scanner</a> (std::istream &amp;in)</td></tr>
+<tr class="separator:aea23d10585c1509e61ab0bd488d3fde2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ac4b5ac07f864a667f3e742b149a304" id="r_a0ac4b5ac07f864a667f3e742b149a304"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a0ac4b5ac07f864a667f3e742b149a304">~Scanner</a> ()</td></tr>
+<tr class="separator:a0ac4b5ac07f864a667f3e742b149a304"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca838c1612fbd22188f9d912c90e1129" id="r_aca838c1612fbd22188f9d912c90e1129"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#aca838c1612fbd22188f9d912c90e1129">empty</a> ()</td></tr>
+<tr class="separator:aca838c1612fbd22188f9d912c90e1129"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59105995d1326628b33b330299e5db4e" id="r_a59105995d1326628b33b330299e5db4e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a59105995d1326628b33b330299e5db4e">pop</a> ()</td></tr>
+<tr class="separator:a59105995d1326628b33b330299e5db4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65433ee930cad573a7f82da86f91c80d" id="r_a65433ee930cad573a7f82da86f91c80d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structYAML_1_1Token.html">Token</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a65433ee930cad573a7f82da86f91c80d">peek</a> ()</td></tr>
+<tr class="separator:a65433ee930cad573a7f82da86f91c80d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2ea7a607ea1d3e96dfbf090b0c29e0a" id="r_ac2ea7a607ea1d3e96dfbf090b0c29e0a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structYAML_1_1Mark.html">Mark</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#ac2ea7a607ea1d3e96dfbf090b0c29e0a">mark</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:ac2ea7a607ea1d3e96dfbf090b0c29e0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 类型</h2></td></tr>
+<tr class="memitem:a53a1ea178f81781f2f698f80ab179b98" id="r_a53a1ea178f81781f2f698f80ab179b98"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a53a1ea178f81781f2f698f80ab179b98">FLOW_MARKER</a> { <a class="el" href="classYAML_1_1Scanner.html#a53a1ea178f81781f2f698f80ab179b98afe1712aaac58edf4a79303058b32f817">FLOW_MAP</a>
+, <a class="el" href="classYAML_1_1Scanner.html#a53a1ea178f81781f2f698f80ab179b98adfdcc779689062656f8625225d0d75e5">FLOW_SEQ</a>
+ }</td></tr>
+<tr class="separator:a53a1ea178f81781f2f698f80ab179b98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 成员函数</h2></td></tr>
+<tr class="memitem:aefd5159da236238a420567b61db15479" id="r_aefd5159da236238a420567b61db15479"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#aefd5159da236238a420567b61db15479">EnsureTokensInQueue</a> ()</td></tr>
+<tr class="separator:aefd5159da236238a420567b61db15479"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a129c35d0110a4d8b1743d852d265e631" id="r_a129c35d0110a4d8b1743d852d265e631"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a129c35d0110a4d8b1743d852d265e631">ScanNextToken</a> ()</td></tr>
+<tr class="separator:a129c35d0110a4d8b1743d852d265e631"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb4de86eaeebe388f66844cbe95f851f" id="r_adb4de86eaeebe388f66844cbe95f851f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#adb4de86eaeebe388f66844cbe95f851f">ScanToNextToken</a> ()</td></tr>
+<tr class="separator:adb4de86eaeebe388f66844cbe95f851f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1dc5daec79f58dfea6bd08298ad3f290" id="r_a1dc5daec79f58dfea6bd08298ad3f290"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a1dc5daec79f58dfea6bd08298ad3f290">StartStream</a> ()</td></tr>
+<tr class="separator:a1dc5daec79f58dfea6bd08298ad3f290"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aedb7d3d2135e728c320144bf7695a970" id="r_aedb7d3d2135e728c320144bf7695a970"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#aedb7d3d2135e728c320144bf7695a970">EndStream</a> ()</td></tr>
+<tr class="separator:aedb7d3d2135e728c320144bf7695a970"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac99cea0ec62d52037401c8e4cb034f44" id="r_ac99cea0ec62d52037401c8e4cb034f44"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structYAML_1_1Token.html">Token</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#ac99cea0ec62d52037401c8e4cb034f44">PushToken</a> (<a class="el" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14">Token::TYPE</a> type)</td></tr>
+<tr class="separator:ac99cea0ec62d52037401c8e4cb034f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a941235b28664b754557544750aaf849c" id="r_a941235b28664b754557544750aaf849c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a941235b28664b754557544750aaf849c">InFlowContext</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:a941235b28664b754557544750aaf849c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae758b3ac49a45644150258510178eeca" id="r_ae758b3ac49a45644150258510178eeca"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#ae758b3ac49a45644150258510178eeca">InBlockContext</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:ae758b3ac49a45644150258510178eeca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d41af553f31d73fa2388da5e81babf1" id="r_a6d41af553f31d73fa2388da5e81babf1"><td class="memItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a6d41af553f31d73fa2388da5e81babf1">GetFlowLevel</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:a6d41af553f31d73fa2388da5e81babf1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2eaae992ffbcd5ffefdaa85e3f43589c" id="r_a2eaae992ffbcd5ffefdaa85e3f43589c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14">Token::TYPE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a2eaae992ffbcd5ffefdaa85e3f43589c">GetStartTokenFor</a> (<a class="el" href="structYAML_1_1Scanner_1_1IndentMarker.html#aba4adf0b567a404616f19d1606acde55">IndentMarker::INDENT_TYPE</a> type) <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:a2eaae992ffbcd5ffefdaa85e3f43589c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90a08e537d1826475a49d9cc12be735b" id="r_a90a08e537d1826475a49d9cc12be735b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structYAML_1_1Scanner_1_1IndentMarker.html">IndentMarker</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a90a08e537d1826475a49d9cc12be735b">PushIndentTo</a> (int column, <a class="el" href="structYAML_1_1Scanner_1_1IndentMarker.html#aba4adf0b567a404616f19d1606acde55">IndentMarker::INDENT_TYPE</a> type)</td></tr>
+<tr class="separator:a90a08e537d1826475a49d9cc12be735b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac92d1c98f7c24f63e51ff2ed2f8f78b2" id="r_ac92d1c98f7c24f63e51ff2ed2f8f78b2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#ac92d1c98f7c24f63e51ff2ed2f8f78b2">PopIndentToHere</a> ()</td></tr>
+<tr class="separator:ac92d1c98f7c24f63e51ff2ed2f8f78b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a554dfec39abc238ab6daac9dd9906b02" id="r_a554dfec39abc238ab6daac9dd9906b02"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a554dfec39abc238ab6daac9dd9906b02">PopAllIndents</a> ()</td></tr>
+<tr class="separator:a554dfec39abc238ab6daac9dd9906b02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a387eb71eb1625d5bc7f6a4b975ed7132" id="r_a387eb71eb1625d5bc7f6a4b975ed7132"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a387eb71eb1625d5bc7f6a4b975ed7132">PopIndent</a> ()</td></tr>
+<tr class="separator:a387eb71eb1625d5bc7f6a4b975ed7132"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc5f3a6054e587cc5ff9ce88197f242a" id="r_acc5f3a6054e587cc5ff9ce88197f242a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#acc5f3a6054e587cc5ff9ce88197f242a">GetTopIndent</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:acc5f3a6054e587cc5ff9ce88197f242a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f9c6e470d4dc5041cdec0a2b64c7753" id="r_a4f9c6e470d4dc5041cdec0a2b64c7753"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a4f9c6e470d4dc5041cdec0a2b64c7753">CanInsertPotentialSimpleKey</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:a4f9c6e470d4dc5041cdec0a2b64c7753"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adea14b0d950416977ee2857bab0caf79" id="r_adea14b0d950416977ee2857bab0caf79"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#adea14b0d950416977ee2857bab0caf79">ExistsActiveSimpleKey</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:adea14b0d950416977ee2857bab0caf79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefb757746e2e225ff4cb2955d7f2b5d1" id="r_aefb757746e2e225ff4cb2955d7f2b5d1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#aefb757746e2e225ff4cb2955d7f2b5d1">InsertPotentialSimpleKey</a> ()</td></tr>
+<tr class="separator:aefb757746e2e225ff4cb2955d7f2b5d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad38b09c4ce6624478b9504d8a7350eb1" id="r_ad38b09c4ce6624478b9504d8a7350eb1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#ad38b09c4ce6624478b9504d8a7350eb1">InvalidateSimpleKey</a> ()</td></tr>
+<tr class="separator:ad38b09c4ce6624478b9504d8a7350eb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27df4ba762a32169d0b91693304b8119" id="r_a27df4ba762a32169d0b91693304b8119"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a27df4ba762a32169d0b91693304b8119">VerifySimpleKey</a> ()</td></tr>
+<tr class="separator:a27df4ba762a32169d0b91693304b8119"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1388029cd44b1958c62727a5517bcbd" id="r_ab1388029cd44b1958c62727a5517bcbd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#ab1388029cd44b1958c62727a5517bcbd">PopAllSimpleKeys</a> ()</td></tr>
+<tr class="separator:ab1388029cd44b1958c62727a5517bcbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3c6d73d54c4c305bb3b394c508bffad" id="r_aa3c6d73d54c4c305bb3b394c508bffad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#aa3c6d73d54c4c305bb3b394c508bffad">ThrowParserException</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;msg) <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:aa3c6d73d54c4c305bb3b394c508bffad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa461a073a67dc0ef4122983624e3a8d4" id="r_aa461a073a67dc0ef4122983624e3a8d4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#aa461a073a67dc0ef4122983624e3a8d4">IsWhitespaceToBeEaten</a> (char ch)</td></tr>
+<tr class="separator:aa461a073a67dc0ef4122983624e3a8d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49e5d3eab4442e2a654bb9a380c82896" id="r_a49e5d3eab4442e2a654bb9a380c82896"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYAML_1_1RegEx.html">RegEx</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a49e5d3eab4442e2a654bb9a380c82896">GetValueRegex</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:a49e5d3eab4442e2a654bb9a380c82896"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0675d6bcf0a7d3fd6a4c2ad964023c34" id="r_a0675d6bcf0a7d3fd6a4c2ad964023c34"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a0675d6bcf0a7d3fd6a4c2ad964023c34">ScanDirective</a> ()</td></tr>
+<tr class="separator:a0675d6bcf0a7d3fd6a4c2ad964023c34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae890ed8410ab35bbd6313e0756aaacfc" id="r_ae890ed8410ab35bbd6313e0756aaacfc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#ae890ed8410ab35bbd6313e0756aaacfc">ScanDocStart</a> ()</td></tr>
+<tr class="separator:ae890ed8410ab35bbd6313e0756aaacfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a3ba88aaae58fa788d8f7b818a43f48" id="r_a8a3ba88aaae58fa788d8f7b818a43f48"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a8a3ba88aaae58fa788d8f7b818a43f48">ScanDocEnd</a> ()</td></tr>
+<tr class="separator:a8a3ba88aaae58fa788d8f7b818a43f48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10099135246beef30f736ccf8cf84f2e" id="r_a10099135246beef30f736ccf8cf84f2e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a10099135246beef30f736ccf8cf84f2e">ScanBlockSeqStart</a> ()</td></tr>
+<tr class="separator:a10099135246beef30f736ccf8cf84f2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96c5d7703d6ae1b7e581fe8594bfefec" id="r_a96c5d7703d6ae1b7e581fe8594bfefec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a96c5d7703d6ae1b7e581fe8594bfefec">ScanBlockMapSTart</a> ()</td></tr>
+<tr class="separator:a96c5d7703d6ae1b7e581fe8594bfefec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3212e0c7b1a36dac5749dd03c6393b1f" id="r_a3212e0c7b1a36dac5749dd03c6393b1f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a3212e0c7b1a36dac5749dd03c6393b1f">ScanBlockEnd</a> ()</td></tr>
+<tr class="separator:a3212e0c7b1a36dac5749dd03c6393b1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ab725ace87c08a04e73ce7ea14880d0" id="r_a4ab725ace87c08a04e73ce7ea14880d0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a4ab725ace87c08a04e73ce7ea14880d0">ScanBlockEntry</a> ()</td></tr>
+<tr class="separator:a4ab725ace87c08a04e73ce7ea14880d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae37ec17474825d18958d59cc29ebcf99" id="r_ae37ec17474825d18958d59cc29ebcf99"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#ae37ec17474825d18958d59cc29ebcf99">ScanFlowStart</a> ()</td></tr>
+<tr class="separator:ae37ec17474825d18958d59cc29ebcf99"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb60be314e8896df4935a69422c759e3" id="r_acb60be314e8896df4935a69422c759e3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#acb60be314e8896df4935a69422c759e3">ScanFlowEnd</a> ()</td></tr>
+<tr class="separator:acb60be314e8896df4935a69422c759e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab316dc416a6b0a6d8fa0dff24c6b275e" id="r_ab316dc416a6b0a6d8fa0dff24c6b275e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#ab316dc416a6b0a6d8fa0dff24c6b275e">ScanFlowEntry</a> ()</td></tr>
+<tr class="separator:ab316dc416a6b0a6d8fa0dff24c6b275e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aadd26643d4fe1153852d570bc213cab0" id="r_aadd26643d4fe1153852d570bc213cab0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#aadd26643d4fe1153852d570bc213cab0">ScanKey</a> ()</td></tr>
+<tr class="separator:aadd26643d4fe1153852d570bc213cab0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5d08ec68a44f532d1d4b8f853540a86" id="r_af5d08ec68a44f532d1d4b8f853540a86"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#af5d08ec68a44f532d1d4b8f853540a86">ScanValue</a> ()</td></tr>
+<tr class="separator:af5d08ec68a44f532d1d4b8f853540a86"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15e1221745b361062bde676a4be3eaa4" id="r_a15e1221745b361062bde676a4be3eaa4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a15e1221745b361062bde676a4be3eaa4">ScanAnchorOrAlias</a> ()</td></tr>
+<tr class="separator:a15e1221745b361062bde676a4be3eaa4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb366a7ada43730f62deab8143c31355" id="r_adb366a7ada43730f62deab8143c31355"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#adb366a7ada43730f62deab8143c31355">ScanTag</a> ()</td></tr>
+<tr class="separator:adb366a7ada43730f62deab8143c31355"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af36c6e9de84ec5c6b94a48b8a5277c11" id="r_af36c6e9de84ec5c6b94a48b8a5277c11"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#af36c6e9de84ec5c6b94a48b8a5277c11">ScanPlainScalar</a> ()</td></tr>
+<tr class="separator:af36c6e9de84ec5c6b94a48b8a5277c11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6b55caa05ce53fa297e3898377dbc5d" id="r_ac6b55caa05ce53fa297e3898377dbc5d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#ac6b55caa05ce53fa297e3898377dbc5d">ScanQuotedScalar</a> ()</td></tr>
+<tr class="separator:ac6b55caa05ce53fa297e3898377dbc5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32fcdb1d12d11f64520ecd06759a3c36" id="r_a32fcdb1d12d11f64520ecd06759a3c36"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a32fcdb1d12d11f64520ecd06759a3c36">ScanBlockScalar</a> ()</td></tr>
+<tr class="separator:a32fcdb1d12d11f64520ecd06759a3c36"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:a72d3a596f6cc172c3044cd863ba9c3c7" id="r_a72d3a596f6cc172c3044cd863ba9c3c7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classYAML_1_1Stream.html">Stream</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a72d3a596f6cc172c3044cd863ba9c3c7">INPUT</a></td></tr>
+<tr class="separator:a72d3a596f6cc172c3044cd863ba9c3c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a087e344b2729a724d38a9ca874075e37" id="r_a087e344b2729a724d38a9ca874075e37"><td class="memItemLeft" align="right" valign="top">std::queue&lt; <a class="el" href="structYAML_1_1Token.html">Token</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a087e344b2729a724d38a9ca874075e37">m_tokens</a></td></tr>
+<tr class="separator:a087e344b2729a724d38a9ca874075e37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95426e753d3be79578909af1c6f3802d" id="r_a95426e753d3be79578909af1c6f3802d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a95426e753d3be79578909af1c6f3802d">m_startedStream</a></td></tr>
+<tr class="separator:a95426e753d3be79578909af1c6f3802d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4010a6d73f6f7433d161bdcbe8f72a5" id="r_ad4010a6d73f6f7433d161bdcbe8f72a5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#ad4010a6d73f6f7433d161bdcbe8f72a5">m_endedStream</a></td></tr>
+<tr class="separator:ad4010a6d73f6f7433d161bdcbe8f72a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4358cfdf2aad349cabdf35a2f07539bf" id="r_a4358cfdf2aad349cabdf35a2f07539bf"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a4358cfdf2aad349cabdf35a2f07539bf">m_simpleKeyAllowed</a></td></tr>
+<tr class="separator:a4358cfdf2aad349cabdf35a2f07539bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32c30dd800f9e3a6f95d7ae5894e2ca1" id="r_a32c30dd800f9e3a6f95d7ae5894e2ca1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a32c30dd800f9e3a6f95d7ae5894e2ca1">m_canBeJSONFlow</a></td></tr>
+<tr class="separator:a32c30dd800f9e3a6f95d7ae5894e2ca1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80c2ed0a69b031bb92adce14f311a69e" id="r_a80c2ed0a69b031bb92adce14f311a69e"><td class="memItemLeft" align="right" valign="top">std::stack&lt; <a class="el" href="structYAML_1_1Scanner_1_1SimpleKey.html">SimpleKey</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#a80c2ed0a69b031bb92adce14f311a69e">m_simpleKeys</a></td></tr>
+<tr class="separator:a80c2ed0a69b031bb92adce14f311a69e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af28dff3b4f406f1f627e5ac05fdbb9f9" id="r_af28dff3b4f406f1f627e5ac05fdbb9f9"><td class="memItemLeft" align="right" valign="top">std::stack&lt; <a class="el" href="structYAML_1_1Scanner_1_1IndentMarker.html">IndentMarker</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#af28dff3b4f406f1f627e5ac05fdbb9f9">m_indents</a></td></tr>
+<tr class="separator:af28dff3b4f406f1f627e5ac05fdbb9f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abcdcd1d561cfb0bba00dd68fc2a5008f" id="r_abcdcd1d561cfb0bba00dd68fc2a5008f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classYAML_1_1ptr__vector.html">ptr_vector</a>&lt; <a class="el" href="structYAML_1_1Scanner_1_1IndentMarker.html">IndentMarker</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#abcdcd1d561cfb0bba00dd68fc2a5008f">m_indentRefs</a></td></tr>
+<tr class="separator:abcdcd1d561cfb0bba00dd68fc2a5008f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade60848f10a34c95525e072e6ea1f3cc" id="r_ade60848f10a34c95525e072e6ea1f3cc"><td class="memItemLeft" align="right" valign="top">std::stack&lt; <a class="el" href="classYAML_1_1Scanner.html#a53a1ea178f81781f2f698f80ab179b98">FLOW_MARKER</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1Scanner.html#ade60848f10a34c95525e072e6ea1f3cc">m_flows</a></td></tr>
+<tr class="separator:ade60848f10a34c95525e072e6ea1f3cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p><a class="el" href="classA.html">A</a> scanner transforms a stream of characters into a stream of tokens. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00030">30</a> 行定义.</p>
+</div><h2 class="groupheader">成员枚举类型说明</h2>
+<a id="a53a1ea178f81781f2f698f80ab179b98" name="a53a1ea178f81781f2f698f80ab179b98"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53a1ea178f81781f2f698f80ab179b98">&#9670;&#160;</a></span>FLOW_MARKER</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classYAML_1_1Scanner.html#a53a1ea178f81781f2f698f80ab179b98">YAML::Scanner::FLOW_MARKER</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a53a1ea178f81781f2f698f80ab179b98afe1712aaac58edf4a79303058b32f817" name="a53a1ea178f81781f2f698f80ab179b98afe1712aaac58edf4a79303058b32f817"></a>FLOW_MAP&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a53a1ea178f81781f2f698f80ab179b98adfdcc779689062656f8625225d0d75e5" name="a53a1ea178f81781f2f698f80ab179b98adfdcc779689062656f8625225d0d75e5"></a>FLOW_SEQ&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00060">60</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="aea23d10585c1509e61ab0bd488d3fde2" name="aea23d10585c1509e61ab0bd488d3fde2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea23d10585c1509e61ab0bd488d3fde2">&#9670;&#160;</a></span>Scanner()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">YAML::Scanner::Scanner </td>
+          <td>(</td>
+          <td class="paramtype">std::istream &amp;&#160;</td>
+          <td class="paramname"><em>in</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00010">10</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0ac4b5ac07f864a667f3e742b149a304" name="a0ac4b5ac07f864a667f3e742b149a304"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ac4b5ac07f864a667f3e742b149a304">&#9670;&#160;</a></span>~Scanner()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">YAML::Scanner::~Scanner </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a4f9c6e470d4dc5041cdec0a2b64c7753" name="a4f9c6e470d4dc5041cdec0a2b64c7753"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f9c6e470d4dc5041cdec0a2b64c7753">&#9670;&#160;</a></span>CanInsertPotentialSimpleKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool YAML::Scanner::CanInsertPotentialSimpleKey </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="simplekey_8cpp_source.html">simplekey.cpp</a> 第 <a class="el" href="simplekey_8cpp_source.html#l00036">36</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aca838c1612fbd22188f9d912c90e1129" name="aca838c1612fbd22188f9d912c90e1129"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca838c1612fbd22188f9d912c90e1129">&#9670;&#160;</a></span>empty()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool YAML::Scanner::empty </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Returns true if there are no more tokens to be read. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00024">24</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aedb7d3d2135e728c320144bf7695a970" name="aedb7d3d2135e728c320144bf7695a970"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aedb7d3d2135e728c320144bf7695a970">&#9670;&#160;</a></span>EndStream()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::EndStream </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Closes out the stream, finish up, etc. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00254">254</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aefd5159da236238a420567b61db15479" name="aefd5159da236238a420567b61db15479"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aefd5159da236238a420567b61db15479">&#9670;&#160;</a></span>EnsureTokensInQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::EnsureTokensInQueue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Scans until there's a valid token at the front of the queue, or the queue is empty. The state can be checked by <code><a class="el" href="classYAML_1_1Scanner.html#aca838c1612fbd22188f9d912c90e1129">empty</a></code>, and the next token retrieved by <code><a class="el" href="classYAML_1_1Scanner.html#a65433ee930cad573a7f82da86f91c80d">peek</a></code>. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00053">53</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adea14b0d950416977ee2857bab0caf79" name="adea14b0d950416977ee2857bab0caf79"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adea14b0d950416977ee2857bab0caf79">&#9670;&#160;</a></span>ExistsActiveSimpleKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool YAML::Scanner::ExistsActiveSimpleKey </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="simplekey_8cpp_source.html">simplekey.cpp</a> 第 <a class="el" href="simplekey_8cpp_source.html#l00047">47</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6d41af553f31d73fa2388da5e81babf1" name="a6d41af553f31d73fa2388da5e81babf1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d41af553f31d73fa2388da5e81babf1">&#9670;&#160;</a></span>GetFlowLevel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::size_t YAML::Scanner::GetFlowLevel </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00091">91</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2eaae992ffbcd5ffefdaa85e3f43589c" name="a2eaae992ffbcd5ffefdaa85e3f43589c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2eaae992ffbcd5ffefdaa85e3f43589c">&#9670;&#160;</a></span>GetStartTokenFor()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14">Token::TYPE</a> YAML::Scanner::GetStartTokenFor </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structYAML_1_1Scanner_1_1IndentMarker.html#aba4adf0b567a404616f19d1606acde55">IndentMarker::INDENT_TYPE</a>&#160;</td>
+          <td class="paramname"><em>type</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00272">272</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acc5f3a6054e587cc5ff9ce88197f242a" name="acc5f3a6054e587cc5ff9ce88197f242a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc5f3a6054e587cc5ff9ce88197f242a">&#9670;&#160;</a></span>GetTopIndent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int YAML::Scanner::GetTopIndent </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00376">376</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a49e5d3eab4442e2a654bb9a380c82896" name="a49e5d3eab4442e2a654bb9a380c82896"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49e5d3eab4442e2a654bb9a380c82896">&#9670;&#160;</a></span>GetValueRegex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYAML_1_1RegEx.html">RegEx</a> &amp; YAML::Scanner::GetValueRegex </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns the appropriate regex to check if the next token is a value token. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00237">237</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae758b3ac49a45644150258510178eeca" name="ae758b3ac49a45644150258510178eeca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae758b3ac49a45644150258510178eeca">&#9670;&#160;</a></span>InBlockContext()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool YAML::Scanner::InBlockContext </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00090">90</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a941235b28664b754557544750aaf849c" name="a941235b28664b754557544750aaf849c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a941235b28664b754557544750aaf849c">&#9670;&#160;</a></span>InFlowContext()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool YAML::Scanner::InFlowContext </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00089">89</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aefb757746e2e225ff4cb2955d7f2b5d1" name="aefb757746e2e225ff4cb2955d7f2b5d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aefb757746e2e225ff4cb2955d7f2b5d1">&#9670;&#160;</a></span>InsertPotentialSimpleKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::InsertPotentialSimpleKey </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="simplekey_8cpp_source.html">simplekey.cpp</a> 第 <a class="el" href="simplekey_8cpp_source.html#l00058">58</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad38b09c4ce6624478b9504d8a7350eb1" name="ad38b09c4ce6624478b9504d8a7350eb1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad38b09c4ce6624478b9504d8a7350eb1">&#9670;&#160;</a></span>InvalidateSimpleKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::InvalidateSimpleKey </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="simplekey_8cpp_source.html">simplekey.cpp</a> 第 <a class="el" href="simplekey_8cpp_source.html#l00084">84</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa461a073a67dc0ef4122983624e3a8d4" name="aa461a073a67dc0ef4122983624e3a8d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa461a073a67dc0ef4122983624e3a8d4">&#9670;&#160;</a></span>IsWhitespaceToBeEaten()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool YAML::Scanner::IsWhitespaceToBeEaten </td>
+          <td>(</td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>ch</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00225">225</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac2ea7a607ea1d3e96dfbf090b0c29e0a" name="ac2ea7a607ea1d3e96dfbf090b0c29e0a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2ea7a607ea1d3e96dfbf090b0c29e0a">&#9670;&#160;</a></span>mark()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structYAML_1_1Mark.html">Mark</a> YAML::Scanner::mark </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Returns the current mark in the input stream. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00051">51</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a65433ee930cad573a7f82da86f91c80d" name="a65433ee930cad573a7f82da86f91c80d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65433ee930cad573a7f82da86f91c80d">&#9670;&#160;</a></span>peek()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structYAML_1_1Token.html">Token</a> &amp; YAML::Scanner::peek </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Returns, but does not remove, the next token in the queue. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00035">35</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a59105995d1326628b33b330299e5db4e" name="a59105995d1326628b33b330299e5db4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59105995d1326628b33b330299e5db4e">&#9670;&#160;</a></span>pop()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::pop </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Removes the next token in the queue. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00029">29</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a554dfec39abc238ab6daac9dd9906b02" name="a554dfec39abc238ab6daac9dd9906b02"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a554dfec39abc238ab6daac9dd9906b02">&#9670;&#160;</a></span>PopAllIndents()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::PopAllIndents </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Pops all indentations (except for the base empty one) off the stack, and enqueues the proper token each time. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00343">343</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab1388029cd44b1958c62727a5517bcbd" name="ab1388029cd44b1958c62727a5517bcbd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1388029cd44b1958c62727a5517bcbd">&#9670;&#160;</a></span>PopAllSimpleKeys()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::PopAllSimpleKeys </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="simplekey_8cpp_source.html">simplekey.cpp</a> 第 <a class="el" href="simplekey_8cpp_source.html#l00128">128</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a387eb71eb1625d5bc7f6a4b975ed7132" name="a387eb71eb1625d5bc7f6a4b975ed7132"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a387eb71eb1625d5bc7f6a4b975ed7132">&#9670;&#160;</a></span>PopIndent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::PopIndent </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Pops a single indent, pushing the proper token. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00360">360</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac92d1c98f7c24f63e51ff2ed2f8f78b2" name="ac92d1c98f7c24f63e51ff2ed2f8f78b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac92d1c98f7c24f63e51ff2ed2f8f78b2">&#9670;&#160;</a></span>PopIndentToHere()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::PopIndentToHere </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Pops indentations off the stack until it reaches the current indentation level, and enqueues the proper token each time. Then pops all invalid indentations off. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00316">316</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a90a08e537d1826475a49d9cc12be735b" name="a90a08e537d1826475a49d9cc12be735b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90a08e537d1826475a49d9cc12be735b">&#9670;&#160;</a></span>PushIndentTo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structYAML_1_1Scanner_1_1IndentMarker.html">Scanner::IndentMarker</a> * YAML::Scanner::PushIndentTo </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>column</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structYAML_1_1Scanner_1_1IndentMarker.html#aba4adf0b567a404616f19d1606acde55">IndentMarker::INDENT_TYPE</a>&#160;</td>
+          <td class="paramname"><em>type</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Pushes an indentation onto the stack, and enqueues the proper token (sequence start or mapping start).</p>
+<dl class="section return"><dt>返回</dt><dd>the indent marker it generates (if any). </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00286">286</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac99cea0ec62d52037401c8e4cb034f44" name="ac99cea0ec62d52037401c8e4cb034f44"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac99cea0ec62d52037401c8e4cb034f44">&#9670;&#160;</a></span>PushToken()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structYAML_1_1Token.html">Token</a> * YAML::Scanner::PushToken </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structYAML_1_1Token.html#a60bcc6615b60f00ae9bce3aaeebf6d14">Token::TYPE</a>&#160;</td>
+          <td class="paramname"><em>type</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00267">267</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a15e1221745b361062bde676a4be3eaa4" name="a15e1221745b361062bde676a4be3eaa4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15e1221745b361062bde676a4be3eaa4">&#9670;&#160;</a></span>ScanAnchorOrAlias()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanAnchorOrAlias </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a> 第 <a class="el" href="scantoken_8cpp_source.html#l00221">221</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3212e0c7b1a36dac5749dd03c6393b1f" name="a3212e0c7b1a36dac5749dd03c6393b1f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3212e0c7b1a36dac5749dd03c6393b1f">&#9670;&#160;</a></span>ScanBlockEnd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanBlockEnd </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4ab725ace87c08a04e73ce7ea14880d0" name="a4ab725ace87c08a04e73ce7ea14880d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ab725ace87c08a04e73ce7ea14880d0">&#9670;&#160;</a></span>ScanBlockEntry()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanBlockEntry </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a> 第 <a class="el" href="scantoken_8cpp_source.html#l00153">153</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a96c5d7703d6ae1b7e581fe8594bfefec" name="a96c5d7703d6ae1b7e581fe8594bfefec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96c5d7703d6ae1b7e581fe8594bfefec">&#9670;&#160;</a></span>ScanBlockMapSTart()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanBlockMapSTart </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a32fcdb1d12d11f64520ecd06759a3c36" name="a32fcdb1d12d11f64520ecd06759a3c36"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32fcdb1d12d11f64520ecd06759a3c36">&#9670;&#160;</a></span>ScanBlockScalar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanBlockScalar </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a> 第 <a class="el" href="scantoken_8cpp_source.html#l00375">375</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a10099135246beef30f736ccf8cf84f2e" name="a10099135246beef30f736ccf8cf84f2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10099135246beef30f736ccf8cf84f2e">&#9670;&#160;</a></span>ScanBlockSeqStart()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanBlockSeqStart </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0675d6bcf0a7d3fd6a4c2ad964023c34" name="a0675d6bcf0a7d3fd6a4c2ad964023c34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0675d6bcf0a7d3fd6a4c2ad964023c34">&#9670;&#160;</a></span>ScanDirective()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanDirective </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a> 第 <a class="el" href="scantoken_8cpp_source.html#l00020">20</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8a3ba88aaae58fa788d8f7b818a43f48" name="a8a3ba88aaae58fa788d8f7b818a43f48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a3ba88aaae58fa788d8f7b818a43f48">&#9670;&#160;</a></span>ScanDocEnd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanDocEnd </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a> 第 <a class="el" href="scantoken_8cpp_source.html#l00074">74</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae890ed8410ab35bbd6313e0756aaacfc" name="ae890ed8410ab35bbd6313e0756aaacfc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae890ed8410ab35bbd6313e0756aaacfc">&#9670;&#160;</a></span>ScanDocStart()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanDocStart </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a> 第 <a class="el" href="scantoken_8cpp_source.html#l00061">61</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acb60be314e8896df4935a69422c759e3" name="acb60be314e8896df4935a69422c759e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb60be314e8896df4935a69422c759e3">&#9670;&#160;</a></span>ScanFlowEnd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanFlowEnd </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a> 第 <a class="el" href="scantoken_8cpp_source.html#l00104">104</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab316dc416a6b0a6d8fa0dff24c6b275e" name="ab316dc416a6b0a6d8fa0dff24c6b275e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab316dc416a6b0a6d8fa0dff24c6b275e">&#9670;&#160;</a></span>ScanFlowEntry()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanFlowEntry </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a> 第 <a class="el" href="scantoken_8cpp_source.html#l00134">134</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae37ec17474825d18958d59cc29ebcf99" name="ae37ec17474825d18958d59cc29ebcf99"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae37ec17474825d18958d59cc29ebcf99">&#9670;&#160;</a></span>ScanFlowStart()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanFlowStart </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a> 第 <a class="el" href="scantoken_8cpp_source.html#l00087">87</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aadd26643d4fe1153852d570bc213cab0" name="aadd26643d4fe1153852d570bc213cab0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aadd26643d4fe1153852d570bc213cab0">&#9670;&#160;</a></span>ScanKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanKey </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a> 第 <a class="el" href="scantoken_8cpp_source.html#l00173">173</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a129c35d0110a4d8b1743d852d265e631" name="a129c35d0110a4d8b1743d852d265e631"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a129c35d0110a4d8b1743d852d265e631">&#9670;&#160;</a></span>ScanNextToken()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanNextToken </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>The main scanning function; this method branches out to scan whatever the next token should be. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00082">82</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af36c6e9de84ec5c6b94a48b8a5277c11" name="af36c6e9de84ec5c6b94a48b8a5277c11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af36c6e9de84ec5c6b94a48b8a5277c11">&#9670;&#160;</a></span>ScanPlainScalar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanPlainScalar </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a> 第 <a class="el" href="scantoken_8cpp_source.html#l00295">295</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac6b55caa05ce53fa297e3898377dbc5d" name="ac6b55caa05ce53fa297e3898377dbc5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6b55caa05ce53fa297e3898377dbc5d">&#9670;&#160;</a></span>ScanQuotedScalar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanQuotedScalar </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a> 第 <a class="el" href="scantoken_8cpp_source.html#l00331">331</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adb366a7ada43730f62deab8143c31355" name="adb366a7ada43730f62deab8143c31355"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb366a7ada43730f62deab8143c31355">&#9670;&#160;</a></span>ScanTag()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanTag </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a> 第 <a class="el" href="scantoken_8cpp_source.html#l00256">256</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adb4de86eaeebe388f66844cbe95f851f" name="adb4de86eaeebe388f66844cbe95f851f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb4de86eaeebe388f66844cbe95f851f">&#9670;&#160;</a></span>ScanToNextToken()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanToNextToken </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Eats the input stream until it reaches the next token-like thing. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00176">176</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af5d08ec68a44f532d1d4b8f853540a86" name="af5d08ec68a44f532d1d4b8f853540a86"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5d08ec68a44f532d1d4b8f853540a86">&#9670;&#160;</a></span>ScanValue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ScanValue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a> 第 <a class="el" href="scantoken_8cpp_source.html#l00192">192</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1dc5daec79f58dfea6bd08298ad3f290" name="a1dc5daec79f58dfea6bd08298ad3f290"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1dc5daec79f58dfea6bd08298ad3f290">&#9670;&#160;</a></span>StartStream()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::StartStream </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Sets the initial conditions for starting a stream. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00245">245</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa3c6d73d54c4c305bb3b394c508bffad" name="aa3c6d73d54c4c305bb3b394c508bffad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3c6d73d54c4c305bb3b394c508bffad">&#9670;&#160;</a></span>ThrowParserException()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::Scanner::ThrowParserException </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>msg</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Throws a <a class="el" href="classYAML_1_1ParserException.html">ParserException</a> with the current token location (if available), and does not parse any more tokens. </p>
+
+<p class="definition">在文件 <a class="el" href="scanner_8cpp_source.html">scanner.cpp</a> 第 <a class="el" href="scanner_8cpp_source.html#l00383">383</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a27df4ba762a32169d0b91693304b8119" name="a27df4ba762a32169d0b91693304b8119"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27df4ba762a32169d0b91693304b8119">&#9670;&#160;</a></span>VerifySimpleKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool YAML::Scanner::VerifySimpleKey </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="simplekey_8cpp_source.html">simplekey.cpp</a> 第 <a class="el" href="simplekey_8cpp_source.html#l00100">100</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a72d3a596f6cc172c3044cd863ba9c3c7" name="a72d3a596f6cc172c3044cd863ba9c3c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72d3a596f6cc172c3044cd863ba9c3c7">&#9670;&#160;</a></span>INPUT</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1Stream.html">Stream</a> YAML::Scanner::INPUT</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00174">174</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a32c30dd800f9e3a6f95d7ae5894e2ca1" name="a32c30dd800f9e3a6f95d7ae5894e2ca1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32c30dd800f9e3a6f95d7ae5894e2ca1">&#9670;&#160;</a></span>m_canBeJSONFlow</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool YAML::Scanner::m_canBeJSONFlow</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00182">182</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad4010a6d73f6f7433d161bdcbe8f72a5" name="ad4010a6d73f6f7433d161bdcbe8f72a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4010a6d73f6f7433d161bdcbe8f72a5">&#9670;&#160;</a></span>m_endedStream</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool YAML::Scanner::m_endedStream</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00180">180</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ade60848f10a34c95525e072e6ea1f3cc" name="ade60848f10a34c95525e072e6ea1f3cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade60848f10a34c95525e072e6ea1f3cc">&#9670;&#160;</a></span>m_flows</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::stack&lt;<a class="el" href="classYAML_1_1Scanner.html#a53a1ea178f81781f2f698f80ab179b98">FLOW_MARKER</a>&gt; YAML::Scanner::m_flows</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00186">186</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abcdcd1d561cfb0bba00dd68fc2a5008f" name="abcdcd1d561cfb0bba00dd68fc2a5008f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abcdcd1d561cfb0bba00dd68fc2a5008f">&#9670;&#160;</a></span>m_indentRefs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1ptr__vector.html">ptr_vector</a>&lt;<a class="el" href="structYAML_1_1Scanner_1_1IndentMarker.html">IndentMarker</a>&gt; YAML::Scanner::m_indentRefs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00185">185</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af28dff3b4f406f1f627e5ac05fdbb9f9" name="af28dff3b4f406f1f627e5ac05fdbb9f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af28dff3b4f406f1f627e5ac05fdbb9f9">&#9670;&#160;</a></span>m_indents</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::stack&lt;<a class="el" href="structYAML_1_1Scanner_1_1IndentMarker.html">IndentMarker</a> *&gt; YAML::Scanner::m_indents</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00184">184</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4358cfdf2aad349cabdf35a2f07539bf" name="a4358cfdf2aad349cabdf35a2f07539bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4358cfdf2aad349cabdf35a2f07539bf">&#9670;&#160;</a></span>m_simpleKeyAllowed</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool YAML::Scanner::m_simpleKeyAllowed</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00181">181</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a80c2ed0a69b031bb92adce14f311a69e" name="a80c2ed0a69b031bb92adce14f311a69e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80c2ed0a69b031bb92adce14f311a69e">&#9670;&#160;</a></span>m_simpleKeys</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::stack&lt;<a class="el" href="structYAML_1_1Scanner_1_1SimpleKey.html">SimpleKey</a>&gt; YAML::Scanner::m_simpleKeys</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00183">183</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a95426e753d3be79578909af1c6f3802d" name="a95426e753d3be79578909af1c6f3802d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95426e753d3be79578909af1c6f3802d">&#9670;&#160;</a></span>m_startedStream</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool YAML::Scanner::m_startedStream</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00180">180</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a087e344b2729a724d38a9ca874075e37" name="a087e344b2729a724d38a9ca874075e37"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a087e344b2729a724d38a9ca874075e37">&#9670;&#160;</a></span>m_tokens</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::queue&lt;<a class="el" href="structYAML_1_1Token.html">Token</a>&gt; YAML::Scanner::m_tokens</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="scanner_8h_source.html">scanner.h</a> 第 <a class="el" href="scanner_8h_source.html#l00177">177</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WTSUtils/yamlcpp/<a class="el" href="scanner_8h_source.html">scanner.h</a></li>
+<li>src/WTSUtils/yamlcpp/<a class="el" href="scanner_8cpp_source.html">scanner.cpp</a></li>
+<li>src/WTSUtils/yamlcpp/<a class="el" href="scantoken_8cpp_source.html">scantoken.cpp</a></li>
+<li>src/WTSUtils/yamlcpp/<a class="el" href="simplekey_8cpp_source.html">simplekey.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespaceYAML.html">YAML</a></li><li class="navelem"><a class="el" href="classYAML_1_1Scanner.html">Scanner</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

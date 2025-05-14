@@ -1,0 +1,26 @@
+var structAPIOptionTradeOrderUnit =
+[
+    [ "APIOptionTradeOrderUnit", "structAPIOptionTradeOrderUnit.html#a030a021d7c129c608b746914c9c30ad0", null ],
+    [ "APIOptionTradeOrderUnit", "structAPIOptionTradeOrderUnit.html#a030a021d7c129c608b746914c9c30ad0", null ],
+    [ "account_id", "structAPIOptionTradeOrderUnit.html#a1a1d7c37de25bd3c40fa7fa9e224024a", null ],
+    [ "business_type", "structAPIOptionTradeOrderUnit.html#a5433f13ea2406967dc9c714c26fc60a1", null ],
+    [ "call_or_put", "structAPIOptionTradeOrderUnit.html#aa61ec5bb7f62de9aafcea08e3f4be67b", null ],
+    [ "cl_ord_id", "structAPIOptionTradeOrderUnit.html#a447eb0d53417e87636111472f5c8f41c", null ],
+    [ "cl_ord_no", "structAPIOptionTradeOrderUnit.html#a676672598fb40239d9864923754fc567", null ],
+    [ "covered_or_uncovered", "structAPIOptionTradeOrderUnit.html#a2f1d6173304f1825f9d8073b0549845c", null ],
+    [ "exec_id", "structAPIOptionTradeOrderUnit.html#af958a0038257451154493956786f0018", null ],
+    [ "exec_type", "structAPIOptionTradeOrderUnit.html#ab5079e7f34de5a10e9ad22bb4012525f", null ],
+    [ "fee", "structAPIOptionTradeOrderUnit.html#a702faf9957069d81f505f2f8c9cf9210", null ],
+    [ "last_px", "structAPIOptionTradeOrderUnit.html#a85138020d85fec16a4db606c32601469", null ],
+    [ "last_qty", "structAPIOptionTradeOrderUnit.html#a380d74db2b11466df4e3a709d5539c9a", null ],
+    [ "market_id", "structAPIOptionTradeOrderUnit.html#af86c3d08e1746eab6224f67a03b9810d", null ],
+    [ "ord_type", "structAPIOptionTradeOrderUnit.html#aa2226875fb9db479f326d46f7eb86f90", null ],
+    [ "order_id", "structAPIOptionTradeOrderUnit.html#abc961bf1ddd036cb9abed9705d41a742", null ],
+    [ "position_effect", "structAPIOptionTradeOrderUnit.html#aa27e87ea7aaf2c82e948fe0a20a9489c", null ],
+    [ "secondary_order_id", "structAPIOptionTradeOrderUnit.html#a796e1fbbb3c9ffa5f496998e61f2a3d3", null ],
+    [ "security_id", "structAPIOptionTradeOrderUnit.html#abd1fb5f9c0c6542ed6437b96fd5f3ccd", null ],
+    [ "security_symbol", "structAPIOptionTradeOrderUnit.html#a04f97570f148b515a067a23a9d418d77", null ],
+    [ "side", "structAPIOptionTradeOrderUnit.html#a5f0f4a6fdd0fe9b984da85934b032731", null ],
+    [ "total_value_traded", "structAPIOptionTradeOrderUnit.html#a41ee13503adccf688cf23f87ab3bb75c", null ],
+    [ "transact_time", "structAPIOptionTradeOrderUnit.html#a26ef841400f4fd3e319e6b944a9bc4f3", null ]
+];

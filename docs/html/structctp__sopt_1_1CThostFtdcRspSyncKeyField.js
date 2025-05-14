@@ -1,0 +1,25 @@
+var structctp__sopt_1_1CThostFtdcRspSyncKeyField =
+[
+    [ "BankBranchID", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#ab795a0512e2b93d1e62a85b7b646cb14", null ],
+    [ "BankID", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#a4e47ba930f1361e0302c9ef74c0c1533", null ],
+    [ "BankSerial", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#af5868227c66515fdb2c5095a9486dc2d", null ],
+    [ "BrokerBranchID", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#a7fbdfbe79c2a9b2fc9cbe00be057da34", null ],
+    [ "BrokerID", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#a22e8fa228f7188b3451d17025a424a61", null ],
+    [ "BrokerIDByBank", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#a4c97db4cc4caeb8afbbee5d1910f883e", null ],
+    [ "DeviceID", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#a1b2ddcd6711d2c6af908a7b971b0f7b9", null ],
+    [ "ErrorID", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#a412dd94a5313a310cd90551a33436751", null ],
+    [ "ErrorMsg", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#af7e5c9016d1cb32cb37c8eac2c8b7769", null ],
+    [ "InstallID", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#a75eb9f2bdf252f71bee8f80fa89fbcb8", null ],
+    [ "LastFragment", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#a32d914c19d4eb6e288c38e53f4dca53a", null ],
+    [ "Message", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#a63af793e4fba410c47f8f59655451611", null ],
+    [ "OperNo", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#adbba50f3a9be1dcd8145b8fbe4ef3d9f", null ],
+    [ "PlateSerial", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#a106dea14565286588c08cc63bca41ca1", null ],
+    [ "RequestID", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#a55eb16ce4fca160b9d793fd399783856", null ],
+    [ "SessionID", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#ab11258ee90498624f695c3a71a3ccc86", null ],
+    [ "TID", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#ac4295424d08bada73553f136af1b3226", null ],
+    [ "TradeCode", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#abf7e8667cb0e98938d5b19c9dd533319", null ],
+    [ "TradeDate", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#a41c45f1b377ba626cedf04b19088cef3", null ],
+    [ "TradeTime", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#a466ca37d0b0b01858360a8fe742a3d68", null ],
+    [ "TradingDay", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#a0238fcb57390aa3ecb5d5cb849f87a7a", null ],
+    [ "UserID", "structctp__sopt_1_1CThostFtdcRspSyncKeyField.html#ad9bfbd921b4b42ed6d833f443dc4ddd9", null ]
+];

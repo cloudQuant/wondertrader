@@ -1,0 +1,1786 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/oes_api/parser/json_parser/oes_query_json_parser.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('oes__query__json__parser_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">oes_query_json_parser.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;<a class="el" href="oes__packets_8h_source.html">oes_global/oes_packets.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__global__packet_8h_source.html">sutil/net/spk_global_packet.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="types_8h_source.html">sutil/types.h</a>&gt;</code><br />
+</div>
+<p><a href="oes__query__json__parser_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:ac19ce248c13785f3944d20371bc62b5f" id="r_ac19ce248c13785f3944d20371bc62b5f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="oes__packets_8h.html#adf264d9c9079ee7ba1f57bf2fbdcd3ef">OesQryReqMsgT</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#ac19ce248c13785f3944d20371bc62b5f">OesJsonParser_DecodeQueryReq</a> (<a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *pReqHead, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pMsgBody, <a class="el" href="oes__packets_8h.html#adf264d9c9079ee7ba1f57bf2fbdcd3ef">OesQryReqMsgT</a> *pQryReq, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pRemoteInfo)</td></tr>
+<tr class="separator:ac19ce248c13785f3944d20371bc62b5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b2906cd409f74c875e0db02b15eecf5" id="r_a5b2906cd409f74c875e0db02b15eecf5"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a5b2906cd409f74c875e0db02b15eecf5">OesJsonParser_EncodeQueryRsp</a> (<a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *pRspHead, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__packets_8h.html#a33088ccb974e47d4289db95b3f3807d7">OesQryRspMsgT</a> *pQryRsp, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pRemoteInfo)</td></tr>
+<tr class="separator:a5b2906cd409f74c875e0db02b15eecf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe4c91bc689d1ea7e5240ddf3af884a3" id="r_abe4c91bc689d1ea7e5240ddf3af884a3"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#abe4c91bc689d1ea7e5240ddf3af884a3">OesJsonParser_EncodeQueryRspItem</a> (<a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *pRspHead, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *pQryRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:abe4c91bc689d1ea7e5240ddf3af884a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5badaf8b57dd4ff5f7272cce215acf2c" id="r_a5badaf8b57dd4ff5f7272cce215acf2c"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a5badaf8b57dd4ff5f7272cce215acf2c">OesJsonParser_EncodeQueryRspItem2</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a> qryMsgType, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *pQryRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a5badaf8b57dd4ff5f7272cce215acf2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a871e7515e595ca391bff5867af6a0f29" id="r_a871e7515e595ca391bff5867af6a0f29"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a871e7515e595ca391bff5867af6a0f29">JsonParser_EncodeClientOverview</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#af4b886210be38a302e9a6806de0ae289">OesClientOverviewT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a871e7515e595ca391bff5867af6a0f29"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fc325bce869b846287b379ff6625c9f" id="r_a3fc325bce869b846287b379ff6625c9f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a3fc325bce869b846287b379ff6625c9f">JsonParser_EncodeOrdItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a380130473d53bbf6d8624002983aeff8">OesOrdItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a3fc325bce869b846287b379ff6625c9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78c1c87b6c4ba183f9c224e91832d16f" id="r_a78c1c87b6c4ba183f9c224e91832d16f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a78c1c87b6c4ba183f9c224e91832d16f">JsonParser_EncodeTrdItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a3966af7dbdef786f0b7d6b6fad9582bf">OesTrdItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a78c1c87b6c4ba183f9c224e91832d16f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c37851807fda150b5cd7422420c866c" id="r_a2c37851807fda150b5cd7422420c866c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a2c37851807fda150b5cd7422420c866c">JsonParser_EncodeCashAssetItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a9c78ed2caacb105c843848560c78388b">OesCashAssetItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a2c37851807fda150b5cd7422420c866c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a166a9079abb39aab2198949895192262" id="r_a166a9079abb39aab2198949895192262"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a166a9079abb39aab2198949895192262">JsonParser_EncodeCashAssetWithRptHead</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__packets_8h.html#a859bc92e6bfa2ef358e42d2d03bccf2a">OesRptMsgHeadT</a> *pRptMsgHead, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__base__model_8h.html#aa81c6b739b09cf800d75d35567faea9e">OesCashAssetReportT</a> *pRptItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a166a9079abb39aab2198949895192262"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaeeee702f535dffa35544a81f827dda6" id="r_aaeeee702f535dffa35544a81f827dda6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#aaeeee702f535dffa35544a81f827dda6">JsonParser_EncodeInvAcctItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#acea216f6c88d9c996b55613ef1db4577">OesInvAcctItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:aaeeee702f535dffa35544a81f827dda6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a880fa58713839d69239fcf34e5919b9a" id="r_a880fa58713839d69239fcf34e5919b9a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a880fa58713839d69239fcf34e5919b9a">JsonParser_EncodeCommissionRateItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#ab24abaeae988653ef645c0c8ecbab078">OesCommissionRateItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a880fa58713839d69239fcf34e5919b9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc0f61d95fe5caeec3fefb38907705a6" id="r_acc0f61d95fe5caeec3fefb38907705a6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#acc0f61d95fe5caeec3fefb38907705a6">JsonParser_EncodeFundTransferSerialItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#ae30b6a19bac0125b15eef0a91d554ff9">OesFundTransferSerialItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:acc0f61d95fe5caeec3fefb38907705a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5abb3c54ad88ca97a8bd2cbd0fbce011" id="r_a5abb3c54ad88ca97a8bd2cbd0fbce011"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a5abb3c54ad88ca97a8bd2cbd0fbce011">JsonParser_EncodeStkHoldingItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#ad65e209c21fc0906518e5deed78f98aa">OesStkHoldingItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a5abb3c54ad88ca97a8bd2cbd0fbce011"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4bd5a0bdcb3ec8100b40163d927fd64b" id="r_a4bd5a0bdcb3ec8100b40163d927fd64b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a4bd5a0bdcb3ec8100b40163d927fd64b">JsonParser_EncodeStkHoldingWithRptHead</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__packets_8h.html#a859bc92e6bfa2ef358e42d2d03bccf2a">OesRptMsgHeadT</a> *pRptMsgHead, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__base__model_8h.html#a27ca4aed7e7467bc42ddfb4cfbd435c4">OesStkHoldingReportT</a> *pRptItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a4bd5a0bdcb3ec8100b40163d927fd64b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58e544ea43e1050785fda77ce9340ed1" id="r_a58e544ea43e1050785fda77ce9340ed1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a58e544ea43e1050785fda77ce9340ed1">JsonParser_EncodeOptHoldingItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__option_8h.html#a67d20da808333b5bb7274abf4d77acc4">OesOptHoldingItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a58e544ea43e1050785fda77ce9340ed1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8089fea7fdc4459c943e7f019190d604" id="r_a8089fea7fdc4459c943e7f019190d604"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a8089fea7fdc4459c943e7f019190d604">JsonParser_EncodeLotWinningItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#ad148ee057ebd7fea889a734fdc6ac2e7">OesLotWinningItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a8089fea7fdc4459c943e7f019190d604"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47e866a1ff6ff2eea2da80b235433034" id="r_a47e866a1ff6ff2eea2da80b235433034"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a47e866a1ff6ff2eea2da80b235433034">JsonParser_EncodeIssueItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a8700faf67c183830a3129a6fd3e2a1bb">OesIssueItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a47e866a1ff6ff2eea2da80b235433034"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6be0d74e20d434ccc21ac4638de56d8f" id="r_a6be0d74e20d434ccc21ac4638de56d8f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a6be0d74e20d434ccc21ac4638de56d8f">JsonParser_EncodeStockItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a6b590a668aea5bc4bd3ca09b622420a0">OesStockItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a6be0d74e20d434ccc21ac4638de56d8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a424ede05b7ea88af1c4d9a8dce28146b" id="r_a424ede05b7ea88af1c4d9a8dce28146b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a424ede05b7ea88af1c4d9a8dce28146b">JsonParser_EncodeCustItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a7c6056c4a171fb2c797397ad7c12ff71">OesCustItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a424ede05b7ea88af1c4d9a8dce28146b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a75bc5caa6e461b228ddc6dceee4b65" id="r_a8a75bc5caa6e461b228ddc6dceee4b65"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a8a75bc5caa6e461b228ddc6dceee4b65">JsonParser_EncodeEtfItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a993b819d94f68b7603f9c505c852efee">OesEtfItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a8a75bc5caa6e461b228ddc6dceee4b65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d492ad45a6dd0bcc734eda0add4dfcc" id="r_a4d492ad45a6dd0bcc734eda0add4dfcc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a4d492ad45a6dd0bcc734eda0add4dfcc">JsonParser_EncodeEtfComponentItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a7e080da654e2f8429342aa9c379f9357">OesEtfComponentItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a4d492ad45a6dd0bcc734eda0add4dfcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab74019d679192f15423b7ebf9385974a" id="r_ab74019d679192f15423b7ebf9385974a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#ab74019d679192f15423b7ebf9385974a">JsonParser_EncodeOptionItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__option_8h.html#ac053912853ad387c566697dc2dc69cf8">OesOptionItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:ab74019d679192f15423b7ebf9385974a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec63e2b58d862a65b4e0c8d57bf7e1e7" id="r_aec63e2b58d862a65b4e0c8d57bf7e1e7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#aec63e2b58d862a65b4e0c8d57bf7e1e7">JsonParser_EncodeMktStatusItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a69fbf2c9cbe0878df222980ed746b930">OesMarketStateItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:aec63e2b58d862a65b4e0c8d57bf7e1e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a442c5ee4adf28c4e4245e135a91b732b" id="r_a442c5ee4adf28c4e4245e135a91b732b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a442c5ee4adf28c4e4245e135a91b732b">JsonParser_EncodeNotifyInfoItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a78d468496d4a2c90ffaee4b587753b3d">OesNotifyInfoItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a442c5ee4adf28c4e4245e135a91b732b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ca219caccdf7c6351c011ca65e5fbbb" id="r_a9ca219caccdf7c6351c011ca65e5fbbb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a9ca219caccdf7c6351c011ca65e5fbbb">JsonParser_EncodeCounterCashItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#ab4dd207f96a7b82e85243b79c44529d4">OesCounterCashItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a9ca219caccdf7c6351c011ca65e5fbbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a244daffd4631060681e271fa7d83d272" id="r_a244daffd4631060681e271fa7d83d272"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a244daffd4631060681e271fa7d83d272">JsonParser_EncodeOptUnderlyingHoldingItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__option_8h.html#a54e4c865cc6d7f3dcbf91403e787503b">OesOptUnderlyingHoldingItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a244daffd4631060681e271fa7d83d272"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86d55018ce663f863f1af45e19a75219" id="r_a86d55018ce663f863f1af45e19a75219"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a86d55018ce663f863f1af45e19a75219">JsonParser_EncodeOptPositionLimitItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__option_8h.html#a168fd5b8d1783dda15190950a2351b70">OesOptPositionLimitItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a86d55018ce663f863f1af45e19a75219"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa688aeac643af35a5577baa1a7b9b097" id="r_aa688aeac643af35a5577baa1a7b9b097"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#aa688aeac643af35a5577baa1a7b9b097">JsonParser_EncodeOptPurchaseLimitItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__option_8h.html#a310ecab2598669c679caaa04368624a1">OesOptPurchaseLimitItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:aa688aeac643af35a5577baa1a7b9b097"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13f34bf27f9551634f69785052657e06" id="r_a13f34bf27f9551634f69785052657e06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a13f34bf27f9551634f69785052657e06">JsonParser_EncodeOptExerciseAssignItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__option_8h.html#a845a5755a67d0c3b5d4327f08aa6b0a2">OesOptExerciseAssignItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a13f34bf27f9551634f69785052657e06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a687b2f0afe50beba2d7345fd8e98bccb" id="r_a687b2f0afe50beba2d7345fd8e98bccb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a687b2f0afe50beba2d7345fd8e98bccb">JsonParser_EncodeOptSettlBaseInfo</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a687b2f0afe50beba2d7345fd8e98bccb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade69db6e682bdf4fead5004ff8301e6d" id="r_ade69db6e682bdf4fead5004ff8301e6d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#ade69db6e682bdf4fead5004ff8301e6d">JsonParser_EncodeOptSettlPosition</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:ade69db6e682bdf4fead5004ff8301e6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a010c7f6040f18e306d2433d3391fb826" id="r_a010c7f6040f18e306d2433d3391fb826"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a010c7f6040f18e306d2433d3391fb826">JsonParser_EncodeBrokerParams</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#ad2bf2e91fe6f74624aa9a38fd6675bfd">OesBrokerParamsInfoT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a010c7f6040f18e306d2433d3391fb826"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7eaf244e9678d3ec36e0c22cd59969c2" id="r_a7eaf244e9678d3ec36e0c22cd59969c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a7eaf244e9678d3ec36e0c22cd59969c2">JsonParser_EncodeApplUpgradeInfo</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a07ec85c19165a8a8af6832e08c176709">OesApplUpgradeInfoT</a> *pUpgradeInfo, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a7eaf244e9678d3ec36e0c22cd59969c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af45c77be3fd43ae1cf46583842518992" id="r_af45c77be3fd43ae1cf46583842518992"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#af45c77be3fd43ae1cf46583842518992">JsonParser_EncodeCrdDebtContractItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#ade8a64b01ec63a30860eedce3f363930">OesCrdDebtContractItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:af45c77be3fd43ae1cf46583842518992"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa46a40a5938cda8dd87d93a007c4b061" id="r_aa46a40a5938cda8dd87d93a007c4b061"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#aa46a40a5938cda8dd87d93a007c4b061">JsonParser_EncodeCrdCustSecuDebtStatsItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#ac2a84993a2b5a8415386021656b7ec0e">OesCrdSecurityDebtStatsItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:aa46a40a5938cda8dd87d93a007c4b061"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89dcddd95976317ce475a601ca3ac00a" id="r_a89dcddd95976317ce475a601ca3ac00a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a89dcddd95976317ce475a601ca3ac00a">JsonParser_EncodeCreditAssetItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#ab4804ff2d8c9148f65dcbb8e58f02599">OesCrdCreditAssetItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a89dcddd95976317ce475a601ca3ac00a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bbfc592f27f1915700fb3260dc6e3b1" id="r_a3bbfc592f27f1915700fb3260dc6e3b1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a3bbfc592f27f1915700fb3260dc6e3b1">JsonParser_EncodeCrdCashRepayItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#a2dada1f1a7e78a17fe401894b16d24f6">OesCrdCashRepayItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a3bbfc592f27f1915700fb3260dc6e3b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3c7d45a7db7f364d4dd9acceeeab9ce" id="r_ad3c7d45a7db7f364d4dd9acceeeab9ce"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#ad3c7d45a7db7f364d4dd9acceeeab9ce">JsonParser_EncodeCrdCashPositionItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#ab951b4b20ec87669b7664d6471059da9">OesCrdCashPositionItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:ad3c7d45a7db7f364d4dd9acceeeab9ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a421470783ac098d7f33f07d5660acaee" id="r_a421470783ac098d7f33f07d5660acaee"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a421470783ac098d7f33f07d5660acaee">JsonParser_EncodeCrdSecurityPositionItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#ae038bf94bee7b38b12bf89639d2fd9a7">OesCrdSecurityPositionItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a421470783ac098d7f33f07d5660acaee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a748e9ba95bf41732d0741de4371125df" id="r_a748e9ba95bf41732d0741de4371125df"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a748e9ba95bf41732d0741de4371125df">JsonParser_EncodeCrdExcessStockItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#a1f4e769260feefb2a756c0789ec0f763">OesCrdExcessStockItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a748e9ba95bf41732d0741de4371125df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1687fdfef5ed488e48cb3a00a6b108a2" id="r_a1687fdfef5ed488e48cb3a00a6b108a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a1687fdfef5ed488e48cb3a00a6b108a2">JsonParser_EncodeCrdDebtJournalItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#a6e7c5f2fe43677bda22ffbd466e5b9ad">OesCrdDebtJournalItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a1687fdfef5ed488e48cb3a00a6b108a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1023ef6a7c74c17e719c66d31f1b4be" id="r_af1023ef6a7c74c17e719c66d31f1b4be"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#af1023ef6a7c74c17e719c66d31f1b4be">JsonParser_EncodeCrdInterestRateItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#ab2d04d203adf206b577fca7dde273add">OesCrdInterestRateItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:af1023ef6a7c74c17e719c66d31f1b4be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f005d273376828b7e3a41655b7926da" id="r_a5f005d273376828b7e3a41655b7926da"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a5f005d273376828b7e3a41655b7926da">JsonParser_EncodeCrdCustUnderlyingInfoItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#aae35c9562bed854cd0537f28f594bafd">OesCrdUnderlyingInfoItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a5f005d273376828b7e3a41655b7926da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9498ed07d91083d2d8c23885bd7870b6" id="r_a9498ed07d91083d2d8c23885bd7870b6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a9498ed07d91083d2d8c23885bd7870b6">JsonParser_EncodeQryCrdDrawableBalanceItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#af8c24ef33743eb9cd7ed14b0aa71cfdf">OesCrdDrawableBalanceItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a9498ed07d91083d2d8c23885bd7870b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0eab5ee163e83c729289dcb697e5ffa5" id="r_a0eab5ee163e83c729289dcb697e5ffa5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__query__json__parser_8h.html#a0eab5ee163e83c729289dcb697e5ffa5">JsonParser_EncodeCrdCollateralTransferOutMaxQtyItem</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#af6288b0e25dfc3390f79c33c0be9effe">OesCrdCollateralTransferOutMaxQtyItemT</a> *pRspItem, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:a0eab5ee163e83c729289dcb697e5ffa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>查询消息解析</p>
+<dl class="section version"><dt>版本</dt><dd>$Id$ </dd></dl>
+<dl class="section since"><dt>自从</dt><dd>2014/12/26 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="oes__query__json__parser_8h_source.html">oes_query_json_parser.h</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="a7eaf244e9678d3ec36e0c22cd59969c2" name="a7eaf244e9678d3ec36e0c22cd59969c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7eaf244e9678d3ec36e0c22cd59969c2">&#9670;&#160;</a></span>JsonParser_EncodeApplUpgradeInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeApplUpgradeInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a07ec85c19165a8a8af6832e08c176709">OesApplUpgradeInfoT</a> *&#160;</td>
+          <td class="paramname"><em>pUpgradeInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a010c7f6040f18e306d2433d3391fb826" name="a010c7f6040f18e306d2433d3391fb826"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a010c7f6040f18e306d2433d3391fb826">&#9670;&#160;</a></span>JsonParser_EncodeBrokerParams()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeBrokerParams </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#ad2bf2e91fe6f74624aa9a38fd6675bfd">OesBrokerParamsInfoT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2c37851807fda150b5cd7422420c866c" name="a2c37851807fda150b5cd7422420c866c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c37851807fda150b5cd7422420c866c">&#9670;&#160;</a></span>JsonParser_EncodeCashAssetItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCashAssetItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a9c78ed2caacb105c843848560c78388b">OesCashAssetItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a166a9079abb39aab2198949895192262" name="a166a9079abb39aab2198949895192262"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a166a9079abb39aab2198949895192262">&#9670;&#160;</a></span>JsonParser_EncodeCashAssetWithRptHead()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCashAssetWithRptHead </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__packets_8h.html#a859bc92e6bfa2ef358e42d2d03bccf2a">OesRptMsgHeadT</a> *&#160;</td>
+          <td class="paramname"><em>pRptMsgHead</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__base__model_8h.html#aa81c6b739b09cf800d75d35567faea9e">OesCashAssetReportT</a> *&#160;</td>
+          <td class="paramname"><em>pRptItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a871e7515e595ca391bff5867af6a0f29" name="a871e7515e595ca391bff5867af6a0f29"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a871e7515e595ca391bff5867af6a0f29">&#9670;&#160;</a></span>JsonParser_EncodeClientOverview()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeClientOverview </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#af4b886210be38a302e9a6806de0ae289">OesClientOverviewT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a880fa58713839d69239fcf34e5919b9a" name="a880fa58713839d69239fcf34e5919b9a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a880fa58713839d69239fcf34e5919b9a">&#9670;&#160;</a></span>JsonParser_EncodeCommissionRateItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCommissionRateItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#ab24abaeae988653ef645c0c8ecbab078">OesCommissionRateItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9ca219caccdf7c6351c011ca65e5fbbb" name="a9ca219caccdf7c6351c011ca65e5fbbb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ca219caccdf7c6351c011ca65e5fbbb">&#9670;&#160;</a></span>JsonParser_EncodeCounterCashItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCounterCashItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#ab4dd207f96a7b82e85243b79c44529d4">OesCounterCashItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad3c7d45a7db7f364d4dd9acceeeab9ce" name="ad3c7d45a7db7f364d4dd9acceeeab9ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3c7d45a7db7f364d4dd9acceeeab9ce">&#9670;&#160;</a></span>JsonParser_EncodeCrdCashPositionItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCrdCashPositionItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#ab951b4b20ec87669b7664d6471059da9">OesCrdCashPositionItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3bbfc592f27f1915700fb3260dc6e3b1" name="a3bbfc592f27f1915700fb3260dc6e3b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bbfc592f27f1915700fb3260dc6e3b1">&#9670;&#160;</a></span>JsonParser_EncodeCrdCashRepayItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCrdCashRepayItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#a2dada1f1a7e78a17fe401894b16d24f6">OesCrdCashRepayItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0eab5ee163e83c729289dcb697e5ffa5" name="a0eab5ee163e83c729289dcb697e5ffa5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0eab5ee163e83c729289dcb697e5ffa5">&#9670;&#160;</a></span>JsonParser_EncodeCrdCollateralTransferOutMaxQtyItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCrdCollateralTransferOutMaxQtyItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#af6288b0e25dfc3390f79c33c0be9effe">OesCrdCollateralTransferOutMaxQtyItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa46a40a5938cda8dd87d93a007c4b061" name="aa46a40a5938cda8dd87d93a007c4b061"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa46a40a5938cda8dd87d93a007c4b061">&#9670;&#160;</a></span>JsonParser_EncodeCrdCustSecuDebtStatsItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCrdCustSecuDebtStatsItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#ac2a84993a2b5a8415386021656b7ec0e">OesCrdSecurityDebtStatsItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5f005d273376828b7e3a41655b7926da" name="a5f005d273376828b7e3a41655b7926da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f005d273376828b7e3a41655b7926da">&#9670;&#160;</a></span>JsonParser_EncodeCrdCustUnderlyingInfoItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCrdCustUnderlyingInfoItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#aae35c9562bed854cd0537f28f594bafd">OesCrdUnderlyingInfoItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af45c77be3fd43ae1cf46583842518992" name="af45c77be3fd43ae1cf46583842518992"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af45c77be3fd43ae1cf46583842518992">&#9670;&#160;</a></span>JsonParser_EncodeCrdDebtContractItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCrdDebtContractItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#ade8a64b01ec63a30860eedce3f363930">OesCrdDebtContractItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1687fdfef5ed488e48cb3a00a6b108a2" name="a1687fdfef5ed488e48cb3a00a6b108a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1687fdfef5ed488e48cb3a00a6b108a2">&#9670;&#160;</a></span>JsonParser_EncodeCrdDebtJournalItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCrdDebtJournalItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#a6e7c5f2fe43677bda22ffbd466e5b9ad">OesCrdDebtJournalItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a748e9ba95bf41732d0741de4371125df" name="a748e9ba95bf41732d0741de4371125df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a748e9ba95bf41732d0741de4371125df">&#9670;&#160;</a></span>JsonParser_EncodeCrdExcessStockItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCrdExcessStockItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#a1f4e769260feefb2a756c0789ec0f763">OesCrdExcessStockItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af1023ef6a7c74c17e719c66d31f1b4be" name="af1023ef6a7c74c17e719c66d31f1b4be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1023ef6a7c74c17e719c66d31f1b4be">&#9670;&#160;</a></span>JsonParser_EncodeCrdInterestRateItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCrdInterestRateItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#ab2d04d203adf206b577fca7dde273add">OesCrdInterestRateItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a421470783ac098d7f33f07d5660acaee" name="a421470783ac098d7f33f07d5660acaee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a421470783ac098d7f33f07d5660acaee">&#9670;&#160;</a></span>JsonParser_EncodeCrdSecurityPositionItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCrdSecurityPositionItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#ae038bf94bee7b38b12bf89639d2fd9a7">OesCrdSecurityPositionItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a89dcddd95976317ce475a601ca3ac00a" name="a89dcddd95976317ce475a601ca3ac00a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89dcddd95976317ce475a601ca3ac00a">&#9670;&#160;</a></span>JsonParser_EncodeCreditAssetItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCreditAssetItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#ab4804ff2d8c9148f65dcbb8e58f02599">OesCrdCreditAssetItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a424ede05b7ea88af1c4d9a8dce28146b" name="a424ede05b7ea88af1c4d9a8dce28146b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a424ede05b7ea88af1c4d9a8dce28146b">&#9670;&#160;</a></span>JsonParser_EncodeCustItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeCustItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a7c6056c4a171fb2c797397ad7c12ff71">OesCustItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4d492ad45a6dd0bcc734eda0add4dfcc" name="a4d492ad45a6dd0bcc734eda0add4dfcc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d492ad45a6dd0bcc734eda0add4dfcc">&#9670;&#160;</a></span>JsonParser_EncodeEtfComponentItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeEtfComponentItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a7e080da654e2f8429342aa9c379f9357">OesEtfComponentItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8a75bc5caa6e461b228ddc6dceee4b65" name="a8a75bc5caa6e461b228ddc6dceee4b65"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a75bc5caa6e461b228ddc6dceee4b65">&#9670;&#160;</a></span>JsonParser_EncodeEtfItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeEtfItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a993b819d94f68b7603f9c505c852efee">OesEtfItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acc0f61d95fe5caeec3fefb38907705a6" name="acc0f61d95fe5caeec3fefb38907705a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc0f61d95fe5caeec3fefb38907705a6">&#9670;&#160;</a></span>JsonParser_EncodeFundTransferSerialItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeFundTransferSerialItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#ae30b6a19bac0125b15eef0a91d554ff9">OesFundTransferSerialItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aaeeee702f535dffa35544a81f827dda6" name="aaeeee702f535dffa35544a81f827dda6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaeeee702f535dffa35544a81f827dda6">&#9670;&#160;</a></span>JsonParser_EncodeInvAcctItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeInvAcctItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#acea216f6c88d9c996b55613ef1db4577">OesInvAcctItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a47e866a1ff6ff2eea2da80b235433034" name="a47e866a1ff6ff2eea2da80b235433034"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47e866a1ff6ff2eea2da80b235433034">&#9670;&#160;</a></span>JsonParser_EncodeIssueItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeIssueItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a8700faf67c183830a3129a6fd3e2a1bb">OesIssueItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8089fea7fdc4459c943e7f019190d604" name="a8089fea7fdc4459c943e7f019190d604"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8089fea7fdc4459c943e7f019190d604">&#9670;&#160;</a></span>JsonParser_EncodeLotWinningItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeLotWinningItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#ad148ee057ebd7fea889a734fdc6ac2e7">OesLotWinningItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aec63e2b58d862a65b4e0c8d57bf7e1e7" name="aec63e2b58d862a65b4e0c8d57bf7e1e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec63e2b58d862a65b4e0c8d57bf7e1e7">&#9670;&#160;</a></span>JsonParser_EncodeMktStatusItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeMktStatusItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a69fbf2c9cbe0878df222980ed746b930">OesMarketStateItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a442c5ee4adf28c4e4245e135a91b732b" name="a442c5ee4adf28c4e4245e135a91b732b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a442c5ee4adf28c4e4245e135a91b732b">&#9670;&#160;</a></span>JsonParser_EncodeNotifyInfoItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeNotifyInfoItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a78d468496d4a2c90ffaee4b587753b3d">OesNotifyInfoItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a13f34bf27f9551634f69785052657e06" name="a13f34bf27f9551634f69785052657e06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13f34bf27f9551634f69785052657e06">&#9670;&#160;</a></span>JsonParser_EncodeOptExerciseAssignItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeOptExerciseAssignItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__option_8h.html#a845a5755a67d0c3b5d4327f08aa6b0a2">OesOptExerciseAssignItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a58e544ea43e1050785fda77ce9340ed1" name="a58e544ea43e1050785fda77ce9340ed1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58e544ea43e1050785fda77ce9340ed1">&#9670;&#160;</a></span>JsonParser_EncodeOptHoldingItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeOptHoldingItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__option_8h.html#a67d20da808333b5bb7274abf4d77acc4">OesOptHoldingItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab74019d679192f15423b7ebf9385974a" name="ab74019d679192f15423b7ebf9385974a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab74019d679192f15423b7ebf9385974a">&#9670;&#160;</a></span>JsonParser_EncodeOptionItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeOptionItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__option_8h.html#ac053912853ad387c566697dc2dc69cf8">OesOptionItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a86d55018ce663f863f1af45e19a75219" name="a86d55018ce663f863f1af45e19a75219"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86d55018ce663f863f1af45e19a75219">&#9670;&#160;</a></span>JsonParser_EncodeOptPositionLimitItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeOptPositionLimitItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__option_8h.html#a168fd5b8d1783dda15190950a2351b70">OesOptPositionLimitItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa688aeac643af35a5577baa1a7b9b097" name="aa688aeac643af35a5577baa1a7b9b097"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa688aeac643af35a5577baa1a7b9b097">&#9670;&#160;</a></span>JsonParser_EncodeOptPurchaseLimitItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeOptPurchaseLimitItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__option_8h.html#a310ecab2598669c679caaa04368624a1">OesOptPurchaseLimitItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a687b2f0afe50beba2d7345fd8e98bccb" name="a687b2f0afe50beba2d7345fd8e98bccb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a687b2f0afe50beba2d7345fd8e98bccb">&#9670;&#160;</a></span>JsonParser_EncodeOptSettlBaseInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeOptSettlBaseInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ade69db6e682bdf4fead5004ff8301e6d" name="ade69db6e682bdf4fead5004ff8301e6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade69db6e682bdf4fead5004ff8301e6d">&#9670;&#160;</a></span>JsonParser_EncodeOptSettlPosition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeOptSettlPosition </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a244daffd4631060681e271fa7d83d272" name="a244daffd4631060681e271fa7d83d272"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a244daffd4631060681e271fa7d83d272">&#9670;&#160;</a></span>JsonParser_EncodeOptUnderlyingHoldingItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeOptUnderlyingHoldingItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__option_8h.html#a54e4c865cc6d7f3dcbf91403e787503b">OesOptUnderlyingHoldingItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3fc325bce869b846287b379ff6625c9f" name="a3fc325bce869b846287b379ff6625c9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fc325bce869b846287b379ff6625c9f">&#9670;&#160;</a></span>JsonParser_EncodeOrdItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeOrdItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a380130473d53bbf6d8624002983aeff8">OesOrdItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9498ed07d91083d2d8c23885bd7870b6" name="a9498ed07d91083d2d8c23885bd7870b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9498ed07d91083d2d8c23885bd7870b6">&#9670;&#160;</a></span>JsonParser_EncodeQryCrdDrawableBalanceItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeQryCrdDrawableBalanceItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets__credit_8h.html#af8c24ef33743eb9cd7ed14b0aa71cfdf">OesCrdDrawableBalanceItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5abb3c54ad88ca97a8bd2cbd0fbce011" name="a5abb3c54ad88ca97a8bd2cbd0fbce011"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5abb3c54ad88ca97a8bd2cbd0fbce011">&#9670;&#160;</a></span>JsonParser_EncodeStkHoldingItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeStkHoldingItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#ad65e209c21fc0906518e5deed78f98aa">OesStkHoldingItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4bd5a0bdcb3ec8100b40163d927fd64b" name="a4bd5a0bdcb3ec8100b40163d927fd64b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4bd5a0bdcb3ec8100b40163d927fd64b">&#9670;&#160;</a></span>JsonParser_EncodeStkHoldingWithRptHead()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeStkHoldingWithRptHead </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__packets_8h.html#a859bc92e6bfa2ef358e42d2d03bccf2a">OesRptMsgHeadT</a> *&#160;</td>
+          <td class="paramname"><em>pRptMsgHead</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__base__model_8h.html#a27ca4aed7e7467bc42ddfb4cfbd435c4">OesStkHoldingReportT</a> *&#160;</td>
+          <td class="paramname"><em>pRptItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6be0d74e20d434ccc21ac4638de56d8f" name="a6be0d74e20d434ccc21ac4638de56d8f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6be0d74e20d434ccc21ac4638de56d8f">&#9670;&#160;</a></span>JsonParser_EncodeStockItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeStockItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a6b590a668aea5bc4bd3ca09b622420a0">OesStockItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a78c1c87b6c4ba183f9c224e91832d16f" name="a78c1c87b6c4ba183f9c224e91832d16f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78c1c87b6c4ba183f9c224e91832d16f">&#9670;&#160;</a></span>JsonParser_EncodeTrdItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> JsonParser_EncodeTrdItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__qry__packets_8h.html#a3966af7dbdef786f0b7d6b6fad9582bf">OesTrdItemT</a> *&#160;</td>
+          <td class="paramname"><em>pRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac19ce248c13785f3944d20371bc62b5f" name="ac19ce248c13785f3944d20371bc62b5f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac19ce248c13785f3944d20371bc62b5f">&#9670;&#160;</a></span>OesJsonParser_DecodeQueryReq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="oes__packets_8h.html#adf264d9c9079ee7ba1f57bf2fbdcd3ef">OesQryReqMsgT</a> * OesJsonParser_DecodeQueryReq </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *&#160;</td>
+          <td class="paramname"><em>pReqHead</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pMsgBody</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="oes__packets_8h.html#adf264d9c9079ee7ba1f57bf2fbdcd3ef">OesQryReqMsgT</a> *&#160;</td>
+          <td class="paramname"><em>pQryReq</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pRemoteInfo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5b2906cd409f74c875e0db02b15eecf5" name="a5b2906cd409f74c875e0db02b15eecf5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b2906cd409f74c875e0db02b15eecf5">&#9670;&#160;</a></span>OesJsonParser_EncodeQueryRsp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * OesJsonParser_EncodeQueryRsp </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *&#160;</td>
+          <td class="paramname"><em>pRspHead</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__packets_8h.html#a33088ccb974e47d4289db95b3f3807d7">OesQryRspMsgT</a> *&#160;</td>
+          <td class="paramname"><em>pQryRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pRemoteInfo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abe4c91bc689d1ea7e5240ddf3af884a3" name="abe4c91bc689d1ea7e5240ddf3af884a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe4c91bc689d1ea7e5240ddf3af884a3">&#9670;&#160;</a></span>OesJsonParser_EncodeQueryRspItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * OesJsonParser_EncodeQueryRspItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *&#160;</td>
+          <td class="paramname"><em>pRspHead</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>pQryRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5badaf8b57dd4ff5f7272cce215acf2c" name="a5badaf8b57dd4ff5f7272cce215acf2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5badaf8b57dd4ff5f7272cce215acf2c">&#9670;&#160;</a></span>OesJsonParser_EncodeQueryRspItem2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * OesJsonParser_EncodeQueryRspItem2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>&#160;</td>
+          <td class="paramname"><em>qryMsgType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>pQryRspItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_70297f1fa9b6148dc45ed33f791a8354.html">oes_api</a></li><li class="navelem"><a class="el" href="dir_9f8a467a3d2884a59a472bc8722c5a93.html">parser</a></li><li class="navelem"><a class="el" href="dir_ac33a07802f029a8e75f680825794900.html">json_parser</a></li><li class="navelem"><a class="el" href="oes__query__json__parser_8h.html">oes_query_json_parser.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

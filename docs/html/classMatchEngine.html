@@ -1,0 +1,1022 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: MatchEngine类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classMatchEngine.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-types">Private 类型</a> &#124;
+<a href="#pri-methods">Private 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classMatchEngine-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">MatchEngine类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>回测撮合引擎类  
+ <a href="classMatchEngine.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="MatchEngine_8h_source.html">MatchEngine.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMatchEngine_1_1__LmtOrdBook.html">_LmtOrdBook</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">限价委托账本结构体  <a href="structMatchEngine_1_1__LmtOrdBook.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMatchEngine_1_1__OrderInfo.html">_OrderInfo</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">订单信息结构体  <a href="structMatchEngine_1_1__OrderInfo.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:ab4ad8f429ed2f2f84d9710faf389f512" id="r_ab4ad8f429ed2f2f84d9710faf389f512"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#ab4ad8f429ed2f2f84d9710faf389f512">MatchEngine</a> ()</td></tr>
+<tr class="memdesc:ab4ad8f429ed2f2f84d9710faf389f512"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:ab4ad8f429ed2f2f84d9710faf389f512"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5e12e4d04719eab3d3e7a2ddd492ad9" id="r_ab5e12e4d04719eab3d3e7a2ddd492ad9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#ab5e12e4d04719eab3d3e7a2ddd492ad9">init</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *cfg)</td></tr>
+<tr class="memdesc:ab5e12e4d04719eab3d3e7a2ddd492ad9"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化撮合引擎  <br /></td></tr>
+<tr class="separator:ab5e12e4d04719eab3d3e7a2ddd492ad9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa73887abfbdfc9c308c7494156a9f4b" id="r_aaa73887abfbdfc9c308c7494156a9f4b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#aaa73887abfbdfc9c308c7494156a9f4b">regisSink</a> (<a class="el" href="classIMatchSink.html">IMatchSink</a> *sink)</td></tr>
+<tr class="memdesc:aaa73887abfbdfc9c308c7494156a9f4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">注册回调接口  <br /></td></tr>
+<tr class="separator:aaa73887abfbdfc9c308c7494156a9f4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae991aa427cc14ee90216e3ef9baca6db" id="r_ae991aa427cc14ee90216e3ef9baca6db"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#ae991aa427cc14ee90216e3ef9baca6db">clear</a> ()</td></tr>
+<tr class="memdesc:ae991aa427cc14ee90216e3ef9baca6db"><td class="mdescLeft">&#160;</td><td class="mdescRight">清空撮合引擎中的所有订单  <br /></td></tr>
+<tr class="separator:ae991aa427cc14ee90216e3ef9baca6db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3098110cf900b07329c72249ecc2f909" id="r_a3098110cf900b07329c72249ecc2f909"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#a3098110cf900b07329c72249ecc2f909">handle_tick</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTickData.html">WTSTickData</a> *curTick)</td></tr>
+<tr class="memdesc:a3098110cf900b07329c72249ecc2f909"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理Tick数据  <br /></td></tr>
+<tr class="separator:a3098110cf900b07329c72249ecc2f909"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70bde061e843d48d67e9a3a446cdee53" id="r_a70bde061e843d48d67e9a3a446cdee53"><td class="memItemLeft" align="right" valign="top"><a class="el" href="MatchEngine_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#a70bde061e843d48d67e9a3a446cdee53">buy</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, uint64_t curTime)</td></tr>
+<tr class="memdesc:a70bde061e843d48d67e9a3a446cdee53"><td class="mdescLeft">&#160;</td><td class="mdescRight">创建买入订单  <br /></td></tr>
+<tr class="separator:a70bde061e843d48d67e9a3a446cdee53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57f17f93b1376a13367ead95bd8e1c6e" id="r_a57f17f93b1376a13367ead95bd8e1c6e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="MatchEngine_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#a57f17f93b1376a13367ead95bd8e1c6e">sell</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, uint64_t curTime)</td></tr>
+<tr class="memdesc:a57f17f93b1376a13367ead95bd8e1c6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">创建卖出订单  <br /></td></tr>
+<tr class="separator:a57f17f93b1376a13367ead95bd8e1c6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a784cbff27fc3bd6030eadd809148f530" id="r_a784cbff27fc3bd6030eadd809148f530"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#a784cbff27fc3bd6030eadd809148f530">cancel</a> (uint32_t localid)</td></tr>
+<tr class="memdesc:a784cbff27fc3bd6030eadd809148f530"><td class="mdescLeft">&#160;</td><td class="mdescRight">按订单ID撤销订单  <br /></td></tr>
+<tr class="separator:a784cbff27fc3bd6030eadd809148f530"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b47a61498c0f1bf93c32f03d604b449" id="r_a6b47a61498c0f1bf93c32f03d604b449"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="MatchEngine_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#a6b47a61498c0f1bf93c32f03d604b449">cancel</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isBuy, double qty, <a class="el" href="MatchEngine_8h.html#a4bf043f806f5dedf2dfa5bf742243b68">FuncCancelCallback</a> cb)</td></tr>
+<tr class="memdesc:a6b47a61498c0f1bf93c32f03d604b449"><td class="mdescLeft">&#160;</td><td class="mdescRight">按合约和方向撤销订单  <br /></td></tr>
+<tr class="separator:a6b47a61498c0f1bf93c32f03d604b449"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 类型</h2></td></tr>
+<tr class="memitem:a8cf853fd4ba148c9361f5f6f53f42441" id="r_a8cf853fd4ba148c9361f5f6f53f42441"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structMatchEngine_1_1__OrderInfo.html">MatchEngine::_OrderInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#a8cf853fd4ba148c9361f5f6f53f42441">OrderInfo</a></td></tr>
+<tr class="memdesc:a8cf853fd4ba148c9361f5f6f53f42441"><td class="mdescLeft">&#160;</td><td class="mdescRight">订单信息结构体  <br /></td></tr>
+<tr class="separator:a8cf853fd4ba148c9361f5f6f53f42441"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19ba92f943238543cd721c6af10e17ea" id="r_a19ba92f943238543cd721c6af10e17ea"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt; uint32_t, <a class="el" href="classMatchEngine.html#a8cf853fd4ba148c9361f5f6f53f42441">OrderInfo</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#a19ba92f943238543cd721c6af10e17ea">Orders</a></td></tr>
+<tr class="memdesc:a19ba92f943238543cd721c6af10e17ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">订单存储容器类型  <br /></td></tr>
+<tr class="separator:a19ba92f943238543cd721c6af10e17ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4561a811423e67f97381621fbc3d0fdd" id="r_a4561a811423e67f97381621fbc3d0fdd"><td class="memItemLeft" align="right" valign="top">typedef std::map&lt; uint32_t, double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#a4561a811423e67f97381621fbc3d0fdd">LOBItems</a></td></tr>
+<tr class="memdesc:a4561a811423e67f97381621fbc3d0fdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托账本条目类型  <br /></td></tr>
+<tr class="separator:a4561a811423e67f97381621fbc3d0fdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad18cf974bd1fe5dd411fd233ae93c3dd" id="r_ad18cf974bd1fe5dd411fd233ae93c3dd"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structMatchEngine_1_1__LmtOrdBook.html">MatchEngine::_LmtOrdBook</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#ad18cf974bd1fe5dd411fd233ae93c3dd">LmtOrdBook</a></td></tr>
+<tr class="memdesc:ad18cf974bd1fe5dd411fd233ae93c3dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">限价委托账本结构体  <br /></td></tr>
+<tr class="separator:ad18cf974bd1fe5dd411fd233ae93c3dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd67f3100a4601f79513e1685019f0bb" id="r_acd67f3100a4601f79513e1685019f0bb"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt; std::string, <a class="el" href="classMatchEngine.html#ad18cf974bd1fe5dd411fd233ae93c3dd">LmtOrdBook</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#acd67f3100a4601f79513e1685019f0bb">LmtOrdBooks</a></td></tr>
+<tr class="memdesc:acd67f3100a4601f79513e1685019f0bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">限价委托账本存储容器类型  <br /></td></tr>
+<tr class="separator:acd67f3100a4601f79513e1685019f0bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 成员函数</h2></td></tr>
+<tr class="memitem:a937e0e40f9d79f19fd6d4b3786287713" id="r_a937e0e40f9d79f19fd6d4b3786287713"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#a937e0e40f9d79f19fd6d4b3786287713">fire_orders</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="MatchEngine_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a> &amp;to_erase)</td></tr>
+<tr class="memdesc:a937e0e40f9d79f19fd6d4b3786287713"><td class="mdescLeft">&#160;</td><td class="mdescRight">激活待处理的订单  <br /></td></tr>
+<tr class="separator:a937e0e40f9d79f19fd6d4b3786287713"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2226ea0a9fd2eb96384baafd7fcce80f" id="r_a2226ea0a9fd2eb96384baafd7fcce80f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#a2226ea0a9fd2eb96384baafd7fcce80f">match_orders</a> (<a class="el" href="classWTSTickData.html">WTSTickData</a> *curTick, <a class="el" href="MatchEngine_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a> &amp;to_erase)</td></tr>
+<tr class="memdesc:a2226ea0a9fd2eb96384baafd7fcce80f"><td class="mdescLeft">&#160;</td><td class="mdescRight">撮合订单  <br /></td></tr>
+<tr class="separator:a2226ea0a9fd2eb96384baafd7fcce80f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90f57ea3191db71c955b76a36435bebf" id="r_a90f57ea3191db71c955b76a36435bebf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#a90f57ea3191db71c955b76a36435bebf">update_lob</a> (<a class="el" href="classWTSTickData.html">WTSTickData</a> *curTick)</td></tr>
+<tr class="memdesc:a90f57ea3191db71c955b76a36435bebf"><td class="mdescLeft">&#160;</td><td class="mdescRight">更新限价委托账本(Limit Order Book)  <br /></td></tr>
+<tr class="separator:a90f57ea3191db71c955b76a36435bebf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72d737c7c7646f6048f720a62f7462b0" id="r_a72d737c7c7646f6048f720a62f7462b0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#a72d737c7c7646f6048f720a62f7462b0">grab_last_tick</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode)</td></tr>
+<tr class="memdesc:a72d737c7c7646f6048f720a62f7462b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取最新的Tick数据  <br /></td></tr>
+<tr class="separator:a72d737c7c7646f6048f720a62f7462b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:ae94b579dc86ec13c3368d9499379a4de" id="r_ae94b579dc86ec13c3368d9499379a4de"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMatchEngine.html#a19ba92f943238543cd721c6af10e17ea">Orders</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#ae94b579dc86ec13c3368d9499379a4de">_orders</a></td></tr>
+<tr class="memdesc:ae94b579dc86ec13c3368d9499379a4de"><td class="mdescLeft">&#160;</td><td class="mdescRight">订单存储容器，管理所有活跃订单  <br /></td></tr>
+<tr class="separator:ae94b579dc86ec13c3368d9499379a4de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeaae268d8559c656a01ba4059c368bc7" id="r_aeaae268d8559c656a01ba4059c368bc7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMatchEngine.html#acd67f3100a4601f79513e1685019f0bb">LmtOrdBooks</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#aeaae268d8559c656a01ba4059c368bc7">_lmt_ord_books</a></td></tr>
+<tr class="memdesc:aeaae268d8559c656a01ba4059c368bc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">限价委托账本存储容器，管理所有合约的委托账本  <br /></td></tr>
+<tr class="separator:aeaae268d8559c656a01ba4059c368bc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af214d76be9f4fe7367476c75995bb744" id="r_af214d76be9f4fe7367476c75995bb744"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIMatchSink.html">IMatchSink</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#af214d76be9f4fe7367476c75995bb744">_sink</a></td></tr>
+<tr class="memdesc:af214d76be9f4fe7367476c75995bb744"><td class="mdescLeft">&#160;</td><td class="mdescRight">撮合引擎回调接口指针  <br /></td></tr>
+<tr class="separator:af214d76be9f4fe7367476c75995bb744"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44d87d11de81cd153932205fa2bad2bc" id="r_a44d87d11de81cd153932205fa2bad2bc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#a44d87d11de81cd153932205fa2bad2bc">_cancelrate</a></td></tr>
+<tr class="memdesc:a44d87d11de81cd153932205fa2bad2bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">撤单率，用于模拟市场中的撤单行为  <br /></td></tr>
+<tr class="separator:a44d87d11de81cd153932205fa2bad2bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bfe33e7a9e446f2ca8de6b90de036c5" id="r_a3bfe33e7a9e446f2ca8de6b90de036c5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="MatchEngine_8h.html#aa63c38f68f3c78457471222f35a139d4">WTSTickCache</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMatchEngine.html#a3bfe33e7a9e446f2ca8de6b90de036c5">_tick_cache</a></td></tr>
+<tr class="memdesc:a3bfe33e7a9e446f2ca8de6b90de036c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick数据缓存指针  <br /></td></tr>
+<tr class="separator:a3bfe33e7a9e446f2ca8de6b90de036c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>回测撮合引擎类 </p>
+<p>实现了回测过程中的订单撮合功能，模拟真实市场中的订单撮合机制， 包括订单创建、撮合、排队和撤销等功能 </p>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8h_source.html">MatchEngine.h</a> 第 <a class="el" href="MatchEngine_8h_source.html#l00096">96</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="ad18cf974bd1fe5dd411fd233ae93c3dd" name="ad18cf974bd1fe5dd411fd233ae93c3dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad18cf974bd1fe5dd411fd233ae93c3dd">&#9670;&#160;</a></span>LmtOrdBook</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structMatchEngine_1_1__LmtOrdBook.html">MatchEngine::_LmtOrdBook</a> <a class="el" href="classMatchEngine.html#ad18cf974bd1fe5dd411fd233ae93c3dd">MatchEngine::LmtOrdBook</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>限价委托账本结构体 </p>
+<p>存储市场深度数据，包括各价位的委托量、当前价格、买一价和卖一价 </p>
+
+</div>
+</div>
+<a id="acd67f3100a4601f79513e1685019f0bb" name="acd67f3100a4601f79513e1685019f0bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd67f3100a4601f79513e1685019f0bb">&#9670;&#160;</a></span>LmtOrdBooks</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt;std::string, <a class="el" href="classMatchEngine.html#ad18cf974bd1fe5dd411fd233ae93c3dd">LmtOrdBook</a>&gt; <a class="el" href="classMatchEngine.html#acd67f3100a4601f79513e1685019f0bb">MatchEngine::LmtOrdBooks</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>限价委托账本存储容器类型 </p>
+<p>定义了以合约代码为键的委托账本映射表，用于存储和管理所有合约的委托账本 </p>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8h_source.html">MatchEngine.h</a> 第 <a class="el" href="MatchEngine_8h_source.html#l00295">295</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4561a811423e67f97381621fbc3d0fdd" name="a4561a811423e67f97381621fbc3d0fdd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4561a811423e67f97381621fbc3d0fdd">&#9670;&#160;</a></span>LOBItems</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::map&lt;uint32_t, double&gt; <a class="el" href="classMatchEngine.html#a4561a811423e67f97381621fbc3d0fdd">MatchEngine::LOBItems</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>委托账本条目类型 </p>
+<p>定义了价格与委托量的映射关系，价格使用整数表示（乘以10000后的值） </p>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8h_source.html">MatchEngine.h</a> 第 <a class="el" href="MatchEngine_8h_source.html#l00255">255</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8cf853fd4ba148c9361f5f6f53f42441" name="a8cf853fd4ba148c9361f5f6f53f42441"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8cf853fd4ba148c9361f5f6f53f42441">&#9670;&#160;</a></span>OrderInfo</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structMatchEngine_1_1__OrderInfo.html">MatchEngine::_OrderInfo</a> <a class="el" href="classMatchEngine.html#a8cf853fd4ba148c9361f5f6f53f42441">MatchEngine::OrderInfo</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>订单信息结构体 </p>
+<p>存储订单的各种信息，包括合约代码、方向、数量、价格等 </p>
+
+</div>
+</div>
+<a id="a19ba92f943238543cd721c6af10e17ea" name="a19ba92f943238543cd721c6af10e17ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19ba92f943238543cd721c6af10e17ea">&#9670;&#160;</a></span>Orders</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt;uint32_t, <a class="el" href="classMatchEngine.html#a8cf853fd4ba148c9361f5f6f53f42441">OrderInfo</a>&gt; <a class="el" href="classMatchEngine.html#a19ba92f943238543cd721c6af10e17ea">MatchEngine::Orders</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>订单存储容器类型 </p>
+<p>定义了以订单ID为键的订单信息映射表，用于存储和管理所有订单 </p>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8h_source.html">MatchEngine.h</a> 第 <a class="el" href="MatchEngine_8h_source.html#l00248">248</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="ab4ad8f429ed2f2f84d9710faf389f512" name="ab4ad8f429ed2f2f84d9710faf389f512"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4ad8f429ed2f2f84d9710faf389f512">&#9670;&#160;</a></span>MatchEngine()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">MatchEngine::MatchEngine </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>初始化撮合引擎，设置初始参数 </p>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8h_source.html">MatchEngine.h</a> 第 <a class="el" href="MatchEngine_8h_source.html#l00103">103</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a70bde061e843d48d67e9a3a446cdee53" name="a70bde061e843d48d67e9a3a446cdee53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70bde061e843d48d67e9a3a446cdee53">&#9670;&#160;</a></span>buy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="MatchEngine_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a> MatchEngine::buy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>qty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>curTime</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>创建买入订单 </p>
+<p>创建一个买入订单，并计算订单排队位置</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">qty</td><td>委托数量 </td></tr>
+    <tr><td class="paramname">curTime</td><td>当前时间戳 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>OrderIDs 返回创建的订单ID列表 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8cpp_source.html">MatchEngine.cpp</a> 第 <a class="el" href="MatchEngine_8cpp_source.html#l00275">275</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6b47a61498c0f1bf93c32f03d604b449" name="a6b47a61498c0f1bf93c32f03d604b449"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b47a61498c0f1bf93c32f03d604b449">&#9670;&#160;</a></span>cancel() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="MatchEngine_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a> MatchEngine::cancel </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isBuy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>qty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="MatchEngine_8h.html#a4bf043f806f5dedf2dfa5bf742243b68">FuncCancelCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>按合约和方向撤销订单 </p>
+<p>撤销指定合约和方向的订单，可以指定撤销数量</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否为买入订单 </td></tr>
+    <tr><td class="paramname">qty</td><td>需要撤销的数量，为0时撤销全部 </td></tr>
+    <tr><td class="paramname">cb</td><td>撤单回调函数，用于通知撤单结果 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>OrderIDs 返回撤销的订单ID列表 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8cpp_source.html">MatchEngine.cpp</a> 第 <a class="el" href="MatchEngine_8cpp_source.html#l00364">364</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a784cbff27fc3bd6030eadd809148f530" name="a784cbff27fc3bd6030eadd809148f530"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a784cbff27fc3bd6030eadd809148f530">&#9670;&#160;</a></span>cancel() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double MatchEngine::cancel </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>按订单ID撤销订单 </p>
+<p>撤销指定订单ID的订单</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>double 返回撤销的数量，买入为正值，卖出为负值，撤单失败返回0 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8cpp_source.html">MatchEngine.cpp</a> 第 <a class="el" href="MatchEngine_8cpp_source.html#l00401">401</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae991aa427cc14ee90216e3ef9baca6db" name="ae991aa427cc14ee90216e3ef9baca6db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae991aa427cc14ee90216e3ef9baca6db">&#9670;&#160;</a></span>clear()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MatchEngine::clear </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>清空撮合引擎中的所有订单 </p>
+<p>清除撮合引擎中的所有订单数据，通常在重置回测环境或结束回测时调用 </p>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8cpp_source.html">MatchEngine.cpp</a> 第 <a class="el" href="MatchEngine_8cpp_source.html#l00039">39</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a937e0e40f9d79f19fd6d4b3786287713" name="a937e0e40f9d79f19fd6d4b3786287713"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a937e0e40f9d79f19fd6d4b3786287713">&#9670;&#160;</a></span>fire_orders()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MatchEngine::fire_orders </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="MatchEngine_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a> &amp;&#160;</td>
+          <td class="paramname"><em>to_erase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>激活待处理的订单 </p>
+<p>遍历所有订单，将状态为0的订单激活，并通知回调接口</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">to_erase</td><td>需要删除的订单ID列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8cpp_source.html">MatchEngine.cpp</a> 第 <a class="el" href="MatchEngine_8cpp_source.html#l00051">51</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a72d737c7c7646f6048f720a62f7462b0" name="a72d737c7c7646f6048f720a62f7462b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72d737c7c7646f6048f720a62f7462b0">&#9670;&#160;</a></span>grab_last_tick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSTickData.html">WTSTickData</a> * MatchEngine::grab_last_tick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取最新的Tick数据 </p>
+<p>从缓存中获取指定合约的最新Tick数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSTickData* 返回Tick数据指针，如果不存在则返回NULL </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8cpp_source.html">MatchEngine.cpp</a> 第 <a class="el" href="MatchEngine_8cpp_source.html#l00454">454</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3098110cf900b07329c72249ecc2f909" name="a3098110cf900b07329c72249ecc2f909"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3098110cf900b07329c72249ecc2f909">&#9670;&#160;</a></span>handle_tick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MatchEngine::handle_tick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>curTick</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>处理Tick数据 </p>
+<p>处理新到达的Tick数据，包括更新委托账本、激活订单和进行订单撮合</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">curTick</td><td>当前Tick数据指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8cpp_source.html">MatchEngine.cpp</a> 第 <a class="el" href="MatchEngine_8cpp_source.html#l00420">420</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab5e12e4d04719eab3d3e7a2ddd492ad9" name="ab5e12e4d04719eab3d3e7a2ddd492ad9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5e12e4d04719eab3d3e7a2ddd492ad9">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MatchEngine::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>cfg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化撮合引擎 </p>
+<p>从配置中读取撮合引擎的相关参数，如撤单率等</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfg</td><td>配置项指针，包含撮合引擎的配置参数 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8cpp_source.html">MatchEngine.cpp</a> 第 <a class="el" href="MatchEngine_8cpp_source.html#l00027">27</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2226ea0a9fd2eb96384baafd7fcce80f" name="a2226ea0a9fd2eb96384baafd7fcce80f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2226ea0a9fd2eb96384baafd7fcce80f">&#9670;&#160;</a></span>match_orders()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MatchEngine::match_orders </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>curTick</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="MatchEngine_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a> &amp;&#160;</td>
+          <td class="paramname"><em>to_erase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>撮合订单 </p>
+<p>根据当前行情数据对所有活跃订单进行撮合处理，包括撤单和成交处理</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curTick</td><td>当前Tick数据指针 </td></tr>
+    <tr><td class="paramname">to_erase</td><td>需要删除的订单ID列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8cpp_source.html">MatchEngine.cpp</a> 第 <a class="el" href="MatchEngine_8cpp_source.html#l00074">74</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaa73887abfbdfc9c308c7494156a9f4b" name="aaa73887abfbdfc9c308c7494156a9f4b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa73887abfbdfc9c308c7494156a9f4b">&#9670;&#160;</a></span>regisSink()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MatchEngine::regisSink </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classIMatchSink.html">IMatchSink</a> *&#160;</td>
+          <td class="paramname"><em>sink</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>注册回调接口 </p>
+<p>注册撮合引擎的回调接口，用于接收成交、订单和委托回报</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sink</td><td>回调接口指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8h_source.html">MatchEngine.h</a> 第 <a class="el" href="MatchEngine_8h_source.html#l00156">156</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a57f17f93b1376a13367ead95bd8e1c6e" name="a57f17f93b1376a13367ead95bd8e1c6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57f17f93b1376a13367ead95bd8e1c6e">&#9670;&#160;</a></span>sell()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="MatchEngine_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a> MatchEngine::sell </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>qty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>curTime</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>创建卖出订单 </p>
+<p>创建一个卖出订单，并计算订单排队位置</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">qty</td><td>委托数量 </td></tr>
+    <tr><td class="paramname">curTime</td><td>当前时间戳 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>OrderIDs 返回创建的订单ID列表 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8cpp_source.html">MatchEngine.cpp</a> 第 <a class="el" href="MatchEngine_8cpp_source.html#l00320">320</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a90f57ea3191db71c955b76a36435bebf" name="a90f57ea3191db71c955b76a36435bebf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90f57ea3191db71c955b76a36435bebf">&#9670;&#160;</a></span>update_lob()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MatchEngine::update_lob </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>curTick</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>更新限价委托账本(Limit Order Book) </p>
+<p>根据当前Tick数据更新内部的委托账本数据，包括当前价格、买一价和卖一价等</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curTick</td><td>当前Tick数据指针</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>根据当前Tick数据更新内部的委托账本数据，包括当前价格、买一价、卖一价等</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curTick</td><td>当前Tick数据指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8cpp_source.html">MatchEngine.cpp</a> 第 <a class="el" href="MatchEngine_8cpp_source.html#l00223">223</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a44d87d11de81cd153932205fa2bad2bc" name="a44d87d11de81cd153932205fa2bad2bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44d87d11de81cd153932205fa2bad2bc">&#9670;&#160;</a></span>_cancelrate</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double MatchEngine::_cancelrate</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>撤单率，用于模拟市场中的撤单行为 </p>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8h_source.html">MatchEngine.h</a> 第 <a class="el" href="MatchEngine_8h_source.html#l00300">300</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aeaae268d8559c656a01ba4059c368bc7" name="aeaae268d8559c656a01ba4059c368bc7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeaae268d8559c656a01ba4059c368bc7">&#9670;&#160;</a></span>_lmt_ord_books</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMatchEngine.html#acd67f3100a4601f79513e1685019f0bb">LmtOrdBooks</a> MatchEngine::_lmt_ord_books</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>限价委托账本存储容器，管理所有合约的委托账本 </p>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8h_source.html">MatchEngine.h</a> 第 <a class="el" href="MatchEngine_8h_source.html#l00296">296</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae94b579dc86ec13c3368d9499379a4de" name="ae94b579dc86ec13c3368d9499379a4de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae94b579dc86ec13c3368d9499379a4de">&#9670;&#160;</a></span>_orders</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMatchEngine.html#a19ba92f943238543cd721c6af10e17ea">Orders</a> MatchEngine::_orders</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>订单存储容器，管理所有活跃订单 </p>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8h_source.html">MatchEngine.h</a> 第 <a class="el" href="MatchEngine_8h_source.html#l00249">249</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af214d76be9f4fe7367476c75995bb744" name="af214d76be9f4fe7367476c75995bb744"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af214d76be9f4fe7367476c75995bb744">&#9670;&#160;</a></span>_sink</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIMatchSink.html">IMatchSink</a>* MatchEngine::_sink</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>撮合引擎回调接口指针 </p>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8h_source.html">MatchEngine.h</a> 第 <a class="el" href="MatchEngine_8h_source.html#l00298">298</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3bfe33e7a9e446f2ca8de6b90de036c5" name="a3bfe33e7a9e446f2ca8de6b90de036c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bfe33e7a9e446f2ca8de6b90de036c5">&#9670;&#160;</a></span>_tick_cache</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="MatchEngine_8h.html#aa63c38f68f3c78457471222f35a139d4">WTSTickCache</a>* MatchEngine::_tick_cache</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tick数据缓存指针 </p>
+
+<p class="definition">在文件 <a class="el" href="MatchEngine_8h_source.html">MatchEngine.h</a> 第 <a class="el" href="MatchEngine_8h_source.html#l00301">301</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WtBtCore/<a class="el" href="MatchEngine_8h_source.html">MatchEngine.h</a></li>
+<li>src/WtBtCore/<a class="el" href="MatchEngine_8cpp_source.html">MatchEngine.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classMatchEngine.html">MatchEngine</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

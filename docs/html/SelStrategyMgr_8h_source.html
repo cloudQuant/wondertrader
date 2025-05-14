@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtCore/SelStrategyMgr.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('SelStrategyMgr_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">SelStrategyMgr.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="SelStrategyMgr_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;boost/core/noncopyable.hpp&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Includes/FasterDefs.h&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/SelStrategyDefs.h&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../Share/DLLHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="foldopen" id="foldopen00019" data-start="{" data-end="};">
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="classSelStraWrapper.html">   19</a></span><span class="keyword">class </span><a class="code hl_class" href="classSelStraWrapper.html">SelStraWrapper</a></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>{</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classSelStraWrapper.html#a42e81e0080445f678008f5079f7e1c3a">   22</a></span>    <a class="code hl_function" href="classSelStraWrapper.html#a42e81e0080445f678008f5079f7e1c3a">SelStraWrapper</a>(<a class="code hl_class" href="classSelStrategy.html">SelStrategy</a>* stra, <a class="code hl_class" href="classISelStrategyFact.html">ISelStrategyFact</a>* fact) :<a class="code hl_variable" href="classSelStraWrapper.html#ac8886721479d9e6f19f93ea7d0a6094d">_stra</a>(stra), <a class="code hl_variable" href="classSelStraWrapper.html#a73a2c1d7ddb8887d43e59b2744081d48">_fact</a>(fact){}</div>
+<div class="foldopen" id="foldopen00023" data-start="{" data-end="}">
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classSelStraWrapper.html#a6cf082dbb0fa8b3a44899c6d69db4763">   23</a></span>    <a class="code hl_function" href="classSelStraWrapper.html#a6cf082dbb0fa8b3a44899c6d69db4763">~SelStraWrapper</a>()</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    {</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSelStraWrapper.html#ac8886721479d9e6f19f93ea7d0a6094d">_stra</a>)</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        {</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>            <a class="code hl_variable" href="classSelStraWrapper.html#a73a2c1d7ddb8887d43e59b2744081d48">_fact</a>-&gt;<a class="code hl_function" href="classISelStrategyFact.html#a933f96726464430e612f169d9f9f12b4">deleteStrategy</a>(<a class="code hl_variable" href="classSelStraWrapper.html#ac8886721479d9e6f19f93ea7d0a6094d">_stra</a>);</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        }</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    }</div>
+</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classSelStraWrapper.html#aa56253b02ec73021f19f789a34b23e4c">   31</a></span>    <a class="code hl_class" href="classSelStrategy.html">SelStrategy</a>* <a class="code hl_function" href="classSelStraWrapper.html#aa56253b02ec73021f19f789a34b23e4c">self</a>(){ <span class="keywordflow">return</span> <a class="code hl_variable" href="classSelStraWrapper.html#ac8886721479d9e6f19f93ea7d0a6094d">_stra</a>; }</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classSelStraWrapper.html#ac8886721479d9e6f19f93ea7d0a6094d">   35</a></span>    <a class="code hl_class" href="classSelStrategy.html">SelStrategy</a>*        <a class="code hl_variable" href="classSelStraWrapper.html#ac8886721479d9e6f19f93ea7d0a6094d">_stra</a>;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="classSelStraWrapper.html#a73a2c1d7ddb8887d43e59b2744081d48">   36</a></span>    <a class="code hl_class" href="classISelStrategyFact.html">ISelStrategyFact</a>*   <a class="code hl_variable" href="classSelStraWrapper.html#a73a2c1d7ddb8887d43e59b2744081d48">_fact</a>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>};</div>
+</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="SelStrategyMgr_8h.html#af7adefb63753d4722e9d5cfb453f1567">   38</a></span><span class="keyword">typedef</span> std::shared_ptr&lt;SelStraWrapper&gt; <a class="code hl_typedef" href="SelStrategyMgr_8h.html#af7adefb63753d4722e9d5cfb453f1567">SelStrategyPtr</a>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="foldopen" id="foldopen00041" data-start="{" data-end="};">
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="classSelStrategyMgr.html">   41</a></span><span class="keyword">class </span><a class="code hl_class" href="classSelStrategyMgr.html">SelStrategyMgr</a> : <span class="keyword">private</span> boost::noncopyable</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>{</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <a class="code hl_function" href="classSelStrategyMgr.html#a658d10d6c33d586841889f3d0c866675">SelStrategyMgr</a>();</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <a class="code hl_function" href="classSelStrategyMgr.html#a4537fee877044af85b74411f02d80ebe">~SelStrategyMgr</a>();</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classSelStrategyMgr.html#a490d5b18ba8a28a2cc219eb55ff49c57">loadFactories</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* path);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <a class="code hl_typedef" href="SelStrategyMgr_8h.html#af7adefb63753d4722e9d5cfb453f1567">SelStrategyPtr</a> <a class="code hl_function" href="classSelStrategyMgr.html#ad2d0ef45cfa7fce50238ab01362ed4b5">createStrategy</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* name, <span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <a class="code hl_typedef" href="SelStrategyMgr_8h.html#af7adefb63753d4722e9d5cfb453f1567">SelStrategyPtr</a> <a class="code hl_function" href="classSelStrategyMgr.html#ad2d0ef45cfa7fce50238ab01362ed4b5">createStrategy</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* factname, <span class="keyword">const</span> <span class="keywordtype">char</span>* unitname, <span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <a class="code hl_typedef" href="SelStrategyMgr_8h.html#af7adefb63753d4722e9d5cfb453f1567">SelStrategyPtr</a> <a class="code hl_function" href="classSelStrategyMgr.html#a3ef13369ff99ddedec3bfa8a0fe87e1e">getStrategy</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="keyword">private</span>:</div>
+<div class="foldopen" id="foldopen00055" data-start="{" data-end="};">
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="structSelStrategyMgr_1_1__StraFactInfo.html">   55</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structSelStrategyMgr_1_1__StraFactInfo.html">_StraFactInfo</a></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    {</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="structSelStrategyMgr_1_1__StraFactInfo.html#afabd43fbbc7df7972a81a86170fb7686">   57</a></span>        std::string         <a class="code hl_variable" href="structSelStrategyMgr_1_1__StraFactInfo.html#afabd43fbbc7df7972a81a86170fb7686">_module_path</a>;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="structSelStrategyMgr_1_1__StraFactInfo.html#a1c79a49dbca74432084565c3e5e8a63a">   58</a></span>        <a class="code hl_typedef" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a>           <a class="code hl_variable" href="structSelStrategyMgr_1_1__StraFactInfo.html#a1c79a49dbca74432084565c3e5e8a63a">_module_inst</a>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="structSelStrategyMgr_1_1__StraFactInfo.html#abeadda06c085c479fc0ce90e46a893be">   59</a></span>        <a class="code hl_class" href="classISelStrategyFact.html">ISelStrategyFact</a>*   <a class="code hl_variable" href="structSelStrategyMgr_1_1__StraFactInfo.html#abeadda06c085c479fc0ce90e46a893be">_fact</a>;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="structSelStrategyMgr_1_1__StraFactInfo.html#ad3f26df232f0a232f29e6fbd5b9d79b4">   60</a></span>        <a class="code hl_typedef" href="SelStrategyDefs_8h.html#a920515e2ad6c154ada28a2d8de6a7050">FuncCreateSelStraFact</a>   <a class="code hl_variable" href="structSelStrategyMgr_1_1__StraFactInfo.html#ad3f26df232f0a232f29e6fbd5b9d79b4">_creator</a>;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="structSelStrategyMgr_1_1__StraFactInfo.html#aee7e44ece4694ce84f008c3560885992">   61</a></span>        <a class="code hl_typedef" href="SelStrategyDefs_8h.html#a5b94115fcef8b3b2c0aae8c17d2c991e">FuncDeleteSelStraFact</a>   <a class="code hl_variable" href="structSelStrategyMgr_1_1__StraFactInfo.html#aee7e44ece4694ce84f008c3560885992">_remover</a>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="classSelStrategyMgr.html#adfd2773e43d4e34ba3bf77e9d260eff5">   62</a></span>    } <a class="code hl_typedef" href="classSelStrategyMgr.html#adfd2773e43d4e34ba3bf77e9d260eff5">StraFactInfo</a>;</div>
+</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="classSelStrategyMgr.html#a25d26632c426639e10a65a253f21c5cd">   63</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, StraFactInfo&gt;</a> <a class="code hl_typedef" href="classSelStrategyMgr.html#a25d26632c426639e10a65a253f21c5cd">StraFactMap</a>;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classSelStrategyMgr.html#a2b066cd8dc99e455ba726a51cb225e7c">   64</a></span>    <a class="code hl_class" href="classwt__hashmap.html">StraFactMap</a> <a class="code hl_variable" href="classSelStrategyMgr.html#a2b066cd8dc99e455ba726a51cb225e7c">_factories</a>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="classSelStrategyMgr.html#a4180c022907300836189a20451f0e6d5">   66</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, SelStrategyPtr&gt;</a> <a class="code hl_typedef" href="classSelStrategyMgr.html#a4180c022907300836189a20451f0e6d5">StrategyMap</a>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classSelStrategyMgr.html#aa76165c5ab150891e851334cee097cbe">   67</a></span>    <a class="code hl_class" href="classwt__hashmap.html">StrategyMap</a> <a class="code hl_variable" href="classSelStrategyMgr.html#aa76165c5ab150891e851334cee097cbe">_strategies</a>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>};</div>
+</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="ttc" id="aDLLHelper_8hpp_html_a40972742af38c16d3ab2f521abf0ca8a"><div class="ttname"><a href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a></div><div class="ttdeci">void * DllHandle</div><div class="ttdoc">动态库句柄类型（非Windows平台）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00032">DLLHelper.hpp:32</a></div></div>
+<div class="ttc" id="aSelStrategyDefs_8h_html_a5b94115fcef8b3b2c0aae8c17d2c991e"><div class="ttname"><a href="SelStrategyDefs_8h.html#a5b94115fcef8b3b2c0aae8c17d2c991e">FuncDeleteSelStraFact</a></div><div class="ttdeci">void(* FuncDeleteSelStraFact)(ISelStrategyFact *&amp;fact)</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyDefs_8h_source.html#l00119">SelStrategyDefs.h:119</a></div></div>
+<div class="ttc" id="aSelStrategyDefs_8h_html_a920515e2ad6c154ada28a2d8de6a7050"><div class="ttname"><a href="SelStrategyDefs_8h.html#a920515e2ad6c154ada28a2d8de6a7050">FuncCreateSelStraFact</a></div><div class="ttdeci">ISelStrategyFact *(* FuncCreateSelStraFact)()</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyDefs_8h_source.html#l00117">SelStrategyDefs.h:117</a></div></div>
+<div class="ttc" id="aSelStrategyMgr_8h_html_af7adefb63753d4722e9d5cfb453f1567"><div class="ttname"><a href="SelStrategyMgr_8h.html#af7adefb63753d4722e9d5cfb453f1567">SelStrategyPtr</a></div><div class="ttdeci">std::shared_ptr&lt; SelStraWrapper &gt; SelStrategyPtr</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00038">SelStrategyMgr.h:38</a></div></div>
+<div class="ttc" id="aclassISelStrategyFact_html"><div class="ttname"><a href="classISelStrategyFact.html">ISelStrategyFact</a></div><div class="ttdef"><b>Definition</b> <a href="SelStrategyDefs_8h_source.html#l00087">SelStrategyDefs.h:88</a></div></div>
+<div class="ttc" id="aclassISelStrategyFact_html_a933f96726464430e612f169d9f9f12b4"><div class="ttname"><a href="classISelStrategyFact.html#a933f96726464430e612f169d9f9f12b4">ISelStrategyFact::deleteStrategy</a></div><div class="ttdeci">virtual bool deleteStrategy(SelStrategy *stra)=0</div></div>
+<div class="ttc" id="aclassSelStraWrapper_html"><div class="ttname"><a href="classSelStraWrapper.html">SelStraWrapper</a></div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00019">SelStrategyMgr.h:20</a></div></div>
+<div class="ttc" id="aclassSelStraWrapper_html_a42e81e0080445f678008f5079f7e1c3a"><div class="ttname"><a href="classSelStraWrapper.html#a42e81e0080445f678008f5079f7e1c3a">SelStraWrapper::SelStraWrapper</a></div><div class="ttdeci">SelStraWrapper(SelStrategy *stra, ISelStrategyFact *fact)</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00022">SelStrategyMgr.h:22</a></div></div>
+<div class="ttc" id="aclassSelStraWrapper_html_a6cf082dbb0fa8b3a44899c6d69db4763"><div class="ttname"><a href="classSelStraWrapper.html#a6cf082dbb0fa8b3a44899c6d69db4763">SelStraWrapper::~SelStraWrapper</a></div><div class="ttdeci">~SelStraWrapper()</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00023">SelStrategyMgr.h:23</a></div></div>
+<div class="ttc" id="aclassSelStraWrapper_html_a73a2c1d7ddb8887d43e59b2744081d48"><div class="ttname"><a href="classSelStraWrapper.html#a73a2c1d7ddb8887d43e59b2744081d48">SelStraWrapper::_fact</a></div><div class="ttdeci">ISelStrategyFact * _fact</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00036">SelStrategyMgr.h:36</a></div></div>
+<div class="ttc" id="aclassSelStraWrapper_html_aa56253b02ec73021f19f789a34b23e4c"><div class="ttname"><a href="classSelStraWrapper.html#aa56253b02ec73021f19f789a34b23e4c">SelStraWrapper::self</a></div><div class="ttdeci">SelStrategy * self()</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00031">SelStrategyMgr.h:31</a></div></div>
+<div class="ttc" id="aclassSelStraWrapper_html_ac8886721479d9e6f19f93ea7d0a6094d"><div class="ttname"><a href="classSelStraWrapper.html#ac8886721479d9e6f19f93ea7d0a6094d">SelStraWrapper::_stra</a></div><div class="ttdeci">SelStrategy * _stra</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00035">SelStrategyMgr.h:35</a></div></div>
+<div class="ttc" id="aclassSelStrategyMgr_html"><div class="ttname"><a href="classSelStrategyMgr.html">SelStrategyMgr</a></div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00041">SelStrategyMgr.h:42</a></div></div>
+<div class="ttc" id="aclassSelStrategyMgr_html_a25d26632c426639e10a65a253f21c5cd"><div class="ttname"><a href="classSelStrategyMgr.html#a25d26632c426639e10a65a253f21c5cd">SelStrategyMgr::StraFactMap</a></div><div class="ttdeci">wt_hashmap&lt; std::string, StraFactInfo &gt; StraFactMap</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00063">SelStrategyMgr.h:63</a></div></div>
+<div class="ttc" id="aclassSelStrategyMgr_html_a2b066cd8dc99e455ba726a51cb225e7c"><div class="ttname"><a href="classSelStrategyMgr.html#a2b066cd8dc99e455ba726a51cb225e7c">SelStrategyMgr::_factories</a></div><div class="ttdeci">StraFactMap _factories</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00064">SelStrategyMgr.h:64</a></div></div>
+<div class="ttc" id="aclassSelStrategyMgr_html_a3ef13369ff99ddedec3bfa8a0fe87e1e"><div class="ttname"><a href="classSelStrategyMgr.html#a3ef13369ff99ddedec3bfa8a0fe87e1e">SelStrategyMgr::getStrategy</a></div><div class="ttdeci">SelStrategyPtr getStrategy(const char *id)</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8cpp_source.html#l00122">SelStrategyMgr.cpp:122</a></div></div>
+<div class="ttc" id="aclassSelStrategyMgr_html_a4180c022907300836189a20451f0e6d5"><div class="ttname"><a href="classSelStrategyMgr.html#a4180c022907300836189a20451f0e6d5">SelStrategyMgr::StrategyMap</a></div><div class="ttdeci">wt_hashmap&lt; std::string, SelStrategyPtr &gt; StrategyMap</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00066">SelStrategyMgr.h:66</a></div></div>
+<div class="ttc" id="aclassSelStrategyMgr_html_a4537fee877044af85b74411f02d80ebe"><div class="ttname"><a href="classSelStrategyMgr.html#a4537fee877044af85b74411f02d80ebe">SelStrategyMgr::~SelStrategyMgr</a></div><div class="ttdeci">~SelStrategyMgr()</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8cpp_source.html#l00025">SelStrategyMgr.cpp:25</a></div></div>
+<div class="ttc" id="aclassSelStrategyMgr_html_a490d5b18ba8a28a2cc219eb55ff49c57"><div class="ttname"><a href="classSelStrategyMgr.html#a490d5b18ba8a28a2cc219eb55ff49c57">SelStrategyMgr::loadFactories</a></div><div class="ttdeci">bool loadFactories(const char *path)</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8cpp_source.html#l00029">SelStrategyMgr.cpp:29</a></div></div>
+<div class="ttc" id="aclassSelStrategyMgr_html_a658d10d6c33d586841889f3d0c866675"><div class="ttname"><a href="classSelStrategyMgr.html#a658d10d6c33d586841889f3d0c866675">SelStrategyMgr::SelStrategyMgr</a></div><div class="ttdeci">SelStrategyMgr()</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8cpp_source.html#l00020">SelStrategyMgr.cpp:20</a></div></div>
+<div class="ttc" id="aclassSelStrategyMgr_html_aa76165c5ab150891e851334cee097cbe"><div class="ttname"><a href="classSelStrategyMgr.html#aa76165c5ab150891e851334cee097cbe">SelStrategyMgr::_strategies</a></div><div class="ttdeci">StrategyMap _strategies</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00067">SelStrategyMgr.h:67</a></div></div>
+<div class="ttc" id="aclassSelStrategyMgr_html_ad2d0ef45cfa7fce50238ab01362ed4b5"><div class="ttname"><a href="classSelStrategyMgr.html#ad2d0ef45cfa7fce50238ab01362ed4b5">SelStrategyMgr::createStrategy</a></div><div class="ttdeci">SelStrategyPtr createStrategy(const char *name, const char *id)</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8cpp_source.html#l00103">SelStrategyMgr.cpp:103</a></div></div>
+<div class="ttc" id="aclassSelStrategyMgr_html_adfd2773e43d4e34ba3bf77e9d260eff5"><div class="ttname"><a href="classSelStrategyMgr.html#adfd2773e43d4e34ba3bf77e9d260eff5">SelStrategyMgr::StraFactInfo</a></div><div class="ttdeci">struct SelStrategyMgr::_StraFactInfo StraFactInfo</div></div>
+<div class="ttc" id="aclassSelStrategy_html"><div class="ttname"><a href="classSelStrategy.html">SelStrategy</a></div><div class="ttdef"><b>Definition</b> <a href="SelStrategyDefs_8h_source.html#l00025">SelStrategyDefs.h:26</a></div></div>
+<div class="ttc" id="aclasswt__hashmap_html"><div class="ttname"><a href="classwt__hashmap.html">wt_hashmap</a></div><div class="ttdoc">WonderTrader通用高性能哈希表模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00162">FasterDefs.h:163</a></div></div>
+<div class="ttc" id="astructSelStrategyMgr_1_1__StraFactInfo_html"><div class="ttname"><a href="structSelStrategyMgr_1_1__StraFactInfo.html">SelStrategyMgr::_StraFactInfo</a></div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00055">SelStrategyMgr.h:56</a></div></div>
+<div class="ttc" id="astructSelStrategyMgr_1_1__StraFactInfo_html_a1c79a49dbca74432084565c3e5e8a63a"><div class="ttname"><a href="structSelStrategyMgr_1_1__StraFactInfo.html#a1c79a49dbca74432084565c3e5e8a63a">SelStrategyMgr::_StraFactInfo::_module_inst</a></div><div class="ttdeci">DllHandle _module_inst</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00058">SelStrategyMgr.h:58</a></div></div>
+<div class="ttc" id="astructSelStrategyMgr_1_1__StraFactInfo_html_abeadda06c085c479fc0ce90e46a893be"><div class="ttname"><a href="structSelStrategyMgr_1_1__StraFactInfo.html#abeadda06c085c479fc0ce90e46a893be">SelStrategyMgr::_StraFactInfo::_fact</a></div><div class="ttdeci">ISelStrategyFact * _fact</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00059">SelStrategyMgr.h:59</a></div></div>
+<div class="ttc" id="astructSelStrategyMgr_1_1__StraFactInfo_html_ad3f26df232f0a232f29e6fbd5b9d79b4"><div class="ttname"><a href="structSelStrategyMgr_1_1__StraFactInfo.html#ad3f26df232f0a232f29e6fbd5b9d79b4">SelStrategyMgr::_StraFactInfo::_creator</a></div><div class="ttdeci">FuncCreateSelStraFact _creator</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00060">SelStrategyMgr.h:60</a></div></div>
+<div class="ttc" id="astructSelStrategyMgr_1_1__StraFactInfo_html_aee7e44ece4694ce84f008c3560885992"><div class="ttname"><a href="structSelStrategyMgr_1_1__StraFactInfo.html#aee7e44ece4694ce84f008c3560885992">SelStrategyMgr::_StraFactInfo::_remover</a></div><div class="ttdeci">FuncDeleteSelStraFact _remover</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00061">SelStrategyMgr.h:61</a></div></div>
+<div class="ttc" id="astructSelStrategyMgr_1_1__StraFactInfo_html_afabd43fbbc7df7972a81a86170fb7686"><div class="ttname"><a href="structSelStrategyMgr_1_1__StraFactInfo.html#afabd43fbbc7df7972a81a86170fb7686">SelStrategyMgr::_StraFactInfo::_module_path</a></div><div class="ttdeci">std::string _module_path</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyMgr_8h_source.html#l00057">SelStrategyMgr.h:57</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3ce996bf6400c0a215df0636043a382c.html">WtCore</a></li><li class="navelem"><a class="el" href="SelStrategyMgr_8h.html">SelStrategyMgr.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

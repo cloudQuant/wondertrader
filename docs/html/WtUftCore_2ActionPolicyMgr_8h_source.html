@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtUftCore/ActionPolicyMgr.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtUftCore_2ActionPolicyMgr_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ActionPolicyMgr.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtUftCore_2ActionPolicyMgr_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;../Includes/FasterDefs.h&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">class </span><a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="};">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="WtUftCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45">   29</a></span><span class="keyword">typedef</span> <span class="keyword">enum</span> <a class="code hl_enumeration" href="WtCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45">tagActionType</a></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>{</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="WtUftCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45a0a24f0979a83ec450cd516883da71959">   31</a></span>    <a class="code hl_enumvalue" href="WtCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45a0a24f0979a83ec450cd516883da71959">AT_Unknown</a> = 8888,    </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="WtUftCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45ab294dc25222ea37d7842b39de2c17503">   32</a></span>    <a class="code hl_enumvalue" href="WtCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45ab294dc25222ea37d7842b39de2c17503">AT_Open</a> = 9999,     </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="WtUftCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45aaf3d27df48e7a75c29010e32307b2a59">   33</a></span>    <a class="code hl_enumvalue" href="WtCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45aaf3d27df48e7a75c29010e32307b2a59">AT_Close</a>,           </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="WtUftCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45ab30c70188ce8f39c3bc7f5750425c769">   34</a></span>    <a class="code hl_enumvalue" href="WtCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45ab30c70188ce8f39c3bc7f5750425c769">AT_CloseToday</a>,      </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <a class="code hl_enumvalue" href="WtCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45aafc7df57c79cc9c91023ecc8b1c6fbe2">AT_CloseYestoday</a>    </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="WtUftCore_2ActionPolicyMgr_8h.html#a71effd5ed3edf687d0649feca929efce">   36</a></span>} <a class="code hl_typedef" href="WtCore_2ActionPolicyMgr_8h.html#a71effd5ed3edf687d0649feca929efce">ActionType</a>;</div>
+</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="struct__ActionRule.html">_ActionRule</a></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>{</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <a class="code hl_typedef" href="WtCore_2ActionPolicyMgr_8h.html#a71effd5ed3edf687d0649feca929efce">ActionType</a>  <a class="code hl_variable" href="struct__ActionRule.html#ad22b7b3c1b82cbd04343475a57da02ca">_atype</a>;     </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    uint32_t    <a class="code hl_variable" href="struct__ActionRule.html#a4812fae3c705e87c9d0161adb3fac49f">_limit</a>;     </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    uint32_t    <a class="code hl_variable" href="struct__ActionRule.html#a9168cda3a750f9c2fec3e2c7fd0027f1">_limit_l</a>;   </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    uint32_t    <a class="code hl_variable" href="struct__ActionRule.html#a9e58b47a2af1dfb063597d91989c1d32">_limit_s</a>;   </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordtype">bool</span>        <a class="code hl_variable" href="struct__ActionRule.html#ab94cd6e03356920130fe06d5f9032a03">_pure</a>;      </div>
+<div class="foldopen" id="foldopen00056" data-start="{" data-end="}">
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="struct__ActionRule.html#a18801661b30e011c6ca6b607a99120a1">   56</a></span>    <a class="code hl_function" href="struct__ActionRule.html#a18801661b30e011c6ca6b607a99120a1">_ActionRule</a>()</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    {</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        memset(<span class="keyword">this</span>, 0, <span class="keyword">sizeof</span>(<a class="code hl_struct" href="struct__ActionRule.html">_ActionRule</a>));</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    }</div>
+</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="WtUftCore_2ActionPolicyMgr_8h.html#aecb9936d450bccbd14b57011fe0824b9">   60</a></span>} <a class="code hl_typedef" href="WtCore_2ActionPolicyMgr_8h.html#aecb9936d450bccbd14b57011fe0824b9">ActionRule</a>;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="WtUftCore_2ActionPolicyMgr_8h.html#a835c188fdc19f58ac8a3e6e0f020e72c">   67</a></span><span class="keyword">typedef</span> std::vector&lt;ActionRule&gt; <a class="code hl_typedef" href="WtCore_2ActionPolicyMgr_8h.html#a835c188fdc19f58ac8a3e6e0f020e72c">ActionRuleGroup</a>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="keyword">class </span><a class="code hl_class" href="classActionPolicyMgr.html">ActionPolicyMgr</a></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>{</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="classActionPolicyMgr.html#a3bc298a1522ae4462b63cc47885a6991">   81</a></span>    <a class="code hl_function" href="classActionPolicyMgr.html#a3bc298a1522ae4462b63cc47885a6991">ActionPolicyMgr</a>();</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classActionPolicyMgr.html#acb8ff9e26fcca2525fd17e4f0cccfd10">   86</a></span>    <a class="code hl_function" href="classActionPolicyMgr.html#acb8ff9e26fcca2525fd17e4f0cccfd10">~ActionPolicyMgr</a>();</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="classActionPolicyMgr.html#a0085476e99af6821daaf97ff99f206d8">   97</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classActionPolicyMgr.html#a0085476e99af6821daaf97ff99f206d8">init</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* filename);</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="classActionPolicyMgr.html#a833100bdf80b54e86ca028e092a627ec">  107</a></span>    <span class="keyword">const</span> <a class="code hl_typedef" href="WtUftCore_2ActionPolicyMgr_8h.html#a835c188fdc19f58ac8a3e6e0f020e72c">ActionRuleGroup</a>&amp; <a class="code hl_function" href="classActionPolicyMgr.html#a833100bdf80b54e86ca028e092a627ec">getActionRules</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* pid);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="classActionPolicyMgr.html#a4eb70f5c16ff896404f1a84bf8efcf8a">  111</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, ActionRuleGroup&gt;</a> <a class="code hl_typedef" href="classActionPolicyMgr.html#a4eb70f5c16ff896404f1a84bf8efcf8a">RulesMap</a>;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <a class="code hl_class" href="classwt__hashmap.html">RulesMap</a>    <a class="code hl_variable" href="classActionPolicyMgr.html#abd7c0528bdbed6b889811475422045de">_rules</a>; </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, std::string&gt;</a> <a class="code hl_variable" href="classActionPolicyMgr.html#a8bb78eaa2ed819039e1c4b6b33b49edc">_comm_rule_map</a>;    </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>};</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aWtCore_2ActionPolicyMgr_8h_html_a71effd5ed3edf687d0649feca929efce"><div class="ttname"><a href="WtCore_2ActionPolicyMgr_8h.html#a71effd5ed3edf687d0649feca929efce">ActionType</a></div><div class="ttdeci">enum tagActionType ActionType</div><div class="ttdoc">交易动作类型枚举</div></div>
+<div class="ttc" id="aWtCore_2ActionPolicyMgr_8h_html_a835c188fdc19f58ac8a3e6e0f020e72c"><div class="ttname"><a href="WtCore_2ActionPolicyMgr_8h.html#a835c188fdc19f58ac8a3e6e0f020e72c">ActionRuleGroup</a></div><div class="ttdeci">std::vector&lt; ActionRule &gt; ActionRuleGroup</div><div class="ttdoc">交易动作规则组类型</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00064">ActionPolicyMgr.h:64</a></div></div>
+<div class="ttc" id="aWtCore_2ActionPolicyMgr_8h_html_aecb9936d450bccbd14b57011fe0824b9"><div class="ttname"><a href="WtCore_2ActionPolicyMgr_8h.html#aecb9936d450bccbd14b57011fe0824b9">ActionRule</a></div><div class="ttdeci">struct _ActionRule ActionRule</div><div class="ttdoc">交易动作规则结构体</div></div>
+<div class="ttc" id="aWtCore_2ActionPolicyMgr_8h_html_afe62bf372d656bee78593eb58c320f45"><div class="ttname"><a href="WtCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45">tagActionType</a></div><div class="ttdeci">tagActionType</div><div class="ttdoc">交易动作类型枚举</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00028">ActionPolicyMgr.h:29</a></div></div>
+<div class="ttc" id="aWtCore_2ActionPolicyMgr_8h_html_afe62bf372d656bee78593eb58c320f45a0a24f0979a83ec450cd516883da71959"><div class="ttname"><a href="WtCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45a0a24f0979a83ec450cd516883da71959">AT_Unknown</a></div><div class="ttdeci">@ AT_Unknown</div><div class="ttdoc">未知动作类型，用于初始化或错误状态</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00030">ActionPolicyMgr.h:30</a></div></div>
+<div class="ttc" id="aWtCore_2ActionPolicyMgr_8h_html_afe62bf372d656bee78593eb58c320f45aaf3d27df48e7a75c29010e32307b2a59"><div class="ttname"><a href="WtCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45aaf3d27df48e7a75c29010e32307b2a59">AT_Close</a></div><div class="ttdeci">@ AT_Close</div><div class="ttdoc">平仓动作，不区分今仓和昨仓</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00032">ActionPolicyMgr.h:32</a></div></div>
+<div class="ttc" id="aWtCore_2ActionPolicyMgr_8h_html_afe62bf372d656bee78593eb58c320f45aafc7df57c79cc9c91023ecc8b1c6fbe2"><div class="ttname"><a href="WtCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45aafc7df57c79cc9c91023ecc8b1c6fbe2">AT_CloseYestoday</a></div><div class="ttdeci">@ AT_CloseYestoday</div><div class="ttdoc">平昨仓动作，专门平掉昨天及更早建立的头寸</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00035">ActionPolicyMgr.h:34</a></div></div>
+<div class="ttc" id="aWtCore_2ActionPolicyMgr_8h_html_afe62bf372d656bee78593eb58c320f45ab294dc25222ea37d7842b39de2c17503"><div class="ttname"><a href="WtCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45ab294dc25222ea37d7842b39de2c17503">AT_Open</a></div><div class="ttdeci">@ AT_Open</div><div class="ttdoc">开仓动作，建立新的头寸</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00031">ActionPolicyMgr.h:31</a></div></div>
+<div class="ttc" id="aWtCore_2ActionPolicyMgr_8h_html_afe62bf372d656bee78593eb58c320f45ab30c70188ce8f39c3bc7f5750425c769"><div class="ttname"><a href="WtCore_2ActionPolicyMgr_8h.html#afe62bf372d656bee78593eb58c320f45ab30c70188ce8f39c3bc7f5750425c769">AT_CloseToday</a></div><div class="ttdeci">@ AT_CloseToday</div><div class="ttdoc">平今仓动作，专门平掉当天建立的头寸</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00033">ActionPolicyMgr.h:33</a></div></div>
+<div class="ttc" id="aWtUftCore_2ActionPolicyMgr_8h_html_a835c188fdc19f58ac8a3e6e0f020e72c"><div class="ttname"><a href="WtUftCore_2ActionPolicyMgr_8h.html#a835c188fdc19f58ac8a3e6e0f020e72c">ActionRuleGroup</a></div><div class="ttdeci">std::vector&lt; ActionRule &gt; ActionRuleGroup</div><div class="ttdoc">交易动作规则组</div><div class="ttdef"><b>Definition</b> <a href="WtUftCore_2ActionPolicyMgr_8h_source.html#l00067">ActionPolicyMgr.h:67</a></div></div>
+<div class="ttc" id="aclassActionPolicyMgr_html"><div class="ttname"><a href="classActionPolicyMgr.html">ActionPolicyMgr</a></div><div class="ttdoc">行为策略管理器类</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00071">ActionPolicyMgr.h:72</a></div></div>
+<div class="ttc" id="aclassActionPolicyMgr_html_a0085476e99af6821daaf97ff99f206d8"><div class="ttname"><a href="classActionPolicyMgr.html#a0085476e99af6821daaf97ff99f206d8">ActionPolicyMgr::init</a></div><div class="ttdeci">bool init(const char *filename)</div><div class="ttdoc">初始化动作策略管理器</div></div>
+<div class="ttc" id="aclassActionPolicyMgr_html_a3bc298a1522ae4462b63cc47885a6991"><div class="ttname"><a href="classActionPolicyMgr.html#a3bc298a1522ae4462b63cc47885a6991">ActionPolicyMgr::ActionPolicyMgr</a></div><div class="ttdeci">ActionPolicyMgr()</div><div class="ttdoc">构造函数</div></div>
+<div class="ttc" id="aclassActionPolicyMgr_html_a4eb70f5c16ff896404f1a84bf8efcf8a"><div class="ttname"><a href="classActionPolicyMgr.html#a4eb70f5c16ff896404f1a84bf8efcf8a">ActionPolicyMgr::RulesMap</a></div><div class="ttdeci">wt_hashmap&lt; std::string, ActionRuleGroup &gt; RulesMap</div><div class="ttdoc">规则组映射表类型定义</div><div class="ttdef"><b>Definition</b> <a href="WtUftCore_2ActionPolicyMgr_8h_source.html#l00111">ActionPolicyMgr.h:111</a></div></div>
+<div class="ttc" id="aclassActionPolicyMgr_html_a833100bdf80b54e86ca028e092a627ec"><div class="ttname"><a href="classActionPolicyMgr.html#a833100bdf80b54e86ca028e092a627ec">ActionPolicyMgr::getActionRules</a></div><div class="ttdeci">const ActionRuleGroup &amp; getActionRules(const char *pid)</div><div class="ttdoc">获取指定品种的交易动作规则组</div></div>
+<div class="ttc" id="aclassActionPolicyMgr_html_a8bb78eaa2ed819039e1c4b6b33b49edc"><div class="ttname"><a href="classActionPolicyMgr.html#a8bb78eaa2ed819039e1c4b6b33b49edc">ActionPolicyMgr::_comm_rule_map</a></div><div class="ttdeci">wt_hashmap&lt; std::string, std::string &gt; _comm_rule_map</div><div class="ttdoc">品种规则映射，将品种映射到对应的规则名称</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00112">ActionPolicyMgr.h:112</a></div></div>
+<div class="ttc" id="aclassActionPolicyMgr_html_abd7c0528bdbed6b889811475422045de"><div class="ttname"><a href="classActionPolicyMgr.html#abd7c0528bdbed6b889811475422045de">ActionPolicyMgr::_rules</a></div><div class="ttdeci">RulesMap _rules</div><div class="ttdoc">规则表，存储所有的规则组</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00110">ActionPolicyMgr.h:110</a></div></div>
+<div class="ttc" id="aclassActionPolicyMgr_html_acb8ff9e26fcca2525fd17e4f0cccfd10"><div class="ttname"><a href="classActionPolicyMgr.html#acb8ff9e26fcca2525fd17e4f0cccfd10">ActionPolicyMgr::~ActionPolicyMgr</a></div><div class="ttdeci">~ActionPolicyMgr()</div><div class="ttdoc">析构函数</div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclasswt__hashmap_html"><div class="ttname"><a href="classwt__hashmap.html">wt_hashmap</a></div><div class="ttdoc">WonderTrader通用高性能哈希表模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00162">FasterDefs.h:163</a></div></div>
+<div class="ttc" id="astruct__ActionRule_html"><div class="ttname"><a href="struct__ActionRule.html">_ActionRule</a></div><div class="ttdoc">交易动作规则结构体</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00042">ActionPolicyMgr.h:43</a></div></div>
+<div class="ttc" id="astruct__ActionRule_html_a18801661b30e011c6ca6b607a99120a1"><div class="ttname"><a href="struct__ActionRule.html#a18801661b30e011c6ca6b607a99120a1">_ActionRule::_ActionRule</a></div><div class="ttdeci">_ActionRule()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtUftCore_2ActionPolicyMgr_8h_source.html#l00056">ActionPolicyMgr.h:56</a></div></div>
+<div class="ttc" id="astruct__ActionRule_html_a4812fae3c705e87c9d0161adb3fac49f"><div class="ttname"><a href="struct__ActionRule.html#a4812fae3c705e87c9d0161adb3fac49f">_ActionRule::_limit</a></div><div class="ttdeci">uint32_t _limit</div><div class="ttdoc">总手数限制，限制该动作的总交易量</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00045">ActionPolicyMgr.h:45</a></div></div>
+<div class="ttc" id="astruct__ActionRule_html_a9168cda3a750f9c2fec3e2c7fd0027f1"><div class="ttname"><a href="struct__ActionRule.html#a9168cda3a750f9c2fec3e2c7fd0027f1">_ActionRule::_limit_l</a></div><div class="ttdeci">uint32_t _limit_l</div><div class="ttdoc">多头手数限制，限制多头方向的交易量</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00046">ActionPolicyMgr.h:46</a></div></div>
+<div class="ttc" id="astruct__ActionRule_html_a9e58b47a2af1dfb063597d91989c1d32"><div class="ttname"><a href="struct__ActionRule.html#a9e58b47a2af1dfb063597d91989c1d32">_ActionRule::_limit_s</a></div><div class="ttdeci">uint32_t _limit_s</div><div class="ttdoc">空头手数限制，限制空头方向的交易量</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00047">ActionPolicyMgr.h:47</a></div></div>
+<div class="ttc" id="astruct__ActionRule_html_ab94cd6e03356920130fe06d5f9032a03"><div class="ttname"><a href="struct__ActionRule.html#ab94cd6e03356920130fe06d5f9032a03">_ActionRule::_pure</a></div><div class="ttdeci">bool _pure</div><div class="ttdoc">纯净标志，主要针对AT_CloseToday和AT_CloseYestoday，用于判断是否是净今仓或者净昨仓</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00048">ActionPolicyMgr.h:48</a></div></div>
+<div class="ttc" id="astruct__ActionRule_html_ad22b7b3c1b82cbd04343475a57da02ca"><div class="ttname"><a href="struct__ActionRule.html#ad22b7b3c1b82cbd04343475a57da02ca">_ActionRule::_atype</a></div><div class="ttdeci">ActionType _atype</div><div class="ttdoc">动作类型，指定该规则适用于哪种交易动作</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ActionPolicyMgr_8h_source.html#l00044">ActionPolicyMgr.h:44</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_d8cf3075eb9e2bed05522e3b08b8e887.html">WtUftCore</a></li><li class="navelem"><a class="el" href="WtUftCore_2ActionPolicyMgr_8h.html">ActionPolicyMgr.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

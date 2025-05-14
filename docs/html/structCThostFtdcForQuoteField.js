@@ -1,0 +1,27 @@
+var structCThostFtdcForQuoteField =
+[
+    [ "ActiveUserID", "structCThostFtdcForQuoteField.html#a7a91860f3e80bca597eba263fb6bf3ab", null ],
+    [ "BrokerForQutoSeq", "structCThostFtdcForQuoteField.html#a97dd2665f09e98c93f11fbcf5fe4cc23", null ],
+    [ "BrokerID", "structCThostFtdcForQuoteField.html#a08e89469c763005d18413d3e18eed7d5", null ],
+    [ "BusinessUnit", "structCThostFtdcForQuoteField.html#a95db68f6433ef98dd4dfd40a048b1bbc", null ],
+    [ "ClientID", "structCThostFtdcForQuoteField.html#abbac68192fc4a6df82a6111e9f718866", null ],
+    [ "ExchangeID", "structCThostFtdcForQuoteField.html#a1aadb6a451971ddac601e5de48e53e9f", null ],
+    [ "ExchangeInstID", "structCThostFtdcForQuoteField.html#a45d1b078805df829b720b0e89fa3569d", null ],
+    [ "ForQuoteLocalID", "structCThostFtdcForQuoteField.html#a94536ee636987ab72c346b5bbba31b65", null ],
+    [ "ForQuoteRef", "structCThostFtdcForQuoteField.html#a3dc3bd900b02c64dfbf57d3a2bf1a9b9", null ],
+    [ "ForQuoteStatus", "structCThostFtdcForQuoteField.html#ad529b96b9982699d76567722aa77aa69", null ],
+    [ "FrontID", "structCThostFtdcForQuoteField.html#a1f5dd116de87a8518e5b9c8f8b7fc2aa", null ],
+    [ "InsertDate", "structCThostFtdcForQuoteField.html#a871838b3e4efb852f9daeb5039ab48d2", null ],
+    [ "InsertTime", "structCThostFtdcForQuoteField.html#a25cb8cc47e855a8497275c3be5cfc8bc", null ],
+    [ "InstallID", "structCThostFtdcForQuoteField.html#a71f75c753f631bdf7c17c424841404a9", null ],
+    [ "InstrumentID", "structCThostFtdcForQuoteField.html#a276102cf15f26aae0310b2dde1bb45cf", null ],
+    [ "InvestorID", "structCThostFtdcForQuoteField.html#a1eb67b0533590c6dabb12eaffb2bae3d", null ],
+    [ "InvestUnitID", "structCThostFtdcForQuoteField.html#a71806ae93efc600cada46191ee4ee09a", null ],
+    [ "IPAddress", "structCThostFtdcForQuoteField.html#a5e513a040a03fcaaed7a86e45af6a217", null ],
+    [ "MacAddress", "structCThostFtdcForQuoteField.html#a47e319d049085ff3a9c963cd1434621e", null ],
+    [ "ParticipantID", "structCThostFtdcForQuoteField.html#a0ca840dc7f005b7fecc7a942ecb7bfe2", null ],
+    [ "SessionID", "structCThostFtdcForQuoteField.html#aa77be882677e722b4eadcec3e9bbbcf7", null ],
+    [ "StatusMsg", "structCThostFtdcForQuoteField.html#aafc13a23ab03d3517b67b3a95e5943fe", null ],
+    [ "TraderID", "structCThostFtdcForQuoteField.html#a98b66979d811db4b1b917da1f25dc19f", null ],
+    [ "UserID", "structCThostFtdcForQuoteField.html#a4d998c987826506c5d1d0938e24bda66", null ]
+];

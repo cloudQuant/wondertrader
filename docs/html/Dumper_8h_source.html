@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/TraderDumper/Dumper.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('Dumper_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">Dumper.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="Dumper_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &quot;<a class="code" href="WtPorter_2PorterDefs_8h.html">PorterDefs.h</a>&quot;</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
+<div class="foldopen" id="foldopen00005" data-start="{" data-end="};">
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno"><a class="line" href="classDumper.html">    5</a></span><span class="keyword">class </span><a class="code hl_class" href="classDumper.html">Dumper</a></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span>{</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00009" data-start="{" data-end="}">
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="classDumper.html#a807fd3e0bf6c14df7791575ca8fe6628">    9</a></span>    <a class="code hl_function" href="classDumper.html#a807fd3e0bf6c14df7791575ca8fe6628">Dumper</a>(): </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>        <a class="code hl_variable" href="classDumper.html#a4e18af8b8aa15906cb8da773d6f70d86">_cb_account</a>(nullptr), <a class="code hl_variable" href="classDumper.html#ab8ac881c6d58908c21220e5b47d29edf">_cb_order</a>(nullptr), <a class="code hl_variable" href="classDumper.html#afcd6b621bc9424f53308bd989d911fae">_cb_trade</a>(nullptr), </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>        <a class="code hl_variable" href="classDumper.html#aea0bfae9b8236c5e554c472fedbf92a1">_cb_position</a>(nullptr), <a class="code hl_variable" href="classDumper.html#a215058fa74627689f233113a6ab6c09d">_refresh_span</a>(10), <a class="code hl_variable" href="classDumper.html#a50ec6755727793b6bd890b87ff754ee3">_stopped</a>(false){}</div>
+</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="foldopen" id="foldopen00013" data-start="{" data-end="}">
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="classDumper.html#a662aee7b643d0443f83470812ad81e61">   13</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classDumper.html#a662aee7b643d0443f83470812ad81e61">register_callbacks</a>(<a class="code hl_typedef" href="TraderDumper_2PorterDefs_8h.html#a8bc850694a74d41808e4ebbe0fefe6d5">FuncOnAccount</a> cbAccount, <a class="code hl_typedef" href="TraderDumper_2PorterDefs_8h.html#ab51d9a53a40286898ac0774fd3e07b04">FuncOnOrder</a> cbOrder, <a class="code hl_typedef" href="TraderDumper_2PorterDefs_8h.html#a58e50c299f541a9fffc47b963f5abc46">FuncOnTrade</a> cbTrade, <a class="code hl_typedef" href="TraderDumper_2PorterDefs_8h.html#ab631f21e2111598ca8864d7c6bd7e9ad">FuncOnPosition</a> cbPosition)</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    {</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>        <a class="code hl_variable" href="classDumper.html#a4e18af8b8aa15906cb8da773d6f70d86">_cb_account</a> = cbAccount;</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>        <a class="code hl_variable" href="classDumper.html#ab8ac881c6d58908c21220e5b47d29edf">_cb_order</a> = cbOrder;</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>        <a class="code hl_variable" href="classDumper.html#aea0bfae9b8236c5e554c472fedbf92a1">_cb_position</a> = cbPosition;</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        <a class="code hl_variable" href="classDumper.html#afcd6b621bc9424f53308bd989d911fae">_cb_trade</a> = cbTrade;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    }</div>
+</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classDumper.html#a65ad358e8869078020fd62c9f3ae8393">init</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* logProfile);</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classDumper.html#a91d6c4e3657bf358cb80503036503487">config</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* cfgfile, <span class="keywordtype">bool</span> isFile, <span class="keyword">const</span> <span class="keywordtype">char</span>* modDir);</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classDumper.html#a4c9ba7e9fb6eda8a29419ed697fd76a7">run</a>(<span class="keywordtype">bool</span> bOnce = <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classDumper.html#a6a48f2635534ecaf58bb4279575704a5">release</a>();</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classDumper.html#a071f65f43394cc25bdfdd1ef0d125fe7">on_account</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* channelid, uint32_t curTDate, <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_variable" href="demo__send__order_8cpp.html#af75f83b1c7d27fcbd5fb60b382330d60">currency</a>, <span class="keywordtype">double</span> prebalance, <span class="keywordtype">double</span> balance,</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        <span class="keywordtype">double</span> dynbalance, <span class="keywordtype">double</span> closeprofit, <span class="keywordtype">double</span> dynprofit, <span class="keywordtype">double</span> fee, <span class="keywordtype">double</span> margin, <span class="keywordtype">double</span> deposit, <span class="keywordtype">double</span> withdraw, <span class="keywordtype">bool</span> isLast);</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classDumper.html#a83374427081cad62a205b1618f165d1c">on_order</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* channelid, <span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, uint32_t curTDate,</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="keyword">const</span> <span class="keywordtype">char</span>* orderid, uint32_t direct, uint32_t offset, <span class="keywordtype">double</span> volume, <span class="keywordtype">double</span> leftover, <span class="keywordtype">double</span> traded, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, uint32_t ordertype,</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        uint32_t pricetype, <a class="code hl_typedef" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a> ordertime, uint32_t state, <span class="keyword">const</span> <span class="keywordtype">char</span>* statemsg, <span class="keywordtype">bool</span> isLast);</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classDumper.html#a6d2dc6812ba7ade94f0719b676f91597">on_trade</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* channelid, <span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, uint32_t curTDate,</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <span class="keyword">const</span> <span class="keywordtype">char</span>* tradeid, <span class="keyword">const</span> <span class="keywordtype">char</span>* orderid, uint32_t direct, uint32_t offset, <span class="keywordtype">double</span> volume, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>,</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        <span class="keywordtype">double</span> amount, uint32_t ordertype, uint32_t tradetype, <a class="code hl_typedef" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a> tradetime, <span class="keywordtype">bool</span> isLast);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classDumper.html#a8f1c0faf5df0e6eb4541abf8670c5145">on_position</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* channelid, <span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, uint32_t curTDate, uint32_t direct,</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <span class="keywordtype">double</span> volume, <span class="keywordtype">double</span> cost, <span class="keywordtype">double</span> margin, <span class="keywordtype">double</span> avgpx, <span class="keywordtype">double</span> dynprofit, uint32_t volscale, <span class="keywordtype">bool</span> isLast);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="classDumper.html#a4e18af8b8aa15906cb8da773d6f70d86">   44</a></span>    <a class="code hl_typedef" href="TraderDumper_2PorterDefs_8h.html#a8bc850694a74d41808e4ebbe0fefe6d5">FuncOnAccount</a>   <a class="code hl_variable" href="classDumper.html#a4e18af8b8aa15906cb8da773d6f70d86">_cb_account</a>;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="classDumper.html#ab8ac881c6d58908c21220e5b47d29edf">   45</a></span>    <a class="code hl_typedef" href="TraderDumper_2PorterDefs_8h.html#ab51d9a53a40286898ac0774fd3e07b04">FuncOnOrder</a>     <a class="code hl_variable" href="classDumper.html#ab8ac881c6d58908c21220e5b47d29edf">_cb_order</a>;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classDumper.html#afcd6b621bc9424f53308bd989d911fae">   46</a></span>    <a class="code hl_typedef" href="TraderDumper_2PorterDefs_8h.html#a58e50c299f541a9fffc47b963f5abc46">FuncOnTrade</a>     <a class="code hl_variable" href="classDumper.html#afcd6b621bc9424f53308bd989d911fae">_cb_trade</a>;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="classDumper.html#aea0bfae9b8236c5e554c472fedbf92a1">   47</a></span>    <a class="code hl_typedef" href="TraderDumper_2PorterDefs_8h.html#ab631f21e2111598ca8864d7c6bd7e9ad">FuncOnPosition</a>  <a class="code hl_variable" href="classDumper.html#aea0bfae9b8236c5e554c472fedbf92a1">_cb_position</a>;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="classDumper.html#a116648b4310065646a3349be4c927989">   49</a></span>    <a class="code hl_typedef" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>    <a class="code hl_variable" href="classDumper.html#a116648b4310065646a3349be4c927989">_worker</a>;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="classDumper.html#a215058fa74627689f233113a6ab6c09d">   51</a></span>    uint32_t        <a class="code hl_variable" href="classDumper.html#a215058fa74627689f233113a6ab6c09d">_refresh_span</a>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="classDumper.html#a50ec6755727793b6bd890b87ff754ee3">   52</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classDumper.html#a50ec6755727793b6bd890b87ff754ee3">_stopped</a>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>};</div>
+</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="ttc" id="aTraderDumper_2PorterDefs_8h_html_a58e50c299f541a9fffc47b963f5abc46"><div class="ttname"><a href="TraderDumper_2PorterDefs_8h.html#a58e50c299f541a9fffc47b963f5abc46">FuncOnTrade</a></div><div class="ttdeci">void(PORTER_FLAG * FuncOnTrade)(const char *channelid, const char *exchg, const char *code, WtUInt32 curTDate, const char *tradeid, const char *orderid, WtUInt32 direct, WtUInt32 offset, double volume, double price, double amount, WtUInt32 ordertype, WtUInt32 tradetype, WtUInt64 tradetime, bool isLast)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2PorterDefs_8h_source.html#l00025">PorterDefs.h:25</a></div></div>
+<div class="ttc" id="aTraderDumper_2PorterDefs_8h_html_a8bc850694a74d41808e4ebbe0fefe6d5"><div class="ttname"><a href="TraderDumper_2PorterDefs_8h.html#a8bc850694a74d41808e4ebbe0fefe6d5">FuncOnAccount</a></div><div class="ttdeci">void(PORTER_FLAG * FuncOnAccount)(const char *channelid, WtUInt32 curTDate, const char *currency, double prebalance, double balance, double dynbalance, double closeprofit, double dynprofit, double fee, double margin, double deposit, double withdraw, bool isLast)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2PorterDefs_8h_source.html#l00018">PorterDefs.h:18</a></div></div>
+<div class="ttc" id="aTraderDumper_2PorterDefs_8h_html_ab51d9a53a40286898ac0774fd3e07b04"><div class="ttname"><a href="TraderDumper_2PorterDefs_8h.html#ab51d9a53a40286898ac0774fd3e07b04">FuncOnOrder</a></div><div class="ttdeci">void(PORTER_FLAG * FuncOnOrder)(const char *channelid, const char *exchg, const char *code, WtUInt32 curTDate, const char *orderid, WtUInt32 direct, WtUInt32 offset, double volume, double leftover, double traded, double price, WtUInt32 ordertype, WtUInt32 pricetype, WtUInt64 ordertime, WtUInt32 state, const char *statemsg, bool isLast)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2PorterDefs_8h_source.html#l00021">PorterDefs.h:21</a></div></div>
+<div class="ttc" id="aTraderDumper_2PorterDefs_8h_html_ab631f21e2111598ca8864d7c6bd7e9ad"><div class="ttname"><a href="TraderDumper_2PorterDefs_8h.html#ab631f21e2111598ca8864d7c6bd7e9ad">FuncOnPosition</a></div><div class="ttdeci">void(PORTER_FLAG * FuncOnPosition)(const char *channelid, const char *exchg, const char *code, WtUInt32 curTDate, WtUInt32 direct, double volume, double cost, double margin, double avgpx, double dynprofit, WtUInt32 volscale, bool isLast)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2PorterDefs_8h_source.html#l00029">PorterDefs.h:29</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a22e9f586e6dc9b793483da4daa24ef8d"><div class="ttname"><a href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a></div><div class="ttdeci">unsigned long long WtUInt64</div><div class="ttdoc">64位无符号整数类型</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00123">WTSMarcos.h:123</a></div></div>
+<div class="ttc" id="aWtPorter_2PorterDefs_8h_html"><div class="ttname"><a href="WtPorter_2PorterDefs_8h.html">PorterDefs.h</a></div><div class="ttdoc">WonderTrader导出接口定义文件</div></div>
+<div class="ttc" id="aclassDumper_html"><div class="ttname"><a href="classDumper.html">Dumper</a></div><div class="ttdef"><b>Definition</b> <a href="Dumper_8h_source.html#l00005">Dumper.h:6</a></div></div>
+<div class="ttc" id="aclassDumper_html_a071f65f43394cc25bdfdd1ef0d125fe7"><div class="ttname"><a href="classDumper.html#a071f65f43394cc25bdfdd1ef0d125fe7">Dumper::on_account</a></div><div class="ttdeci">void on_account(const char *channelid, uint32_t curTDate, const char *currency, double prebalance, double balance, double dynbalance, double closeprofit, double dynprofit, double fee, double margin, double deposit, double withdraw, bool isLast)</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8cpp_source.html#l00137">Dumper.cpp:137</a></div></div>
+<div class="ttc" id="aclassDumper_html_a116648b4310065646a3349be4c927989"><div class="ttname"><a href="classDumper.html#a116648b4310065646a3349be4c927989">Dumper::_worker</a></div><div class="ttdeci">StdThreadPtr _worker</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8h_source.html#l00049">Dumper.h:49</a></div></div>
+<div class="ttc" id="aclassDumper_html_a215058fa74627689f233113a6ab6c09d"><div class="ttname"><a href="classDumper.html#a215058fa74627689f233113a6ab6c09d">Dumper::_refresh_span</a></div><div class="ttdeci">uint32_t _refresh_span</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8h_source.html#l00051">Dumper.h:51</a></div></div>
+<div class="ttc" id="aclassDumper_html_a4c9ba7e9fb6eda8a29419ed697fd76a7"><div class="ttname"><a href="classDumper.html#a4c9ba7e9fb6eda8a29419ed697fd76a7">Dumper::run</a></div><div class="ttdeci">void run(bool bOnce=true)</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8cpp_source.html#l00102">Dumper.cpp:102</a></div></div>
+<div class="ttc" id="aclassDumper_html_a4e18af8b8aa15906cb8da773d6f70d86"><div class="ttname"><a href="classDumper.html#a4e18af8b8aa15906cb8da773d6f70d86">Dumper::_cb_account</a></div><div class="ttdeci">FuncOnAccount _cb_account</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8h_source.html#l00044">Dumper.h:44</a></div></div>
+<div class="ttc" id="aclassDumper_html_a50ec6755727793b6bd890b87ff754ee3"><div class="ttname"><a href="classDumper.html#a50ec6755727793b6bd890b87ff754ee3">Dumper::_stopped</a></div><div class="ttdeci">bool _stopped</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8h_source.html#l00052">Dumper.h:52</a></div></div>
+<div class="ttc" id="aclassDumper_html_a65ad358e8869078020fd62c9f3ae8393"><div class="ttname"><a href="classDumper.html#a65ad358e8869078020fd62c9f3ae8393">Dumper::init</a></div><div class="ttdeci">void init(const char *logProfile)</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8cpp_source.html#l00016">Dumper.cpp:16</a></div></div>
+<div class="ttc" id="aclassDumper_html_a662aee7b643d0443f83470812ad81e61"><div class="ttname"><a href="classDumper.html#a662aee7b643d0443f83470812ad81e61">Dumper::register_callbacks</a></div><div class="ttdeci">void register_callbacks(FuncOnAccount cbAccount, FuncOnOrder cbOrder, FuncOnTrade cbTrade, FuncOnPosition cbPosition)</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8h_source.html#l00013">Dumper.h:13</a></div></div>
+<div class="ttc" id="aclassDumper_html_a6a48f2635534ecaf58bb4279575704a5"><div class="ttname"><a href="classDumper.html#a6a48f2635534ecaf58bb4279575704a5">Dumper::release</a></div><div class="ttdeci">void release()</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8cpp_source.html#l00130">Dumper.cpp:130</a></div></div>
+<div class="ttc" id="aclassDumper_html_a6d2dc6812ba7ade94f0719b676f91597"><div class="ttname"><a href="classDumper.html#a6d2dc6812ba7ade94f0719b676f91597">Dumper::on_trade</a></div><div class="ttdeci">void on_trade(const char *channelid, const char *exchg, const char *code, uint32_t curTDate, const char *tradeid, const char *orderid, uint32_t direct, uint32_t offset, double volume, double price, double amount, uint32_t ordertype, uint32_t tradetype, WtUInt64 tradetime, bool isLast)</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8cpp_source.html#l00152">Dumper.cpp:152</a></div></div>
+<div class="ttc" id="aclassDumper_html_a807fd3e0bf6c14df7791575ca8fe6628"><div class="ttname"><a href="classDumper.html#a807fd3e0bf6c14df7791575ca8fe6628">Dumper::Dumper</a></div><div class="ttdeci">Dumper()</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8h_source.html#l00009">Dumper.h:9</a></div></div>
+<div class="ttc" id="aclassDumper_html_a83374427081cad62a205b1618f165d1c"><div class="ttname"><a href="classDumper.html#a83374427081cad62a205b1618f165d1c">Dumper::on_order</a></div><div class="ttdeci">void on_order(const char *channelid, const char *exchg, const char *code, uint32_t curTDate, const char *orderid, uint32_t direct, uint32_t offset, double volume, double leftover, double traded, double price, uint32_t ordertype, uint32_t pricetype, WtUInt64 ordertime, uint32_t state, const char *statemsg, bool isLast)</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8cpp_source.html#l00159">Dumper.cpp:159</a></div></div>
+<div class="ttc" id="aclassDumper_html_a8f1c0faf5df0e6eb4541abf8670c5145"><div class="ttname"><a href="classDumper.html#a8f1c0faf5df0e6eb4541abf8670c5145">Dumper::on_position</a></div><div class="ttdeci">void on_position(const char *channelid, const char *exchg, const char *code, uint32_t curTDate, uint32_t direct, double volume, double cost, double margin, double avgpx, double dynprofit, uint32_t volscale, bool isLast)</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8cpp_source.html#l00145">Dumper.cpp:145</a></div></div>
+<div class="ttc" id="aclassDumper_html_a91d6c4e3657bf358cb80503036503487"><div class="ttname"><a href="classDumper.html#a91d6c4e3657bf358cb80503036503487">Dumper::config</a></div><div class="ttdeci">bool config(const char *cfgfile, bool isFile, const char *modDir)</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8cpp_source.html#l00021">Dumper.cpp:21</a></div></div>
+<div class="ttc" id="aclassDumper_html_ab8ac881c6d58908c21220e5b47d29edf"><div class="ttname"><a href="classDumper.html#ab8ac881c6d58908c21220e5b47d29edf">Dumper::_cb_order</a></div><div class="ttdeci">FuncOnOrder _cb_order</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8h_source.html#l00045">Dumper.h:45</a></div></div>
+<div class="ttc" id="aclassDumper_html_aea0bfae9b8236c5e554c472fedbf92a1"><div class="ttname"><a href="classDumper.html#aea0bfae9b8236c5e554c472fedbf92a1">Dumper::_cb_position</a></div><div class="ttdeci">FuncOnPosition _cb_position</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8h_source.html#l00047">Dumper.h:47</a></div></div>
+<div class="ttc" id="aclassDumper_html_afcd6b621bc9424f53308bd989d911fae"><div class="ttname"><a href="classDumper.html#afcd6b621bc9424f53308bd989d911fae">Dumper::_cb_trade</a></div><div class="ttdeci">FuncOnTrade _cb_trade</div><div class="ttdef"><b>Definition</b> <a href="Dumper_8h_source.html#l00046">Dumper.h:46</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_a04f887fc8800d4727971dbb8eb550132"><div class="ttname"><a href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a></div><div class="ttdeci">ATPPriceType price</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00040">main.cpp:40</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_af75f83b1c7d27fcbd5fb60b382330d60"><div class="ttname"><a href="demo__send__order_8cpp.html#af75f83b1c7d27fcbd5fb60b382330d60">currency</a></div><div class="ttdeci">std::string currency</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00060">main.cpp:60</a></div></div>
+<div class="ttc" id="agroup__ThreadUtils_html_gaf9ea8e1e64d43ab034614d39d0b35776"><div class="ttname"><a href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a></div><div class="ttdeci">std::shared_ptr&lt; StdThread &gt; StdThreadPtr</div><div class="ttdoc">线程智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00042">StdUtils.hpp:42</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_e196f49eb960f9cca6fb56ba1a2ade26.html">TraderDumper</a></li><li class="navelem"><a class="el" href="Dumper_8h.html">Dumper.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtPorter/ExpSelContext.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('ExpSelContext_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ExpSelContext.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="ExpSelContext_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="ExpSelContext_8h.html">ExpSelContext.h</a>&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="WtRtRunner_8h.html">WtRtRunner.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">extern</span> <a class="code hl_class" href="classWtRtRunner.html">WtRtRunner</a>&amp; <a class="code hl_function" href="ExpSelContext_8cpp.html#a164379edb99407462130854b52be63f6">getRunner</a>();</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="foldopen" id="foldopen00028" data-start="{" data-end="}">
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="classExpSelContext.html#a0140ba98ec416fed4589b10dff9be761">   28</a></span><a class="code hl_function" href="classExpSelContext.html#a0140ba98ec416fed4589b10dff9be761">ExpSelContext::ExpSelContext</a>(<a class="code hl_class" href="classWtSelEngine.html">WtSelEngine</a>* env, <span class="keyword">const</span> <span class="keywordtype">char</span>* name, int32_t slippage)</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    : <a class="code hl_class" href="classSelStraBaseCtx.html">SelStraBaseCtx</a>(env, name, slippage)</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>{</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="comment">// 构造函数仅调用基类构造函数进行初始化</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>}</div>
+</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="}">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="classExpSelContext.html#a19cce234b684c3eafa3be9a3a8024c88">   39</a></span><a class="code hl_function" href="classExpSelContext.html#a19cce234b684c3eafa3be9a3a8024c88">ExpSelContext::~ExpSelContext</a>()</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>{</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="comment">// 析构函数当前无需要清理的资源</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}</div>
+</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="foldopen" id="foldopen00048" data-start="{" data-end="}">
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="classExpSelContext.html#a4bad8b3714f82939136198d081276cda">   48</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpSelContext.html#a4bad8b3714f82939136198d081276cda">ExpSelContext::on_init</a>()</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>{</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="comment">// 调用基类的初始化方法</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <a class="code hl_function" href="classSelStraBaseCtx.html#a009d8de1498d20903441bbbb5f1d8e64">SelStraBaseCtx::on_init</a>();</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="comment">// 向外部接口回调初始化事件</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a38a0585c00d54c623c75f620897e5f5d">ctx_on_init</a>(<a class="code hl_variable" href="classSelStraBaseCtx.html#ac0c6dd6653e17deb7b4ad26c8b5c56b4">_context_id</a>, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67afa00cf42681ba50f503fa79a40f076dd">ET_SEL</a>);</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>}</div>
+</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="foldopen" id="foldopen00062" data-start="{" data-end="}">
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="classExpSelContext.html#af959553e93c03445429d3cd82a180522">   62</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpSelContext.html#af959553e93c03445429d3cd82a180522">ExpSelContext::on_session_begin</a>(uint32_t uDate)</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>{</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="comment">// 调用基类的交易日开始方法</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <a class="code hl_function" href="classSelStraBaseCtx.html#ad2fb514670d3634abf72e09515f81ed9">SelStraBaseCtx::on_session_begin</a>(uDate);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="comment">// 向外部接口回调交易日开始事件，true表示开始</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#ab5b1d4f5fb31efdc7e30844690f4a312">ctx_on_session_event</a>(<a class="code hl_variable" href="classSelStraBaseCtx.html#ac0c6dd6653e17deb7b4ad26c8b5c56b4">_context_id</a>, uDate, <span class="keyword">true</span>, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67afa00cf42681ba50f503fa79a40f076dd">ET_SEL</a>);</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>}</div>
+</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="foldopen" id="foldopen00076" data-start="{" data-end="}">
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="classExpSelContext.html#afbb9c2f657e2d07de70a33fd743ea919">   76</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpSelContext.html#afbb9c2f657e2d07de70a33fd743ea919">ExpSelContext::on_session_end</a>(uint32_t uDate)</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>{</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="comment">// 向外部接口回调交易日结束事件，false表示结束</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#ab5b1d4f5fb31efdc7e30844690f4a312">ctx_on_session_event</a>(<a class="code hl_variable" href="classSelStraBaseCtx.html#ac0c6dd6653e17deb7b4ad26c8b5c56b4">_context_id</a>, uDate, <span class="keyword">false</span>, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67afa00cf42681ba50f503fa79a40f076dd">ET_SEL</a>);</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="comment">// 调用基类的交易日结束方法</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <a class="code hl_function" href="classSelStraBaseCtx.html#a9d7ca5754415936f3e67f9c4f3d18f5d">SelStraBaseCtx::on_session_end</a>(uDate);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>}</div>
+</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="foldopen" id="foldopen00091" data-start="{" data-end="}">
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="classExpSelContext.html#a8ea0dae4421358fb9289df4cf134a755">   91</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpSelContext.html#a8ea0dae4421358fb9289df4cf134a755">ExpSelContext::on_strategy_schedule</a>(uint32_t curDate, uint32_t curTime)</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>{</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="comment">// 向外部接口回调计算事件</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a4c69193990afbb4fe487020d13a48c3b">ctx_on_calc</a>(<a class="code hl_variable" href="classSelStraBaseCtx.html#ac0c6dd6653e17deb7b4ad26c8b5c56b4">_context_id</a>, curDate, curTime, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67afa00cf42681ba50f503fa79a40f076dd">ET_SEL</a>);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>}</div>
+</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="foldopen" id="foldopen00104" data-start="{" data-end="}">
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="classExpSelContext.html#ae43cfbe6444cacb40aa73f1b8598fca3">  104</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpSelContext.html#ae43cfbe6444cacb40aa73f1b8598fca3">ExpSelContext::on_bar_close</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* newBar)</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>{</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <span class="comment">// 将K线数据转发给外部接口</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a60337635dfbc52484aefb74f9cfc54e4">ctx_on_bar</a>(<a class="code hl_variable" href="classSelStraBaseCtx.html#ac0c6dd6653e17deb7b4ad26c8b5c56b4">_context_id</a>, stdCode, period, newBar, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67afa00cf42681ba50f503fa79a40f076dd">ET_SEL</a>);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>}</div>
+</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
+<div class="foldopen" id="foldopen00117" data-start="{" data-end="}">
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="classExpSelContext.html#ad6291046789ee16c7256407795d90ce8">  117</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpSelContext.html#ad6291046789ee16c7256407795d90ce8">ExpSelContext::on_tick_updated</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick)</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>{</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <span class="comment">// 检查是否订阅了该合约的Tick数据</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="classSelStraBaseCtx.html#ac0ff19da7ab2aac26b9a8c963240a4a5">_tick_subs</a>.find(stdCode);</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="classSelStraBaseCtx.html#ac0ff19da7ab2aac26b9a8c963240a4a5">_tick_subs</a>.end())</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    <span class="comment">// 将Tick数据转发给外部接口</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a70a32e8718b7663a7001a835d9c4e871">ctx_on_tick</a>(<a class="code hl_variable" href="classSelStraBaseCtx.html#ac0c6dd6653e17deb7b4ad26c8b5c56b4">_context_id</a>, stdCode, newTick, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67afa00cf42681ba50f503fa79a40f076dd">ET_SEL</a>);</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>}</div>
+</div>
+<div class="ttc" id="aExpCtaMocker_8cpp_html_aeae7c7722f120a5b990f96dfced42ff0"><div class="ttname"><a href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a></div><div class="ttdeci">WtBtRunner &amp; getRunner()</div><div class="ttdoc">获取全局回测引擎实例</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_8cpp_source.html#l00040">WtBtPorter.cpp:40</a></div></div>
+<div class="ttc" id="aExpSelContext_8cpp_html_a164379edb99407462130854b52be63f6"><div class="ttname"><a href="ExpSelContext_8cpp.html#a164379edb99407462130854b52be63f6">getRunner</a></div><div class="ttdeci">WtRtRunner &amp; getRunner()</div><div class="ttdoc">获取运行器实例的外部函数声明</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_8cpp_source.html#l00040">WtBtPorter.cpp:40</a></div></div>
+<div class="ttc" id="aExpSelContext_8h_html"><div class="ttname"><a href="ExpSelContext_8h.html">ExpSelContext.h</a></div><div class="ttdoc">SEL策略导出上下文定义</div></div>
+<div class="ttc" id="aWtBtRunner_8h_html_ad6bae4b8ec2ac5001b85aa4992e22d67afa00cf42681ba50f503fa79a40f076dd"><div class="ttname"><a href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67afa00cf42681ba50f503fa79a40f076dd">ET_SEL</a></div><div class="ttdeci">@ ET_SEL</div><div class="ttdef"><b>Definition</b> <a href="WtBtRunner_8h_source.html#l00033">WtBtRunner.h:32</a></div></div>
+<div class="ttc" id="aWtRtRunner_8h_html"><div class="ttname"><a href="WtRtRunner_8h.html">WtRtRunner.h</a></div><div class="ttdoc">WonderTrader实时交易运行器定义</div></div>
+<div class="ttc" id="aclassExpSelContext_html_a0140ba98ec416fed4589b10dff9be761"><div class="ttname"><a href="classExpSelContext.html#a0140ba98ec416fed4589b10dff9be761">ExpSelContext::ExpSelContext</a></div><div class="ttdeci">ExpSelContext(WtSelEngine *env, const char *name, int32_t slippage)</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="ExpSelContext_8cpp_source.html#l00028">ExpSelContext.cpp:28</a></div></div>
+<div class="ttc" id="aclassExpSelContext_html_a19cce234b684c3eafa3be9a3a8024c88"><div class="ttname"><a href="classExpSelContext.html#a19cce234b684c3eafa3be9a3a8024c88">ExpSelContext::~ExpSelContext</a></div><div class="ttdeci">virtual ~ExpSelContext()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="ExpSelContext_8cpp_source.html#l00039">ExpSelContext.cpp:39</a></div></div>
+<div class="ttc" id="aclassExpSelContext_html_a4bad8b3714f82939136198d081276cda"><div class="ttname"><a href="classExpSelContext.html#a4bad8b3714f82939136198d081276cda">ExpSelContext::on_init</a></div><div class="ttdeci">virtual void on_init() override</div><div class="ttdoc">初始化回调</div><div class="ttdef"><b>Definition</b> <a href="ExpSelContext_8cpp_source.html#l00048">ExpSelContext.cpp:48</a></div></div>
+<div class="ttc" id="aclassExpSelContext_html_a8ea0dae4421358fb9289df4cf134a755"><div class="ttname"><a href="classExpSelContext.html#a8ea0dae4421358fb9289df4cf134a755">ExpSelContext::on_strategy_schedule</a></div><div class="ttdeci">virtual void on_strategy_schedule(uint32_t curDate, uint32_t curTime) override</div><div class="ttdoc">策略调度回调</div><div class="ttdef"><b>Definition</b> <a href="ExpSelContext_8cpp_source.html#l00091">ExpSelContext.cpp:91</a></div></div>
+<div class="ttc" id="aclassExpSelContext_html_ad6291046789ee16c7256407795d90ce8"><div class="ttname"><a href="classExpSelContext.html#ad6291046789ee16c7256407795d90ce8">ExpSelContext::on_tick_updated</a></div><div class="ttdeci">virtual void on_tick_updated(const char *stdCode, WTSTickData *newTick) override</div><div class="ttdoc">Tick数据更新回调</div><div class="ttdef"><b>Definition</b> <a href="ExpSelContext_8cpp_source.html#l00117">ExpSelContext.cpp:117</a></div></div>
+<div class="ttc" id="aclassExpSelContext_html_ae43cfbe6444cacb40aa73f1b8598fca3"><div class="ttname"><a href="classExpSelContext.html#ae43cfbe6444cacb40aa73f1b8598fca3">ExpSelContext::on_bar_close</a></div><div class="ttdeci">virtual void on_bar_close(const char *stdCode, const char *period, WTSBarStruct *newBar) override</div><div class="ttdoc">K线闭合回调</div><div class="ttdef"><b>Definition</b> <a href="ExpSelContext_8cpp_source.html#l00104">ExpSelContext.cpp:104</a></div></div>
+<div class="ttc" id="aclassExpSelContext_html_af959553e93c03445429d3cd82a180522"><div class="ttname"><a href="classExpSelContext.html#af959553e93c03445429d3cd82a180522">ExpSelContext::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin(uint32_t uDate) override</div><div class="ttdoc">交易日开始回调</div><div class="ttdef"><b>Definition</b> <a href="ExpSelContext_8cpp_source.html#l00062">ExpSelContext.cpp:62</a></div></div>
+<div class="ttc" id="aclassExpSelContext_html_afbb9c2f657e2d07de70a33fd743ea919"><div class="ttname"><a href="classExpSelContext.html#afbb9c2f657e2d07de70a33fd743ea919">ExpSelContext::on_session_end</a></div><div class="ttdeci">virtual void on_session_end(uint32_t uDate) override</div><div class="ttdoc">交易日结束回调</div><div class="ttdef"><b>Definition</b> <a href="ExpSelContext_8cpp_source.html#l00076">ExpSelContext.cpp:76</a></div></div>
+<div class="ttc" id="aclassSelStraBaseCtx_html"><div class="ttname"><a href="classSelStraBaseCtx.html">SelStraBaseCtx</a></div><div class="ttdoc">选股策略基础上下文类</div><div class="ttdef"><b>Definition</b> <a href="SelStraBaseCtx_8h_source.html#l00032">SelStraBaseCtx.h:33</a></div></div>
+<div class="ttc" id="aclassSelStraBaseCtx_html_a009d8de1498d20903441bbbb5f1d8e64"><div class="ttname"><a href="classSelStraBaseCtx.html#a009d8de1498d20903441bbbb5f1d8e64">SelStraBaseCtx::on_init</a></div><div class="ttdeci">virtual void on_init() override</div><div class="ttdoc">策略初始化回调</div><div class="ttdef"><b>Definition</b> <a href="SelStraBaseCtx_8cpp_source.html#l00620">SelStraBaseCtx.cpp:620</a></div></div>
+<div class="ttc" id="aclassSelStraBaseCtx_html_a9d7ca5754415936f3e67f9c4f3d18f5d"><div class="ttname"><a href="classSelStraBaseCtx.html#a9d7ca5754415936f3e67f9c4f3d18f5d">SelStraBaseCtx::on_session_end</a></div><div class="ttdeci">virtual void on_session_end(uint32_t uTDate) override</div><div class="ttdoc">交易会话结束回调</div><div class="ttdef"><b>Definition</b> <a href="SelStraBaseCtx_8cpp_source.html#l00863">SelStraBaseCtx.cpp:863</a></div></div>
+<div class="ttc" id="aclassSelStraBaseCtx_html_ac0c6dd6653e17deb7b4ad26c8b5c56b4"><div class="ttname"><a href="classSelStraBaseCtx.html#ac0c6dd6653e17deb7b4ad26c8b5c56b4">SelStraBaseCtx::_context_id</a></div><div class="ttdeci">uint32_t _context_id</div><div class="ttdoc">策略上下文ID</div><div class="ttdef"><b>Definition</b> <a href="SelStraBaseCtx_8h_source.html#l00520">SelStraBaseCtx.h:520</a></div></div>
+<div class="ttc" id="aclassSelStraBaseCtx_html_ac0ff19da7ab2aac26b9a8c963240a4a5"><div class="ttname"><a href="classSelStraBaseCtx.html#ac0ff19da7ab2aac26b9a8c963240a4a5">SelStraBaseCtx::_tick_subs</a></div><div class="ttdeci">wt_hashset&lt; std::string &gt; _tick_subs</div><div class="ttdoc">Tick订阅列表</div><div class="ttdef"><b>Definition</b> <a href="SelStraBaseCtx_8h_source.html#l00925">SelStraBaseCtx.h:925</a></div></div>
+<div class="ttc" id="aclassSelStraBaseCtx_html_ad2fb514670d3634abf72e09515f81ed9"><div class="ttname"><a href="classSelStraBaseCtx.html#ad2fb514670d3634abf72e09515f81ed9">SelStraBaseCtx::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin(uint32_t uTDate) override</div><div class="ttdoc">交易会话开始回调</div><div class="ttdef"><b>Definition</b> <a href="SelStraBaseCtx_8cpp_source.html#l00799">SelStraBaseCtx.cpp:799</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a38a0585c00d54c623c75f620897e5f5d"><div class="ttname"><a href="classWtBtRunner.html#a38a0585c00d54c623c75f620897e5f5d">WtBtRunner::ctx_on_init</a></div><div class="ttdeci">void ctx_on_init(uint32_t id, EngineType eType)</div><div class="ttdoc">策略上下文初始化事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00569">WtBtRunner.cpp:569</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a4c69193990afbb4fe487020d13a48c3b"><div class="ttname"><a href="classWtBtRunner.html#a4c69193990afbb4fe487020d13a48c3b">WtBtRunner::ctx_on_calc</a></div><div class="ttdeci">void ctx_on_calc(uint32_t id, uint32_t uDate, uint32_t uTime, EngineType eType)</div><div class="ttdoc">策略计算事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00527">WtBtRunner.cpp:527</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a60337635dfbc52484aefb74f9cfc54e4"><div class="ttname"><a href="classWtBtRunner.html#a60337635dfbc52484aefb74f9cfc54e4">WtBtRunner::ctx_on_bar</a></div><div class="ttdeci">void ctx_on_bar(uint32_t id, const char *stdCode, const char *period, WTSBarStruct *newBar, EngineType eType)</div><div class="ttdoc">K线周期数据事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00505">WtBtRunner.cpp:505</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a70a32e8718b7663a7001a835d9c4e871"><div class="ttname"><a href="classWtBtRunner.html#a70a32e8718b7663a7001a835d9c4e871">WtBtRunner::ctx_on_tick</a></div><div class="ttdeci">void ctx_on_tick(uint32_t id, const char *stdCode, WTSTickData *newTick, EngineType eType)</div><div class="ttdoc">实时行情数据事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00638">WtBtRunner.cpp:638</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_ab5b1d4f5fb31efdc7e30844690f4a312"><div class="ttname"><a href="classWtBtRunner.html#ab5b1d4f5fb31efdc7e30844690f4a312">WtBtRunner::ctx_on_session_event</a></div><div class="ttdeci">void ctx_on_session_event(uint32_t id, uint32_t curTDate, bool isBegin=true, EngineType eType=ET_CTA)</div><div class="ttdoc">交易日事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00615">WtBtRunner.cpp:615</a></div></div>
+<div class="ttc" id="aclassWtRtRunner_html"><div class="ttname"><a href="classWtRtRunner.html">WtRtRunner</a></div><div class="ttdoc">WonderTrader实时交易运行器类</div><div class="ttdef"><b>Definition</b> <a href="WtRtRunner_8h_source.html#l00062">WtRtRunner.h:63</a></div></div>
+<div class="ttc" id="aclassWtSelEngine_html"><div class="ttname"><a href="classWtSelEngine.html">WtSelEngine</a></div><div class="ttdoc">选股策略引擎类</div><div class="ttdef"><b>Definition</b> <a href="WtSelEngine_8h_source.html#l00081">WtSelEngine.h:82</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_dc27b00ee5bce5a7f56bbfd467e9d584.html">WtPorter</a></li><li class="navelem"><a class="el" href="ExpSelContext_8cpp.html">ExpSelContext.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

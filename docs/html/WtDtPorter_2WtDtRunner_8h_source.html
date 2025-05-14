@@ -1,0 +1,288 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtDtPorter/WtDtRunner.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtDtPorter_2WtDtRunner_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtDtRunner.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtDtPorter_2WtDtRunner_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="WtPorter_2PorterDefs_8h.html">PorterDefs.h</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="ExpDumper_8h.html">ExpDumper.h</a>&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../WtDtCore/DataManager.h&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../WtDtCore/ParserAdapter.h&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;../WtDtCore/StateMonitor.h&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;../WtDtCore/UDPCaster.h&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;../WtDtCore/IndexFactory.h&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;../WtDtCore/ShmCaster.h&quot;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;../WTSTools/WTSHotMgr.h&quot;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;../WTSTools/WTSBaseDataMgr.h&quot;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;boost/asio.hpp&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keyword">class </span><a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="foldopen" id="foldopen00037" data-start="{" data-end="};">
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="classWtDtRunner.html">   37</a></span><span class="keyword">class </span><a class="code hl_class" href="classWtDtRunner.html">WtDtRunner</a></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>{</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <a class="code hl_function" href="classWtDtRunner.html#a3bab459a18f73556679b71f53ec4fa1d">WtDtRunner</a>();</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <a class="code hl_function" href="classWtDtRunner.html#a32f933940980ace059095518f9552379">~WtDtRunner</a>();</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classWtDtRunner.html#ac0d061d0d1468a332d9e96d62d0a817b">initialize</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* cfgFile, <span class="keyword">const</span> <span class="keywordtype">char</span>* logCfg, <span class="keyword">const</span> <span class="keywordtype">char</span>* modDir = <span class="stringliteral">&quot;&quot;</span>, <span class="keywordtype">bool</span> bCfgFile = <span class="keyword">true</span>, <span class="keywordtype">bool</span> bLogCfgFile = <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classWtDtRunner.html#a525332564db25d9227ac86d2d4977f1a">start</a>(<span class="keywordtype">bool</span> bAsync = <span class="keyword">false</span>, <span class="keywordtype">bool</span> bAlldayMode = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classWtDtRunner.html#a15ecc1bca166a1150898388b696aba86">createExtParser</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtRunner.html#a18f8edb190e89637f5e3f5b92c3f9406">registerParserPorter</a>(<a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a19abdbb76592f69c751dc63b6978c3bc">FuncParserEvtCallback</a> cbEvt, <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a6036ab6dc363c10ac1af93552add37cc">FuncParserSubCallback</a> cbSub);</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtRunner.html#ace1583f33dcfabede9673af036a3c416">parser_init</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtRunner.html#ab9a767a51a104fab78039ac4471f2538">parser_connect</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtRunner.html#af994a66d67d5af016df2b3fb57e4ca24">parser_release</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtRunner.html#ab9a0092e069f0e2f2c7ad6b5ee5b5bbe">parser_disconnect</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtRunner.html#af23b9dc53cb68492ae0ceb0ef7ec809c">parser_subscribe</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">char</span>* code);</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtRunner.html#a9a522b9aa4b7922c5c4f48f7ad653641">parser_unsubscribe</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">char</span>* code);</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtRunner.html#a2047afc1135c8af33f25fe53182e37af">on_ext_parser_quote</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>, <a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>* curTick, uint32_t uProcFlag);</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtDtRunner.html#a3a1968976ffd07e72a3cb04270281c28">createExtDumper</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span> </div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtRunner.html#a208fc4be183e826bdb083c803c0adb75">registerExtDumper</a>(<a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#adc4513b79f4c5b470eb9dbcfae034f3d">FuncDumpBars</a> barDumper, <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a9c9111f37d33566db91bab58d98463fe">FuncDumpTicks</a> tickDumper);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtRunner.html#a2438290030de893209f2356a487b919b">registerExtHftDataDumper</a>(<a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a5f4a554e983f0d8709b79940cde62dba">FuncDumpOrdQue</a> ordQueDumper, <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a01d26dff0ca98d73297c7fca7dd2789f">FuncDumpOrdDtl</a> ordDtlDumper, <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a8a8857d86ecda6e85f2d98f067735680">FuncDumpTrans</a> transDumper);</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtDtRunner.html#a351dfa44dc7eca55eca2dae35b0e615d">dumpHisBars</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* bars, uint32_t count);</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span> </div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtDtRunner.html#ae0c6d1bd7b88704a8b3ef4be2ddc0b0c">dumpHisTicks</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t uDate, <a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>* ticks, uint32_t count);</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span> </div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtDtRunner.html#a5baa101fafe9f9b98ba0cf44a8d37db7">dumpHisOrdQue</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t uDate, <a class="code hl_struct" href="structWTSOrdQueStruct.html">WTSOrdQueStruct</a>* item, uint32_t count);</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span> </div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtDtRunner.html#ab55d73e0453afd1ca3747ea121bed18d">dumpHisOrdDtl</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t uDate, <a class="code hl_struct" href="structWTSOrdDtlStruct.html">WTSOrdDtlStruct</a>* items, uint32_t count);</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span> </div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtDtRunner.html#aaf780708dd46a595bb63008dbeab36fe">dumpHisTrans</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t uDate, <a class="code hl_struct" href="structWTSTransStruct.html">WTSTransStruct</a>* items, uint32_t count);</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span> </div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtRunner.html#ab136bd8bd0635341ea9c34851447c7cf">initDataMgr</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* <a class="code hl_function" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>, <span class="keywordtype">bool</span> bAlldayMode = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtRunner.html#a779d40f275d13e3f88dcae8785e5206b">initParsers</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg);</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span> </div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#aa06674eed13941cb6c1c92ec6cf76d17">  257</a></span>    <a class="code hl_class" href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a>  <a class="code hl_variable" href="classWtDtRunner.html#aa06674eed13941cb6c1c92ec6cf76d17">_bd_mgr</a>;</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#a1118b050ff4e4d060d74e7d53e994950">  259</a></span>    <a class="code hl_class" href="classWTSHotMgr.html">WTSHotMgr</a>       <a class="code hl_variable" href="classWtDtRunner.html#a1118b050ff4e4d060d74e7d53e994950">_hot_mgr</a>;</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#ab1cc9d195306e1f89d1d55a485207c63">  261</a></span>    boost::asio::io_service <a class="code hl_variable" href="classWtDtRunner.html#ab1cc9d195306e1f89d1d55a485207c63">_async_io</a>;</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#a4cea3f13f62afd0d9fb12feee5234295">  263</a></span>    <a class="code hl_class" href="classStateMonitor.html">StateMonitor</a>    <a class="code hl_variable" href="classWtDtRunner.html#a4cea3f13f62afd0d9fb12feee5234295">_state_mon</a>;</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#a8d8842dbac939cdec04ee2cfae396c99">  265</a></span>    <a class="code hl_class" href="classUDPCaster.html">UDPCaster</a>       <a class="code hl_variable" href="classWtDtRunner.html#a8d8842dbac939cdec04ee2cfae396c99">_udp_caster</a>;</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#a60268fb16c8c4519be6c8a4a60abbeba">  267</a></span>    <a class="code hl_class" href="classShmCaster.html">ShmCaster</a>       <a class="code hl_variable" href="classWtDtRunner.html#a60268fb16c8c4519be6c8a4a60abbeba">_shm_caster</a>;</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#a2aaa67a37ab52ab2343be941e1301637">  269</a></span>    <a class="code hl_class" href="classDataManager.html">DataManager</a>     <a class="code hl_variable" href="classWtDtRunner.html#a2aaa67a37ab52ab2343be941e1301637">_data_mgr</a>;</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#ae017e19ceb7809710c58fa2946bef468">  271</a></span>    <a class="code hl_class" href="classIndexFactory.html">IndexFactory</a>    <a class="code hl_variable" href="classWtDtRunner.html#ae017e19ceb7809710c58fa2946bef468">_idx_factory</a>;</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#acca4eeaff23def9668fa5dc81cf11da0">  273</a></span>    <a class="code hl_class" href="classParserAdapterMgr.html">ParserAdapterMgr</a>    <a class="code hl_variable" href="classWtDtRunner.html#acca4eeaff23def9668fa5dc81cf11da0">_parsers</a>;</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span> </div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#aedb1e76c90e7d417b7f80300f4309397">  276</a></span>    <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a19abdbb76592f69c751dc63b6978c3bc">FuncParserEvtCallback</a>   <a class="code hl_variable" href="classWtDtRunner.html#aedb1e76c90e7d417b7f80300f4309397">_cb_parser_evt</a>;</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#a2d4e64d469f036e6979b317e6e069a87">  278</a></span>    <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a6036ab6dc363c10ac1af93552add37cc">FuncParserSubCallback</a>   <a class="code hl_variable" href="classWtDtRunner.html#a2d4e64d469f036e6979b317e6e069a87">_cb_parser_sub</a>;</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#a86f32cc4d20b5862168108dc9200c458">  281</a></span>    <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#adc4513b79f4c5b470eb9dbcfae034f3d">FuncDumpBars</a>    <a class="code hl_variable" href="classWtDtRunner.html#a86f32cc4d20b5862168108dc9200c458">_dumper_for_bars</a>;</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#a492f38f8be6c27cac48422e9776c14e6">  283</a></span>    <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a9c9111f37d33566db91bab58d98463fe">FuncDumpTicks</a>   <a class="code hl_variable" href="classWtDtRunner.html#a492f38f8be6c27cac48422e9776c14e6">_dumper_for_ticks</a>;</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span> </div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#a4a4e8201fe2d762c44ec1c4459f7864d">  286</a></span>    <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a5f4a554e983f0d8709b79940cde62dba">FuncDumpOrdQue</a>  <a class="code hl_variable" href="classWtDtRunner.html#a4a4e8201fe2d762c44ec1c4459f7864d">_dumper_for_ordque</a>;</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#a587388f2ffa9cf0e7117dbe30acee0ad">  288</a></span>    <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a01d26dff0ca98d73297c7fca7dd2789f">FuncDumpOrdDtl</a>  <a class="code hl_variable" href="classWtDtRunner.html#a587388f2ffa9cf0e7117dbe30acee0ad">_dumper_for_orddtl</a>;</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#a1c6f52d61a48ccbf267d155dd4e27cdb">  290</a></span>    <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a8a8857d86ecda6e85f2d98f067735680">FuncDumpTrans</a>   <a class="code hl_variable" href="classWtDtRunner.html#a1c6f52d61a48ccbf267d155dd4e27cdb">_dumper_for_trans</a>;</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span> </div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#a54ecb208b54fef782cc9f79516c11b38">  293</a></span>    <span class="keyword">typedef</span> std::shared_ptr&lt;ExpDumper&gt; <a class="code hl_typedef" href="classWtDtRunner.html#a54ecb208b54fef782cc9f79516c11b38">ExpDumperPtr</a>;</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#a263a337d42a87be6e30a1f3dd6c460b8">  295</a></span>    <span class="keyword">typedef</span> std::map&lt;std::string, ExpDumperPtr&gt;  <a class="code hl_typedef" href="classWtDtRunner.html#a263a337d42a87be6e30a1f3dd6c460b8">ExpDumpers</a>;</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#ac88151beee13679d0f9e6f168c750133">  297</a></span>    <a class="code hl_typedef" href="classWtDtRunner.html#a263a337d42a87be6e30a1f3dd6c460b8">ExpDumpers</a>      <a class="code hl_variable" href="classWtDtRunner.html#ac88151beee13679d0f9e6f168c750133">_dumpers</a>;</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span> </div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno"><a class="line" href="classWtDtRunner.html#afd086d4b4cec9b5355bcc8c42b43fd84">  300</a></span>    <span class="keywordtype">bool</span> <a class="code hl_variable" href="classWtDtRunner.html#afd086d4b4cec9b5355bcc8c42b43fd84">_to_exit</a>;</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>};</div>
+</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span> </div>
+<div class="ttc" id="aExpDumper_8h_html"><div class="ttname"><a href="ExpDumper_8h.html">ExpDumper.h</a></div><div class="ttdoc">历史数据导出器的头文件</div></div>
+<div class="ttc" id="aTraderDumper_8cpp_html_abc68ad0fe9293fb2709e004ffe3fa333"><div class="ttname"><a href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a></div><div class="ttdeci">bool config(const char *cfgfile, bool isFile)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_8cpp_source.html#l00022">TraderDumper.cpp:22</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aWtDtPorter_2PorterDefs_8h_html_a01d26dff0ca98d73297c7fca7dd2789f"><div class="ttname"><a href="WtDtPorter_2PorterDefs_8h.html#a01d26dff0ca98d73297c7fca7dd2789f">FuncDumpOrdDtl</a></div><div class="ttdeci">bool(PORTER_FLAG * FuncDumpOrdDtl)(const char *id, const char *stdCode, WtUInt32 uDate, WTSOrdDtlStruct *items, WtUInt32 count)</div><div class="ttdoc">委托明细数据导出回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2PorterDefs_8h_source.html#l00157">PorterDefs.h:157</a></div></div>
+<div class="ttc" id="aWtDtPorter_2PorterDefs_8h_html_a19abdbb76592f69c751dc63b6978c3bc"><div class="ttname"><a href="WtDtPorter_2PorterDefs_8h.html#a19abdbb76592f69c751dc63b6978c3bc">FuncParserEvtCallback</a></div><div class="ttdeci">void(PORTER_FLAG * FuncParserEvtCallback)(WtUInt32 evtId, const char *id)</div><div class="ttdoc">解析器事件回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2PorterDefs_8h_source.html#l00093">PorterDefs.h:93</a></div></div>
+<div class="ttc" id="aWtDtPorter_2PorterDefs_8h_html_a5f4a554e983f0d8709b79940cde62dba"><div class="ttname"><a href="WtDtPorter_2PorterDefs_8h.html#a5f4a554e983f0d8709b79940cde62dba">FuncDumpOrdQue</a></div><div class="ttdeci">bool(PORTER_FLAG * FuncDumpOrdQue)(const char *id, const char *stdCode, WtUInt32 uDate, WTSOrdQueStruct *items, WtUInt32 count)</div><div class="ttdoc">委托队列数据导出回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2PorterDefs_8h_source.html#l00145">PorterDefs.h:145</a></div></div>
+<div class="ttc" id="aWtDtPorter_2PorterDefs_8h_html_a6036ab6dc363c10ac1af93552add37cc"><div class="ttname"><a href="WtDtPorter_2PorterDefs_8h.html#a6036ab6dc363c10ac1af93552add37cc">FuncParserSubCallback</a></div><div class="ttdeci">void(PORTER_FLAG * FuncParserSubCallback)(const char *id, const char *fullCode, bool isForSub)</div><div class="ttdoc">解析器订阅回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2PorterDefs_8h_source.html#l00102">PorterDefs.h:102</a></div></div>
+<div class="ttc" id="aWtDtPorter_2PorterDefs_8h_html_a8a8857d86ecda6e85f2d98f067735680"><div class="ttname"><a href="WtDtPorter_2PorterDefs_8h.html#a8a8857d86ecda6e85f2d98f067735680">FuncDumpTrans</a></div><div class="ttdeci">bool(PORTER_FLAG * FuncDumpTrans)(const char *id, const char *stdCode, WtUInt32 uDate, WTSTransStruct *items, WtUInt32 count)</div><div class="ttdoc">成交数据导出回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2PorterDefs_8h_source.html#l00169">PorterDefs.h:169</a></div></div>
+<div class="ttc" id="aWtDtPorter_2PorterDefs_8h_html_a9c9111f37d33566db91bab58d98463fe"><div class="ttname"><a href="WtDtPorter_2PorterDefs_8h.html#a9c9111f37d33566db91bab58d98463fe">FuncDumpTicks</a></div><div class="ttdeci">bool(PORTER_FLAG * FuncDumpTicks)(const char *id, const char *stdCode, WtUInt32 uDate, WTSTickStruct *ticks, WtUInt32 count)</div><div class="ttdoc">适价数据导出回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2PorterDefs_8h_source.html#l00133">PorterDefs.h:133</a></div></div>
+<div class="ttc" id="aWtDtPorter_2PorterDefs_8h_html_adc4513b79f4c5b470eb9dbcfae034f3d"><div class="ttname"><a href="WtDtPorter_2PorterDefs_8h.html#adc4513b79f4c5b470eb9dbcfae034f3d">FuncDumpBars</a></div><div class="ttdeci">bool(PORTER_FLAG * FuncDumpBars)(const char *id, const char *stdCode, const char *period, WTSBarStruct *bars, WtUInt32 count)</div><div class="ttdoc">数据导出器相关回调函数定义</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2PorterDefs_8h_source.html#l00121">PorterDefs.h:121</a></div></div>
+<div class="ttc" id="aWtPorter_2PorterDefs_8h_html"><div class="ttname"><a href="WtPorter_2PorterDefs_8h.html">PorterDefs.h</a></div><div class="ttdoc">WonderTrader导出接口定义文件</div></div>
+<div class="ttc" id="aclassDataManager_html"><div class="ttname"><a href="classDataManager.html">DataManager</a></div><div class="ttdoc">数据管理器类</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8h_source.html#l00039">DataManager.h:40</a></div></div>
+<div class="ttc" id="aclassIndexFactory_html"><div class="ttname"><a href="classIndexFactory.html">IndexFactory</a></div><div class="ttdoc">指数工厂类</div><div class="ttdef"><b>Definition</b> <a href="IndexFactory_8h_source.html#l00023">IndexFactory.h:24</a></div></div>
+<div class="ttc" id="aclassParserAdapterMgr_html"><div class="ttname"><a href="classParserAdapterMgr.html">ParserAdapterMgr</a></div><div class="ttdoc">解析器适配器管理器类</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ParserAdapter_8h_source.html#l00268">ParserAdapter.h:269</a></div></div>
+<div class="ttc" id="aclassShmCaster_html"><div class="ttname"><a href="classShmCaster.html">ShmCaster</a></div><div class="ttdoc">基于共享内存的行情广播器</div><div class="ttdef"><b>Definition</b> <a href="ShmCaster_8h_source.html#l00028">ShmCaster.h:29</a></div></div>
+<div class="ttc" id="aclassStateMonitor_html"><div class="ttname"><a href="classStateMonitor.html">StateMonitor</a></div><div class="ttdoc">交易状态监控器类</div><div class="ttdef"><b>Definition</b> <a href="StateMonitor_8h_source.html#l00127">StateMonitor.h:128</a></div></div>
+<div class="ttc" id="aclassUDPCaster_html"><div class="ttname"><a href="classUDPCaster.html">UDPCaster</a></div><div class="ttdoc">UDP数据广播器类</div><div class="ttdef"><b>Definition</b> <a href="UDPCaster_8h_source.html#l00036">UDPCaster.h:37</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html"><div class="ttname"><a href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a></div><div class="ttdoc">基础数据管理器类</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00073">WTSBaseDataMgr.h:74</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html"><div class="ttname"><a href="classWTSHotMgr.html">WTSHotMgr</a></div><div class="ttdoc">主力合约管理器类</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8h_source.html#l00044">WTSHotMgr.h:45</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html"><div class="ttname"><a href="classWtDtRunner.html">WtDtRunner</a></div><div class="ttdoc">WonderTrader数据处理模块的运行器类</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00037">WtDtRunner.h:38</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a1118b050ff4e4d060d74e7d53e994950"><div class="ttname"><a href="classWtDtRunner.html#a1118b050ff4e4d060d74e7d53e994950">WtDtRunner::_hot_mgr</a></div><div class="ttdeci">WTSHotMgr _hot_mgr</div><div class="ttdoc">主力合约管理器，管理主力合约映射关系</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00259">WtDtRunner.h:259</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a15ecc1bca166a1150898388b696aba86"><div class="ttname"><a href="classWtDtRunner.html#a15ecc1bca166a1150898388b696aba86">WtDtRunner::createExtParser</a></div><div class="ttdeci">bool createExtParser(const char *id)</div><div class="ttdoc">创建扩展解析器</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00431">WtDtRunner.cpp:431</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a18f8edb190e89637f5e3f5b92c3f9406"><div class="ttname"><a href="classWtDtRunner.html#a18f8edb190e89637f5e3f5b92c3f9406">WtDtRunner::registerParserPorter</a></div><div class="ttdeci">void registerParserPorter(FuncParserEvtCallback cbEvt, FuncParserSubCallback cbSub)</div><div class="ttdoc">扩展解析器相关方法</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00327">WtDtRunner.cpp:327</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a1c6f52d61a48ccbf267d155dd4e27cdb"><div class="ttname"><a href="classWtDtRunner.html#a1c6f52d61a48ccbf267d155dd4e27cdb">WtDtRunner::_dumper_for_trans</a></div><div class="ttdeci">FuncDumpTrans _dumper_for_trans</div><div class="ttdoc">成交数据导出回调函数</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00290">WtDtRunner.h:290</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a2047afc1135c8af33f25fe53182e37af"><div class="ttname"><a href="classWtDtRunner.html#a2047afc1135c8af33f25fe53182e37af">WtDtRunner::on_ext_parser_quote</a></div><div class="ttdeci">void on_ext_parser_quote(const char *id, WTSTickStruct *curTick, uint32_t uProcFlag)</div><div class="ttdoc">处理外部解析器的行情数据</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00410">WtDtRunner.cpp:410</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a208fc4be183e826bdb083c803c0adb75"><div class="ttname"><a href="classWtDtRunner.html#a208fc4be183e826bdb083c803c0adb75">WtDtRunner::registerExtDumper</a></div><div class="ttdeci">void registerExtDumper(FuncDumpBars barDumper, FuncDumpTicks tickDumper)</div><div class="ttdoc">注册扩展数据导出器的基础数据回调</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00466">WtDtRunner.cpp:466</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a2438290030de893209f2356a487b919b"><div class="ttname"><a href="classWtDtRunner.html#a2438290030de893209f2356a487b919b">WtDtRunner::registerExtHftDataDumper</a></div><div class="ttdeci">void registerExtHftDataDumper(FuncDumpOrdQue ordQueDumper, FuncDumpOrdDtl ordDtlDumper, FuncDumpTrans transDumper)</div><div class="ttdoc">注册扩展数据导出器的高频数据回调</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00479">WtDtRunner.cpp:479</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a263a337d42a87be6e30a1f3dd6c460b8"><div class="ttname"><a href="classWtDtRunner.html#a263a337d42a87be6e30a1f3dd6c460b8">WtDtRunner::ExpDumpers</a></div><div class="ttdeci">std::map&lt; std::string, ExpDumperPtr &gt; ExpDumpers</div><div class="ttdoc">导出器映射表类型定义，将导出器ID映射到导出器实例</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00295">WtDtRunner.h:295</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a2aaa67a37ab52ab2343be941e1301637"><div class="ttname"><a href="classWtDtRunner.html#a2aaa67a37ab52ab2343be941e1301637">WtDtRunner::_data_mgr</a></div><div class="ttdeci">DataManager _data_mgr</div><div class="ttdoc">数据管理器，负责数据的缓存和管理</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00269">WtDtRunner.h:269</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a2d4e64d469f036e6979b317e6e069a87"><div class="ttname"><a href="classWtDtRunner.html#a2d4e64d469f036e6979b317e6e069a87">WtDtRunner::_cb_parser_sub</a></div><div class="ttdeci">FuncParserSubCallback _cb_parser_sub</div><div class="ttdoc">解析器订阅回调函数</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00278">WtDtRunner.h:278</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a32f933940980ace059095518f9552379"><div class="ttname"><a href="classWtDtRunner.html#a32f933940980ace059095518f9552379">WtDtRunner::~WtDtRunner</a></div><div class="ttdeci">~WtDtRunner()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00048">WtDtRunner.cpp:48</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a351dfa44dc7eca55eca2dae35b0e615d"><div class="ttname"><a href="classWtDtRunner.html#a351dfa44dc7eca55eca2dae35b0e615d">WtDtRunner::dumpHisBars</a></div><div class="ttdeci">bool dumpHisBars(const char *id, const char *stdCode, const char *period, WTSBarStruct *bars, uint32_t count)</div><div class="ttdoc">导出K线历史数据</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00517">WtDtRunner.cpp:517</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a3a1968976ffd07e72a3cb04270281c28"><div class="ttname"><a href="classWtDtRunner.html#a3a1968976ffd07e72a3cb04270281c28">WtDtRunner::createExtDumper</a></div><div class="ttdeci">bool createExtDumper(const char *id)</div><div class="ttdoc">扩展导出器相关方法</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00449">WtDtRunner.cpp:449</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a3bab459a18f73556679b71f53ec4fa1d"><div class="ttname"><a href="classWtDtRunner.html#a3bab459a18f73556679b71f53ec4fa1d">WtDtRunner::WtDtRunner</a></div><div class="ttdeci">WtDtRunner()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00033">WtDtRunner.cpp:33</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a492f38f8be6c27cac48422e9776c14e6"><div class="ttname"><a href="classWtDtRunner.html#a492f38f8be6c27cac48422e9776c14e6">WtDtRunner::_dumper_for_ticks</a></div><div class="ttdeci">FuncDumpTicks _dumper_for_ticks</div><div class="ttdoc">适价数据导出回调函数</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00283">WtDtRunner.h:283</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a4a4e8201fe2d762c44ec1c4459f7864d"><div class="ttname"><a href="classWtDtRunner.html#a4a4e8201fe2d762c44ec1c4459f7864d">WtDtRunner::_dumper_for_ordque</a></div><div class="ttdeci">FuncDumpOrdQue _dumper_for_ordque</div><div class="ttdoc">委托队列数据导出回调函数</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00286">WtDtRunner.h:286</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a4cea3f13f62afd0d9fb12feee5234295"><div class="ttname"><a href="classWtDtRunner.html#a4cea3f13f62afd0d9fb12feee5234295">WtDtRunner::_state_mon</a></div><div class="ttdeci">StateMonitor _state_mon</div><div class="ttdoc">状态监控器，监控系统状态</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00263">WtDtRunner.h:263</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a525332564db25d9227ac86d2d4977f1a"><div class="ttname"><a href="classWtDtRunner.html#a525332564db25d9227ac86d2d4977f1a">WtDtRunner::start</a></div><div class="ttdeci">void start()</div><div class="ttdoc">启动数据服务运行器</div><div class="ttdef"><b>Definition</b> <a href="WtDtServo_2WtDtRunner_8cpp_source.html#l00567">WtDtRunner.cpp:567</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a54ecb208b54fef782cc9f79516c11b38"><div class="ttname"><a href="classWtDtRunner.html#a54ecb208b54fef782cc9f79516c11b38">WtDtRunner::ExpDumperPtr</a></div><div class="ttdeci">std::shared_ptr&lt; ExpDumper &gt; ExpDumperPtr</div><div class="ttdoc">导出器智能指针类型定义</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00293">WtDtRunner.h:293</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a587388f2ffa9cf0e7117dbe30acee0ad"><div class="ttname"><a href="classWtDtRunner.html#a587388f2ffa9cf0e7117dbe30acee0ad">WtDtRunner::_dumper_for_orddtl</a></div><div class="ttdeci">FuncDumpOrdDtl _dumper_for_orddtl</div><div class="ttdoc">委托明细数据导出回调函数</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00288">WtDtRunner.h:288</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a5baa101fafe9f9b98ba0cf44a8d37db7"><div class="ttname"><a href="classWtDtRunner.html#a5baa101fafe9f9b98ba0cf44a8d37db7">WtDtRunner::dumpHisOrdQue</a></div><div class="ttdeci">bool dumpHisOrdQue(const char *id, const char *stdCode, uint32_t uDate, WTSOrdQueStruct *item, uint32_t count)</div><div class="ttdoc">导出委托队列历史数据</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00559">WtDtRunner.cpp:559</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a60268fb16c8c4519be6c8a4a60abbeba"><div class="ttname"><a href="classWtDtRunner.html#a60268fb16c8c4519be6c8a4a60abbeba">WtDtRunner::_shm_caster</a></div><div class="ttdeci">ShmCaster _shm_caster</div><div class="ttdoc">数据共享管理器，用于进程间数据共享</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00267">WtDtRunner.h:267</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a779d40f275d13e3f88dcae8785e5206b"><div class="ttname"><a href="classWtDtRunner.html#a779d40f275d13e3f88dcae8785e5206b">WtDtRunner::initParsers</a></div><div class="ttdeci">void initParsers(WTSVariant *cfg)</div><div class="ttdoc">初始化解析器</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00293">WtDtRunner.cpp:293</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a86f32cc4d20b5862168108dc9200c458"><div class="ttname"><a href="classWtDtRunner.html#a86f32cc4d20b5862168108dc9200c458">WtDtRunner::_dumper_for_bars</a></div><div class="ttdeci">FuncDumpBars _dumper_for_bars</div><div class="ttdoc">K线数据导出回调函数</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00281">WtDtRunner.h:281</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a8d8842dbac939cdec04ee2cfae396c99"><div class="ttname"><a href="classWtDtRunner.html#a8d8842dbac939cdec04ee2cfae396c99">WtDtRunner::_udp_caster</a></div><div class="ttdeci">UDPCaster _udp_caster</div><div class="ttdoc">UDP广播器，用于将数据通过UDP广播出去</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00265">WtDtRunner.h:265</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a9a522b9aa4b7922c5c4f48f7ad653641"><div class="ttname"><a href="classWtDtRunner.html#a9a522b9aa4b7922c5c4f48f7ad653641">WtDtRunner::parser_unsubscribe</a></div><div class="ttdeci">void parser_unsubscribe(const char *id, const char *code)</div><div class="ttdoc">为解析器取消订阅行情</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00397">WtDtRunner.cpp:397</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_aa06674eed13941cb6c1c92ec6cf76d17"><div class="ttname"><a href="classWtDtRunner.html#aa06674eed13941cb6c1c92ec6cf76d17">WtDtRunner::_bd_mgr</a></div><div class="ttdeci">WTSBaseDataMgr _bd_mgr</div><div class="ttdoc">基础数据管理器，管理合约、交易时间等基础数据</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00257">WtDtRunner.h:257</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_aaf780708dd46a595bb63008dbeab36fe"><div class="ttname"><a href="classWtDtRunner.html#aaf780708dd46a595bb63008dbeab36fe">WtDtRunner::dumpHisTrans</a></div><div class="ttdeci">bool dumpHisTrans(const char *id, const char *stdCode, uint32_t uDate, WTSTransStruct *items, uint32_t count)</div><div class="ttdoc">导出成交历史数据</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00580">WtDtRunner.cpp:580</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_ab136bd8bd0635341ea9c34851447c7cf"><div class="ttname"><a href="classWtDtRunner.html#ab136bd8bd0635341ea9c34851447c7cf">WtDtRunner::initDataMgr</a></div><div class="ttdeci">void initDataMgr(WTSVariant *config, bool bAlldayMode=false)</div><div class="ttdoc">初始化数据管理器</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00283">WtDtRunner.cpp:283</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_ab1cc9d195306e1f89d1d55a485207c63"><div class="ttname"><a href="classWtDtRunner.html#ab1cc9d195306e1f89d1d55a485207c63">WtDtRunner::_async_io</a></div><div class="ttdeci">boost::asio::io_service _async_io</div><div class="ttdoc">异步IO服务，用于异步事件处理</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00261">WtDtRunner.h:261</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_ab55d73e0453afd1ca3747ea121bed18d"><div class="ttname"><a href="classWtDtRunner.html#ab55d73e0453afd1ca3747ea121bed18d">WtDtRunner::dumpHisOrdDtl</a></div><div class="ttdeci">bool dumpHisOrdDtl(const char *id, const char *stdCode, uint32_t uDate, WTSOrdDtlStruct *items, uint32_t count)</div><div class="ttdoc">导出委托明细历史数据</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00538">WtDtRunner.cpp:538</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_ab9a0092e069f0e2f2c7ad6b5ee5b5bbe"><div class="ttname"><a href="classWtDtRunner.html#ab9a0092e069f0e2f2c7ad6b5ee5b5bbe">WtDtRunner::parser_disconnect</a></div><div class="ttdeci">void parser_disconnect(const char *id)</div><div class="ttdoc">通知解析器断开连接事件</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00362">WtDtRunner.cpp:362</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_ab9a767a51a104fab78039ac4471f2538"><div class="ttname"><a href="classWtDtRunner.html#ab9a767a51a104fab78039ac4471f2538">WtDtRunner::parser_connect</a></div><div class="ttdeci">void parser_connect(const char *id)</div><div class="ttdoc">通知解析器连接事件</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00351">WtDtRunner.cpp:351</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_ac0d061d0d1468a332d9e96d62d0a817b"><div class="ttname"><a href="classWtDtRunner.html#ac0d061d0d1468a332d9e96d62d0a817b">WtDtRunner::initialize</a></div><div class="ttdeci">void initialize(const char *cfgFile, const char *logCfg, const char *modDir=&quot;&quot;, bool bCfgFile=true, bool bLogCfgFile=true)</div><div class="ttdoc">初始化数据处理模块</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00111">WtDtRunner.cpp:111</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_ac88151beee13679d0f9e6f168c750133"><div class="ttname"><a href="classWtDtRunner.html#ac88151beee13679d0f9e6f168c750133">WtDtRunner::_dumpers</a></div><div class="ttdeci">ExpDumpers _dumpers</div><div class="ttdoc">数据导出器集合，管理所有的数据导出器</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00297">WtDtRunner.h:297</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_acca4eeaff23def9668fa5dc81cf11da0"><div class="ttname"><a href="classWtDtRunner.html#acca4eeaff23def9668fa5dc81cf11da0">WtDtRunner::_parsers</a></div><div class="ttdeci">ParserAdapterMgr _parsers</div><div class="ttdoc">行情接入适配器管理器，管理所有数据解析器</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00273">WtDtRunner.h:273</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_ace1583f33dcfabede9673af036a3c416"><div class="ttname"><a href="classWtDtRunner.html#ace1583f33dcfabede9673af036a3c416">WtDtRunner::parser_init</a></div><div class="ttdeci">void parser_init(const char *id)</div><div class="ttdoc">通知解析器初始化事件</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00340">WtDtRunner.cpp:340</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_ae017e19ceb7809710c58fa2946bef468"><div class="ttname"><a href="classWtDtRunner.html#ae017e19ceb7809710c58fa2946bef468">WtDtRunner::_idx_factory</a></div><div class="ttdeci">IndexFactory _idx_factory</div><div class="ttdoc">指标工厂，用于创建和管理指标</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00271">WtDtRunner.h:271</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_ae0c6d1bd7b88704a8b3ef4be2ddc0b0c"><div class="ttname"><a href="classWtDtRunner.html#ae0c6d1bd7b88704a8b3ef4be2ddc0b0c">WtDtRunner::dumpHisTicks</a></div><div class="ttdeci">bool dumpHisTicks(const char *id, const char *stdCode, uint32_t uDate, WTSTickStruct *ticks, uint32_t count)</div><div class="ttdoc">导出适价历史数据</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00496">WtDtRunner.cpp:496</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_aedb1e76c90e7d417b7f80300f4309397"><div class="ttname"><a href="classWtDtRunner.html#aedb1e76c90e7d417b7f80300f4309397">WtDtRunner::_cb_parser_evt</a></div><div class="ttdeci">FuncParserEvtCallback _cb_parser_evt</div><div class="ttdoc">解析器事件回调函数</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00276">WtDtRunner.h:276</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_af23b9dc53cb68492ae0ceb0ef7ec809c"><div class="ttname"><a href="classWtDtRunner.html#af23b9dc53cb68492ae0ceb0ef7ec809c">WtDtRunner::parser_subscribe</a></div><div class="ttdeci">void parser_subscribe(const char *id, const char *code)</div><div class="ttdoc">为解析器订阅行情</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00385">WtDtRunner.cpp:385</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_af994a66d67d5af016df2b3fb57e4ca24"><div class="ttname"><a href="classWtDtRunner.html#af994a66d67d5af016df2b3fb57e4ca24">WtDtRunner::parser_release</a></div><div class="ttdeci">void parser_release(const char *id)</div><div class="ttdoc">通知解析器释放事件</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00373">WtDtRunner.cpp:373</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_afd086d4b4cec9b5355bcc8c42b43fd84"><div class="ttname"><a href="classWtDtRunner.html#afd086d4b4cec9b5355bcc8c42b43fd84">WtDtRunner::_to_exit</a></div><div class="ttdeci">bool _to_exit</div><div class="ttdoc">退出标志，标记是否需要退出处理</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00300">WtDtRunner.h:300</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+<div class="ttc" id="astructWTSOrdDtlStruct_html"><div class="ttname"><a href="structWTSOrdDtlStruct.html">WTSOrdDtlStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00262">WTSStruct.h:263</a></div></div>
+<div class="ttc" id="astructWTSOrdQueStruct_html"><div class="ttname"><a href="structWTSOrdQueStruct.html">WTSOrdQueStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00240">WTSStruct.h:241</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html"><div class="ttname"><a href="structWTSTickStruct.html">WTSTickStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00158">WTSStruct.h:159</a></div></div>
+<div class="ttc" id="astructWTSTransStruct_html"><div class="ttname"><a href="structWTSTransStruct.html">WTSTransStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00284">WTSStruct.h:285</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_a1e191ac351261b7a05020a3948e707e.html">WtDtPorter</a></li><li class="navelem"><a class="el" href="WtDtPorter_2WtDtRunner_8h.html">WtDtRunner.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,1710 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: ParserCTP类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classParserCTP.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Public 类型</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-types">Private 类型</a> &#124;
+<a href="#pri-methods">Private 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classParserCTP-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">ParserCTP类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>CTP行情解析器类  
+ <a href="classParserCTP.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public 类型</h2></td></tr>
+<tr class="memitem:ae5817f828d99178ff902ae3e2c545fe5" id="r_ae5817f828d99178ff902ae3e2c545fe5"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#ae5817f828d99178ff902ae3e2c545fe5">LoginStatus</a> { <a class="el" href="classParserCTP.html#ae5817f828d99178ff902ae3e2c545fe5aaabef2414ff0b37e850cf70bc2bc311e">LS_NOTLOGIN</a>
+, <a class="el" href="classParserCTP.html#ae5817f828d99178ff902ae3e2c545fe5af49a058a1e1deffeaaa73d21f1e1d240">LS_LOGINING</a>
+, <a class="el" href="classParserCTP.html#ae5817f828d99178ff902ae3e2c545fe5a3917445330b578e49faa12d6575a2df1">LS_LOGINED</a>
+ }</td></tr>
+<tr class="memdesc:ae5817f828d99178ff902ae3e2c545fe5"><td class="mdescLeft">&#160;</td><td class="mdescRight">登录状态枚举  <a href="classParserCTP.html#ae5817f828d99178ff902ae3e2c545fe5">更多...</a><br /></td></tr>
+<tr class="separator:ae5817f828d99178ff902ae3e2c545fe5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a9fad7aa1d54cc011074a3de3ec4e31d2" id="r_a9fad7aa1d54cc011074a3de3ec4e31d2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a9fad7aa1d54cc011074a3de3ec4e31d2">ParserCTP</a> ()</td></tr>
+<tr class="memdesc:a9fad7aa1d54cc011074a3de3ec4e31d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a9fad7aa1d54cc011074a3de3ec4e31d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54001945038ae9b99fd40ba3680c27ed" id="r_a54001945038ae9b99fd40ba3680c27ed"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a54001945038ae9b99fd40ba3680c27ed">~ParserCTP</a> ()</td></tr>
+<tr class="memdesc:a54001945038ae9b99fd40ba3680c27ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:a54001945038ae9b99fd40ba3680c27ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5cece25e9747b06f87accc424b74cf2c" id="r_a5cece25e9747b06f87accc424b74cf2c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a5cece25e9747b06f87accc424b74cf2c">init</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *<a class="el" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>) override</td></tr>
+<tr class="memdesc:a5cece25e9747b06f87accc424b74cf2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化行情解析器  <br /></td></tr>
+<tr class="separator:a5cece25e9747b06f87accc424b74cf2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a956458e4c49e251f82fd824c8abbab" id="r_a3a956458e4c49e251f82fd824c8abbab"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a3a956458e4c49e251f82fd824c8abbab">release</a> () override</td></tr>
+<tr class="memdesc:a3a956458e4c49e251f82fd824c8abbab"><td class="mdescLeft">&#160;</td><td class="mdescRight">释放行情解析器资源  <br /></td></tr>
+<tr class="separator:a3a956458e4c49e251f82fd824c8abbab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa767cc44c4fd227aec3b9754e00a3d4" id="r_afa767cc44c4fd227aec3b9754e00a3d4"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#afa767cc44c4fd227aec3b9754e00a3d4">connect</a> () override</td></tr>
+<tr class="memdesc:afa767cc44c4fd227aec3b9754e00a3d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">连接行情服务器  <br /></td></tr>
+<tr class="separator:afa767cc44c4fd227aec3b9754e00a3d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d573c8448ac5a74fae6bf0680311766" id="r_a2d573c8448ac5a74fae6bf0680311766"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a2d573c8448ac5a74fae6bf0680311766">disconnect</a> () override</td></tr>
+<tr class="memdesc:a2d573c8448ac5a74fae6bf0680311766"><td class="mdescLeft">&#160;</td><td class="mdescRight">断开行情服务器连接  <br /></td></tr>
+<tr class="separator:a2d573c8448ac5a74fae6bf0680311766"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af28d581b58acdc01e5d625cc4cea1285" id="r_af28d581b58acdc01e5d625cc4cea1285"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#af28d581b58acdc01e5d625cc4cea1285">isConnected</a> () override</td></tr>
+<tr class="memdesc:af28d581b58acdc01e5d625cc4cea1285"><td class="mdescLeft">&#160;</td><td class="mdescRight">检查行情接口连接状态  <br /></td></tr>
+<tr class="separator:af28d581b58acdc01e5d625cc4cea1285"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21e21bcfc6b2587005cbdfeca419e35f" id="r_a21e21bcfc6b2587005cbdfeca419e35f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a21e21bcfc6b2587005cbdfeca419e35f">subscribe</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="FasterDefs_8h.html#ac6831b9d0154219721fb3c2b5d254eba">CodeSet</a> &amp;vecSymbols) override</td></tr>
+<tr class="memdesc:a21e21bcfc6b2587005cbdfeca419e35f"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅行情  <br /></td></tr>
+<tr class="separator:a21e21bcfc6b2587005cbdfeca419e35f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac82d74e316abf95d6661e64a39d45e01" id="r_ac82d74e316abf95d6661e64a39d45e01"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#ac82d74e316abf95d6661e64a39d45e01">unsubscribe</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="FasterDefs_8h.html#ac6831b9d0154219721fb3c2b5d254eba">CodeSet</a> &amp;vecSymbols) override</td></tr>
+<tr class="memdesc:ac82d74e316abf95d6661e64a39d45e01"><td class="mdescLeft">&#160;</td><td class="mdescRight">取消订阅行情  <br /></td></tr>
+<tr class="separator:ac82d74e316abf95d6661e64a39d45e01"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20f341cef77a01150bd6a94efd7d2bca" id="r_a20f341cef77a01150bd6a94efd7d2bca"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a20f341cef77a01150bd6a94efd7d2bca">registerSpi</a> (<a class="el" href="classIParserSpi.html">IParserSpi</a> *listener) override</td></tr>
+<tr class="memdesc:a20f341cef77a01150bd6a94efd7d2bca"><td class="mdescLeft">&#160;</td><td class="mdescRight">注册行情回调接口  <br /></td></tr>
+<tr class="separator:a20f341cef77a01150bd6a94efd7d2bca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a118bb31559055fbd42e191151193a781" id="r_a118bb31559055fbd42e191151193a781"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a118bb31559055fbd42e191151193a781">OnRspError</a> (<a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, int nRequestID, bool bIsLast)</td></tr>
+<tr class="memdesc:a118bb31559055fbd42e191151193a781"><td class="mdescLeft">&#160;</td><td class="mdescRight">响应错误回调  <br /></td></tr>
+<tr class="separator:a118bb31559055fbd42e191151193a781"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa675fc31eb73692d49f0b7d1ac6fe223" id="r_aa675fc31eb73692d49f0b7d1ac6fe223"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#aa675fc31eb73692d49f0b7d1ac6fe223">OnFrontConnected</a> ()</td></tr>
+<tr class="memdesc:aa675fc31eb73692d49f0b7d1ac6fe223"><td class="mdescLeft">&#160;</td><td class="mdescRight">前置机连接成功回调  <br /></td></tr>
+<tr class="separator:aa675fc31eb73692d49f0b7d1ac6fe223"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26a0e82f0bf53320505b26229c00fd7f" id="r_a26a0e82f0bf53320505b26229c00fd7f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a26a0e82f0bf53320505b26229c00fd7f">OnRspUserLogin</a> (<a class="el" href="structCThostFtdcRspUserLoginField.html">CThostFtdcRspUserLoginField</a> *pRspUserLogin, <a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, int nRequestID, bool bIsLast)</td></tr>
+<tr class="memdesc:a26a0e82f0bf53320505b26229c00fd7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">用户登录响应回调  <br /></td></tr>
+<tr class="separator:a26a0e82f0bf53320505b26229c00fd7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5beb4478bb34fc186d107acde8c4fc3c" id="r_a5beb4478bb34fc186d107acde8c4fc3c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a5beb4478bb34fc186d107acde8c4fc3c">OnRspUserLogout</a> (<a class="el" href="structCThostFtdcUserLogoutField.html">CThostFtdcUserLogoutField</a> *pUserLogout, <a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, int nRequestID, bool bIsLast)</td></tr>
+<tr class="memdesc:a5beb4478bb34fc186d107acde8c4fc3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">登出请求响应回调  <br /></td></tr>
+<tr class="separator:a5beb4478bb34fc186d107acde8c4fc3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a467f4ac7ac8dac332a68b74c6e10f02d" id="r_a467f4ac7ac8dac332a68b74c6e10f02d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a467f4ac7ac8dac332a68b74c6e10f02d">OnFrontDisconnected</a> (int nReason)</td></tr>
+<tr class="memdesc:a467f4ac7ac8dac332a68b74c6e10f02d"><td class="mdescLeft">&#160;</td><td class="mdescRight">前置机断开连接回调  <br /></td></tr>
+<tr class="separator:a467f4ac7ac8dac332a68b74c6e10f02d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29cb326941ff7deaa4c3efca5e22991d" id="r_a29cb326941ff7deaa4c3efca5e22991d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a29cb326941ff7deaa4c3efca5e22991d">OnRspUnSubMarketData</a> (<a class="el" href="structCThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a> *pSpecificInstrument, <a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, int nRequestID, bool bIsLast)</td></tr>
+<tr class="memdesc:a29cb326941ff7deaa4c3efca5e22991d"><td class="mdescLeft">&#160;</td><td class="mdescRight">取消订阅行情响应回调  <br /></td></tr>
+<tr class="separator:a29cb326941ff7deaa4c3efca5e22991d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c77694c3969db9c5759d4d8fea8fd90" id="r_a1c77694c3969db9c5759d4d8fea8fd90"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a1c77694c3969db9c5759d4d8fea8fd90">OnRtnDepthMarketData</a> (<a class="el" href="structCThostFtdcDepthMarketDataField.html">CThostFtdcDepthMarketDataField</a> *pDepthMarketData)</td></tr>
+<tr class="memdesc:a1c77694c3969db9c5759d4d8fea8fd90"><td class="mdescLeft">&#160;</td><td class="mdescRight">市场行情推送回调  <br /></td></tr>
+<tr class="separator:a1c77694c3969db9c5759d4d8fea8fd90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b9c7286f90b27a76040538b18909efa" id="r_a7b9c7286f90b27a76040538b18909efa"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a7b9c7286f90b27a76040538b18909efa">OnRspSubMarketData</a> (<a class="el" href="structCThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a> *pSpecificInstrument, <a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, int nRequestID, bool bIsLast)</td></tr>
+<tr class="memdesc:a7b9c7286f90b27a76040538b18909efa"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅行情响应回调  <br /></td></tr>
+<tr class="separator:a7b9c7286f90b27a76040538b18909efa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1503c93b7073f516ef762d5feac0b853" id="r_a1503c93b7073f516ef762d5feac0b853"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a1503c93b7073f516ef762d5feac0b853">OnHeartBeatWarning</a> (int nTimeLapse)</td></tr>
+<tr class="memdesc:a1503c93b7073f516ef762d5feac0b853"><td class="mdescLeft">&#160;</td><td class="mdescRight">心跳超时警告回调  <br /></td></tr>
+<tr class="separator:a1503c93b7073f516ef762d5feac0b853"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classIParserApi"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classIParserApi')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classIParserApi.html">IParserApi</a></td></tr>
+<tr class="memitem:afbf2a0fc9cfe198ccea70eaa5ec4ae4e inherit pub_methods_classIParserApi" id="r_afbf2a0fc9cfe198ccea70eaa5ec4ae4e"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIParserApi.html#afbf2a0fc9cfe198ccea70eaa5ec4ae4e">~IParserApi</a> ()</td></tr>
+<tr class="separator:afbf2a0fc9cfe198ccea70eaa5ec4ae4e inherit pub_methods_classIParserApi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classCThostFtdcMdSpi"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classCThostFtdcMdSpi')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classCThostFtdcMdSpi.html">CThostFtdcMdSpi</a></td></tr>
+<tr class="memitem:aab756d4123ef2c016c903c75ab1c0e62 inherit pub_methods_classCThostFtdcMdSpi" id="r_aab756d4123ef2c016c903c75ab1c0e62"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCThostFtdcMdSpi.html#aab756d4123ef2c016c903c75ab1c0e62">OnRspSubForQuoteRsp</a> (<a class="el" href="structCThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a> *pSpecificInstrument, <a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, int nRequestID, bool bIsLast)</td></tr>
+<tr class="memdesc:aab756d4123ef2c016c903c75ab1c0e62 inherit pub_methods_classCThostFtdcMdSpi"><td class="mdescLeft">&#160;</td><td class="mdescRight">����ѯ��Ӧ��  <br /></td></tr>
+<tr class="separator:aab756d4123ef2c016c903c75ab1c0e62 inherit pub_methods_classCThostFtdcMdSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cd13e5600c132c63e5d4fc565200d88 inherit pub_methods_classCThostFtdcMdSpi" id="r_a0cd13e5600c132c63e5d4fc565200d88"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCThostFtdcMdSpi.html#a0cd13e5600c132c63e5d4fc565200d88">OnRspUnSubForQuoteRsp</a> (<a class="el" href="structCThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a> *pSpecificInstrument, <a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, int nRequestID, bool bIsLast)</td></tr>
+<tr class="memdesc:a0cd13e5600c132c63e5d4fc565200d88 inherit pub_methods_classCThostFtdcMdSpi"><td class="mdescLeft">&#160;</td><td class="mdescRight">ȡ������ѯ��Ӧ��  <br /></td></tr>
+<tr class="separator:a0cd13e5600c132c63e5d4fc565200d88 inherit pub_methods_classCThostFtdcMdSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91d3fa6e749c07711903c47210182c8a inherit pub_methods_classCThostFtdcMdSpi" id="r_a91d3fa6e749c07711903c47210182c8a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCThostFtdcMdSpi.html#a91d3fa6e749c07711903c47210182c8a">OnRtnForQuoteRsp</a> (<a class="el" href="structCThostFtdcForQuoteRspField.html">CThostFtdcForQuoteRspField</a> *pForQuoteRsp)</td></tr>
+<tr class="memdesc:a91d3fa6e749c07711903c47210182c8a inherit pub_methods_classCThostFtdcMdSpi"><td class="mdescLeft">&#160;</td><td class="mdescRight">ѯ��֪ͨ  <br /></td></tr>
+<tr class="separator:a91d3fa6e749c07711903c47210182c8a inherit pub_methods_classCThostFtdcMdSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab756d4123ef2c016c903c75ab1c0e62 inherit pub_methods_classCThostFtdcMdSpi" id="r_aab756d4123ef2c016c903c75ab1c0e62"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCThostFtdcMdSpi.html#aab756d4123ef2c016c903c75ab1c0e62">OnRspSubForQuoteRsp</a> (<a class="el" href="structCThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a> *pSpecificInstrument, <a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, int nRequestID, bool bIsLast)</td></tr>
+<tr class="memdesc:aab756d4123ef2c016c903c75ab1c0e62 inherit pub_methods_classCThostFtdcMdSpi"><td class="mdescLeft">&#160;</td><td class="mdescRight">����ѯ��Ӧ��  <br /></td></tr>
+<tr class="separator:aab756d4123ef2c016c903c75ab1c0e62 inherit pub_methods_classCThostFtdcMdSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cd13e5600c132c63e5d4fc565200d88 inherit pub_methods_classCThostFtdcMdSpi" id="r_a0cd13e5600c132c63e5d4fc565200d88"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCThostFtdcMdSpi.html#a0cd13e5600c132c63e5d4fc565200d88">OnRspUnSubForQuoteRsp</a> (<a class="el" href="structCThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a> *pSpecificInstrument, <a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, int nRequestID, bool bIsLast)</td></tr>
+<tr class="memdesc:a0cd13e5600c132c63e5d4fc565200d88 inherit pub_methods_classCThostFtdcMdSpi"><td class="mdescLeft">&#160;</td><td class="mdescRight">ȡ������ѯ��Ӧ��  <br /></td></tr>
+<tr class="separator:a0cd13e5600c132c63e5d4fc565200d88 inherit pub_methods_classCThostFtdcMdSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a706713bbc2150316c4b2e2a53a17201b inherit pub_methods_classCThostFtdcMdSpi" id="r_a706713bbc2150316c4b2e2a53a17201b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCThostFtdcMdSpi.html#a706713bbc2150316c4b2e2a53a17201b">OnRtnMBLMarketData</a> (<a class="el" href="structCThostFtdcMBLMarketDataField.html">CThostFtdcMBLMarketDataField</a> *pMBLMarketData)</td></tr>
+<tr class="memdesc:a706713bbc2150316c4b2e2a53a17201b inherit pub_methods_classCThostFtdcMdSpi"><td class="mdescLeft">&#160;</td><td class="mdescRight">�ּ۱�֪ͨ  <br /></td></tr>
+<tr class="separator:a706713bbc2150316c4b2e2a53a17201b inherit pub_methods_classCThostFtdcMdSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91d3fa6e749c07711903c47210182c8a inherit pub_methods_classCThostFtdcMdSpi" id="r_a91d3fa6e749c07711903c47210182c8a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCThostFtdcMdSpi.html#a91d3fa6e749c07711903c47210182c8a">OnRtnForQuoteRsp</a> (<a class="el" href="structCThostFtdcForQuoteRspField.html">CThostFtdcForQuoteRspField</a> *pForQuoteRsp)</td></tr>
+<tr class="memdesc:a91d3fa6e749c07711903c47210182c8a inherit pub_methods_classCThostFtdcMdSpi"><td class="mdescLeft">&#160;</td><td class="mdescRight">ѯ��֪ͨ  <br /></td></tr>
+<tr class="separator:a91d3fa6e749c07711903c47210182c8a inherit pub_methods_classCThostFtdcMdSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 类型</h2></td></tr>
+<tr class="memitem:ad8f347b9d57bfa2ad7d6046c8e183df7" id="r_ad8f347b9d57bfa2ad7d6046c8e183df7"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classCThostFtdcMdApi.html">CThostFtdcMdApi</a> *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#ad8f347b9d57bfa2ad7d6046c8e183df7">CTPCreator</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> bool, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> bool)</td></tr>
+<tr class="separator:ad8f347b9d57bfa2ad7d6046c8e183df7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 成员函数</h2></td></tr>
+<tr class="memitem:a7f0a58d46016c76513f0118994ca3fd4" id="r_a7f0a58d46016c76513f0118994ca3fd4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a7f0a58d46016c76513f0118994ca3fd4">ReqUserLogin</a> ()</td></tr>
+<tr class="memdesc:a7f0a58d46016c76513f0118994ca3fd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">发送登录请求  <br /></td></tr>
+<tr class="separator:a7f0a58d46016c76513f0118994ca3fd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa11ef4b80d09ac6f8c6b20c5df0223f0" id="r_aa11ef4b80d09ac6f8c6b20c5df0223f0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#aa11ef4b80d09ac6f8c6b20c5df0223f0">DoSubscribeMD</a> ()</td></tr>
+<tr class="memdesc:aa11ef4b80d09ac6f8c6b20c5df0223f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅品种行情  <br /></td></tr>
+<tr class="separator:aa11ef4b80d09ac6f8c6b20c5df0223f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59aee1e13abea9a3af22aeb8cee0713b" id="r_a59aee1e13abea9a3af22aeb8cee0713b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a59aee1e13abea9a3af22aeb8cee0713b">IsErrorRspInfo</a> (<a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo)</td></tr>
+<tr class="memdesc:a59aee1e13abea9a3af22aeb8cee0713b"><td class="mdescLeft">&#160;</td><td class="mdescRight">检查错误信息  <br /></td></tr>
+<tr class="separator:a59aee1e13abea9a3af22aeb8cee0713b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:a2b0b339eca703a581bf23f05fc6fed8b" id="r_a2b0b339eca703a581bf23f05fc6fed8b"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a2b0b339eca703a581bf23f05fc6fed8b">m_uTradingDate</a></td></tr>
+<tr class="memdesc:a2b0b339eca703a581bf23f05fc6fed8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易日，格式为YYYYMMDD  <br /></td></tr>
+<tr class="separator:a2b0b339eca703a581bf23f05fc6fed8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3506f01d20bf3baf1a01d32bab925f18" id="r_a3506f01d20bf3baf1a01d32bab925f18"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCThostFtdcMdApi.html">CThostFtdcMdApi</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a3506f01d20bf3baf1a01d32bab925f18">m_pUserAPI</a></td></tr>
+<tr class="memdesc:a3506f01d20bf3baf1a01d32bab925f18"><td class="mdescLeft">&#160;</td><td class="mdescRight">CTP行情API接口实例指针  <br /></td></tr>
+<tr class="separator:a3506f01d20bf3baf1a01d32bab925f18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae430db804402b734eb176e63fe803221" id="r_ae430db804402b734eb176e63fe803221"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#ae430db804402b734eb176e63fe803221">m_strFrontAddr</a></td></tr>
+<tr class="memdesc:ae430db804402b734eb176e63fe803221"><td class="mdescLeft">&#160;</td><td class="mdescRight">前置机地址，格式为"tcp://ip:port"  <br /></td></tr>
+<tr class="separator:ae430db804402b734eb176e63fe803221"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2a06537409b064e017f1d39a2818a93" id="r_ab2a06537409b064e017f1d39a2818a93"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#ab2a06537409b064e017f1d39a2818a93">m_strBroker</a></td></tr>
+<tr class="memdesc:ab2a06537409b064e017f1d39a2818a93"><td class="mdescLeft">&#160;</td><td class="mdescRight">经纪商代码  <br /></td></tr>
+<tr class="separator:ab2a06537409b064e017f1d39a2818a93"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f833e693b1f229b1920371366f15eb9" id="r_a1f833e693b1f229b1920371366f15eb9"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a1f833e693b1f229b1920371366f15eb9">m_strUserID</a></td></tr>
+<tr class="memdesc:a1f833e693b1f229b1920371366f15eb9"><td class="mdescLeft">&#160;</td><td class="mdescRight">用户名/投资者代码  <br /></td></tr>
+<tr class="separator:a1f833e693b1f229b1920371366f15eb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a293eac66c8bf5ec40d37c56f26549f04" id="r_a293eac66c8bf5ec40d37c56f26549f04"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a293eac66c8bf5ec40d37c56f26549f04">m_strPassword</a></td></tr>
+<tr class="memdesc:a293eac66c8bf5ec40d37c56f26549f04"><td class="mdescLeft">&#160;</td><td class="mdescRight">用户密码  <br /></td></tr>
+<tr class="separator:a293eac66c8bf5ec40d37c56f26549f04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acab7f5a00ff75efea186028d20228cfd" id="r_acab7f5a00ff75efea186028d20228cfd"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#acab7f5a00ff75efea186028d20228cfd">m_strFlowDir</a></td></tr>
+<tr class="memdesc:acab7f5a00ff75efea186028d20228cfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">流文件存储目录  <br /></td></tr>
+<tr class="separator:acab7f5a00ff75efea186028d20228cfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3eac00094cfc10e37d88e083c2218260" id="r_a3eac00094cfc10e37d88e083c2218260"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a3eac00094cfc10e37d88e083c2218260">m_bLocaltime</a></td></tr>
+<tr class="memdesc:a3eac00094cfc10e37d88e083c2218260"><td class="mdescLeft">&#160;</td><td class="mdescRight">是否使用本地时间戳，true表示使用本地时间，false表示使用交易所时间  <br /></td></tr>
+<tr class="separator:a3eac00094cfc10e37d88e083c2218260"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c62665109dcc3b9772c949e1533baf5" id="r_a9c62665109dcc3b9772c949e1533baf5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="FasterDefs_8h.html#ac6831b9d0154219721fb3c2b5d254eba">CodeSet</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a9c62665109dcc3b9772c949e1533baf5">m_filterSubs</a></td></tr>
+<tr class="memdesc:a9c62665109dcc3b9772c949e1533baf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅合约代码集合  <br /></td></tr>
+<tr class="separator:a9c62665109dcc3b9772c949e1533baf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a441a1a919e77b4e1a70e656ad246cc4d" id="r_a441a1a919e77b4e1a70e656ad246cc4d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a441a1a919e77b4e1a70e656ad246cc4d">m_iRequestID</a></td></tr>
+<tr class="memdesc:a441a1a919e77b4e1a70e656ad246cc4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">请求编号，用于标识不同的请求  <br /></td></tr>
+<tr class="separator:a441a1a919e77b4e1a70e656ad246cc4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93cb03d083880cb77c38c8e94b9118e4" id="r_a93cb03d083880cb77c38c8e94b9118e4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIParserSpi.html">IParserSpi</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a93cb03d083880cb77c38c8e94b9118e4">m_sink</a></td></tr>
+<tr class="memdesc:a93cb03d083880cb77c38c8e94b9118e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">行情回调接口实例指针  <br /></td></tr>
+<tr class="separator:a93cb03d083880cb77c38c8e94b9118e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3e82ff4dd148ef91b9a93214c39b09e" id="r_ac3e82ff4dd148ef91b9a93214c39b09e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#ac3e82ff4dd148ef91b9a93214c39b09e">m_pBaseDataMgr</a></td></tr>
+<tr class="memdesc:ac3e82ff4dd148ef91b9a93214c39b09e"><td class="mdescLeft">&#160;</td><td class="mdescRight">基础数据管理器实例指针  <br /></td></tr>
+<tr class="separator:ac3e82ff4dd148ef91b9a93214c39b09e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e37be33413f4539d700044a75deac08" id="r_a7e37be33413f4539d700044a75deac08"><td class="memItemLeft" align="right" valign="top"><a class="el" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a7e37be33413f4539d700044a75deac08">m_hInstCTP</a></td></tr>
+<tr class="memdesc:a7e37be33413f4539d700044a75deac08"><td class="mdescLeft">&#160;</td><td class="mdescRight">CTP动态库句柄  <br /></td></tr>
+<tr class="separator:a7e37be33413f4539d700044a75deac08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a252dfa11bc7f16d83248595e74579c1f" id="r_a252dfa11bc7f16d83248595e74579c1f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParserCTP.html#ad8f347b9d57bfa2ad7d6046c8e183df7">CTPCreator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserCTP.html#a252dfa11bc7f16d83248595e74579c1f">m_funcCreator</a></td></tr>
+<tr class="memdesc:a252dfa11bc7f16d83248595e74579c1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">CTP API创建函数指针  <br /></td></tr>
+<tr class="separator:a252dfa11bc7f16d83248595e74579c1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>CTP行情解析器类 </p>
+<p>实现了IParserApi接口和CThostFtdcMdSpi回调接口 负责与Shanghai Futures Exchange(SFE)的CTP行情服务器建立连接 订阅行情并将接收到的行情数据转换为内部定义的数据格式 然后通过回调接口推送给上层应用 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00031">31</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="ad8f347b9d57bfa2ad7d6046c8e183df7" name="ad8f347b9d57bfa2ad7d6046c8e183df7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8f347b9d57bfa2ad7d6046c8e183df7">&#9670;&#160;</a></span>CTPCreator</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="classCThostFtdcMdApi.html">CThostFtdcMdApi</a> *(* ParserCTP::CTPCreator) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> bool, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> bool)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00260">260</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员枚举类型说明</h2>
+<a id="ae5817f828d99178ff902ae3e2c545fe5" name="ae5817f828d99178ff902ae3e2c545fe5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5817f828d99178ff902ae3e2c545fe5">&#9670;&#160;</a></span>LoginStatus</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classParserCTP.html#ae5817f828d99178ff902ae3e2c545fe5">ParserCTP::LoginStatus</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>登录状态枚举 </p>
+<p>定义了行情解析器的不同登录状态 </p>
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="ae5817f828d99178ff902ae3e2c545fe5aaabef2414ff0b37e850cf70bc2bc311e" name="ae5817f828d99178ff902ae3e2c545fe5aaabef2414ff0b37e850cf70bc2bc311e"></a>LS_NOTLOGIN&#160;</td><td class="fielddoc"><p>未登录状态 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae5817f828d99178ff902ae3e2c545fe5af49a058a1e1deffeaaa73d21f1e1d240" name="ae5817f828d99178ff902ae3e2c545fe5af49a058a1e1deffeaaa73d21f1e1d240"></a>LS_LOGINING&#160;</td><td class="fielddoc"><p>登录中状态 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae5817f828d99178ff902ae3e2c545fe5a3917445330b578e49faa12d6575a2df1" name="ae5817f828d99178ff902ae3e2c545fe5a3917445330b578e49faa12d6575a2df1"></a>LS_LOGINED&#160;</td><td class="fielddoc"><p>已登录状态 </p>
+</td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00053">53</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a9fad7aa1d54cc011074a3de3ec4e31d2" name="a9fad7aa1d54cc011074a3de3ec4e31d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fad7aa1d54cc011074a3de3ec4e31d2">&#9670;&#160;</a></span>ParserCTP()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ParserCTP::ParserCTP </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>初始化ParserCTP对象的成员变量 将指针和状态设置为初始值</p>
+<p>初始化ParserCTP对象的成员变量 将API指针、请求ID、交易日等置为初始值 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00130">130</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a54001945038ae9b99fd40ba3680c27ed" name="a54001945038ae9b99fd40ba3680c27ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54001945038ae9b99fd40ba3680c27ed">&#9670;&#160;</a></span>~ParserCTP()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ParserCTP::~ParserCTP </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>析构函数 </p>
+<p>清理ParserCTP对象资源 实际资源释放在release方法中进行</p>
+<p>清理ParserCTP对象资源 将API指针置空，实际资源释放在release方法中进行 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00144">144</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="afa767cc44c4fd227aec3b9754e00a3d4" name="afa767cc44c4fd227aec3b9754e00a3d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa767cc44c4fd227aec3b9754e00a3d4">&#9670;&#160;</a></span>connect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ParserCTP::connect </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>连接行情服务器 </p>
+<p>连接到CTP行情服务器</p>
+<p>初始化CTP行情接口并连接服务器 创建流文件目录、注册回调接口 注册前置机地址并初始化数据集合 </p><dl class="section return"><dt>返回</dt><dd>bool 连接是否成功</dd></dl>
+<p>如果CTP API实例已创建，则初始化该实例 这将触发异步连接过程 连接成功后会回调OnFrontConnected方法 </p><dl class="section return"><dt>返回</dt><dd>bool 连接请求是否成功发送，总是返回true </dd></dl>
+
+<p>重载 <a class="el" href="classIParserApi.html#ab318c4ada41576a863f75028f90b4d06">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00222">222</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2d573c8448ac5a74fae6bf0680311766" name="a2d573c8448ac5a74fae6bf0680311766"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d573c8448ac5a74fae6bf0680311766">&#9670;&#160;</a></span>disconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ParserCTP::disconnect </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>断开行情服务器连接 </p>
+<p>断开与CTP行情服务器的连接</p>
+<p>释放CTP行情接口并清理相关资源 </p><dl class="section return"><dt>返回</dt><dd>bool 断开连接是否成功</dd></dl>
+<p>如果CTP API实例存在，则取消回调注册并释放API资源 将API指针置空以防止重复释放 </p><dl class="section return"><dt>返回</dt><dd>bool 断开连接是否成功，总是返回true </dd></dl>
+
+<p>重载 <a class="el" href="classIParserApi.html#ac8a3ec275e4afc0427fea1112c721eb0">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00238">238</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa11ef4b80d09ac6f8c6b20c5df0223f0" name="aa11ef4b80d09ac6f8c6b20c5df0223f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa11ef4b80d09ac6f8c6b20c5df0223f0">&#9670;&#160;</a></span>DoSubscribeMD()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::DoSubscribeMD </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>订阅品种行情 </p>
+<p>执行市场行情订阅</p>
+<p>将缓存的订阅列表中的所有合约代码发送给CTP服务器 批量订阅这些合约的行情数据</p>
+<p>根据过滤集合发送行情订阅请求 处理流程包括：</p><ol type="1">
+<li>检查是否有合约要订阅</li>
+<li>处理合约代码格式，去除交易所前缀</li>
+<li>调用CTP API发送订阅请求</li>
+<li>记录订阅结果日志 </li>
+</ol>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00560">560</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5cece25e9747b06f87accc424b74cf2c" name="a5cece25e9747b06f87accc424b74cf2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5cece25e9747b06f87accc424b74cf2c">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ParserCTP::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>config</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>初始化行情解析器 </p>
+<p>根据传入的配置参数设置行情解析器的各种配置 包括前置机地址、经纪商代码、用户名密码等 加载CTP行情接口动态库并获取创建函数 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">config</td><td>配置参数集合 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 初始化是否成功</dd></dl>
+<p>从配置中读取各种参数并初始化行情解析器 加载CTP行情接口动态链接库 创建CTP行情API实例 注册回调接口和前置机地址 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">config</td><td>包含初始化参数的变量集合 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 初始化是否成功，总是返回true </dd></dl>
+
+<p>重载 <a class="el" href="classIParserApi.html#a9b6eb9509e68e7bbc5901629ff7dcc43">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00158">158</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af28d581b58acdc01e5d625cc4cea1285" name="af28d581b58acdc01e5d625cc4cea1285"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af28d581b58acdc01e5d625cc4cea1285">&#9670;&#160;</a></span>isConnected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ParserCTP::isConnected </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>检查行情接口连接状态 </p>
+<p>检查是否已连接</p>
+<p>判断当前行情接口是否处于已登录状态 </p><dl class="section return"><dt>返回</dt><dd>bool 如果已连接并登录返回true，否则返回false</dd></dl>
+<p>检查CTP行情API实例是否已创建 注意这只检查API实例是否存在，不能决定连接是否活跃 </p><dl class="section return"><dt>返回</dt><dd>bool 如果API实例已创建则返回true，否则返回false </dd></dl>
+
+<p>重载 <a class="el" href="classIParserApi.html#a6064c852322972cec9e76f915c727528">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00646">646</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a59aee1e13abea9a3af22aeb8cee0713b" name="a59aee1e13abea9a3af22aeb8cee0713b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59aee1e13abea9a3af22aeb8cee0713b">&#9670;&#160;</a></span>IsErrorRspInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ParserCTP::IsErrorRspInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *&#160;</td>
+          <td class="paramname"><em>pRspInfo</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>检查错误信息 </p>
+<p>检查响应信息是否包含错误</p>
+<p>检查CTP响应信息字段中的错误代码是否非零 如果错误代码非零，则表示响应中包含错误 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pRspInfo</td><td>CTP响应信息字段指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 如果包含错误返回true，否则返回false</dd></dl>
+<p>当前实现总是返回false，表示无错误 在实际应用中可能需要完善实现，检查pRspInfo是否为空 以及ErrorID是否为0来判断是否发生错误 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pRspInfo</td><td>CTP响应信息字段指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 如果有错误返回true，无错误返回false </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00605">605</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa675fc31eb73692d49f0b7d1ac6fe223" name="aa675fc31eb73692d49f0b7d1ac6fe223"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa675fc31eb73692d49f0b7d1ac6fe223">&#9670;&#160;</a></span>OnFrontConnected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::OnFrontConnected </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>前置机连接成功回调 </p>
+<p>当与CTP前置机建立连接成功时触发该回调 在该回调中发送登录请求</p>
+<p>当成功连接到CTP前置机时触发该回调 记录连接成功日志，并通过回调接口通知上层应用 然后自动发送登录请求 </p>
+
+<p>重载 <a class="el" href="classCThostFtdcMdSpi.html#ac9f31527e48926cf81ec0ca84fc952a5">CThostFtdcMdSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00269">269</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a467f4ac7ac8dac332a68b74c6e10f02d" name="a467f4ac7ac8dac332a68b74c6e10f02d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a467f4ac7ac8dac332a68b74c6e10f02d">&#9670;&#160;</a></span>OnFrontDisconnected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::OnFrontDisconnected </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>nReason</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>前置机断开连接回调 </p>
+<p>当与CTP前置机断开连接时触发该回调 输出断开原因并通过回调接口通知上层应用 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">nReason</td><td>断开原因</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当与CTP前置机断开连接时触发该回调 记录断开连接错误日志，包含断开原因 通过回调接口将断开事件通知上层应用 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">nReason</td><td>断开连接的原因代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classCThostFtdcMdSpi.html#ab5840abfd0695a0175a1175c9383a247">CThostFtdcMdSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00336">336</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1503c93b7073f516ef762d5feac0b853" name="a1503c93b7073f516ef762d5feac0b853"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1503c93b7073f516ef762d5feac0b853">&#9670;&#160;</a></span>OnHeartBeatWarning()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::OnHeartBeatWarning </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>nTimeLapse</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>心跳超时警告回调 </p>
+<p>当与CTP服务器心跳检测超时时触发该回调 输出警告日志并可能重新初始化连接 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">nTimeLapse</td><td>超时时间间隔（秒）</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当CTP行情服务器心跳超时时触发该回调 记录心跳超时日志，包含超时的时间间隔 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">nTimeLapse</td><td>心跳超时的时间间隔（单位：秒） </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classCThostFtdcMdSpi.html#a7951d545b933f66dd7e45f0067ad045f">CThostFtdcMdSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00517">517</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a118bb31559055fbd42e191151193a781" name="a118bb31559055fbd42e191151193a781"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a118bb31559055fbd42e191151193a781">&#9670;&#160;</a></span>OnRspError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::OnRspError </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *&#160;</td>
+          <td class="paramname"><em>pRspInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>nRequestID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bIsLast</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>响应错误回调 </p>
+<p>当CTP行情服务器返回错误响应时触发该回调 将错误信息转换为内部错误对象并输出日志 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pRspInfo</td><td>错误信息字段指针 </td></tr>
+    <tr><td class="paramname">nRequestID</td><td>请求ID </td></tr>
+    <tr><td class="paramname">bIsLast</td><td>是否为最后一个响应</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当CTP行情接口返回错误时触发该回调 调用IsErrorRspInfo方法处理错误信息 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pRspInfo</td><td>错误信息字段指针 </td></tr>
+    <tr><td class="paramname">nRequestID</td><td>对应的请求ID </td></tr>
+    <tr><td class="paramname">bIsLast</td><td>是否为最后一个响应 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classCThostFtdcMdSpi.html#a47d250448c7acad3d65a8eecc54d738c">CThostFtdcMdSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00258">258</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7b9c7286f90b27a76040538b18909efa" name="a7b9c7286f90b27a76040538b18909efa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b9c7286f90b27a76040538b18909efa">&#9670;&#160;</a></span>OnRspSubMarketData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::OnRspSubMarketData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structCThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a> *&#160;</td>
+          <td class="paramname"><em>pSpecificInstrument</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *&#160;</td>
+          <td class="paramname"><em>pRspInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>nRequestID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bIsLast</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>订阅行情响应回调 </p>
+<p>当发送订阅请求后收到的响应 处理订阅结果并输出日志 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pSpecificInstrument</td><td>合约信息字段指针 </td></tr>
+    <tr><td class="paramname">pRspInfo</td><td>响应信息字段指针 </td></tr>
+    <tr><td class="paramname">nRequestID</td><td>请求ID </td></tr>
+    <tr><td class="paramname">bIsLast</td><td>是否为最后一个响应</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当发送订阅行情请求后收到的响应 检查响应是否包含错误信息 当前实现中空处理，可用于日志或状态跟踪 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pSpecificInstrument</td><td>合约信息字段指针 </td></tr>
+    <tr><td class="paramname">pRspInfo</td><td>响应信息字段指针 </td></tr>
+    <tr><td class="paramname">nRequestID</td><td>请求ID </td></tr>
+    <tr><td class="paramname">bIsLast</td><td>是否为最后一个响应 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classCThostFtdcMdSpi.html#a523b2d7a149e70dbe0a479e90f2ec436">CThostFtdcMdSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00499">499</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a29cb326941ff7deaa4c3efca5e22991d" name="a29cb326941ff7deaa4c3efca5e22991d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29cb326941ff7deaa4c3efca5e22991d">&#9670;&#160;</a></span>OnRspUnSubMarketData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::OnRspUnSubMarketData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structCThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a> *&#160;</td>
+          <td class="paramname"><em>pSpecificInstrument</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *&#160;</td>
+          <td class="paramname"><em>pRspInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>nRequestID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bIsLast</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>取消订阅行情响应回调 </p>
+<p>当发送取消订阅请求后收到的响应 处理取消订阅结果并输出日志 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pSpecificInstrument</td><td>合约信息字段指针 </td></tr>
+    <tr><td class="paramname">pRspInfo</td><td>响应信息字段指针 </td></tr>
+    <tr><td class="paramname">nRequestID</td><td>请求ID </td></tr>
+    <tr><td class="paramname">bIsLast</td><td>是否为最后一个响应</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当发送取消订阅行情请求后收到的响应 当前实现中未处理此响应 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pSpecificInstrument</td><td>合约信息字段指针 </td></tr>
+    <tr><td class="paramname">pRspInfo</td><td>响应信息字段指针 </td></tr>
+    <tr><td class="paramname">nRequestID</td><td>请求ID </td></tr>
+    <tr><td class="paramname">bIsLast</td><td>是否为最后一个响应 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classCThostFtdcMdSpi.html#abf3171b22288654e4981518f844e3e84">CThostFtdcMdSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00354">354</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a26a0e82f0bf53320505b26229c00fd7f" name="a26a0e82f0bf53320505b26229c00fd7f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26a0e82f0bf53320505b26229c00fd7f">&#9670;&#160;</a></span>OnRspUserLogin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::OnRspUserLogin </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structCThostFtdcRspUserLoginField.html">CThostFtdcRspUserLoginField</a> *&#160;</td>
+          <td class="paramname"><em>pRspUserLogin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *&#160;</td>
+          <td class="paramname"><em>pRspInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>nRequestID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bIsLast</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>用户登录响应回调 </p>
+<p>当发送登录请求后收到的响应 如果登录成功，更新交易日并调用订阅方法 如果失败，输出错误日志 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pRspUserLogin</td><td>登录响应字段指针 </td></tr>
+    <tr><td class="paramname">pRspInfo</td><td>响应信息字段指针 </td></tr>
+    <tr><td class="paramname">nRequestID</td><td>请求ID </td></tr>
+    <tr><td class="paramname">bIsLast</td><td>是否为最后一个响应</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当发送登录请求后收到的响应 如果登录成功，获取交易日并处理无效交易日的情况 记录登录成功日志并通知上层应用 然后自动执行行情订阅 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pRspUserLogin</td><td>登录响应字段指针 </td></tr>
+    <tr><td class="paramname">pRspInfo</td><td>响应信息字段指针 </td></tr>
+    <tr><td class="paramname">nRequestID</td><td>请求ID </td></tr>
+    <tr><td class="paramname">bIsLast</td><td>是否为最后一个响应 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classCThostFtdcMdSpi.html#acf78a12c4ed35d348b89383dc7bfff80">CThostFtdcMdSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00290">290</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5beb4478bb34fc186d107acde8c4fc3c" name="a5beb4478bb34fc186d107acde8c4fc3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5beb4478bb34fc186d107acde8c4fc3c">&#9670;&#160;</a></span>OnRspUserLogout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::OnRspUserLogout </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structCThostFtdcUserLogoutField.html">CThostFtdcUserLogoutField</a> *&#160;</td>
+          <td class="paramname"><em>pUserLogout</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *&#160;</td>
+          <td class="paramname"><em>pRspInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>nRequestID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bIsLast</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>登出请求响应回调 </p>
+<p>用户登出响应回调</p>
+<p>当发送登出请求后收到的响应 清理现有的资源并更新状态 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pUserLogout</td><td>登出响应字段指针 </td></tr>
+    <tr><td class="paramname">pRspInfo</td><td>响应信息字段指针 </td></tr>
+    <tr><td class="paramname">nRequestID</td><td>请求ID </td></tr>
+    <tr><td class="paramname">bIsLast</td><td>是否为最后一个响应</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当发送登出请求后收到的响应 通过回调接口将登出事件通知上层应用 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pUserLogout</td><td>登出响应字段指针 </td></tr>
+    <tr><td class="paramname">pRspInfo</td><td>响应信息字段指针 </td></tr>
+    <tr><td class="paramname">nRequestID</td><td>请求ID </td></tr>
+    <tr><td class="paramname">bIsLast</td><td>是否为最后一个响应 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classCThostFtdcMdSpi.html#a3266aceee7b069d558609e0c90988a0e">CThostFtdcMdSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00321">321</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1c77694c3969db9c5759d4d8fea8fd90" name="a1c77694c3969db9c5759d4d8fea8fd90"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c77694c3969db9c5759d4d8fea8fd90">&#9670;&#160;</a></span>OnRtnDepthMarketData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::OnRtnDepthMarketData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structCThostFtdcDepthMarketDataField.html">CThostFtdcDepthMarketDataField</a> *&#160;</td>
+          <td class="paramname"><em>pDepthMarketData</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>市场行情推送回调 </p>
+<p>行情数据推送回调</p>
+<p>当收到订阅合约的新行情时触发该回调 将CTP行情数据转换为内部WTSTickData对象 然后通过回调接口推送给上层应用 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pDepthMarketData</td><td>深度市场行情数据字段指针</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到CTP推送的实时行情数据时触发该回调 处理流程包括：</p><ol type="1">
+<li>验证合约是否有效</li>
+<li>根据配置决定使用本地时间或CTP提供的时间</li>
+<li>将CTP行情数据转换为内部行情数据结构</li>
+<li>调用回调接口将行情数据推送给上层应用 <dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pDepthMarketData</td><td>CTP行情数据字段指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+</li>
+</ol>
+
+<p>重载 <a class="el" href="classCThostFtdcMdSpi.html#a4dd1dd6d9c40b7adbad1e7459c1c3962">CThostFtdcMdSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00369">369</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a20f341cef77a01150bd6a94efd7d2bca" name="a20f341cef77a01150bd6a94efd7d2bca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20f341cef77a01150bd6a94efd7d2bca">&#9670;&#160;</a></span>registerSpi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::registerSpi </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classIParserSpi.html">IParserSpi</a> *&#160;</td>
+          <td class="paramname"><em>listener</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>注册行情回调接口 </p>
+<p>注册用于接收行情数据和事件通知的回调接口 并从接口中获取基础数据管理器 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">listener</td><td>行情回调接口实例</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>设置接收行情数据和事件通知的回调接口 同时从回调接口获取基础数据管理器 基础数据管理器用于获取合约信息 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">listener</td><td>实现了IParserSpi接口的回调对象指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classIParserApi.html#a37ba828035dff6492ab185b462d070ec">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00658">658</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3a956458e4c49e251f82fd824c8abbab" name="a3a956458e4c49e251f82fd824c8abbab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a956458e4c49e251f82fd824c8abbab">&#9670;&#160;</a></span>release()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::release </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>释放行情解析器资源 </p>
+<p>释放行情解析器的所有资源 包括释放CTP行情接口实例 清空各种数据缓存</p>
+<p>调用disconnect方法断开与CTP服务器的连接并释放相关资源 </p>
+
+<p>重载 <a class="el" href="classIParserApi.html#a9053ed20289653de487d5fe5d9e88690">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00210">210</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7f0a58d46016c76513f0118994ca3fd4" name="a7f0a58d46016c76513f0118994ca3fd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f0a58d46016c76513f0118994ca3fd4">&#9670;&#160;</a></span>ReqUserLogin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::ReqUserLogin </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>发送登录请求 </p>
+<p>创建并填充CTP登录请求字段 包括经纪商代码、用户名、密码等信息 然后向CTP服务器发送登录请求</p>
+<p>向CTP行情服务器发送登录请求 填充登录所需的各个字段：经纪ID、用户ID、密码等 如果用户API对象为空或请求发送失败，记录相应错误日志 登录结果将在OnRspUserLogin回调中处理 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00530">530</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a21e21bcfc6b2587005cbdfeca419e35f" name="a21e21bcfc6b2587005cbdfeca419e35f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21e21bcfc6b2587005cbdfeca419e35f">&#9670;&#160;</a></span>subscribe()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::subscribe </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="FasterDefs_8h.html#ac6831b9d0154219721fb3c2b5d254eba">CodeSet</a> &amp;&#160;</td>
+          <td class="paramname"><em>vecSymbols</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>订阅行情 </p>
+<p>向CTP服务器发送订阅请求，订阅指定合约的行情 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vecSymbols</td><td>要订阅的合约代码集合</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>接受上层要订阅的合约代码集合 如果已登录（交易日已设置）则立即执行订阅 否则仅保存订阅列表，等待登录成功后自动订阅 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vecSymbols</td><td>要订阅的合约代码集合 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classIParserApi.html#ab20f1e4ddb820ef80e2aa0f31ac46e2b">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00617">617</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac82d74e316abf95d6661e64a39d45e01" name="ac82d74e316abf95d6661e64a39d45e01"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac82d74e316abf95d6661e64a39d45e01">&#9670;&#160;</a></span>unsubscribe()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserCTP::unsubscribe </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="FasterDefs_8h.html#ac6831b9d0154219721fb3c2b5d254eba">CodeSet</a> &amp;&#160;</td>
+          <td class="paramname"><em>vecSymbols</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>取消订阅行情 </p>
+<p>取消行情订阅</p>
+<p>向CTP服务器发送取消订阅请求，取消指定合约的行情订阅 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vecSymbols</td><td>要取消订阅的合约代码集合</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>取消指定合约的行情订阅 当前实现中未实现该功能 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vecSymbols</td><td>要取消订阅的合约代码集合 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classIParserApi.html#a9bd40dd38a8b376ed24d63915af69770">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a> 第 <a class="el" href="ParserCTP_8cpp_source.html#l00636">636</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a3eac00094cfc10e37d88e083c2218260" name="a3eac00094cfc10e37d88e083c2218260"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3eac00094cfc10e37d88e083c2218260">&#9670;&#160;</a></span>m_bLocaltime</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ParserCTP::m_bLocaltime</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>是否使用本地时间戳，true表示使用本地时间，false表示使用交易所时间 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00250">250</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9c62665109dcc3b9772c949e1533baf5" name="a9c62665109dcc3b9772c949e1533baf5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c62665109dcc3b9772c949e1533baf5">&#9670;&#160;</a></span>m_filterSubs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="FasterDefs_8h.html#ac6831b9d0154219721fb3c2b5d254eba">CodeSet</a> ParserCTP::m_filterSubs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>订阅合约代码集合 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00252">252</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a252dfa11bc7f16d83248595e74579c1f" name="a252dfa11bc7f16d83248595e74579c1f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a252dfa11bc7f16d83248595e74579c1f">&#9670;&#160;</a></span>m_funcCreator</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classParserCTP.html#ad8f347b9d57bfa2ad7d6046c8e183df7">CTPCreator</a> ParserCTP::m_funcCreator</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>CTP API创建函数指针 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00261">261</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7e37be33413f4539d700044a75deac08" name="a7e37be33413f4539d700044a75deac08"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e37be33413f4539d700044a75deac08">&#9670;&#160;</a></span>m_hInstCTP</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a> ParserCTP::m_hInstCTP</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>CTP动态库句柄 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00259">259</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a441a1a919e77b4e1a70e656ad246cc4d" name="a441a1a919e77b4e1a70e656ad246cc4d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a441a1a919e77b4e1a70e656ad246cc4d">&#9670;&#160;</a></span>m_iRequestID</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ParserCTP::m_iRequestID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>请求编号，用于标识不同的请求 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00254">254</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac3e82ff4dd148ef91b9a93214c39b09e" name="ac3e82ff4dd148ef91b9a93214c39b09e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3e82ff4dd148ef91b9a93214c39b09e">&#9670;&#160;</a></span>m_pBaseDataMgr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a>* ParserCTP::m_pBaseDataMgr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>基础数据管理器实例指针 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00257">257</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3506f01d20bf3baf1a01d32bab925f18" name="a3506f01d20bf3baf1a01d32bab925f18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3506f01d20bf3baf1a01d32bab925f18">&#9670;&#160;</a></span>m_pUserAPI</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCThostFtdcMdApi.html">CThostFtdcMdApi</a>* ParserCTP::m_pUserAPI</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>CTP行情API接口实例指针 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00243">243</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a93cb03d083880cb77c38c8e94b9118e4" name="a93cb03d083880cb77c38c8e94b9118e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a93cb03d083880cb77c38c8e94b9118e4">&#9670;&#160;</a></span>m_sink</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIParserSpi.html">IParserSpi</a>* ParserCTP::m_sink</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>行情回调接口实例指针 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00256">256</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab2a06537409b064e017f1d39a2818a93" name="ab2a06537409b064e017f1d39a2818a93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2a06537409b064e017f1d39a2818a93">&#9670;&#160;</a></span>m_strBroker</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string ParserCTP::m_strBroker</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>经纪商代码 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00246">246</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acab7f5a00ff75efea186028d20228cfd" name="acab7f5a00ff75efea186028d20228cfd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acab7f5a00ff75efea186028d20228cfd">&#9670;&#160;</a></span>m_strFlowDir</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string ParserCTP::m_strFlowDir</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>流文件存储目录 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00249">249</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae430db804402b734eb176e63fe803221" name="ae430db804402b734eb176e63fe803221"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae430db804402b734eb176e63fe803221">&#9670;&#160;</a></span>m_strFrontAddr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string ParserCTP::m_strFrontAddr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>前置机地址，格式为"tcp://ip:port" </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00245">245</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a293eac66c8bf5ec40d37c56f26549f04" name="a293eac66c8bf5ec40d37c56f26549f04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a293eac66c8bf5ec40d37c56f26549f04">&#9670;&#160;</a></span>m_strPassword</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string ParserCTP::m_strPassword</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>用户密码 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00248">248</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1f833e693b1f229b1920371366f15eb9" name="a1f833e693b1f229b1920371366f15eb9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f833e693b1f229b1920371366f15eb9">&#9670;&#160;</a></span>m_strUserID</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string ParserCTP::m_strUserID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>用户名/投资者代码 </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00247">247</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2b0b339eca703a581bf23f05fc6fed8b" name="a2b0b339eca703a581bf23f05fc6fed8b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b0b339eca703a581bf23f05fc6fed8b">&#9670;&#160;</a></span>m_uTradingDate</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t ParserCTP::m_uTradingDate</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易日，格式为YYYYMMDD </p>
+
+<p class="definition">在文件 <a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a> 第 <a class="el" href="ParserCTP_8h_source.html#l00242">242</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/ParserCTP/<a class="el" href="ParserCTP_8h_source.html">ParserCTP.h</a></li>
+<li>src/ParserCTP/<a class="el" href="ParserCTP_8cpp_source.html">ParserCTP.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classParserCTP.html">ParserCTP</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/TraderHTS/TraderHTS.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('TraderHTS_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">TraderHTS.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="TraderHTS_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;queue&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;unordered_set&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;unordered_map&gt;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;../API/HTS5.2.43.0/include/secitpdk.h&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;boost/asio/io_service.hpp&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;boost/asio/strand.hpp&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;../Includes/WTSTypes.h&quot;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;../Includes/ITraderApi.h&quot;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;../Includes/WTSCollection.hpp&quot;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;../Share/IniHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;../Share/DLLHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="TraderHTS_8h.html#a17226795848decb565e90624584e5c0f">   32</a></span><a class="code hl_variable" href="TraderHTS_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="foldopen" id="foldopen00035" data-start="{" data-end="};">
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classTraderHTS.html">   35</a></span><span class="keyword">class </span><a class="code hl_class" href="classTraderHTS.html">TraderHTS</a> : <span class="keyword">public</span> <a class="code hl_class" href="classITraderApi.html">ITraderApi</a></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>{</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="comment">//friend void callback_rtn1(const char* pTime, const char* pMsg, int nType);</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_function" href="classTraderHTS.html#a2f11a6f28c80bf6c9707afe35791b460">TraderHTS</a>();</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keyword">virtual</span> <a class="code hl_function" href="classTraderHTS.html#ad34f1ae01aa450b20392ef2417c82430">~TraderHTS</a>();</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00044" data-start="{" data-end="};">
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007">   44</a></span>    <span class="keyword">typedef</span> <span class="keyword">enum</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    {</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007ae0eb0b4369c91455d61f3ccb4167b29c">   46</a></span>        <a class="code hl_enumvalue" href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007ae0eb0b4369c91455d61f3ccb4167b29c">WS_NOTLOGIN</a>,        <span class="comment">//未登录</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007afe76a652db2135ce7b0b60da6edacd35">   47</a></span>        <a class="code hl_enumvalue" href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007afe76a652db2135ce7b0b60da6edacd35">WS_LOGINING</a>,        <span class="comment">//正在登录</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007a355268b594ba6f8b73cb16833e8f571b">   48</a></span>        <a class="code hl_enumvalue" href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007a355268b594ba6f8b73cb16833e8f571b">WS_LOGINED</a>,         <span class="comment">//已登录</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007adabf8b7c460288ee96f8069cb11c7bbe">   49</a></span>        <a class="code hl_enumvalue" href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007adabf8b7c460288ee96f8069cb11c7bbe">WS_LOGINFAILED</a>,     <span class="comment">//登录失败</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        <a class="code hl_enumvalue" href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007ae94da63f64141825e531596cebc065e6">WS_ALLREADY</a>         <span class="comment">//全部就绪</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007ae94da63f64141825e531596cebc065e6">   51</a></span>    } <a class="code hl_enumeration" href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007">WrapperState</a>;</div>
+</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderHTS.html#a314fa7bc08db132e86c802844a30dfe5">doLogin</a>();</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderHTS.html#a1982e421b9644ebc13cfe6fa71407a65">InitializeHTS</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* params);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderHTS.html#a4017f2fb072a7a8229173c8648dc5b47">qryGDNo</a>(); <span class="comment">//查询股东号</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="comment">//void qryCustInfo();  // 查询客户信息</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="comment">//void qryCustNodeInfo();  // 查询客户节点信息</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderHTS.html#a2813d640dad976e8c6095e66933cbbfd">reconnect</a>();</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderHTS.html#aad2870778a423cb6a1ed96f87d12d8a4">triggerQuery</a>();</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="comment">/* 接收订阅的回报数据 */</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderHTS.html#a9f0dfdfbe2129815efa2f5af092e1410">htsGetCallback</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* pTime, <span class="keyword">const</span> <span class="keywordtype">char</span>* pMsg, <span class="keywordtype">int</span> nType);</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderHTS.html#a4060350bb3afa5a8cee131ef1d46aa59">OnRtnOrder</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* pMsg);  <span class="comment">// 委托信息</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderHTS.html#aac69e82a0573ed353a52711ede6691c0">OnRtnTrade</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* pMsg);  <span class="comment">// 成交信息</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="comment">//ITraderApi接口</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classTraderHTS.html#a2a437258d13813ab9607eba100130c35">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* params) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderHTS.html#a883691dd16475fa4a7c5a42a76126df6">release</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderHTS.html#a8d5d418921066574c4c814ca50aad878">registerSpi</a>(<a class="code hl_class" href="classITraderSpi.html">ITraderSpi</a> *listener) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classTraderHTS.html#ab825c57338d4616fe51bc48fa23093d6">makeEntrustID</a>(<span class="keywordtype">char</span>* buffer, <span class="keywordtype">int</span> length) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderHTS.html#a1d82e58901f44e56e05adfe63b887053">connect</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderHTS.html#a37fd88fb23cb43e15125fbc963e065c7">disconnect</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classTraderHTS.html#abe234e87145bbee04175d09cb5f1ac8e">isConnected</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderHTS.html#a59308d14bda8100189944d3d478c0d71">login</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_variable" href="demo__send__order_8cpp.html#a6dfa0071362986f2680867cd51fa2ea8">user</a>, <span class="keyword">const</span> <span class="keywordtype">char</span>* pass, <span class="keyword">const</span> <span class="keywordtype">char</span>* productInfo) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderHTS.html#aa294ed670b9f14c98d1ff2856f3d15ea">logout</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderHTS.html#a35e1b2725d34450dcb7be5600330157f">orderInsert</a>(<a class="code hl_class" href="classWTSEntrust.html">WTSEntrust</a>* eutrust) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderHTS.html#a640604784a25736b520e352cbdd5c323">orderAction</a>(<a class="code hl_class" href="classWTSEntrustAction.html">WTSEntrustAction</a>* action) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderHTS.html#a659f4ea9462f2e5eb3970bc93faa287b">queryAccount</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderHTS.html#af98c8d5f526b8a334ad64f875355b14d">queryPositions</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderHTS.html#a12f71093d73b0b40a8839478f934c67b">queryOrders</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderHTS.html#a4a354d3c236bba9886931a7c48d4b186">queryTrades</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a9f396176727dacf07adb6c8d2d63c0c1">  107</a></span>    std::string     <a class="code hl_variable" href="classTraderHTS.html#a9f396176727dacf07adb6c8d2d63c0c1">m_strUser</a>;  <span class="comment">// 客户号</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a541898f7f2d52cb02524f7f8ce4e2462">  108</a></span>    std::string     <a class="code hl_variable" href="classTraderHTS.html#a541898f7f2d52cb02524f7f8ce4e2462">m_strPass</a>;  <span class="comment">// 密码</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a285ff55aaa5617668f0542a1c5e10fc9">  109</a></span>    std::string     <a class="code hl_variable" href="classTraderHTS.html#a285ff55aaa5617668f0542a1c5e10fc9">m_strNode</a>;  <span class="comment">// 站点信息</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a56718c7854dd7bf459150bca88e61d67">  111</a></span>    <span class="keywordtype">char</span>            <a class="code hl_variable" href="classTraderHTS.html#a56718c7854dd7bf459150bca88e61d67">sShGdh</a>[13];                <span class="comment">// 上海股东号</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a22b389bd7e3ea499bc9b83ff8f9baae7">  112</a></span>    <span class="keywordtype">char</span>            <a class="code hl_variable" href="classTraderHTS.html#a22b389bd7e3ea499bc9b83ff8f9baae7">sSzGdh</a>[13];                <span class="comment">// 深圳股东号</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="classTraderHTS.html#aaca86bf194f432499e03817a33a983fb">  113</a></span>    <span class="keywordtype">char</span>            <a class="code hl_variable" href="classTraderHTS.html#aaca86bf194f432499e03817a33a983fb">sShZjzh</a>[13];               <span class="comment">// 上海资金账号</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a617cbba09649b85083a46b725d63c8ce">  114</a></span>    <span class="keywordtype">char</span>            <a class="code hl_variable" href="classTraderHTS.html#a617cbba09649b85083a46b725d63c8ce">sSzZjzh</a>[13];               <span class="comment">// 深圳资金账号</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="classTraderHTS.html#ad1d43d793963daea6c77125b57bc1cff">  116</a></span>    std::string     <a class="code hl_variable" href="classTraderHTS.html#ad1d43d793963daea6c77125b57bc1cff">m_strWtfs</a>;  <span class="comment">// 委托方式</span></div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a2693af8c9fd0b6f76ce6fa0e6874de33">  117</a></span>    std::string     <a class="code hl_variable" href="classTraderHTS.html#a2693af8c9fd0b6f76ce6fa0e6874de33">m_strKey</a>;  <span class="comment">// 配置文件段名</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="classTraderHTS.html#abe77247564f7f12dfd1b5613f08bb29b">  118</a></span>    std::string     <a class="code hl_variable" href="classTraderHTS.html#abe77247564f7f12dfd1b5613f08bb29b">m_strDevName</a>;  <span class="comment">// 开发商代码</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno"><a class="line" href="classTraderHTS.html#aaabf92cc9cdf2907f572bcebbdbcddc2">  120</a></span>    std::string     <a class="code hl_variable" href="classTraderHTS.html#aaabf92cc9cdf2907f572bcebbdbcddc2">m_strTag</a>;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a959e3d166f062f8af2d2e1c3f63af8fc">  122</a></span>    <a class="code hl_struct" href="structITPDK__CusReqInfo.html">ITPDK_CusReqInfo</a> <a class="code hl_variable" href="classTraderHTS.html#a959e3d166f062f8af2d2e1c3f63af8fc">cusreqinfo</a>;  <span class="comment">// 登录信息</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a125d4a2877ad420991a62c299a4c6d9a">  124</a></span>    <a class="code hl_class" href="classITraderSpi.html">ITraderSpi</a>*     <a class="code hl_variable" href="classTraderHTS.html#a125d4a2877ad420991a62c299a4c6d9a">m_traderSink</a>;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a3a6371d651188fb25db728abe7ad7be5">  125</a></span>    uint64_t        <a class="code hl_variable" href="classTraderHTS.html#a3a6371d651188fb25db728abe7ad7be5">m_uLastQryTime</a>;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a9125a0553c0bf2504232f61c4618b966">  127</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classTraderHTS.html#a9125a0553c0bf2504232f61c4618b966">m_bUseEX</a>;  <span class="comment">// 使用EX后缀</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno"><a class="line" href="classTraderHTS.html#ae0141ea74f5da3c98521b92e1216060a">  128</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classTraderHTS.html#ae0141ea74f5da3c98521b92e1216060a">m_bASync</a>;  <span class="comment">// 是否使用异步</span></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a98047aa41af826bd2eec979ea3235e52">  130</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classWTSHashMap.html">WTSHashMap&lt;std::string&gt;</a> <a class="code hl_typedef" href="classTraderHTS.html#a98047aa41af826bd2eec979ea3235e52">TradeDataMap</a>;</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a33b000a5f3f990856e659dcfb34737e5">  131</a></span>    <a class="code hl_class" href="classWTSHashMap.html">TradeDataMap</a>*   <a class="code hl_variable" href="classTraderHTS.html#a33b000a5f3f990856e659dcfb34737e5">m_mapLives</a>;</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno"><a class="line" href="classTraderHTS.html#acb64db1629babdec4ee60df448080079">  132</a></span>    std::unordered_set&lt;std::string&gt; <a class="code hl_variable" href="classTraderHTS.html#acb64db1629babdec4ee60df448080079">m_tradeids</a>;</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a29f1d5b90793ad15f199821e1e4a979b">  134</a></span>    uint32_t                    <a class="code hl_variable" href="classTraderHTS.html#a29f1d5b90793ad15f199821e1e4a979b">m_lDate</a>;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a8175f8af564698c13c4625f4692ab1da">  135</a></span>    std::atomic&lt;uint32_t&gt;       <a class="code hl_variable" href="classTraderHTS.html#a8175f8af564698c13c4625f4692ab1da">m_orderRef</a>;     <span class="comment">//报单引用</span></div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno"><a class="line" href="classTraderHTS.html#aca90163f930585b1f092fb6f7169c8e3">  137</a></span>    <a class="code hl_enumeration" href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007">WrapperState</a>                <a class="code hl_variable" href="classTraderHTS.html#aca90163f930585b1f092fb6f7169c8e3">m_wrapperState</a>;</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="classTraderHTS.html#ac1d26af6abc0f8c2f040a19ec4d5e1f0">  139</a></span>    uint64_t                    <a class="code hl_variable" href="classTraderHTS.html#ac1d26af6abc0f8c2f040a19ec4d5e1f0">m_uSessID</a>;</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="classTraderHTS.html#ac869383e7aec4109c251620d73908361">  141</a></span>    <a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>*               <a class="code hl_variable" href="classTraderHTS.html#ac869383e7aec4109c251620d73908361">m_bdMgr</a>;</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a9f1368be3f4dca9e8d3b4ae1bdce4fbb">  143</a></span>    <span class="keyword">typedef</span> std::queue&lt;CommonExecuter&gt;  <a class="code hl_typedef" href="classTraderHTS.html#a9f1368be3f4dca9e8d3b4ae1bdce4fbb">QueryQue</a>;</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno"><a class="line" href="classTraderHTS.html#abb31cbeb09279e3ac8ab6dbe7e050603">  144</a></span>    <a class="code hl_typedef" href="classTraderHTS.html#a9f1368be3f4dca9e8d3b4ae1bdce4fbb">QueryQue</a>            <a class="code hl_variable" href="classTraderHTS.html#abb31cbeb09279e3ac8ab6dbe7e050603">m_queQuery</a>;</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a6c67bbcb49cf6a82f70d549852a1cf49">  145</a></span>    <span class="keywordtype">bool</span>                <a class="code hl_variable" href="classTraderHTS.html#a6c67bbcb49cf6a82f70d549852a1cf49">m_bInQuery</a>;</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a9c8ebc83ddc6c3e938def2ea5404c66e">  146</a></span>    <a class="code hl_typedef" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a>      <a class="code hl_variable" href="classTraderHTS.html#a9c8ebc83ddc6c3e938def2ea5404c66e">m_mtxQuery</a>;</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a63ab4dcc1c98043bd63633723f5f4ccd">  147</a></span>    uint64_t            <a class="code hl_variable" href="classTraderHTS.html#a63ab4dcc1c98043bd63633723f5f4ccd">m_lastQryTime</a>;</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno"><a class="line" href="classTraderHTS.html#af6a3674a4135cacf0b4926b3fb0db58c">  149</a></span>    boost::asio::io_service     <a class="code hl_variable" href="classTraderHTS.html#af6a3674a4135cacf0b4926b3fb0db58c">m_asyncIO</a>;</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a10b18e2440f9381e91ce50569df97960">  150</a></span>    boost::asio::io_service::strand*    <a class="code hl_variable" href="classTraderHTS.html#a10b18e2440f9381e91ce50569df97960">m_strandIO</a>;</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a82a9ae9976ddb7f714b34bc3e80e7d4b">  151</a></span>    <a class="code hl_typedef" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>        <a class="code hl_variable" href="classTraderHTS.html#a82a9ae9976ddb7f714b34bc3e80e7d4b">m_thrdWorker</a>;</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno"><a class="line" href="classTraderHTS.html#ac588b04e9619746b0a07a1759000b41b">  153</a></span>    std::string     <a class="code hl_variable" href="classTraderHTS.html#ac588b04e9619746b0a07a1759000b41b">m_strModule</a>;</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno"><a class="line" href="classTraderHTS.html#a5e2e4fc9b36d1c05962181607cc7c158">  154</a></span>    <a class="code hl_typedef" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a>       <a class="code hl_variable" href="classTraderHTS.html#a5e2e4fc9b36d1c05962181607cc7c158">m_hInstDD</a>;</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno"><a class="line" href="classTraderHTS.html#ab7acdd74f0ccf54c59d6123e223e138d">  156</a></span>    <a class="code hl_class" href="classIniHelper.html">IniHelper</a>       <a class="code hl_variable" href="classTraderHTS.html#ab7acdd74f0ccf54c59d6123e223e138d">m_iniHelper</a>;</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>};</div>
+</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span> </div>
+<div class="foldopen" id="foldopen00160" data-start="{" data-end="};">
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno"><a class="line" href="classHTSCallMgr.html">  160</a></span><span class="keyword">class </span><a class="code hl_class" href="classHTSCallMgr.html">HTSCallMgr</a></div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>{</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    <a class="code hl_function" href="classHTSCallMgr.html#a177accdac1ba2236d60d446188cbf706">HTSCallMgr</a>();</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <a class="code hl_function" href="classHTSCallMgr.html#aae82a6406416e2e0f9ec49c52cfe3101">~HTSCallMgr</a>();</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classHTSCallMgr.html#ad34be2b104b29abacef1674c7426dee9">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* params);</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classHTSCallMgr.html#a908ec1c30855cfd803d9123da7ce9e3d">setCallbackMsgFunc</a>();</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classHTSCallMgr.html#a8484c1a9fa58a8b49f0300dcac5c5215">setHTSCallPtr</a>(std::string khh, <a class="code hl_class" href="classTraderHTS.html">TraderHTS</a>* pTrader);</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHTSCallMgr.html#a2e7e2955bffa94891e506ce6da97a61b">callbackMsgFunc</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* pTime, <span class="keyword">const</span> <span class="keywordtype">char</span>* pMsg, <span class="keywordtype">int</span> nType);</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHTSCallMgr.html#a3c74f3af29c44863b32bb5ebc00c5052">callbackConnFunc</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* pKhh, <span class="keyword">const</span> <span class="keywordtype">char</span>* pConnKey, <span class="keywordtype">int</span> nEvent, <span class="keywordtype">int</span> nType);</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>};</div>
+</div>
+<div class="ttc" id="aDLLHelper_8hpp_html_a40972742af38c16d3ab2f521abf0ca8a"><div class="ttname"><a href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a></div><div class="ttdeci">void * DllHandle</div><div class="ttdoc">动态库句柄类型（非Windows平台）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00032">DLLHelper.hpp:32</a></div></div>
+<div class="ttc" id="aTraderHTS_8h_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="TraderHTS_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00032">TraderHTS.h:32</a></div></div>
+<div class="ttc" id="aclassHTSCallMgr_html"><div class="ttname"><a href="classHTSCallMgr.html">HTSCallMgr</a></div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00160">TraderHTS.h:161</a></div></div>
+<div class="ttc" id="aclassHTSCallMgr_html_a177accdac1ba2236d60d446188cbf706"><div class="ttname"><a href="classHTSCallMgr.html#a177accdac1ba2236d60d446188cbf706">HTSCallMgr::HTSCallMgr</a></div><div class="ttdeci">HTSCallMgr()</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l01410">TraderHTS.cpp:1410</a></div></div>
+<div class="ttc" id="aclassHTSCallMgr_html_a2e7e2955bffa94891e506ce6da97a61b"><div class="ttname"><a href="classHTSCallMgr.html#a2e7e2955bffa94891e506ce6da97a61b">HTSCallMgr::callbackMsgFunc</a></div><div class="ttdeci">static void callbackMsgFunc(const char *pTime, const char *pMsg, int nType)</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l01460">TraderHTS.cpp:1460</a></div></div>
+<div class="ttc" id="aclassHTSCallMgr_html_a3c74f3af29c44863b32bb5ebc00c5052"><div class="ttname"><a href="classHTSCallMgr.html#a3c74f3af29c44863b32bb5ebc00c5052">HTSCallMgr::callbackConnFunc</a></div><div class="ttdeci">static void callbackConnFunc(const char *pKhh, const char *pConnKey, int nEvent, int nType)</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l01490">TraderHTS.cpp:1490</a></div></div>
+<div class="ttc" id="aclassHTSCallMgr_html_a8484c1a9fa58a8b49f0300dcac5c5215"><div class="ttname"><a href="classHTSCallMgr.html#a8484c1a9fa58a8b49f0300dcac5c5215">HTSCallMgr::setHTSCallPtr</a></div><div class="ttdeci">void setHTSCallPtr(std::string khh, TraderHTS *pTrader)</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l01449">TraderHTS.cpp:1449</a></div></div>
+<div class="ttc" id="aclassHTSCallMgr_html_a908ec1c30855cfd803d9123da7ce9e3d"><div class="ttname"><a href="classHTSCallMgr.html#a908ec1c30855cfd803d9123da7ce9e3d">HTSCallMgr::setCallbackMsgFunc</a></div><div class="ttdeci">void setCallbackMsgFunc()</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l01523">TraderHTS.cpp:1523</a></div></div>
+<div class="ttc" id="aclassHTSCallMgr_html_aae82a6406416e2e0f9ec49c52cfe3101"><div class="ttname"><a href="classHTSCallMgr.html#aae82a6406416e2e0f9ec49c52cfe3101">HTSCallMgr::~HTSCallMgr</a></div><div class="ttdeci">~HTSCallMgr()</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l01415">TraderHTS.cpp:1415</a></div></div>
+<div class="ttc" id="aclassHTSCallMgr_html_ad34be2b104b29abacef1674c7426dee9"><div class="ttname"><a href="classHTSCallMgr.html#ad34be2b104b29abacef1674c7426dee9">HTSCallMgr::init</a></div><div class="ttdeci">bool init(WTSVariant *params)</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l01420">TraderHTS.cpp:1420</a></div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html"><div class="ttname"><a href="classIBaseDataMgr.html">IBaseDataMgr</a></div><div class="ttdoc">基础数据管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IBaseDataMgr_8h_source.html#l00075">IBaseDataMgr.h:76</a></div></div>
+<div class="ttc" id="aclassITraderApi_html"><div class="ttname"><a href="classITraderApi.html">ITraderApi</a></div><div class="ttdef"><b>Definition</b> <a href="ITraderApi_8h_source.html#l00189">ITraderApi.h:190</a></div></div>
+<div class="ttc" id="aclassITraderSpi_html"><div class="ttname"><a href="classITraderSpi.html">ITraderSpi</a></div><div class="ttdef"><b>Definition</b> <a href="ITraderApi_8h_source.html#l00098">ITraderApi.h:99</a></div></div>
+<div class="ttc" id="aclassIniHelper_html"><div class="ttname"><a href="classIniHelper.html">IniHelper</a></div><div class="ttdoc">INI配置文件辅助类</div><div class="ttdef"><b>Definition</b> <a href="IniHelper_8hpp_source.html#l00034">IniHelper.hpp:35</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html"><div class="ttname"><a href="classTraderHTS.html">TraderHTS</a></div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00035">TraderHTS.h:36</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a10b18e2440f9381e91ce50569df97960"><div class="ttname"><a href="classTraderHTS.html#a10b18e2440f9381e91ce50569df97960">TraderHTS::m_strandIO</a></div><div class="ttdeci">boost::asio::io_service::strand * m_strandIO</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00150">TraderHTS.h:150</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a125d4a2877ad420991a62c299a4c6d9a"><div class="ttname"><a href="classTraderHTS.html#a125d4a2877ad420991a62c299a4c6d9a">TraderHTS::m_traderSink</a></div><div class="ttdeci">ITraderSpi * m_traderSink</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00124">TraderHTS.h:124</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a12f71093d73b0b40a8839478f934c67b"><div class="ttname"><a href="classTraderHTS.html#a12f71093d73b0b40a8839478f934c67b">TraderHTS::queryOrders</a></div><div class="ttdeci">virtual int queryOrders() override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l01126">TraderHTS.cpp:1126</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a1982e421b9644ebc13cfe6fa71407a65"><div class="ttname"><a href="classTraderHTS.html#a1982e421b9644ebc13cfe6fa71407a65">TraderHTS::InitializeHTS</a></div><div class="ttdeci">void InitializeHTS(WTSVariant *params)</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00234">TraderHTS.cpp:234</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a1d82e58901f44e56e05adfe63b887053"><div class="ttname"><a href="classTraderHTS.html#a1d82e58901f44e56e05adfe63b887053">TraderHTS::connect</a></div><div class="ttdeci">virtual void connect() override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00342">TraderHTS.cpp:342</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a20c8c329c4b16db66d04a8e78e154007"><div class="ttname"><a href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007">TraderHTS::WrapperState</a></div><div class="ttdeci">WrapperState</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00044">TraderHTS.h:45</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a20c8c329c4b16db66d04a8e78e154007a355268b594ba6f8b73cb16833e8f571b"><div class="ttname"><a href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007a355268b594ba6f8b73cb16833e8f571b">TraderHTS::WS_LOGINED</a></div><div class="ttdeci">@ WS_LOGINED</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00048">TraderHTS.h:48</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a20c8c329c4b16db66d04a8e78e154007adabf8b7c460288ee96f8069cb11c7bbe"><div class="ttname"><a href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007adabf8b7c460288ee96f8069cb11c7bbe">TraderHTS::WS_LOGINFAILED</a></div><div class="ttdeci">@ WS_LOGINFAILED</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00049">TraderHTS.h:49</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a20c8c329c4b16db66d04a8e78e154007ae0eb0b4369c91455d61f3ccb4167b29c"><div class="ttname"><a href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007ae0eb0b4369c91455d61f3ccb4167b29c">TraderHTS::WS_NOTLOGIN</a></div><div class="ttdeci">@ WS_NOTLOGIN</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00046">TraderHTS.h:46</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a20c8c329c4b16db66d04a8e78e154007ae94da63f64141825e531596cebc065e6"><div class="ttname"><a href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007ae94da63f64141825e531596cebc065e6">TraderHTS::WS_ALLREADY</a></div><div class="ttdeci">@ WS_ALLREADY</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00051">TraderHTS.h:50</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a20c8c329c4b16db66d04a8e78e154007afe76a652db2135ce7b0b60da6edacd35"><div class="ttname"><a href="classTraderHTS.html#a20c8c329c4b16db66d04a8e78e154007afe76a652db2135ce7b0b60da6edacd35">TraderHTS::WS_LOGINING</a></div><div class="ttdeci">@ WS_LOGINING</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00047">TraderHTS.h:47</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a22b389bd7e3ea499bc9b83ff8f9baae7"><div class="ttname"><a href="classTraderHTS.html#a22b389bd7e3ea499bc9b83ff8f9baae7">TraderHTS::sSzGdh</a></div><div class="ttdeci">char sSzGdh[13]</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00112">TraderHTS.h:112</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a2693af8c9fd0b6f76ce6fa0e6874de33"><div class="ttname"><a href="classTraderHTS.html#a2693af8c9fd0b6f76ce6fa0e6874de33">TraderHTS::m_strKey</a></div><div class="ttdeci">std::string m_strKey</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00117">TraderHTS.h:117</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a2813d640dad976e8c6095e66933cbbfd"><div class="ttname"><a href="classTraderHTS.html#a2813d640dad976e8c6095e66933cbbfd">TraderHTS::reconnect</a></div><div class="ttdeci">void reconnect()</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00320">TraderHTS.cpp:320</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a285ff55aaa5617668f0542a1c5e10fc9"><div class="ttname"><a href="classTraderHTS.html#a285ff55aaa5617668f0542a1c5e10fc9">TraderHTS::m_strNode</a></div><div class="ttdeci">std::string m_strNode</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00109">TraderHTS.h:109</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a29f1d5b90793ad15f199821e1e4a979b"><div class="ttname"><a href="classTraderHTS.html#a29f1d5b90793ad15f199821e1e4a979b">TraderHTS::m_lDate</a></div><div class="ttdeci">uint32_t m_lDate</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00134">TraderHTS.h:134</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a2a437258d13813ab9607eba100130c35"><div class="ttname"><a href="classTraderHTS.html#a2a437258d13813ab9607eba100130c35">TraderHTS::init</a></div><div class="ttdeci">virtual bool init(WTSVariant *params) override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00248">TraderHTS.cpp:248</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a2f11a6f28c80bf6c9707afe35791b460"><div class="ttname"><a href="classTraderHTS.html#a2f11a6f28c80bf6c9707afe35791b460">TraderHTS::TraderHTS</a></div><div class="ttdeci">TraderHTS()</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00207">TraderHTS.cpp:207</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a314fa7bc08db132e86c802844a30dfe5"><div class="ttname"><a href="classTraderHTS.html#a314fa7bc08db132e86c802844a30dfe5">TraderHTS::doLogin</a></div><div class="ttdeci">void doLogin()</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00723">TraderHTS.cpp:723</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a33b000a5f3f990856e659dcfb34737e5"><div class="ttname"><a href="classTraderHTS.html#a33b000a5f3f990856e659dcfb34737e5">TraderHTS::m_mapLives</a></div><div class="ttdeci">TradeDataMap * m_mapLives</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00131">TraderHTS.h:131</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a35e1b2725d34450dcb7be5600330157f"><div class="ttname"><a href="classTraderHTS.html#a35e1b2725d34450dcb7be5600330157f">TraderHTS::orderInsert</a></div><div class="ttdeci">virtual int orderInsert(WTSEntrust *eutrust) override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00808">TraderHTS.cpp:808</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a37fd88fb23cb43e15125fbc963e065c7"><div class="ttname"><a href="classTraderHTS.html#a37fd88fb23cb43e15125fbc963e065c7">TraderHTS::disconnect</a></div><div class="ttdeci">virtual void disconnect() override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00360">TraderHTS.cpp:360</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a3a6371d651188fb25db728abe7ad7be5"><div class="ttname"><a href="classTraderHTS.html#a3a6371d651188fb25db728abe7ad7be5">TraderHTS::m_uLastQryTime</a></div><div class="ttdeci">uint64_t m_uLastQryTime</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00125">TraderHTS.h:125</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a4017f2fb072a7a8229173c8648dc5b47"><div class="ttname"><a href="classTraderHTS.html#a4017f2fb072a7a8229173c8648dc5b47">TraderHTS::qryGDNo</a></div><div class="ttdeci">void qryGDNo()</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00672">TraderHTS.cpp:672</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a4060350bb3afa5a8cee131ef1d46aa59"><div class="ttname"><a href="classTraderHTS.html#a4060350bb3afa5a8cee131ef1d46aa59">TraderHTS::OnRtnOrder</a></div><div class="ttdeci">void OnRtnOrder(const char *pMsg)</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00428">TraderHTS.cpp:428</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a4a354d3c236bba9886931a7c48d4b186"><div class="ttname"><a href="classTraderHTS.html#a4a354d3c236bba9886931a7c48d4b186">TraderHTS::queryTrades</a></div><div class="ttdeci">virtual int queryTrades() override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l01269">TraderHTS.cpp:1269</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a541898f7f2d52cb02524f7f8ce4e2462"><div class="ttname"><a href="classTraderHTS.html#a541898f7f2d52cb02524f7f8ce4e2462">TraderHTS::m_strPass</a></div><div class="ttdeci">std::string m_strPass</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00108">TraderHTS.h:108</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a56718c7854dd7bf459150bca88e61d67"><div class="ttname"><a href="classTraderHTS.html#a56718c7854dd7bf459150bca88e61d67">TraderHTS::sShGdh</a></div><div class="ttdeci">char sShGdh[13]</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00111">TraderHTS.h:111</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a59308d14bda8100189944d3d478c0d71"><div class="ttname"><a href="classTraderHTS.html#a59308d14bda8100189944d3d478c0d71">TraderHTS::login</a></div><div class="ttdeci">virtual int login(const char *user, const char *pass, const char *productInfo) override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00660">TraderHTS.cpp:660</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a5e2e4fc9b36d1c05962181607cc7c158"><div class="ttname"><a href="classTraderHTS.html#a5e2e4fc9b36d1c05962181607cc7c158">TraderHTS::m_hInstDD</a></div><div class="ttdeci">DllHandle m_hInstDD</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00154">TraderHTS.h:154</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a617cbba09649b85083a46b725d63c8ce"><div class="ttname"><a href="classTraderHTS.html#a617cbba09649b85083a46b725d63c8ce">TraderHTS::sSzZjzh</a></div><div class="ttdeci">char sSzZjzh[13]</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00114">TraderHTS.h:114</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a63ab4dcc1c98043bd63633723f5f4ccd"><div class="ttname"><a href="classTraderHTS.html#a63ab4dcc1c98043bd63633723f5f4ccd">TraderHTS::m_lastQryTime</a></div><div class="ttdeci">uint64_t m_lastQryTime</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00147">TraderHTS.h:147</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a640604784a25736b520e352cbdd5c323"><div class="ttname"><a href="classTraderHTS.html#a640604784a25736b520e352cbdd5c323">TraderHTS::orderAction</a></div><div class="ttdeci">virtual int orderAction(WTSEntrustAction *action) override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00902">TraderHTS.cpp:902</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a659f4ea9462f2e5eb3970bc93faa287b"><div class="ttname"><a href="classTraderHTS.html#a659f4ea9462f2e5eb3970bc93faa287b">TraderHTS::queryAccount</a></div><div class="ttdeci">virtual int queryAccount() override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00959">TraderHTS.cpp:959</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a6c67bbcb49cf6a82f70d549852a1cf49"><div class="ttname"><a href="classTraderHTS.html#a6c67bbcb49cf6a82f70d549852a1cf49">TraderHTS::m_bInQuery</a></div><div class="ttdeci">bool m_bInQuery</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00145">TraderHTS.h:145</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a8175f8af564698c13c4625f4692ab1da"><div class="ttname"><a href="classTraderHTS.html#a8175f8af564698c13c4625f4692ab1da">TraderHTS::m_orderRef</a></div><div class="ttdeci">std::atomic&lt; uint32_t &gt; m_orderRef</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00135">TraderHTS.h:135</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a82a9ae9976ddb7f714b34bc3e80e7d4b"><div class="ttname"><a href="classTraderHTS.html#a82a9ae9976ddb7f714b34bc3e80e7d4b">TraderHTS::m_thrdWorker</a></div><div class="ttdeci">StdThreadPtr m_thrdWorker</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00151">TraderHTS.h:151</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a883691dd16475fa4a7c5a42a76126df6"><div class="ttname"><a href="classTraderHTS.html#a883691dd16475fa4a7c5a42a76126df6">TraderHTS::release</a></div><div class="ttdeci">virtual void release() override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00314">TraderHTS.cpp:314</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a8d5d418921066574c4c814ca50aad878"><div class="ttname"><a href="classTraderHTS.html#a8d5d418921066574c4c814ca50aad878">TraderHTS::registerSpi</a></div><div class="ttdeci">virtual void registerSpi(ITraderSpi *listener) override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00651">TraderHTS.cpp:651</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a9125a0553c0bf2504232f61c4618b966"><div class="ttname"><a href="classTraderHTS.html#a9125a0553c0bf2504232f61c4618b966">TraderHTS::m_bUseEX</a></div><div class="ttdeci">bool m_bUseEX</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00127">TraderHTS.h:127</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a959e3d166f062f8af2d2e1c3f63af8fc"><div class="ttname"><a href="classTraderHTS.html#a959e3d166f062f8af2d2e1c3f63af8fc">TraderHTS::cusreqinfo</a></div><div class="ttdeci">ITPDK_CusReqInfo cusreqinfo</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00122">TraderHTS.h:122</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a98047aa41af826bd2eec979ea3235e52"><div class="ttname"><a href="classTraderHTS.html#a98047aa41af826bd2eec979ea3235e52">TraderHTS::TradeDataMap</a></div><div class="ttdeci">WTSHashMap&lt; std::string &gt; TradeDataMap</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00130">TraderHTS.h:130</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a9c8ebc83ddc6c3e938def2ea5404c66e"><div class="ttname"><a href="classTraderHTS.html#a9c8ebc83ddc6c3e938def2ea5404c66e">TraderHTS::m_mtxQuery</a></div><div class="ttdeci">StdUniqueMutex m_mtxQuery</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00146">TraderHTS.h:146</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a9f0dfdfbe2129815efa2f5af092e1410"><div class="ttname"><a href="classTraderHTS.html#a9f0dfdfbe2129815efa2f5af092e1410">TraderHTS::htsGetCallback</a></div><div class="ttdeci">void htsGetCallback(const char *pTime, const char *pMsg, int nType)</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00377">TraderHTS.cpp:377</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a9f1368be3f4dca9e8d3b4ae1bdce4fbb"><div class="ttname"><a href="classTraderHTS.html#a9f1368be3f4dca9e8d3b4ae1bdce4fbb">TraderHTS::QueryQue</a></div><div class="ttdeci">std::queue&lt; CommonExecuter &gt; QueryQue</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00143">TraderHTS.h:143</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_a9f396176727dacf07adb6c8d2d63c0c1"><div class="ttname"><a href="classTraderHTS.html#a9f396176727dacf07adb6c8d2d63c0c1">TraderHTS::m_strUser</a></div><div class="ttdeci">std::string m_strUser</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00107">TraderHTS.h:107</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_aa294ed670b9f14c98d1ff2856f3d15ea"><div class="ttname"><a href="classTraderHTS.html#aa294ed670b9f14c98d1ff2856f3d15ea">TraderHTS::logout</a></div><div class="ttdeci">virtual int logout() override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00799">TraderHTS.cpp:799</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_aaabf92cc9cdf2907f572bcebbdbcddc2"><div class="ttname"><a href="classTraderHTS.html#aaabf92cc9cdf2907f572bcebbdbcddc2">TraderHTS::m_strTag</a></div><div class="ttdeci">std::string m_strTag</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00120">TraderHTS.h:120</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_aac69e82a0573ed353a52711ede6691c0"><div class="ttname"><a href="classTraderHTS.html#aac69e82a0573ed353a52711ede6691c0">TraderHTS::OnRtnTrade</a></div><div class="ttdeci">void OnRtnTrade(const char *pMsg)</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00552">TraderHTS.cpp:552</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_aaca86bf194f432499e03817a33a983fb"><div class="ttname"><a href="classTraderHTS.html#aaca86bf194f432499e03817a33a983fb">TraderHTS::sShZjzh</a></div><div class="ttdeci">char sShZjzh[13]</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00113">TraderHTS.h:113</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_aad2870778a423cb6a1ed96f87d12d8a4"><div class="ttname"><a href="classTraderHTS.html#aad2870778a423cb6a1ed96f87d12d8a4">TraderHTS::triggerQuery</a></div><div class="ttdeci">void triggerQuery()</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l01380">TraderHTS.cpp:1380</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_ab7acdd74f0ccf54c59d6123e223e138d"><div class="ttname"><a href="classTraderHTS.html#ab7acdd74f0ccf54c59d6123e223e138d">TraderHTS::m_iniHelper</a></div><div class="ttdeci">IniHelper m_iniHelper</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00156">TraderHTS.h:156</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_ab825c57338d4616fe51bc48fa23093d6"><div class="ttname"><a href="classTraderHTS.html#ab825c57338d4616fe51bc48fa23093d6">TraderHTS::makeEntrustID</a></div><div class="ttdeci">virtual bool makeEntrustID(char *buffer, int length) override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00630">TraderHTS.cpp:630</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_abb31cbeb09279e3ac8ab6dbe7e050603"><div class="ttname"><a href="classTraderHTS.html#abb31cbeb09279e3ac8ab6dbe7e050603">TraderHTS::m_queQuery</a></div><div class="ttdeci">QueryQue m_queQuery</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00144">TraderHTS.h:144</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_abe234e87145bbee04175d09cb5f1ac8e"><div class="ttname"><a href="classTraderHTS.html#abe234e87145bbee04175d09cb5f1ac8e">TraderHTS::isConnected</a></div><div class="ttdeci">virtual bool isConnected() override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l01375">TraderHTS.cpp:1375</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_abe77247564f7f12dfd1b5613f08bb29b"><div class="ttname"><a href="classTraderHTS.html#abe77247564f7f12dfd1b5613f08bb29b">TraderHTS::m_strDevName</a></div><div class="ttdeci">std::string m_strDevName</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00118">TraderHTS.h:118</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_ac1d26af6abc0f8c2f040a19ec4d5e1f0"><div class="ttname"><a href="classTraderHTS.html#ac1d26af6abc0f8c2f040a19ec4d5e1f0">TraderHTS::m_uSessID</a></div><div class="ttdeci">uint64_t m_uSessID</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00139">TraderHTS.h:139</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_ac588b04e9619746b0a07a1759000b41b"><div class="ttname"><a href="classTraderHTS.html#ac588b04e9619746b0a07a1759000b41b">TraderHTS::m_strModule</a></div><div class="ttdeci">std::string m_strModule</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00153">TraderHTS.h:153</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_ac869383e7aec4109c251620d73908361"><div class="ttname"><a href="classTraderHTS.html#ac869383e7aec4109c251620d73908361">TraderHTS::m_bdMgr</a></div><div class="ttdeci">IBaseDataMgr * m_bdMgr</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00141">TraderHTS.h:141</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_aca90163f930585b1f092fb6f7169c8e3"><div class="ttname"><a href="classTraderHTS.html#aca90163f930585b1f092fb6f7169c8e3">TraderHTS::m_wrapperState</a></div><div class="ttdeci">WrapperState m_wrapperState</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00137">TraderHTS.h:137</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_acb64db1629babdec4ee60df448080079"><div class="ttname"><a href="classTraderHTS.html#acb64db1629babdec4ee60df448080079">TraderHTS::m_tradeids</a></div><div class="ttdeci">std::unordered_set&lt; std::string &gt; m_tradeids</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00132">TraderHTS.h:132</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_ad1d43d793963daea6c77125b57bc1cff"><div class="ttname"><a href="classTraderHTS.html#ad1d43d793963daea6c77125b57bc1cff">TraderHTS::m_strWtfs</a></div><div class="ttdeci">std::string m_strWtfs</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00116">TraderHTS.h:116</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_ad34f1ae01aa450b20392ef2417c82430"><div class="ttname"><a href="classTraderHTS.html#ad34f1ae01aa450b20392ef2417c82430">TraderHTS::~TraderHTS</a></div><div class="ttdeci">virtual ~TraderHTS()</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l00229">TraderHTS.cpp:229</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_ae0141ea74f5da3c98521b92e1216060a"><div class="ttname"><a href="classTraderHTS.html#ae0141ea74f5da3c98521b92e1216060a">TraderHTS::m_bASync</a></div><div class="ttdeci">bool m_bASync</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00128">TraderHTS.h:128</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_af6a3674a4135cacf0b4926b3fb0db58c"><div class="ttname"><a href="classTraderHTS.html#af6a3674a4135cacf0b4926b3fb0db58c">TraderHTS::m_asyncIO</a></div><div class="ttdeci">boost::asio::io_service m_asyncIO</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8h_source.html#l00149">TraderHTS.h:149</a></div></div>
+<div class="ttc" id="aclassTraderHTS_html_af98c8d5f526b8a334ad64f875355b14d"><div class="ttname"><a href="classTraderHTS.html#af98c8d5f526b8a334ad64f875355b14d">TraderHTS::queryPositions</a></div><div class="ttdeci">virtual int queryPositions() override</div><div class="ttdef"><b>Definition</b> <a href="TraderHTS_8cpp_source.html#l01017">TraderHTS.cpp:1017</a></div></div>
+<div class="ttc" id="aclassWTSEntrustAction_html"><div class="ttname"><a href="classWTSEntrustAction.html">WTSEntrustAction</a></div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00142">WTSTradeDef.hpp:143</a></div></div>
+<div class="ttc" id="aclassWTSEntrust_html"><div class="ttname"><a href="classWTSEntrust.html">WTSEntrust</a></div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00025">WTSTradeDef.hpp:26</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html"><div class="ttname"><a href="classWTSHashMap.html">WTSHashMap</a></div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00594">WTSCollection.hpp:595</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_a6dfa0071362986f2680867cd51fa2ea8"><div class="ttname"><a href="demo__send__order_8cpp.html#a6dfa0071362986f2680867cd51fa2ea8">user</a></div><div class="ttdeci">std::string user</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00022">main.cpp:22</a></div></div>
+<div class="ttc" id="agroup__MutexUtils_html_gaff888cdcc14f5ebb7a1a9c9f7b52846f"><div class="ttname"><a href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a></div><div class="ttdeci">std::mutex StdUniqueMutex</div><div class="ttdoc">普通互斥量类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00061">StdUtils.hpp:61</a></div></div>
+<div class="ttc" id="agroup__ThreadUtils_html_gaf9ea8e1e64d43ab034614d39d0b35776"><div class="ttname"><a href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a></div><div class="ttdeci">std::shared_ptr&lt; StdThread &gt; StdThreadPtr</div><div class="ttdoc">线程智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00042">StdUtils.hpp:42</a></div></div>
+<div class="ttc" id="astructITPDK__CusReqInfo_html"><div class="ttname"><a href="structITPDK__CusReqInfo.html">ITPDK_CusReqInfo</a></div><div class="ttdef"><b>Definition</b> <a href="secitpdk_2secitpdk__struct_8h_source.html#l00829">secitpdk_struct.h:830</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_92f55dd58ee9357beeb433684bffa515.html">TraderHTS</a></li><li class="navelem"><a class="el" href="TraderHTS_8h.html">TraderHTS.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

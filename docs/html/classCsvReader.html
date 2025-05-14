@@ -1,0 +1,947 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: CsvReader类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classCsvReader.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-methods">Private 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classCsvReader-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">CsvReader类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>CSV文件读取器类  
+ <a href="classCsvReader.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="CsvHelper_8h_source.html">CsvHelper.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:acf4c9e8c1960a2bfaa6e2fcf480f3fb9" id="r_acf4c9e8c1960a2bfaa6e2fcf480f3fb9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#acf4c9e8c1960a2bfaa6e2fcf480f3fb9">CsvReader</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *item_splitter=&quot;,&quot;)</td></tr>
+<tr class="memdesc:acf4c9e8c1960a2bfaa6e2fcf480f3fb9"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:acf4c9e8c1960a2bfaa6e2fcf480f3fb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58620553a5d28321c617b7896615acaa" id="r_a58620553a5d28321c617b7896615acaa"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#a58620553a5d28321c617b7896615acaa">load_from_file</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *filename)</td></tr>
+<tr class="memdesc:a58620553a5d28321c617b7896615acaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">从文件加载CSV数据  <br /></td></tr>
+<tr class="separator:a58620553a5d28321c617b7896615acaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae30835c13c53e72ae5353c36f888bee2" id="r_ae30835c13c53e72ae5353c36f888bee2"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#ae30835c13c53e72ae5353c36f888bee2">col_count</a> ()</td></tr>
+<tr class="memdesc:ae30835c13c53e72ae5353c36f888bee2"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取列数  <br /></td></tr>
+<tr class="separator:ae30835c13c53e72ae5353c36f888bee2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a244dad7f98c135125a44f836e300f4f0" id="r_a244dad7f98c135125a44f836e300f4f0"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#a244dad7f98c135125a44f836e300f4f0">get_int32</a> (int32_t col)</td></tr>
+<tr class="memdesc:a244dad7f98c135125a44f836e300f4f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定列的32位有符号整数值  <br /></td></tr>
+<tr class="separator:a244dad7f98c135125a44f836e300f4f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c0ae3d0ba89a1564eab92ca92995623" id="r_a8c0ae3d0ba89a1564eab92ca92995623"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#a8c0ae3d0ba89a1564eab92ca92995623">get_uint32</a> (int32_t col)</td></tr>
+<tr class="memdesc:a8c0ae3d0ba89a1564eab92ca92995623"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定列的32位无符号整数值  <br /></td></tr>
+<tr class="separator:a8c0ae3d0ba89a1564eab92ca92995623"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0c9b6c1a7958fe4dce928d236980545" id="r_ac0c9b6c1a7958fe4dce928d236980545"><td class="memItemLeft" align="right" valign="top">int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#ac0c9b6c1a7958fe4dce928d236980545">get_int64</a> (int32_t col)</td></tr>
+<tr class="memdesc:ac0c9b6c1a7958fe4dce928d236980545"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定列的64位有符号整数值  <br /></td></tr>
+<tr class="separator:ac0c9b6c1a7958fe4dce928d236980545"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34f9ee97ce4b292e63b7cfd53057a5f1" id="r_a34f9ee97ce4b292e63b7cfd53057a5f1"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#a34f9ee97ce4b292e63b7cfd53057a5f1">get_uint64</a> (int32_t col)</td></tr>
+<tr class="memdesc:a34f9ee97ce4b292e63b7cfd53057a5f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定列的64位无符号整数值  <br /></td></tr>
+<tr class="separator:a34f9ee97ce4b292e63b7cfd53057a5f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d475909d51d3a731ab87f2287531797" id="r_a3d475909d51d3a731ab87f2287531797"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#a3d475909d51d3a731ab87f2287531797">get_double</a> (int32_t col)</td></tr>
+<tr class="memdesc:a3d475909d51d3a731ab87f2287531797"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定列的双精度浮点数值  <br /></td></tr>
+<tr class="separator:a3d475909d51d3a731ab87f2287531797"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9b837943b8969ce1ad33dc894ffa137" id="r_aa9b837943b8969ce1ad33dc894ffa137"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#aa9b837943b8969ce1ad33dc894ffa137">get_string</a> (int32_t col)</td></tr>
+<tr class="memdesc:aa9b837943b8969ce1ad33dc894ffa137"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定列的字符串值  <br /></td></tr>
+<tr class="separator:aa9b837943b8969ce1ad33dc894ffa137"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2901b1258c30a4c8346523c2a76d8411" id="r_a2901b1258c30a4c8346523c2a76d8411"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#a2901b1258c30a4c8346523c2a76d8411">get_int32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *field)</td></tr>
+<tr class="memdesc:a2901b1258c30a4c8346523c2a76d8411"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据字段名获取32位有符号整数值  <br /></td></tr>
+<tr class="separator:a2901b1258c30a4c8346523c2a76d8411"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60517a115b470da483b04ca538aab5e0" id="r_a60517a115b470da483b04ca538aab5e0"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#a60517a115b470da483b04ca538aab5e0">get_uint32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *field)</td></tr>
+<tr class="memdesc:a60517a115b470da483b04ca538aab5e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据字段名获取32位无符号整数值  <br /></td></tr>
+<tr class="separator:a60517a115b470da483b04ca538aab5e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a632b8ffb9e65ae3dcf0d0fb573198e40" id="r_a632b8ffb9e65ae3dcf0d0fb573198e40"><td class="memItemLeft" align="right" valign="top">int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#a632b8ffb9e65ae3dcf0d0fb573198e40">get_int64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *field)</td></tr>
+<tr class="memdesc:a632b8ffb9e65ae3dcf0d0fb573198e40"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据字段名获取64位有符号整数值  <br /></td></tr>
+<tr class="separator:a632b8ffb9e65ae3dcf0d0fb573198e40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afed488107dbe91fc05dd1b3c14a6fd88" id="r_afed488107dbe91fc05dd1b3c14a6fd88"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#afed488107dbe91fc05dd1b3c14a6fd88">get_uint64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *field)</td></tr>
+<tr class="memdesc:afed488107dbe91fc05dd1b3c14a6fd88"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据字段名获取64位无符号整数值  <br /></td></tr>
+<tr class="separator:afed488107dbe91fc05dd1b3c14a6fd88"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a785e02733ef64a43f80c5a6c24f46b3b" id="r_a785e02733ef64a43f80c5a6c24f46b3b"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#a785e02733ef64a43f80c5a6c24f46b3b">get_double</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *field)</td></tr>
+<tr class="memdesc:a785e02733ef64a43f80c5a6c24f46b3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据字段名获取双精度浮点数值  <br /></td></tr>
+<tr class="separator:a785e02733ef64a43f80c5a6c24f46b3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89d855b2e00bcecf631b18f116f26176" id="r_a89d855b2e00bcecf631b18f116f26176"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#a89d855b2e00bcecf631b18f116f26176">get_string</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *field)</td></tr>
+<tr class="memdesc:a89d855b2e00bcecf631b18f116f26176"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据字段名获取字符串值  <br /></td></tr>
+<tr class="separator:a89d855b2e00bcecf631b18f116f26176"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4b43d7a3aaa3e9f4c0d8d8a9a9c4af4" id="r_ae4b43d7a3aaa3e9f4c0d8d8a9a9c4af4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#ae4b43d7a3aaa3e9f4c0d8d8a9a9c4af4">next_row</a> ()</td></tr>
+<tr class="memdesc:ae4b43d7a3aaa3e9f4c0d8d8a9a9c4af4"><td class="mdescLeft">&#160;</td><td class="mdescRight">读取下一行数据  <br /></td></tr>
+<tr class="separator:ae4b43d7a3aaa3e9f4c0d8d8a9a9c4af4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a206a8e7a7b02441b8bde1ebc1cbc4699" id="r_a206a8e7a7b02441b8bde1ebc1cbc4699"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#a206a8e7a7b02441b8bde1ebc1cbc4699">fields</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a206a8e7a7b02441b8bde1ebc1cbc4699"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取所有字段名  <br /></td></tr>
+<tr class="separator:a206a8e7a7b02441b8bde1ebc1cbc4699"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 成员函数</h2></td></tr>
+<tr class="memitem:a7ad65b4b670aaece2f65779e7d87a0e4" id="r_a7ad65b4b670aaece2f65779e7d87a0e4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#a7ad65b4b670aaece2f65779e7d87a0e4">check_cell</a> (int32_t col)</td></tr>
+<tr class="memdesc:a7ad65b4b670aaece2f65779e7d87a0e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">检查列索引是否有效  <br /></td></tr>
+<tr class="separator:a7ad65b4b670aaece2f65779e7d87a0e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2f0af64bad0875c8fe92c47b4a1c132" id="r_ab2f0af64bad0875c8fe92c47b4a1c132"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#ab2f0af64bad0875c8fe92c47b4a1c132">get_col_by_filed</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *field)</td></tr>
+<tr class="memdesc:ab2f0af64bad0875c8fe92c47b4a1c132"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据字段名获取列索引  <br /></td></tr>
+<tr class="separator:ab2f0af64bad0875c8fe92c47b4a1c132"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:aa2d90e05c1b56ffae8862b10c4b9c21b" id="r_aa2d90e05c1b56ffae8862b10c4b9c21b"><td class="memItemLeft" align="right" valign="top">std::ifstream&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#aa2d90e05c1b56ffae8862b10c4b9c21b">_ifs</a></td></tr>
+<tr class="memdesc:aa2d90e05c1b56ffae8862b10c4b9c21b"><td class="mdescLeft">&#160;</td><td class="mdescRight">文件输入流  <br /></td></tr>
+<tr class="separator:aa2d90e05c1b56ffae8862b10c4b9c21b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ec8017ff560c2208d9ff21953de9a8d" id="r_a0ec8017ff560c2208d9ff21953de9a8d"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#a0ec8017ff560c2208d9ff21953de9a8d">_buffer</a> [1024]</td></tr>
+<tr class="memdesc:a0ec8017ff560c2208d9ff21953de9a8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">行缓冲区  <br /></td></tr>
+<tr class="separator:a0ec8017ff560c2208d9ff21953de9a8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac58b57a44a9c0ad9154bde12c194427d" id="r_ac58b57a44a9c0ad9154bde12c194427d"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#ac58b57a44a9c0ad9154bde12c194427d">_item_splitter</a></td></tr>
+<tr class="memdesc:ac58b57a44a9c0ad9154bde12c194427d"><td class="mdescLeft">&#160;</td><td class="mdescRight">列分隔符  <br /></td></tr>
+<tr class="separator:ac58b57a44a9c0ad9154bde12c194427d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4e171df7a32c587fe5e7afb0ad408fc" id="r_ac4e171df7a32c587fe5e7afb0ad408fc"><td class="memItemLeft" align="right" valign="top">std::unordered_map&lt; std::string, int32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#ac4e171df7a32c587fe5e7afb0ad408fc">_fields_map</a></td></tr>
+<tr class="memdesc:ac4e171df7a32c587fe5e7afb0ad408fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">字段名到列索引的映射  <br /></td></tr>
+<tr class="separator:ac4e171df7a32c587fe5e7afb0ad408fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f285c1406064d2f2f5541a6fa61fbea" id="r_a7f285c1406064d2f2f5541a6fa61fbea"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsvReader.html#a7f285c1406064d2f2f5541a6fa61fbea">_current_cells</a></td></tr>
+<tr class="memdesc:a7f285c1406064d2f2f5541a6fa61fbea"><td class="mdescLeft">&#160;</td><td class="mdescRight">当前行的单元格数据  <br /></td></tr>
+<tr class="separator:a7f285c1406064d2f2f5541a6fa61fbea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>CSV文件读取器类 </p>
+<p>该类提供了CSV文件的读取、解析和数据访问功能，支持按列名或列索引获取不同类型的数据 </p>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8h_source.html">CsvHelper.h</a> 第 <a class="el" href="CsvHelper_8h_source.html#l00022">22</a> 行定义.</p>
+</div><h2 class="groupheader">构造及析构函数说明</h2>
+<a id="acf4c9e8c1960a2bfaa6e2fcf480f3fb9" name="acf4c9e8c1960a2bfaa6e2fcf480f3fb9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf4c9e8c1960a2bfaa6e2fcf480f3fb9">&#9670;&#160;</a></span>CsvReader()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CsvReader::CsvReader </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>item_splitter</em> = <code>&quot;,&quot;</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>CsvReader类构造函数</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">item_splitter</td><td>列分隔符，默认为逗号</td></tr>
+    <tr><td class="paramname">item_splitter</td><td>列分隔符，默认为逗号</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>初始化CSV读取器，设置列分隔符 </p>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00021">21</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a7ad65b4b670aaece2f65779e7d87a0e4" name="a7ad65b4b670aaece2f65779e7d87a0e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ad65b4b670aaece2f65779e7d87a0e4">&#9670;&#160;</a></span>check_cell()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CsvReader::check_cell </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>col</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>检查列索引是否有效 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">col</td><td>列索引 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>列索引是否有效</dd></dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">col</td><td>列索引 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>列索引是否有效</dd></dl>
+<p>该方法检查列索引是否在有效范围内，包括检查是否为INT_MAX（表示字段不存在） 以及是否在0到字段数量之间 </p>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00261">261</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae30835c13c53e72ae5353c36f888bee2" name="ae30835c13c53e72ae5353c36f888bee2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae30835c13c53e72ae5353c36f888bee2">&#9670;&#160;</a></span>col_count()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t CsvReader::col_count </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取列数 </p>
+<dl class="section return"><dt>返回</dt><dd>当前CSV文件的列数 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8h_source.html">CsvHelper.h</a> 第 <a class="el" href="CsvHelper_8h_source.html#l00046">46</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a206a8e7a7b02441b8bde1ebc1cbc4699" name="a206a8e7a7b02441b8bde1ebc1cbc4699"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a206a8e7a7b02441b8bde1ebc1cbc4699">&#9670;&#160;</a></span>fields()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * CsvReader::fields </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取所有字段名 </p>
+<dl class="section return"><dt>返回</dt><dd>逗号分隔的字段名字符串</dd></dl>
+<p>该方法返回CSV文件的所有字段名，以逗号分隔 </p>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8h_source.html">CsvHelper.h</a> 第 <a class="el" href="CsvHelper_8h_source.html#l00146">146</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab2f0af64bad0875c8fe92c47b4a1c132" name="ab2f0af64bad0875c8fe92c47b4a1c132"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2f0af64bad0875c8fe92c47b4a1c132">&#9670;&#160;</a></span>get_col_by_filed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t CsvReader::get_col_by_filed </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>field</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>根据字段名获取列索引 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">field</td><td>字段名 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>列索引，如果字段不存在则返回INT_MAX</dd></dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">field</td><td>字段名 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>列索引，如果字段不存在则返回INT_MAX</dd></dl>
+<p>该方法在字段映射表中查找指定字段名，返回对应的列索引 如果字段不存在，则返回INT_MAX作为特殊标记 </p>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00280">280</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a785e02733ef64a43f80c5a6c24f46b3b" name="a785e02733ef64a43f80c5a6c24f46b3b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a785e02733ef64a43f80c5a6c24f46b3b">&#9670;&#160;</a></span>get_double() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double CsvReader::get_double </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>field</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>根据字段名获取双精度浮点数值 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">field</td><td>字段名 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>浮点数值，如果字段不存在则返回0 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00236">236</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3d475909d51d3a731ab87f2287531797" name="a3d475909d51d3a731ab87f2287531797"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d475909d51d3a731ab87f2287531797">&#9670;&#160;</a></span>get_double() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double CsvReader::get_double </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>col</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取指定列的双精度浮点数值 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">col</td><td>列索引 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>浮点数值，如果列不存在则返回0 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00166">166</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2901b1258c30a4c8346523c2a76d8411" name="a2901b1258c30a4c8346523c2a76d8411"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2901b1258c30a4c8346523c2a76d8411">&#9670;&#160;</a></span>get_int32() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t CsvReader::get_int32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>field</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>根据字段名获取32位有符号整数值 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">field</td><td>字段名 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>整数值，如果字段不存在则返回0 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00192">192</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a244dad7f98c135125a44f836e300f4f0" name="a244dad7f98c135125a44f836e300f4f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a244dad7f98c135125a44f836e300f4f0">&#9670;&#160;</a></span>get_int32() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t CsvReader::get_int32 </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>col</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取指定列的32位有符号整数值 </p>
+<p>获取指定列的整型值</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">col</td><td>列索引 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>整数值，如果列不存在则返回0</dd></dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">col</td><td>列索引 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>整型值</dd></dl>
+<p>该方法检查指定列是否存在，然后将列值转换为整型返回 </p>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00114">114</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a632b8ffb9e65ae3dcf0d0fb573198e40" name="a632b8ffb9e65ae3dcf0d0fb573198e40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a632b8ffb9e65ae3dcf0d0fb573198e40">&#9670;&#160;</a></span>get_int64() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int64_t CsvReader::get_int64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>field</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>根据字段名获取64位有符号整数值 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">field</td><td>字段名 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>整数值，如果字段不存在则返回0 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00214">214</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac0c9b6c1a7958fe4dce928d236980545" name="ac0c9b6c1a7958fe4dce928d236980545"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0c9b6c1a7958fe4dce928d236980545">&#9670;&#160;</a></span>get_int64() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int64_t CsvReader::get_int64 </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>col</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取指定列的64位有符号整数值 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">col</td><td>列索引 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>整数值，如果列不存在则返回0 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00140">140</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a89d855b2e00bcecf631b18f116f26176" name="a89d855b2e00bcecf631b18f116f26176"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89d855b2e00bcecf631b18f116f26176">&#9670;&#160;</a></span>get_string() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * CsvReader::get_string </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>field</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>根据字段名获取字符串值 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">field</td><td>字段名 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>字符串值，如果字段不存在则返回空字符串 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00247">247</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa9b837943b8969ce1ad33dc894ffa137" name="aa9b837943b8969ce1ad33dc894ffa137"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9b837943b8969ce1ad33dc894ffa137">&#9670;&#160;</a></span>get_string() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * CsvReader::get_string </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>col</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取指定列的字符串值 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">col</td><td>列索引 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>字符串值，如果列不存在则返回空字符串 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00179">179</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a60517a115b470da483b04ca538aab5e0" name="a60517a115b470da483b04ca538aab5e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60517a115b470da483b04ca538aab5e0">&#9670;&#160;</a></span>get_uint32() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t CsvReader::get_uint32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>field</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>根据字段名获取32位无符号整数值 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">field</td><td>字段名 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>无符号整数值，如果字段不存在则返回0 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00203">203</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8c0ae3d0ba89a1564eab92ca92995623" name="a8c0ae3d0ba89a1564eab92ca92995623"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c0ae3d0ba89a1564eab92ca92995623">&#9670;&#160;</a></span>get_uint32() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t CsvReader::get_uint32 </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>col</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取指定列的32位无符号整数值 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">col</td><td>列索引 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>无符号整数值，如果列不存在则返回0 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00127">127</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afed488107dbe91fc05dd1b3c14a6fd88" name="afed488107dbe91fc05dd1b3c14a6fd88"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afed488107dbe91fc05dd1b3c14a6fd88">&#9670;&#160;</a></span>get_uint64() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t CsvReader::get_uint64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>field</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>根据字段名获取64位无符号整数值 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">field</td><td>字段名 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>无符号整数值，如果字段不存在则返回0 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00225">225</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a34f9ee97ce4b292e63b7cfd53057a5f1" name="a34f9ee97ce4b292e63b7cfd53057a5f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34f9ee97ce4b292e63b7cfd53057a5f1">&#9670;&#160;</a></span>get_uint64() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t CsvReader::get_uint64 </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>col</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取指定列的64位无符号整数值 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">col</td><td>列索引 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>无符号整数值，如果列不存在则返回0 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00153">153</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a58620553a5d28321c617b7896615acaa" name="a58620553a5d28321c617b7896615acaa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58620553a5d28321c617b7896615acaa">&#9670;&#160;</a></span>load_from_file()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CsvReader::load_from_file </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>filename</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>从文件加载CSV数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>文件路径 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>加载是否成功</dd></dl>
+<p>该方法会读取CSV文件的第一行作为字段名，并构建字段名到列索引的映射</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>文件路径 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>加载是否成功</dd></dl>
+<p>该方法首先检查文件是否存在，然后打开文件并读取第一行作为字段名。 处理过程包括：</p><ol type="1">
+<li>检测并跳过UTF-8 BOM标记</li>
+<li>清除特殊字符</li>
+<li>将字段名转为小写</li>
+<li>分割并存储字段名到列索引的映射 </li>
+</ol>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00039">39</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae4b43d7a3aaa3e9f4c0d8d8a9a9c4af4" name="ae4b43d7a3aaa3e9f4c0d8d8a9a9c4af4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4b43d7a3aaa3e9f4c0d8d8a9a9c4af4">&#9670;&#160;</a></span>next_row()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CsvReader::next_row </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>读取下一行数据 </p>
+<dl class="section return"><dt>返回</dt><dd>是否成功读取到下一行数据</dd></dl>
+<p>该方法读取CSV文件的下一行数据，并将其解析为单元格数组</p>
+<dl class="section return"><dt>返回</dt><dd>是否成功读取到下一行数据</dd></dl>
+<p>该方法读取CSV文件的下一行数据，跳过空行，并将非空行解析为单元格数组 </p>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a> 第 <a class="el" href="CsvHelper_8cpp_source.html#l00086">86</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a0ec8017ff560c2208d9ff21953de9a8d" name="a0ec8017ff560c2208d9ff21953de9a8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ec8017ff560c2208d9ff21953de9a8d">&#9670;&#160;</a></span>_buffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">char CsvReader::_buffer[1024]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>行缓冲区 </p>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8h_source.html">CsvHelper.h</a> 第 <a class="el" href="CsvHelper_8h_source.html#l00179">179</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7f285c1406064d2f2f5541a6fa61fbea" name="a7f285c1406064d2f2f5541a6fa61fbea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f285c1406064d2f2f5541a6fa61fbea">&#9670;&#160;</a></span>_current_cells</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::string&gt; CsvReader::_current_cells</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>当前行的单元格数据 </p>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8h_source.html">CsvHelper.h</a> 第 <a class="el" href="CsvHelper_8h_source.html#l00183">183</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac4e171df7a32c587fe5e7afb0ad408fc" name="ac4e171df7a32c587fe5e7afb0ad408fc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4e171df7a32c587fe5e7afb0ad408fc">&#9670;&#160;</a></span>_fields_map</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::unordered_map&lt;std::string, int32_t&gt; CsvReader::_fields_map</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>字段名到列索引的映射 </p>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8h_source.html">CsvHelper.h</a> 第 <a class="el" href="CsvHelper_8h_source.html#l00182">182</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa2d90e05c1b56ffae8862b10c4b9c21b" name="aa2d90e05c1b56ffae8862b10c4b9c21b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2d90e05c1b56ffae8862b10c4b9c21b">&#9670;&#160;</a></span>_ifs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::ifstream CsvReader::_ifs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>文件输入流 </p>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8h_source.html">CsvHelper.h</a> 第 <a class="el" href="CsvHelper_8h_source.html#l00178">178</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac58b57a44a9c0ad9154bde12c194427d" name="ac58b57a44a9c0ad9154bde12c194427d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac58b57a44a9c0ad9154bde12c194427d">&#9670;&#160;</a></span>_item_splitter</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string CsvReader::_item_splitter</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>列分隔符 </p>
+
+<p class="definition">在文件 <a class="el" href="CsvHelper_8h_source.html">CsvHelper.h</a> 第 <a class="el" href="CsvHelper_8h_source.html#l00180">180</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WTSTools/<a class="el" href="CsvHelper_8h_source.html">CsvHelper.h</a></li>
+<li>src/WTSTools/<a class="el" href="CsvHelper_8cpp_source.html">CsvHelper.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classCsvReader.html">CsvReader</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

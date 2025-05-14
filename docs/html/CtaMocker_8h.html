@@ -1,0 +1,371 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtBtCore/CtaMocker.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('CtaMocker_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">CtaMocker.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>CTA策略回测模拟器头文件  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &lt;sstream&gt;</code><br />
+<code>#include &lt;atomic&gt;</code><br />
+<code>#include &lt;unordered_map&gt;</code><br />
+<code>#include &quot;<a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="FasterDefs_8h_source.html">../Includes/FasterDefs.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="ICtaStraCtx_8h_source.html">../Includes/ICtaStraCtx.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="CtaStrategyDefs_8h_source.html">../Includes/CtaStrategyDefs.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSDataDef_8hpp_source.html">../Includes/WTSDataDef.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSCollection_8hpp_source.html">../Includes/WTSCollection.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="DLLHelper_8hpp_source.html">../Share/DLLHelper.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="StdUtils_8hpp_source.html">../Share/StdUtils.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="fmtlib_8h_source.html">../Share/fmtlib.h</a>&quot;</code><br />
+</div>
+<p><a href="CtaMocker_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__CondEntrust.html">_CondEntrust</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">条件委托结构体  <a href="struct__CondEntrust.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCtaMocker.html">CtaMocker</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">CTA策略回测模拟器类  <a href="classCtaMocker.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structCtaMocker_1_1__KlineTag.html">CtaMocker::_KlineTag</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">K线标记结构体  <a href="structCtaMocker_1_1__KlineTag.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structCtaMocker_1_1__DetailInfo.html">CtaMocker::_DetailInfo</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易详情结构体  <a href="structCtaMocker_1_1__DetailInfo.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structCtaMocker_1_1__PosInfo.html">CtaMocker::_PosInfo</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">持仓信息结构体  <a href="structCtaMocker_1_1__PosInfo.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structCtaMocker_1_1__SigInfo.html">CtaMocker::_SigInfo</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">信号信息结构体  <a href="structCtaMocker_1_1__SigInfo.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structCtaMocker_1_1__StraFundInfo.html">CtaMocker::_StraFundInfo</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">策略资金信息结构体  <a href="structCtaMocker_1_1__StraFundInfo.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structCtaMocker_1_1__StraFactInfo.html">CtaMocker::_StraFactInfo</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">策略工厂信息结构体  <a href="structCtaMocker_1_1__StraFactInfo.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structCtaMocker_1_1__ChartLine.html">CtaMocker::_ChartLine</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">图表线结构体  <a href="structCtaMocker_1_1__ChartLine.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structCtaMocker_1_1__ChartIndex.html">CtaMocker::_ChartIndex</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">图表指标结构体  <a href="structCtaMocker_1_1__ChartIndex.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:ab0d539e6301ebfe19190a670b489e06c" id="r_ab0d539e6301ebfe19190a670b489e06c"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__CondEntrust.html">_CondEntrust</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CtaMocker_8h.html#ab0d539e6301ebfe19190a670b489e06c">CondEntrust</a></td></tr>
+<tr class="memdesc:ab0d539e6301ebfe19190a670b489e06c"><td class="mdescLeft">&#160;</td><td class="mdescRight">条件委托结构体  <br /></td></tr>
+<tr class="separator:ab0d539e6301ebfe19190a670b489e06c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a554586e84eb02c2dd968b6cbb4af59ef" id="r_a554586e84eb02c2dd968b6cbb4af59ef"><td class="memItemLeft" align="right" valign="top">typedef std::vector&lt; <a class="el" href="CtaMocker_8h.html#ab0d539e6301ebfe19190a670b489e06c">CondEntrust</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CtaMocker_8h.html#a554586e84eb02c2dd968b6cbb4af59ef">CondList</a></td></tr>
+<tr class="memdesc:a554586e84eb02c2dd968b6cbb4af59ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">条件委托列表类型  <br /></td></tr>
+<tr class="separator:a554586e84eb02c2dd968b6cbb4af59ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f907939e222c805bb69004f7be6e6c6" id="r_a4f907939e222c805bb69004f7be6e6c6"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt; std::string, <a class="el" href="CtaMocker_8h.html#a554586e84eb02c2dd968b6cbb4af59ef">CondList</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CtaMocker_8h.html#a4f907939e222c805bb69004f7be6e6c6">CondEntrustMap</a></td></tr>
+<tr class="memdesc:a4f907939e222c805bb69004f7be6e6c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">条件委托映射类型  <br /></td></tr>
+<tr class="separator:a4f907939e222c805bb69004f7be6e6c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a9e1fc31194100ab43bbad77a2f5c12b3" id="r_a9e1fc31194100ab43bbad77a2f5c12b3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CtaMocker_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a></td></tr>
+<tr class="separator:a9e1fc31194100ab43bbad77a2f5c12b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adffdbd2f8c6ed15a22086ab266c67b27" id="r_adffdbd2f8c6ed15a22086ab266c67b27"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CtaMocker_8h.html#adffdbd2f8c6ed15a22086ab266c67b27">COND_ACTION_OL</a> = 0</td></tr>
+<tr class="memdesc:adffdbd2f8c6ed15a22086ab266c67b27"><td class="mdescLeft">&#160;</td><td class="mdescRight">条件单动作类型常量定义  <br /></td></tr>
+<tr class="separator:adffdbd2f8c6ed15a22086ab266c67b27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a732820d2144e26576b23e4be45729d20" id="r_a732820d2144e26576b23e4be45729d20"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CtaMocker_8h.html#a732820d2144e26576b23e4be45729d20">COND_ACTION_CL</a> = 1</td></tr>
+<tr class="memdesc:a732820d2144e26576b23e4be45729d20"><td class="mdescLeft">&#160;</td><td class="mdescRight">平多，平掉多头仓位  <br /></td></tr>
+<tr class="separator:a732820d2144e26576b23e4be45729d20"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65549870af9f1b7db63a543d03ae0a1f" id="r_a65549870af9f1b7db63a543d03ae0a1f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CtaMocker_8h.html#a65549870af9f1b7db63a543d03ae0a1f">COND_ACTION_OS</a> = 2</td></tr>
+<tr class="memdesc:a65549870af9f1b7db63a543d03ae0a1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">开空，建立空头仓位  <br /></td></tr>
+<tr class="separator:a65549870af9f1b7db63a543d03ae0a1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d09d82c6c905daa455e71beacd29bc7" id="r_a7d09d82c6c905daa455e71beacd29bc7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CtaMocker_8h.html#a7d09d82c6c905daa455e71beacd29bc7">COND_ACTION_CS</a> = 3</td></tr>
+<tr class="memdesc:a7d09d82c6c905daa455e71beacd29bc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">平空，平掉空头仓位  <br /></td></tr>
+<tr class="separator:a7d09d82c6c905daa455e71beacd29bc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d1a8c2e64df5c1ab3be24e130694e54" id="r_a0d1a8c2e64df5c1ab3be24e130694e54"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CtaMocker_8h.html#a0d1a8c2e64df5c1ab3be24e130694e54">COND_ACTION_SP</a> = 4</td></tr>
+<tr class="memdesc:a0d1a8c2e64df5c1ab3be24e130694e54"><td class="mdescLeft">&#160;</td><td class="mdescRight">直接设置仓位，不区分多空  <br /></td></tr>
+<tr class="separator:a0d1a8c2e64df5c1ab3be24e130694e54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>CTA策略回测模拟器头文件 </p>
+<p>\project WonderTrader</p>
+<dl class="section author"><dt>作者</dt><dd>Wesley </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2020/03/30</dd></dl>
+<p>该文件定义了CTA策略回测模拟器，用于模拟策略在历史数据上的运行过程。 模拟器实现了ICtaStraCtx和IDataSink接口，可以处理历史数据并执行策略逻辑。 通过该模拟器，可以对CTA策略进行回测、调试和优化。 </p>
+
+<p class="definition">在文件 <a class="el" href="CtaMocker_8h_source.html">CtaMocker.h</a> 中定义.</p>
+</div><h2 class="groupheader">类型定义说明</h2>
+<a id="ab0d539e6301ebfe19190a670b489e06c" name="ab0d539e6301ebfe19190a670b489e06c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0d539e6301ebfe19190a670b489e06c">&#9670;&#160;</a></span>CondEntrust</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct__CondEntrust.html">_CondEntrust</a> <a class="el" href="CtaMocker_8h.html#ab0d539e6301ebfe19190a670b489e06c">CondEntrust</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>条件委托结构体 </p>
+<p>定义了条件委托的各个属性，用于实现条件单功能 条件单是指当满足特定条件时触发的交易指令 </p>
+
+</div>
+</div>
+<a id="a4f907939e222c805bb69004f7be6e6c6" name="a4f907939e222c805bb69004f7be6e6c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f907939e222c805bb69004f7be6e6c6">&#9670;&#160;</a></span>CondEntrustMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt;std::string, <a class="el" href="CtaMocker_8h.html#a554586e84eb02c2dd968b6cbb4af59ef">CondList</a>&gt; <a class="el" href="CtaMocker_8h.html#a4f907939e222c805bb69004f7be6e6c6">CondEntrustMap</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>条件委托映射类型 </p>
+<p>定义了从合约代码到条件委托列表的映射，用于按合约管理条件委托</p>
+<p>条件委托映射类型</p>
+<p>定义了从合约代码到条件委托列表的映射，用于按合约管理条件委托 </p>
+
+<p class="definition">在文件 <a class="el" href="CtaMocker_8h_source.html">CtaMocker.h</a> 第 <a class="el" href="CtaMocker_8h_source.html#l00099">99</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a554586e84eb02c2dd968b6cbb4af59ef" name="a554586e84eb02c2dd968b6cbb4af59ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a554586e84eb02c2dd968b6cbb4af59ef">&#9670;&#160;</a></span>CondList</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::vector&lt;<a class="el" href="CtaMocker_8h.html#ab0d539e6301ebfe19190a670b489e06c">CondEntrust</a>&gt; <a class="el" href="CtaMocker_8h.html#a554586e84eb02c2dd968b6cbb4af59ef">CondList</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>条件委托列表类型 </p>
+<p>定义了条件委托的列表类型，用于存储多个条件委托</p>
+<p>条件委托列表类型</p>
+<p>定义了条件委托的列表类型，用于存储多个条件委托 </p>
+
+<p class="definition">在文件 <a class="el" href="CtaMocker_8h_source.html">CtaMocker.h</a> 第 <a class="el" href="CtaMocker_8h_source.html#l00089">89</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a732820d2144e26576b23e4be45729d20" name="a732820d2144e26576b23e4be45729d20"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a732820d2144e26576b23e4be45729d20">&#9670;&#160;</a></span>COND_ACTION_CL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char COND_ACTION_CL = 1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>平多，平掉多头仓位 </p>
+
+<p class="definition">在文件 <a class="el" href="CtaMocker_8h_source.html">CtaMocker.h</a> 第 <a class="el" href="CtaMocker_8h_source.html#l00047">47</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7d09d82c6c905daa455e71beacd29bc7" name="a7d09d82c6c905daa455e71beacd29bc7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d09d82c6c905daa455e71beacd29bc7">&#9670;&#160;</a></span>COND_ACTION_CS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char COND_ACTION_CS = 3</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>平空，平掉空头仓位 </p>
+
+<p class="definition">在文件 <a class="el" href="CtaMocker_8h_source.html">CtaMocker.h</a> 第 <a class="el" href="CtaMocker_8h_source.html#l00049">49</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adffdbd2f8c6ed15a22086ab266c67b27" name="adffdbd2f8c6ed15a22086ab266c67b27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adffdbd2f8c6ed15a22086ab266c67b27">&#9670;&#160;</a></span>COND_ACTION_OL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char COND_ACTION_OL = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>条件单动作类型常量定义 </p>
+<p>定义了各种条件单的动作类型，用于标识不同的交易操作</p>
+<p>条件单动作类型常量定义</p>
+<p>定义了各种条件单的动作类型，用于标识不同的交易操作 开多，建立多头仓位 </p>
+
+<p class="definition">在文件 <a class="el" href="CtaMocker_8h_source.html">CtaMocker.h</a> 第 <a class="el" href="CtaMocker_8h_source.html#l00046">46</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a65549870af9f1b7db63a543d03ae0a1f" name="a65549870af9f1b7db63a543d03ae0a1f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65549870af9f1b7db63a543d03ae0a1f">&#9670;&#160;</a></span>COND_ACTION_OS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char COND_ACTION_OS = 2</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>开空，建立空头仓位 </p>
+
+<p class="definition">在文件 <a class="el" href="CtaMocker_8h_source.html">CtaMocker.h</a> 第 <a class="el" href="CtaMocker_8h_source.html#l00048">48</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0d1a8c2e64df5c1ab3be24e130694e54" name="a0d1a8c2e64df5c1ab3be24e130694e54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d1a8c2e64df5c1ab3be24e130694e54">&#9670;&#160;</a></span>COND_ACTION_SP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char COND_ACTION_SP = 4</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>直接设置仓位，不区分多空 </p>
+
+<p class="definition">在文件 <a class="el" href="CtaMocker_8h_source.html">CtaMocker.h</a> 第 <a class="el" href="CtaMocker_8h_source.html#l00050">50</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9e1fc31194100ab43bbad77a2f5c12b3" name="a9e1fc31194100ab43bbad77a2f5c12b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e1fc31194100ab43bbad77a2f5c12b3">&#9670;&#160;</a></span>USING_NS_WTP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a> USING_NS_WTP</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="CtaMocker_8h_source.html">CtaMocker.h</a> 第 <a class="el" href="CtaMocker_8h_source.html#l00033">33</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_e0a6b04728b7bc818baf88501da85ff3.html">WtBtCore</a></li><li class="navelem"><a class="el" href="CtaMocker_8h.html">CtaMocker.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

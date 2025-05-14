@@ -1,0 +1,1886 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/zdict.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('zdict_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">zdict.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;stdlib.h&gt;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;stdio.h&gt;</code><br />
+<code>#include &lt;time.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="mem_8h_source.html">mem.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="fse_8h_source.html">fse.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="huf_8h_source.html">huf.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="xxhash_8h_source.html">xxhash.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="divsufsort_8h_source.html">divsufsort.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="zdict_8h_source.html">zdict.h</a>&quot;</code><br />
+</div>
+<p><a href="zdict_8c_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structdictItem.html">dictItem</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structEStats__ress__t.html">EStats_ress_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structoffsetCount__t.html">offsetCount_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:ac57133343d156b44dae36faf1c45cc3e" id="r_ac57133343d156b44dae36faf1c45cc3e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#ac57133343d156b44dae36faf1c45cc3e">MINRATIO</a>&#160;&#160;&#160;4   /* minimum nb of apparition to be selected in dictionary */</td></tr>
+<tr class="separator:ac57133343d156b44dae36faf1c45cc3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ee2f9f4f9cae25be0d2d3978745ca18" id="r_a0ee2f9f4f9cae25be0d2d3978745ca18"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a0ee2f9f4f9cae25be0d2d3978745ca18">ZDICT_MAX_SAMPLES_SIZE</a>&#160;&#160;&#160;(2000U &lt;&lt; 20)</td></tr>
+<tr class="separator:a0ee2f9f4f9cae25be0d2d3978745ca18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af78bb502af0545c63e8669ee1bc7bc33" id="r_af78bb502af0545c63e8669ee1bc7bc33"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#af78bb502af0545c63e8669ee1bc7bc33">ZDICT_MIN_SAMPLES_SIZE</a>&#160;&#160;&#160;(ZDICT_CONTENTSIZE_MIN * <a class="el" href="zdict_8c.html#ac57133343d156b44dae36faf1c45cc3e">MINRATIO</a>)</td></tr>
+<tr class="separator:af78bb502af0545c63e8669ee1bc7bc33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44d01ba0a136b8e27ad362f5a823d14e" id="r_a44d01ba0a136b8e27ad362f5a823d14e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a44d01ba0a136b8e27ad362f5a823d14e">_FILE_OFFSET_BITS</a>&#160;&#160;&#160;64</td></tr>
+<tr class="separator:a44d01ba0a136b8e27ad362f5a823d14e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e6d20c5075b52b0f0bc4858d51c8591" id="r_a0e6d20c5075b52b0f0bc4858d51c8591"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a0e6d20c5075b52b0f0bc4858d51c8591">_LARGEFILE64_SOURCE</a></td></tr>
+<tr class="separator:a0e6d20c5075b52b0f0bc4858d51c8591"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7691fd75a0d8bc9d2b1544f0df8e381c" id="r_a7691fd75a0d8bc9d2b1544f0df8e381c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a7691fd75a0d8bc9d2b1544f0df8e381c">HUF_STATIC_LINKING_ONLY</a></td></tr>
+<tr class="separator:a7691fd75a0d8bc9d2b1544f0df8e381c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67a585a357b2e71e8ece2ee1ee510b7f" id="r_a67a585a357b2e71e8ece2ee1ee510b7f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a67a585a357b2e71e8ece2ee1ee510b7f">ZDICT_STATIC_LINKING_ONLY</a></td></tr>
+<tr class="separator:a67a585a357b2e71e8ece2ee1ee510b7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1841fd1a462d245d8c73dce55e2f45da" id="r_a1841fd1a462d245d8c73dce55e2f45da"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a1841fd1a462d245d8c73dce55e2f45da">KB</a>&#160;&#160;&#160;*(1 &lt;&lt;10)</td></tr>
+<tr class="separator:a1841fd1a462d245d8c73dce55e2f45da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6b38d492364d98453284934ed7caee9" id="r_aa6b38d492364d98453284934ed7caee9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#aa6b38d492364d98453284934ed7caee9">MB</a>&#160;&#160;&#160;*(1 &lt;&lt;20)</td></tr>
+<tr class="separator:aa6b38d492364d98453284934ed7caee9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44172ac633c517cb4c9e278cef36b000" id="r_a44172ac633c517cb4c9e278cef36b000"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a44172ac633c517cb4c9e278cef36b000">GB</a>&#160;&#160;&#160;*(1U&lt;&lt;30)</td></tr>
+<tr class="separator:a44172ac633c517cb4c9e278cef36b000"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe5b414fec54a38ce919b10c98f271df" id="r_afe5b414fec54a38ce919b10c98f271df"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#afe5b414fec54a38ce919b10c98f271df">DICTLISTSIZE_DEFAULT</a>&#160;&#160;&#160;10000</td></tr>
+<tr class="separator:afe5b414fec54a38ce919b10c98f271df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9233bbf304cd8b4c4aa31e1670a45a2f" id="r_a9233bbf304cd8b4c4aa31e1670a45a2f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a9233bbf304cd8b4c4aa31e1670a45a2f">NOISELENGTH</a>&#160;&#160;&#160;32</td></tr>
+<tr class="separator:a9233bbf304cd8b4c4aa31e1670a45a2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a5fbd7a78051c2134b21324e5c74bdc" id="r_a5a5fbd7a78051c2134b21324e5c74bdc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a5a5fbd7a78051c2134b21324e5c74bdc">DISPLAY</a>(...)&#160;&#160;&#160;{ fprintf(stderr, __VA_ARGS__); fflush( stderr ); }</td></tr>
+<tr class="separator:a5a5fbd7a78051c2134b21324e5c74bdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9200da68a37a9ae33332f82599d00e67" id="r_a9200da68a37a9ae33332f82599d00e67"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a9200da68a37a9ae33332f82599d00e67">DISPLAYLEVEL</a>(l, ...)&#160;&#160;&#160;if (notificationLevel&gt;=l) { <a class="el" href="cover_8c.html#a5a5fbd7a78051c2134b21324e5c74bdc">DISPLAY</a>(__VA_ARGS__); }    /* 0 : no display;   1: errors;   2: default;  3: details;  4: debug */</td></tr>
+<tr class="separator:a9200da68a37a9ae33332f82599d00e67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7894d78df8da46cb23d8441c0dc9d9b2" id="r_a7894d78df8da46cb23d8441c0dc9d9b2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a7894d78df8da46cb23d8441c0dc9d9b2">LLIMIT</a>&#160;&#160;&#160;64          /* heuristic determined experimentally */</td></tr>
+<tr class="separator:a7894d78df8da46cb23d8441c0dc9d9b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f48ae94792012c8ed0256af7d97e7d1" id="r_a5f48ae94792012c8ed0256af7d97e7d1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a5f48ae94792012c8ed0256af7d97e7d1">MINMATCHLENGTH</a>&#160;&#160;&#160;7   /* heuristic determined experimentally */</td></tr>
+<tr class="separator:a5f48ae94792012c8ed0256af7d97e7d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40fa793cc466bb4f03748de2352e8e8c" id="r_a40fa793cc466bb4f03748de2352e8e8c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a40fa793cc466bb4f03748de2352e8e8c">DISPLAYUPDATE</a>(l, ...)</td></tr>
+<tr class="separator:a40fa793cc466bb4f03748de2352e8e8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad217948110f3e7f60d04020c9b75f7af" id="r_ad217948110f3e7f60d04020c9b75f7af"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#ad217948110f3e7f60d04020c9b75f7af">MAXREPOFFSET</a>&#160;&#160;&#160;1024</td></tr>
+<tr class="separator:ad217948110f3e7f60d04020c9b75f7af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0edf695ddbbbd6be7040665d30f8b26" id="r_ac0edf695ddbbbd6be7040665d30f8b26"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#ac0edf695ddbbbd6be7040665d30f8b26">OFFCODE_MAX</a>&#160;&#160;&#160;30  /* only applicable to first block */</td></tr>
+<tr class="separator:ac0edf695ddbbbd6be7040665d30f8b26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08a40caa7e3e936ab9ce49b927556d28" id="r_a08a40caa7e3e936ab9ce49b927556d28"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a08a40caa7e3e936ab9ce49b927556d28">HBUFFSIZE</a>&#160;&#160;&#160;256   /* should prove large enough for all entropy headers */</td></tr>
+<tr class="separator:a08a40caa7e3e936ab9ce49b927556d28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a46b73f421098242a6f9ff995dc76901b" id="r_a46b73f421098242a6f9ff995dc76901b"><td class="memItemLeft" align="right" valign="top">static clock_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a46b73f421098242a6f9ff995dc76901b">ZDICT_clockSpan</a> (clock_t nPrevious)</td></tr>
+<tr class="separator:a46b73f421098242a6f9ff995dc76901b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71f1c9946b99ffe041d1f5e6f0903697" id="r_a71f1c9946b99ffe041d1f5e6f0903697"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a71f1c9946b99ffe041d1f5e6f0903697">ZDICT_printHex</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *ptr, size_t length)</td></tr>
+<tr class="separator:a71f1c9946b99ffe041d1f5e6f0903697"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeca21ecd78156f040d6fd55754552ec5" id="r_aeca21ecd78156f040d6fd55754552ec5"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#aeca21ecd78156f040d6fd55754552ec5">ZDICT_isError</a> (size_t errorCode)</td></tr>
+<tr class="separator:aeca21ecd78156f040d6fd55754552ec5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab66ff28d790ccf9e1106c1a7d4c99d26" id="r_ab66ff28d790ccf9e1106c1a7d4c99d26"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#ab66ff28d790ccf9e1106c1a7d4c99d26">ZDICT_getErrorName</a> (size_t errorCode)</td></tr>
+<tr class="separator:ab66ff28d790ccf9e1106c1a7d4c99d26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d7b7d6bba8f42da1ae3227017499dd5" id="r_a6d7b7d6bba8f42da1ae3227017499dd5"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a6d7b7d6bba8f42da1ae3227017499dd5">ZDICT_getDictID</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *dictBuffer, size_t <a class="el" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>)</td></tr>
+<tr class="separator:a6d7b7d6bba8f42da1ae3227017499dd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43d3dd17aec3b24a9fbaafed455c2141" id="r_a43d3dd17aec3b24a9fbaafed455c2141"><td class="memItemLeft" align="right" valign="top">static unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a43d3dd17aec3b24a9fbaafed455c2141">ZDICT_NbCommonBytes</a> (size_t val)</td></tr>
+<tr class="separator:a43d3dd17aec3b24a9fbaafed455c2141"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75f31ce4885e60f3cad83f717292fdef" id="r_a75f31ce4885e60f3cad83f717292fdef"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a75f31ce4885e60f3cad83f717292fdef">ZDICT_count</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *pIn, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *pMatch)</td></tr>
+<tr class="separator:a75f31ce4885e60f3cad83f717292fdef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7c5253d2c6d53023fd633edbcf07c45" id="r_ae7c5253d2c6d53023fd633edbcf07c45"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#ae7c5253d2c6d53023fd633edbcf07c45">ZDICT_initDictItem</a> (<a class="el" href="structdictItem.html">dictItem</a> *d)</td></tr>
+<tr class="separator:ae7c5253d2c6d53023fd633edbcf07c45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4de803496c102f21579087cd158c2b97" id="r_a4de803496c102f21579087cd158c2b97"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structdictItem.html">dictItem</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a4de803496c102f21579087cd158c2b97">ZDICT_analyzePos</a> (<a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *doneMarks, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *suffix, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="WtDtPorter_8cpp.html#a011cfecbf1cc7aea656da1554c8f0e7f">start</a>, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *buffer, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> minRatio, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> notificationLevel)</td></tr>
+<tr class="separator:a4de803496c102f21579087cd158c2b97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b19f64d5b33225f0df3dd9a82b2212e" id="r_a5b19f64d5b33225f0df3dd9a82b2212e"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a5b19f64d5b33225f0df3dd9a82b2212e">isIncluded</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *in, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *container, size_t length)</td></tr>
+<tr class="separator:a5b19f64d5b33225f0df3dd9a82b2212e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a480ec2f0c12c9e42b3e53c7740f02c8b" id="r_a480ec2f0c12c9e42b3e53c7740f02c8b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a480ec2f0c12c9e42b3e53c7740f02c8b">ZDICT_tryMerge</a> (<a class="el" href="structdictItem.html">dictItem</a> *table, <a class="el" href="structdictItem.html">dictItem</a> elt, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> eltNbToSkip, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *buffer)</td></tr>
+<tr class="separator:a480ec2f0c12c9e42b3e53c7740f02c8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64312b1d75970ce61682ce267cb6f594" id="r_a64312b1d75970ce61682ce267cb6f594"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a64312b1d75970ce61682ce267cb6f594">ZDICT_removeDictItem</a> (<a class="el" href="structdictItem.html">dictItem</a> *table, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> id)</td></tr>
+<tr class="separator:a64312b1d75970ce61682ce267cb6f594"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a020be04ccd50578763f3f6235cf35f4f" id="r_a020be04ccd50578763f3f6235cf35f4f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a020be04ccd50578763f3f6235cf35f4f">ZDICT_insertDictItem</a> (<a class="el" href="structdictItem.html">dictItem</a> *table, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> maxSize, <a class="el" href="structdictItem.html">dictItem</a> elt, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *buffer)</td></tr>
+<tr class="separator:a020be04ccd50578763f3f6235cf35f4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e54908f49ede031e1ab853f0427b26e" id="r_a2e54908f49ede031e1ab853f0427b26e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a2e54908f49ede031e1ab853f0427b26e">ZDICT_dictSize</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structdictItem.html">dictItem</a> *dictList)</td></tr>
+<tr class="separator:a2e54908f49ede031e1ab853f0427b26e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab589772fa365470b4937af2b10247e11" id="r_ab589772fa365470b4937af2b10247e11"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#ab589772fa365470b4937af2b10247e11">ZDICT_trainBuffer_legacy</a> (<a class="el" href="structdictItem.html">dictItem</a> *dictList, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> dictListSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> buffer, size_t bufferSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *fileSizes, unsigned nbFiles, unsigned minRatio, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> notificationLevel)</td></tr>
+<tr class="separator:ab589772fa365470b4937af2b10247e11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c86ded2fbed82d750a3c61e186c0673" id="r_a0c86ded2fbed82d750a3c61e186c0673"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a0c86ded2fbed82d750a3c61e186c0673">ZDICT_fillNoise</a> (void *buffer, size_t length)</td></tr>
+<tr class="separator:a0c86ded2fbed82d750a3c61e186c0673"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac39b57b9a658a5c8f2596608e7d31927" id="r_ac39b57b9a658a5c8f2596608e7d31927"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#ac39b57b9a658a5c8f2596608e7d31927">ZDICT_countEStats</a> (<a class="el" href="structEStats__ress__t.html">EStats_ress_t</a> esr, ZSTD_parameters params, unsigned *countLit, unsigned *offsetcodeCount, unsigned *matchlengthCount, unsigned *litlengthCount, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *repOffsets, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> notificationLevel)</td></tr>
+<tr class="separator:ac39b57b9a658a5c8f2596608e7d31927"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08fe20bc358d1ec41e7dd52b33492623" id="r_a08fe20bc358d1ec41e7dd52b33492623"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a08fe20bc358d1ec41e7dd52b33492623">ZDICT_totalSampleSize</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *fileSizes, unsigned nbFiles)</td></tr>
+<tr class="separator:a08fe20bc358d1ec41e7dd52b33492623"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1eb89752fb8740b7be5cba768e19e395" id="r_a1eb89752fb8740b7be5cba768e19e395"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a1eb89752fb8740b7be5cba768e19e395">ZDICT_insertSortCount</a> (<a class="el" href="structoffsetCount__t.html">offsetCount_t</a> table[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>+1], <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> val, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> count)</td></tr>
+<tr class="separator:a1eb89752fb8740b7be5cba768e19e395"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01f4b0e479a571cffe9a6271d13dc44c" id="r_a01f4b0e479a571cffe9a6271d13dc44c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a01f4b0e479a571cffe9a6271d13dc44c">ZDICT_flatLit</a> (unsigned *countLit)</td></tr>
+<tr class="separator:a01f4b0e479a571cffe9a6271d13dc44c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae880a15ecda00807b828cd0fba57a4d1" id="r_ae880a15ecda00807b828cd0fba57a4d1"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#ae880a15ecda00807b828cd0fba57a4d1">ZDICT_analyzeEntropy</a> (void *dstBuffer, size_t maxDstSize, unsigned <a class="el" href="zbuff_8h.html#ade711b19285bdf476a4f753670ca3489">compressionLevel</a>, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *srcBuffer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *fileSizes, unsigned nbFiles, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *dictBuffer, size_t dictBufferSize, unsigned notificationLevel)</td></tr>
+<tr class="separator:ae880a15ecda00807b828cd0fba57a4d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa093aab5b825f7d4a3a1a3cdffcb8269" id="r_aa093aab5b825f7d4a3a1a3cdffcb8269"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#aa093aab5b825f7d4a3a1a3cdffcb8269">ZDICT_finalizeDictionary</a> (void *dictBuffer, size_t dictBufferCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *customDictContent, size_t dictContentSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *samplesBuffer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, unsigned nbSamples, ZDICT_params_t params)</td></tr>
+<tr class="separator:aa093aab5b825f7d4a3a1a3cdffcb8269"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af36cb3455ddfcd843adbcbe3035bccea" id="r_af36cb3455ddfcd843adbcbe3035bccea"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#af36cb3455ddfcd843adbcbe3035bccea">ZDICT_addEntropyTablesFromBuffer_advanced</a> (void *dictBuffer, size_t dictContentSize, size_t dictBufferCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *samplesBuffer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, unsigned nbSamples, ZDICT_params_t params)</td></tr>
+<tr class="separator:af36cb3455ddfcd843adbcbe3035bccea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaad6e969f90e08866517f2a923e60d3c" id="r_aaad6e969f90e08866517f2a923e60d3c"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#aaad6e969f90e08866517f2a923e60d3c">ZDICT_trainFromBuffer_unsafe_legacy</a> (void *dictBuffer, size_t maxDictSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *samplesBuffer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, unsigned nbSamples, ZDICT_legacy_params_t params)</td></tr>
+<tr class="separator:aaad6e969f90e08866517f2a923e60d3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06e0c0fd408e2a9781f339641947ed50" id="r_a06e0c0fd408e2a9781f339641947ed50"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a06e0c0fd408e2a9781f339641947ed50">ZDICT_trainFromBuffer_legacy</a> (void *dictBuffer, size_t dictBufferCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *samplesBuffer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, unsigned nbSamples, ZDICT_legacy_params_t params)</td></tr>
+<tr class="separator:a06e0c0fd408e2a9781f339641947ed50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a705dc14081aec26178b8adf718a2e364" id="r_a705dc14081aec26178b8adf718a2e364"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a705dc14081aec26178b8adf718a2e364">ZDICT_trainFromBuffer</a> (void *dictBuffer, size_t dictBufferCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *samplesBuffer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, unsigned nbSamples)</td></tr>
+<tr class="separator:a705dc14081aec26178b8adf718a2e364"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add1110679aae05b9611674bc827497e1" id="r_add1110679aae05b9611674bc827497e1"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#add1110679aae05b9611674bc827497e1">ZDICT_addEntropyTablesFromBuffer</a> (void *dictBuffer, size_t dictContentSize, size_t dictBufferCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *samplesBuffer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, unsigned nbSamples)</td></tr>
+<tr class="separator:add1110679aae05b9611674bc827497e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a10a2cdbcaedd8135805372d5e1f1e3ff" id="r_a10a2cdbcaedd8135805372d5e1f1e3ff"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#a10a2cdbcaedd8135805372d5e1f1e3ff">g_compressionLevel_default</a> = 3</td></tr>
+<tr class="separator:a10a2cdbcaedd8135805372d5e1f1e3ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdf1b266d7e5f0d6c51ebc5df241ccaa" id="r_afdf1b266d7e5f0d6c51ebc5df241ccaa"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zdict_8c.html#afdf1b266d7e5f0d6c51ebc5df241ccaa">g_selectivity_default</a> = 9</td></tr>
+<tr class="separator:afdf1b266d7e5f0d6c51ebc5df241ccaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a44d01ba0a136b8e27ad362f5a823d14e" name="a44d01ba0a136b8e27ad362f5a823d14e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44d01ba0a136b8e27ad362f5a823d14e">&#9670;&#160;</a></span>_FILE_OFFSET_BITS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define _FILE_OFFSET_BITS&#160;&#160;&#160;64</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00024">24</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0e6d20c5075b52b0f0bc4858d51c8591" name="a0e6d20c5075b52b0f0bc4858d51c8591"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e6d20c5075b52b0f0bc4858d51c8591">&#9670;&#160;</a></span>_LARGEFILE64_SOURCE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define _LARGEFILE64_SOURCE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00028">28</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afe5b414fec54a38ce919b10c98f271df" name="afe5b414fec54a38ce919b10c98f271df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe5b414fec54a38ce919b10c98f271df">&#9670;&#160;</a></span>DICTLISTSIZE_DEFAULT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DICTLISTSIZE_DEFAULT&#160;&#160;&#160;10000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00060">60</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5a5fbd7a78051c2134b21324e5c74bdc" name="a5a5fbd7a78051c2134b21324e5c74bdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a5fbd7a78051c2134b21324e5c74bdc">&#9670;&#160;</a></span>DISPLAY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DISPLAY</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em></td><td>)</td>
+          <td>&#160;&#160;&#160;{ fprintf(stderr, __VA_ARGS__); fflush( stderr ); }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00071">71</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9200da68a37a9ae33332f82599d00e67" name="a9200da68a37a9ae33332f82599d00e67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9200da68a37a9ae33332f82599d00e67">&#9670;&#160;</a></span>DISPLAYLEVEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DISPLAYLEVEL</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">l, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;if (notificationLevel&gt;=l) { <a class="el" href="cover_8c.html#a5a5fbd7a78051c2134b21324e5c74bdc">DISPLAY</a>(__VA_ARGS__); }    /* 0 : no display;   1: errors;   2: default;  3: details;  4: debug */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00072">72</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a40fa793cc466bb4f03748de2352e8e8c" name="a40fa793cc466bb4f03748de2352e8e8c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40fa793cc466bb4f03748de2352e8e8c">&#9670;&#160;</a></span>DISPLAYUPDATE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DISPLAYUPDATE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">l, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">            <span class="keywordflow">if</span> (notificationLevel&gt;=l) { \</div>
+<div class="line">            if (<a class="code hl_function" href="zdict_8c.html#a46b73f421098242a6f9ff995dc76901b">ZDICT_clockSpan</a>(displayClock) &gt; <a class="code hl_variable" href="cover_8c.html#aefc094acd97c214655e20602823c224a">refreshRate</a>)  \</div>
+<div class="line">            { displayClock = clock(); <a class="code hl_define" href="zdict_8c.html#a5a5fbd7a78051c2134b21324e5c74bdc">DISPLAY</a>(__VA_ARGS__); \</div>
+<div class="line">            if (notificationLevel&gt;=4) fflush(stderr); } }</div>
+<div class="ttc" id="acover_8c_html_aefc094acd97c214655e20602823c224a"><div class="ttname"><a href="cover_8c.html#aefc094acd97c214655e20602823c224a">refreshRate</a></div><div class="ttdeci">static const clock_t refreshRate</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00068">cover.c:68</a></div></div>
+<div class="ttc" id="azdict_8c_html_a46b73f421098242a6f9ff995dc76901b"><div class="ttname"><a href="zdict_8c.html#a46b73f421098242a6f9ff995dc76901b">ZDICT_clockSpan</a></div><div class="ttdeci">static clock_t ZDICT_clockSpan(clock_t nPrevious)</div><div class="ttdef"><b>Definition</b> <a href="zdict_8c_source.html#l00074">zdict.c:74</a></div></div>
+<div class="ttc" id="azdict_8c_html_a5a5fbd7a78051c2134b21324e5c74bdc"><div class="ttname"><a href="zdict_8c.html#a5a5fbd7a78051c2134b21324e5c74bdc">DISPLAY</a></div><div class="ttdeci">#define DISPLAY(...)</div><div class="ttdef"><b>Definition</b> <a href="zdict_8c_source.html#l00071">zdict.c:71</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a44172ac633c517cb4c9e278cef36b000" name="a44172ac633c517cb4c9e278cef36b000"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44172ac633c517cb4c9e278cef36b000">&#9670;&#160;</a></span>GB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define GB&#160;&#160;&#160;*(1U&lt;&lt;30)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00058">58</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a08a40caa7e3e936ab9ce49b927556d28" name="a08a40caa7e3e936ab9ce49b927556d28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08a40caa7e3e936ab9ce49b927556d28">&#9670;&#160;</a></span>HBUFFSIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HBUFFSIZE&#160;&#160;&#160;256   /* should prove large enough for all entropy headers */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7691fd75a0d8bc9d2b1544f0df8e381c" name="a7691fd75a0d8bc9d2b1544f0df8e381c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7691fd75a0d8bc9d2b1544f0df8e381c">&#9670;&#160;</a></span>HUF_STATIC_LINKING_ONLY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_STATIC_LINKING_ONLY</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00042">42</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1841fd1a462d245d8c73dce55e2f45da" name="a1841fd1a462d245d8c73dce55e2f45da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1841fd1a462d245d8c73dce55e2f45da">&#9670;&#160;</a></span>KB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define KB&#160;&#160;&#160;*(1 &lt;&lt;10)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00056">56</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7894d78df8da46cb23d8441c0dc9d9b2" name="a7894d78df8da46cb23d8441c0dc9d9b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7894d78df8da46cb23d8441c0dc9d9b2">&#9670;&#160;</a></span>LLIMIT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LLIMIT&#160;&#160;&#160;64          /* heuristic determined experimentally */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00199">199</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad217948110f3e7f60d04020c9b75f7af" name="ad217948110f3e7f60d04020c9b75f7af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad217948110f3e7f60d04020c9b75f7af">&#9670;&#160;</a></span>MAXREPOFFSET</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MAXREPOFFSET&#160;&#160;&#160;1024</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00589">589</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa6b38d492364d98453284934ed7caee9" name="aa6b38d492364d98453284934ed7caee9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6b38d492364d98453284934ed7caee9">&#9670;&#160;</a></span>MB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MB&#160;&#160;&#160;*(1 &lt;&lt;20)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00057">57</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5f48ae94792012c8ed0256af7d97e7d1" name="a5f48ae94792012c8ed0256af7d97e7d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f48ae94792012c8ed0256af7d97e7d1">&#9670;&#160;</a></span>MINMATCHLENGTH</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MINMATCHLENGTH&#160;&#160;&#160;7   /* heuristic determined experimentally */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00200">200</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac57133343d156b44dae36faf1c45cc3e" name="ac57133343d156b44dae36faf1c45cc3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac57133343d156b44dae36faf1c45cc3e">&#9670;&#160;</a></span>MINRATIO</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MINRATIO&#160;&#160;&#160;4   /* minimum nb of apparition to be selected in dictionary */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00015">15</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9233bbf304cd8b4c4aa31e1670a45a2f" name="a9233bbf304cd8b4c4aa31e1670a45a2f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9233bbf304cd8b4c4aa31e1670a45a2f">&#9670;&#160;</a></span>NOISELENGTH</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NOISELENGTH&#160;&#160;&#160;32</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00062">62</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac0edf695ddbbbd6be7040665d30f8b26" name="ac0edf695ddbbbd6be7040665d30f8b26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0edf695ddbbbd6be7040665d30f8b26">&#9670;&#160;</a></span>OFFCODE_MAX</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define OFFCODE_MAX&#160;&#160;&#160;30  /* only applicable to first block */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00683">683</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0ee2f9f4f9cae25be0d2d3978745ca18" name="a0ee2f9f4f9cae25be0d2d3978745ca18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ee2f9f4f9cae25be0d2d3978745ca18">&#9670;&#160;</a></span>ZDICT_MAX_SAMPLES_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZDICT_MAX_SAMPLES_SIZE&#160;&#160;&#160;(2000U &lt;&lt; 20)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00016">16</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af78bb502af0545c63e8669ee1bc7bc33" name="af78bb502af0545c63e8669ee1bc7bc33"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af78bb502af0545c63e8669ee1bc7bc33">&#9670;&#160;</a></span>ZDICT_MIN_SAMPLES_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZDICT_MIN_SAMPLES_SIZE&#160;&#160;&#160;(ZDICT_CONTENTSIZE_MIN * <a class="el" href="zdict_8c.html#ac57133343d156b44dae36faf1c45cc3e">MINRATIO</a>)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00017">17</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a67a585a357b2e71e8ece2ee1ee510b7f" name="a67a585a357b2e71e8ece2ee1ee510b7f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67a585a357b2e71e8ece2ee1ee510b7f">&#9670;&#160;</a></span>ZDICT_STATIC_LINKING_ONLY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZDICT_STATIC_LINKING_ONLY</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00048">48</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a5b19f64d5b33225f0df3dd9a82b2212e" name="a5b19f64d5b33225f0df3dd9a82b2212e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b19f64d5b33225f0df3dd9a82b2212e">&#9670;&#160;</a></span>isIncluded()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int isIncluded </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>in</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>container</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00371">371</a> 行定义.</p>
+
+</div>
+</div>
+<a id="add1110679aae05b9611674bc827497e1" name="add1110679aae05b9611674bc827497e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add1110679aae05b9611674bc827497e1">&#9670;&#160;</a></span>ZDICT_addEntropyTablesFromBuffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZDICT_addEntropyTablesFromBuffer </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictContentSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictBufferCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>samplesBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbSamples</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l01103">1103</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af36cb3455ddfcd843adbcbe3035bccea" name="af36cb3455ddfcd843adbcbe3035bccea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af36cb3455ddfcd843adbcbe3035bccea">&#9670;&#160;</a></span>ZDICT_addEntropyTablesFromBuffer_advanced()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZDICT_addEntropyTablesFromBuffer_advanced </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictContentSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictBufferCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>samplesBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_params_t&#160;</td>
+          <td class="paramname"><em>params</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00913">913</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae880a15ecda00807b828cd0fba57a4d1" name="ae880a15ecda00807b828cd0fba57a4d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae880a15ecda00807b828cd0fba57a4d1">&#9670;&#160;</a></span>ZDICT_analyzeEntropy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZDICT_analyzeEntropy </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dstBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>maxDstSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>compressionLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>srcBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>fileSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbFiles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictBufferSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>notificationLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00684">684</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4de803496c102f21579087cd158c2b97" name="a4de803496c102f21579087cd158c2b97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4de803496c102f21579087cd158c2b97">&#9670;&#160;</a></span>ZDICT_analyzePos()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structdictItem.html">dictItem</a> ZDICT_analyzePos </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>doneMarks</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>suffix</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>start</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>minRatio</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>notificationLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00201">201</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a46b73f421098242a6f9ff995dc76901b" name="a46b73f421098242a6f9ff995dc76901b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46b73f421098242a6f9ff995dc76901b">&#9670;&#160;</a></span>ZDICT_clockSpan()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static clock_t ZDICT_clockSpan </td>
+          <td>(</td>
+          <td class="paramtype">clock_t&#160;</td>
+          <td class="paramname"><em>nPrevious</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00074">74</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a75f31ce4885e60f3cad83f717292fdef" name="a75f31ce4885e60f3cad83f717292fdef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75f31ce4885e60f3cad83f717292fdef">&#9670;&#160;</a></span>ZDICT_count()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZDICT_count </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>pIn</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>pMatch</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zdict_8c.html#a75f31ce4885e60f3cad83f717292fdef">ZDICT_count()</a> : Count the nb of common bytes between 2 pointers. Note : this function presumes end of buffer followed by noisy guard band. </p>
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00169">169</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac39b57b9a658a5c8f2596608e7d31927" name="ac39b57b9a658a5c8f2596608e7d31927"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac39b57b9a658a5c8f2596608e7d31927">&#9670;&#160;</a></span>ZDICT_countEStats()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZDICT_countEStats </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structEStats__ress__t.html">EStats_ress_t</a>&#160;</td>
+          <td class="paramname"><em>esr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_parameters&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned *&#160;</td>
+          <td class="paramname"><em>countLit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned *&#160;</td>
+          <td class="paramname"><em>offsetcodeCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned *&#160;</td>
+          <td class="paramname"><em>matchlengthCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned *&#160;</td>
+          <td class="paramname"><em>litlengthCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *&#160;</td>
+          <td class="paramname"><em>repOffsets</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>notificationLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00591">591</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2e54908f49ede031e1ab853f0427b26e" name="a2e54908f49ede031e1ab853f0427b26e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e54908f49ede031e1ab853f0427b26e">&#9670;&#160;</a></span>ZDICT_dictSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ZDICT_dictSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structdictItem.html">dictItem</a> *&#160;</td>
+          <td class="paramname"><em>dictList</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00488">488</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0c86ded2fbed82d750a3c61e186c0673" name="a0c86ded2fbed82d750a3c61e186c0673"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c86ded2fbed82d750a3c61e186c0673">&#9670;&#160;</a></span>ZDICT_fillNoise()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZDICT_fillNoise </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00569">569</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa093aab5b825f7d4a3a1a3cdffcb8269" name="aa093aab5b825f7d4a3a1a3cdffcb8269"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa093aab5b825f7d4a3a1a3cdffcb8269">&#9670;&#160;</a></span>ZDICT_finalizeDictionary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZDICT_finalizeDictionary </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictBufferCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>customDictContent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictContentSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>samplesBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_params_t&#160;</td>
+          <td class="paramname"><em>params</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00864">864</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a01f4b0e479a571cffe9a6271d13dc44c" name="a01f4b0e479a571cffe9a6271d13dc44c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01f4b0e479a571cffe9a6271d13dc44c">&#9670;&#160;</a></span>ZDICT_flatLit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZDICT_flatLit </td>
+          <td>(</td>
+          <td class="paramtype">unsigned *&#160;</td>
+          <td class="paramname"><em>countLit</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00674">674</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6d7b7d6bba8f42da1ae3227017499dd5" name="a6d7b7d6bba8f42da1ae3227017499dd5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d7b7d6bba8f42da1ae3227017499dd5">&#9670;&#160;</a></span>ZDICT_getDictID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned ZDICT_getDictID </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>extracts dictID; </p><dl class="section return"><dt>返回</dt><dd>zero if error (not a valid dictionary) </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00095">95</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab66ff28d790ccf9e1106c1a7d4c99d26" name="ab66ff28d790ccf9e1106c1a7d4c99d26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab66ff28d790ccf9e1106c1a7d4c99d26">&#9670;&#160;</a></span>ZDICT_getErrorName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * ZDICT_getErrorName </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>errorCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00093">93</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae7c5253d2c6d53023fd633edbcf07c45" name="ae7c5253d2c6d53023fd633edbcf07c45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7c5253d2c6d53023fd633edbcf07c45">&#9670;&#160;</a></span>ZDICT_initDictItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZDICT_initDictItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structdictItem.html">dictItem</a> *&#160;</td>
+          <td class="paramname"><em>d</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00191">191</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a020be04ccd50578763f3f6235cf35f4f" name="a020be04ccd50578763f3f6235cf35f4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a020be04ccd50578763f3f6235cf35f4f">&#9670;&#160;</a></span>ZDICT_insertDictItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZDICT_insertDictItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structdictItem.html">dictItem</a> *&#160;</td>
+          <td class="paramname"><em>table</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>maxSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structdictItem.html">dictItem</a>&#160;</td>
+          <td class="paramname"><em>elt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>buffer</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00459">459</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1eb89752fb8740b7be5cba768e19e395" name="a1eb89752fb8740b7be5cba768e19e395"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1eb89752fb8740b7be5cba768e19e395">&#9670;&#160;</a></span>ZDICT_insertSortCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZDICT_insertSortCount </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structoffsetCount__t.html">offsetCount_t</a>&#160;</td>
+          <td class="paramname"><em>table</em>[ZSTD_REP_NUM+1], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>val</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>count</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00656">656</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aeca21ecd78156f040d6fd55754552ec5" name="aeca21ecd78156f040d6fd55754552ec5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeca21ecd78156f040d6fd55754552ec5">&#9670;&#160;</a></span>ZDICT_isError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned ZDICT_isError </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>errorCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00091">91</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a43d3dd17aec3b24a9fbaafed455c2141" name="a43d3dd17aec3b24a9fbaafed455c2141"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43d3dd17aec3b24a9fbaafed455c2141">&#9670;&#160;</a></span>ZDICT_NbCommonBytes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static unsigned ZDICT_NbCommonBytes </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>val</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00106">106</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a71f1c9946b99ffe041d1f5e6f0903697" name="a71f1c9946b99ffe041d1f5e6f0903697"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71f1c9946b99ffe041d1f5e6f0903697">&#9670;&#160;</a></span>ZDICT_printHex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZDICT_printHex </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00076">76</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a64312b1d75970ce61682ce267cb6f594" name="a64312b1d75970ce61682ce267cb6f594"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64312b1d75970ce61682ce267cb6f594">&#9670;&#160;</a></span>ZDICT_removeDictItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZDICT_removeDictItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structdictItem.html">dictItem</a> *&#160;</td>
+          <td class="paramname"><em>table</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00447">447</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a08fe20bc358d1ec41e7dd52b33492623" name="a08fe20bc358d1ec41e7dd52b33492623"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08fe20bc358d1ec41e7dd52b33492623">&#9670;&#160;</a></span>ZDICT_totalSampleSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZDICT_totalSampleSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>fileSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbFiles</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00646">646</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab589772fa365470b4937af2b10247e11" name="ab589772fa365470b4937af2b10247e11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab589772fa365470b4937af2b10247e11">&#9670;&#160;</a></span>ZDICT_trainBuffer_legacy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZDICT_trainBuffer_legacy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structdictItem.html">dictItem</a> *&#160;</td>
+          <td class="paramname"><em>dictList</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>dictListSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>bufferSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>fileSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbFiles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>minRatio</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>notificationLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00497">497</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a705dc14081aec26178b8adf718a2e364" name="a705dc14081aec26178b8adf718a2e364"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a705dc14081aec26178b8adf718a2e364">&#9670;&#160;</a></span>ZDICT_trainFromBuffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZDICT_trainFromBuffer </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictBufferCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>samplesBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbSamples</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zdict_8h.html#a453e142373fcc36b68db245a2f6e2ade">ZDICT_trainFromBuffer()</a>: Train a dictionary from an array of samples. Redirect towards <a class="el" href="fastcover_8c.html#a56745742202f55abaece58a70f587a58">ZDICT_optimizeTrainFromBuffer_fastCover()</a> single-threaded, with d=8, steps=4, f=20, and accel=1. Samples must be stored concatenated in a single flat buffer <code>samplesBuffer</code>, supplied with an array of sizes <code>samplesSizes</code>, providing the size of each sample, in order. The resulting dictionary will be saved into <code>dictBuffer</code>. </p><dl class="section return"><dt>返回</dt><dd>: size of dictionary stored into <code>dictBuffer</code> (&lt;= <code>dictBufferCapacity</code>) or an error code, which can be tested with <a class="el" href="zdict_8h.html#acf6c9520a2331666e87c7db1b68fae2e">ZDICT_isError()</a>. Note: Dictionary training will fail if there are not enough samples to construct a dictionary, or if most of the samples are too small (&lt; 8 bytes being the lower limit). If dictionary training fails, you should use zstd without a dictionary, as the dictionary would've been ineffective anyways. If you believe your samples would benefit from a dictionary please open an issue with details, and we can look into it. Note: <a class="el" href="zdict_8h.html#a453e142373fcc36b68db245a2f6e2ade">ZDICT_trainFromBuffer()</a>'s memory usage is about 6 MB. Tips: In general, a reasonable dictionary has a size of ~ 100 KB. It's possible to select smaller or larger size, just by specifying <code>dictBufferCapacity</code>. In general, it's recommended to provide a few thousands samples, though this can vary a lot. It's recommended that total size of all samples be about ~x100 times the target size of dictionary. </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l01085">1085</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a06e0c0fd408e2a9781f339641947ed50" name="a06e0c0fd408e2a9781f339641947ed50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06e0c0fd408e2a9781f339641947ed50">&#9670;&#160;</a></span>ZDICT_trainFromBuffer_legacy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZDICT_trainFromBuffer_legacy </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictBufferCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>samplesBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_legacy_params_t&#160;</td>
+          <td class="paramname"><em>params</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l01062">1062</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaad6e969f90e08866517f2a923e60d3c" name="aaad6e969f90e08866517f2a923e60d3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaad6e969f90e08866517f2a923e60d3c">&#9670;&#160;</a></span>ZDICT_trainFromBuffer_unsafe_legacy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZDICT_trainFromBuffer_unsafe_legacy </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>maxDictSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>samplesBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_legacy_params_t&#160;</td>
+          <td class="paramname"><em>params</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zdict_8c.html#aaad6e969f90e08866517f2a923e60d3c">ZDICT_trainFromBuffer_unsafe_legacy()</a> : Warning : <code>samplesBuffer</code> must be followed by noisy guard band. </p><dl class="section return"><dt>返回</dt><dd>: size of dictionary, or an error code which can be tested with <a class="el" href="zdict_8c.html#aeca21ecd78156f040d6fd55754552ec5">ZDICT_isError()</a> </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00956">956</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a480ec2f0c12c9e42b3e53c7740f02c8b" name="a480ec2f0c12c9e42b3e53c7740f02c8b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a480ec2f0c12c9e42b3e53c7740f02c8b">&#9670;&#160;</a></span>ZDICT_tryMerge()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ZDICT_tryMerge </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structdictItem.html">dictItem</a> *&#160;</td>
+          <td class="paramname"><em>table</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structdictItem.html">dictItem</a>&#160;</td>
+          <td class="paramname"><em>elt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>eltNbToSkip</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>buffer</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zdict_8c.html#a480ec2f0c12c9e42b3e53c7740f02c8b">ZDICT_tryMerge()</a> : check if <a class="el" href="structdictItem.html">dictItem</a> can be merged, do it if possible </p><dl class="section return"><dt>返回</dt><dd>: id of destination elt, 0 if not merged </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00388">388</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a10a2cdbcaedd8135805372d5e1f1e3ff" name="a10a2cdbcaedd8135805372d5e1f1e3ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10a2cdbcaedd8135805372d5e1f1e3ff">&#9670;&#160;</a></span>g_compressionLevel_default</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int g_compressionLevel_default = 3</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00064">64</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afdf1b266d7e5f0d6c51ebc5df241ccaa" name="afdf1b266d7e5f0d6c51ebc5df241ccaa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afdf1b266d7e5f0d6c51ebc5df241ccaa">&#9670;&#160;</a></span>g_selectivity_default</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> g_selectivity_default = 9</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zdict_8c_source.html">zdict.c</a> 第 <a class="el" href="zdict_8c_source.html#l00065">65</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="zdict_8c.html">zdict.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

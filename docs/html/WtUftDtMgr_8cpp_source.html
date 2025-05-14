@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtUftCore/WtUftDtMgr.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtUftDtMgr_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtUftDtMgr.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtUftDtMgr_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="WtUftDtMgr_8h.html">WtUftDtMgr.h</a>&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="WtUftEngine_8h.html">WtUftEngine.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="WtUftCore_2WtHelper_8h.html">WtHelper.h</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Share/StrUtil.hpp&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../Includes/WTSDataDef.hpp&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../Includes/WTSVariant.hpp&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;../WTSTools/WTSLogger.h&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;../WTSTools/WTSDataFactory.h&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="WtUftDtMgr_8cpp.html#a226378f5907b16b0da57da97372f0af7">   27</a></span><a class="code hl_class" href="classWTSDataFactory.html">WTSDataFactory</a> <a class="code hl_variable" href="WtUftDtMgr_8cpp.html#a226378f5907b16b0da57da97372f0af7">g_dataFact</a>;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="foldopen" id="foldopen00033" data-start="{" data-end="}">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classWtUftDtMgr.html#abd73e6a4488bcbcc521cd78eebb4aab1">   33</a></span><a class="code hl_function" href="classWtUftDtMgr.html#abd73e6a4488bcbcc521cd78eebb4aab1">WtUftDtMgr::WtUftDtMgr</a>()</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    : _engine(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    , _bars_cache(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    , _ticks_cache(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    , _rt_tick_map(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>{</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>}</div>
+</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="foldopen" id="foldopen00046" data-start="{" data-end="}">
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classWtUftDtMgr.html#a5e253795cc04373885b0ca2ce91eec16">   46</a></span><a class="code hl_function" href="classWtUftDtMgr.html#a5e253795cc04373885b0ca2ce91eec16">WtUftDtMgr::~WtUftDtMgr</a>()</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>{</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtUftDtMgr.html#a6904f3e6902f24fe753f1ebbba15b2dd">_bars_cache</a>)</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <a class="code hl_variable" href="classWtUftDtMgr.html#a6904f3e6902f24fe753f1ebbba15b2dd">_bars_cache</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a61053c683d4af266c2b28da611bf455a">release</a>();</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtUftDtMgr.html#aca3dbabad8aeda89de92e922a0890ddb">_ticks_cache</a>)</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        <a class="code hl_variable" href="classWtUftDtMgr.html#aca3dbabad8aeda89de92e922a0890ddb">_ticks_cache</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a61053c683d4af266c2b28da611bf455a">release</a>();</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtUftDtMgr.html#a7f02d0a8ad8582469ce2406098d422da">_rt_tick_map</a>)</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        <a class="code hl_variable" href="classWtUftDtMgr.html#a7f02d0a8ad8582469ce2406098d422da">_rt_tick_map</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a61053c683d4af266c2b28da611bf455a">release</a>();</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}</div>
+</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="foldopen" id="foldopen00065" data-start="{" data-end="}">
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classWtUftDtMgr.html#a274d7465699bc0b0fce8c2349a6fead1">   65</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classWtUftDtMgr.html#a274d7465699bc0b0fce8c2349a6fead1">WtUftDtMgr::init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg, <a class="code hl_class" href="classWtUftEngine.html">WtUftEngine</a>* engine)</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>{</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <a class="code hl_variable" href="classWtUftDtMgr.html#afb42c43efe91f084a7461f30742a15ec">_engine</a> = engine;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>}</div>
+</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="foldopen" id="foldopen00078" data-start="{" data-end="}">
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="classWtUftDtMgr.html#a7397fdd5b198ffccf18bffd9742ec097">   78</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftDtMgr.html#a7397fdd5b198ffccf18bffd9742ec097">WtUftDtMgr::handle_push_quote</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick)</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>{</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keywordflow">if</span> (newTick == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtUftDtMgr.html#a7f02d0a8ad8582469ce2406098d422da">_rt_tick_map</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        <a class="code hl_variable" href="classWtUftDtMgr.html#a7f02d0a8ad8582469ce2406098d422da">_rt_tick_map</a> = <a class="code hl_function" href="classWTSHashMap.html#a92728481e09486cd7200b2f91c446bd3">DataCacheMap::create</a>();</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <a class="code hl_variable" href="classWtUftDtMgr.html#a7f02d0a8ad8582469ce2406098d422da">_rt_tick_map</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#ad38538f62db5b2f37a18533f8192a01d">add</a>(stdCode, newTick, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classWtUftDtMgr.html#aca3dbabad8aeda89de92e922a0890ddb">_ticks_cache</a> != <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    {</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        <a class="code hl_class" href="classWTSHisTickData.html">WTSHisTickData</a>* tData = (<a class="code hl_class" href="classWTSHisTickData.html">WTSHisTickData</a>*)<a class="code hl_variable" href="classWtUftDtMgr.html#aca3dbabad8aeda89de92e922a0890ddb">_ticks_cache</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a66e6536c6db604c162a415620264d747">get</a>(stdCode);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        <span class="keywordflow">if</span> (tData == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="comment">// 如果只需要有效数据且当前成交量为0，则跳过</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <span class="keywordflow">if</span> (tData-&gt;<a class="code hl_function" href="classWTSHisTickData.html#aa3b8c04eebd78124cf13d24b31fc09f9">isValidOnly</a>() &amp;&amp; newTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a097548155cfbbf9a0a36e1ee1ce3ad38">volume</a>() == 0)</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        <span class="comment">// 将新的Tick数据追加到历史数据中</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        tData-&gt;<a class="code hl_function" href="classWTSHisTickData.html#a826a25a2d3e5370b43b0d261ca51ce26">appendTick</a>(newTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a6a81212366831e7afe3eeac41b42e7b0">getTickStruct</a>());</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    }</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>}</div>
+</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="foldopen" id="foldopen00109" data-start="{" data-end="}">
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="classWtUftDtMgr.html#ab3aa5e855f94b62d823f6fb05c8093d9">  109</a></span><a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* <a class="code hl_function" href="classWtUftDtMgr.html#ab3aa5e855f94b62d823f6fb05c8093d9">WtUftDtMgr::grab_last_tick</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* code)</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>{</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtUftDtMgr.html#a7f02d0a8ad8582469ce2406098d422da">_rt_tick_map</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* curTick = (<a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>*)<a class="code hl_variable" href="classWtUftDtMgr.html#a7f02d0a8ad8582469ce2406098d422da">_rt_tick_map</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a7d912a82f0d7bc4f5de0c40675a389e6">grab</a>(code);</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="keywordflow">if</span> (curTick == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keywordflow">return</span> curTick;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>}</div>
+</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="foldopen" id="foldopen00130" data-start="{" data-end="}">
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="classWtUftDtMgr.html#a73bf74dbe78586bd9935ca75e6ff8ff4">  130</a></span><a class="code hl_class" href="classWTSTickSlice.html">WTSTickSlice</a>* <a class="code hl_function" href="classWtUftDtMgr.html#a73bf74dbe78586bd9935ca75e6ff8ff4">WtUftDtMgr::get_tick_slice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t count, uint64_t etime <span class="comment">/* = 0 */</span>)</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>{</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>}</div>
+</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="foldopen" id="foldopen00143" data-start="{" data-end="}">
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="classWtUftDtMgr.html#ac54e30b7a08be8d4eab8eba7c89a4a0c">  143</a></span><a class="code hl_class" href="classWTSOrdQueSlice.html">WTSOrdQueSlice</a>* <a class="code hl_function" href="classWtUftDtMgr.html#ac54e30b7a08be8d4eab8eba7c89a4a0c">WtUftDtMgr::get_order_queue_slice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t count, uint64_t etime <span class="comment">/* = 0 */</span>)</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>{</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>}</div>
+</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="foldopen" id="foldopen00156" data-start="{" data-end="}">
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno"><a class="line" href="classWtUftDtMgr.html#af58ff84dbe7a2b8cfc68f10940cc4086">  156</a></span><a class="code hl_class" href="classWTSOrdDtlSlice.html">WTSOrdDtlSlice</a>* <a class="code hl_function" href="classWtUftDtMgr.html#af58ff84dbe7a2b8cfc68f10940cc4086">WtUftDtMgr::get_order_detail_slice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t count, uint64_t etime <span class="comment">/* = 0 */</span>)</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>{</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>}</div>
+</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
+<div class="foldopen" id="foldopen00169" data-start="{" data-end="}">
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno"><a class="line" href="classWtUftDtMgr.html#a64795a9fd191ad4d0ab0065006b8b1a2">  169</a></span><a class="code hl_class" href="classWTSTransSlice.html">WTSTransSlice</a>* <a class="code hl_function" href="classWtUftDtMgr.html#a64795a9fd191ad4d0ab0065006b8b1a2">WtUftDtMgr::get_transaction_slice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t count, uint64_t etime <span class="comment">/* = 0 */</span>)</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>{</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>}</div>
+</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span> </div>
+<div class="foldopen" id="foldopen00184" data-start="{" data-end="}">
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno"><a class="line" href="classWtUftDtMgr.html#abb0907d29372f4f4bd49971cc7414842">  184</a></span><a class="code hl_class" href="classWTSKlineSlice.html">WTSKlineSlice</a>* <a class="code hl_function" href="classWtUftDtMgr.html#abb0907d29372f4f4bd49971cc7414842">WtUftDtMgr::get_kline_slice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_typedef" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, uint32_t times, uint32_t count, uint64_t etime <span class="comment">/* = 0 */</span>)</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>{</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>}</div>
+</div>
+<div class="ttc" id="aWTSTypes_8h_html_a27f5d8bd7208a5fc1d044c6f5961904c"><div class="ttname"><a href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a></div><div class="ttdeci">enum tagKlinePeriod WTSKlinePeriod</div></div>
+<div class="ttc" id="aWtUftCore_2WtHelper_8h_html"><div class="ttname"><a href="WtUftCore_2WtHelper_8h.html">WtHelper.h</a></div><div class="ttdoc">WonderTrader辅助工具类头文件</div></div>
+<div class="ttc" id="aWtUftDtMgr_8cpp_html_a226378f5907b16b0da57da97372f0af7"><div class="ttname"><a href="WtUftDtMgr_8cpp.html#a226378f5907b16b0da57da97372f0af7">g_dataFact</a></div><div class="ttdeci">WTSDataFactory g_dataFact</div><div class="ttdoc">全局数据工厂对象</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8cpp_source.html#l00027">WtUftDtMgr.cpp:27</a></div></div>
+<div class="ttc" id="aWtUftDtMgr_8h_html"><div class="ttname"><a href="WtUftDtMgr_8h.html">WtUftDtMgr.h</a></div><div class="ttdoc">UFT数据管理器头文件</div></div>
+<div class="ttc" id="aWtUftEngine_8h_html"><div class="ttname"><a href="WtUftEngine_8h.html">WtUftEngine.h</a></div><div class="ttdoc">UFT策略引擎头文件</div></div>
+<div class="ttc" id="aclassWTSDataFactory_html"><div class="ttname"><a href="classWTSDataFactory.html">WTSDataFactory</a></div><div class="ttdoc">数据工厂类，负责K线数据的生成、更新和合并</div><div class="ttdef"><b>Definition</b> <a href="WTSDataFactory_8h_source.html#l00028">WTSDataFactory.h:29</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html_a61053c683d4af266c2b28da611bf455a"><div class="ttname"><a href="classWTSHashMap.html#a61053c683d4af266c2b28da611bf455a">WTSHashMap::release</a></div><div class="ttdeci">virtual void release()</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00731">WTSCollection.hpp:731</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html_a66e6536c6db604c162a415620264d747"><div class="ttname"><a href="classWTSHashMap.html#a66e6536c6db604c162a415620264d747">WTSHashMap::get</a></div><div class="ttdeci">WTSObject * get(const T &amp;_key) noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00629">WTSCollection.hpp:629</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html_a7d912a82f0d7bc4f5de0c40675a389e6"><div class="ttname"><a href="classWTSHashMap.html#a7d912a82f0d7bc4f5de0c40675a389e6">WTSHashMap::grab</a></div><div class="ttdeci">WTSObject * grab(const T &amp;_key) noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00644">WTSCollection.hpp:644</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html_a92728481e09486cd7200b2f91c446bd3"><div class="ttname"><a href="classWTSHashMap.html#a92728481e09486cd7200b2f91c446bd3">WTSHashMap::create</a></div><div class="ttdeci">static WTSHashMap&lt; T, Hash &gt; * create() noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00613">WTSCollection.hpp:613</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html_ad38538f62db5b2f37a18533f8192a01d"><div class="ttname"><a href="classWTSHashMap.html#ad38538f62db5b2f37a18533f8192a01d">WTSHashMap::add</a></div><div class="ttdeci">void add(const T &amp;_key, WTSObject *obj, bool bAutoRetain=true) noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00659">WTSCollection.hpp:659</a></div></div>
+<div class="ttc" id="aclassWTSHisTickData_html"><div class="ttname"><a href="classWTSHisTickData.html">WTSHisTickData</a></div><div class="ttdoc">历史Tick数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01954">WTSDataDef.hpp:1955</a></div></div>
+<div class="ttc" id="aclassWTSHisTickData_html_a826a25a2d3e5370b43b0d261ca51ce26"><div class="ttname"><a href="classWTSHisTickData.html#a826a25a2d3e5370b43b0d261ca51ce26">WTSHisTickData::appendTick</a></div><div class="ttdeci">void appendTick(const WTSTickStruct &amp;ts)</div><div class="ttdoc">追加一条Tick数据</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02108">WTSDataDef.hpp:2108</a></div></div>
+<div class="ttc" id="aclassWTSHisTickData_html_aa3b8c04eebd78124cf13d24b31fc09f9"><div class="ttname"><a href="classWTSHisTickData.html#aa3b8c04eebd78124cf13d24b31fc09f9">WTSHisTickData::isValidOnly</a></div><div class="ttdeci">bool isValidOnly() const</div><div class="ttdoc">判断是否仅包含有效数据</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02098">WTSDataDef.hpp:2098</a></div></div>
+<div class="ttc" id="aclassWTSKlineSlice_html"><div class="ttname"><a href="classWTSKlineSlice.html">WTSKlineSlice</a></div><div class="ttdoc">K线数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00295">WTSDataDef.hpp:296</a></div></div>
+<div class="ttc" id="aclassWTSOrdDtlSlice_html"><div class="ttname"><a href="classWTSOrdDtlSlice.html">WTSOrdDtlSlice</a></div><div class="ttdoc">委托明细数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02335">WTSDataDef.hpp:2336</a></div></div>
+<div class="ttc" id="aclassWTSOrdQueSlice_html"><div class="ttname"><a href="classWTSOrdQueSlice.html">WTSOrdQueSlice</a></div><div class="ttdoc">委托队列数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02442">WTSDataDef.hpp:2443</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a097548155cfbbf9a0a36e1ee1ce3ad38"><div class="ttname"><a href="classWTSTickData.html#a097548155cfbbf9a0a36e1ee1ce3ad38">WTSTickData::volume</a></div><div class="ttdeci">double volume() const</div><div class="ttdoc">获取当前成交量</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01428">WTSDataDef.hpp:1428</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a6a81212366831e7afe3eeac41b42e7b0"><div class="ttname"><a href="classWTSTickData.html#a6a81212366831e7afe3eeac41b42e7b0">WTSTickData::getTickStruct</a></div><div class="ttdeci">WTSTickStruct &amp; getTickStruct()</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01580">WTSDataDef.hpp:1580</a></div></div>
+<div class="ttc" id="aclassWTSTickSlice_html"><div class="ttname"><a href="classWTSTickSlice.html">WTSTickSlice</a></div><div class="ttdoc">Tick数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02128">WTSDataDef.hpp:2129</a></div></div>
+<div class="ttc" id="aclassWTSTransSlice_html"><div class="ttname"><a href="classWTSTransSlice.html">WTSTransSlice</a></div><div class="ttdoc">逐笔成交数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02549">WTSDataDef.hpp:2550</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWtUftDtMgr_html_a274d7465699bc0b0fce8c2349a6fead1"><div class="ttname"><a href="classWtUftDtMgr.html#a274d7465699bc0b0fce8c2349a6fead1">WtUftDtMgr::init</a></div><div class="ttdeci">bool init(WTSVariant *cfg, WtUftEngine *engine)</div><div class="ttdoc">初始化数据管理器</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8cpp_source.html#l00065">WtUftDtMgr.cpp:65</a></div></div>
+<div class="ttc" id="aclassWtUftDtMgr_html_a5e253795cc04373885b0ca2ce91eec16"><div class="ttname"><a href="classWtUftDtMgr.html#a5e253795cc04373885b0ca2ce91eec16">WtUftDtMgr::~WtUftDtMgr</a></div><div class="ttdeci">~WtUftDtMgr()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8cpp_source.html#l00046">WtUftDtMgr.cpp:46</a></div></div>
+<div class="ttc" id="aclassWtUftDtMgr_html_a64795a9fd191ad4d0ab0065006b8b1a2"><div class="ttname"><a href="classWtUftDtMgr.html#a64795a9fd191ad4d0ab0065006b8b1a2">WtUftDtMgr::get_transaction_slice</a></div><div class="ttdeci">virtual WTSTransSlice * get_transaction_slice(const char *stdCode, uint32_t count, uint64_t etime=0) override</div><div class="ttdoc">获取成交切片数据</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8cpp_source.html#l00169">WtUftDtMgr.cpp:169</a></div></div>
+<div class="ttc" id="aclassWtUftDtMgr_html_a6904f3e6902f24fe753f1ebbba15b2dd"><div class="ttname"><a href="classWtUftDtMgr.html#a6904f3e6902f24fe753f1ebbba15b2dd">WtUftDtMgr::_bars_cache</a></div><div class="ttdeci">DataCacheMap * _bars_cache</div><div class="ttdoc">K线缓存</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8h_source.html#l00130">WtUftDtMgr.h:130</a></div></div>
+<div class="ttc" id="aclassWtUftDtMgr_html_a7397fdd5b198ffccf18bffd9742ec097"><div class="ttname"><a href="classWtUftDtMgr.html#a7397fdd5b198ffccf18bffd9742ec097">WtUftDtMgr::handle_push_quote</a></div><div class="ttdeci">void handle_push_quote(const char *stdCode, WTSTickData *newTick)</div><div class="ttdoc">处理实时推送的行情数据</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8cpp_source.html#l00078">WtUftDtMgr.cpp:78</a></div></div>
+<div class="ttc" id="aclassWtUftDtMgr_html_a73bf74dbe78586bd9935ca75e6ff8ff4"><div class="ttname"><a href="classWtUftDtMgr.html#a73bf74dbe78586bd9935ca75e6ff8ff4">WtUftDtMgr::get_tick_slice</a></div><div class="ttdeci">virtual WTSTickSlice * get_tick_slice(const char *stdCode, uint32_t count, uint64_t etime=0) override</div><div class="ttdoc">获取Tick切片数据</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8cpp_source.html#l00130">WtUftDtMgr.cpp:130</a></div></div>
+<div class="ttc" id="aclassWtUftDtMgr_html_a7f02d0a8ad8582469ce2406098d422da"><div class="ttname"><a href="classWtUftDtMgr.html#a7f02d0a8ad8582469ce2406098d422da">WtUftDtMgr::_rt_tick_map</a></div><div class="ttdeci">DataCacheMap * _rt_tick_map</div><div class="ttdoc">实时tick缓存</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8h_source.html#l00132">WtUftDtMgr.h:132</a></div></div>
+<div class="ttc" id="aclassWtUftDtMgr_html_ab3aa5e855f94b62d823f6fb05c8093d9"><div class="ttname"><a href="classWtUftDtMgr.html#ab3aa5e855f94b62d823f6fb05c8093d9">WtUftDtMgr::grab_last_tick</a></div><div class="ttdeci">virtual WTSTickData * grab_last_tick(const char *stdCode) override</div><div class="ttdoc">获取最新的Tick数据</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8cpp_source.html#l00109">WtUftDtMgr.cpp:109</a></div></div>
+<div class="ttc" id="aclassWtUftDtMgr_html_abb0907d29372f4f4bd49971cc7414842"><div class="ttname"><a href="classWtUftDtMgr.html#abb0907d29372f4f4bd49971cc7414842">WtUftDtMgr::get_kline_slice</a></div><div class="ttdeci">virtual WTSKlineSlice * get_kline_slice(const char *stdCode, WTSKlinePeriod period, uint32_t times, uint32_t count, uint64_t etime=0) override</div><div class="ttdoc">获取K线切片数据</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8cpp_source.html#l00184">WtUftDtMgr.cpp:184</a></div></div>
+<div class="ttc" id="aclassWtUftDtMgr_html_abd73e6a4488bcbcc521cd78eebb4aab1"><div class="ttname"><a href="classWtUftDtMgr.html#abd73e6a4488bcbcc521cd78eebb4aab1">WtUftDtMgr::WtUftDtMgr</a></div><div class="ttdeci">WtUftDtMgr()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8cpp_source.html#l00033">WtUftDtMgr.cpp:33</a></div></div>
+<div class="ttc" id="aclassWtUftDtMgr_html_ac54e30b7a08be8d4eab8eba7c89a4a0c"><div class="ttname"><a href="classWtUftDtMgr.html#ac54e30b7a08be8d4eab8eba7c89a4a0c">WtUftDtMgr::get_order_queue_slice</a></div><div class="ttdeci">virtual WTSOrdQueSlice * get_order_queue_slice(const char *stdCode, uint32_t count, uint64_t etime=0) override</div><div class="ttdoc">获取委托队列切片数据</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8cpp_source.html#l00143">WtUftDtMgr.cpp:143</a></div></div>
+<div class="ttc" id="aclassWtUftDtMgr_html_aca3dbabad8aeda89de92e922a0890ddb"><div class="ttname"><a href="classWtUftDtMgr.html#aca3dbabad8aeda89de92e922a0890ddb">WtUftDtMgr::_ticks_cache</a></div><div class="ttdeci">DataCacheMap * _ticks_cache</div><div class="ttdoc">历史Tick缓存</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8h_source.html#l00131">WtUftDtMgr.h:131</a></div></div>
+<div class="ttc" id="aclassWtUftDtMgr_html_af58ff84dbe7a2b8cfc68f10940cc4086"><div class="ttname"><a href="classWtUftDtMgr.html#af58ff84dbe7a2b8cfc68f10940cc4086">WtUftDtMgr::get_order_detail_slice</a></div><div class="ttdeci">virtual WTSOrdDtlSlice * get_order_detail_slice(const char *stdCode, uint32_t count, uint64_t etime=0) override</div><div class="ttdoc">获取委托明细切片数据</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8cpp_source.html#l00156">WtUftDtMgr.cpp:156</a></div></div>
+<div class="ttc" id="aclassWtUftDtMgr_html_afb42c43efe91f084a7461f30742a15ec"><div class="ttname"><a href="classWtUftDtMgr.html#afb42c43efe91f084a7461f30742a15ec">WtUftDtMgr::_engine</a></div><div class="ttdeci">WtUftEngine * _engine</div><div class="ttdoc">UFT引擎指针</div><div class="ttdef"><b>Definition</b> <a href="WtUftDtMgr_8h_source.html#l00121">WtUftDtMgr.h:121</a></div></div>
+<div class="ttc" id="aclassWtUftEngine_html"><div class="ttname"><a href="classWtUftEngine.html">WtUftEngine</a></div><div class="ttdoc">UFT策略引擎类</div><div class="ttdef"><b>Definition</b> <a href="WtUftEngine_8h_source.html#l00064">WtUftEngine.h:65</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_d8cf3075eb9e2bed05522e3b08b8e887.html">WtUftCore</a></li><li class="navelem"><a class="el" href="WtUftDtMgr_8cpp.html">WtUftDtMgr.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

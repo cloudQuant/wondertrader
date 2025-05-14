@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtUftCore/EventNotifier.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtUftCore_2EventNotifier_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">EventNotifier.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtUftCore_2EventNotifier_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;boost/asio/io_service.hpp&gt;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../Includes/WTSMarcos.h&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;../Includes/WTSObject.hpp&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="WtUftCore_2EventNotifier_8h.html#ad2fd82701ffd71cefdf561fae2b49446">   26</a></span><span class="keyword">typedef</span> <span class="keywordtype">unsigned</span> long(*<a class="code hl_typedef" href="WtBtCore_2EventNotifier_8h.html#a04e245a6468716fe78599ffae9fad936">FuncCreateMQServer</a>)(<span class="keyword">const</span> <span class="keywordtype">char</span>*);</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="WtUftCore_2EventNotifier_8h.html#a3522cc64d06d81ed85a8b524cf8b82c2">   32</a></span><span class="keyword">typedef</span> void(*<a class="code hl_typedef" href="WtBtCore_2EventNotifier_8h.html#a3522cc64d06d81ed85a8b524cf8b82c2">FuncDestroyMQServer</a>)(<span class="keywordtype">unsigned</span> long);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="WtUftCore_2EventNotifier_8h.html#a87a3a860679f7f5e622261d4d0e6f287">   41</a></span><span class="keyword">typedef</span> void(*<a class="code hl_typedef" href="WtBtCore_2EventNotifier_8h.html#a87a3a860679f7f5e622261d4d0e6f287">FundPublishMessage</a>)(<span class="keywordtype">unsigned</span> long, <span class="keyword">const</span> <span class="keywordtype">char</span>*, <span class="keyword">const</span> <span class="keywordtype">char</span>*, <span class="keywordtype">unsigned</span> long);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="WtUftCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">   49</a></span><span class="keyword">typedef</span> void(*<a class="code hl_typedef" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>)(<span class="keywordtype">unsigned</span> long, <span class="keyword">const</span> <span class="keywordtype">char</span>*, bool);</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="WtUftCore_2EventNotifier_8h.html#a8d23775ba30cc3102a9ee6fafb76a871">   55</a></span><span class="keyword">typedef</span> void(*<a class="code hl_typedef" href="WtBtCore_2EventNotifier_8h.html#a8d23775ba30cc3102a9ee6fafb76a871">FuncRegCallbacks</a>)(<a class="code hl_typedef" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="keyword">class </span><a class="code hl_class" href="classWTSTradeInfo.html">WTSTradeInfo</a>;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="keyword">class </span><a class="code hl_class" href="classWTSOrderInfo.html">WTSOrderInfo</a>;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="keyword">class </span><a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="keyword">class </span><a class="code hl_class" href="classEventNotifier.html">EventNotifier</a></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>{</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="classEventNotifier.html#af4e8558e00d272a55547d72b34a5fedd">   77</a></span>    <a class="code hl_function" href="classEventNotifier.html#af4e8558e00d272a55547d72b34a5fedd">EventNotifier</a>();</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="classEventNotifier.html#a512da14ec6f0d036a919ab39617b97e9">   84</a></span>    <a class="code hl_function" href="classEventNotifier.html#a512da14ec6f0d036a919ab39617b97e9">~EventNotifier</a>();</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="classEventNotifier.html#a9ea3431fa5ced6a232d5e8dff5ebf1dd">   96</a></span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classEventNotifier.html#a9ea3431fa5ced6a232d5e8dff5ebf1dd">tradeToJson</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* trader, uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTradeInfo.html">WTSTradeInfo</a>* trdInfo, std::string&amp; output);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="classEventNotifier.html#a99137f05f5acbd16d150075ca9b20307">  107</a></span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classEventNotifier.html#a99137f05f5acbd16d150075ca9b20307">orderToJson</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* trader, uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSOrderInfo.html">WTSOrderInfo</a>* ordInfo, std::string&amp; output);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="classEventNotifier.html#a4547482410c8759f72673d3902b990ee">  118</a></span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classEventNotifier.html#a4547482410c8759f72673d3902b990ee">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg);</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="classEventNotifier.html#a2e1a5f8071c58d89422dcfafda32c703">  130</a></span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classEventNotifier.html#a2e1a5f8071c58d89422dcfafda32c703">notify</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* trader, uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTradeInfo.html">WTSTradeInfo</a>* trdInfo);</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="classEventNotifier.html#a2c8ed97d5ce86392c155fcbd43da3371">  142</a></span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classEventNotifier.html#a2c8ed97d5ce86392c155fcbd43da3371">notify</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* trader, uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSOrderInfo.html">WTSOrderInfo</a>* ordInfo);</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span> </div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno"><a class="line" href="classEventNotifier.html#ae90b62ade84181a8387ca5f6025bec6f">  152</a></span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classEventNotifier.html#ae90b62ade84181a8387ca5f6025bec6f">notify</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* trader, <span class="keyword">const</span> <span class="keywordtype">char</span>* message);</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno"><a class="line" href="classEventNotifier.html#afe59bb8dfd08ef8960743cb79d16c114">  162</a></span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classEventNotifier.html#afe59bb8dfd08ef8960743cb79d16c114">notify_log</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* tag, <span class="keyword">const</span> <span class="keywordtype">char</span>* message);</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno"><a class="line" href="classEventNotifier.html#a6ddecad48701ffcf7ee388485b6f29a9">  171</a></span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classEventNotifier.html#a6ddecad48701ffcf7ee388485b6f29a9">notify_event</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* message);</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    std::string     <a class="code hl_variable" href="classEventNotifier.html#a1f9ec2c20ca9091b290bffb1866bd7f4">_url</a>;           </div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    uint32_t        <a class="code hl_variable" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a>;        </div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    <a class="code hl_typedef" href="WtUftCore_2EventNotifier_8h.html#ad2fd82701ffd71cefdf561fae2b49446">FuncCreateMQServer</a>  <a class="code hl_variable" href="classEventNotifier.html#a36a31a906436f07677cf62d750794140">_creator</a>;       </div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    <a class="code hl_typedef" href="WtUftCore_2EventNotifier_8h.html#a3522cc64d06d81ed85a8b524cf8b82c2">FuncDestroyMQServer</a> <a class="code hl_variable" href="classEventNotifier.html#a57d276e9cf1a7247de069554d229aa45">_remover</a>;       </div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    <a class="code hl_typedef" href="WtUftCore_2EventNotifier_8h.html#a87a3a860679f7f5e622261d4d0e6f287">FundPublishMessage</a>  <a class="code hl_variable" href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">_publisher</a>;     </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    <a class="code hl_typedef" href="WtUftCore_2EventNotifier_8h.html#a8d23775ba30cc3102a9ee6fafb76a871">FuncRegCallbacks</a>    <a class="code hl_variable" href="classEventNotifier.html#a408f207bc3cb4821c72e1080b663711e">_register</a>;      </div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classEventNotifier.html#a12ec122bae2c557400acc7ee196e2d1e">_stopped</a>;       </div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    boost::asio::io_service     <a class="code hl_variable" href="classEventNotifier.html#a0919eddb5d2f795e841f17949ab22b96">_asyncio</a>;       </div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    <a class="code hl_typedef" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>                <a class="code hl_variable" href="classEventNotifier.html#af88b03ed7914f730cab479513b38748b">_worker</a>;        </div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>};</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aWtBtCore_2EventNotifier_8h_html_a04e245a6468716fe78599ffae9fad936"><div class="ttname"><a href="WtBtCore_2EventNotifier_8h.html#a04e245a6468716fe78599ffae9fad936">FuncCreateMQServer</a></div><div class="ttdeci">unsigned long(* FuncCreateMQServer)(const char *, bool)</div><div class="ttdoc">创建消息队列服务器的函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00024">EventNotifier.h:24</a></div></div>
+<div class="ttc" id="aWtBtCore_2EventNotifier_8h_html_a3522cc64d06d81ed85a8b524cf8b82c2"><div class="ttname"><a href="WtBtCore_2EventNotifier_8h.html#a3522cc64d06d81ed85a8b524cf8b82c2">FuncDestroyMQServer</a></div><div class="ttdeci">void(* FuncDestroyMQServer)(unsigned long)</div><div class="ttdoc">销毁消息队列服务器的函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00030">EventNotifier.h:30</a></div></div>
+<div class="ttc" id="aWtBtCore_2EventNotifier_8h_html_a749dc86d073c15a88e4a719af94bc813"><div class="ttname"><a href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a></div><div class="ttdeci">void(* FuncLogCallback)(unsigned long, const char *, bool)</div><div class="ttdoc">日志回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00047">EventNotifier.h:47</a></div></div>
+<div class="ttc" id="aWtBtCore_2EventNotifier_8h_html_a87a3a860679f7f5e622261d4d0e6f287"><div class="ttname"><a href="WtBtCore_2EventNotifier_8h.html#a87a3a860679f7f5e622261d4d0e6f287">FundPublishMessage</a></div><div class="ttdeci">void(* FundPublishMessage)(unsigned long, const char *, const char *, unsigned long)</div><div class="ttdoc">发布消息的函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00039">EventNotifier.h:39</a></div></div>
+<div class="ttc" id="aWtBtCore_2EventNotifier_8h_html_a8d23775ba30cc3102a9ee6fafb76a871"><div class="ttname"><a href="WtBtCore_2EventNotifier_8h.html#a8d23775ba30cc3102a9ee6fafb76a871">FuncRegCallbacks</a></div><div class="ttdeci">void(* FuncRegCallbacks)(FuncLogCallback)</div><div class="ttdoc">注册回调函数的函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00053">EventNotifier.h:53</a></div></div>
+<div class="ttc" id="aWtUftCore_2EventNotifier_8h_html_a3522cc64d06d81ed85a8b524cf8b82c2"><div class="ttname"><a href="WtUftCore_2EventNotifier_8h.html#a3522cc64d06d81ed85a8b524cf8b82c2">FuncDestroyMQServer</a></div><div class="ttdeci">void(* FuncDestroyMQServer)(unsigned long)</div><div class="ttdoc">销毁消息队列服务器函数指针类型</div><div class="ttdef"><b>Definition</b> <a href="WtUftCore_2EventNotifier_8h_source.html#l00032">EventNotifier.h:32</a></div></div>
+<div class="ttc" id="aWtUftCore_2EventNotifier_8h_html_a87a3a860679f7f5e622261d4d0e6f287"><div class="ttname"><a href="WtUftCore_2EventNotifier_8h.html#a87a3a860679f7f5e622261d4d0e6f287">FundPublishMessage</a></div><div class="ttdeci">void(* FundPublishMessage)(unsigned long, const char *, const char *, unsigned long)</div><div class="ttdoc">发布消息函数指针类型</div><div class="ttdef"><b>Definition</b> <a href="WtUftCore_2EventNotifier_8h_source.html#l00041">EventNotifier.h:41</a></div></div>
+<div class="ttc" id="aWtUftCore_2EventNotifier_8h_html_a8d23775ba30cc3102a9ee6fafb76a871"><div class="ttname"><a href="WtUftCore_2EventNotifier_8h.html#a8d23775ba30cc3102a9ee6fafb76a871">FuncRegCallbacks</a></div><div class="ttdeci">void(* FuncRegCallbacks)(FuncLogCallback)</div><div class="ttdoc">注册回调函数指针类型</div><div class="ttdef"><b>Definition</b> <a href="WtUftCore_2EventNotifier_8h_source.html#l00055">EventNotifier.h:55</a></div></div>
+<div class="ttc" id="aWtUftCore_2EventNotifier_8h_html_ad2fd82701ffd71cefdf561fae2b49446"><div class="ttname"><a href="WtUftCore_2EventNotifier_8h.html#ad2fd82701ffd71cefdf561fae2b49446">FuncCreateMQServer</a></div><div class="ttdeci">unsigned long(* FuncCreateMQServer)(const char *)</div><div class="ttdoc">创建消息队列服务器函数指针类型</div><div class="ttdef"><b>Definition</b> <a href="WtUftCore_2EventNotifier_8h_source.html#l00026">EventNotifier.h:26</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html"><div class="ttname"><a href="classEventNotifier.html">EventNotifier</a></div><div class="ttdoc">事件通知器类，用于回测过程中的事件、数据和资金信息广播</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00063">EventNotifier.h:64</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a0919eddb5d2f795e841f17949ab22b96"><div class="ttname"><a href="classEventNotifier.html#a0919eddb5d2f795e841f17949ab22b96">EventNotifier::_asyncio</a></div><div class="ttdeci">boost::asio::io_service _asyncio</div><div class="ttdoc">asio异步IO服务</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2EventNotifier_8h_source.html#l00187">EventNotifier.h:187</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a101f642fc6b56698302eb941d769331c"><div class="ttname"><a href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">EventNotifier::_publisher</a></div><div class="ttdeci">FundPublishMessage _publisher</div><div class="ttdoc">发布消息的函数指针</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00115">EventNotifier.h:115</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a12ec122bae2c557400acc7ee196e2d1e"><div class="ttname"><a href="classEventNotifier.html#a12ec122bae2c557400acc7ee196e2d1e">EventNotifier::_stopped</a></div><div class="ttdeci">bool _stopped</div><div class="ttdoc">是否停止工作线程</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2EventNotifier_8h_source.html#l00186">EventNotifier.h:186</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a1f9ec2c20ca9091b290bffb1866bd7f4"><div class="ttname"><a href="classEventNotifier.html#a1f9ec2c20ca9091b290bffb1866bd7f4">EventNotifier::_url</a></div><div class="ttdeci">std::string _url</div><div class="ttdoc">消息队列服务器URL</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2EventNotifier_8h_source.html#l00179">EventNotifier.h:179</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a2c8ed97d5ce86392c155fcbd43da3371"><div class="ttname"><a href="classEventNotifier.html#a2c8ed97d5ce86392c155fcbd43da3371">EventNotifier::notify</a></div><div class="ttdeci">void notify(const char *trader, uint32_t localid, const char *stdCode, WTSOrderInfo *ordInfo)</div><div class="ttdoc">通知订单信息</div></div>
+<div class="ttc" id="aclassEventNotifier_html_a2e1a5f8071c58d89422dcfafda32c703"><div class="ttname"><a href="classEventNotifier.html#a2e1a5f8071c58d89422dcfafda32c703">EventNotifier::notify</a></div><div class="ttdeci">void notify(const char *trader, uint32_t localid, const char *stdCode, WTSTradeInfo *trdInfo)</div><div class="ttdoc">通知成交信息</div></div>
+<div class="ttc" id="aclassEventNotifier_html_a36a31a906436f07677cf62d750794140"><div class="ttname"><a href="classEventNotifier.html#a36a31a906436f07677cf62d750794140">EventNotifier::_creator</a></div><div class="ttdeci">FuncCreateMQServer _creator</div><div class="ttdoc">创建消息队列服务器的函数指针</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00113">EventNotifier.h:113</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a408f207bc3cb4821c72e1080b663711e"><div class="ttname"><a href="classEventNotifier.html#a408f207bc3cb4821c72e1080b663711e">EventNotifier::_register</a></div><div class="ttdeci">FuncRegCallbacks _register</div><div class="ttdoc">注册回调函数的函数指针</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00116">EventNotifier.h:116</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a4547482410c8759f72673d3902b990ee"><div class="ttname"><a href="classEventNotifier.html#a4547482410c8759f72673d3902b990ee">EventNotifier::init</a></div><div class="ttdeci">bool init(WTSVariant *cfg)</div><div class="ttdoc">初始化事件通知器</div></div>
+<div class="ttc" id="aclassEventNotifier_html_a512da14ec6f0d036a919ab39617b97e9"><div class="ttname"><a href="classEventNotifier.html#a512da14ec6f0d036a919ab39617b97e9">EventNotifier::~EventNotifier</a></div><div class="ttdeci">~EventNotifier()</div><div class="ttdoc">析构函数</div></div>
+<div class="ttc" id="aclassEventNotifier_html_a57d276e9cf1a7247de069554d229aa45"><div class="ttname"><a href="classEventNotifier.html#a57d276e9cf1a7247de069554d229aa45">EventNotifier::_remover</a></div><div class="ttdeci">FuncDestroyMQServer _remover</div><div class="ttdoc">销毁消息队列服务器的函数指针</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00114">EventNotifier.h:114</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a6ddecad48701ffcf7ee388485b6f29a9"><div class="ttname"><a href="classEventNotifier.html#a6ddecad48701ffcf7ee388485b6f29a9">EventNotifier::notify_event</a></div><div class="ttdeci">void notify_event(const char *message)</div><div class="ttdoc">通知事件信息</div></div>
+<div class="ttc" id="aclassEventNotifier_html_a7d72e6fb52f53aa3a24fd1b1a1611cfd"><div class="ttname"><a href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">EventNotifier::_mq_sid</a></div><div class="ttdeci">uint32_t _mq_sid</div><div class="ttdoc">消息队列服务器ID</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00112">EventNotifier.h:112</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a99137f05f5acbd16d150075ca9b20307"><div class="ttname"><a href="classEventNotifier.html#a99137f05f5acbd16d150075ca9b20307">EventNotifier::orderToJson</a></div><div class="ttdeci">void orderToJson(const char *trader, uint32_t localid, const char *stdCode, WTSOrderInfo *ordInfo, std::string &amp;output)</div><div class="ttdoc">将订单信息转换为JSON格式</div></div>
+<div class="ttc" id="aclassEventNotifier_html_a9ea3431fa5ced6a232d5e8dff5ebf1dd"><div class="ttname"><a href="classEventNotifier.html#a9ea3431fa5ced6a232d5e8dff5ebf1dd">EventNotifier::tradeToJson</a></div><div class="ttdeci">void tradeToJson(const char *trader, uint32_t localid, const char *stdCode, WTSTradeInfo *trdInfo, std::string &amp;output)</div><div class="ttdoc">将成交信息转换为JSON格式</div></div>
+<div class="ttc" id="aclassEventNotifier_html_ae90b62ade84181a8387ca5f6025bec6f"><div class="ttname"><a href="classEventNotifier.html#ae90b62ade84181a8387ca5f6025bec6f">EventNotifier::notify</a></div><div class="ttdeci">void notify(const char *trader, const char *message)</div><div class="ttdoc">通知交易消息</div></div>
+<div class="ttc" id="aclassEventNotifier_html_af4e8558e00d272a55547d72b34a5fedd"><div class="ttname"><a href="classEventNotifier.html#af4e8558e00d272a55547d72b34a5fedd">EventNotifier::EventNotifier</a></div><div class="ttdeci">EventNotifier()</div><div class="ttdoc">构造函数</div></div>
+<div class="ttc" id="aclassEventNotifier_html_af88b03ed7914f730cab479513b38748b"><div class="ttname"><a href="classEventNotifier.html#af88b03ed7914f730cab479513b38748b">EventNotifier::_worker</a></div><div class="ttdeci">StdThreadPtr _worker</div><div class="ttdoc">工作线程指针</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2EventNotifier_8h_source.html#l00188">EventNotifier.h:188</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_afe59bb8dfd08ef8960743cb79d16c114"><div class="ttname"><a href="classEventNotifier.html#afe59bb8dfd08ef8960743cb79d16c114">EventNotifier::notify_log</a></div><div class="ttdeci">void notify_log(const char *tag, const char *message)</div><div class="ttdoc">通知日志信息</div></div>
+<div class="ttc" id="aclassWTSOrderInfo_html"><div class="ttname"><a href="classWTSOrderInfo.html">WTSOrderInfo</a></div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00235">WTSTradeDef.hpp:236</a></div></div>
+<div class="ttc" id="aclassWTSTradeInfo_html"><div class="ttname"><a href="classWTSTradeInfo.html">WTSTradeInfo</a></div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00406">WTSTradeDef.hpp:407</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="agroup__ThreadUtils_html_gaf9ea8e1e64d43ab034614d39d0b35776"><div class="ttname"><a href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a></div><div class="ttdeci">std::shared_ptr&lt; StdThread &gt; StdThreadPtr</div><div class="ttdoc">线程智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00042">StdUtils.hpp:42</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_d8cf3075eb9e2bed05522e3b08b8e887.html">WtUftCore</a></li><li class="navelem"><a class="el" href="WtUftCore_2EventNotifier_8h.html">EventNotifier.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

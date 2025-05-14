@@ -1,0 +1,25 @@
+var classYDMarketData =
+[
+    [ "AskPrice", "classYDMarketData.html#ad1eb6628e2738ee47345b6a6808e5d75", null ],
+    [ "AskVolume", "classYDMarketData.html#a0107ab280bcfda248eba24c984a11823", null ],
+    [ "AveragePrice", "classYDMarketData.html#af304b8c86877a395b596ed812363192a", null ],
+    [ "BidPrice", "classYDMarketData.html#ada09e9e9ae8338d84c4edbb7a191d806", null ],
+    [ "BidVolume", "classYDMarketData.html#a50bf1120f2e23765e619878d1a40ba1d", null ],
+    [ "InstrumentRef", "classYDMarketData.html#a1a184072c05f3dac5341b3bf62d8d4e2", null ],
+    [ "LastPrice", "classYDMarketData.html#a96baf3b2bf3898b49372005efc855bd2", null ],
+    [ "LowerLimitPrice", "classYDMarketData.html#a876f425dd6bfb21ddb1892b44b4f778b", null ],
+    [ "m_pInstrument", "classYDMarketData.html#a9a21bb6b8abf14e032cdcb7af09be629", null ],
+    [ "OpenInterest", "classYDMarketData.html#a6715fa190d451952b2698523082b8f08", null ],
+    [ "PreClosePrice", "classYDMarketData.html#a5cca3af9857fdbd5499698e15c372a04", null ],
+    [ "PreOpenInterest", "classYDMarketData.html#a097dc535c2faa8c4ba9c9a29ea4ec74a", null ],
+    [ "PreSettlementPrice", "classYDMarketData.html#a4d2ebf22769ca1bab155a896580c0a90", null ],
+    [ "pUser", "classYDMarketData.html#a3141401d83c20482f3d3737907dd4765", null ],
+    [ "TimeStamp", "classYDMarketData.html#af8c8bf8ff9903d82e625bdd2fd3c62cd", null ],
+    [ "TradingDay", "classYDMarketData.html#a64504b6be41f2a3dbadffb401e5a9de3", null ],
+    [ "Turnover", "classYDMarketData.html#a8f028a2366a6ec0e5ba8b10b0d2a04b3", null ],
+    [ "UpperLimitPrice", "classYDMarketData.html#a23edba16fed3771b65e7bc6c364489cb", null ],
+    [ "UserFloat", "classYDMarketData.html#a700519edf8de2888c16d6906b15a5e43", null ],
+    [ "UserInt1", "classYDMarketData.html#aaa567035a934579104223ec6b738f905", null ],
+    [ "UserInt2", "classYDMarketData.html#a602c83dedc8c60710dea43f8695dca75", null ],
+    [ "Volume", "classYDMarketData.html#a6bf32593d2ea3a002c80ef3e99026fb7", null ]
+];

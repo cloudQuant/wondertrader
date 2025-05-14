@@ -1,0 +1,307 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtBtCore/MatchEngine.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('MatchEngine_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">MatchEngine.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="MatchEngine_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;map&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;functional&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Includes/WTSMarcos.h&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/WTSCollection.hpp&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../Includes/FasterDefs.h&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">class </span><a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">class </span><a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="MatchEngine_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">   23</a></span><a class="code hl_variable" href="MatchEngine_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="MatchEngine_8h.html#a5956353808ff4eea2def6475db30bc0d">   29</a></span><span class="keyword">typedef</span> std::vector&lt;uint32_t&gt; <a class="code hl_typedef" href="MatchEngine_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="MatchEngine_8h.html#aa63c38f68f3c78457471222f35a139d4">   35</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classWTSHashMap.html">WTSHashMap&lt;std::string&gt;</a> <a class="code hl_typedef" href="MatchEngine_8h.html#aa63c38f68f3c78457471222f35a139d4">WTSTickCache</a>;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="foldopen" id="foldopen00041" data-start="{" data-end="};">
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="classIMatchSink.html">   41</a></span><span class="keyword">class </span><a class="code hl_class" href="classIMatchSink.html">IMatchSink</a></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>{</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="classIMatchSink.html#a2a6998ffd98595703716c4b27eb96e82">   56</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classIMatchSink.html#a2a6998ffd98595703716c4b27eb96e82">handle_trade</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> vol, <span class="keywordtype">double</span> fireprice, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, uint64_t ordTime) = 0;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="classIMatchSink.html#aafb169f0bb13d7672ad40ba8e5460787">   70</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classIMatchSink.html#aafb169f0bb13d7672ad40ba8e5460787">handle_order</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> leftover, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <span class="keywordtype">bool</span> isCanceled, uint64_t ordTime) = 0;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="classIMatchSink.html#a27bcde4c05c0c46654f65bf3192b017b">   82</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classIMatchSink.html#a27bcde4c05c0c46654f65bf3192b017b">handle_entrust</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> bSuccess, <span class="keyword">const</span> <span class="keywordtype">char</span>* message, uint64_t ordTime) = 0;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>};</div>
+</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="MatchEngine_8h.html#a4bf043f806f5dedf2dfa5bf742243b68">   89</a></span><span class="keyword">typedef</span> std::function&lt;void(<span class="keywordtype">double</span>)&gt; <a class="code hl_typedef" href="MatchEngine_8h.html#a4bf043f806f5dedf2dfa5bf742243b68">FuncCancelCallback</a>;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="foldopen" id="foldopen00096" data-start="{" data-end="};">
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="classMatchEngine.html">   96</a></span><span class="keyword">class </span><a class="code hl_class" href="classMatchEngine.html">MatchEngine</a></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>{</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00103" data-start="{" data-end="}">
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="classMatchEngine.html#ab4ad8f429ed2f2f84d9710faf389f512">  103</a></span>    <a class="code hl_function" href="classMatchEngine.html#ab4ad8f429ed2f2f84d9710faf389f512">MatchEngine</a>() : <a class="code hl_variable" href="classMatchEngine.html#a3bfe33e7a9e446f2ca8de6b90de036c5">_tick_cache</a>(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>),<a class="code hl_variable" href="classMatchEngine.html#a44d87d11de81cd153932205fa2bad2bc">_cancelrate</a>(0), <a class="code hl_variable" href="classMatchEngine.html#af214d76be9f4fe7367476c75995bb744">_sink</a>(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    {</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    }</div>
+</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classMatchEngine.html#a937e0e40f9d79f19fd6d4b3786287713">fire_orders</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_typedef" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>&amp; to_erase);</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classMatchEngine.html#a2226ea0a9fd2eb96384baafd7fcce80f">match_orders</a>(<a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* curTick, <a class="code hl_typedef" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>&amp; to_erase);</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classMatchEngine.html#a90f57ea3191db71c955b76a36435bebf">update_lob</a>(<a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* curTick);</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    <span class="keyword">inline</span> <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* <a class="code hl_function" href="classMatchEngine.html#a72d737c7c7646f6048f720a62f7462b0">grab_last_tick</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode);</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classMatchEngine.html#ab5e12e4d04719eab3d3e7a2ddd492ad9">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg);</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno"><a class="line" href="classMatchEngine.html#aaa73887abfbdfc9c308c7494156a9f4b">  156</a></span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classMatchEngine.html#aaa73887abfbdfc9c308c7494156a9f4b">regisSink</a>(<a class="code hl_class" href="classIMatchSink.html">IMatchSink</a>* sink) { <a class="code hl_variable" href="classMatchEngine.html#af214d76be9f4fe7367476c75995bb744">_sink</a> = sink; }</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classMatchEngine.html#ae991aa427cc14ee90216e3ef9baca6db">clear</a>();</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classMatchEngine.html#a3098110cf900b07329c72249ecc2f909">handle_tick</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* curTick);</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    <a class="code hl_typedef" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>    <a class="code hl_function" href="classMatchEngine.html#a70bde061e843d48d67e9a3a446cdee53">buy</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <span class="keywordtype">double</span> qty, uint64_t curTime);</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <a class="code hl_typedef" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>    <a class="code hl_function" href="classMatchEngine.html#a57f17f93b1376a13367ead95bd8e1c6e">sell</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <span class="keywordtype">double</span> qty, uint64_t curTime);</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>    <span class="keywordtype">double</span>      <a class="code hl_function" href="classMatchEngine.html#a784cbff27fc3bd6030eadd809148f530">cancel</a>(uint32_t localid);</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    <span class="keyword">virtual</span> <a class="code hl_typedef" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a> <a class="code hl_function" href="classMatchEngine.html#a784cbff27fc3bd6030eadd809148f530">cancel</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> qty, <a class="code hl_typedef" href="MatchEngine_8h.html#a4bf043f806f5dedf2dfa5bf742243b68">FuncCancelCallback</a> cb);</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span> </div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span><span class="keyword">private</span>:</div>
+<div class="foldopen" id="foldopen00220" data-start="{" data-end="};">
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__OrderInfo.html">  220</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structMatchEngine_1_1__OrderInfo.html">_OrderInfo</a></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>    {</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__OrderInfo.html#a0d09747ddf7a0bb7c17f3b23a12999c4">  222</a></span>        <span class="keywordtype">char</span>        <a class="code hl_variable" href="structMatchEngine_1_1__OrderInfo.html#a0d09747ddf7a0bb7c17f3b23a12999c4">_code</a>[32];      </div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__OrderInfo.html#aeca77348497ebc93e0862ee50ee30d54">  223</a></span>        <span class="keywordtype">bool</span>        <a class="code hl_variable" href="structMatchEngine_1_1__OrderInfo.html#aeca77348497ebc93e0862ee50ee30d54">_buy</a>;           </div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__OrderInfo.html#aa09d18f7aa26f39de635844c35206e36">  224</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structMatchEngine_1_1__OrderInfo.html#aa09d18f7aa26f39de635844c35206e36">_qty</a>;           </div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__OrderInfo.html#aed27677440a43b1940988b077b9ac40e">  225</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structMatchEngine_1_1__OrderInfo.html#aed27677440a43b1940988b077b9ac40e">_left</a>;          </div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__OrderInfo.html#ae90f4918a84ef7112d9a134b77c7f7ef">  226</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structMatchEngine_1_1__OrderInfo.html#ae90f4918a84ef7112d9a134b77c7f7ef">_traded</a>;        </div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__OrderInfo.html#ab1db1a2dcc123311d5aebed92179acac">  227</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structMatchEngine_1_1__OrderInfo.html#ab1db1a2dcc123311d5aebed92179acac">_limit</a>;         </div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__OrderInfo.html#ad6a39f49c93ea0b0b0e0c6babf25456e">  228</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structMatchEngine_1_1__OrderInfo.html#ad6a39f49c93ea0b0b0e0c6babf25456e">_price</a>;         </div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__OrderInfo.html#a0e8b10399aa00c299fd19bbe980ae84f">  229</a></span>        uint32_t    <a class="code hl_variable" href="structMatchEngine_1_1__OrderInfo.html#a0e8b10399aa00c299fd19bbe980ae84f">_state</a>;         </div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__OrderInfo.html#ab055b888b270a49f69d9ee5e76e1c535">  230</a></span>        uint64_t    <a class="code hl_variable" href="structMatchEngine_1_1__OrderInfo.html#ab055b888b270a49f69d9ee5e76e1c535">_time</a>;          </div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__OrderInfo.html#ad7d113e197bceed5198442074cf574a5">  231</a></span>        <span class="keywordtype">double</span>      <a class="code hl_variable" href="structMatchEngine_1_1__OrderInfo.html#ad7d113e197bceed5198442074cf574a5">_queue</a>;         </div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__OrderInfo.html#a8e9c5a28a7557999369502edc014bbac">  232</a></span>        <span class="keywordtype">bool</span>        <a class="code hl_variable" href="structMatchEngine_1_1__OrderInfo.html#a8e9c5a28a7557999369502edc014bbac">_positive</a>;      </div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span> </div>
+<div class="foldopen" id="foldopen00238" data-start="{" data-end="}">
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__OrderInfo.html#aecb5b05616f3f424a2572d949f6f2b71">  238</a></span>        <a class="code hl_function" href="structMatchEngine_1_1__OrderInfo.html#aecb5b05616f3f424a2572d949f6f2b71">_OrderInfo</a>()</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        {</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>            memset(<span class="keyword">this</span>, 0, <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structMatchEngine_1_1__OrderInfo.html">_OrderInfo</a>));</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        }</div>
+</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno"><a class="line" href="classMatchEngine.html#a8cf853fd4ba148c9361f5f6f53f42441">  242</a></span>    } <a class="code hl_typedef" href="classMatchEngine.html#a8cf853fd4ba148c9361f5f6f53f42441">OrderInfo</a>;</div>
+</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span> </div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno"><a class="line" href="classMatchEngine.html#a19ba92f943238543cd721c6af10e17ea">  248</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;uint32_t, OrderInfo&gt;</a> <a class="code hl_typedef" href="classMatchEngine.html#a19ba92f943238543cd721c6af10e17ea">Orders</a>;</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno"><a class="line" href="classMatchEngine.html#ae94b579dc86ec13c3368d9499379a4de">  249</a></span>    <a class="code hl_class" href="classwt__hashmap.html">Orders</a>  <a class="code hl_variable" href="classMatchEngine.html#ae94b579dc86ec13c3368d9499379a4de">_orders</a>;    </div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span> </div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno"><a class="line" href="classMatchEngine.html#a4561a811423e67f97381621fbc3d0fdd">  255</a></span>    <span class="keyword">typedef</span> std::map&lt;uint32_t, double&gt;  <a class="code hl_typedef" href="classMatchEngine.html#a4561a811423e67f97381621fbc3d0fdd">LOBItems</a>;</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span> </div>
+<div class="foldopen" id="foldopen00261" data-start="{" data-end="};">
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__LmtOrdBook.html">  261</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structMatchEngine_1_1__LmtOrdBook.html">_LmtOrdBook</a></div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>    {</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__LmtOrdBook.html#af97c09a362623cf69e9d4ea820b561da">  263</a></span>        <a class="code hl_typedef" href="classMatchEngine.html#a4561a811423e67f97381621fbc3d0fdd">LOBItems</a>    <a class="code hl_variable" href="structMatchEngine_1_1__LmtOrdBook.html#af97c09a362623cf69e9d4ea820b561da">_items</a>;        </div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__LmtOrdBook.html#a6d07a76edc1df5e07409ca172fcd36de">  264</a></span>        uint32_t    <a class="code hl_variable" href="structMatchEngine_1_1__LmtOrdBook.html#a6d07a76edc1df5e07409ca172fcd36de">_cur_px</a>;       </div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__LmtOrdBook.html#afb35914f3e23551c04887ffce3087278">  265</a></span>        uint32_t    <a class="code hl_variable" href="structMatchEngine_1_1__LmtOrdBook.html#afb35914f3e23551c04887ffce3087278">_ask_px</a>;       </div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__LmtOrdBook.html#ae0e582ad5fc1311d9394d57d835414b9">  266</a></span>        uint32_t    <a class="code hl_variable" href="structMatchEngine_1_1__LmtOrdBook.html#ae0e582ad5fc1311d9394d57d835414b9">_bid_px</a>;       </div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span> </div>
+<div class="foldopen" id="foldopen00272" data-start="{" data-end="}">
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__LmtOrdBook.html#a9344dda5c719ad103209ad3f3e0ada29">  272</a></span>        <span class="keywordtype">void</span> <a class="code hl_function" href="structMatchEngine_1_1__LmtOrdBook.html#a9344dda5c719ad103209ad3f3e0ada29">clear</a>()</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>        {</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>            <a class="code hl_variable" href="structMatchEngine_1_1__LmtOrdBook.html#af97c09a362623cf69e9d4ea820b561da">_items</a>.clear();</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>            <a class="code hl_variable" href="structMatchEngine_1_1__LmtOrdBook.html#a6d07a76edc1df5e07409ca172fcd36de">_cur_px</a> = 0;</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>            <a class="code hl_variable" href="structMatchEngine_1_1__LmtOrdBook.html#afb35914f3e23551c04887ffce3087278">_ask_px</a> = 0;</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>            <a class="code hl_variable" href="structMatchEngine_1_1__LmtOrdBook.html#ae0e582ad5fc1311d9394d57d835414b9">_bid_px</a> = 0;</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        }</div>
+</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
+<div class="foldopen" id="foldopen00284" data-start="{" data-end="}">
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno"><a class="line" href="structMatchEngine_1_1__LmtOrdBook.html#acd70a071871619754a13031d9be43915">  284</a></span>        <a class="code hl_function" href="structMatchEngine_1_1__LmtOrdBook.html#acd70a071871619754a13031d9be43915">_LmtOrdBook</a>()</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>        {</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>            <a class="code hl_variable" href="structMatchEngine_1_1__LmtOrdBook.html#a6d07a76edc1df5e07409ca172fcd36de">_cur_px</a> = 0;</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>            <a class="code hl_variable" href="structMatchEngine_1_1__LmtOrdBook.html#afb35914f3e23551c04887ffce3087278">_ask_px</a> = 0;</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>            <a class="code hl_variable" href="structMatchEngine_1_1__LmtOrdBook.html#ae0e582ad5fc1311d9394d57d835414b9">_bid_px</a> = 0;</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>        }</div>
+</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno"><a class="line" href="classMatchEngine.html#ad18cf974bd1fe5dd411fd233ae93c3dd">  290</a></span>    } <a class="code hl_typedef" href="classMatchEngine.html#ad18cf974bd1fe5dd411fd233ae93c3dd">LmtOrdBook</a>;</div>
+</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno"><a class="line" href="classMatchEngine.html#acd67f3100a4601f79513e1685019f0bb">  295</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, LmtOrdBook&gt;</a> <a class="code hl_typedef" href="classMatchEngine.html#acd67f3100a4601f79513e1685019f0bb">LmtOrdBooks</a>;</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno"><a class="line" href="classMatchEngine.html#aeaae268d8559c656a01ba4059c368bc7">  296</a></span>    <a class="code hl_class" href="classwt__hashmap.html">LmtOrdBooks</a> <a class="code hl_variable" href="classMatchEngine.html#aeaae268d8559c656a01ba4059c368bc7">_lmt_ord_books</a>;    </div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span> </div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno"><a class="line" href="classMatchEngine.html#af214d76be9f4fe7367476c75995bb744">  298</a></span>    <a class="code hl_class" href="classIMatchSink.html">IMatchSink</a>* <a class="code hl_variable" href="classMatchEngine.html#af214d76be9f4fe7367476c75995bb744">_sink</a>;          </div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span> </div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno"><a class="line" href="classMatchEngine.html#a44d87d11de81cd153932205fa2bad2bc">  300</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classMatchEngine.html#a44d87d11de81cd153932205fa2bad2bc">_cancelrate</a>;     </div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno"><a class="line" href="classMatchEngine.html#a3bfe33e7a9e446f2ca8de6b90de036c5">  301</a></span>    <a class="code hl_class" href="classWTSHashMap.html">WTSTickCache</a>*   <a class="code hl_variable" href="classMatchEngine.html#a3bfe33e7a9e446f2ca8de6b90de036c5">_tick_cache</a>;    </div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>};</div>
+</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span> </div>
+<div class="ttc" id="aExecuteDefs_8h_html_a5956353808ff4eea2def6475db30bc0d"><div class="ttname"><a href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a></div><div class="ttdeci">std::vector&lt; uint32_t &gt; OrderIDs</div><div class="ttdef"><b>Definition</b> <a href="ExecuteDefs_8h_source.html#l00021">ExecuteDefs.h:21</a></div></div>
+<div class="ttc" id="aMatchEngine_8h_html_a4bf043f806f5dedf2dfa5bf742243b68"><div class="ttname"><a href="MatchEngine_8h.html#a4bf043f806f5dedf2dfa5bf742243b68">FuncCancelCallback</a></div><div class="ttdeci">std::function&lt; void(double)&gt; FuncCancelCallback</div><div class="ttdoc">撤单回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00089">MatchEngine.h:89</a></div></div>
+<div class="ttc" id="aMatchEngine_8h_html_a5956353808ff4eea2def6475db30bc0d"><div class="ttname"><a href="MatchEngine_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a></div><div class="ttdeci">std::vector&lt; uint32_t &gt; OrderIDs</div><div class="ttdoc">订单ID列表类型</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00029">MatchEngine.h:29</a></div></div>
+<div class="ttc" id="aMatchEngine_8h_html_a9e1fc31194100ab43bbad77a2f5c12b3"><div class="ttname"><a href="MatchEngine_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a></div><div class="ttdeci">NS_WTP_END USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00023">MatchEngine.h:23</a></div></div>
+<div class="ttc" id="aMatchEngine_8h_html_aa63c38f68f3c78457471222f35a139d4"><div class="ttname"><a href="MatchEngine_8h.html#aa63c38f68f3c78457471222f35a139d4">WTSTickCache</a></div><div class="ttdeci">WTSHashMap&lt; std::string &gt; WTSTickCache</div><div class="ttdoc">Tick数据缓存类型</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00035">MatchEngine.h:35</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aclassIMatchSink_html"><div class="ttname"><a href="classIMatchSink.html">IMatchSink</a></div><div class="ttdoc">撮合引擎回调接口</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00041">MatchEngine.h:42</a></div></div>
+<div class="ttc" id="aclassIMatchSink_html_a27bcde4c05c0c46654f65bf3192b017b"><div class="ttname"><a href="classIMatchSink.html#a27bcde4c05c0c46654f65bf3192b017b">IMatchSink::handle_entrust</a></div><div class="ttdeci">virtual void handle_entrust(uint32_t localid, const char *stdCode, bool bSuccess, const char *message, uint64_t ordTime)=0</div><div class="ttdoc">委托回报回调函数</div></div>
+<div class="ttc" id="aclassIMatchSink_html_a2a6998ffd98595703716c4b27eb96e82"><div class="ttname"><a href="classIMatchSink.html#a2a6998ffd98595703716c4b27eb96e82">IMatchSink::handle_trade</a></div><div class="ttdeci">virtual void handle_trade(uint32_t localid, const char *stdCode, bool isBuy, double vol, double fireprice, double price, uint64_t ordTime)=0</div><div class="ttdoc">成交回报回调函数</div></div>
+<div class="ttc" id="aclassIMatchSink_html_aafb169f0bb13d7672ad40ba8e5460787"><div class="ttname"><a href="classIMatchSink.html#aafb169f0bb13d7672ad40ba8e5460787">IMatchSink::handle_order</a></div><div class="ttdeci">virtual void handle_order(uint32_t localid, const char *stdCode, bool isBuy, double leftover, double price, bool isCanceled, uint64_t ordTime)=0</div><div class="ttdoc">订单状态回报回调函数</div></div>
+<div class="ttc" id="aclassMatchEngine_html"><div class="ttname"><a href="classMatchEngine.html">MatchEngine</a></div><div class="ttdoc">回测撮合引擎类</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00096">MatchEngine.h:97</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_a19ba92f943238543cd721c6af10e17ea"><div class="ttname"><a href="classMatchEngine.html#a19ba92f943238543cd721c6af10e17ea">MatchEngine::Orders</a></div><div class="ttdeci">wt_hashmap&lt; uint32_t, OrderInfo &gt; Orders</div><div class="ttdoc">订单存储容器类型</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00248">MatchEngine.h:248</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_a2226ea0a9fd2eb96384baafd7fcce80f"><div class="ttname"><a href="classMatchEngine.html#a2226ea0a9fd2eb96384baafd7fcce80f">MatchEngine::match_orders</a></div><div class="ttdeci">void match_orders(WTSTickData *curTick, OrderIDs &amp;to_erase)</div><div class="ttdoc">撮合订单</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8cpp_source.html#l00074">MatchEngine.cpp:74</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_a3098110cf900b07329c72249ecc2f909"><div class="ttname"><a href="classMatchEngine.html#a3098110cf900b07329c72249ecc2f909">MatchEngine::handle_tick</a></div><div class="ttdeci">void handle_tick(const char *stdCode, WTSTickData *curTick)</div><div class="ttdoc">处理Tick数据</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8cpp_source.html#l00420">MatchEngine.cpp:420</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_a3bfe33e7a9e446f2ca8de6b90de036c5"><div class="ttname"><a href="classMatchEngine.html#a3bfe33e7a9e446f2ca8de6b90de036c5">MatchEngine::_tick_cache</a></div><div class="ttdeci">WTSTickCache * _tick_cache</div><div class="ttdoc">Tick数据缓存指针</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00301">MatchEngine.h:301</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_a44d87d11de81cd153932205fa2bad2bc"><div class="ttname"><a href="classMatchEngine.html#a44d87d11de81cd153932205fa2bad2bc">MatchEngine::_cancelrate</a></div><div class="ttdeci">double _cancelrate</div><div class="ttdoc">撤单率，用于模拟市场中的撤单行为</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00300">MatchEngine.h:300</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_a4561a811423e67f97381621fbc3d0fdd"><div class="ttname"><a href="classMatchEngine.html#a4561a811423e67f97381621fbc3d0fdd">MatchEngine::LOBItems</a></div><div class="ttdeci">std::map&lt; uint32_t, double &gt; LOBItems</div><div class="ttdoc">委托账本条目类型</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00255">MatchEngine.h:255</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_a57f17f93b1376a13367ead95bd8e1c6e"><div class="ttname"><a href="classMatchEngine.html#a57f17f93b1376a13367ead95bd8e1c6e">MatchEngine::sell</a></div><div class="ttdeci">OrderIDs sell(const char *stdCode, double price, double qty, uint64_t curTime)</div><div class="ttdoc">创建卖出订单</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8cpp_source.html#l00320">MatchEngine.cpp:320</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_a70bde061e843d48d67e9a3a446cdee53"><div class="ttname"><a href="classMatchEngine.html#a70bde061e843d48d67e9a3a446cdee53">MatchEngine::buy</a></div><div class="ttdeci">OrderIDs buy(const char *stdCode, double price, double qty, uint64_t curTime)</div><div class="ttdoc">创建买入订单</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8cpp_source.html#l00275">MatchEngine.cpp:275</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_a72d737c7c7646f6048f720a62f7462b0"><div class="ttname"><a href="classMatchEngine.html#a72d737c7c7646f6048f720a62f7462b0">MatchEngine::grab_last_tick</a></div><div class="ttdeci">WTSTickData * grab_last_tick(const char *stdCode)</div><div class="ttdoc">获取最新的Tick数据</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8cpp_source.html#l00454">MatchEngine.cpp:454</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_a784cbff27fc3bd6030eadd809148f530"><div class="ttname"><a href="classMatchEngine.html#a784cbff27fc3bd6030eadd809148f530">MatchEngine::cancel</a></div><div class="ttdeci">double cancel(uint32_t localid)</div><div class="ttdoc">按订单ID撤销订单</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8cpp_source.html#l00401">MatchEngine.cpp:401</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_a8cf853fd4ba148c9361f5f6f53f42441"><div class="ttname"><a href="classMatchEngine.html#a8cf853fd4ba148c9361f5f6f53f42441">MatchEngine::OrderInfo</a></div><div class="ttdeci">struct MatchEngine::_OrderInfo OrderInfo</div><div class="ttdoc">订单信息结构体</div></div>
+<div class="ttc" id="aclassMatchEngine_html_a90f57ea3191db71c955b76a36435bebf"><div class="ttname"><a href="classMatchEngine.html#a90f57ea3191db71c955b76a36435bebf">MatchEngine::update_lob</a></div><div class="ttdeci">void update_lob(WTSTickData *curTick)</div><div class="ttdoc">更新限价委托账本(Limit Order Book)</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8cpp_source.html#l00223">MatchEngine.cpp:223</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_a937e0e40f9d79f19fd6d4b3786287713"><div class="ttname"><a href="classMatchEngine.html#a937e0e40f9d79f19fd6d4b3786287713">MatchEngine::fire_orders</a></div><div class="ttdeci">void fire_orders(const char *stdCode, OrderIDs &amp;to_erase)</div><div class="ttdoc">激活待处理的订单</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8cpp_source.html#l00051">MatchEngine.cpp:51</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_aaa73887abfbdfc9c308c7494156a9f4b"><div class="ttname"><a href="classMatchEngine.html#aaa73887abfbdfc9c308c7494156a9f4b">MatchEngine::regisSink</a></div><div class="ttdeci">void regisSink(IMatchSink *sink)</div><div class="ttdoc">注册回调接口</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00156">MatchEngine.h:156</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_ab4ad8f429ed2f2f84d9710faf389f512"><div class="ttname"><a href="classMatchEngine.html#ab4ad8f429ed2f2f84d9710faf389f512">MatchEngine::MatchEngine</a></div><div class="ttdeci">MatchEngine()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00103">MatchEngine.h:103</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_ab5e12e4d04719eab3d3e7a2ddd492ad9"><div class="ttname"><a href="classMatchEngine.html#ab5e12e4d04719eab3d3e7a2ddd492ad9">MatchEngine::init</a></div><div class="ttdeci">void init(WTSVariant *cfg)</div><div class="ttdoc">初始化撮合引擎</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8cpp_source.html#l00027">MatchEngine.cpp:27</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_acd67f3100a4601f79513e1685019f0bb"><div class="ttname"><a href="classMatchEngine.html#acd67f3100a4601f79513e1685019f0bb">MatchEngine::LmtOrdBooks</a></div><div class="ttdeci">wt_hashmap&lt; std::string, LmtOrdBook &gt; LmtOrdBooks</div><div class="ttdoc">限价委托账本存储容器类型</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00295">MatchEngine.h:295</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_ad18cf974bd1fe5dd411fd233ae93c3dd"><div class="ttname"><a href="classMatchEngine.html#ad18cf974bd1fe5dd411fd233ae93c3dd">MatchEngine::LmtOrdBook</a></div><div class="ttdeci">struct MatchEngine::_LmtOrdBook LmtOrdBook</div><div class="ttdoc">限价委托账本结构体</div></div>
+<div class="ttc" id="aclassMatchEngine_html_ae94b579dc86ec13c3368d9499379a4de"><div class="ttname"><a href="classMatchEngine.html#ae94b579dc86ec13c3368d9499379a4de">MatchEngine::_orders</a></div><div class="ttdeci">Orders _orders</div><div class="ttdoc">订单存储容器，管理所有活跃订单</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00249">MatchEngine.h:249</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_ae991aa427cc14ee90216e3ef9baca6db"><div class="ttname"><a href="classMatchEngine.html#ae991aa427cc14ee90216e3ef9baca6db">MatchEngine::clear</a></div><div class="ttdeci">void clear()</div><div class="ttdoc">清空撮合引擎中的所有订单</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8cpp_source.html#l00039">MatchEngine.cpp:39</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_aeaae268d8559c656a01ba4059c368bc7"><div class="ttname"><a href="classMatchEngine.html#aeaae268d8559c656a01ba4059c368bc7">MatchEngine::_lmt_ord_books</a></div><div class="ttdeci">LmtOrdBooks _lmt_ord_books</div><div class="ttdoc">限价委托账本存储容器，管理所有合约的委托账本</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00296">MatchEngine.h:296</a></div></div>
+<div class="ttc" id="aclassMatchEngine_html_af214d76be9f4fe7367476c75995bb744"><div class="ttname"><a href="classMatchEngine.html#af214d76be9f4fe7367476c75995bb744">MatchEngine::_sink</a></div><div class="ttdeci">IMatchSink * _sink</div><div class="ttdoc">撮合引擎回调接口指针</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00298">MatchEngine.h:298</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html"><div class="ttname"><a href="classWTSHashMap.html">WTSHashMap</a></div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00594">WTSCollection.hpp:595</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclasswt__hashmap_html"><div class="ttname"><a href="classwt__hashmap.html">wt_hashmap</a></div><div class="ttdoc">WonderTrader通用高性能哈希表模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00162">FasterDefs.h:163</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_a04f887fc8800d4727971dbb8eb550132"><div class="ttname"><a href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a></div><div class="ttdeci">ATPPriceType price</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00040">main.cpp:40</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__LmtOrdBook_html"><div class="ttname"><a href="structMatchEngine_1_1__LmtOrdBook.html">MatchEngine::_LmtOrdBook</a></div><div class="ttdoc">限价委托账本结构体</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00261">MatchEngine.h:262</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__LmtOrdBook_html_a6d07a76edc1df5e07409ca172fcd36de"><div class="ttname"><a href="structMatchEngine_1_1__LmtOrdBook.html#a6d07a76edc1df5e07409ca172fcd36de">MatchEngine::_LmtOrdBook::_cur_px</a></div><div class="ttdeci">uint32_t _cur_px</div><div class="ttdoc">当前价格（乘以10000后的整数表示）</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00264">MatchEngine.h:264</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__LmtOrdBook_html_a9344dda5c719ad103209ad3f3e0ada29"><div class="ttname"><a href="structMatchEngine_1_1__LmtOrdBook.html#a9344dda5c719ad103209ad3f3e0ada29">MatchEngine::_LmtOrdBook::clear</a></div><div class="ttdeci">void clear()</div><div class="ttdoc">清空委托账本</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00272">MatchEngine.h:272</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__LmtOrdBook_html_acd70a071871619754a13031d9be43915"><div class="ttname"><a href="structMatchEngine_1_1__LmtOrdBook.html#acd70a071871619754a13031d9be43915">MatchEngine::_LmtOrdBook::_LmtOrdBook</a></div><div class="ttdeci">_LmtOrdBook()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00284">MatchEngine.h:284</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__LmtOrdBook_html_ae0e582ad5fc1311d9394d57d835414b9"><div class="ttname"><a href="structMatchEngine_1_1__LmtOrdBook.html#ae0e582ad5fc1311d9394d57d835414b9">MatchEngine::_LmtOrdBook::_bid_px</a></div><div class="ttdeci">uint32_t _bid_px</div><div class="ttdoc">买一价（乘以10000后的整数表示）</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00266">MatchEngine.h:266</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__LmtOrdBook_html_af97c09a362623cf69e9d4ea820b561da"><div class="ttname"><a href="structMatchEngine_1_1__LmtOrdBook.html#af97c09a362623cf69e9d4ea820b561da">MatchEngine::_LmtOrdBook::_items</a></div><div class="ttdeci">LOBItems _items</div><div class="ttdoc">各价位的委托量映射表</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00263">MatchEngine.h:263</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__LmtOrdBook_html_afb35914f3e23551c04887ffce3087278"><div class="ttname"><a href="structMatchEngine_1_1__LmtOrdBook.html#afb35914f3e23551c04887ffce3087278">MatchEngine::_LmtOrdBook::_ask_px</a></div><div class="ttdeci">uint32_t _ask_px</div><div class="ttdoc">卖一价（乘以10000后的整数表示）</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00265">MatchEngine.h:265</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__OrderInfo_html"><div class="ttname"><a href="structMatchEngine_1_1__OrderInfo.html">MatchEngine::_OrderInfo</a></div><div class="ttdoc">订单信息结构体</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00220">MatchEngine.h:221</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__OrderInfo_html_a0d09747ddf7a0bb7c17f3b23a12999c4"><div class="ttname"><a href="structMatchEngine_1_1__OrderInfo.html#a0d09747ddf7a0bb7c17f3b23a12999c4">MatchEngine::_OrderInfo::_code</a></div><div class="ttdeci">char _code[32]</div><div class="ttdoc">合约代码</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00222">MatchEngine.h:222</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__OrderInfo_html_a0e8b10399aa00c299fd19bbe980ae84f"><div class="ttname"><a href="structMatchEngine_1_1__OrderInfo.html#a0e8b10399aa00c299fd19bbe980ae84f">MatchEngine::_OrderInfo::_state</a></div><div class="ttdeci">uint32_t _state</div><div class="ttdoc">订单状态（0-未激活，1-活跃，9-要撤单，99-已撤单）</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00229">MatchEngine.h:229</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__OrderInfo_html_a8e9c5a28a7557999369502edc014bbac"><div class="ttname"><a href="structMatchEngine_1_1__OrderInfo.html#a8e9c5a28a7557999369502edc014bbac">MatchEngine::_OrderInfo::_positive</a></div><div class="ttdeci">bool _positive</div><div class="ttdoc">是否为主动委托（对手价）</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00232">MatchEngine.h:232</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__OrderInfo_html_aa09d18f7aa26f39de635844c35206e36"><div class="ttname"><a href="structMatchEngine_1_1__OrderInfo.html#aa09d18f7aa26f39de635844c35206e36">MatchEngine::_OrderInfo::_qty</a></div><div class="ttdeci">double _qty</div><div class="ttdoc">委托总数量</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00224">MatchEngine.h:224</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__OrderInfo_html_ab055b888b270a49f69d9ee5e76e1c535"><div class="ttname"><a href="structMatchEngine_1_1__OrderInfo.html#ab055b888b270a49f69d9ee5e76e1c535">MatchEngine::_OrderInfo::_time</a></div><div class="ttdeci">uint64_t _time</div><div class="ttdoc">订单时间</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00230">MatchEngine.h:230</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__OrderInfo_html_ab1db1a2dcc123311d5aebed92179acac"><div class="ttname"><a href="structMatchEngine_1_1__OrderInfo.html#ab1db1a2dcc123311d5aebed92179acac">MatchEngine::_OrderInfo::_limit</a></div><div class="ttdeci">double _limit</div><div class="ttdoc">限价</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00227">MatchEngine.h:227</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__OrderInfo_html_ad6a39f49c93ea0b0b0e0c6babf25456e"><div class="ttname"><a href="structMatchEngine_1_1__OrderInfo.html#ad6a39f49c93ea0b0b0e0c6babf25456e">MatchEngine::_OrderInfo::_price</a></div><div class="ttdeci">double _price</div><div class="ttdoc">委托时的市场价格</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00228">MatchEngine.h:228</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__OrderInfo_html_ad7d113e197bceed5198442074cf574a5"><div class="ttname"><a href="structMatchEngine_1_1__OrderInfo.html#ad7d113e197bceed5198442074cf574a5">MatchEngine::_OrderInfo::_queue</a></div><div class="ttdeci">double _queue</div><div class="ttdoc">排队位置</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00231">MatchEngine.h:231</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__OrderInfo_html_ae90f4918a84ef7112d9a134b77c7f7ef"><div class="ttname"><a href="structMatchEngine_1_1__OrderInfo.html#ae90f4918a84ef7112d9a134b77c7f7ef">MatchEngine::_OrderInfo::_traded</a></div><div class="ttdeci">double _traded</div><div class="ttdoc">已成交数量</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00226">MatchEngine.h:226</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__OrderInfo_html_aeca77348497ebc93e0862ee50ee30d54"><div class="ttname"><a href="structMatchEngine_1_1__OrderInfo.html#aeca77348497ebc93e0862ee50ee30d54">MatchEngine::_OrderInfo::_buy</a></div><div class="ttdeci">bool _buy</div><div class="ttdoc">是否为买入订单</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00223">MatchEngine.h:223</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__OrderInfo_html_aecb5b05616f3f424a2572d949f6f2b71"><div class="ttname"><a href="structMatchEngine_1_1__OrderInfo.html#aecb5b05616f3f424a2572d949f6f2b71">MatchEngine::_OrderInfo::_OrderInfo</a></div><div class="ttdeci">_OrderInfo()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00238">MatchEngine.h:238</a></div></div>
+<div class="ttc" id="astructMatchEngine_1_1__OrderInfo_html_aed27677440a43b1940988b077b9ac40e"><div class="ttname"><a href="structMatchEngine_1_1__OrderInfo.html#aed27677440a43b1940988b077b9ac40e">MatchEngine::_OrderInfo::_left</a></div><div class="ttdeci">double _left</div><div class="ttdoc">剩余数量</div><div class="ttdef"><b>Definition</b> <a href="MatchEngine_8h_source.html#l00225">MatchEngine.h:225</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_e0a6b04728b7bc818baf88501da85ff3.html">WtBtCore</a></li><li class="navelem"><a class="el" href="MatchEngine_8h.html">MatchEngine.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

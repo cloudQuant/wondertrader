@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/yaml-cpp/ostream_wrapper.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('ostream__wrapper_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ostream_wrapper.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="ostream__wrapper_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef OSTREAM_WRAPPER_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define OSTREAM_WRAPPER_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#if defined(_MSC_VER) ||                                            \</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">    (defined(__GNUC__) &amp;&amp; (__GNUC__ == 3 &amp;&amp; __GNUC_MINOR__ &gt;= 4) || \</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">     (__GNUC__ &gt;= 4))  </span><span class="comment">// GCC supports &quot;pragma once&quot; correctly since 3.4</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="dll_8h.html">yaml-cpp/dll.h</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceYAML.html">YAML</a> {</div>
+<div class="foldopen" id="foldopen00016" data-start="{" data-end="};">
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html">   16</a></span><span class="keyword">class </span><a class="code hl_define" href="dll_8h.html#a70903db05b58f40db9aa4f966658fa65">YAML_CPP_API</a> <a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a> {</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>  <a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a>();</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>  <span class="keyword">explicit</span> <a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a>(std::ostream&amp; stream);</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#a989b6e18be010c1044afd3b9d9c42527">   20</a></span>  <a class="code hl_function" href="classYAML_1_1ostream__wrapper.html#a989b6e18be010c1044afd3b9d9c42527">ostream_wrapper</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#aa576aaf1c82781cc1fb67822a0983268">   21</a></span>  <a class="code hl_function" href="classYAML_1_1ostream__wrapper.html#aa576aaf1c82781cc1fb67822a0983268">ostream_wrapper</a>(<a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a>&amp;&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#aeec1511a62055f29f706530f13db755b">   22</a></span>  <a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a>&amp; <a class="code hl_function" href="classYAML_1_1ostream__wrapper.html#aeec1511a62055f29f706530f13db755b">operator=</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#a83bd1143a67e083b12c35ab55a25baf2">   23</a></span>  <a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a>&amp; <a class="code hl_function" href="classYAML_1_1ostream__wrapper.html#a83bd1143a67e083b12c35ab55a25baf2">operator=</a>(<a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a>&amp;&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#ab4d0c630394c7062c85bb44e052feb18">   24</a></span>  <a class="code hl_function" href="classYAML_1_1ostream__wrapper.html#ab4d0c630394c7062c85bb44e052feb18">~ostream_wrapper</a>();</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <span class="keywordtype">void</span> write(<span class="keyword">const</span> std::string&amp; str);</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>  <span class="keywordtype">void</span> write(<span class="keyword">const</span> <span class="keywordtype">char</span>* str, std::size_t size);</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#a915ba192b32d05342619531e626b7580">   29</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1ostream__wrapper.html#a915ba192b32d05342619531e626b7580">set_comment</a>() { m_comment = <span class="keyword">true</span>; }</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="foldopen" id="foldopen00031" data-start="{" data-end="}">
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#a9d8692ae183c3c12fc03b314f63c7933">   31</a></span>  <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classYAML_1_1ostream__wrapper.html#a9d8692ae183c3c12fc03b314f63c7933">str</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keywordflow">if</span> (m_pStream) {</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>      <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>      m_buffer[m_pos] = <span class="charliteral">&#39;\0&#39;</span>;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>      <span class="keywordflow">return</span> &amp;m_buffer[0];</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    }</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  }</div>
+</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#a80e715ec84df28b7e6b03c005bfe4b5e">   40</a></span>  std::size_t <a class="code hl_function" href="classYAML_1_1ostream__wrapper.html#a80e715ec84df28b7e6b03c005bfe4b5e">row</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_row; }</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#a41f5e634e6595d585fdf6607695ff089">   41</a></span>  std::size_t <a class="code hl_function" href="classYAML_1_1ostream__wrapper.html#a41f5e634e6595d585fdf6607695ff089">col</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_col; }</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#a4a42954da9d63544e57e37400ad40280">   42</a></span>  std::size_t <a class="code hl_function" href="classYAML_1_1ostream__wrapper.html#a4a42954da9d63544e57e37400ad40280">pos</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_pos; }</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#a4bd22f207c3be8398867ca190bf2bcb3">   43</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classYAML_1_1ostream__wrapper.html#a4bd22f207c3be8398867ca190bf2bcb3">comment</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_comment; }</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  <span class="keywordtype">void</span> update_pos(<span class="keywordtype">char</span> ch);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#a1f778f7813c84118d972337f50e891f5">   49</a></span>  <span class="keyword">mutable</span> std::vector&lt;char&gt; <a class="code hl_variable" href="classYAML_1_1ostream__wrapper.html#a1f778f7813c84118d972337f50e891f5">m_buffer</a>;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#a8a5e2653f697085c80577a83ded2918c">   50</a></span>  std::ostream* <span class="keyword">const</span> <a class="code hl_variable" href="classYAML_1_1ostream__wrapper.html#a8a5e2653f697085c80577a83ded2918c">m_pStream</a>;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#af550be3d54f6f9d55cf33d71c6433650">   52</a></span>  std::size_t <a class="code hl_variable" href="classYAML_1_1ostream__wrapper.html#af550be3d54f6f9d55cf33d71c6433650">m_pos</a>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#ab81b2c1f0406174d5f8cf7813b4f7f9f">   53</a></span>  std::size_t m_row, <a class="code hl_variable" href="classYAML_1_1ostream__wrapper.html#ab81b2c1f0406174d5f8cf7813b4f7f9f">m_col</a>;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="classYAML_1_1ostream__wrapper.html#ac3ed9d4543b23f81105fca100f4df968">   54</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="classYAML_1_1ostream__wrapper.html#ac3ed9d4543b23f81105fca100f4df968">m_comment</a>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>};</div>
+</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="keyword">template</span> &lt;std::<span class="keywordtype">size_t</span> N&gt;</div>
+<div class="foldopen" id="foldopen00058" data-start="{" data-end="}">
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="namespaceYAML.html#a1e2d5550402b670be0e74ccf091a6a60">   58</a></span><span class="keyword">inline</span> <a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a>&amp; <a class="code hl_function" href="namespaceYAML.html#a3d200321eb9b9124d02f118d85f3b280">operator&lt;&lt;</a>(<a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a>&amp; stream,</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>                                   <span class="keyword">const</span> <span class="keywordtype">char</span> (&amp;str)[N]) {</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  stream.<a class="code hl_function" href="classYAML_1_1ostream__wrapper.html#a9530c6507de27dce5dde5324b64a7b81">write</a>(str, N - 1);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <span class="keywordflow">return</span> stream;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>}</div>
+</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="foldopen" id="foldopen00064" data-start="{" data-end="}">
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="namespaceYAML.html#a0b655ae5306680f81e11c787daa642e0">   64</a></span><span class="keyword">inline</span> <a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a>&amp; <a class="code hl_function" href="namespaceYAML.html#a3d200321eb9b9124d02f118d85f3b280">operator&lt;&lt;</a>(<a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a>&amp; stream,</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>                                   <span class="keyword">const</span> std::string&amp; str) {</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  stream.<a class="code hl_function" href="classYAML_1_1ostream__wrapper.html#a9530c6507de27dce5dde5324b64a7b81">write</a>(str);</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  <span class="keywordflow">return</span> stream;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>}</div>
+</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="foldopen" id="foldopen00070" data-start="{" data-end="}">
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="namespaceYAML.html#ab245df2f9a84fd5fc62114b873b0bca1">   70</a></span><span class="keyword">inline</span> <a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a>&amp; <a class="code hl_function" href="namespaceYAML.html#a3d200321eb9b9124d02f118d85f3b280">operator&lt;&lt;</a>(<a class="code hl_class" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a>&amp; stream, <span class="keywordtype">char</span> ch) {</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  stream.<a class="code hl_function" href="classYAML_1_1ostream__wrapper.html#a9530c6507de27dce5dde5324b64a7b81">write</a>(&amp;ch, 1);</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>  <span class="keywordflow">return</span> stream;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>}</div>
+</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>}  <span class="comment">// namespace YAML</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#endif  </span><span class="comment">// OSTREAM_WRAPPER_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html">YAML::ostream_wrapper</a></div><div class="ttdef"><b>Definition</b> <a href="ostream__wrapper_8h_source.html#l00016">ostream_wrapper.h:16</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_a1f778f7813c84118d972337f50e891f5"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#a1f778f7813c84118d972337f50e891f5">YAML::ostream_wrapper::m_buffer</a></div><div class="ttdeci">std::vector&lt; char &gt; m_buffer</div><div class="ttdef"><b>Definition</b> <a href="ostream__wrapper_8h_source.html#l00049">ostream_wrapper.h:49</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_a41f5e634e6595d585fdf6607695ff089"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#a41f5e634e6595d585fdf6607695ff089">YAML::ostream_wrapper::col</a></div><div class="ttdeci">std::size_t col() const</div><div class="ttdef"><b>Definition</b> <a href="ostream__wrapper_8h_source.html#l00041">ostream_wrapper.h:41</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_a4a42954da9d63544e57e37400ad40280"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#a4a42954da9d63544e57e37400ad40280">YAML::ostream_wrapper::pos</a></div><div class="ttdeci">std::size_t pos() const</div><div class="ttdef"><b>Definition</b> <a href="ostream__wrapper_8h_source.html#l00042">ostream_wrapper.h:42</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_a4bd22f207c3be8398867ca190bf2bcb3"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#a4bd22f207c3be8398867ca190bf2bcb3">YAML::ostream_wrapper::comment</a></div><div class="ttdeci">bool comment() const</div><div class="ttdef"><b>Definition</b> <a href="ostream__wrapper_8h_source.html#l00043">ostream_wrapper.h:43</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_a80e715ec84df28b7e6b03c005bfe4b5e"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#a80e715ec84df28b7e6b03c005bfe4b5e">YAML::ostream_wrapper::row</a></div><div class="ttdeci">std::size_t row() const</div><div class="ttdef"><b>Definition</b> <a href="ostream__wrapper_8h_source.html#l00040">ostream_wrapper.h:40</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_a83bd1143a67e083b12c35ab55a25baf2"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#a83bd1143a67e083b12c35ab55a25baf2">YAML::ostream_wrapper::operator=</a></div><div class="ttdeci">ostream_wrapper &amp; operator=(ostream_wrapper &amp;&amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_a8a5e2653f697085c80577a83ded2918c"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#a8a5e2653f697085c80577a83ded2918c">YAML::ostream_wrapper::m_pStream</a></div><div class="ttdeci">std::ostream *const m_pStream</div><div class="ttdef"><b>Definition</b> <a href="ostream__wrapper_8h_source.html#l00050">ostream_wrapper.h:50</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_a915ba192b32d05342619531e626b7580"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#a915ba192b32d05342619531e626b7580">YAML::ostream_wrapper::set_comment</a></div><div class="ttdeci">void set_comment()</div><div class="ttdef"><b>Definition</b> <a href="ostream__wrapper_8h_source.html#l00029">ostream_wrapper.h:29</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_a9530c6507de27dce5dde5324b64a7b81"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#a9530c6507de27dce5dde5324b64a7b81">YAML::ostream_wrapper::write</a></div><div class="ttdeci">void write(const std::string &amp;str)</div><div class="ttdef"><b>Definition</b> <a href="ostream__wrapper_8cpp_source.html#l00026">ostream_wrapper.cpp:26</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_a989b6e18be010c1044afd3b9d9c42527"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#a989b6e18be010c1044afd3b9d9c42527">YAML::ostream_wrapper::ostream_wrapper</a></div><div class="ttdeci">ostream_wrapper(const ostream_wrapper &amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_a9d8692ae183c3c12fc03b314f63c7933"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#a9d8692ae183c3c12fc03b314f63c7933">YAML::ostream_wrapper::str</a></div><div class="ttdeci">const char * str() const</div><div class="ttdef"><b>Definition</b> <a href="ostream__wrapper_8h_source.html#l00031">ostream_wrapper.h:31</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_aa576aaf1c82781cc1fb67822a0983268"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#aa576aaf1c82781cc1fb67822a0983268">YAML::ostream_wrapper::ostream_wrapper</a></div><div class="ttdeci">ostream_wrapper(ostream_wrapper &amp;&amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_ab4d0c630394c7062c85bb44e052feb18"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#ab4d0c630394c7062c85bb44e052feb18">YAML::ostream_wrapper::~ostream_wrapper</a></div><div class="ttdeci">~ostream_wrapper()</div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_ab81b2c1f0406174d5f8cf7813b4f7f9f"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#ab81b2c1f0406174d5f8cf7813b4f7f9f">YAML::ostream_wrapper::m_col</a></div><div class="ttdeci">std::size_t m_col</div><div class="ttdef"><b>Definition</b> <a href="ostream__wrapper_8h_source.html#l00053">ostream_wrapper.h:53</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_ac3ed9d4543b23f81105fca100f4df968"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#ac3ed9d4543b23f81105fca100f4df968">YAML::ostream_wrapper::m_comment</a></div><div class="ttdeci">bool m_comment</div><div class="ttdef"><b>Definition</b> <a href="ostream__wrapper_8h_source.html#l00054">ostream_wrapper.h:54</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_aeec1511a62055f29f706530f13db755b"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#aeec1511a62055f29f706530f13db755b">YAML::ostream_wrapper::operator=</a></div><div class="ttdeci">ostream_wrapper &amp; operator=(const ostream_wrapper &amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1ostream__wrapper_html_af550be3d54f6f9d55cf33d71c6433650"><div class="ttname"><a href="classYAML_1_1ostream__wrapper.html#af550be3d54f6f9d55cf33d71c6433650">YAML::ostream_wrapper::m_pos</a></div><div class="ttdeci">std::size_t m_pos</div><div class="ttdef"><b>Definition</b> <a href="ostream__wrapper_8h_source.html#l00052">ostream_wrapper.h:52</a></div></div>
+<div class="ttc" id="adll_8h_html"><div class="ttname"><a href="dll_8h.html">dll.h</a></div></div>
+<div class="ttc" id="adll_8h_html_a70903db05b58f40db9aa4f966658fa65"><div class="ttname"><a href="dll_8h.html#a70903db05b58f40db9aa4f966658fa65">YAML_CPP_API</a></div><div class="ttdeci">#define YAML_CPP_API</div><div class="ttdef"><b>Definition</b> <a href="dll_8h_source.html#l00030">dll.h:30</a></div></div>
+<div class="ttc" id="anamespaceYAML_html"><div class="ttname"><a href="namespaceYAML.html">YAML</a></div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00005">binary.cpp:5</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_a3d200321eb9b9124d02f118d85f3b280"><div class="ttname"><a href="namespaceYAML.html#a3d200321eb9b9124d02f118d85f3b280">YAML::operator&lt;&lt;</a></div><div class="ttdeci">Emitter &amp; operator&lt;&lt;(Emitter &amp;out, const Node &amp;node)</div><div class="ttdef"><b>Definition</b> <a href="emit_8cpp_source.html#l00007">emit.cpp:7</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="dir_8ca95df02d0e181a4cddee9d3a76ea3e.html">yaml-cpp</a></li><li class="navelem"><a class="el" href="ostream__wrapper_8h.html">ostream_wrapper.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

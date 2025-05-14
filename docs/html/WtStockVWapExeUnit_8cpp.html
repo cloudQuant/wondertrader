@@ -1,0 +1,340 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtExeFact/WtStockVWapExeUnit.cpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtStockVWapExeUnit_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">WtStockVWapExeUnit.cpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>股票VWAP执行单元实现文件  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="WtStockVWapExeUnit_8h_source.html">WtStockVWapExeUnit.h</a>&quot;</code><br />
+</div>
+<p><a href="WtStockVWapExeUnit_8cpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:aebc0811c475e14b5c86802049d68e510" id="r_aebc0811c475e14b5c86802049d68e510"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtStockVWapExeUnit_8cpp.html#aebc0811c475e14b5c86802049d68e510">get_real_target</a> (double _target)</td></tr>
+<tr class="memdesc:aebc0811c475e14b5c86802049d68e510"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取实际目标仓位  <br /></td></tr>
+<tr class="separator:aebc0811c475e14b5c86802049d68e510"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65a7dea8c6689addda9df3c11340db24" id="r_a65a7dea8c6689addda9df3c11340db24"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtStockVWapExeUnit_8cpp.html#a65a7dea8c6689addda9df3c11340db24">is_clear</a> (double target)</td></tr>
+<tr class="memdesc:a65a7dea8c6689addda9df3c11340db24"><td class="mdescLeft">&#160;</td><td class="mdescRight">检查是否为清仓状态  <br /></td></tr>
+<tr class="separator:a65a7dea8c6689addda9df3c11340db24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bb09d35d2681a33ecacbedbaec87b7a" id="r_a1bb09d35d2681a33ecacbedbaec87b7a"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtStockVWapExeUnit_8cpp.html#a1bb09d35d2681a33ecacbedbaec87b7a">calTmSecs</a> (uint32_t begintime, uint32_t endtime)</td></tr>
+<tr class="memdesc:a1bb09d35d2681a33ecacbedbaec87b7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">计算时间区间的秒数  <br /></td></tr>
+<tr class="separator:a1bb09d35d2681a33ecacbedbaec87b7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38479ea13966d5f994fd9e8bd68b02cd" id="r_a38479ea13966d5f994fd9e8bd68b02cd"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtStockVWapExeUnit_8cpp.html#a38479ea13966d5f994fd9e8bd68b02cd">calTmStamp</a> (uint32_t actiontime)</td></tr>
+<tr class="memdesc:a38479ea13966d5f994fd9e8bd68b02cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">计算交易时间点在交易日内的分钟数  <br /></td></tr>
+<tr class="separator:a38479ea13966d5f994fd9e8bd68b02cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:aee880c24316260593ee859c8443ff4b6" id="r_aee880c24316260593ee859c8443ff4b6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtStockVWapExeUnit_8cpp.html#aee880c24316260593ee859c8443ff4b6">FACT_NAME</a></td></tr>
+<tr class="memdesc:aee880c24316260593ee859c8443ff4b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">外部声明的工厂名称常量  <br /></td></tr>
+<tr class="separator:aee880c24316260593ee859c8443ff4b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>股票VWAP执行单元实现文件 </p>
+<dl class="section author"><dt>作者</dt><dd>zhaoyk (23.6.2)</dd></dl>
+<p>实现股票的成交量加权平均价(VWAP)执行单元的核心逻辑 将大单拆分为多个小单并按时间分布执行，减少市场冲击 </p>
+
+<p class="definition">在文件 <a class="el" href="WtStockVWapExeUnit_8cpp_source.html">WtStockVWapExeUnit.cpp</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="a1bb09d35d2681a33ecacbedbaec87b7a" name="a1bb09d35d2681a33ecacbedbaec87b7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bb09d35d2681a33ecacbedbaec87b7a">&#9670;&#160;</a></span>calTmSecs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t calTmSecs </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>begintime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>endtime</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>计算时间区间的秒数 </p>
+<p>将开始时间和结束时间（以HHMM格式表示）转换为总秒数 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">begintime</td><td>开始时间，格式为HHMM，如1030表示10:30 </td></tr>
+    <tr><td class="paramname">endtime</td><td>结束时间，格式为HHMM，如1100表示11:00 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>开始时间和结束时间之间的秒数 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtStockVWapExeUnit_8cpp_source.html">WtStockVWapExeUnit.cpp</a> 第 <a class="el" href="WtStockVWapExeUnit_8cpp_source.html#l00085">85</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a38479ea13966d5f994fd9e8bd68b02cd" name="a38479ea13966d5f994fd9e8bd68b02cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a38479ea13966d5f994fd9e8bd68b02cd">&#9670;&#160;</a></span>calTmStamp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double calTmStamp </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>actiontime</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>计算交易时间点在交易日内的分钟数 </p>
+<p>将行情的时间戳转换为分钟计数，考虑交易日内的不同时段 上午交易时段：9:30-11:30，下午交易时段：13:00-15:00 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">actiontime</td><td>行情时间，格式为HHMMSSmmm </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>该时间点在交易日内的分钟数，用于匹配目标VWAP序列 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtStockVWapExeUnit_8cpp_source.html">WtStockVWapExeUnit.cpp</a> 第 <a class="el" href="WtStockVWapExeUnit_8cpp_source.html#l00098">98</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aebc0811c475e14b5c86802049d68e510" name="aebc0811c475e14b5c86802049d68e510"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aebc0811c475e14b5c86802049d68e510">&#9670;&#160;</a></span>get_real_target()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double get_real_target </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>_target</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取实际目标仓位 </p>
+<p>如果目标仓位是DBL_MAX（清仓标记），则返回0，否则返回原值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">_target</td><td>原始目标仓位 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>实际目标仓位 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtStockVWapExeUnit_8cpp_source.html">WtStockVWapExeUnit.cpp</a> 第 <a class="el" href="WtStockVWapExeUnit_8cpp_source.html#l00062">62</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a65a7dea8c6689addda9df3c11340db24" name="a65a7dea8c6689addda9df3c11340db24"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65a7dea8c6689addda9df3c11340db24">&#9670;&#160;</a></span>is_clear()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool is_clear </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>target</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>检查是否为清仓状态 </p>
+<p>判断目标仓位是否等于DBL_MAX，该值被用作清仓标记 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>目标仓位 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>如果为清仓状态返回true，否则返回false </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtStockVWapExeUnit_8cpp_source.html">WtStockVWapExeUnit.cpp</a> 第 <a class="el" href="WtStockVWapExeUnit_8cpp_source.html#l00074">74</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="aee880c24316260593ee859c8443ff4b6" name="aee880c24316260593ee859c8443ff4b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee880c24316260593ee859c8443ff4b6">&#9670;&#160;</a></span>FACT_NAME</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char* FACT_NAME</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">extern</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>外部声明的工厂名称常量 </p>
+<p>外部声明的工厂名称常量</p>
+<p>外部声明的工厂名称常量</p>
+<p>高频交易策略工厂名称</p>
+<p>外部声明的工厂名称常量</p>
+<p>工厂名称常量</p>
+<p>定义了风控模块工厂的名称常量，用于标识该工厂</p>
+<p>外部声明的工厂名称常量</p>
+<p>工厂名称常量</p>
+<p>外部声明的工厂名称常量</p>
+<p>定义工厂的唯一标识名称，用于策略实例的注册和查找 </p>
+
+<p class="definition">在文件 <a class="el" href="WtCtaStraFact_8cpp_source.html">WtCtaStraFact.cpp</a> 第 <a class="el" href="WtCtaStraFact_8cpp_source.html#l00017">17</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_35e91bc913ca608ca8aed17ce3ae7d3c.html">WtExeFact</a></li><li class="navelem"><a class="el" href="WtStockVWapExeUnit_8cpp.html">WtStockVWapExeUnit.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

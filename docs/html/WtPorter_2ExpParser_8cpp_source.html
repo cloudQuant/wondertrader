@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtPorter/ExpParser.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtPorter_2ExpParser_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ExpParser.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtPorter_2ExpParser_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="WtPorter_2ExpParser_8h.html">ExpParser.h</a>&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="WtRtRunner_8h.html">WtRtRunner.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">extern</span> <a class="code hl_class" href="classWtRtRunner.html">WtRtRunner</a>&amp; <a class="code hl_function" href="WtPorter_2ExpParser_8cpp.html#a164379edb99407462130854b52be63f6">getRunner</a>();</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keywordtype">bool</span> <a class="code hl_function" href="classExpParser.html#a045cfa45b9d828111f6c08dc75a61611">ExpParser::init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* <a class="code hl_function" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>)</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>{</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="comment">// 调用运行器的解析器初始化接口，传入解析器ID</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().parser_init(<a class="code hl_variable" href="classExpParser.html#a61f37a11ff2fdc54c3522be4395eed23">_id</a>.c_str());</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>}</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpParser.html#a87ee7f06ece6ecdce4da18dcc854dadd">ExpParser::release</a>()</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>{</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="comment">// 调用运行器的解析器释放接口，传入解析器ID</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().parser_release(<a class="code hl_variable" href="classExpParser.html#a61f37a11ff2fdc54c3522be4395eed23">_id</a>.c_str());</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>}</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="keywordtype">bool</span> <a class="code hl_function" href="classExpParser.html#a9d13bea9abeeaf487da39f4301a4ff6e">ExpParser::connect</a>()</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>{</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="comment">// 调用运行器的解析器连接接口，传入解析器ID</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().parser_connect(<a class="code hl_variable" href="classExpParser.html#a61f37a11ff2fdc54c3522be4395eed23">_id</a>.c_str());</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>}</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="keywordtype">bool</span> <a class="code hl_function" href="classExpParser.html#abc3870a7f5469b0bace7ac77aced2a33">ExpParser::disconnect</a>()</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>{</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="comment">// 调用运行器的解析器断开连接接口，传入解析器ID</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().parser_disconnect(<a class="code hl_variable" href="classExpParser.html#a61f37a11ff2fdc54c3522be4395eed23">_id</a>.c_str());</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>}</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpParser.html#a866054e0644ac39072c4688b07fd927d">ExpParser::subscribe</a>(<span class="keyword">const</span> <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a>&amp; setCodes)</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>{</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="comment">// 遍历合约代码集合，逐个订阅</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keywordflow">for</span>(<span class="keyword">const</span> <span class="keyword">auto</span>&amp; code : setCodes)</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        <span class="comment">// 调用运行器的解析器订阅接口，传入解析器ID和合约代码</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().parser_subscribe(<a class="code hl_variable" href="classExpParser.html#a61f37a11ff2fdc54c3522be4395eed23">_id</a>.c_str(), code.c_str());</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>}</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpParser.html#a635a313fdb5fb4455782b94862268bc1">ExpParser::unsubscribe</a>(<span class="keyword">const</span> <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a>&amp; setCodes)</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>{</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="comment">// 遍历合约代码集合，逐个取消订阅</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; code : setCodes)</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        <span class="comment">// 调用运行器的解析器取消订阅接口，传入解析器ID和合约代码</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().parser_unsubscribe(<a class="code hl_variable" href="classExpParser.html#a61f37a11ff2fdc54c3522be4395eed23">_id</a>.c_str(), code.c_str());</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>}</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpParser.html#ab790a697574d67abbf0425466d19eccf">ExpParser::registerSpi</a>(<a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>* listener)</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>{</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="comment">// 设置回调接口</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <a class="code hl_variable" href="classExpParser.html#a60f701d9db86fff13b9faca03b316939">m_sink</a> = listener;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    <span class="comment">// 如果回调接口有效，获取基础数据管理器</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classExpParser.html#a60f701d9db86fff13b9faca03b316939">m_sink</a>)</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        <a class="code hl_variable" href="classExpParser.html#a8417a989716871a2b436a95242dd68eb">m_pBaseDataMgr</a> = <a class="code hl_variable" href="classExpParser.html#a60f701d9db86fff13b9faca03b316939">m_sink</a>-&gt;<a class="code hl_function" href="classIParserSpi.html#a48bc03c868be4a38bf50b355c9149a93">getBaseDataMgr</a>();</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>}</div>
+<div class="ttc" id="aExpCtaMocker_8cpp_html_aeae7c7722f120a5b990f96dfced42ff0"><div class="ttname"><a href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a></div><div class="ttdeci">WtBtRunner &amp; getRunner()</div><div class="ttdoc">获取全局回测引擎实例</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_8cpp_source.html#l00040">WtBtPorter.cpp:40</a></div></div>
+<div class="ttc" id="aTraderDumper_8cpp_html_abc68ad0fe9293fb2709e004ffe3fa333"><div class="ttname"><a href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a></div><div class="ttdeci">bool config(const char *cfgfile, bool isFile)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_8cpp_source.html#l00022">TraderDumper.cpp:22</a></div></div>
+<div class="ttc" id="aWtPorter_2ExpParser_8cpp_html_a164379edb99407462130854b52be63f6"><div class="ttname"><a href="WtPorter_2ExpParser_8cpp.html#a164379edb99407462130854b52be63f6">getRunner</a></div><div class="ttdeci">WtRtRunner &amp; getRunner()</div><div class="ttdoc">获取运行器实例的外部函数声明</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_8cpp_source.html#l00040">WtBtPorter.cpp:40</a></div></div>
+<div class="ttc" id="aWtPorter_2ExpParser_8h_html"><div class="ttname"><a href="WtPorter_2ExpParser_8h.html">ExpParser.h</a></div><div class="ttdoc">行情解析器导出模块定义</div></div>
+<div class="ttc" id="aWtRtRunner_8h_html"><div class="ttname"><a href="WtRtRunner_8h.html">WtRtRunner.h</a></div><div class="ttdoc">WonderTrader实时交易运行器定义</div></div>
+<div class="ttc" id="aclassExpParser_html_a045cfa45b9d828111f6c08dc75a61611"><div class="ttname"><a href="classExpParser.html#a045cfa45b9d828111f6c08dc75a61611">ExpParser::init</a></div><div class="ttdeci">virtual bool init(WTSVariant *config) override</div><div class="ttdoc">初始化解析器</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2ExpParser_8cpp_source.html#l00029">ExpParser.cpp:29</a></div></div>
+<div class="ttc" id="aclassExpParser_html_a60f701d9db86fff13b9faca03b316939"><div class="ttname"><a href="classExpParser.html#a60f701d9db86fff13b9faca03b316939">ExpParser::m_sink</a></div><div class="ttdeci">IParserSpi * m_sink</div><div class="ttdoc">行情数据回调接口</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2ExpParser_8h_source.html#l00098">ExpParser.h:98</a></div></div>
+<div class="ttc" id="aclassExpParser_html_a61f37a11ff2fdc54c3522be4395eed23"><div class="ttname"><a href="classExpParser.html#a61f37a11ff2fdc54c3522be4395eed23">ExpParser::_id</a></div><div class="ttdeci">std::string _id</div><div class="ttdoc">解析器实例的唯一标识符</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2ExpParser_8h_source.html#l00097">ExpParser.h:97</a></div></div>
+<div class="ttc" id="aclassExpParser_html_a635a313fdb5fb4455782b94862268bc1"><div class="ttname"><a href="classExpParser.html#a635a313fdb5fb4455782b94862268bc1">ExpParser::unsubscribe</a></div><div class="ttdeci">virtual void unsubscribe(const CodeSet &amp;setCodes) override</div><div class="ttdoc">取消订阅行情代码</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2ExpParser_8cpp_source.html#l00087">ExpParser.cpp:87</a></div></div>
+<div class="ttc" id="aclassExpParser_html_a8417a989716871a2b436a95242dd68eb"><div class="ttname"><a href="classExpParser.html#a8417a989716871a2b436a95242dd68eb">ExpParser::m_pBaseDataMgr</a></div><div class="ttdeci">IBaseDataMgr * m_pBaseDataMgr</div><div class="ttdoc">基础数据管理器指针</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2ExpParser_8h_source.html#l00099">ExpParser.h:99</a></div></div>
+<div class="ttc" id="aclassExpParser_html_a866054e0644ac39072c4688b07fd927d"><div class="ttname"><a href="classExpParser.html#a866054e0644ac39072c4688b07fd927d">ExpParser::subscribe</a></div><div class="ttdeci">virtual void subscribe(const CodeSet &amp;setCodes) override</div><div class="ttdoc">订阅行情代码</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2ExpParser_8cpp_source.html#l00075">ExpParser.cpp:75</a></div></div>
+<div class="ttc" id="aclassExpParser_html_a87ee7f06ece6ecdce4da18dcc854dadd"><div class="ttname"><a href="classExpParser.html#a87ee7f06ece6ecdce4da18dcc854dadd">ExpParser::release</a></div><div class="ttdeci">virtual void release() override</div><div class="ttdoc">释放解析器资源</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2ExpParser_8cpp_source.html#l00040">ExpParser.cpp:40</a></div></div>
+<div class="ttc" id="aclassExpParser_html_a9d13bea9abeeaf487da39f4301a4ff6e"><div class="ttname"><a href="classExpParser.html#a9d13bea9abeeaf487da39f4301a4ff6e">ExpParser::connect</a></div><div class="ttdeci">virtual bool connect() override</div><div class="ttdoc">连接行情服务器</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2ExpParser_8cpp_source.html#l00051">ExpParser.cpp:51</a></div></div>
+<div class="ttc" id="aclassExpParser_html_ab790a697574d67abbf0425466d19eccf"><div class="ttname"><a href="classExpParser.html#ab790a697574d67abbf0425466d19eccf">ExpParser::registerSpi</a></div><div class="ttdeci">virtual void registerSpi(IParserSpi *listener) override</div><div class="ttdoc">注册回调接口</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2ExpParser_8cpp_source.html#l00099">ExpParser.cpp:99</a></div></div>
+<div class="ttc" id="aclassExpParser_html_abc3870a7f5469b0bace7ac77aced2a33"><div class="ttname"><a href="classExpParser.html#abc3870a7f5469b0bace7ac77aced2a33">ExpParser::disconnect</a></div><div class="ttdeci">virtual bool disconnect() override</div><div class="ttdoc">断开行情服务器连接</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2ExpParser_8cpp_source.html#l00063">ExpParser.cpp:63</a></div></div>
+<div class="ttc" id="aclassIParserSpi_html"><div class="ttname"><a href="classIParserSpi.html">IParserSpi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00028">IParserApi.h:29</a></div></div>
+<div class="ttc" id="aclassIParserSpi_html_a48bc03c868be4a38bf50b355c9149a93"><div class="ttname"><a href="classIParserSpi.html#a48bc03c868be4a38bf50b355c9149a93">IParserSpi::getBaseDataMgr</a></div><div class="ttdeci">virtual IBaseDataMgr * getBaseDataMgr()=0</div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWtRtRunner_html"><div class="ttname"><a href="classWtRtRunner.html">WtRtRunner</a></div><div class="ttdoc">WonderTrader实时交易运行器类</div><div class="ttdef"><b>Definition</b> <a href="WtRtRunner_8h_source.html#l00062">WtRtRunner.h:63</a></div></div>
+<div class="ttc" id="aclassfastest__hashset_3_01std_1_1string_01_4_html"><div class="ttname"><a href="classfastest__hashset_3_01std_1_1string_01_4.html">fastest_hashset&lt; std::string &gt;</a></div><div class="ttdoc">字符串元素的高性能哈希集合类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00134">FasterDefs.h:135</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_dc27b00ee5bce5a7f56bbfd467e9d584.html">WtPorter</a></li><li class="navelem"><a class="el" href="WtPorter_2ExpParser_8cpp.html">ExpParser.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

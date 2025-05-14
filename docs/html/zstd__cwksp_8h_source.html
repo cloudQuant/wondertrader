@@ -1,0 +1,621 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/zstd_cwksp.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('zstd__cwksp_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">zstd_cwksp.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="zstd__cwksp_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (c) 2016-present, Yann Collet, Facebook, Inc.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * This source code is licensed under both the BSD-style license (found in the</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * LICENSE file in the root directory of this source tree) and the GPLv2 (found</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * in the COPYING file in the root directory of this source tree).</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * You may select, at your option, one of the above-listed licenses.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#ifndef ZSTD_CWKSP_H</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#define ZSTD_CWKSP_H</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">/*-*************************************</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">*  Dependencies</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">***************************************/</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;<a class="code" href="zstd__internal_8h.html">zstd_internal.h</a>&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#if defined (__cplusplus)</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">/*-*************************************</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">*  Constants</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">***************************************/</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment">/* define &quot;workspace is too large&quot; as this number of times larger than needed */</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#af4b9e9fcd8cacf6f41787130a8f6a896">   28</a></span><span class="preprocessor">#define ZSTD_WORKSPACETOOLARGE_FACTOR 3</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">/* when workspace is continuously too large</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment"> * during at least this number of times,</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment"> * context&#39;s memory usage is considered wasteful,</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment"> * because it&#39;s sized to handle a worst case scenario which rarely happens.</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment"> * In which case, resize it down to free some memory */</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a187e646ae346eb70172e09fea2d4bd9c">   35</a></span><span class="preprocessor">#define ZSTD_WORKSPACETOOLARGE_MAXDURATION 128</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment">/* Since the workspace is effectively its own little malloc implementation /</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment"> * arena, when we run under ASAN, we should similarly insert redzones between</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment"> * each internal element of the workspace, so ASAN will catch overruns that</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment"> * reach outside an object but that stay inside the workspace.</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment"> * This defines the size of that redzone.</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#ifndef ZSTD_CWKSP_ASAN_REDZONE_SIZE</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#ad5d1ef486ccfdd687e5202f84a2afe4c">   45</a></span><span class="preprocessor">#define ZSTD_CWKSP_ASAN_REDZONE_SIZE 128</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">/*-*************************************</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment">*  Structures</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">***************************************/</span></div>
+<div class="foldopen" id="foldopen00051" data-start="{" data-end="};">
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343">   51</a></span><span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a4adb0f3fd52ef05dce796041d76831db">   52</a></span>    <a class="code hl_enumvalue" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a4adb0f3fd52ef05dce796041d76831db">ZSTD_cwksp_alloc_objects</a>,</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a6614cf716c212fb82da9ca3adc392c7b">   53</a></span>    <a class="code hl_enumvalue" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a6614cf716c212fb82da9ca3adc392c7b">ZSTD_cwksp_alloc_buffers</a>,</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <a class="code hl_enumvalue" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a8bcd2f55f725e0b1f95542f2dd8afd51">ZSTD_cwksp_alloc_aligned</a></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a8bcd2f55f725e0b1f95542f2dd8afd51">   55</a></span>} <a class="code hl_enumeration" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343">ZSTD_cwksp_alloc_phase_e</a>;</div>
+</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="foldopen" id="foldopen00141" data-start="{" data-end="};">
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="structZSTD__cwksp.html">  141</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="structZSTD__cwksp.html#aaf997d6b32f18dee07fcbe9452d37062">  142</a></span>    <span class="keywordtype">void</span>* <a class="code hl_variable" href="structZSTD__cwksp.html#aaf997d6b32f18dee07fcbe9452d37062">workspace</a>;</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="structZSTD__cwksp.html#a0cbea25172e7dc9c1ac2fbae0e539e74">  143</a></span>    <span class="keywordtype">void</span>* <a class="code hl_variable" href="structZSTD__cwksp.html#a0cbea25172e7dc9c1ac2fbae0e539e74">workspaceEnd</a>;</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">  145</a></span>    <span class="keywordtype">void</span>* <a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>;</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno"><a class="line" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">  146</a></span>    <span class="keywordtype">void</span>* <a class="code hl_variable" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">tableEnd</a>;</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno"><a class="line" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">  147</a></span>    <span class="keywordtype">void</span>* <a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a>;</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno"><a class="line" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">  148</a></span>    <span class="keywordtype">void</span>* <a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a>;</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno"><a class="line" href="structZSTD__cwksp.html#a55ef065fce77006bb19787faa8281ffd">  150</a></span>    <span class="keywordtype">int</span> <a class="code hl_variable" href="structZSTD__cwksp.html#a55ef065fce77006bb19787faa8281ffd">allocFailed</a>;</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="structZSTD__cwksp.html#a1e78a023a5bd52056393ac6f3f1e80ae">  151</a></span>    <span class="keywordtype">int</span> <a class="code hl_variable" href="structZSTD__cwksp.html#a1e78a023a5bd52056393ac6f3f1e80ae">workspaceOversizedDuration</a>;</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno"><a class="line" href="structZSTD__cwksp.html#a73353689bb49ac0d357c3ff3c19e44e6">  152</a></span>    <a class="code hl_enumeration" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343">ZSTD_cwksp_alloc_phase_e</a> <a class="code hl_variable" href="structZSTD__cwksp.html#a73353689bb49ac0d357c3ff3c19e44e6">phase</a>;</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>} <a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>;</div>
+</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span><span class="comment">/*-*************************************</span></div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span><span class="comment">*  Functions</span></div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span><span class="comment">***************************************/</span></div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstd__cwksp_8h.html#af9f28b678632973bb80f9738d7b3faee">ZSTD_cwksp_available_space</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws);</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
+<div class="foldopen" id="foldopen00161" data-start="{" data-end="}">
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a4cf3b7c9a7fe923f3c9ba6575c917320">  161</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a4cf3b7c9a7fe923f3c9ba6575c917320">ZSTD_cwksp_assert_internal_consistency</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws) {</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    (void)ws;</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#aaf997d6b32f18dee07fcbe9452d37062">workspace</a> &lt;= ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>);</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a> &lt;= ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">tableEnd</a>);</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a> &lt;= ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a>);</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">tableEnd</a> &lt;= ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a>);</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> &lt;= ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a>);</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a> &lt;= ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a0cbea25172e7dc9c1ac2fbae0e539e74">workspaceEnd</a>);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>}</div>
+</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
+<div class="foldopen" id="foldopen00174" data-start="{" data-end="}">
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a02c1e471b370cc4e2e83b133e14a0d0a">  174</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a02c1e471b370cc4e2e83b133e14a0d0a">ZSTD_cwksp_align</a>(<span class="keywordtype">size_t</span> size, <span class="keywordtype">size_t</span> <span class="keyword">const</span> align) {</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    <span class="keywordtype">size_t</span> <span class="keyword">const</span> mask = align - 1;</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>((align &amp; mask) == 0);</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    <span class="keywordflow">return</span> (size + mask) &amp; ~mask;</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>}</div>
+</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
+<div class="foldopen" id="foldopen00190" data-start="{" data-end="}">
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#ab886033561bea9f8fa032aaae25b284e">  190</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstd__cwksp_8h.html#ab886033561bea9f8fa032aaae25b284e">ZSTD_cwksp_alloc_size</a>(<span class="keywordtype">size_t</span> size) {</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span><span class="preprocessor">#if defined (ADDRESS_SANITIZER) &amp;&amp; !defined (ZSTD_ASAN_DONT_POISON_WORKSPACE)</span></div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    <span class="keywordflow">return</span> size + 2 * <a class="code hl_define" href="zstd__cwksp_8h.html#ad5d1ef486ccfdd687e5202f84a2afe4c">ZSTD_CWKSP_ASAN_REDZONE_SIZE</a>;</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <span class="keywordflow">return</span> size;</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>}</div>
+</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span> </div>
+<div class="foldopen" id="foldopen00198" data-start="{" data-end="}">
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a546ba31cd66078a9eb665d9688412d12">  198</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a546ba31cd66078a9eb665d9688412d12">ZSTD_cwksp_internal_advance_phase</a>(</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        <a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws, <a class="code hl_enumeration" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343">ZSTD_cwksp_alloc_phase_e</a> phase) {</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(phase &gt;= ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a73353689bb49ac0d357c3ff3c19e44e6">phase</a>);</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    <span class="keywordflow">if</span> (phase &gt; ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a73353689bb49ac0d357c3ff3c19e44e6">phase</a>) {</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        <span class="keywordflow">if</span> (ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a73353689bb49ac0d357c3ff3c19e44e6">phase</a> &lt; <a class="code hl_enumvalue" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a6614cf716c212fb82da9ca3adc392c7b">ZSTD_cwksp_alloc_buffers</a> &amp;&amp;</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>                phase &gt;= <a class="code hl_enumvalue" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a6614cf716c212fb82da9ca3adc392c7b">ZSTD_cwksp_alloc_buffers</a>) {</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>            ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> = ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>;</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>        }</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>        <span class="keywordflow">if</span> (ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a73353689bb49ac0d357c3ff3c19e44e6">phase</a> &lt; <a class="code hl_enumvalue" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a8bcd2f55f725e0b1f95542f2dd8afd51">ZSTD_cwksp_alloc_aligned</a> &amp;&amp;</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>                phase &gt;= <a class="code hl_enumvalue" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a8bcd2f55f725e0b1f95542f2dd8afd51">ZSTD_cwksp_alloc_aligned</a>) {</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>            <span class="comment">/* If unaligned allocations down from a too-large top have left us</span></div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span><span class="comment">             * unaligned, we need to realign our alloc ptr. Technically, this</span></div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span><span class="comment">             * can consume space that is unaccounted for in the neededSpace</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span><span class="comment">             * calculation. However, I believe this can only happen when the</span></div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span><span class="comment">             * workspace is too large, and specifically when it is too large</span></div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span><span class="comment">             * by a larger margin than the space that will be consumed. */</span></div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>            <span class="comment">/* TODO: cleaner, compiler warning friendly way to do this??? */</span></div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>            ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a> = (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a> - ((<span class="keywordtype">size_t</span>)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a> &amp; (<span class="keyword">sizeof</span>(<a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)-1));</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>            <span class="keywordflow">if</span> (ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a> &lt; ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a>) {</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>                ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> = ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a>;</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>            }</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>        }</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>        ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a73353689bb49ac0d357c3ff3c19e44e6">phase</a> = phase;</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>    }</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>}</div>
+</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span> </div>
+<div class="foldopen" id="foldopen00227" data-start="{" data-end="}">
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a54a1b7fd981681509a8d79affbbb7294">  227</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">int</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a54a1b7fd981681509a8d79affbbb7294">ZSTD_cwksp_owns_buffer</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws, <span class="keyword">const</span> <span class="keywordtype">void</span>* ptr) {</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    <span class="keywordflow">return</span> (ptr != <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>) &amp;&amp; (ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#aaf997d6b32f18dee07fcbe9452d37062">workspace</a> &lt;= ptr) &amp;&amp; (ptr &lt;= ws-&gt;workspaceEnd);</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>}</div>
+</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span> </div>
+<div class="foldopen" id="foldopen00234" data-start="{" data-end="}">
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a87799538af6a18429344d264c68be2c2">  234</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span>* <a class="code hl_function" href="zstd__cwksp_8h.html#a87799538af6a18429344d264c68be2c2">ZSTD_cwksp_reserve_internal</a>(</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws, <span class="keywordtype">size_t</span> bytes, <a class="code hl_enumeration" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343">ZSTD_cwksp_alloc_phase_e</a> phase) {</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>    <span class="keywordtype">void</span>* alloc;</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    <span class="keywordtype">void</span>* bottom = ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">tableEnd</a>;</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    <a class="code hl_function" href="zstd__cwksp_8h.html#a546ba31cd66078a9eb665d9688412d12">ZSTD_cwksp_internal_advance_phase</a>(ws, phase);</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    alloc = (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a> - bytes;</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span> </div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span><span class="preprocessor">#if defined (ADDRESS_SANITIZER) &amp;&amp; !defined (ZSTD_ASAN_DONT_POISON_WORKSPACE)</span></div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    <span class="comment">/* over-reserve space */</span></div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    alloc = (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *)alloc - 2 * <a class="code hl_define" href="zstd__cwksp_8h.html#ad5d1ef486ccfdd687e5202f84a2afe4c">ZSTD_CWKSP_ASAN_REDZONE_SIZE</a>;</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> </div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>    <a class="code hl_define" href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a>(5, <span class="stringliteral">&quot;cwksp: reserving %p %zd bytes, %zd bytes remaining&quot;</span>,</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>        alloc, bytes, <a class="code hl_function" href="zstd__cwksp_8h.html#af9f28b678632973bb80f9738d7b3faee">ZSTD_cwksp_available_space</a>(ws) - bytes);</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>    <a class="code hl_function" href="zstd__cwksp_8h.html#a4cf3b7c9a7fe923f3c9ba6575c917320">ZSTD_cwksp_assert_internal_consistency</a>(ws);</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(alloc &gt;= bottom);</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>    <span class="keywordflow">if</span> (alloc &lt; bottom) {</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        <a class="code hl_define" href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a>(4, <span class="stringliteral">&quot;cwksp: alloc failed!&quot;</span>);</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a55ef065fce77006bb19787faa8281ffd">allocFailed</a> = 1;</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>    }</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>    <span class="keywordflow">if</span> (alloc &lt; ws-&gt;tableValidEnd) {</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> = alloc;</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>    }</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a> = alloc;</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span> </div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span><span class="preprocessor">#if defined (ADDRESS_SANITIZER) &amp;&amp; !defined (ZSTD_ASAN_DONT_POISON_WORKSPACE)</span></div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    <span class="comment">/* Move alloc so there&#39;s ZSTD_CWKSP_ASAN_REDZONE_SIZE unused space on</span></div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span><span class="comment">     * either size. */</span></div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>    alloc = (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *)alloc + <a class="code hl_define" href="zstd__cwksp_8h.html#ad5d1ef486ccfdd687e5202f84a2afe4c">ZSTD_CWKSP_ASAN_REDZONE_SIZE</a>;</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>    __asan_unpoison_memory_region(alloc, bytes);</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span> </div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>    <span class="keywordflow">return</span> alloc;</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>}</div>
+</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span> </div>
+<div class="foldopen" id="foldopen00273" data-start="{" data-end="}">
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a89702019661989749d94182098fe3892">  273</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>* <a class="code hl_function" href="zstd__cwksp_8h.html#a89702019661989749d94182098fe3892">ZSTD_cwksp_reserve_buffer</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws, <span class="keywordtype">size_t</span> bytes) {</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>    <span class="keywordflow">return</span> (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)<a class="code hl_function" href="zstd__cwksp_8h.html#a87799538af6a18429344d264c68be2c2">ZSTD_cwksp_reserve_internal</a>(ws, bytes, <a class="code hl_enumvalue" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a6614cf716c212fb82da9ca3adc392c7b">ZSTD_cwksp_alloc_buffers</a>);</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>}</div>
+</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span> </div>
+<div class="foldopen" id="foldopen00280" data-start="{" data-end="}">
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#ae35cf4dee50619725e7f7ef635e1eff5">  280</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span>* <a class="code hl_function" href="zstd__cwksp_8h.html#ae35cf4dee50619725e7f7ef635e1eff5">ZSTD_cwksp_reserve_aligned</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws, <span class="keywordtype">size_t</span> bytes) {</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>((bytes &amp; (<span class="keyword">sizeof</span>(<a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)-1)) == 0);</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a87799538af6a18429344d264c68be2c2">ZSTD_cwksp_reserve_internal</a>(ws, <a class="code hl_function" href="zstd__cwksp_8h.html#a02c1e471b370cc4e2e83b133e14a0d0a">ZSTD_cwksp_align</a>(bytes, <span class="keyword">sizeof</span>(<a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)), <a class="code hl_enumvalue" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a8bcd2f55f725e0b1f95542f2dd8afd51">ZSTD_cwksp_alloc_aligned</a>);</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>}</div>
+</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span> </div>
+<div class="foldopen" id="foldopen00290" data-start="{" data-end="}">
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#acd591be46e522cc7dc75ebebe79df235">  290</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span>* <a class="code hl_function" href="zstd__cwksp_8h.html#acd591be46e522cc7dc75ebebe79df235">ZSTD_cwksp_reserve_table</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws, <span class="keywordtype">size_t</span> bytes) {</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>    <span class="keyword">const</span> <a class="code hl_enumeration" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343">ZSTD_cwksp_alloc_phase_e</a> phase = <a class="code hl_enumvalue" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a8bcd2f55f725e0b1f95542f2dd8afd51">ZSTD_cwksp_alloc_aligned</a>;</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>    <span class="keywordtype">void</span>* alloc = ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">tableEnd</a>;</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>    <span class="keywordtype">void</span>* end = (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *)alloc + bytes;</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>    <span class="keywordtype">void</span>* top = ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a>;</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span> </div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>    <a class="code hl_define" href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a>(5, <span class="stringliteral">&quot;cwksp: reserving %p table %zd bytes, %zd bytes remaining&quot;</span>,</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>        alloc, bytes, <a class="code hl_function" href="zstd__cwksp_8h.html#af9f28b678632973bb80f9738d7b3faee">ZSTD_cwksp_available_space</a>(ws) - bytes);</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>((bytes &amp; (<span class="keyword">sizeof</span>(<a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)-1)) == 0);</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>    <a class="code hl_function" href="zstd__cwksp_8h.html#a546ba31cd66078a9eb665d9688412d12">ZSTD_cwksp_internal_advance_phase</a>(ws, phase);</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>    <a class="code hl_function" href="zstd__cwksp_8h.html#a4cf3b7c9a7fe923f3c9ba6575c917320">ZSTD_cwksp_assert_internal_consistency</a>(ws);</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(end &lt;= top);</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>    <span class="keywordflow">if</span> (end &gt; top) {</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>        <a class="code hl_define" href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a>(4, <span class="stringliteral">&quot;cwksp: table alloc failed!&quot;</span>);</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>        ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a55ef065fce77006bb19787faa8281ffd">allocFailed</a> = 1;</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>    }</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">tableEnd</a> = end;</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span> </div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span><span class="preprocessor">#if defined (ADDRESS_SANITIZER) &amp;&amp; !defined (ZSTD_ASAN_DONT_POISON_WORKSPACE)</span></div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>    __asan_unpoison_memory_region(alloc, bytes);</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span> </div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>    <span class="keywordflow">return</span> alloc;</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>}</div>
+</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span> </div>
+<div class="foldopen" id="foldopen00319" data-start="{" data-end="}">
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a928eb46e9206ebd790baf05b0e34cc32">  319</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span>* <a class="code hl_function" href="zstd__cwksp_8h.html#a928eb46e9206ebd790baf05b0e34cc32">ZSTD_cwksp_reserve_object</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws, <span class="keywordtype">size_t</span> bytes) {</div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>    <span class="keywordtype">size_t</span> roundedBytes = <a class="code hl_function" href="zstd__cwksp_8h.html#a02c1e471b370cc4e2e83b133e14a0d0a">ZSTD_cwksp_align</a>(bytes, <span class="keyword">sizeof</span>(<span class="keywordtype">void</span>*));</div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>    <span class="keywordtype">void</span>* alloc = ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>;</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>    <span class="keywordtype">void</span>* end = (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)alloc + roundedBytes;</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span> </div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span><span class="preprocessor">#if defined (ADDRESS_SANITIZER) &amp;&amp; !defined (ZSTD_ASAN_DONT_POISON_WORKSPACE)</span></div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>    <span class="comment">/* over-reserve space */</span></div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>    end = (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *)end + 2 * <a class="code hl_define" href="zstd__cwksp_8h.html#ad5d1ef486ccfdd687e5202f84a2afe4c">ZSTD_CWKSP_ASAN_REDZONE_SIZE</a>;</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span> </div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>    <a class="code hl_define" href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a>(5,</div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>        <span class="stringliteral">&quot;cwksp: reserving %p object %zd bytes (rounded to %zd), %zd bytes remaining&quot;</span>,</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>        alloc, bytes, roundedBytes, <a class="code hl_function" href="zstd__cwksp_8h.html#af9f28b678632973bb80f9738d7b3faee">ZSTD_cwksp_available_space</a>(ws) - roundedBytes);</div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(((<span class="keywordtype">size_t</span>)alloc &amp; (<span class="keyword">sizeof</span>(<span class="keywordtype">void</span>*)-1)) == 0);</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>((bytes &amp; (<span class="keyword">sizeof</span>(<span class="keywordtype">void</span>*)-1)) == 0);</div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>    <a class="code hl_function" href="zstd__cwksp_8h.html#a4cf3b7c9a7fe923f3c9ba6575c917320">ZSTD_cwksp_assert_internal_consistency</a>(ws);</div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>    <span class="comment">/* we must be in the first phase, no advance is possible */</span></div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>    <span class="keywordflow">if</span> (ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a73353689bb49ac0d357c3ff3c19e44e6">phase</a> != <a class="code hl_enumvalue" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a4adb0f3fd52ef05dce796041d76831db">ZSTD_cwksp_alloc_objects</a> || end &gt; ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a0cbea25172e7dc9c1ac2fbae0e539e74">workspaceEnd</a>) {</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>        <a class="code hl_define" href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a>(4, <span class="stringliteral">&quot;cwksp: object alloc failed!&quot;</span>);</div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>        ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a55ef065fce77006bb19787faa8281ffd">allocFailed</a> = 1;</div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>    }</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a> = end;</div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">tableEnd</a> = end;</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> = end;</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span> </div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span><span class="preprocessor">#if defined (ADDRESS_SANITIZER) &amp;&amp; !defined (ZSTD_ASAN_DONT_POISON_WORKSPACE)</span></div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>    <span class="comment">/* Move alloc so there&#39;s ZSTD_CWKSP_ASAN_REDZONE_SIZE unused space on</span></div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span><span class="comment">     * either size. */</span></div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>    alloc = (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *)alloc + <a class="code hl_define" href="zstd__cwksp_8h.html#ad5d1ef486ccfdd687e5202f84a2afe4c">ZSTD_CWKSP_ASAN_REDZONE_SIZE</a>;</div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>    __asan_unpoison_memory_region(alloc, bytes);</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span> </div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>    <span class="keywordflow">return</span> alloc;</div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>}</div>
+</div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span> </div>
+<div class="foldopen" id="foldopen00355" data-start="{" data-end="}">
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a7701edeea53bd3e326c65c90a9274f62">  355</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a7701edeea53bd3e326c65c90a9274f62">ZSTD_cwksp_mark_tables_dirty</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws) {</div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>    <a class="code hl_define" href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a>(4, <span class="stringliteral">&quot;cwksp: ZSTD_cwksp_mark_tables_dirty&quot;</span>);</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span> </div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span><span class="preprocessor">#if defined (MEMORY_SANITIZER) &amp;&amp; !defined (ZSTD_MSAN_DONT_POISON_WORKSPACE)</span></div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>    <span class="comment">/* To validate that the table re-use logic is sound, and that we don&#39;t</span></div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span><span class="comment">     * access table space that we haven&#39;t cleaned, we re-&quot;poison&quot; the table</span></div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span><span class="comment">     * space every time we mark it dirty. */</span></div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>    {</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>        <span class="keywordtype">size_t</span> size = (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> - (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>;</div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>        <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(__msan_test_shadow(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>, size) == -1);</div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>        __msan_poison(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>, size);</div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>    }</div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span> </div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> &gt;= ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>);</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> &lt;= ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a>);</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> = ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>;</div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>    <a class="code hl_function" href="zstd__cwksp_8h.html#a4cf3b7c9a7fe923f3c9ba6575c917320">ZSTD_cwksp_assert_internal_consistency</a>(ws);</div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>}</div>
+</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span> </div>
+<div class="foldopen" id="foldopen00375" data-start="{" data-end="}">
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a0fb8336e3c1e1f1bd6e689181d1da15e">  375</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a0fb8336e3c1e1f1bd6e689181d1da15e">ZSTD_cwksp_mark_tables_clean</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws) {</div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>    <a class="code hl_define" href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a>(4, <span class="stringliteral">&quot;cwksp: ZSTD_cwksp_mark_tables_clean&quot;</span>);</div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> &gt;= ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>);</div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> &lt;= ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a>);</div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>    <span class="keywordflow">if</span> (ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> &lt; ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">tableEnd</a>) {</div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>        ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> = ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">tableEnd</a>;</div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>    }</div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>    <a class="code hl_function" href="zstd__cwksp_8h.html#a4cf3b7c9a7fe923f3c9ba6575c917320">ZSTD_cwksp_assert_internal_consistency</a>(ws);</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>}</div>
+</div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span> </div>
+<div class="foldopen" id="foldopen00388" data-start="{" data-end="}">
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a3fe429aca2f2a9063b08a2372dd82e58">  388</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a3fe429aca2f2a9063b08a2372dd82e58">ZSTD_cwksp_clean_tables</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws) {</div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>    <a class="code hl_define" href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a>(4, <span class="stringliteral">&quot;cwksp: ZSTD_cwksp_clean_tables&quot;</span>);</div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> &gt;= ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>);</div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> &lt;= ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a>);</div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>    <span class="keywordflow">if</span> (ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> &lt; ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">tableEnd</a>) {</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>        memset(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a>, 0, (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">tableEnd</a> - (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a>);</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>    }</div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>    <a class="code hl_function" href="zstd__cwksp_8h.html#a0fb8336e3c1e1f1bd6e689181d1da15e">ZSTD_cwksp_mark_tables_clean</a>(ws);</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>}</div>
+</div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span> </div>
+<div class="foldopen" id="foldopen00402" data-start="{" data-end="}">
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a48ddee198a3d51f146cf9cb0e3c259c9">  402</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a48ddee198a3d51f146cf9cb0e3c259c9">ZSTD_cwksp_clear_tables</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws) {</div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>    <a class="code hl_define" href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a>(4, <span class="stringliteral">&quot;cwksp: clearing tables!&quot;</span>);</div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span> </div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span><span class="preprocessor">#if defined (ADDRESS_SANITIZER) &amp;&amp; !defined (ZSTD_ASAN_DONT_POISON_WORKSPACE)</span></div>
+<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>    {</div>
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>        <span class="keywordtype">size_t</span> size = (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> - (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>;</div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>        __asan_poison_memory_region(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>, size);</div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>    }</div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span> </div>
+<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">tableEnd</a> = ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>;</div>
+<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>    <a class="code hl_function" href="zstd__cwksp_8h.html#a4cf3b7c9a7fe923f3c9ba6575c917320">ZSTD_cwksp_assert_internal_consistency</a>(ws);</div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>}</div>
+</div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span> </div>
+<div class="foldopen" id="foldopen00420" data-start="{" data-end="}">
+<div class="line"><a id="l00420" name="l00420"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a8f4481557c43ba23a4ca8be832b0b765">  420</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a8f4481557c43ba23a4ca8be832b0b765">ZSTD_cwksp_clear</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws) {</div>
+<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span>    <a class="code hl_define" href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a>(4, <span class="stringliteral">&quot;cwksp: clearing!&quot;</span>);</div>
+<div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span> </div>
+<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span><span class="preprocessor">#if defined (MEMORY_SANITIZER) &amp;&amp; !defined (ZSTD_MSAN_DONT_POISON_WORKSPACE)</span></div>
+<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>    <span class="comment">/* To validate that the context re-use logic is sound, and that we don&#39;t</span></div>
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span><span class="comment">     * access stuff that this compression hasn&#39;t initialized, we re-&quot;poison&quot;</span></div>
+<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span><span class="comment">     * the workspace (or at least the non-static, non-table parts of it)</span></div>
+<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span><span class="comment">     * every time we start a new compression. */</span></div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>    {</div>
+<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span>        <span class="keywordtype">size_t</span> size = (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a0cbea25172e7dc9c1ac2fbae0e539e74">workspaceEnd</a> - (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a>;</div>
+<div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span>        __msan_poison(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a>, size);</div>
+<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>    }</div>
+<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span> </div>
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span><span class="preprocessor">#if defined (ADDRESS_SANITIZER) &amp;&amp; !defined (ZSTD_ASAN_DONT_POISON_WORKSPACE)</span></div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>    {</div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>        <span class="keywordtype">size_t</span> size = (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a0cbea25172e7dc9c1ac2fbae0e539e74">workspaceEnd</a> - (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>;</div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>        __asan_poison_memory_region(ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>, size);</div>
+<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span>    }</div>
+<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span> </div>
+<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">tableEnd</a> = ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>;</div>
+<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a> = ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a0cbea25172e7dc9c1ac2fbae0e539e74">workspaceEnd</a>;</div>
+<div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a55ef065fce77006bb19787faa8281ffd">allocFailed</a> = 0;</div>
+<div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span>    <span class="keywordflow">if</span> (ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a73353689bb49ac0d357c3ff3c19e44e6">phase</a> &gt; <a class="code hl_enumvalue" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a6614cf716c212fb82da9ca3adc392c7b">ZSTD_cwksp_alloc_buffers</a>) {</div>
+<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span>        ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a73353689bb49ac0d357c3ff3c19e44e6">phase</a> = <a class="code hl_enumvalue" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a6614cf716c212fb82da9ca3adc392c7b">ZSTD_cwksp_alloc_buffers</a>;</div>
+<div class="line"><a id="l00446" name="l00446"></a><span class="lineno">  446</span>    }</div>
+<div class="line"><a id="l00447" name="l00447"></a><span class="lineno">  447</span>    <a class="code hl_function" href="zstd__cwksp_8h.html#a4cf3b7c9a7fe923f3c9ba6575c917320">ZSTD_cwksp_assert_internal_consistency</a>(ws);</div>
+<div class="line"><a id="l00448" name="l00448"></a><span class="lineno">  448</span>}</div>
+</div>
+<div class="line"><a id="l00449" name="l00449"></a><span class="lineno">  449</span> </div>
+<div class="foldopen" id="foldopen00455" data-start="{" data-end="}">
+<div class="line"><a id="l00455" name="l00455"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#ada054560115234e87b365a4b0390a0af">  455</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> <a class="code hl_function" href="zstd__cwksp_8h.html#ada054560115234e87b365a4b0390a0af">ZSTD_cwksp_init</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws, <span class="keywordtype">void</span>* <a class="code hl_function" href="WtDtPorter_8cpp.html#a011cfecbf1cc7aea656da1554c8f0e7f">start</a>, <span class="keywordtype">size_t</span> size) {</div>
+<div class="line"><a id="l00456" name="l00456"></a><span class="lineno">  456</span>    <a class="code hl_define" href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a>(4, <span class="stringliteral">&quot;cwksp: init&#39;ing workspace with %zd bytes&quot;</span>, size);</div>
+<div class="line"><a id="l00457" name="l00457"></a><span class="lineno">  457</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(((<span class="keywordtype">size_t</span>)<a class="code hl_function" href="WtDtPorter_8cpp.html#a011cfecbf1cc7aea656da1554c8f0e7f">start</a> &amp; (<span class="keyword">sizeof</span>(<span class="keywordtype">void</span>*)-1)) == 0); <span class="comment">/* ensure correct alignment */</span></div>
+<div class="line"><a id="l00458" name="l00458"></a><span class="lineno">  458</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#aaf997d6b32f18dee07fcbe9452d37062">workspace</a> = <a class="code hl_function" href="WtDtPorter_8cpp.html#a011cfecbf1cc7aea656da1554c8f0e7f">start</a>;</div>
+<div class="line"><a id="l00459" name="l00459"></a><span class="lineno">  459</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a0cbea25172e7dc9c1ac2fbae0e539e74">workspaceEnd</a> = (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)<a class="code hl_function" href="WtDtPorter_8cpp.html#a011cfecbf1cc7aea656da1554c8f0e7f">start</a> + size;</div>
+<div class="line"><a id="l00460" name="l00460"></a><span class="lineno">  460</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a> = ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#aaf997d6b32f18dee07fcbe9452d37062">workspace</a>;</div>
+<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">tableValidEnd</a> = ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">objectEnd</a>;</div>
+<div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a73353689bb49ac0d357c3ff3c19e44e6">phase</a> = <a class="code hl_enumvalue" href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a4adb0f3fd52ef05dce796041d76831db">ZSTD_cwksp_alloc_objects</a>;</div>
+<div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span>    <a class="code hl_function" href="zstd__cwksp_8h.html#a8f4481557c43ba23a4ca8be832b0b765">ZSTD_cwksp_clear</a>(ws);</div>
+<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>    ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a1e78a023a5bd52056393ac6f3f1e80ae">workspaceOversizedDuration</a> = 0;</div>
+<div class="line"><a id="l00465" name="l00465"></a><span class="lineno">  465</span>    <a class="code hl_function" href="zstd__cwksp_8h.html#a4cf3b7c9a7fe923f3c9ba6575c917320">ZSTD_cwksp_assert_internal_consistency</a>(ws);</div>
+<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>}</div>
+</div>
+<div class="line"><a id="l00467" name="l00467"></a><span class="lineno">  467</span> </div>
+<div class="foldopen" id="foldopen00468" data-start="{" data-end="}">
+<div class="line"><a id="l00468" name="l00468"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a02af981589dbdc42e18ae680f1a18daa">  468</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a02af981589dbdc42e18ae680f1a18daa">ZSTD_cwksp_create</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws, <span class="keywordtype">size_t</span> size, ZSTD_customMem customMem) {</div>
+<div class="line"><a id="l00469" name="l00469"></a><span class="lineno">  469</span>    <span class="keywordtype">void</span>* workspace = <a class="code hl_function" href="zstd__common_8c.html#aaf3d500bcf39cd8fedb3d5163eb5f364">ZSTD_malloc</a>(size, customMem);</div>
+<div class="line"><a id="l00470" name="l00470"></a><span class="lineno">  470</span>    <a class="code hl_define" href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a>(4, <span class="stringliteral">&quot;cwksp: creating new workspace with %zd bytes&quot;</span>, size);</div>
+<div class="line"><a id="l00471" name="l00471"></a><span class="lineno">  471</span>    <a class="code hl_define" href="zstd__internal_8h.html#a5d0783e849b3fc286fe720307a952d26">RETURN_ERROR_IF</a>(workspace == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, memory_allocation);</div>
+<div class="line"><a id="l00472" name="l00472"></a><span class="lineno">  472</span>    <a class="code hl_function" href="zstd__cwksp_8h.html#ada054560115234e87b365a4b0390a0af">ZSTD_cwksp_init</a>(ws, workspace, size);</div>
+<div class="line"><a id="l00473" name="l00473"></a><span class="lineno">  473</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00474" name="l00474"></a><span class="lineno">  474</span>}</div>
+</div>
+<div class="line"><a id="l00475" name="l00475"></a><span class="lineno">  475</span> </div>
+<div class="foldopen" id="foldopen00476" data-start="{" data-end="}">
+<div class="line"><a id="l00476" name="l00476"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a86cb1dc328ba75e8bb63a14636bd603f">  476</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a86cb1dc328ba75e8bb63a14636bd603f">ZSTD_cwksp_free</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws, ZSTD_customMem customMem) {</div>
+<div class="line"><a id="l00477" name="l00477"></a><span class="lineno">  477</span>    <span class="keywordtype">void</span> *ptr = ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#aaf997d6b32f18dee07fcbe9452d37062">workspace</a>;</div>
+<div class="line"><a id="l00478" name="l00478"></a><span class="lineno">  478</span>    <a class="code hl_define" href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a>(4, <span class="stringliteral">&quot;cwksp: freeing workspace&quot;</span>);</div>
+<div class="line"><a id="l00479" name="l00479"></a><span class="lineno">  479</span>    memset(ws, 0, <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>));</div>
+<div class="line"><a id="l00480" name="l00480"></a><span class="lineno">  480</span>    <a class="code hl_function" href="zstd__common_8c.html#a9fbb7e3dcf0e887ae8a05914ebdf0c53">ZSTD_free</a>(ptr, customMem);</div>
+<div class="line"><a id="l00481" name="l00481"></a><span class="lineno">  481</span>}</div>
+</div>
+<div class="line"><a id="l00482" name="l00482"></a><span class="lineno">  482</span> </div>
+<div class="foldopen" id="foldopen00487" data-start="{" data-end="}">
+<div class="line"><a id="l00487" name="l00487"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a2134dd2d9a727e3215a0c80b5b9df0b7">  487</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a2134dd2d9a727e3215a0c80b5b9df0b7">ZSTD_cwksp_move</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* <a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>) {</div>
+<div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span>    *<a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a> = *<a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>;</div>
+<div class="line"><a id="l00489" name="l00489"></a><span class="lineno">  489</span>    memset(<a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, 0, <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>));</div>
+<div class="line"><a id="l00490" name="l00490"></a><span class="lineno">  490</span>}</div>
+</div>
+<div class="line"><a id="l00491" name="l00491"></a><span class="lineno">  491</span> </div>
+<div class="foldopen" id="foldopen00492" data-start="{" data-end="}">
+<div class="line"><a id="l00492" name="l00492"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a65bb0f0f87883b48bbba0330db3ab2e0">  492</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a65bb0f0f87883b48bbba0330db3ab2e0">ZSTD_cwksp_sizeof</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws) {</div>
+<div class="line"><a id="l00493" name="l00493"></a><span class="lineno">  493</span>    <span class="keywordflow">return</span> (<span class="keywordtype">size_t</span>)((<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a0cbea25172e7dc9c1ac2fbae0e539e74">workspaceEnd</a> - (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#aaf997d6b32f18dee07fcbe9452d37062">workspace</a>);</div>
+<div class="line"><a id="l00494" name="l00494"></a><span class="lineno">  494</span>}</div>
+</div>
+<div class="line"><a id="l00495" name="l00495"></a><span class="lineno">  495</span> </div>
+<div class="foldopen" id="foldopen00496" data-start="{" data-end="}">
+<div class="line"><a id="l00496" name="l00496"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a1482c65b46014c2e46eaa911c6189039">  496</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">int</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a1482c65b46014c2e46eaa911c6189039">ZSTD_cwksp_reserve_failed</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws) {</div>
+<div class="line"><a id="l00497" name="l00497"></a><span class="lineno">  497</span>    <span class="keywordflow">return</span> ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a55ef065fce77006bb19787faa8281ffd">allocFailed</a>;</div>
+<div class="line"><a id="l00498" name="l00498"></a><span class="lineno">  498</span>}</div>
+</div>
+<div class="line"><a id="l00499" name="l00499"></a><span class="lineno">  499</span> </div>
+<div class="line"><a id="l00500" name="l00500"></a><span class="lineno">  500</span><span class="comment">/*-*************************************</span></div>
+<div class="line"><a id="l00501" name="l00501"></a><span class="lineno">  501</span><span class="comment">*  Functions Checking Free Space</span></div>
+<div class="line"><a id="l00502" name="l00502"></a><span class="lineno">  502</span><span class="comment">***************************************/</span></div>
+<div class="line"><a id="l00503" name="l00503"></a><span class="lineno">  503</span> </div>
+<div class="foldopen" id="foldopen00504" data-start="{" data-end="}">
+<div class="line"><a id="l00504" name="l00504"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#af9f28b678632973bb80f9738d7b3faee">  504</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstd__cwksp_8h.html#af9f28b678632973bb80f9738d7b3faee">ZSTD_cwksp_available_space</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws) {</div>
+<div class="line"><a id="l00505" name="l00505"></a><span class="lineno">  505</span>    <span class="keywordflow">return</span> (<span class="keywordtype">size_t</span>)((<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">allocStart</a> - (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>*)ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">tableEnd</a>);</div>
+<div class="line"><a id="l00506" name="l00506"></a><span class="lineno">  506</span>}</div>
+</div>
+<div class="line"><a id="l00507" name="l00507"></a><span class="lineno">  507</span> </div>
+<div class="foldopen" id="foldopen00508" data-start="{" data-end="}">
+<div class="line"><a id="l00508" name="l00508"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#abb576ce45cc40051f7fea734068eceba">  508</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">int</span> <a class="code hl_function" href="zstd__cwksp_8h.html#abb576ce45cc40051f7fea734068eceba">ZSTD_cwksp_check_available</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws, <span class="keywordtype">size_t</span> additionalNeededSpace) {</div>
+<div class="line"><a id="l00509" name="l00509"></a><span class="lineno">  509</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="zstd__cwksp_8h.html#af9f28b678632973bb80f9738d7b3faee">ZSTD_cwksp_available_space</a>(ws) &gt;= additionalNeededSpace;</div>
+<div class="line"><a id="l00510" name="l00510"></a><span class="lineno">  510</span>}</div>
+</div>
+<div class="line"><a id="l00511" name="l00511"></a><span class="lineno">  511</span> </div>
+<div class="foldopen" id="foldopen00512" data-start="{" data-end="}">
+<div class="line"><a id="l00512" name="l00512"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a426d15e33b19566ea9032f97ab876ed4">  512</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">int</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a426d15e33b19566ea9032f97ab876ed4">ZSTD_cwksp_check_too_large</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws, <span class="keywordtype">size_t</span> additionalNeededSpace) {</div>
+<div class="line"><a id="l00513" name="l00513"></a><span class="lineno">  513</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="zstd__cwksp_8h.html#abb576ce45cc40051f7fea734068eceba">ZSTD_cwksp_check_available</a>(</div>
+<div class="line"><a id="l00514" name="l00514"></a><span class="lineno">  514</span>        ws, additionalNeededSpace * <a class="code hl_define" href="zstd__cwksp_8h.html#af4b9e9fcd8cacf6f41787130a8f6a896">ZSTD_WORKSPACETOOLARGE_FACTOR</a>);</div>
+<div class="line"><a id="l00515" name="l00515"></a><span class="lineno">  515</span>}</div>
+</div>
+<div class="line"><a id="l00516" name="l00516"></a><span class="lineno">  516</span> </div>
+<div class="foldopen" id="foldopen00517" data-start="{" data-end="}">
+<div class="line"><a id="l00517" name="l00517"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a5bbdfd92eff20915b8993f77f2063371">  517</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">int</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a5bbdfd92eff20915b8993f77f2063371">ZSTD_cwksp_check_wasteful</a>(<a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws, <span class="keywordtype">size_t</span> additionalNeededSpace) {</div>
+<div class="line"><a id="l00518" name="l00518"></a><span class="lineno">  518</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a426d15e33b19566ea9032f97ab876ed4">ZSTD_cwksp_check_too_large</a>(ws, additionalNeededSpace)</div>
+<div class="line"><a id="l00519" name="l00519"></a><span class="lineno">  519</span>        &amp;&amp; ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a1e78a023a5bd52056393ac6f3f1e80ae">workspaceOversizedDuration</a> &gt; <a class="code hl_define" href="zstd__cwksp_8h.html#a187e646ae346eb70172e09fea2d4bd9c">ZSTD_WORKSPACETOOLARGE_MAXDURATION</a>;</div>
+<div class="line"><a id="l00520" name="l00520"></a><span class="lineno">  520</span>}</div>
+</div>
+<div class="line"><a id="l00521" name="l00521"></a><span class="lineno">  521</span> </div>
+<div class="foldopen" id="foldopen00522" data-start="{" data-end="}">
+<div class="line"><a id="l00522" name="l00522"></a><span class="lineno"><a class="line" href="zstd__cwksp_8h.html#a70258e4389e8f9a325810ba1d82b8e57">  522</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> <a class="code hl_function" href="zstd__cwksp_8h.html#a70258e4389e8f9a325810ba1d82b8e57">ZSTD_cwksp_bump_oversized_duration</a>(</div>
+<div class="line"><a id="l00523" name="l00523"></a><span class="lineno">  523</span>        <a class="code hl_struct" href="structZSTD__cwksp.html">ZSTD_cwksp</a>* ws, <span class="keywordtype">size_t</span> additionalNeededSpace) {</div>
+<div class="line"><a id="l00524" name="l00524"></a><span class="lineno">  524</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="zstd__cwksp_8h.html#a426d15e33b19566ea9032f97ab876ed4">ZSTD_cwksp_check_too_large</a>(ws, additionalNeededSpace)) {</div>
+<div class="line"><a id="l00525" name="l00525"></a><span class="lineno">  525</span>        ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a1e78a023a5bd52056393ac6f3f1e80ae">workspaceOversizedDuration</a>++;</div>
+<div class="line"><a id="l00526" name="l00526"></a><span class="lineno">  526</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00527" name="l00527"></a><span class="lineno">  527</span>        ws-&gt;<a class="code hl_variable" href="structZSTD__cwksp.html#a1e78a023a5bd52056393ac6f3f1e80ae">workspaceOversizedDuration</a> = 0;</div>
+<div class="line"><a id="l00528" name="l00528"></a><span class="lineno">  528</span>    }</div>
+<div class="line"><a id="l00529" name="l00529"></a><span class="lineno">  529</span>}</div>
+</div>
+<div class="line"><a id="l00530" name="l00530"></a><span class="lineno">  530</span> </div>
+<div class="line"><a id="l00531" name="l00531"></a><span class="lineno">  531</span><span class="preprocessor">#if defined (__cplusplus)</span></div>
+<div class="line"><a id="l00532" name="l00532"></a><span class="lineno">  532</span>}</div>
+<div class="line"><a id="l00533" name="l00533"></a><span class="lineno">  533</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00534" name="l00534"></a><span class="lineno">  534</span> </div>
+<div class="line"><a id="l00535" name="l00535"></a><span class="lineno">  535</span><span class="preprocessor">#endif </span><span class="comment">/* ZSTD_CWKSP_H */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="aWTSExpressData_8hpp_html_a4ae1dab0fb4b072a66584546209e7d58"><div class="ttname"><a href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a></div><div class="ttdeci">unsigned char BYTE</div><div class="ttdef"><b>Definition</b> <a href="WTSExpressData_8hpp_source.html#l00019">WTSExpressData.hpp:19</a></div></div>
+<div class="ttc" id="aWtDtPorter_8cpp_html_a011cfecbf1cc7aea656da1554c8f0e7f"><div class="ttname"><a href="WtDtPorter_8cpp.html#a011cfecbf1cc7aea656da1554c8f0e7f">start</a></div><div class="ttdeci">void start(bool bAsync)</div><div class="ttdoc">启动数据处理模块</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_8cpp_source.html#l00104">WtDtPorter.cpp:104</a></div></div>
+<div class="ttc" id="adebug_8h_html_a8728fe9e99fe783be28c0f38bb0d0761"><div class="ttname"><a href="debug_8h.html#a8728fe9e99fe783be28c0f38bb0d0761">DEBUGLOG</a></div><div class="ttdeci">#define DEBUGLOG(l,...)</div><div class="ttdef"><b>Definition</b> <a href="debug_8h_source.html#l00126">debug.h:126</a></div></div>
+<div class="ttc" id="adebug_8h_html_acdcc5aaebf3f273c1762f24a6ece2e5e"><div class="ttname"><a href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a></div><div class="ttdeci">#define assert(condition)</div><div class="ttdef"><b>Definition</b> <a href="debug_8h_source.html#l00102">debug.h:102</a></div></div>
+<div class="ttc" id="amem_8h_html_ac3df7cf3c8cb172a588adec881447d68"><div class="ttname"><a href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a></div><div class="ttdeci">unsigned int U32</div><div class="ttdef"><b>Definition</b> <a href="mem_8h_source.html#l00150">mem.h:150</a></div></div>
+<div class="ttc" id="amem_8h_html_acf4d568511d5e964c3579616a28ab62b"><div class="ttname"><a href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a></div><div class="ttdeci">#define MEM_STATIC</div><div class="ttdef"><b>Definition</b> <a href="mem_8h_source.html#l00039">mem.h:39</a></div></div>
+<div class="ttc" id="astructZSTD__cwksp_html"><div class="ttname"><a href="structZSTD__cwksp.html">ZSTD_cwksp</a></div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00141">zstd_cwksp.h:141</a></div></div>
+<div class="ttc" id="astructZSTD__cwksp_html_a05a28e3c713b260601997c8dd31833ea"><div class="ttname"><a href="structZSTD__cwksp.html#a05a28e3c713b260601997c8dd31833ea">ZSTD_cwksp::tableValidEnd</a></div><div class="ttdeci">void * tableValidEnd</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00147">zstd_cwksp.h:147</a></div></div>
+<div class="ttc" id="astructZSTD__cwksp_html_a0cbea25172e7dc9c1ac2fbae0e539e74"><div class="ttname"><a href="structZSTD__cwksp.html#a0cbea25172e7dc9c1ac2fbae0e539e74">ZSTD_cwksp::workspaceEnd</a></div><div class="ttdeci">void * workspaceEnd</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00143">zstd_cwksp.h:143</a></div></div>
+<div class="ttc" id="astructZSTD__cwksp_html_a1e78a023a5bd52056393ac6f3f1e80ae"><div class="ttname"><a href="structZSTD__cwksp.html#a1e78a023a5bd52056393ac6f3f1e80ae">ZSTD_cwksp::workspaceOversizedDuration</a></div><div class="ttdeci">int workspaceOversizedDuration</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00151">zstd_cwksp.h:151</a></div></div>
+<div class="ttc" id="astructZSTD__cwksp_html_a24b2a3ebbb454fa0154ae74f27a89594"><div class="ttname"><a href="structZSTD__cwksp.html#a24b2a3ebbb454fa0154ae74f27a89594">ZSTD_cwksp::tableEnd</a></div><div class="ttdeci">void * tableEnd</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00146">zstd_cwksp.h:146</a></div></div>
+<div class="ttc" id="astructZSTD__cwksp_html_a55ef065fce77006bb19787faa8281ffd"><div class="ttname"><a href="structZSTD__cwksp.html#a55ef065fce77006bb19787faa8281ffd">ZSTD_cwksp::allocFailed</a></div><div class="ttdeci">int allocFailed</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00150">zstd_cwksp.h:150</a></div></div>
+<div class="ttc" id="astructZSTD__cwksp_html_a73353689bb49ac0d357c3ff3c19e44e6"><div class="ttname"><a href="structZSTD__cwksp.html#a73353689bb49ac0d357c3ff3c19e44e6">ZSTD_cwksp::phase</a></div><div class="ttdeci">ZSTD_cwksp_alloc_phase_e phase</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00152">zstd_cwksp.h:152</a></div></div>
+<div class="ttc" id="astructZSTD__cwksp_html_a8156e41d1ff6c92ceaa75edb56619017"><div class="ttname"><a href="structZSTD__cwksp.html#a8156e41d1ff6c92ceaa75edb56619017">ZSTD_cwksp::objectEnd</a></div><div class="ttdeci">void * objectEnd</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00145">zstd_cwksp.h:145</a></div></div>
+<div class="ttc" id="astructZSTD__cwksp_html_aaf997d6b32f18dee07fcbe9452d37062"><div class="ttname"><a href="structZSTD__cwksp.html#aaf997d6b32f18dee07fcbe9452d37062">ZSTD_cwksp::workspace</a></div><div class="ttdeci">void * workspace</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00142">zstd_cwksp.h:142</a></div></div>
+<div class="ttc" id="astructZSTD__cwksp_html_ad11c6fcee8a2e1562b754122b3afe165"><div class="ttname"><a href="structZSTD__cwksp.html#ad11c6fcee8a2e1562b754122b3afe165">ZSTD_cwksp::allocStart</a></div><div class="ttdeci">void * allocStart</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00148">zstd_cwksp.h:148</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a08f683b5840d86269fccb0ca7609598c"><div class="ttname"><a href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a></div><div class="ttdeci">void * dst</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00078">zbuff.h:78</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a49286b6a0dd3728961b8ff1f1730a982"><div class="ttname"><a href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a></div><div class="ttdeci">void size_t const void * src</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00078">zbuff.h:78</a></div></div>
+<div class="ttc" id="azstd__common_8c_html_a9fbb7e3dcf0e887ae8a05914ebdf0c53"><div class="ttname"><a href="zstd__common_8c.html#a9fbb7e3dcf0e887ae8a05914ebdf0c53">ZSTD_free</a></div><div class="ttdeci">void ZSTD_free(void *ptr, ZSTD_customMem customMem)</div><div class="ttdef"><b>Definition</b> <a href="zstd__common_8c_source.html#l00075">zstd_common.c:75</a></div></div>
+<div class="ttc" id="azstd__common_8c_html_aaf3d500bcf39cd8fedb3d5163eb5f364"><div class="ttname"><a href="zstd__common_8c.html#aaf3d500bcf39cd8fedb3d5163eb5f364">ZSTD_malloc</a></div><div class="ttdeci">void * ZSTD_malloc(size_t size, ZSTD_customMem customMem)</div><div class="ttdef"><b>Definition</b> <a href="zstd__common_8c_source.html#l00056">zstd_common.c:56</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a02af981589dbdc42e18ae680f1a18daa"><div class="ttname"><a href="zstd__cwksp_8h.html#a02af981589dbdc42e18ae680f1a18daa">ZSTD_cwksp_create</a></div><div class="ttdeci">MEM_STATIC size_t ZSTD_cwksp_create(ZSTD_cwksp *ws, size_t size, ZSTD_customMem customMem)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00468">zstd_cwksp.h:468</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a02c1e471b370cc4e2e83b133e14a0d0a"><div class="ttname"><a href="zstd__cwksp_8h.html#a02c1e471b370cc4e2e83b133e14a0d0a">ZSTD_cwksp_align</a></div><div class="ttdeci">MEM_STATIC size_t ZSTD_cwksp_align(size_t size, size_t const align)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00174">zstd_cwksp.h:174</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a0fb8336e3c1e1f1bd6e689181d1da15e"><div class="ttname"><a href="zstd__cwksp_8h.html#a0fb8336e3c1e1f1bd6e689181d1da15e">ZSTD_cwksp_mark_tables_clean</a></div><div class="ttdeci">MEM_STATIC void ZSTD_cwksp_mark_tables_clean(ZSTD_cwksp *ws)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00375">zstd_cwksp.h:375</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a1482c65b46014c2e46eaa911c6189039"><div class="ttname"><a href="zstd__cwksp_8h.html#a1482c65b46014c2e46eaa911c6189039">ZSTD_cwksp_reserve_failed</a></div><div class="ttdeci">MEM_STATIC int ZSTD_cwksp_reserve_failed(const ZSTD_cwksp *ws)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00496">zstd_cwksp.h:496</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a187e646ae346eb70172e09fea2d4bd9c"><div class="ttname"><a href="zstd__cwksp_8h.html#a187e646ae346eb70172e09fea2d4bd9c">ZSTD_WORKSPACETOOLARGE_MAXDURATION</a></div><div class="ttdeci">#define ZSTD_WORKSPACETOOLARGE_MAXDURATION</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00035">zstd_cwksp.h:35</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a2134dd2d9a727e3215a0c80b5b9df0b7"><div class="ttname"><a href="zstd__cwksp_8h.html#a2134dd2d9a727e3215a0c80b5b9df0b7">ZSTD_cwksp_move</a></div><div class="ttdeci">MEM_STATIC void ZSTD_cwksp_move(ZSTD_cwksp *dst, ZSTD_cwksp *src)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00487">zstd_cwksp.h:487</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a3fe429aca2f2a9063b08a2372dd82e58"><div class="ttname"><a href="zstd__cwksp_8h.html#a3fe429aca2f2a9063b08a2372dd82e58">ZSTD_cwksp_clean_tables</a></div><div class="ttdeci">MEM_STATIC void ZSTD_cwksp_clean_tables(ZSTD_cwksp *ws)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00388">zstd_cwksp.h:388</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a426d15e33b19566ea9032f97ab876ed4"><div class="ttname"><a href="zstd__cwksp_8h.html#a426d15e33b19566ea9032f97ab876ed4">ZSTD_cwksp_check_too_large</a></div><div class="ttdeci">MEM_STATIC int ZSTD_cwksp_check_too_large(ZSTD_cwksp *ws, size_t additionalNeededSpace)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00512">zstd_cwksp.h:512</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a48ddee198a3d51f146cf9cb0e3c259c9"><div class="ttname"><a href="zstd__cwksp_8h.html#a48ddee198a3d51f146cf9cb0e3c259c9">ZSTD_cwksp_clear_tables</a></div><div class="ttdeci">MEM_STATIC void ZSTD_cwksp_clear_tables(ZSTD_cwksp *ws)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00402">zstd_cwksp.h:402</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a4cf3b7c9a7fe923f3c9ba6575c917320"><div class="ttname"><a href="zstd__cwksp_8h.html#a4cf3b7c9a7fe923f3c9ba6575c917320">ZSTD_cwksp_assert_internal_consistency</a></div><div class="ttdeci">MEM_STATIC void ZSTD_cwksp_assert_internal_consistency(ZSTD_cwksp *ws)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00161">zstd_cwksp.h:161</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a546ba31cd66078a9eb665d9688412d12"><div class="ttname"><a href="zstd__cwksp_8h.html#a546ba31cd66078a9eb665d9688412d12">ZSTD_cwksp_internal_advance_phase</a></div><div class="ttdeci">MEM_STATIC void ZSTD_cwksp_internal_advance_phase(ZSTD_cwksp *ws, ZSTD_cwksp_alloc_phase_e phase)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00198">zstd_cwksp.h:198</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a54a1b7fd981681509a8d79affbbb7294"><div class="ttname"><a href="zstd__cwksp_8h.html#a54a1b7fd981681509a8d79affbbb7294">ZSTD_cwksp_owns_buffer</a></div><div class="ttdeci">MEM_STATIC int ZSTD_cwksp_owns_buffer(const ZSTD_cwksp *ws, const void *ptr)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00227">zstd_cwksp.h:227</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a5bbdfd92eff20915b8993f77f2063371"><div class="ttname"><a href="zstd__cwksp_8h.html#a5bbdfd92eff20915b8993f77f2063371">ZSTD_cwksp_check_wasteful</a></div><div class="ttdeci">MEM_STATIC int ZSTD_cwksp_check_wasteful(ZSTD_cwksp *ws, size_t additionalNeededSpace)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00517">zstd_cwksp.h:517</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a65bb0f0f87883b48bbba0330db3ab2e0"><div class="ttname"><a href="zstd__cwksp_8h.html#a65bb0f0f87883b48bbba0330db3ab2e0">ZSTD_cwksp_sizeof</a></div><div class="ttdeci">MEM_STATIC size_t ZSTD_cwksp_sizeof(const ZSTD_cwksp *ws)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00492">zstd_cwksp.h:492</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a70258e4389e8f9a325810ba1d82b8e57"><div class="ttname"><a href="zstd__cwksp_8h.html#a70258e4389e8f9a325810ba1d82b8e57">ZSTD_cwksp_bump_oversized_duration</a></div><div class="ttdeci">MEM_STATIC void ZSTD_cwksp_bump_oversized_duration(ZSTD_cwksp *ws, size_t additionalNeededSpace)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00522">zstd_cwksp.h:522</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a7701edeea53bd3e326c65c90a9274f62"><div class="ttname"><a href="zstd__cwksp_8h.html#a7701edeea53bd3e326c65c90a9274f62">ZSTD_cwksp_mark_tables_dirty</a></div><div class="ttdeci">MEM_STATIC void ZSTD_cwksp_mark_tables_dirty(ZSTD_cwksp *ws)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00355">zstd_cwksp.h:355</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a847d60a839dbaa26818fedaa8b5f2343"><div class="ttname"><a href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343">ZSTD_cwksp_alloc_phase_e</a></div><div class="ttdeci">ZSTD_cwksp_alloc_phase_e</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00051">zstd_cwksp.h:51</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a847d60a839dbaa26818fedaa8b5f2343a4adb0f3fd52ef05dce796041d76831db"><div class="ttname"><a href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a4adb0f3fd52ef05dce796041d76831db">ZSTD_cwksp_alloc_objects</a></div><div class="ttdeci">@ ZSTD_cwksp_alloc_objects</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00052">zstd_cwksp.h:52</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a847d60a839dbaa26818fedaa8b5f2343a6614cf716c212fb82da9ca3adc392c7b"><div class="ttname"><a href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a6614cf716c212fb82da9ca3adc392c7b">ZSTD_cwksp_alloc_buffers</a></div><div class="ttdeci">@ ZSTD_cwksp_alloc_buffers</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00053">zstd_cwksp.h:53</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a847d60a839dbaa26818fedaa8b5f2343a8bcd2f55f725e0b1f95542f2dd8afd51"><div class="ttname"><a href="zstd__cwksp_8h.html#a847d60a839dbaa26818fedaa8b5f2343a8bcd2f55f725e0b1f95542f2dd8afd51">ZSTD_cwksp_alloc_aligned</a></div><div class="ttdeci">@ ZSTD_cwksp_alloc_aligned</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00055">zstd_cwksp.h:54</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a86cb1dc328ba75e8bb63a14636bd603f"><div class="ttname"><a href="zstd__cwksp_8h.html#a86cb1dc328ba75e8bb63a14636bd603f">ZSTD_cwksp_free</a></div><div class="ttdeci">MEM_STATIC void ZSTD_cwksp_free(ZSTD_cwksp *ws, ZSTD_customMem customMem)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00476">zstd_cwksp.h:476</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a87799538af6a18429344d264c68be2c2"><div class="ttname"><a href="zstd__cwksp_8h.html#a87799538af6a18429344d264c68be2c2">ZSTD_cwksp_reserve_internal</a></div><div class="ttdeci">MEM_STATIC void * ZSTD_cwksp_reserve_internal(ZSTD_cwksp *ws, size_t bytes, ZSTD_cwksp_alloc_phase_e phase)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00234">zstd_cwksp.h:234</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a89702019661989749d94182098fe3892"><div class="ttname"><a href="zstd__cwksp_8h.html#a89702019661989749d94182098fe3892">ZSTD_cwksp_reserve_buffer</a></div><div class="ttdeci">MEM_STATIC BYTE * ZSTD_cwksp_reserve_buffer(ZSTD_cwksp *ws, size_t bytes)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00273">zstd_cwksp.h:273</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a8f4481557c43ba23a4ca8be832b0b765"><div class="ttname"><a href="zstd__cwksp_8h.html#a8f4481557c43ba23a4ca8be832b0b765">ZSTD_cwksp_clear</a></div><div class="ttdeci">MEM_STATIC void ZSTD_cwksp_clear(ZSTD_cwksp *ws)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00420">zstd_cwksp.h:420</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_a928eb46e9206ebd790baf05b0e34cc32"><div class="ttname"><a href="zstd__cwksp_8h.html#a928eb46e9206ebd790baf05b0e34cc32">ZSTD_cwksp_reserve_object</a></div><div class="ttdeci">MEM_STATIC void * ZSTD_cwksp_reserve_object(ZSTD_cwksp *ws, size_t bytes)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00319">zstd_cwksp.h:319</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_ab886033561bea9f8fa032aaae25b284e"><div class="ttname"><a href="zstd__cwksp_8h.html#ab886033561bea9f8fa032aaae25b284e">ZSTD_cwksp_alloc_size</a></div><div class="ttdeci">MEM_STATIC size_t ZSTD_cwksp_alloc_size(size_t size)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00190">zstd_cwksp.h:190</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_abb576ce45cc40051f7fea734068eceba"><div class="ttname"><a href="zstd__cwksp_8h.html#abb576ce45cc40051f7fea734068eceba">ZSTD_cwksp_check_available</a></div><div class="ttdeci">MEM_STATIC int ZSTD_cwksp_check_available(ZSTD_cwksp *ws, size_t additionalNeededSpace)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00508">zstd_cwksp.h:508</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_acd591be46e522cc7dc75ebebe79df235"><div class="ttname"><a href="zstd__cwksp_8h.html#acd591be46e522cc7dc75ebebe79df235">ZSTD_cwksp_reserve_table</a></div><div class="ttdeci">MEM_STATIC void * ZSTD_cwksp_reserve_table(ZSTD_cwksp *ws, size_t bytes)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00290">zstd_cwksp.h:290</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_ad5d1ef486ccfdd687e5202f84a2afe4c"><div class="ttname"><a href="zstd__cwksp_8h.html#ad5d1ef486ccfdd687e5202f84a2afe4c">ZSTD_CWKSP_ASAN_REDZONE_SIZE</a></div><div class="ttdeci">#define ZSTD_CWKSP_ASAN_REDZONE_SIZE</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00045">zstd_cwksp.h:45</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_ada054560115234e87b365a4b0390a0af"><div class="ttname"><a href="zstd__cwksp_8h.html#ada054560115234e87b365a4b0390a0af">ZSTD_cwksp_init</a></div><div class="ttdeci">MEM_STATIC void ZSTD_cwksp_init(ZSTD_cwksp *ws, void *start, size_t size)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00455">zstd_cwksp.h:455</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_ae35cf4dee50619725e7f7ef635e1eff5"><div class="ttname"><a href="zstd__cwksp_8h.html#ae35cf4dee50619725e7f7ef635e1eff5">ZSTD_cwksp_reserve_aligned</a></div><div class="ttdeci">MEM_STATIC void * ZSTD_cwksp_reserve_aligned(ZSTD_cwksp *ws, size_t bytes)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00280">zstd_cwksp.h:280</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_af4b9e9fcd8cacf6f41787130a8f6a896"><div class="ttname"><a href="zstd__cwksp_8h.html#af4b9e9fcd8cacf6f41787130a8f6a896">ZSTD_WORKSPACETOOLARGE_FACTOR</a></div><div class="ttdeci">#define ZSTD_WORKSPACETOOLARGE_FACTOR</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00028">zstd_cwksp.h:28</a></div></div>
+<div class="ttc" id="azstd__cwksp_8h_html_af9f28b678632973bb80f9738d7b3faee"><div class="ttname"><a href="zstd__cwksp_8h.html#af9f28b678632973bb80f9738d7b3faee">ZSTD_cwksp_available_space</a></div><div class="ttdeci">MEM_STATIC size_t ZSTD_cwksp_available_space(ZSTD_cwksp *ws)</div><div class="ttdef"><b>Definition</b> <a href="zstd__cwksp_8h_source.html#l00504">zstd_cwksp.h:504</a></div></div>
+<div class="ttc" id="azstd__internal_8h_html"><div class="ttname"><a href="zstd__internal_8h.html">zstd_internal.h</a></div></div>
+<div class="ttc" id="azstd__internal_8h_html_a5d0783e849b3fc286fe720307a952d26"><div class="ttname"><a href="zstd__internal_8h.html#a5d0783e849b3fc286fe720307a952d26">RETURN_ERROR_IF</a></div><div class="ttdeci">#define RETURN_ERROR_IF(cond, err,...)</div><div class="ttdef"><b>Definition</b> <a href="zstd__internal_8h_source.html#l00063">zstd_internal.h:63</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="zstd__cwksp_8h.html">zstd_cwksp.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

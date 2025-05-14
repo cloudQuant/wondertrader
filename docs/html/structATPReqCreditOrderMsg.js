@@ -1,0 +1,26 @@
+var structATPReqCreditOrderMsg =
+[
+    [ "ATPReqCreditOrderMsg", "structATPReqCreditOrderMsg.html#a8f9b9971074cf263b9e3bc4a22fbc705", null ],
+    [ "ATPReqCreditOrderMsg", "structATPReqCreditOrderMsg.html#a8f9b9971074cf263b9e3bc4a22fbc705", null ],
+    [ "account_id", "structATPReqCreditOrderMsg.html#abd0e531bdde1a24ebfe348fb6a595bbf", null ],
+    [ "branch_id", "structATPReqCreditOrderMsg.html#a449cd8b0f220164ac6cfd7ec83db8199", null ],
+    [ "client_feature_code", "structATPReqCreditOrderMsg.html#a359716df37321651d7f2d89896444a9a", null ],
+    [ "client_seq_id", "structATPReqCreditOrderMsg.html#a802aee6e7391f5a1f63cbb9866e0efff", null ],
+    [ "cust_id", "structATPReqCreditOrderMsg.html#a5456b198becbeccb95851ef86dbe5907", null ],
+    [ "enforce_flag", "structATPReqCreditOrderMsg.html#a5c3e7f77d8165c4deb818b47ee1d0c42", null ],
+    [ "extra_data", "structATPReqCreditOrderMsg.html#a71cf562d2301785ad299e1a332604e46", null ],
+    [ "fund_account_id", "structATPReqCreditOrderMsg.html#a1efd0a087f6e4ecc47c68b1c2732026f", null ],
+    [ "market_id", "structATPReqCreditOrderMsg.html#a085a50b36a06363c5289c29129fab8ed", null ],
+    [ "max_price_levels", "structATPReqCreditOrderMsg.html#a333018f2070ea9fc12ae32bd6ab074ea", null ],
+    [ "min_qty", "structATPReqCreditOrderMsg.html#a415e44797dd61164ac7deef0f1f0567f", null ],
+    [ "order_qty", "structATPReqCreditOrderMsg.html#aacc2cda476860ab55a3f77cb9c98882a", null ],
+    [ "order_type", "structATPReqCreditOrderMsg.html#a2c8b3311106ea3b55122f0c1dac5a817", null ],
+    [ "order_way", "structATPReqCreditOrderMsg.html#a79342be73fe05380674378c7367ca6f8", null ],
+    [ "password", "structATPReqCreditOrderMsg.html#ac7ecc5fa35c4817b2509997d91e66737", null ],
+    [ "price", "structATPReqCreditOrderMsg.html#aadc419276033c7d2fe03b57a337c6737", null ],
+    [ "security_id", "structATPReqCreditOrderMsg.html#abbd193edcbacf1e4451f6e3f6112e338", null ],
+    [ "side", "structATPReqCreditOrderMsg.html#a2a981d859f17d8b7e2c7947b18d461a6", null ],
+    [ "stop_px", "structATPReqCreditOrderMsg.html#af39bbc05e80b445f06cd341826d52f0c", null ],
+    [ "time_in_force", "structATPReqCreditOrderMsg.html#a22d2eaf3415a9a46efd7746d4c5bffc2", null ],
+    [ "user_info", "structATPReqCreditOrderMsg.html#aa92b5e416eadd52deb9e49891baba17c", null ]
+];

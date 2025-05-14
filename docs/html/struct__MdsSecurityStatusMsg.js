@@ -1,0 +1,28 @@
+var struct__MdsSecurityStatusMsg =
+[
+    [ "__collectedTime", "struct__MdsSecurityStatusMsg.html#a0a0998768625efc7b17bc7ae5e485698", null ],
+    [ "__dataVersion", "struct__MdsSecurityStatusMsg.html#a8b05a37af4199b02d8647c4173271f7b", null ],
+    [ "__exchSendingTime", "struct__MdsSecurityStatusMsg.html#a477d5b130b905c856f76ac0943d8a3a8", null ],
+    [ "__filler", "struct__MdsSecurityStatusMsg.html#a8d4a0a73cca3572e94a90939f8e9bdce", null ],
+    [ "__filler2", "struct__MdsSecurityStatusMsg.html#ad2694882712db9895fe99315f4637c4c", null ],
+    [ "__filler4", "struct__MdsSecurityStatusMsg.html#af582554b8ecdb3a278e0d5ac419a2cba", null ],
+    [ "__isRepeated", "struct__MdsSecurityStatusMsg.html#a9f653bb4bbda1f01b3263054f8f94d43", null ],
+    [ "__mdsRecvTime", "struct__MdsSecurityStatusMsg.html#a023536fb318085efc34fc8590d9a1b7f", null ],
+    [ "__origMdSource", "struct__MdsSecurityStatusMsg.html#a2468fffa64e3693210848f0f395f2aa0", null ],
+    [ "__origNetTime", "struct__MdsSecurityStatusMsg.html#aad1cfb4a74d8fcc30006ba406d549d54", null ],
+    [ "__origTickSeq", "struct__MdsSecurityStatusMsg.html#ac2cd38c4beb20129675c4ea5a5ceca6e", null ],
+    [ "__processedTime", "struct__MdsSecurityStatusMsg.html#a940cbe2fa9f3091af480fff81715bcad", null ],
+    [ "__pushingTime", "struct__MdsSecurityStatusMsg.html#abb3c7f20b721052e2753ab9bb7e22d9a", null ],
+    [ "__recvTime", "struct__MdsSecurityStatusMsg.html#acc9c846fd71aea71e2c1981d34a50177", null ],
+    [ "exchId", "struct__MdsSecurityStatusMsg.html#a6d7c112c5c873c722766cb6046ffda0b", null ],
+    [ "FinancialStatus", "struct__MdsSecurityStatusMsg.html#a71da023e62e59e252ff607108780191c", null ],
+    [ "instrId", "struct__MdsSecurityStatusMsg.html#ad59fa905a12b756f2baac76641edc257", null ],
+    [ "mdProductType", "struct__MdsSecurityStatusMsg.html#a10bcaae980de085dccd532fe8fcf27c7", null ],
+    [ "NoSwitch", "struct__MdsSecurityStatusMsg.html#a3764b5bc258e3136543e3bd6fbc03418", null ],
+    [ "SecurityID", "struct__MdsSecurityStatusMsg.html#a50b4d31797e3cdbeaa7b87afb7907de1", null ],
+    [ "switches", "struct__MdsSecurityStatusMsg.html#a656914724860b4ab836629740f7573ce", null ],
+    [ "switchFlag", "struct__MdsSecurityStatusMsg.html#a81496f4aec78ee03637cfc2c2e199a6c", null ],
+    [ "switchStatus", "struct__MdsSecurityStatusMsg.html#a95be222b16522f67338df2a08816a9a2", null ],
+    [ "tradeDate", "struct__MdsSecurityStatusMsg.html#ab5a38af92d59f6961aab06dce1e06334", null ],
+    [ "updateTime", "struct__MdsSecurityStatusMsg.html#a42ddc02f18a7d1c81b98b4d084776174", null ]
+];

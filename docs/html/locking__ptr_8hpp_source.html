@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/Share/threadpool/detail/locking_ptr.hpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('locking__ptr_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">locking_ptr.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="locking__ptr_8hpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#ifndef THREADPOOL_DETAIL_LOCKING_PTR_HPP_INCLUDED</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#define THREADPOOL_DETAIL_LOCKING_PTR_HPP_INCLUDED</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;boost/utility.hpp&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;boost/thread/mutex.hpp&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceboost.html">boost</a> { <span class="keyword">namespace </span>threadpool { <span class="keyword">namespace </span><a class="code hl_namespace" href="namespacedetail.html">detail</a> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>{</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> Mutex&gt;</div>
+<div class="foldopen" id="foldopen00045" data-start="{" data-end="};">
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html">   45</a></span>  <span class="keyword">class </span><a class="code hl_class" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html">locking_ptr</a> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  : <span class="keyword">private</span> noncopyable</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  {</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#ae1d2c8dbbdb6b715b8a4a6efcde7f6f2">   52</a></span>    T* <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#ae1d2c8dbbdb6b715b8a4a6efcde7f6f2">m_obj</a>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#ac1f32cbb914fbdd9fd739b25193cc483">   58</a></span>    Mutex &amp; <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#ac1f32cbb914fbdd9fd739b25193cc483">m_mutex</a>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  <span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00068" data-start="{" data-end="}">
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a791c8a23a2f6435794a733074607a856">   68</a></span>    <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a791c8a23a2f6435794a733074607a856">locking_ptr</a>(<span class="keyword">volatile</span> T&amp; obj, <span class="keyword">const</span> <span class="keyword">volatile</span> Mutex&amp; mtx)</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>      : <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#ae1d2c8dbbdb6b715b8a4a6efcde7f6f2">m_obj</a>(const_cast&lt;T*&gt;(&amp;obj))</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>      , <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#ac1f32cbb914fbdd9fd739b25193cc483">m_mutex</a>(*const_cast&lt;Mutex*&gt;(&amp;mtx))</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    {   </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>      <span class="comment">// Lock mutex</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>      <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#ac1f32cbb914fbdd9fd739b25193cc483">m_mutex</a>.lock();</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    }</div>
+</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="foldopen" id="foldopen00082" data-start="{" data-end="}">
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a4f801066955b7a6b200c42940457d6b1">   82</a></span>    <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a4f801066955b7a6b200c42940457d6b1">~locking_ptr</a>()</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    { </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>      <span class="comment">// Unlock mutex</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>      <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#ac1f32cbb914fbdd9fd739b25193cc483">m_mutex</a>.unlock();</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    }</div>
+</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="foldopen" id="foldopen00095" data-start="{" data-end="}">
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a6af81fee1281f817aff49d6889882674">   95</a></span>    T&amp; <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a6af81fee1281f817aff49d6889882674">operator*</a>()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="keyword">    </span>{    </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>      <span class="keywordflow">return</span> *<a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#ae1d2c8dbbdb6b715b8a4a6efcde7f6f2">m_obj</a>;    </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    }</div>
+</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="foldopen" id="foldopen00107" data-start="{" data-end="}">
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a386fdf58cb863dcd2a99dba2458f6dcc">  107</a></span>    T* <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a386fdf58cb863dcd2a99dba2458f6dcc">operator-&gt;</a>()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="keyword">    </span>{   </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>      <span class="keywordflow">return</span> <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#ae1d2c8dbbdb6b715b8a4a6efcde7f6f2">m_obj</a>;   </div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    }</div>
+</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  };</div>
+</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>} } } <span class="comment">// namespace boost::threadpool::detail</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="preprocessor">#endif </span><span class="comment">// THREADPOOL_DETAIL_LOCKING_PTR_HPP_INCLUDED</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1locking__ptr_html"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html">boost::threadpool::detail::locking_ptr</a></div><div class="ttdoc">带有作用域锁定机制的智能指针</div><div class="ttdef"><b>Definition</b> <a href="locking__ptr_8hpp_source.html#l00045">locking_ptr.hpp:47</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1locking__ptr_html_a386fdf58cb863dcd2a99dba2458f6dcc"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a386fdf58cb863dcd2a99dba2458f6dcc">boost::threadpool::detail::locking_ptr::operator-&gt;</a></div><div class="ttdeci">T * operator-&gt;() const</div><div class="ttdoc">成员访问运算符</div><div class="ttdef"><b>Definition</b> <a href="locking__ptr_8hpp_source.html#l00107">locking_ptr.hpp:107</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1locking__ptr_html_a4f801066955b7a6b200c42940457d6b1"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a4f801066955b7a6b200c42940457d6b1">boost::threadpool::detail::locking_ptr::~locking_ptr</a></div><div class="ttdeci">~locking_ptr()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="locking__ptr_8hpp_source.html#l00082">locking_ptr.hpp:82</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1locking__ptr_html_a6af81fee1281f817aff49d6889882674"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a6af81fee1281f817aff49d6889882674">boost::threadpool::detail::locking_ptr::operator*</a></div><div class="ttdeci">T &amp; operator*() const</div><div class="ttdoc">解引用运算符</div><div class="ttdef"><b>Definition</b> <a href="locking__ptr_8hpp_source.html#l00095">locking_ptr.hpp:95</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1locking__ptr_html_a791c8a23a2f6435794a733074607a856"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a791c8a23a2f6435794a733074607a856">boost::threadpool::detail::locking_ptr::locking_ptr</a></div><div class="ttdeci">locking_ptr(volatile T &amp;obj, const volatile Mutex &amp;mtx)</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="locking__ptr_8hpp_source.html#l00068">locking_ptr.hpp:68</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1locking__ptr_html_ac1f32cbb914fbdd9fd739b25193cc483"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#ac1f32cbb914fbdd9fd739b25193cc483">boost::threadpool::detail::locking_ptr::m_mutex</a></div><div class="ttdeci">Mutex &amp; m_mutex</div><div class="ttdoc">互斥量引用</div><div class="ttdef"><b>Definition</b> <a href="locking__ptr_8hpp_source.html#l00058">locking_ptr.hpp:58</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1locking__ptr_html_ae1d2c8dbbdb6b715b8a4a6efcde7f6f2"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#ae1d2c8dbbdb6b715b8a4a6efcde7f6f2">boost::threadpool::detail::locking_ptr::m_obj</a></div><div class="ttdeci">T * m_obj</div><div class="ttdoc">被包装的对象指针</div><div class="ttdef"><b>Definition</b> <a href="locking__ptr_8hpp_source.html#l00052">locking_ptr.hpp:52</a></div></div>
+<div class="ttc" id="anamespaceboost_html"><div class="ttname"><a href="namespaceboost.html">boost</a></div><div class="ttdoc">boost::threadpool::detail 命名空间包含了线程池库的内部实现细节</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00037">future.hpp:37</a></div></div>
+<div class="ttc" id="anamespacedetail_html"><div class="ttname"><a href="namespacedetail.html">detail</a></div><div class="ttdoc">内部实现细节的命名空间</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_b415f7b135736b475386968edd2cefde.html">Share</a></li><li class="navelem"><a class="el" href="dir_cde2ca495d87b0f6351e3c62be53575e.html">threadpool</a></li><li class="navelem"><a class="el" href="dir_10ded6ddb3436b7d7fe5fd9ee17682de.html">detail</a></li><li class="navelem"><a class="el" href="locking__ptr_8hpp.html">locking_ptr.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

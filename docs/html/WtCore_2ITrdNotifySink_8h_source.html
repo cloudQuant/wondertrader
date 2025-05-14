@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtCore/ITrdNotifySink.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtCore_2ITrdNotifySink_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ITrdNotifySink.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtCore_2ITrdNotifySink_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;../Includes/WTSMarcos.h&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="foldopen" id="foldopen00021" data-start="{" data-end="};">
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="classITrdNotifySink.html">   21</a></span><span class="keyword">class </span><a class="code hl_class" href="classITrdNotifySink.html">ITrdNotifySink</a></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>{</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classITrdNotifySink.html#a5194a86c27cc25869664dc395ffc7a34">   33</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classITrdNotifySink.html#a5194a86c27cc25869664dc395ffc7a34">on_trade</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> vol, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>) = 0;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classITrdNotifySink.html#a6d94f7d9a478a10b74aa5c22fd64442b">   46</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classITrdNotifySink.html#a6d94f7d9a478a10b74aa5c22fd64442b">on_order</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> totalQty, <span class="keywordtype">double</span> leftQty, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <span class="keywordtype">bool</span> isCanceled = <span class="keyword">false</span>) = 0;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="classITrdNotifySink.html#ac14573f6ffa6d514cd0623224bdef49c">   59</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classITrdNotifySink.html#ac14573f6ffa6d514cd0623224bdef49c">on_position</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isLong, <span class="keywordtype">double</span> prevol, <span class="keywordtype">double</span> preavail, <span class="keywordtype">double</span> newvol, <span class="keywordtype">double</span> newavail, uint32_t tradingday) {}</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classITrdNotifySink.html#a11c67f1886dfc6065f8dfd7114174f89">   65</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classITrdNotifySink.html#a11c67f1886dfc6065f8dfd7114174f89">on_channel_ready</a>() = 0;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="classITrdNotifySink.html#aeae96c9f4a81d07d8d818f764c5a2174">   71</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classITrdNotifySink.html#aeae96c9f4a81d07d8d818f764c5a2174">on_channel_lost</a>() = 0;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="classITrdNotifySink.html#a07fdff40e8b5fc42c7d6f13e1fe23ab4">   81</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classITrdNotifySink.html#a07fdff40e8b5fc42c7d6f13e1fe23ab4">on_entrust</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> bSuccess, <span class="keyword">const</span> <span class="keywordtype">char</span>* message){}</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="classITrdNotifySink.html#a48aff2eda862be2f42b06bfeb7fe8966">   98</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classITrdNotifySink.html#a48aff2eda862be2f42b06bfeb7fe8966">on_account</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_variable" href="demo__send__order_8cpp.html#af75f83b1c7d27fcbd5fb60b382330d60">currency</a>, <span class="keywordtype">double</span> prebalance, <span class="keywordtype">double</span> balance, <span class="keywordtype">double</span> dynbalance, <span class="keywordtype">double</span> avaliable, <span class="keywordtype">double</span> closeprofit, <span class="keywordtype">double</span> dynprofit, <span class="keywordtype">double</span> margin, <span class="keywordtype">double</span> fee, <span class="keywordtype">double</span> deposit, <span class="keywordtype">double</span> withdraw){}</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>};</div>
+</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aclassITrdNotifySink_html"><div class="ttname"><a href="classITrdNotifySink.html">ITrdNotifySink</a></div><div class="ttdoc">交易通知接收器接口</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ITrdNotifySink_8h_source.html#l00021">ITrdNotifySink.h:22</a></div></div>
+<div class="ttc" id="aclassITrdNotifySink_html_a07fdff40e8b5fc42c7d6f13e1fe23ab4"><div class="ttname"><a href="classITrdNotifySink.html#a07fdff40e8b5fc42c7d6f13e1fe23ab4">ITrdNotifySink::on_entrust</a></div><div class="ttdeci">virtual void on_entrust(uint32_t localid, const char *stdCode, bool bSuccess, const char *message)</div><div class="ttdoc">下单回报通知</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ITrdNotifySink_8h_source.html#l00081">ITrdNotifySink.h:81</a></div></div>
+<div class="ttc" id="aclassITrdNotifySink_html_a11c67f1886dfc6065f8dfd7114174f89"><div class="ttname"><a href="classITrdNotifySink.html#a11c67f1886dfc6065f8dfd7114174f89">ITrdNotifySink::on_channel_ready</a></div><div class="ttdeci">virtual void on_channel_ready()=0</div><div class="ttdoc">交易通道就绪通知</div></div>
+<div class="ttc" id="aclassITrdNotifySink_html_a48aff2eda862be2f42b06bfeb7fe8966"><div class="ttname"><a href="classITrdNotifySink.html#a48aff2eda862be2f42b06bfeb7fe8966">ITrdNotifySink::on_account</a></div><div class="ttdeci">virtual void on_account(const char *currency, double prebalance, double balance, double dynbalance, double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw)</div><div class="ttdoc">资金账户更新回调</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ITrdNotifySink_8h_source.html#l00098">ITrdNotifySink.h:98</a></div></div>
+<div class="ttc" id="aclassITrdNotifySink_html_a5194a86c27cc25869664dc395ffc7a34"><div class="ttname"><a href="classITrdNotifySink.html#a5194a86c27cc25869664dc395ffc7a34">ITrdNotifySink::on_trade</a></div><div class="ttdeci">virtual void on_trade(uint32_t localid, const char *stdCode, bool isBuy, double vol, double price)=0</div><div class="ttdoc">成交回报通知</div></div>
+<div class="ttc" id="aclassITrdNotifySink_html_a6d94f7d9a478a10b74aa5c22fd64442b"><div class="ttname"><a href="classITrdNotifySink.html#a6d94f7d9a478a10b74aa5c22fd64442b">ITrdNotifySink::on_order</a></div><div class="ttdeci">virtual void on_order(uint32_t localid, const char *stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled=false)=0</div><div class="ttdoc">订单状态回报通知</div></div>
+<div class="ttc" id="aclassITrdNotifySink_html_ac14573f6ffa6d514cd0623224bdef49c"><div class="ttname"><a href="classITrdNotifySink.html#ac14573f6ffa6d514cd0623224bdef49c">ITrdNotifySink::on_position</a></div><div class="ttdeci">virtual void on_position(const char *stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)</div><div class="ttdoc">持仓更新回调</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ITrdNotifySink_8h_source.html#l00059">ITrdNotifySink.h:59</a></div></div>
+<div class="ttc" id="aclassITrdNotifySink_html_aeae96c9f4a81d07d8d818f764c5a2174"><div class="ttname"><a href="classITrdNotifySink.html#aeae96c9f4a81d07d8d818f764c5a2174">ITrdNotifySink::on_channel_lost</a></div><div class="ttdeci">virtual void on_channel_lost()=0</div><div class="ttdoc">交易通道丢失通知</div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_a04f887fc8800d4727971dbb8eb550132"><div class="ttname"><a href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a></div><div class="ttdeci">ATPPriceType price</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00040">main.cpp:40</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_af75f83b1c7d27fcbd5fb60b382330d60"><div class="ttname"><a href="demo__send__order_8cpp.html#af75f83b1c7d27fcbd5fb60b382330d60">currency</a></div><div class="ttdeci">std::string currency</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00060">main.cpp:60</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3ce996bf6400c0a215df0636043a382c.html">WtCore</a></li><li class="navelem"><a class="el" href="WtCore_2ITrdNotifySink_8h.html">ITrdNotifySink.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

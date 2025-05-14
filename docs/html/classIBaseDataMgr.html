@@ -1,0 +1,703 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: IBaseDataMgr类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classIBaseDataMgr.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="classIBaseDataMgr-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">IBaseDataMgr类 参考<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>基础数据管理器接口  
+ <a href="classIBaseDataMgr.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="IBaseDataMgr_8h_source.html">IBaseDataMgr.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a435a180d8497a49cd6468fd34579b7ff" id="r_a435a180d8497a49cd6468fd34579b7ff"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSCommodityInfo.html">WTSCommodityInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBaseDataMgr.html#a435a180d8497a49cd6468fd34579b7ff">getCommodity</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchgpid)=0</td></tr>
+<tr class="memdesc:a435a180d8497a49cd6468fd34579b7ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取品种信息  <br /></td></tr>
+<tr class="separator:a435a180d8497a49cd6468fd34579b7ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab02f683d6533bc6cfc9e0f96047be8fa" id="r_ab02f683d6533bc6cfc9e0f96047be8fa"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSCommodityInfo.html">WTSCommodityInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBaseDataMgr.html#ab02f683d6533bc6cfc9e0f96047be8fa">getCommodity</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pid)=0</td></tr>
+<tr class="memdesc:ab02f683d6533bc6cfc9e0f96047be8fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取品种信息  <br /></td></tr>
+<tr class="separator:ab02f683d6533bc6cfc9e0f96047be8fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7902cf7c19636ee381ba9fa7a6e3f065" id="r_a7902cf7c19636ee381ba9fa7a6e3f065"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSContractInfo.html">WTSContractInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBaseDataMgr.html#a7902cf7c19636ee381ba9fa7a6e3f065">getContract</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg=&quot;&quot;, uint32_t uDate=0)=0</td></tr>
+<tr class="memdesc:a7902cf7c19636ee381ba9fa7a6e3f065"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取合约信息  <br /></td></tr>
+<tr class="separator:a7902cf7c19636ee381ba9fa7a6e3f065"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a384ddeba63e7d60deba2e6214cbf7d30" id="r_a384ddeba63e7d60deba2e6214cbf7d30"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSArray.html">WTSArray</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBaseDataMgr.html#a384ddeba63e7d60deba2e6214cbf7d30">getContracts</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg=&quot;&quot;, uint32_t uDate=0)=0</td></tr>
+<tr class="memdesc:a384ddeba63e7d60deba2e6214cbf7d30"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取合约列表  <br /></td></tr>
+<tr class="separator:a384ddeba63e7d60deba2e6214cbf7d30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c98c31963a32a6c91e0df4316f06ad7" id="r_a4c98c31963a32a6c91e0df4316f06ad7"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBaseDataMgr.html#a4c98c31963a32a6c91e0df4316f06ad7">getSession</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *sid)=0</td></tr>
+<tr class="memdesc:a4c98c31963a32a6c91e0df4316f06ad7"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取交易时段信息  <br /></td></tr>
+<tr class="separator:a4c98c31963a32a6c91e0df4316f06ad7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb18e73ccfb7c3343e5be551781aa66b" id="r_abb18e73ccfb7c3343e5be551781aa66b"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBaseDataMgr.html#abb18e73ccfb7c3343e5be551781aa66b">getSessionByCode</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg=&quot;&quot;)=0</td></tr>
+<tr class="memdesc:abb18e73ccfb7c3343e5be551781aa66b"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据合约获取交易时段信息  <br /></td></tr>
+<tr class="separator:abb18e73ccfb7c3343e5be551781aa66b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33add434e4a8ed4b631888757b71bb18" id="r_a33add434e4a8ed4b631888757b71bb18"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSArray.html">WTSArray</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBaseDataMgr.html#a33add434e4a8ed4b631888757b71bb18">getAllSessions</a> ()=0</td></tr>
+<tr class="memdesc:a33add434e4a8ed4b631888757b71bb18"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取所有交易时段  <br /></td></tr>
+<tr class="separator:a33add434e4a8ed4b631888757b71bb18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f84968d02ae224b1a4f1e646cab67b7" id="r_a9f84968d02ae224b1a4f1e646cab67b7"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBaseDataMgr.html#a9f84968d02ae224b1a4f1e646cab67b7">isHoliday</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pid, uint32_t uDate, bool isTpl=false)=0</td></tr>
+<tr class="memdesc:a9f84968d02ae224b1a4f1e646cab67b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">判断指定日期是否为假日  <br /></td></tr>
+<tr class="separator:a9f84968d02ae224b1a4f1e646cab67b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a981fbaa0343a14325cb8ff3b1f70075a" id="r_a981fbaa0343a14325cb8ff3b1f70075a"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBaseDataMgr.html#a981fbaa0343a14325cb8ff3b1f70075a">calcTradingDate</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdPID, uint32_t uDate, uint32_t uTime, bool isSession=false)=0</td></tr>
+<tr class="memdesc:a981fbaa0343a14325cb8ff3b1f70075a"><td class="mdescLeft">&#160;</td><td class="mdescRight">计算交易日期  <br /></td></tr>
+<tr class="separator:a981fbaa0343a14325cb8ff3b1f70075a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2aa16c77e7647007c1299967bc379d4" id="r_af2aa16c77e7647007c1299967bc379d4"><td class="memItemLeft" align="right" valign="top">virtual uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBaseDataMgr.html#af2aa16c77e7647007c1299967bc379d4">getBoundaryTime</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdPID, uint32_t tDate, bool isSession=false, bool isStart=true)=0</td></tr>
+<tr class="memdesc:af2aa16c77e7647007c1299967bc379d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取交易时段边界时间  <br /></td></tr>
+<tr class="separator:af2aa16c77e7647007c1299967bc379d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9d9c01b7e02440c06cde4b1b1e3f271" id="r_ae9d9c01b7e02440c06cde4b1b1e3f271"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIBaseDataMgr.html#ae9d9c01b7e02440c06cde4b1b1e3f271">getContractSize</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg=&quot;&quot;, uint32_t uDate=0)</td></tr>
+<tr class="memdesc:ae9d9c01b7e02440c06cde4b1b1e3f271"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取合约数量  <br /></td></tr>
+<tr class="separator:ae9d9c01b7e02440c06cde4b1b1e3f271"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>基础数据管理器接口 </p>
+<p>该接口定义了管理和访问交易所、品种、合约、交易时段等静态基础数据的方法 </p>
+
+<p class="definition">在文件 <a class="el" href="IBaseDataMgr_8h_source.html">IBaseDataMgr.h</a> 第 <a class="el" href="IBaseDataMgr_8h_source.html#l00075">75</a> 行定义.</p>
+</div><h2 class="groupheader">成员函数说明</h2>
+<a id="a981fbaa0343a14325cb8ff3b1f70075a" name="a981fbaa0343a14325cb8ff3b1f70075a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a981fbaa0343a14325cb8ff3b1f70075a">&#9670;&#160;</a></span>calcTradingDate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual uint32_t IBaseDataMgr::calcTradingDate </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdPID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uDate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isSession</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>计算交易日期 </p>
+<p>根据实际日期、时间和品种信息计算对应的交易日期</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdPID</td><td>标准化品种代码，格式为“交易所.品种代码”，如“SHFE.au”（上期黄金） </td></tr>
+    <tr><td class="paramname">uDate</td><td>当前日期，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">uTime</td><td>当前时间，格式为HHMMSS </td></tr>
+    <tr><td class="paramname">isSession</td><td>是否使用交易时段，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>计算出的交易日期，格式为YYYYMMDD </dd></dl>
+
+<p>在 <a class="el" href="classWTSBaseDataMgr.html#ab2ff9bd9564154135849b5e598fa4ee0">WTSBaseDataMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a33add434e4a8ed4b631888757b71bb18" name="a33add434e4a8ed4b631888757b71bb18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33add434e4a8ed4b631888757b71bb18">&#9670;&#160;</a></span>getAllSessions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classWTSArray.html">WTSArray</a> * IBaseDataMgr::getAllSessions </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取所有交易时段 </p>
+<p>获取系统中配置的所有交易时段信息</p>
+<dl class="section return"><dt>返回</dt><dd>交易时段信息列表（WTSArray对象），元素为WTSSessionInfo对象 </dd></dl>
+
+<p>在 <a class="el" href="classWTSBaseDataMgr.html#ad1e342aa308ac3856dd9d52d124c034f">WTSBaseDataMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="af2aa16c77e7647007c1299967bc379d4" name="af2aa16c77e7647007c1299967bc379d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2aa16c77e7647007c1299967bc379d4">&#9670;&#160;</a></span>getBoundaryTime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual uint64_t IBaseDataMgr::getBoundaryTime </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdPID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>tDate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isSession</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isStart</em> = <code>true</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取交易时段边界时间 </p>
+<p>获取指定品种在指定交易日的交易时段边界时间（开始或结束时间）</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdPID</td><td>标准化品种代码，格式为“交易所.品种代码”，如“SHFE.au”（上期黄金） </td></tr>
+    <tr><td class="paramname">tDate</td><td>交易日期，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">isSession</td><td>是否使用交易时段，默认为false </td></tr>
+    <tr><td class="paramname">isStart</td><td>是否获取开始时间，如果为false则获取结束时间，默认为true </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>边界时间，格式为YYYYMMDDHHMMSSmmm </dd></dl>
+
+<p>在 <a class="el" href="classWTSBaseDataMgr.html#a495150eddd10ef92338ad84bbde5b7ac">WTSBaseDataMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="ab02f683d6533bc6cfc9e0f96047be8fa" name="ab02f683d6533bc6cfc9e0f96047be8fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab02f683d6533bc6cfc9e0f96047be8fa">&#9670;&#160;</a></span>getCommodity() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classWTSCommodityInfo.html">WTSCommodityInfo</a> * IBaseDataMgr::getCommodity </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pid</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取品种信息 </p>
+<p>通过分别指定交易所和品种代码获取品种信息</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码，如“SHFE”（上期） </td></tr>
+    <tr><td class="paramname">pid</td><td>品种代码，如“au”（黄金） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>品种信息对象指针，如果不存在返回NULL </dd></dl>
+
+<p>在 <a class="el" href="classWTSBaseDataMgr.html#ac47743e71e8a0e5ece6c4fbef8abcb95">WTSBaseDataMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a435a180d8497a49cd6468fd34579b7ff" name="a435a180d8497a49cd6468fd34579b7ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a435a180d8497a49cd6468fd34579b7ff">&#9670;&#160;</a></span>getCommodity() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classWTSCommodityInfo.html">WTSCommodityInfo</a> * IBaseDataMgr::getCommodity </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchgpid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取品种信息 </p>
+<p>通过带交易所的品种代码获取品种信息</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchgpid</td><td>品种代码，格式为“交易所.品种代码”，如“SHFE.au”（上期黄金） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>品种信息对象指针，如果不存在返回NULL </dd></dl>
+
+<p>在 <a class="el" href="classWTSBaseDataMgr.html#a3c8d0059a4b4772feade21e0360f5b3e">WTSBaseDataMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a7902cf7c19636ee381ba9fa7a6e3f065" name="a7902cf7c19636ee381ba9fa7a6e3f065"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7902cf7c19636ee381ba9fa7a6e3f065">&#9670;&#160;</a></span>getContract()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classWTSContractInfo.html">WTSContractInfo</a> * IBaseDataMgr::getContract </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em> = <code>&quot;&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uDate</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取合约信息 </p>
+<p>通过合约代码和交易所获取合约的详细信息</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码，如“au2106”（黄金2106合约） </td></tr>
+    <tr><td class="paramname">exchg</td><td>交易所代码，如“SHFE”（上期），默认为空字符串 </td></tr>
+    <tr><td class="paramname">uDate</td><td>日期，格式为YYYYMMDD，默认为0，表示当前日期 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>合约信息对象指针，如果不存在返回NULL </dd></dl>
+
+<p>在 <a class="el" href="classWTSBaseDataMgr.html#a3e9d267521c1ed9850b244528b98fbf0">WTSBaseDataMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a384ddeba63e7d60deba2e6214cbf7d30" name="a384ddeba63e7d60deba2e6214cbf7d30"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a384ddeba63e7d60deba2e6214cbf7d30">&#9670;&#160;</a></span>getContracts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classWTSArray.html">WTSArray</a> * IBaseDataMgr::getContracts </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em> = <code>&quot;&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uDate</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取合约列表 </p>
+<p>获取指定交易所在指定日期的所有合约</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码，如“SHFE”（上期），默认为空字符串，表示所有交易所 </td></tr>
+    <tr><td class="paramname">uDate</td><td>日期，格式为YYYYMMDD，默认为0，表示当前日期 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>合约信息列表（WTSArray对象），元素为WTSContractInfo对象 </dd></dl>
+
+<p>在 <a class="el" href="classWTSBaseDataMgr.html#a63885c8ed3b5a721b6ac7a5a82f93102">WTSBaseDataMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="ae9d9c01b7e02440c06cde4b1b1e3f271" name="ae9d9c01b7e02440c06cde4b1b1e3f271"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9d9c01b7e02440c06cde4b1b1e3f271">&#9670;&#160;</a></span>getContractSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual uint32_t IBaseDataMgr::getContractSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em> = <code>&quot;&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uDate</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取合约数量 </p>
+<p>获取指定交易所在指定日期的合约总数</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码，如“SHFE”（上期），默认为空字符串，表示所有交易所 </td></tr>
+    <tr><td class="paramname">uDate</td><td>日期，格式为YYYYMMDD，默认为0，表示当前日期 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>合约数量，子类必须实现此接口，基类中默认返回0 </dd></dl>
+
+<p>被 <a class="el" href="classWTSBaseDataMgr.html#a1766f9c8cb3b3650ad55a109e7c767ad">WTSBaseDataMgr</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="IBaseDataMgr_8h_source.html">IBaseDataMgr.h</a> 第 <a class="el" href="IBaseDataMgr_8h_source.html#l00188">188</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4c98c31963a32a6c91e0df4316f06ad7" name="a4c98c31963a32a6c91e0df4316f06ad7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c98c31963a32a6c91e0df4316f06ad7">&#9670;&#160;</a></span>getSession()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> * IBaseDataMgr::getSession </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>sid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取交易时段信息 </p>
+<p>通过交易时段ID获取交易时段的详细信息</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sid</td><td>交易时段ID，如“SHFE01”（上期第一交易时段） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>交易时段信息对象指针，如果不存在返回NULL </dd></dl>
+
+<p>在 <a class="el" href="classWTSBaseDataMgr.html#af6490dcd4fed173a5f372c765ce2010f">WTSBaseDataMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="abb18e73ccfb7c3343e5be551781aa66b" name="abb18e73ccfb7c3343e5be551781aa66b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb18e73ccfb7c3343e5be551781aa66b">&#9670;&#160;</a></span>getSessionByCode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> * IBaseDataMgr::getSessionByCode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>根据合约获取交易时段信息 </p>
+<p>通过合约代码和交易所获取对应的交易时段信息</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码，如“au2106”（黄金2106合约） </td></tr>
+    <tr><td class="paramname">exchg</td><td>交易所代码，如“SHFE”（上期），默认为空字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>交易时段信息对象指针，如果不存在返回NULL </dd></dl>
+
+<p>在 <a class="el" href="classWTSBaseDataMgr.html#ae4cb2075167dad363e7f19e2b1116864">WTSBaseDataMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a9f84968d02ae224b1a4f1e646cab67b7" name="a9f84968d02ae224b1a4f1e646cab67b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f84968d02ae224b1a4f1e646cab67b7">&#9670;&#160;</a></span>isHoliday()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool IBaseDataMgr::isHoliday </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uDate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isTpl</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>判断指定日期是否为假日 </p>
+<p>检查指定品种在指定日期是否为交易所休市日</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pid</td><td>品种代码或带交易所的品种代码，如“SHFE.au”（上期黄金） </td></tr>
+    <tr><td class="paramname">uDate</td><td>日期，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">isTpl</td><td>是否使用模板，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>如果是假日返回true，否则返回false </dd></dl>
+
+<p>在 <a class="el" href="classWTSBaseDataMgr.html#ab6cb1b21d0600f3ef1f0c5ff76488744">WTSBaseDataMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/Includes/<a class="el" href="IBaseDataMgr_8h_source.html">IBaseDataMgr.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

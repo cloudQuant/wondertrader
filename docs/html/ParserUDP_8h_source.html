@@ -1,0 +1,244 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/ParserUDP/ParserUDP.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('ParserUDP_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ParserUDP.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="ParserUDP_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;../Includes/IParserApi.h&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;queue&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;boost/asio.hpp&gt;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;boost/array.hpp&gt;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;boost/asio/io_service.hpp&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="ParserUDP_8h.html#a17226795848decb565e90624584e5c0f">   20</a></span><a class="code hl_variable" href="ParserUDP_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">using namespace </span>boost::asio;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="foldopen" id="foldopen00023" data-start="{" data-end="};">
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classParserUDP.html">   23</a></span><span class="keyword">class </span><a class="code hl_class" href="classParserUDP.html">ParserUDP</a> : <span class="keyword">public</span> <a class="code hl_class" href="classIParserApi.html">IParserApi</a></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>{</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <a class="code hl_function" href="classParserUDP.html#abfb4b3f7c7c23585f863e22b10b18931">ParserUDP</a>();</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <a class="code hl_function" href="classParserUDP.html#a066aa65c34d3dc52666fedf068592eaa">~ParserUDP</a>();</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="comment">//IQuoteParser ½Ó¿Ú</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserUDP.html#a8a5e453951c1f2a843cc0caabd9c8fe4">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* <a class="code hl_function" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserUDP.html#ae6d285cbacdca2337b4518a7c5f94f32">release</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserUDP.html#afdb13ec80de858ef7de607ab184b5c64">connect</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserUDP.html#a54e8f6d69ee070d465d8f128585ab992">disconnect</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserUDP.html#a063d2acd033c30fc0c5f487849e40c75">isConnected</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserUDP.html#aea0b8aa214721e4a824e241118b30fdc">subscribe</a>(<span class="keyword">const</span> <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a> &amp;vecSymbols) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserUDP.html#a634e51c3541ee31a46ef4be540ffbb27">unsubscribe</a>(<span class="keyword">const</span> <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a> &amp;vecSymbols) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserUDP.html#aa52a9633b59d38041b5e73d868096c86">registerSpi</a>(<a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>* listener) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classParserUDP.html#a0e66e726fa3159f861c49ef68df0cbd1">handle_read</a>(<span class="keyword">const</span> boost::system::error_code&amp; e, std::size_t bytes_transferred, <span class="keywordtype">bool</span> isBroad);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classParserUDP.html#ab0b1255766203bee9968fcbdbcd3a5dd">handle_write</a>(<span class="keyword">const</span> boost::system::error_code&amp; e);</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classParserUDP.html#a64a37fe170d902e0f192476014cb3474">reconnect</a>(uint32_t flag = 3);</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classParserUDP.html#aea0b8aa214721e4a824e241118b30fdc">subscribe</a>();</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classParserUDP.html#a5ff57da86043bbea44e4ce5129a6f913">extract_buffer</a>(uint32_t length, <span class="keywordtype">bool</span> isBroad);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classParserUDP.html#a73b4a3fc11f5f62acfea88678896a846">doOnConnected</a>();</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classParserUDP.html#ad5dbbd71bfc7b3efda168e8cf0c0af4b">doOnDisconnected</a>();</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classParserUDP.html#a33dde575d18650fcb2a1dae7673fe41b">do_send</a>();</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classParserUDP.html#aaeafe4bfb1afc8e837ca21568a7d5ada">   64</a></span>    std::string <a class="code hl_variable" href="classParserUDP.html#aaeafe4bfb1afc8e837ca21568a7d5ada">_hots</a>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classParserUDP.html#a6e8415122e62d200987ad9123ef0ef55">   65</a></span>    <span class="keywordtype">int</span>         <a class="code hl_variable" href="classParserUDP.html#a6e8415122e62d200987ad9123ef0ef55">_bport</a>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="classParserUDP.html#a95aa267b2f0a2b6ba345ab06468fa05c">   66</a></span>    <span class="keywordtype">int</span>         <a class="code hl_variable" href="classParserUDP.html#a95aa267b2f0a2b6ba345ab06468fa05c">_sport</a>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classParserUDP.html#ac869d4e382d331785d7803d1230e8888">   67</a></span>    uint32_t    <a class="code hl_variable" href="classParserUDP.html#ac869d4e382d331785d7803d1230e8888">_gpsize</a>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="classParserUDP.html#abca03deb156298775b8b80b2e3f59f6f">   69</a></span>    ip::udp::endpoint   <a class="code hl_variable" href="classParserUDP.html#abca03deb156298775b8b80b2e3f59f6f">_broad_ep</a>;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="classParserUDP.html#afe8d78c0a4f77fe67ed330ea536c06fc">   70</a></span>    ip::udp::endpoint   <a class="code hl_variable" href="classParserUDP.html#afe8d78c0a4f77fe67ed330ea536c06fc">_server_ep</a>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="classParserUDP.html#a6d5ffaf80167f22a91071f5bd6422f2f">   71</a></span>    io_service          <a class="code hl_variable" href="classParserUDP.html#a6d5ffaf80167f22a91071f5bd6422f2f">_io_service</a>;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="classParserUDP.html#abc514926901a8a05085ba08d8662a8a4">   73</a></span>    io_service::strand  <a class="code hl_variable" href="classParserUDP.html#abc514926901a8a05085ba08d8662a8a4">_strand</a>;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="classParserUDP.html#a77c62321cb5a420fcde914173586420e">   75</a></span>    ip::udp::socket*    <a class="code hl_variable" href="classParserUDP.html#a77c62321cb5a420fcde914173586420e">_b_socket</a>;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="classParserUDP.html#a027067eb44a6bc1b1ed24dcdfa783c69">   76</a></span>    ip::udp::socket*    <a class="code hl_variable" href="classParserUDP.html#a027067eb44a6bc1b1ed24dcdfa783c69">_s_socket</a>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="classParserUDP.html#acf24b1151cf4acbde22c6e444f7dc22f">   77</a></span>    <span class="keywordtype">bool</span>                <a class="code hl_variable" href="classParserUDP.html#acf24b1151cf4acbde22c6e444f7dc22f">_s_inited</a>;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="classParserUDP.html#a7c4081d45b31cc861f8f02fe4df7e2f1">   79</a></span>    boost::array&lt;char, 1024&gt; <a class="code hl_variable" href="classParserUDP.html#a7c4081d45b31cc861f8f02fe4df7e2f1">_b_buffer</a>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="classParserUDP.html#acdc810233541f749d954d7aa227ebe93">   80</a></span>    boost::array&lt;char, 1024&gt; <a class="code hl_variable" href="classParserUDP.html#acdc810233541f749d954d7aa227ebe93">_s_buffer</a>;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="classParserUDP.html#a1dd7192f0365702db034abb848e9d1a9">   82</a></span>    <a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>*             <a class="code hl_variable" href="classParserUDP.html#a1dd7192f0365702db034abb848e9d1a9">_sink</a>;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="classParserUDP.html#abdd76d8f1187d529c37948c8ae75d49a">   83</a></span>    <span class="keywordtype">bool</span>                    <a class="code hl_variable" href="classParserUDP.html#abdd76d8f1187d529c37948c8ae75d49a">_stopped</a>;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="classParserUDP.html#ad54bda74266d9d53ee2ac591c031c1f1">   84</a></span>    <span class="keywordtype">bool</span>                    <a class="code hl_variable" href="classParserUDP.html#ad54bda74266d9d53ee2ac591c031c1f1">_connecting</a>;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classParserUDP.html#ab17fb867e5e077e2ad460aee966aabdf">   86</a></span>    <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a>                 <a class="code hl_variable" href="classParserUDP.html#ab17fb867e5e077e2ad460aee966aabdf">_set_subs</a>;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="classParserUDP.html#af52f412bd539dae4f244c3578cb800ad">   88</a></span>    <a class="code hl_typedef" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>            <a class="code hl_variable" href="classParserUDP.html#af52f412bd539dae4f244c3578cb800ad">_thrd_parser</a>;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="classParserUDP.html#aac83c5e67a15542959689072ef752445">   90</a></span>    <a class="code hl_typedef" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a>          <a class="code hl_variable" href="classParserUDP.html#aac83c5e67a15542959689072ef752445">_mtx_queue</a>;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="classParserUDP.html#a635778f764c06ca7986f2e6e2ac1ba09">   91</a></span>    std::queue&lt;std::string&gt; <a class="code hl_variable" href="classParserUDP.html#a635778f764c06ca7986f2e6e2ac1ba09">_send_queue</a>;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>};</div>
+</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="ttc" id="aParserUDP_8h_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="ParserUDP_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00020">ParserUDP.h:20</a></div></div>
+<div class="ttc" id="aTraderDumper_8cpp_html_abc68ad0fe9293fb2709e004ffe3fa333"><div class="ttname"><a href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a></div><div class="ttdeci">bool config(const char *cfgfile, bool isFile)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_8cpp_source.html#l00022">TraderDumper.cpp:22</a></div></div>
+<div class="ttc" id="aclassIParserApi_html"><div class="ttname"><a href="classIParserApi.html">IParserApi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00083">IParserApi.h:84</a></div></div>
+<div class="ttc" id="aclassIParserSpi_html"><div class="ttname"><a href="classIParserSpi.html">IParserSpi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00028">IParserApi.h:29</a></div></div>
+<div class="ttc" id="aclassParserUDP_html"><div class="ttname"><a href="classParserUDP.html">ParserUDP</a></div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00023">ParserUDP.h:24</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a027067eb44a6bc1b1ed24dcdfa783c69"><div class="ttname"><a href="classParserUDP.html#a027067eb44a6bc1b1ed24dcdfa783c69">ParserUDP::_s_socket</a></div><div class="ttdeci">ip::udp::socket * _s_socket</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00076">ParserUDP.h:76</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a063d2acd033c30fc0c5f487849e40c75"><div class="ttname"><a href="classParserUDP.html#a063d2acd033c30fc0c5f487849e40c75">ParserUDP::isConnected</a></div><div class="ttdeci">virtual bool isConnected() override</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00273">ParserUDP.cpp:273</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a066aa65c34d3dc52666fedf068592eaa"><div class="ttname"><a href="classParserUDP.html#a066aa65c34d3dc52666fedf068592eaa">ParserUDP::~ParserUDP</a></div><div class="ttdeci">~ParserUDP()</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00093">ParserUDP.cpp:93</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a0e66e726fa3159f861c49ef68df0cbd1"><div class="ttname"><a href="classParserUDP.html#a0e66e726fa3159f861c49ef68df0cbd1">ParserUDP::handle_read</a></div><div class="ttdeci">void handle_read(const boost::system::error_code &amp;e, std::size_t bytes_transferred, bool isBroad)</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00308">ParserUDP.cpp:308</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a1dd7192f0365702db034abb848e9d1a9"><div class="ttname"><a href="classParserUDP.html#a1dd7192f0365702db034abb848e9d1a9">ParserUDP::_sink</a></div><div class="ttdeci">IParserSpi * _sink</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00082">ParserUDP.h:82</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a33dde575d18650fcb2a1dae7673fe41b"><div class="ttname"><a href="classParserUDP.html#a33dde575d18650fcb2a1dae7673fe41b">ParserUDP::do_send</a></div><div class="ttdeci">void do_send()</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00206">ParserUDP.cpp:206</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a54e8f6d69ee070d465d8f128585ab992"><div class="ttname"><a href="classParserUDP.html#a54e8f6d69ee070d465d8f128585ab992">ParserUDP::disconnect</a></div><div class="ttdeci">virtual bool disconnect() override</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00258">ParserUDP.cpp:258</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a5ff57da86043bbea44e4ce5129a6f913"><div class="ttname"><a href="classParserUDP.html#a5ff57da86043bbea44e4ce5129a6f913">ParserUDP::extract_buffer</a></div><div class="ttdeci">void extract_buffer(uint32_t length, bool isBroad)</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00347">ParserUDP.cpp:347</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a634e51c3541ee31a46ef4be540ffbb27"><div class="ttname"><a href="classParserUDP.html#a634e51c3541ee31a46ef4be540ffbb27">ParserUDP::unsubscribe</a></div><div class="ttdeci">virtual void unsubscribe(const CodeSet &amp;vecSymbols) override</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00292">ParserUDP.cpp:292</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a635778f764c06ca7986f2e6e2ac1ba09"><div class="ttname"><a href="classParserUDP.html#a635778f764c06ca7986f2e6e2ac1ba09">ParserUDP::_send_queue</a></div><div class="ttdeci">std::queue&lt; std::string &gt; _send_queue</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00091">ParserUDP.h:91</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a64a37fe170d902e0f192476014cb3474"><div class="ttname"><a href="classParserUDP.html#a64a37fe170d902e0f192476014cb3474">ParserUDP::reconnect</a></div><div class="ttdeci">bool reconnect(uint32_t flag=3)</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00119">ParserUDP.cpp:119</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a6d5ffaf80167f22a91071f5bd6422f2f"><div class="ttname"><a href="classParserUDP.html#a6d5ffaf80167f22a91071f5bd6422f2f">ParserUDP::_io_service</a></div><div class="ttdeci">io_service _io_service</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00071">ParserUDP.h:71</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a6e8415122e62d200987ad9123ef0ef55"><div class="ttname"><a href="classParserUDP.html#a6e8415122e62d200987ad9123ef0ef55">ParserUDP::_bport</a></div><div class="ttdeci">int _bport</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00065">ParserUDP.h:65</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a73b4a3fc11f5f62acfea88678896a846"><div class="ttname"><a href="classParserUDP.html#a73b4a3fc11f5f62acfea88678896a846">ParserUDP::doOnConnected</a></div><div class="ttdeci">void doOnConnected()</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00433">ParserUDP.cpp:433</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a77c62321cb5a420fcde914173586420e"><div class="ttname"><a href="classParserUDP.html#a77c62321cb5a420fcde914173586420e">ParserUDP::_b_socket</a></div><div class="ttdeci">ip::udp::socket * _b_socket</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00075">ParserUDP.h:75</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a7c4081d45b31cc861f8f02fe4df7e2f1"><div class="ttname"><a href="classParserUDP.html#a7c4081d45b31cc861f8f02fe4df7e2f1">ParserUDP::_b_buffer</a></div><div class="ttdeci">boost::array&lt; char, 1024 &gt; _b_buffer</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00079">ParserUDP.h:79</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a8a5e453951c1f2a843cc0caabd9c8fe4"><div class="ttname"><a href="classParserUDP.html#a8a5e453951c1f2a843cc0caabd9c8fe4">ParserUDP::init</a></div><div class="ttdeci">virtual bool init(WTSVariant *config) override</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00097">ParserUDP.cpp:97</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_a95aa267b2f0a2b6ba345ab06468fa05c"><div class="ttname"><a href="classParserUDP.html#a95aa267b2f0a2b6ba345ab06468fa05c">ParserUDP::_sport</a></div><div class="ttdeci">int _sport</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00066">ParserUDP.h:66</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_aa52a9633b59d38041b5e73d868096c86"><div class="ttname"><a href="classParserUDP.html#aa52a9633b59d38041b5e73d868096c86">ParserUDP::registerSpi</a></div><div class="ttdeci">virtual void registerSpi(IParserSpi *listener) override</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00297">ParserUDP.cpp:297</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_aac83c5e67a15542959689072ef752445"><div class="ttname"><a href="classParserUDP.html#aac83c5e67a15542959689072ef752445">ParserUDP::_mtx_queue</a></div><div class="ttdeci">StdUniqueMutex _mtx_queue</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00090">ParserUDP.h:90</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_aaeafe4bfb1afc8e837ca21568a7d5ada"><div class="ttname"><a href="classParserUDP.html#aaeafe4bfb1afc8e837ca21568a7d5ada">ParserUDP::_hots</a></div><div class="ttdeci">std::string _hots</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00064">ParserUDP.h:64</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_ab0b1255766203bee9968fcbdbcd3a5dd"><div class="ttname"><a href="classParserUDP.html#ab0b1255766203bee9968fcbdbcd3a5dd">ParserUDP::handle_write</a></div><div class="ttdeci">void handle_write(const boost::system::error_code &amp;e)</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00229">ParserUDP.cpp:229</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_ab17fb867e5e077e2ad460aee966aabdf"><div class="ttname"><a href="classParserUDP.html#ab17fb867e5e077e2ad460aee966aabdf">ParserUDP::_set_subs</a></div><div class="ttdeci">CodeSet _set_subs</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00086">ParserUDP.h:86</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_abc514926901a8a05085ba08d8662a8a4"><div class="ttname"><a href="classParserUDP.html#abc514926901a8a05085ba08d8662a8a4">ParserUDP::_strand</a></div><div class="ttdeci">io_service::strand _strand</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00073">ParserUDP.h:73</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_abca03deb156298775b8b80b2e3f59f6f"><div class="ttname"><a href="classParserUDP.html#abca03deb156298775b8b80b2e3f59f6f">ParserUDP::_broad_ep</a></div><div class="ttdeci">ip::udp::endpoint _broad_ep</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00069">ParserUDP.h:69</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_abdd76d8f1187d529c37948c8ae75d49a"><div class="ttname"><a href="classParserUDP.html#abdd76d8f1187d529c37948c8ae75d49a">ParserUDP::_stopped</a></div><div class="ttdeci">bool _stopped</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00083">ParserUDP.h:83</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_abfb4b3f7c7c23585f863e22b10b18931"><div class="ttname"><a href="classParserUDP.html#abfb4b3f7c7c23585f863e22b10b18931">ParserUDP::ParserUDP</a></div><div class="ttdeci">ParserUDP()</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00081">ParserUDP.cpp:81</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_ac869d4e382d331785d7803d1230e8888"><div class="ttname"><a href="classParserUDP.html#ac869d4e382d331785d7803d1230e8888">ParserUDP::_gpsize</a></div><div class="ttdeci">uint32_t _gpsize</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00067">ParserUDP.h:67</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_acdc810233541f749d954d7aa227ebe93"><div class="ttname"><a href="classParserUDP.html#acdc810233541f749d954d7aa227ebe93">ParserUDP::_s_buffer</a></div><div class="ttdeci">boost::array&lt; char, 1024 &gt; _s_buffer</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00080">ParserUDP.h:80</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_acf24b1151cf4acbde22c6e444f7dc22f"><div class="ttname"><a href="classParserUDP.html#acf24b1151cf4acbde22c6e444f7dc22f">ParserUDP::_s_inited</a></div><div class="ttdeci">bool _s_inited</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00077">ParserUDP.h:77</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_ad54bda74266d9d53ee2ac591c031c1f1"><div class="ttname"><a href="classParserUDP.html#ad54bda74266d9d53ee2ac591c031c1f1">ParserUDP::_connecting</a></div><div class="ttdeci">bool _connecting</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00084">ParserUDP.h:84</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_ad5dbbd71bfc7b3efda168e8cf0c0af4b"><div class="ttname"><a href="classParserUDP.html#ad5dbbd71bfc7b3efda168e8cf0c0af4b">ParserUDP::doOnDisconnected</a></div><div class="ttdeci">void doOnDisconnected()</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00442">ParserUDP.cpp:442</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_ae6d285cbacdca2337b4518a7c5f94f32"><div class="ttname"><a href="classParserUDP.html#ae6d285cbacdca2337b4518a7c5f94f32">ParserUDP::release</a></div><div class="ttdeci">virtual void release() override</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00114">ParserUDP.cpp:114</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_aea0b8aa214721e4a824e241118b30fdc"><div class="ttname"><a href="classParserUDP.html#aea0b8aa214721e4a824e241118b30fdc">ParserUDP::subscribe</a></div><div class="ttdeci">void subscribe()</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00168">ParserUDP.cpp:168</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_af52f412bd539dae4f244c3578cb800ad"><div class="ttname"><a href="classParserUDP.html#af52f412bd539dae4f244c3578cb800ad">ParserUDP::_thrd_parser</a></div><div class="ttdeci">StdThreadPtr _thrd_parser</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00088">ParserUDP.h:88</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_afdb13ec80de858ef7de607ab184b5c64"><div class="ttname"><a href="classParserUDP.html#afdb13ec80de858ef7de607ab184b5c64">ParserUDP::connect</a></div><div class="ttdeci">virtual bool connect() override</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8cpp_source.html#l00244">ParserUDP.cpp:244</a></div></div>
+<div class="ttc" id="aclassParserUDP_html_afe8d78c0a4f77fe67ed330ea536c06fc"><div class="ttname"><a href="classParserUDP.html#afe8d78c0a4f77fe67ed330ea536c06fc">ParserUDP::_server_ep</a></div><div class="ttdeci">ip::udp::endpoint _server_ep</div><div class="ttdef"><b>Definition</b> <a href="ParserUDP_8h_source.html#l00070">ParserUDP.h:70</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassfastest__hashset_3_01std_1_1string_01_4_html"><div class="ttname"><a href="classfastest__hashset_3_01std_1_1string_01_4.html">fastest_hashset&lt; std::string &gt;</a></div><div class="ttdoc">字符串元素的高性能哈希集合类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00134">FasterDefs.h:135</a></div></div>
+<div class="ttc" id="agroup__MutexUtils_html_gaff888cdcc14f5ebb7a1a9c9f7b52846f"><div class="ttname"><a href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a></div><div class="ttdeci">std::mutex StdUniqueMutex</div><div class="ttdoc">普通互斥量类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00061">StdUtils.hpp:61</a></div></div>
+<div class="ttc" id="agroup__ThreadUtils_html_gaf9ea8e1e64d43ab034614d39d0b35776"><div class="ttname"><a href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a></div><div class="ttdeci">std::shared_ptr&lt; StdThread &gt; StdThreadPtr</div><div class="ttdoc">线程智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00042">StdUtils.hpp:42</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_fb0ad69887c32f399caababf8d3dc3e4.html">ParserUDP</a></li><li class="navelem"><a class="el" href="ParserUDP_8h.html">ParserUDP.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

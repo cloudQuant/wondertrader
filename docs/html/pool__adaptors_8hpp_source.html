@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/Share/threadpool/pool_adaptors.hpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('pool__adaptors_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">pool_adaptors.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="pool__adaptors_8hpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#ifndef THREADPOOL_POOL_ADAPTORS_HPP_INCLUDED</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#define THREADPOOL_POOL_ADAPTORS_HPP_INCLUDED</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;boost/smart_ptr.hpp&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceboost.html">boost</a> { <span class="keyword">namespace </span>threadpool</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>{</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Pool, <span class="keyword">typename</span> Runnable&gt;</div>
+<div class="foldopen" id="foldopen00041" data-start="{" data-end="}">
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="namespaceboost_1_1threadpool.html#a92842f50114d39d008ff8231a9f460d1">   41</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceboost_1_1threadpool.html#ade0e923b4b636c837583943ac15f8f22">schedule</a>(Pool&amp; <a class="code hl_class" href="classboost_1_1threadpool_1_1thread__pool.html">pool</a>, shared_ptr&lt;Runnable&gt; <span class="keyword">const</span> &amp; obj)</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    {   </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>      <span class="keywordflow">return</span> <a class="code hl_class" href="classboost_1_1threadpool_1_1thread__pool.html">pool</a>-&gt;<a class="code hl_function" href="classboost_1_1threadpool_1_1thread__pool.html#a3daf5e17f6c2ba9a0ecdeb73b41478e6">schedule</a>(bind(&amp;Runnable::run, obj));</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    }   </div>
+</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Pool&gt;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keyword">typename</span> enable_if &lt; </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>      is_void&lt; <span class="keyword">typename</span> result_of&lt; <span class="keyword">typename</span> Pool::task_type() &gt;::type &gt;,</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>      <span class="keywordtype">bool</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    &gt;::type</div>
+<div class="foldopen" id="foldopen00062" data-start="{" data-end="}">
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="namespaceboost_1_1threadpool.html#ac5cc72030d193876ba85a8dac1dfbdd2">   62</a></span>    <a class="code hl_function" href="namespaceboost_1_1threadpool.html#ade0e923b4b636c837583943ac15f8f22">schedule</a>(Pool&amp; <a class="code hl_class" href="classboost_1_1threadpool_1_1thread__pool.html">pool</a>, <span class="keyword">typename</span> Pool::task_type <span class="keyword">const</span> &amp; task)</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    {   </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>      <span class="keywordflow">return</span> <a class="code hl_class" href="classboost_1_1threadpool_1_1thread__pool.html">pool</a>.<a class="code hl_function" href="classboost_1_1threadpool_1_1thread__pool.html#a3daf5e17f6c2ba9a0ecdeb73b41478e6">schedule</a>(task);</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    }   </div>
+</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Pool&gt;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keyword">typename</span> enable_if &lt; </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>      is_void&lt; <span class="keyword">typename</span> result_of&lt; <span class="keyword">typename</span> Pool::task_type() &gt;::type &gt;,</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>      <span class="keywordtype">bool</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    &gt;::type</div>
+<div class="foldopen" id="foldopen00085" data-start="{" data-end="}">
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="namespaceboost_1_1threadpool.html#ad538879233a3dea4f8f6333a272856eb">   85</a></span>    <a class="code hl_function" href="namespaceboost_1_1threadpool.html#ade0e923b4b636c837583943ac15f8f22">schedule</a>(shared_ptr&lt;Pool&gt; <span class="keyword">const</span> <a class="code hl_class" href="classboost_1_1threadpool_1_1thread__pool.html">pool</a>, <span class="keyword">typename</span> Pool::task_type <span class="keyword">const</span> &amp; task)</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    {   </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>      <span class="keywordflow">return</span> <a class="code hl_class" href="classboost_1_1threadpool_1_1thread__pool.html">pool</a>-&gt;<a class="code hl_function" href="classboost_1_1threadpool_1_1thread__pool.html#a3daf5e17f6c2ba9a0ecdeb73b41478e6">schedule</a>(task);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    }   </div>
+</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>} } <span class="comment">// namespace boost::threadpool</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="preprocessor">#endif </span><span class="comment">// THREADPOOL_POOL_ADAPTORS_HPP_INCLUDED</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1thread__pool_html"><div class="ttname"><a href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a></div><div class="ttdoc">线程池类</div><div class="ttdef"><b>Definition</b> <a href="pool_8hpp_source.html#l00081">pool.hpp:82</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1thread__pool_html_a3daf5e17f6c2ba9a0ecdeb73b41478e6"><div class="ttname"><a href="classboost_1_1threadpool_1_1thread__pool.html#a3daf5e17f6c2ba9a0ecdeb73b41478e6">boost::threadpool::thread_pool::schedule</a></div><div class="ttdeci">bool schedule(task_type const &amp;task)</div><div class="ttdoc">将任务调度用于异步执行</div><div class="ttdef"><b>Definition</b> <a href="pool_8hpp_source.html#l00193">pool.hpp:193</a></div></div>
+<div class="ttc" id="anamespaceboost_1_1threadpool_html_ade0e923b4b636c837583943ac15f8f22"><div class="ttname"><a href="namespaceboost_1_1threadpool.html#ade0e923b4b636c837583943ac15f8f22">boost::threadpool::schedule</a></div><div class="ttdeci">disable_if&lt; is_void&lt; typenameresult_of&lt; Function()&gt;::type &gt;, future&lt; typenameresult_of&lt; Function()&gt;::type &gt; &gt;::type schedule(Pool &amp;pool, const Function &amp;task)</div><div class="ttdoc">将任务提交到线程池并返回 future 对象</div><div class="ttdef"><b>Definition</b> <a href="future_8hpp_source.html#l00184">future.hpp:184</a></div></div>
+<div class="ttc" id="anamespaceboost_html"><div class="ttname"><a href="namespaceboost.html">boost</a></div><div class="ttdoc">boost::threadpool::detail 命名空间包含了线程池库的内部实现细节</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00037">future.hpp:37</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_b415f7b135736b475386968edd2cefde.html">Share</a></li><li class="navelem"><a class="el" href="dir_cde2ca495d87b0f6351e3c62be53575e.html">threadpool</a></li><li class="navelem"><a class="el" href="pool__adaptors_8hpp.html">pool_adaptors.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

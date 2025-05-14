@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtBtCore/CtaMocker.cpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('CtaMocker_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">CtaMocker.cpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>CTA策略回测模拟器实现文件  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="CtaMocker_8h_source.html">CtaMocker.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WtBtCore_2WtHelper_8h_source.html">WtHelper.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a>&quot;</code><br />
+<code>#include &lt;exception&gt;</code><br />
+<code>#include &lt;boost/filesystem.hpp&gt;</code><br />
+<code>#include &quot;<a class="el" href="WTSContractInfo_8hpp_source.html">../Includes/WTSContractInfo.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSSessionInfo_8hpp_source.html">../Includes/WTSSessionInfo.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSVariant_8hpp_source.html">../Includes/WTSVariant.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="CodeHelper_8hpp_source.html">../Share/CodeHelper.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="decimal_8h_source.html">../Share/decimal.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="StrUtil_8hpp_source.html">../Share/StrUtil.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSLogger_8h_source.html">../WTSTools/WTSLogger.h</a>&quot;</code><br />
+<code>#include &lt;rapidjson/document.h&gt;</code><br />
+<code>#include &lt;rapidjson/prettywriter.h&gt;</code><br />
+<code>#include &quot;rapidjson/filereadstream.h&quot;</code><br />
+<code>#include &lt;fstream&gt;</code><br />
+</div>
+<p><a href="CtaMocker_8cpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a5767a7ed8400967197eeb5aaeec1ed1e" id="r_a5767a7ed8400967197eeb5aaeec1ed1e"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CtaMocker_8cpp.html#a5767a7ed8400967197eeb5aaeec1ed1e">makeCtxId</a> ()</td></tr>
+<tr class="memdesc:a5767a7ed8400967197eeb5aaeec1ed1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">生成唯一的上下文ID  <br /></td></tr>
+<tr class="separator:a5767a7ed8400967197eeb5aaeec1ed1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:aa0ca859b1dc5c51b4d069b74928ea1ea" id="r_aa0ca859b1dc5c51b4d069b74928ea1ea"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CtaMocker_8cpp.html#aa0ca859b1dc5c51b4d069b74928ea1ea">CMP_ALG_NAMES</a> []</td></tr>
+<tr class="separator:aa0ca859b1dc5c51b4d069b74928ea1ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a511f7de6e7205311f4433f92105ec1b1" id="r_a511f7de6e7205311f4433f92105ec1b1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CtaMocker_8cpp.html#a511f7de6e7205311f4433f92105ec1b1">ACTION_NAMES</a> []</td></tr>
+<tr class="separator:a511f7de6e7205311f4433f92105ec1b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>CTA策略回测模拟器实现文件 </p>
+<p>\project WonderTrader</p>
+<dl class="section author"><dt>作者</dt><dd>Wesley </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2020/03/30</dd></dl>
+<p>本文件实现了CTA策略回测模拟器的核心功能，包括：</p><ol type="1">
+<li>实现ICtaStraCtx接口，提供策略交易上下文</li>
+<li>实现IDataSink接口，处理历史数据回放</li>
+<li>模拟交易执行和持仓管理</li>
+<li>记录回测过程中的交易、信号和资金数据</li>
+<li>导出回测结果和图表数据 </li>
+</ol>
+
+<p class="definition">在文件 <a class="el" href="CtaMocker_8cpp_source.html">CtaMocker.cpp</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="a5767a7ed8400967197eeb5aaeec1ed1e" name="a5767a7ed8400967197eeb5aaeec1ed1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5767a7ed8400967197eeb5aaeec1ed1e">&#9670;&#160;</a></span>makeCtxId()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t makeCtxId </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>生成唯一的上下文ID </p>
+<p>使用原子操作生成递增的上下文ID，确保每个策略实例有唯一标识 </p><dl class="section return"><dt>返回</dt><dd>返回新生成的上下文ID </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="CtaMocker_8cpp_source.html">CtaMocker.cpp</a> 第 <a class="el" href="CtaMocker_8cpp_source.html#l00062">62</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a511f7de6e7205311f4433f92105ec1b1" name="a511f7de6e7205311f4433f92105ec1b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a511f7de6e7205311f4433f92105ec1b1">&#9670;&#160;</a></span>ACTION_NAMES</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char* ACTION_NAMES[]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>初始值:</b><div class="fragment"><div class="line">=</div>
+<div class="line">{</div>
+<div class="line">    <span class="stringliteral">&quot;OL&quot;</span>,</div>
+<div class="line">    <span class="stringliteral">&quot;CL&quot;</span>,</div>
+<div class="line">    <span class="stringliteral">&quot;OS&quot;</span>,</div>
+<div class="line">    <span class="stringliteral">&quot;CS&quot;</span>,</div>
+<div class="line">    <span class="stringliteral">&quot;SYN&quot;</span></div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="CtaMocker_8cpp_source.html">CtaMocker.cpp</a> 第 <a class="el" href="CtaMocker_8cpp_source.html#l00047">47</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa0ca859b1dc5c51b4d069b74928ea1ea" name="aa0ca859b1dc5c51b4d069b74928ea1ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0ca859b1dc5c51b4d069b74928ea1ea">&#9670;&#160;</a></span>CMP_ALG_NAMES</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char* CMP_ALG_NAMES[]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>初始值:</b><div class="fragment"><div class="line">=</div>
+<div class="line">{</div>
+<div class="line">    <span class="stringliteral">&quot;＝&quot;</span>,</div>
+<div class="line">    <span class="stringliteral">&quot;&gt;&quot;</span>,</div>
+<div class="line">    <span class="stringliteral">&quot;&lt;&quot;</span>,</div>
+<div class="line">    <span class="stringliteral">&quot;&gt;=&quot;</span>,</div>
+<div class="line">    <span class="stringliteral">&quot;&lt;=&quot;</span></div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="CtaMocker_8cpp_source.html">CtaMocker.cpp</a> 第 <a class="el" href="CtaMocker_8cpp_source.html#l00038">38</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_e0a6b04728b7bc818baf88501da85ff3.html">WtBtCore</a></li><li class="navelem"><a class="el" href="CtaMocker_8cpp.html">CtaMocker.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

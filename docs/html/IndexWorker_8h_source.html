@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtDtCore/IndexWorker.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('IndexWorker_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">IndexWorker.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="IndexWorker_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;../Includes/WTSMarcos.h&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Includes/WTSStruct.h&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/FasterDefs.h&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;../Share/SpinMutex.hpp&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">class </span><a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">class </span><a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">class </span><a class="code hl_class" href="classIHotMgr.html">IHotMgr</a>;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">class </span><a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">class </span><a class="code hl_class" href="classWTSContractInfo.html">WTSContractInfo</a>;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="IndexWorker_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">   29</a></span><a class="code hl_variable" href="IndexWorker_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">class </span><a class="code hl_class" href="classIndexFactory.html">IndexFactory</a>;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="};">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="classIndexWorker.html">   39</a></span><span class="keyword">class </span><a class="code hl_class" href="classIndexWorker.html">IndexWorker</a></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>{</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="classIndexWorker.html#a1dd78393235f530625147440a0723daf">   47</a></span>    <a class="code hl_function" href="classIndexWorker.html#a1dd78393235f530625147440a0723daf">IndexWorker</a>(<a class="code hl_class" href="classIndexFactory.html">IndexFactory</a>* factor):<a class="code hl_variable" href="classIndexWorker.html#adedf6a0abe1bbd110f5da40fe5f44a7c">_factor</a>(factor), <a class="code hl_variable" href="classIndexWorker.html#a872c0903b6d427ae3df2c70ea03ac60c">_stopped</a>(false), <a class="code hl_variable" href="classIndexWorker.html#ac382911ee436ed9262e116e29521b4b0">_process</a>(false) {}</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classIndexWorker.html#ae34dfc0140e51a986ecc6f7ff5188fd1">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* <a class="code hl_function" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>);</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classIndexWorker.html#a0d183e9c823c01fc0ddb03ec1be3dffa">handle_quote</a>(<a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classIndexWorker.html#aa8ef354c925975676de9e273f162383b">generate_tick</a>();</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="classIndexWorker.html#adedf6a0abe1bbd110f5da40fe5f44a7c">   78</a></span>    <a class="code hl_class" href="classIndexFactory.html">IndexFactory</a>*   <a class="code hl_variable" href="classIndexWorker.html#adedf6a0abe1bbd110f5da40fe5f44a7c">_factor</a>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="classIndexWorker.html#a4826e283c964c6266a02dec965f60928">   80</a></span>    std::string     <a class="code hl_variable" href="classIndexWorker.html#a4826e283c964c6266a02dec965f60928">_exchg</a>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="classIndexWorker.html#ab0bcdb2bb7270e93383accf2c968e2ee">   82</a></span>    std::string     <a class="code hl_variable" href="classIndexWorker.html#ab0bcdb2bb7270e93383accf2c968e2ee">_code</a>;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="classIndexWorker.html#af3500c16e02fe45ad02bac74f88c2487">   84</a></span>    std::string     <a class="code hl_variable" href="classIndexWorker.html#af3500c16e02fe45ad02bac74f88c2487">_trigger</a>;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classIndexWorker.html#ada80829756f7d9babd6f15c266c6dce7">   86</a></span>    uint32_t        <a class="code hl_variable" href="classIndexWorker.html#ada80829756f7d9babd6f15c266c6dce7">_timeout</a>;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="classIndexWorker.html#af10bb4407f16238371748e836ef2167f">   88</a></span>    uint64_t        <a class="code hl_variable" href="classIndexWorker.html#af10bb4407f16238371748e836ef2167f">_recalc_time</a>;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="classIndexWorker.html#ae3ff728eff894fe0b2b52c762e75f3fc">   90</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classIndexWorker.html#ae3ff728eff894fe0b2b52c762e75f3fc">_stand_scale</a>;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="classIndexWorker.html#a8a35d8bfa0461054ec6e84231b79bf78">   92</a></span>    <a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>   <a class="code hl_variable" href="classIndexWorker.html#a8a35d8bfa0461054ec6e84231b79bf78">_cache</a>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="classIndexWorker.html#af0b7d3b46034b20a6a0acd4de52d81ae">   94</a></span>    <a class="code hl_class" href="classWTSContractInfo.html">WTSContractInfo</a>*    <a class="code hl_variable" href="classIndexWorker.html#af0b7d3b46034b20a6a0acd4de52d81ae">_cInfo</a>;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="foldopen" id="foldopen00100" data-start="{" data-end="};">
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="structIndexWorker_1_1__WeightFactor.html">  100</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structIndexWorker_1_1__WeightFactor.html">_WeightFactor</a></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    {</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="structIndexWorker_1_1__WeightFactor.html#a99ef57dcbc02c27b08dca7fcdaebf959">  103</a></span>        <span class="keywordtype">double</span>          <a class="code hl_variable" href="structIndexWorker_1_1__WeightFactor.html#a99ef57dcbc02c27b08dca7fcdaebf959">_weight</a>;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="structIndexWorker_1_1__WeightFactor.html#a53624b24625282aba3bd4d7c6f9a75b9">  105</a></span>        <a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>   <a class="code hl_variable" href="structIndexWorker_1_1__WeightFactor.html#a53624b24625282aba3bd4d7c6f9a75b9">_tick</a>;</div>
+<div class="foldopen" id="foldopen00110" data-start="{" data-end="}">
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno"><a class="line" href="structIndexWorker_1_1__WeightFactor.html#aecf9ba27b19c03ff2cd9f2e5ad224deb">  110</a></span>        <a class="code hl_function" href="structIndexWorker_1_1__WeightFactor.html#aecf9ba27b19c03ff2cd9f2e5ad224deb">_WeightFactor</a>()</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>        {</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>            memset(<span class="keyword">this</span>, 0, <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structIndexWorker_1_1__WeightFactor.html">_WeightFactor</a>));</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>        }</div>
+</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="classIndexWorker.html#a40421e51f0720cbd4db7f30c0e07ce26">  114</a></span>    }<a class="code hl_typedef" href="classIndexWorker.html#a40421e51f0720cbd4db7f30c0e07ce26">WeightFactor</a>;</div>
+</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="classIndexWorker.html#ab89ed8130a1f05222adefde2c88c708c">  116</a></span>    <a class="code hl_class" href="classSpinMutex.html">SpinMutex</a>   <a class="code hl_variable" href="classIndexWorker.html#ab89ed8130a1f05222adefde2c88c708c">_mtx_data</a>;</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="classIndexWorker.html#adac11327d669baf1125082f5b578b7e2">  118</a></span>    <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, WeightFactor&gt;</a>   <a class="code hl_variable" href="classIndexWorker.html#adac11327d669baf1125082f5b578b7e2">_weight_scales</a>;</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno"><a class="line" href="classIndexWorker.html#a262b90a884bb2dabeaded2e32d6941bc">  120</a></span>    uint32_t    <a class="code hl_variable" href="classIndexWorker.html#a262b90a884bb2dabeaded2e32d6941bc">_weight_alg</a>;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="classIndexWorker.html#acf21d38f0cd433a17bcd600965a75cc1">  123</a></span>    <a class="code hl_typedef" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>    <a class="code hl_variable" href="classIndexWorker.html#acf21d38f0cd433a17bcd600965a75cc1">_thrd_trigger</a>;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="classIndexWorker.html#ada1c487b5279cc5386a73663bd3bf4db">  125</a></span>    <a class="code hl_typedef" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a>  <a class="code hl_variable" href="classIndexWorker.html#ada1c487b5279cc5386a73663bd3bf4db">_mtx_trigger</a>;</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="classIndexWorker.html#adf3264cc9eec72c166538a6958a33f0e">  127</a></span>    <a class="code hl_typedef" href="group__MutexUtils.html#gafaa630f2eecc6c68bc508cb484fcd3a3">StdCondVariable</a> <a class="code hl_variable" href="classIndexWorker.html#adf3264cc9eec72c166538a6958a33f0e">_cond_trigger</a>;</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno"><a class="line" href="classIndexWorker.html#a872c0903b6d427ae3df2c70ea03ac60c">  129</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classIndexWorker.html#a872c0903b6d427ae3df2c70ea03ac60c">_stopped</a>;</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="classIndexWorker.html#ac382911ee436ed9262e116e29521b4b0">  131</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classIndexWorker.html#ac382911ee436ed9262e116e29521b4b0">_process</a>;</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>};</div>
+</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno"><a class="line" href="IndexWorker_8h.html#a1b77f3cc7116acc1bb9c9e8020470680">  134</a></span><span class="keyword">typedef</span> std::shared_ptr&lt;IndexWorker&gt; <a class="code hl_typedef" href="IndexWorker_8h.html#a1b77f3cc7116acc1bb9c9e8020470680">IndexWorkerPtr</a>;</div>
+<div class="ttc" id="aIndexWorker_8h_html_a1b77f3cc7116acc1bb9c9e8020470680"><div class="ttname"><a href="IndexWorker_8h.html#a1b77f3cc7116acc1bb9c9e8020470680">IndexWorkerPtr</a></div><div class="ttdeci">std::shared_ptr&lt; IndexWorker &gt; IndexWorkerPtr</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00134">IndexWorker.h:134</a></div></div>
+<div class="ttc" id="aIndexWorker_8h_html_a9e1fc31194100ab43bbad77a2f5c12b3"><div class="ttname"><a href="IndexWorker_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a></div><div class="ttdeci">NS_WTP_END USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00029">IndexWorker.h:29</a></div></div>
+<div class="ttc" id="aTraderDumper_8cpp_html_abc68ad0fe9293fb2709e004ffe3fa333"><div class="ttname"><a href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a></div><div class="ttdeci">bool config(const char *cfgfile, bool isFile)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_8cpp_source.html#l00022">TraderDumper.cpp:22</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html"><div class="ttname"><a href="classIBaseDataMgr.html">IBaseDataMgr</a></div><div class="ttdoc">基础数据管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IBaseDataMgr_8h_source.html#l00075">IBaseDataMgr.h:76</a></div></div>
+<div class="ttc" id="aclassIHotMgr_html"><div class="ttname"><a href="classIHotMgr.html">IHotMgr</a></div><div class="ttdoc">主力合约管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IHotMgr_8h_source.html#l00066">IHotMgr.h:67</a></div></div>
+<div class="ttc" id="aclassIndexFactory_html"><div class="ttname"><a href="classIndexFactory.html">IndexFactory</a></div><div class="ttdoc">指数工厂类</div><div class="ttdef"><b>Definition</b> <a href="IndexFactory_8h_source.html#l00023">IndexFactory.h:24</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html"><div class="ttname"><a href="classIndexWorker.html">IndexWorker</a></div><div class="ttdoc">指数计算器类</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00039">IndexWorker.h:40</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_a0d183e9c823c01fc0ddb03ec1be3dffa"><div class="ttname"><a href="classIndexWorker.html#a0d183e9c823c01fc0ddb03ec1be3dffa">IndexWorker::handle_quote</a></div><div class="ttdeci">void handle_quote(WTSTickData *newTick)</div><div class="ttdoc">处理实时行情数据</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8cpp_source.html#l00204">IndexWorker.cpp:204</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_a1dd78393235f530625147440a0723daf"><div class="ttname"><a href="classIndexWorker.html#a1dd78393235f530625147440a0723daf">IndexWorker::IndexWorker</a></div><div class="ttdeci">IndexWorker(IndexFactory *factor)</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00047">IndexWorker.h:47</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_a262b90a884bb2dabeaded2e32d6941bc"><div class="ttname"><a href="classIndexWorker.html#a262b90a884bb2dabeaded2e32d6941bc">IndexWorker::_weight_alg</a></div><div class="ttdeci">uint32_t _weight_alg</div><div class="ttdoc">权重算法类型，0=固定权重，1=根据持仓量动态调整，2=根据成交量动态调整</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00120">IndexWorker.h:120</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_a40421e51f0720cbd4db7f30c0e07ce26"><div class="ttname"><a href="classIndexWorker.html#a40421e51f0720cbd4db7f30c0e07ce26">IndexWorker::WeightFactor</a></div><div class="ttdeci">struct IndexWorker::_WeightFactor WeightFactor</div><div class="ttdoc">成分合约的权重因子结构</div></div>
+<div class="ttc" id="aclassIndexWorker_html_a4826e283c964c6266a02dec965f60928"><div class="ttname"><a href="classIndexWorker.html#a4826e283c964c6266a02dec965f60928">IndexWorker::_exchg</a></div><div class="ttdeci">std::string _exchg</div><div class="ttdoc">指数所属交易所代码</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00080">IndexWorker.h:80</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_a872c0903b6d427ae3df2c70ea03ac60c"><div class="ttname"><a href="classIndexWorker.html#a872c0903b6d427ae3df2c70ea03ac60c">IndexWorker::_stopped</a></div><div class="ttdeci">bool _stopped</div><div class="ttdoc">是否停止触发线程的标志</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00129">IndexWorker.h:129</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_a8a35d8bfa0461054ec6e84231b79bf78"><div class="ttname"><a href="classIndexWorker.html#a8a35d8bfa0461054ec6e84231b79bf78">IndexWorker::_cache</a></div><div class="ttdeci">WTSTickStruct _cache</div><div class="ttdoc">指数Tick数据缓存，保存当前指数的行情数据</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00092">IndexWorker.h:92</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_aa8ef354c925975676de9e273f162383b"><div class="ttname"><a href="classIndexWorker.html#aa8ef354c925975676de9e273f162383b">IndexWorker::generate_tick</a></div><div class="ttdeci">void generate_tick()</div><div class="ttdoc">生成指数Tick数据</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8cpp_source.html#l00274">IndexWorker.cpp:274</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_ab0bcdb2bb7270e93383accf2c968e2ee"><div class="ttname"><a href="classIndexWorker.html#ab0bcdb2bb7270e93383accf2c968e2ee">IndexWorker::_code</a></div><div class="ttdeci">std::string _code</div><div class="ttdoc">指数代码</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00082">IndexWorker.h:82</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_ab89ed8130a1f05222adefde2c88c708c"><div class="ttname"><a href="classIndexWorker.html#ab89ed8130a1f05222adefde2c88c708c">IndexWorker::_mtx_data</a></div><div class="ttdeci">SpinMutex _mtx_data</div><div class="ttdoc">数据互斥锁，用于保护成分合约数据的并发访问</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00116">IndexWorker.h:116</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_ac382911ee436ed9262e116e29521b4b0"><div class="ttname"><a href="classIndexWorker.html#ac382911ee436ed9262e116e29521b4b0">IndexWorker::_process</a></div><div class="ttdeci">bool _process</div><div class="ttdoc">是否正在处理触发的标志</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00131">IndexWorker.h:131</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_acf21d38f0cd433a17bcd600965a75cc1"><div class="ttname"><a href="classIndexWorker.html#acf21d38f0cd433a17bcd600965a75cc1">IndexWorker::_thrd_trigger</a></div><div class="ttdeci">StdThreadPtr _thrd_trigger</div><div class="ttdoc">触发线程指针，用于定时触发指数计算</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00123">IndexWorker.h:123</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_ada1c487b5279cc5386a73663bd3bf4db"><div class="ttname"><a href="classIndexWorker.html#ada1c487b5279cc5386a73663bd3bf4db">IndexWorker::_mtx_trigger</a></div><div class="ttdeci">StdUniqueMutex _mtx_trigger</div><div class="ttdoc">触发互斥锁，用于保护触发线程中的共享数据</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00125">IndexWorker.h:125</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_ada80829756f7d9babd6f15c266c6dce7"><div class="ttname"><a href="classIndexWorker.html#ada80829756f7d9babd6f15c266c6dce7">IndexWorker::_timeout</a></div><div class="ttdeci">uint32_t _timeout</div><div class="ttdoc">触发超时时间（毫秒），当时间超过这个值后触发指数计算</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00086">IndexWorker.h:86</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_adac11327d669baf1125082f5b578b7e2"><div class="ttname"><a href="classIndexWorker.html#adac11327d669baf1125082f5b578b7e2">IndexWorker::_weight_scales</a></div><div class="ttdeci">wt_hashmap&lt; std::string, WeightFactor &gt; _weight_scales</div><div class="ttdoc">存储所有成分合约的权重因子数据，以合约完整代码为键</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00118">IndexWorker.h:118</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_adedf6a0abe1bbd110f5da40fe5f44a7c"><div class="ttname"><a href="classIndexWorker.html#adedf6a0abe1bbd110f5da40fe5f44a7c">IndexWorker::_factor</a></div><div class="ttdeci">IndexFactory * _factor</div><div class="ttdoc">指数工厂指针，用于访问基础数据管理器和热点合约管理器</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00078">IndexWorker.h:78</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_adf3264cc9eec72c166538a6958a33f0e"><div class="ttname"><a href="classIndexWorker.html#adf3264cc9eec72c166538a6958a33f0e">IndexWorker::_cond_trigger</a></div><div class="ttdeci">StdCondVariable _cond_trigger</div><div class="ttdoc">触发条件变量，用于线程间通知</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00127">IndexWorker.h:127</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_ae34dfc0140e51a986ecc6f7ff5188fd1"><div class="ttname"><a href="classIndexWorker.html#ae34dfc0140e51a986ecc6f7ff5188fd1">IndexWorker::init</a></div><div class="ttdeci">bool init(WTSVariant *config)</div><div class="ttdoc">初始化指数计算器</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8cpp_source.html#l00040">IndexWorker.cpp:40</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_ae3ff728eff894fe0b2b52c762e75f3fc"><div class="ttname"><a href="classIndexWorker.html#ae3ff728eff894fe0b2b52c762e75f3fc">IndexWorker::_stand_scale</a></div><div class="ttdeci">double _stand_scale</div><div class="ttdoc">标准化系数，用于调整指数值的量级</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00090">IndexWorker.h:90</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_af0b7d3b46034b20a6a0acd4de52d81ae"><div class="ttname"><a href="classIndexWorker.html#af0b7d3b46034b20a6a0acd4de52d81ae">IndexWorker::_cInfo</a></div><div class="ttdeci">WTSContractInfo * _cInfo</div><div class="ttdoc">指数合约信息指针</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00094">IndexWorker.h:94</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_af10bb4407f16238371748e836ef2167f"><div class="ttname"><a href="classIndexWorker.html#af10bb4407f16238371748e836ef2167f">IndexWorker::_recalc_time</a></div><div class="ttdeci">uint64_t _recalc_time</div><div class="ttdoc">重新计算时间点，用于定时触发时计算下一次触发时间</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00088">IndexWorker.h:88</a></div></div>
+<div class="ttc" id="aclassIndexWorker_html_af3500c16e02fe45ad02bac74f88c2487"><div class="ttname"><a href="classIndexWorker.html#af3500c16e02fe45ad02bac74f88c2487">IndexWorker::_trigger</a></div><div class="ttdeci">std::string _trigger</div><div class="ttdoc">触发条件，可以是合约代码或者&quot;time&quot;表示定时触发</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00084">IndexWorker.h:84</a></div></div>
+<div class="ttc" id="aclassSpinMutex_html"><div class="ttname"><a href="classSpinMutex.html">SpinMutex</a></div><div class="ttdoc">自旋互斥锁类</div><div class="ttdef"><b>Definition</b> <a href="SpinMutex_8hpp_source.html#l00024">SpinMutex.hpp:25</a></div></div>
+<div class="ttc" id="aclassWTSContractInfo_html"><div class="ttname"><a href="classWTSContractInfo.html">WTSContractInfo</a></div><div class="ttdoc">合约信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00171">WTSContractInfo.hpp:172</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclasswt__hashmap_html"><div class="ttname"><a href="classwt__hashmap.html">wt_hashmap</a></div><div class="ttdoc">WonderTrader通用高性能哈希表模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00162">FasterDefs.h:163</a></div></div>
+<div class="ttc" id="agroup__MutexUtils_html_gafaa630f2eecc6c68bc508cb484fcd3a3"><div class="ttname"><a href="group__MutexUtils.html#gafaa630f2eecc6c68bc508cb484fcd3a3">StdCondVariable</a></div><div class="ttdeci">std::condition_variable_any StdCondVariable</div><div class="ttdoc">条件变量类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00067">StdUtils.hpp:67</a></div></div>
+<div class="ttc" id="agroup__MutexUtils_html_gaff888cdcc14f5ebb7a1a9c9f7b52846f"><div class="ttname"><a href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a></div><div class="ttdeci">std::mutex StdUniqueMutex</div><div class="ttdoc">普通互斥量类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00061">StdUtils.hpp:61</a></div></div>
+<div class="ttc" id="agroup__ThreadUtils_html_gaf9ea8e1e64d43ab034614d39d0b35776"><div class="ttname"><a href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a></div><div class="ttdeci">std::shared_ptr&lt; StdThread &gt; StdThreadPtr</div><div class="ttdoc">线程智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00042">StdUtils.hpp:42</a></div></div>
+<div class="ttc" id="astructIndexWorker_1_1__WeightFactor_html"><div class="ttname"><a href="structIndexWorker_1_1__WeightFactor.html">IndexWorker::_WeightFactor</a></div><div class="ttdoc">成分合约的权重因子结构</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00100">IndexWorker.h:101</a></div></div>
+<div class="ttc" id="astructIndexWorker_1_1__WeightFactor_html_a53624b24625282aba3bd4d7c6f9a75b9"><div class="ttname"><a href="structIndexWorker_1_1__WeightFactor.html#a53624b24625282aba3bd4d7c6f9a75b9">IndexWorker::_WeightFactor::_tick</a></div><div class="ttdeci">WTSTickStruct _tick</div><div class="ttdoc">成分合约的Tick数据</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00105">IndexWorker.h:105</a></div></div>
+<div class="ttc" id="astructIndexWorker_1_1__WeightFactor_html_a99ef57dcbc02c27b08dca7fcdaebf959"><div class="ttname"><a href="structIndexWorker_1_1__WeightFactor.html#a99ef57dcbc02c27b08dca7fcdaebf959">IndexWorker::_WeightFactor::_weight</a></div><div class="ttdeci">double _weight</div><div class="ttdoc">成分合约的权重值</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00103">IndexWorker.h:103</a></div></div>
+<div class="ttc" id="astructIndexWorker_1_1__WeightFactor_html_aecf9ba27b19c03ff2cd9f2e5ad224deb"><div class="ttname"><a href="structIndexWorker_1_1__WeightFactor.html#aecf9ba27b19c03ff2cd9f2e5ad224deb">IndexWorker::_WeightFactor::_WeightFactor</a></div><div class="ttdeci">_WeightFactor()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="IndexWorker_8h_source.html#l00110">IndexWorker.h:110</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html"><div class="ttname"><a href="structWTSTickStruct.html">WTSTickStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00158">WTSStruct.h:159</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_a28b32a32e43d6abee9cd6e629f0fe5a.html">WtDtCore</a></li><li class="navelem"><a class="el" href="IndexWorker_8h.html">IndexWorker.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

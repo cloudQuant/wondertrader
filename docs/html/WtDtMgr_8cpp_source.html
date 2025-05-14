@@ -1,0 +1,810 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtCore/WtDtMgr.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtDtMgr_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtDtMgr.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtDtMgr_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="WtDtMgr_8h.html">WtDtMgr.h</a>&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="WtEngine_8h.html">WtEngine.h</a>&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;<a class="code" href="WtUftCore_2WtHelper_8h.html">WtHelper.h</a>&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;../Share/StrUtil.hpp&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;../Share/CodeHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;../Includes/WTSDataDef.hpp&quot;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;../Includes/WTSVariant.hpp&quot;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;../WTSTools/WTSLogger.h&quot;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;../WTSTools/WTSDataFactory.h&quot;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="WtDtMgr_8cpp.html#a226378f5907b16b0da57da97372f0af7">   28</a></span><a class="code hl_class" href="classWTSDataFactory.html">WTSDataFactory</a> <a class="code hl_variable" href="WtDtMgr_8cpp.html#a226378f5907b16b0da57da97372f0af7">g_dataFact</a>;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="foldopen" id="foldopen00034" data-start="{" data-end="}">
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#aeffbf9a1a25e574061a482af005d9640">   34</a></span><a class="code hl_function" href="classWtDtMgr.html#aeffbf9a1a25e574061a482af005d9640">WtDtMgr::WtDtMgr</a>()</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    : _reader(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    , _engine(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    , _loader(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    , _bars_cache(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    , _ticks_adjusted(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    , _rt_tick_map(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    , _force_cache(false)</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>{</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="comment">// 构造函数中不需要额外的初始化操作，所有初始化已在初始化列表中完成</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>}</div>
+</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="foldopen" id="foldopen00052" data-start="{" data-end="}">
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#a2243b5a049b39746a5ee54555167141f">   52</a></span><a class="code hl_function" href="classWtDtMgr.html#a2243b5a049b39746a5ee54555167141f">WtDtMgr::~WtDtMgr</a>()</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>{</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="comment">// 释放K线缓存</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#ae5ff65e58b85df5bb89bb013b412b087">_bars_cache</a>)</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        <a class="code hl_variable" href="classWtDtMgr.html#ae5ff65e58b85df5bb89bb013b412b087">_bars_cache</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a61053c683d4af266c2b28da611bf455a">release</a>();</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="comment">// 释放复权Tick缓存</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#a5e316e5c62acea26b774af7b500ce1b8">_ticks_adjusted</a>)</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <a class="code hl_variable" href="classWtDtMgr.html#a5e316e5c62acea26b774af7b500ce1b8">_ticks_adjusted</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a61053c683d4af266c2b28da611bf455a">release</a>();</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="comment">// 释放实时Tick缓存</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#aaa1a0112973676e0a2832c268a132586">_rt_tick_map</a>)</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <a class="code hl_variable" href="classWtDtMgr.html#aaa1a0112973676e0a2832c268a132586">_rt_tick_map</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a61053c683d4af266c2b28da611bf455a">release</a>();</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="comment">// 注意：这里没有释放_reader和_loader，可能是因为这些对象的所有权在外部</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>}</div>
+</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="foldopen" id="foldopen00075" data-start="{" data-end="}">
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#a2d72d81cd6030f57f5993feab1fe0911">   75</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classWtDtMgr.html#a2d72d81cd6030f57f5993feab1fe0911">WtDtMgr::initStore</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg)</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>{</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="comment">// 检查配置是否为空</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordflow">if</span> (cfg == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="comment">// 获取数据存储模块名称</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    std::string <span class="keyword">module</span> = cfg-&gt;getCString(&quot;module&quot;);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="comment">// 如果模块名称为空，使用默认的WtDataStorage</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keywordflow">if</span> (module.empty())</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        <span class="keyword">module</span> = WtHelper::getInstDir() + DLLHelper::wrap_module(&quot;WtDataStorage&quot;);</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        <span class="keyword">module</span> = WtHelper::getInstDir() + DLLHelper::wrap_module(module.c_str());</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="comment">// 加载数据存储模块动态库</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <a class="code hl_typedef" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a> hInst = <a class="code hl_function" href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a>(module.c_str());</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="keywordflow">if</span>(hInst == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    {</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;Loading data reader module {} failed&quot;</span>, module.c_str());</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    }</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="comment">// 获取创建数据读取器的函数指针</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <a class="code hl_typedef" href="IDataReader_8h.html#aa3b1986abaa355b0e287a96305d59086">FuncCreateDataReader</a> funcCreator = (<a class="code hl_typedef" href="IDataReader_8h.html#aa3b1986abaa355b0e287a96305d59086">FuncCreateDataReader</a>)<a class="code hl_function" href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a>(hInst, <span class="stringliteral">&quot;createDataReader&quot;</span>);</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <span class="keywordflow">if</span>(funcCreator == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    {</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;Loading data reader module {} failed, entrance function createDataReader not found&quot;</span>, module.c_str());</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        <a class="code hl_function" href="classDLLHelper.html#adbde89a530ae734c57506bf9639ccc65">DLLHelper::free_library</a>(hInst);</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    }</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <span class="comment">// 创建数据读取器实例</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a> = funcCreator();</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    {</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>        <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;Creating instance of data reader module {} failed&quot;</span>, module.c_str());</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>        <a class="code hl_function" href="classDLLHelper.html#adbde89a530ae734c57506bf9639ccc65">DLLHelper::free_library</a>(hInst);</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    }</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="comment">// 初始化数据读取器，传入配置、当前对象作为回调接收器和历史数据加载器</span></div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a>-&gt;<a class="code hl_function" href="classIDataReader.html#a40b6b830392806696c9f89799e396ab0">init</a>(cfg, <span class="keyword">this</span>, <a class="code hl_variable" href="classWtDtMgr.html#a1b7089bc5a99ea6e1e9797e4c5109309">_loader</a>);</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>}</div>
+</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="foldopen" id="foldopen00129" data-start="{" data-end="}">
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#abc136030e4bf7954d9dcc0cc89929a45">  129</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classWtDtMgr.html#abc136030e4bf7954d9dcc0cc89929a45">WtDtMgr::init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg, <a class="code hl_class" href="classWtEngine.html">WtEngine</a>* engine, <span class="keywordtype">bool</span> bForceCache <span class="comment">/* = false */</span>)</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>{</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="comment">// 设置交易引擎指针</span></div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <a class="code hl_variable" href="classWtDtMgr.html#ac62627be16dca058feaac9f3020dc137">_engine</a> = engine;</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="comment">// 从配置中读取是否按小节对齐K线</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <a class="code hl_variable" href="classWtDtMgr.html#a132d8aa2a32936471ca1304c4c5693e9">_align_by_section</a> = cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#a597bf32bfe71fb040721dc65dc786df6">getBoolean</a>(<span class="stringliteral">&quot;align_by_section&quot;</span>);</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    <span class="comment">// 设置是否强制缓存K线数据</span></div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <a class="code hl_variable" href="classWtDtMgr.html#aef1f5ebec303fe8ba9200709d9e6e93c">_force_cache</a> = bForceCache;</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span> </div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>    <span class="comment">// 输出小节对齐设置的日志</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    <a class="code hl_function" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a>(<span class="stringliteral">&quot;Resampled bars will be aligned by section: {}&quot;</span>, <a class="code hl_variable" href="classWtDtMgr.html#a132d8aa2a32936471ca1304c4c5693e9">_align_by_section</a>?<span class="stringliteral">&quot;yes&quot;</span>:<span class="stringliteral">&quot; no&quot;</span>);</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>    <span class="comment">// 输出强制缓存设置的日志</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    <a class="code hl_function" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a>(<span class="stringliteral">&quot;Force to cache bars: {}&quot;</span>, <a class="code hl_variable" href="classWtDtMgr.html#aef1f5ebec303fe8ba9200709d9e6e93c">_force_cache</a> ? <span class="stringliteral">&quot;yes&quot;</span> : <span class="stringliteral">&quot; no&quot;</span>);</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span> </div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>    <span class="comment">// 初始化数据存储模块</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classWtDtMgr.html#a2d72d81cd6030f57f5993feab1fe0911">initStore</a>(cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#a4dacb2b4afd195d05dedb5323d7982f3">get</a>(<span class="stringliteral">&quot;store&quot;</span>));</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>}</div>
+</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="foldopen" id="foldopen00156" data-start="{" data-end="}">
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#add84dcc76efdc00d2585e35fc8944b6a">  156</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtMgr.html#add84dcc76efdc00d2585e35fc8944b6a">WtDtMgr::on_all_bar_updated</a>(uint32_t updateTime)</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>{</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    <span class="comment">// 如果没有等待的通知，直接返回</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#a9a00c0f09063a9b6ef7079fa37a47d77">_bar_notifies</a>.empty())</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span> </div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    <span class="comment">// 输出调试日志</span></div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    <a class="code hl_function" href="classWTSLogger.html#adcbb6a78b99a8c514a4b55677e5a1a28">WTSLogger::debug</a>(<span class="stringliteral">&quot;All bars updated, on_bar will be triggered&quot;</span>);</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    <span class="comment">// 遍历所有等待的K线通知项，触发交易引擎的on_bar回调</span></div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <a class="code hl_struct" href="structWtDtMgr_1_1__NotifyItem.html">NotifyItem</a>&amp; item : <a class="code hl_variable" href="classWtDtMgr.html#a9a00c0f09063a9b6ef7079fa37a47d77">_bar_notifies</a>)</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    {</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>        <a class="code hl_variable" href="classWtDtMgr.html#ac62627be16dca058feaac9f3020dc137">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a491dfad66237c2f1e4a058c1981dc0a9">on_bar</a>(item._code, item._period, item._times, item._newBar);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    }</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    <span class="comment">// 清空通知列表，准备下一轮更新</span></div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    <a class="code hl_variable" href="classWtDtMgr.html#a9a00c0f09063a9b6ef7079fa37a47d77">_bar_notifies</a>.clear();</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>}</div>
+</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
+<div class="foldopen" id="foldopen00180" data-start="{" data-end="}">
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#a2f3d13eb9383e83c0ca6e0d388bda248">  180</a></span><a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>* <a class="code hl_function" href="classWtDtMgr.html#a2f3d13eb9383e83c0ca6e0d388bda248">WtDtMgr::get_basedata_mgr</a>()</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>{ </div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    <span class="comment">// 直接调用交易引擎的方法获取基础数据管理器</span></div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtDtMgr.html#ac62627be16dca058feaac9f3020dc137">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a48ca1d0982f8362b0c00c004411ae34b">get_basedata_mgr</a>(); </div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>}</div>
+</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
+<div class="foldopen" id="foldopen00191" data-start="{" data-end="}">
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#aa000040bdb2840101914dc0680219c8f">  191</a></span><a class="code hl_class" href="classIHotMgr.html">IHotMgr</a>* <a class="code hl_function" href="classWtDtMgr.html#aa000040bdb2840101914dc0680219c8f">WtDtMgr::get_hot_mgr</a>() </div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>{ </div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    <span class="comment">// 直接调用交易引擎的方法获取主力合约管理器</span></div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtDtMgr.html#ac62627be16dca058feaac9f3020dc137">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#acb4fb6f1158643610d511916dc821a78">get_hot_mgr</a>(); </div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>}</div>
+</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
+<div class="foldopen" id="foldopen00202" data-start="{" data-end="}">
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#a3cfb71c889bed5ec736cdb917d07d6ed">  202</a></span>uint32_t <a class="code hl_function" href="classWtDtMgr.html#a3cfb71c889bed5ec736cdb917d07d6ed">WtDtMgr::get_date</a>() </div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>{ </div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>    <span class="comment">// 直接调用交易引擎的方法获取当前交易日期</span></div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtDtMgr.html#ac62627be16dca058feaac9f3020dc137">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a6d4697459f99aeaf394f277fc7000500">get_date</a>(); </div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>}</div>
+</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span> </div>
+<div class="foldopen" id="foldopen00213" data-start="{" data-end="}">
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#a5b282002b22746c942895611c08b4f6c">  213</a></span>uint32_t <a class="code hl_function" href="classWtDtMgr.html#a5b282002b22746c942895611c08b4f6c">WtDtMgr::get_min_time</a>()</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>{ </div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    <span class="comment">// 直接调用交易引擎的方法获取当前交易分钟时间</span></div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtDtMgr.html#ac62627be16dca058feaac9f3020dc137">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a3fafa118edfedd8abe7ef1474a78d7f5">get_min_time</a>(); </div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>}</div>
+</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
+<div class="foldopen" id="foldopen00224" data-start="{" data-end="}">
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#affbcab1aed2602e8b66ae6fc1f8b4f74">  224</a></span>uint32_t <a class="code hl_function" href="classWtDtMgr.html#affbcab1aed2602e8b66ae6fc1f8b4f74">WtDtMgr::get_secs</a>() </div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>{ </div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    <span class="comment">// 直接调用交易引擎的方法获取当前交易秒数</span></div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtDtMgr.html#ac62627be16dca058feaac9f3020dc137">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a6a794ed143178b37084dd265826f93a7">get_secs</a>(); </div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>}</div>
+</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span> </div>
+<div class="foldopen" id="foldopen00237" data-start="{" data-end="}">
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#a5029ac4ae07382b9b08eed9f5126858a">  237</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtMgr.html#a5029ac4ae07382b9b08eed9f5126858a">WtDtMgr::reader_log</a>(<a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* message)</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>{</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    <span class="comment">// 将消息转发到系统日志器</span></div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    <a class="code hl_function" href="classWTSLogger.html#aa3257bbd8e5b1db25f65cd936f50025c">WTSLogger::log_raw</a>(ll, message);</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>}</div>
+</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
+<div class="foldopen" id="foldopen00251" data-start="{" data-end="}">
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#af512487bb1565b4934fea49b73477d7e">  251</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtMgr.html#af512487bb1565b4934fea49b73477d7e">WtDtMgr::on_bar</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* code, <a class="code hl_typedef" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* newBar)</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>{</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    <span class="comment">// 生成合约和周期的键值模式</span></div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>    std::string key_pattern = fmt::format(<span class="stringliteral">&quot;{}-{}&quot;</span>, code, period);</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span> </div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>    <span class="comment">// 根据周期类型转换为字符周期和倍数</span></div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>    <span class="keywordtype">char</span> speriod;</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    uint32_t times = 1;</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>    <span class="keywordflow">switch</span> (period)</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    {</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="WTSTypes_8h.html#acac96eb977d20b3a6186f0ccede8a9d8a3b64a9f21f4bd5432a8b3f8424c4410e">KP_Minute1</a>:</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>        speriod = <span class="charliteral">&#39;m&#39;</span>;</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>        times = 1;</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="WTSTypes_8h.html#acac96eb977d20b3a6186f0ccede8a9d8adcd66f71c090964efdc8474bca5b9209">KP_Minute5</a>:</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>        speriod = <span class="charliteral">&#39;m&#39;</span>;</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>        times = 5;</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    <span class="keywordflow">default</span>:</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>        speriod = <span class="charliteral">&#39;d&#39;</span>;</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>        times = 1;</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>    }</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span> </div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    <span class="comment">// 如果是订阅的基础周期，则添加到通知列表中</span></div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classWtDtMgr.html#a6aeae6e632cdae36f9ffa5a2c965d746">_subed_basic_bars</a>.find(key_pattern) != <a class="code hl_variable" href="classWtDtMgr.html#a6aeae6e632cdae36f9ffa5a2c965d746">_subed_basic_bars</a>.end())</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>    {</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        <span class="comment">//如果是基础周期, 直接触发on_bar事件</span></div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>        <span class="comment">//_engine-&gt;on_bar(code, speriod.c_str(), times, newBar);</span></div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>        <span class="comment">//更新完K线以后, 统一通知交易引擎</span></div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>        <a class="code hl_variable" href="classWtDtMgr.html#a9a00c0f09063a9b6ef7079fa37a47d77">_bar_notifies</a>.emplace_back(<a class="code hl_typedef" href="classWtDtMgr.html#a96e6fd75e421de0396685eb69c2ea7bc">NotifyItem</a>(code, speriod, times, newBar));</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>    }</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span> </div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>    <span class="comment">//然后再处理非基础周期</span></div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#ae5ff65e58b85df5bb89bb013b412b087">_bars_cache</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a> || <a class="code hl_variable" href="classWtDtMgr.html#ae5ff65e58b85df5bb89bb013b412b087">_bars_cache</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a5a3e012444d1fa65ce0057d8263fa808">size</a>() == 0)</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>    </div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>    <a class="code hl_class" href="classWTSSessionInfo.html">WTSSessionInfo</a>* sInfo = <a class="code hl_variable" href="classWtDtMgr.html#ac62627be16dca058feaac9f3020dc137">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a6c51ead2f0c35c0ae075bc55e91ea828">get_session_info</a>(code, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span> </div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> it = <a class="code hl_variable" href="classWtDtMgr.html#ae5ff65e58b85df5bb89bb013b412b087">_bars_cache</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#aba7f0195840c5bdf0314a10f4b961050">begin</a>(); it != <a class="code hl_variable" href="classWtDtMgr.html#ae5ff65e58b85df5bb89bb013b412b087">_bars_cache</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a45357009b4f78b3c1d39da46d169d666">end</a>(); it++)</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>    {</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>        <span class="keyword">const</span> <span class="keywordtype">char</span>* key = it-&gt;first.c_str();</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>        <span class="keywordflow">if</span>(memcmp(key, key_pattern.c_str(), key_pattern.size()) != 0)</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span> </div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>        <a class="code hl_class" href="classWTSKlineData.html">WTSKlineData</a>* kData = (<a class="code hl_class" href="classWTSKlineData.html">WTSKlineData</a>*)it-&gt;second;</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>        <span class="keywordflow">if</span>(kData-&gt;<a class="code hl_function" href="classWTSKlineData.html#a4c3ac297e1e2facfa2027fe18b76ffa9">times</a>() != 1)</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>        {</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>            <a class="code hl_variable" href="WtDtMgr_8cpp.html#a226378f5907b16b0da57da97372f0af7">g_dataFact</a>.<a class="code hl_function" href="classWTSDataFactory.html#a091516188f5425c7e122de89236b731a">updateKlineData</a>(kData, newBar, sInfo, <a class="code hl_variable" href="classWtDtMgr.html#a132d8aa2a32936471ca1304c4c5693e9">_align_by_section</a>);</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>            <span class="keywordflow">if</span> (kData-&gt;<a class="code hl_function" href="classWTSKlineData.html#a74b21efb7193ebf027bbf4b831413a3d">isClosed</a>())</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>            {</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>                <span class="comment">//如果基础周期K线的时间和自定义周期K线的时间一致, 说明K线关闭了</span></div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>                <span class="comment">//这里也要触发on_bar事件</span></div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>                <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* lastBar = kData-&gt;<a class="code hl_function" href="classWTSKlineData.html#a9b0b5ce2c4aef6633a94ec170180bbdb">at</a>(-1);</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>                <span class="comment">//_engine-&gt;on_bar(code, speriod.c_str(), times, lastBar);</span></div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>                <span class="comment">//更新完K线以后, 统一通知交易引擎</span></div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>                <a class="code hl_variable" href="classWtDtMgr.html#a9a00c0f09063a9b6ef7079fa37a47d77">_bar_notifies</a>.emplace_back(<a class="code hl_typedef" href="classWtDtMgr.html#a96e6fd75e421de0396685eb69c2ea7bc">NotifyItem</a>(code, speriod, times*kData-&gt;<a class="code hl_function" href="classWTSKlineData.html#a4c3ac297e1e2facfa2027fe18b76ffa9">times</a>(), lastBar));</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>            }</div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>        }</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>        {</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>            <span class="comment">//如果是强制缓存的一倍周期，直接压到缓存队列里</span></div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>            kData-&gt;<a class="code hl_function" href="classWTSKlineData.html#a5231e60be31ff49788b7ee311cbecaf4">getDataRef</a>().emplace_back(*newBar);</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>            <a class="code hl_variable" href="classWtDtMgr.html#a9a00c0f09063a9b6ef7079fa37a47d77">_bar_notifies</a>.emplace_back(<a class="code hl_typedef" href="classWtDtMgr.html#a96e6fd75e421de0396685eb69c2ea7bc">NotifyItem</a>(code, speriod, times, newBar));</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>        }</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>    }</div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>}</div>
+</div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span> </div>
+<div class="foldopen" id="foldopen00326" data-start="{" data-end="}">
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#a3e3a1f265f439df9846c475348a12821">  326</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtDtMgr.html#a3e3a1f265f439df9846c475348a12821">WtDtMgr::handle_push_quote</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick)</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>{</div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>    <span class="comment">// 检查新Tick数据是否有效</span></div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>    <span class="keywordflow">if</span> (newTick == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span> </div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>    <span class="comment">// 如果实时Tick缓存不存在，创建一个新的</span></div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#aaa1a0112973676e0a2832c268a132586">_rt_tick_map</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>        <a class="code hl_variable" href="classWtDtMgr.html#aaa1a0112973676e0a2832c268a132586">_rt_tick_map</a> = <a class="code hl_function" href="classWTSHashMap.html#a92728481e09486cd7200b2f91c446bd3">DataCacheMap::create</a>();</div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span> </div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>    <span class="comment">// 将新的Tick数据添加到实时缓存中，并设置为自动释放</span></div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>    <a class="code hl_variable" href="classWtDtMgr.html#aaa1a0112973676e0a2832c268a132586">_rt_tick_map</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#ad38538f62db5b2f37a18533f8192a01d">add</a>(stdCode, newTick, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span> </div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>    <span class="comment">// 如果复权Tick缓存存在，则处理复权数据</span></div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classWtDtMgr.html#a5e316e5c62acea26b774af7b500ce1b8">_ticks_adjusted</a> != <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>    {</div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>        <span class="comment">// 获取合约的复权历史数据</span></div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>        <a class="code hl_class" href="classWTSHisTickData.html">WTSHisTickData</a>* tData = (<a class="code hl_class" href="classWTSHisTickData.html">WTSHisTickData</a>*)<a class="code hl_variable" href="classWtDtMgr.html#a5e316e5c62acea26b774af7b500ce1b8">_ticks_adjusted</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a66e6536c6db604c162a415620264d747">get</a>(stdCode);</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>        <span class="keywordflow">if</span> (tData == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span> </div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>        <span class="comment">// 如果只处理有效数据且当前数据成交量为0，则跳过</span></div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>        <span class="keywordflow">if</span> (tData-&gt;<a class="code hl_function" href="classWTSHisTickData.html#aa3b8c04eebd78124cf13d24b31fc09f9">isValidOnly</a>() &amp;&amp; newTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a097548155cfbbf9a0a36e1ee1ce3ad38">volume</a>() == 0)</div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span> </div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>        <span class="comment">// 将新的Tick数据添加到复权历史数据中</span></div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>        tData-&gt;<a class="code hl_function" href="classWTSHisTickData.html#a826a25a2d3e5370b43b0d261ca51ce26">appendTick</a>(newTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a6a81212366831e7afe3eeac41b42e7b0">getTickStruct</a>());</div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>    }</div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>}</div>
+</div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span> </div>
+<div class="foldopen" id="foldopen00362" data-start="{" data-end="}">
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#a6cd8f89ff3aa31eac4b0cc54d363a65d">  362</a></span><a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* <a class="code hl_function" href="classWtDtMgr.html#a6cd8f89ff3aa31eac4b0cc54d363a65d">WtDtMgr::grab_last_tick</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* code)</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>{</div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#aaa1a0112973676e0a2832c268a132586">_rt_tick_map</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span> </div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>    <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* curTick = (<a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>*)<a class="code hl_variable" href="classWtDtMgr.html#aaa1a0112973676e0a2832c268a132586">_rt_tick_map</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a66e6536c6db604c162a415620264d747">get</a>(code);</div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>    <span class="keywordflow">if</span> (curTick == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span> </div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>    curTick-&gt;<a class="code hl_function" href="classWTSObject.html#a3e41434e26313af90b03c8c8b395b049">retain</a>();</div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>    <span class="keywordflow">return</span> curTick;</div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>}</div>
+</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span> </div>
+<div class="foldopen" id="foldopen00382" data-start="{" data-end="}">
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#ad95c02b7148be0d26851d8cb9ce32002">  382</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="classWtDtMgr.html#ad95c02b7148be0d26851d8cb9ce32002">WtDtMgr::get_adjusting_factor</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t uDate)</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>{</div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a>)</div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a>-&gt;<a class="code hl_function" href="classIDataReader.html#a00af78e7b9dc47695af9ab2154bea387">getAdjFactorByDate</a>(stdCode, uDate);</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span> </div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>    <span class="keywordflow">return</span> 1.0;</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>}</div>
+</div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span> </div>
+<div class="foldopen" id="foldopen00395" data-start="{" data-end="}">
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#a0e856283b2047e222e5ab07b056dbfc9">  395</a></span>uint32_t <a class="code hl_function" href="classWtDtMgr.html#a0e856283b2047e222e5ab07b056dbfc9">WtDtMgr::get_adjusting_flag</a>()</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>{</div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>    <span class="keyword">static</span> uint32_t flag = UINT_MAX;</div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>    <span class="keywordflow">if</span>(flag == UINT_MAX)</div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>    {</div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a>)</div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>            flag = <a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a>-&gt;<a class="code hl_function" href="classIDataReader.html#aa65fa7afd19e78560aff43f49cc69370">getAdjustingFlag</a>();</div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>            flag = 0;</div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>    }</div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span> </div>
+<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>    <span class="keywordflow">return</span> flag;</div>
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>}</div>
+</div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span> </div>
+<div class="foldopen" id="foldopen00417" data-start="{" data-end="}">
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#a7621426df582e4c1a818623bb25b2d14">  417</a></span><a class="code hl_class" href="classWTSTickSlice.html">WTSTickSlice</a>* <a class="code hl_function" href="classWtDtMgr.html#a7621426df582e4c1a818623bb25b2d14">WtDtMgr::get_tick_slice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t count, uint64_t etime <span class="comment">/* = 0 */</span>)</div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>{</div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span> </div>
+<div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span><span class="comment">     *  By Wesley @ 2022.02.11</span></div>
+<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span><span class="comment">     *  这里要重新处理一下</span></div>
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span><span class="comment">     *  如果是不复权或者前复权，则直接读取底层的实时缓存即可</span></div>
+<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>    <span class="keyword">auto</span> len = strlen(stdCode);</div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>    <span class="keywordtype">bool</span> isHFQ = (stdCode[len - 1] == <a class="code hl_variable" href="CodeHelper_8hpp.html#a57589d4ee5ee7b3d186d8e3c6436bce7">SUFFIX_HFQ</a>);</div>
+<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span> </div>
+<div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span>    <span class="comment">//不是后复权，缓存直接用底层缓存</span></div>
+<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>    <span class="keywordflow">if</span>(!isHFQ)</div>
+<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a>-&gt;<a class="code hl_function" href="classIDataReader.html#a84dac45a85c9f65a5683a221ecfdba78">readTickSlice</a>(stdCode, count, etime);</div>
+<div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span> </div>
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>    <span class="comment">//先转成不带+的标准代码</span></div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>    std::string pureStdCode(stdCode, len - 1);</div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span> </div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#a5e316e5c62acea26b774af7b500ce1b8">_ticks_adjusted</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span>        <a class="code hl_variable" href="classWtDtMgr.html#a5e316e5c62acea26b774af7b500ce1b8">_ticks_adjusted</a> = <a class="code hl_function" href="classWTSHashMap.html#a92728481e09486cd7200b2f91c446bd3">DataCacheMap::create</a>();</div>
+<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span> </div>
+<div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span>    <span class="comment">//如果缓存没有，先重新生成一下缓存</span></div>
+<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="classWtDtMgr.html#a5e316e5c62acea26b774af7b500ce1b8">_ticks_adjusted</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#aef6a85184914bbf462de7ef37a98fd28">find</a>(pureStdCode);</div>
+<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="classWtDtMgr.html#a5e316e5c62acea26b774af7b500ce1b8">_ticks_adjusted</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a45357009b4f78b3c1d39da46d169d666">end</a>())</div>
+<div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span>    {</div>
+<div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span>        <span class="comment">//先读取全部tick数据</span></div>
+<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span>        <span class="keywordtype">double</span> factor = <a class="code hl_variable" href="classWtDtMgr.html#ac62627be16dca058feaac9f3020dc137">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#ab6464b8e3675226ef6b3c89f8bbe2e7a">get_exright_factor</a>(stdCode, <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>);</div>
+<div class="line"><a id="l00446" name="l00446"></a><span class="lineno">  446</span>        <a class="code hl_class" href="classWTSTickSlice.html">WTSTickSlice</a>* slice = <a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a>-&gt;<a class="code hl_function" href="classIDataReader.html#a84dac45a85c9f65a5683a221ecfdba78">readTickSlice</a>(pureStdCode.c_str(), 999999, etime);</div>
+<div class="line"><a id="l00447" name="l00447"></a><span class="lineno">  447</span>        std::vector&lt;WTSTickStruct&gt; ayTicks;</div>
+<div class="line"><a id="l00448" name="l00448"></a><span class="lineno">  448</span>        ayTicks.resize(slice-&gt;<a class="code hl_function" href="classWTSTickSlice.html#aefe68c93c7a904a1daec29f2f10f6ea1">size</a>());</div>
+<div class="line"><a id="l00449" name="l00449"></a><span class="lineno">  449</span>        std::size_t offset = 0;</div>
+<div class="line"><a id="l00450" name="l00450"></a><span class="lineno">  450</span>        <span class="keywordflow">for</span> (std::size_t bIdx = 0; bIdx &lt; slice-&gt;<a class="code hl_function" href="classWTSTickSlice.html#a926a036c5939d799ab46390c4542bbde">get_block_counts</a>(); bIdx++)</div>
+<div class="line"><a id="l00451" name="l00451"></a><span class="lineno">  451</span>        {</div>
+<div class="line"><a id="l00452" name="l00452"></a><span class="lineno">  452</span>            memcpy(&amp;ayTicks[0] + offset, slice-&gt;<a class="code hl_function" href="classWTSTickSlice.html#a521a6dc789392a657c5e12a560e16a4f">get_block_addr</a>(bIdx), slice-&gt;<a class="code hl_function" href="classWTSTickSlice.html#a80e65a26a9722f492cc5a525af2e12dc">get_block_size</a>(bIdx) * <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>));</div>
+<div class="line"><a id="l00453" name="l00453"></a><span class="lineno">  453</span>            offset += slice-&gt;<a class="code hl_function" href="classWTSTickSlice.html#a80e65a26a9722f492cc5a525af2e12dc">get_block_size</a>(bIdx);</div>
+<div class="line"><a id="l00454" name="l00454"></a><span class="lineno">  454</span>        }</div>
+<div class="line"><a id="l00455" name="l00455"></a><span class="lineno">  455</span> </div>
+<div class="line"><a id="l00456" name="l00456"></a><span class="lineno">  456</span>        <span class="comment">//缓存的数据做一个复权处理</span></div>
+<div class="line"><a id="l00457" name="l00457"></a><span class="lineno">  457</span>        <span class="keywordflow">for</span> (<a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>&amp; tick : ayTicks)</div>
+<div class="line"><a id="l00458" name="l00458"></a><span class="lineno">  458</span>        {</div>
+<div class="line"><a id="l00459" name="l00459"></a><span class="lineno">  459</span>            tick.price *= factor;</div>
+<div class="line"><a id="l00460" name="l00460"></a><span class="lineno">  460</span>            tick.open *= factor;</div>
+<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span>            tick.high *= factor;</div>
+<div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span>            tick.low *= factor;</div>
+<div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span>        }</div>
+<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span> </div>
+<div class="line"><a id="l00465" name="l00465"></a><span class="lineno">  465</span>        <span class="comment">//添加到缓存中</span></div>
+<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>        <a class="code hl_class" href="classWTSHisTickData.html">WTSHisTickData</a>* hisTick = <a class="code hl_function" href="classWTSHisTickData.html#ad3e64605aa9877081bc8d133bc72453b">WTSHisTickData::create</a>(stdCode, <span class="keyword">false</span>, factor);</div>
+<div class="line"><a id="l00467" name="l00467"></a><span class="lineno">  467</span>        hisTick-&gt;<a class="code hl_function" href="classWTSHisTickData.html#a20365050de927f885a98f4e7b991d347">getDataRef</a>().swap(ayTicks);</div>
+<div class="line"><a id="l00468" name="l00468"></a><span class="lineno">  468</span>        <a class="code hl_variable" href="classWtDtMgr.html#a5e316e5c62acea26b774af7b500ce1b8">_ticks_adjusted</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#ad38538f62db5b2f37a18533f8192a01d">add</a>(pureStdCode, hisTick, <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00469" name="l00469"></a><span class="lineno">  469</span>    }</div>
+<div class="line"><a id="l00470" name="l00470"></a><span class="lineno">  470</span> </div>
+<div class="line"><a id="l00471" name="l00471"></a><span class="lineno">  471</span>    <a class="code hl_class" href="classWTSHisTickData.html">WTSHisTickData</a>* hisTick = (<a class="code hl_class" href="classWTSHisTickData.html">WTSHisTickData</a>*)<a class="code hl_variable" href="classWtDtMgr.html#a5e316e5c62acea26b774af7b500ce1b8">_ticks_adjusted</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a66e6536c6db604c162a415620264d747">get</a>(pureStdCode);</div>
+<div class="line"><a id="l00472" name="l00472"></a><span class="lineno">  472</span>    uint32_t curDate, curTime, curSecs;</div>
+<div class="line"><a id="l00473" name="l00473"></a><span class="lineno">  473</span>    <span class="keywordflow">if</span> (etime == 0)</div>
+<div class="line"><a id="l00474" name="l00474"></a><span class="lineno">  474</span>    {</div>
+<div class="line"><a id="l00475" name="l00475"></a><span class="lineno">  475</span>        curDate = <a class="code hl_function" href="classWtDtMgr.html#a3cfb71c889bed5ec736cdb917d07d6ed">get_date</a>();</div>
+<div class="line"><a id="l00476" name="l00476"></a><span class="lineno">  476</span>        curTime = <a class="code hl_function" href="classWtDtMgr.html#a5b282002b22746c942895611c08b4f6c">get_min_time</a>();</div>
+<div class="line"><a id="l00477" name="l00477"></a><span class="lineno">  477</span>        curSecs = <a class="code hl_function" href="classWtDtMgr.html#affbcab1aed2602e8b66ae6fc1f8b4f74">get_secs</a>();</div>
+<div class="line"><a id="l00478" name="l00478"></a><span class="lineno">  478</span> </div>
+<div class="line"><a id="l00479" name="l00479"></a><span class="lineno">  479</span>        etime = (uint64_t)curDate * 1000000000 + curTime * 100000 + curSecs;</div>
+<div class="line"><a id="l00480" name="l00480"></a><span class="lineno">  480</span>    }</div>
+<div class="line"><a id="l00481" name="l00481"></a><span class="lineno">  481</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00482" name="l00482"></a><span class="lineno">  482</span>    {</div>
+<div class="line"><a id="l00483" name="l00483"></a><span class="lineno">  483</span>        <span class="comment">//20190807124533900</span></div>
+<div class="line"><a id="l00484" name="l00484"></a><span class="lineno">  484</span>        curDate = (uint32_t)(etime / 1000000000);</div>
+<div class="line"><a id="l00485" name="l00485"></a><span class="lineno">  485</span>        curTime = (uint32_t)(etime % 1000000000) / 100000;</div>
+<div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span>        curSecs = (uint32_t)(etime % 100000);</div>
+<div class="line"><a id="l00487" name="l00487"></a><span class="lineno">  487</span>    }</div>
+<div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span> </div>
+<div class="line"><a id="l00489" name="l00489"></a><span class="lineno">  489</span>    <span class="comment">//比较时间的对象</span></div>
+<div class="line"><a id="l00490" name="l00490"></a><span class="lineno">  490</span>    <a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a> eTick;</div>
+<div class="line"><a id="l00491" name="l00491"></a><span class="lineno">  491</span>    eTick.<a class="code hl_variable" href="structWTSTickStruct.html#afd2eb785cc5bfd6ca1f93375732a09ef">action_date</a> = curDate;</div>
+<div class="line"><a id="l00492" name="l00492"></a><span class="lineno">  492</span>    eTick.<a class="code hl_variable" href="structWTSTickStruct.html#a44aea5df719841d66b883c572ecd291d">action_time</a> = curTime * 100000 + curSecs;</div>
+<div class="line"><a id="l00493" name="l00493"></a><span class="lineno">  493</span> </div>
+<div class="line"><a id="l00494" name="l00494"></a><span class="lineno">  494</span>    <span class="keyword">auto</span>&amp; ticks = hisTick-&gt;<a class="code hl_function" href="classWTSHisTickData.html#a20365050de927f885a98f4e7b991d347">getDataRef</a>();</div>
+<div class="line"><a id="l00495" name="l00495"></a><span class="lineno">  495</span> </div>
+<div class="line"><a id="l00496" name="l00496"></a><span class="lineno">  496</span>    <a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>* pTick = std::lower_bound(&amp;ticks.front(), &amp;ticks.back(), eTick, [](<span class="keyword">const</span> <a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>&amp; a, <span class="keyword">const</span> <a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>&amp; b) {</div>
+<div class="line"><a id="l00497" name="l00497"></a><span class="lineno">  497</span>        if (a.action_date != b.action_date)</div>
+<div class="line"><a id="l00498" name="l00498"></a><span class="lineno">  498</span>            return a.action_date &lt; b.action_date;</div>
+<div class="line"><a id="l00499" name="l00499"></a><span class="lineno">  499</span>        else</div>
+<div class="line"><a id="l00500" name="l00500"></a><span class="lineno">  500</span>            return a.action_time &lt; b.action_time;</div>
+<div class="line"><a id="l00501" name="l00501"></a><span class="lineno">  501</span>    });</div>
+<div class="line"><a id="l00502" name="l00502"></a><span class="lineno">  502</span> </div>
+<div class="line"><a id="l00503" name="l00503"></a><span class="lineno">  503</span>    uint32_t eIdx = pTick - &amp;ticks.front();</div>
+<div class="line"><a id="l00504" name="l00504"></a><span class="lineno">  504</span> </div>
+<div class="line"><a id="l00505" name="l00505"></a><span class="lineno">  505</span>    <span class="comment">//如果光标定位的tick时间比目标时间打, 则全部回退一个</span></div>
+<div class="line"><a id="l00506" name="l00506"></a><span class="lineno">  506</span>    <span class="keywordflow">if</span> (pTick-&gt;<a class="code hl_variable" href="structWTSTickStruct.html#afd2eb785cc5bfd6ca1f93375732a09ef">action_date</a> &gt; eTick.<a class="code hl_variable" href="structWTSTickStruct.html#afd2eb785cc5bfd6ca1f93375732a09ef">action_date</a> || pTick-&gt;<a class="code hl_variable" href="structWTSTickStruct.html#a44aea5df719841d66b883c572ecd291d">action_time</a> &gt; eTick.<a class="code hl_variable" href="structWTSTickStruct.html#a44aea5df719841d66b883c572ecd291d">action_time</a>)</div>
+<div class="line"><a id="l00507" name="l00507"></a><span class="lineno">  507</span>    {</div>
+<div class="line"><a id="l00508" name="l00508"></a><span class="lineno">  508</span>        pTick--;</div>
+<div class="line"><a id="l00509" name="l00509"></a><span class="lineno">  509</span>        eIdx--;</div>
+<div class="line"><a id="l00510" name="l00510"></a><span class="lineno">  510</span>    }</div>
+<div class="line"><a id="l00511" name="l00511"></a><span class="lineno">  511</span> </div>
+<div class="line"><a id="l00512" name="l00512"></a><span class="lineno">  512</span>    uint32_t cnt = min(eIdx + 1, count);</div>
+<div class="line"><a id="l00513" name="l00513"></a><span class="lineno">  513</span>    uint32_t sIdx = eIdx + 1 - cnt;</div>
+<div class="line"><a id="l00514" name="l00514"></a><span class="lineno">  514</span>    <a class="code hl_class" href="classWTSTickSlice.html">WTSTickSlice</a>* slice = <a class="code hl_function" href="classWTSTickSlice.html#a370515e4189bc4bb6c69b17375704878">WTSTickSlice::create</a>(stdCode, &amp;ticks.front() + sIdx, cnt);</div>
+<div class="line"><a id="l00515" name="l00515"></a><span class="lineno">  515</span>    <span class="keywordflow">return</span> slice;</div>
+<div class="line"><a id="l00516" name="l00516"></a><span class="lineno">  516</span>}</div>
+</div>
+<div class="line"><a id="l00517" name="l00517"></a><span class="lineno">  517</span> </div>
+<div class="foldopen" id="foldopen00526" data-start="{" data-end="}">
+<div class="line"><a id="l00526" name="l00526"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#abfaaf3a4147a851ef033d0ddb130579e">  526</a></span><a class="code hl_class" href="classWTSOrdQueSlice.html">WTSOrdQueSlice</a>* <a class="code hl_function" href="classWtDtMgr.html#abfaaf3a4147a851ef033d0ddb130579e">WtDtMgr::get_order_queue_slice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t count, uint64_t etime <span class="comment">/* = 0 */</span>)</div>
+<div class="line"><a id="l00527" name="l00527"></a><span class="lineno">  527</span>{</div>
+<div class="line"><a id="l00528" name="l00528"></a><span class="lineno">  528</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00529" name="l00529"></a><span class="lineno">  529</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00530" name="l00530"></a><span class="lineno">  530</span> </div>
+<div class="line"><a id="l00531" name="l00531"></a><span class="lineno">  531</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a>-&gt;<a class="code hl_function" href="classIDataReader.html#a8ac04a7cfb9e1767040bd403a65cd0db">readOrdQueSlice</a>(stdCode, count, etime);</div>
+<div class="line"><a id="l00532" name="l00532"></a><span class="lineno">  532</span>}</div>
+</div>
+<div class="line"><a id="l00533" name="l00533"></a><span class="lineno">  533</span> </div>
+<div class="foldopen" id="foldopen00542" data-start="{" data-end="}">
+<div class="line"><a id="l00542" name="l00542"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#ad16ee5b66e8b4d52d7c218d242bdbae0">  542</a></span><a class="code hl_class" href="classWTSOrdDtlSlice.html">WTSOrdDtlSlice</a>* <a class="code hl_function" href="classWtDtMgr.html#ad16ee5b66e8b4d52d7c218d242bdbae0">WtDtMgr::get_order_detail_slice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t count, uint64_t etime <span class="comment">/* = 0 */</span>)</div>
+<div class="line"><a id="l00543" name="l00543"></a><span class="lineno">  543</span>{</div>
+<div class="line"><a id="l00544" name="l00544"></a><span class="lineno">  544</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00545" name="l00545"></a><span class="lineno">  545</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00546" name="l00546"></a><span class="lineno">  546</span> </div>
+<div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a>-&gt;<a class="code hl_function" href="classIDataReader.html#a41855a6d24b61fd143daf72a3626da80">readOrdDtlSlice</a>(stdCode, count, etime);</div>
+<div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span>}</div>
+</div>
+<div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span> </div>
+<div class="foldopen" id="foldopen00558" data-start="{" data-end="}">
+<div class="line"><a id="l00558" name="l00558"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#a37e9c31e3357b5c043f12ed5aa27981d">  558</a></span><a class="code hl_class" href="classWTSTransSlice.html">WTSTransSlice</a>* <a class="code hl_function" href="classWtDtMgr.html#a37e9c31e3357b5c043f12ed5aa27981d">WtDtMgr::get_transaction_slice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t count, uint64_t etime <span class="comment">/* = 0 */</span>)</div>
+<div class="line"><a id="l00559" name="l00559"></a><span class="lineno">  559</span>{</div>
+<div class="line"><a id="l00560" name="l00560"></a><span class="lineno">  560</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00561" name="l00561"></a><span class="lineno">  561</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00562" name="l00562"></a><span class="lineno">  562</span> </div>
+<div class="line"><a id="l00563" name="l00563"></a><span class="lineno">  563</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a>-&gt;<a class="code hl_function" href="classIDataReader.html#a65b238e2eded61c2d7fab35ae9a0f832">readTransSlice</a>(stdCode, count, etime);</div>
+<div class="line"><a id="l00564" name="l00564"></a><span class="lineno">  564</span>}</div>
+</div>
+<div class="line"><a id="l00565" name="l00565"></a><span class="lineno">  565</span> </div>
+<div class="foldopen" id="foldopen00577" data-start="{" data-end="}">
+<div class="line"><a id="l00577" name="l00577"></a><span class="lineno"><a class="line" href="classWtDtMgr.html#ab4cdcf2a7c5069b105a9a89902e04c54">  577</a></span><a class="code hl_class" href="classWTSKlineSlice.html">WTSKlineSlice</a>* <a class="code hl_function" href="classWtDtMgr.html#ab4cdcf2a7c5069b105a9a89902e04c54">WtDtMgr::get_kline_slice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_typedef" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, uint32_t times, uint32_t count, uint64_t etime <span class="comment">/* = 0 */</span>)</div>
+<div class="line"><a id="l00578" name="l00578"></a><span class="lineno">  578</span>{</div>
+<div class="line"><a id="l00579" name="l00579"></a><span class="lineno">  579</span>    <span class="comment">// 如果数据读取器不存在，返回NULL</span></div>
+<div class="line"><a id="l00580" name="l00580"></a><span class="lineno">  580</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00581" name="l00581"></a><span class="lineno">  581</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00582" name="l00582"></a><span class="lineno">  582</span> </div>
+<div class="line"><a id="l00583" name="l00583"></a><span class="lineno">  583</span>    <span class="comment">// 使用线程本地存储创建缓存键值</span></div>
+<div class="line"><a id="l00584" name="l00584"></a><span class="lineno">  584</span>    <span class="keyword">thread_local</span> <span class="keyword">static</span> <span class="keywordtype">char</span> key[64] = { 0 };</div>
+<div class="line"><a id="l00585" name="l00585"></a><span class="lineno">  585</span>    <a class="code hl_function" href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a>(key, <span class="stringliteral">&quot;{}-{}&quot;</span>, stdCode, (uint32_t)period);</div>
+<div class="line"><a id="l00586" name="l00586"></a><span class="lineno">  586</span> </div>
+<div class="line"><a id="l00587" name="l00587"></a><span class="lineno">  587</span>    <span class="comment">// 如果不强制缓存，并且重采样倍数为1，则直接读取slice返回</span></div>
+<div class="line"><a id="l00588" name="l00588"></a><span class="lineno">  588</span>    <span class="keywordflow">if</span> (times == 1 &amp;&amp; !<a class="code hl_variable" href="classWtDtMgr.html#aef1f5ebec303fe8ba9200709d9e6e93c">_force_cache</a>)</div>
+<div class="line"><a id="l00589" name="l00589"></a><span class="lineno">  589</span>    {</div>
+<div class="line"><a id="l00590" name="l00590"></a><span class="lineno">  590</span>        <span class="comment">// 将当前合约周期添加到订阅的基础周期集合中</span></div>
+<div class="line"><a id="l00591" name="l00591"></a><span class="lineno">  591</span>        <a class="code hl_variable" href="classWtDtMgr.html#a6aeae6e632cdae36f9ffa5a2c965d746">_subed_basic_bars</a>.insert(key);</div>
+<div class="line"><a id="l00592" name="l00592"></a><span class="lineno">  592</span> </div>
+<div class="line"><a id="l00593" name="l00593"></a><span class="lineno">  593</span>        <span class="comment">// 直接调用数据读取器获取K线切片</span></div>
+<div class="line"><a id="l00594" name="l00594"></a><span class="lineno">  594</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a>-&gt;<a class="code hl_function" href="classIDataReader.html#a920676cb7d0bbd47e3e64f7155219503">readKlineSlice</a>(stdCode, period, count, etime);</div>
+<div class="line"><a id="l00595" name="l00595"></a><span class="lineno">  595</span>    }</div>
+<div class="line"><a id="l00596" name="l00596"></a><span class="lineno">  596</span> </div>
+<div class="line"><a id="l00597" name="l00597"></a><span class="lineno">  597</span>    <span class="comment">// 只有非基础周期的会进到下面的步骤</span></div>
+<div class="line"><a id="l00598" name="l00598"></a><span class="lineno">  598</span>    <span class="comment">// 获取合约的交易时段信息</span></div>
+<div class="line"><a id="l00599" name="l00599"></a><span class="lineno">  599</span>    <a class="code hl_class" href="classWTSSessionInfo.html">WTSSessionInfo</a>* sInfo = <a class="code hl_variable" href="classWtDtMgr.html#ac62627be16dca058feaac9f3020dc137">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a6c51ead2f0c35c0ae075bc55e91ea828">get_session_info</a>(stdCode, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00600" name="l00600"></a><span class="lineno">  600</span> </div>
+<div class="line"><a id="l00601" name="l00601"></a><span class="lineno">  601</span>    <span class="comment">// 如果K线缓存不存在，创建一个新的</span></div>
+<div class="line"><a id="l00602" name="l00602"></a><span class="lineno">  602</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtDtMgr.html#ae5ff65e58b85df5bb89bb013b412b087">_bars_cache</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00603" name="l00603"></a><span class="lineno">  603</span>        <a class="code hl_variable" href="classWtDtMgr.html#ae5ff65e58b85df5bb89bb013b412b087">_bars_cache</a> = <a class="code hl_function" href="classWTSHashMap.html#a92728481e09486cd7200b2f91c446bd3">DataCacheMap::create</a>();</div>
+<div class="line"><a id="l00604" name="l00604"></a><span class="lineno">  604</span> </div>
+<div class="line"><a id="l00605" name="l00605"></a><span class="lineno">  605</span>    <span class="comment">// 生成缓存键，包含合约代码、周期和倍数</span></div>
+<div class="line"><a id="l00606" name="l00606"></a><span class="lineno">  606</span>    <a class="code hl_function" href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a>(key, <span class="stringliteral">&quot;{}-{}-{}&quot;</span>, stdCode, (uint32_t)period, times);</div>
+<div class="line"><a id="l00607" name="l00607"></a><span class="lineno">  607</span> </div>
+<div class="line"><a id="l00608" name="l00608"></a><span class="lineno">  608</span>    <span class="comment">// 从缓存中获取K线数据</span></div>
+<div class="line"><a id="l00609" name="l00609"></a><span class="lineno">  609</span>    <a class="code hl_class" href="classWTSKlineData.html">WTSKlineData</a>* kData = (<a class="code hl_class" href="classWTSKlineData.html">WTSKlineData</a>*)<a class="code hl_variable" href="classWtDtMgr.html#ae5ff65e58b85df5bb89bb013b412b087">_bars_cache</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#a66e6536c6db604c162a415620264d747">get</a>(key);</div>
+<div class="line"><a id="l00610" name="l00610"></a><span class="lineno">  610</span>    <span class="comment">// 如果缓存中没有数据或数据不足，需要重新读取</span></div>
+<div class="line"><a id="l00611" name="l00611"></a><span class="lineno">  611</span>    <span class="keywordflow">if</span> (kData == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a> || kData-&gt;<a class="code hl_function" href="classWTSKlineData.html#a43fb5ca9e10d81ed94a21baede44b2d9">size</a>() &lt; count)</div>
+<div class="line"><a id="l00612" name="l00612"></a><span class="lineno">  612</span>    {</div>
+<div class="line"><a id="l00613" name="l00613"></a><span class="lineno">  613</span>        <span class="comment">// 计算需要读取的原始K线数量</span></div>
+<div class="line"><a id="l00614" name="l00614"></a><span class="lineno">  614</span>        uint32_t realCount = times==1 ? count: (count*times + times);</div>
+<div class="line"><a id="l00615" name="l00615"></a><span class="lineno">  615</span>        <span class="comment">// 读取原始K线数据</span></div>
+<div class="line"><a id="l00616" name="l00616"></a><span class="lineno">  616</span>        <a class="code hl_class" href="classWTSKlineSlice.html">WTSKlineSlice</a>* rawData = <a class="code hl_variable" href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">_reader</a>-&gt;<a class="code hl_function" href="classIDataReader.html#a920676cb7d0bbd47e3e64f7155219503">readKlineSlice</a>(stdCode, period, realCount, etime);</div>
+<div class="line"><a id="l00617" name="l00617"></a><span class="lineno">  617</span>        <span class="keywordflow">if</span> (rawData != <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a> &amp;&amp; rawData-&gt;<a class="code hl_function" href="classWTSKlineSlice.html#a86b5e048d687483ac6dc91014e503d09">size</a>() &gt; 0)</div>
+<div class="line"><a id="l00618" name="l00618"></a><span class="lineno">  618</span>        {</div>
+<div class="line"><a id="l00619" name="l00619"></a><span class="lineno">  619</span>            <span class="keywordflow">if</span>(times != 1) <span class="comment">// 如果是多周期，需要进行重采样</span></div>
+<div class="line"><a id="l00620" name="l00620"></a><span class="lineno">  620</span>            {</div>
+<div class="line"><a id="l00621" name="l00621"></a><span class="lineno">  621</span>                <span class="comment">// 使用数据工厂提取多周期K线数据</span></div>
+<div class="line"><a id="l00622" name="l00622"></a><span class="lineno">  622</span>                kData = <a class="code hl_variable" href="WtDtMgr_8cpp.html#a226378f5907b16b0da57da97372f0af7">g_dataFact</a>.<a class="code hl_function" href="classWTSDataFactory.html#acf283ddb33effa4d3338d38ff76dc1a4">extractKlineData</a>(rawData, period, times, sInfo, <span class="keyword">true</span>, <a class="code hl_variable" href="classWtDtMgr.html#a132d8aa2a32936471ca1304c4c5693e9">_align_by_section</a>);</div>
+<div class="line"><a id="l00623" name="l00623"></a><span class="lineno">  623</span>            }</div>
+<div class="line"><a id="l00624" name="l00624"></a><span class="lineno">  624</span>            <span class="keywordflow">else</span> <span class="comment">// 如果是单周期，直接复制数据</span></div>
+<div class="line"><a id="l00625" name="l00625"></a><span class="lineno">  625</span>            {</div>
+<div class="line"><a id="l00626" name="l00626"></a><span class="lineno">  626</span>                <span class="comment">// 创建K线数据对象</span></div>
+<div class="line"><a id="l00627" name="l00627"></a><span class="lineno">  627</span>                kData = <a class="code hl_function" href="classWTSKlineData.html#a1ff97a9a62dd22a6f7f2608e1b719bbf">WTSKlineData::create</a>(stdCode, rawData-&gt;<a class="code hl_function" href="classWTSKlineSlice.html#a86b5e048d687483ac6dc91014e503d09">size</a>());</div>
+<div class="line"><a id="l00628" name="l00628"></a><span class="lineno">  628</span>                kData-&gt;<a class="code hl_function" href="classWTSKlineData.html#a669e83176a30e91885eaf71cd672fdb2">setPeriod</a>(period, 1);</div>
+<div class="line"><a id="l00629" name="l00629"></a><span class="lineno">  629</span>                kData-&gt;<a class="code hl_function" href="classWTSKlineData.html#a96e8a3872278372d0da974ae7ac96705">setClosed</a>(<span class="keyword">true</span>);</div>
+<div class="line"><a id="l00630" name="l00630"></a><span class="lineno">  630</span>                <span class="comment">// 复制原始K线数据</span></div>
+<div class="line"><a id="l00631" name="l00631"></a><span class="lineno">  631</span>                <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* pBar = kData-&gt;<a class="code hl_function" href="classWTSKlineData.html#a5231e60be31ff49788b7ee311cbecaf4">getDataRef</a>().data();</div>
+<div class="line"><a id="l00632" name="l00632"></a><span class="lineno">  632</span>                <span class="keywordflow">for</span>(uint32_t bIdx = 0; bIdx &lt; rawData-&gt;<a class="code hl_function" href="classWTSKlineSlice.html#abeabf480ff8ddfd412f20a9cf118c86c">get_block_counts</a>(); bIdx++ )</div>
+<div class="line"><a id="l00633" name="l00633"></a><span class="lineno">  633</span>                {</div>
+<div class="line"><a id="l00634" name="l00634"></a><span class="lineno">  634</span>                    memcpy(pBar, rawData-&gt;<a class="code hl_function" href="classWTSKlineSlice.html#a6259e239f18e611007ef176259d836d9">get_block_addr</a>(bIdx), <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>)*rawData-&gt;<a class="code hl_function" href="classWTSKlineSlice.html#a763673e4cc73d6b28519c795411d098e">get_block_size</a>(bIdx));</div>
+<div class="line"><a id="l00635" name="l00635"></a><span class="lineno">  635</span>                    pBar += rawData-&gt;<a class="code hl_function" href="classWTSKlineSlice.html#a763673e4cc73d6b28519c795411d098e">get_block_size</a>(bIdx);</div>
+<div class="line"><a id="l00636" name="l00636"></a><span class="lineno">  636</span>                }</div>
+<div class="line"><a id="l00637" name="l00637"></a><span class="lineno">  637</span>            }</div>
+<div class="line"><a id="l00638" name="l00638"></a><span class="lineno">  638</span>            </div>
+<div class="line"><a id="l00639" name="l00639"></a><span class="lineno">  639</span>            <span class="comment">// 释放原始K线数据</span></div>
+<div class="line"><a id="l00640" name="l00640"></a><span class="lineno">  640</span>            rawData-&gt;<a class="code hl_function" href="classWTSObject.html#a57b87f47529974f735f4989eaf2dd55f">release</a>();</div>
+<div class="line"><a id="l00641" name="l00641"></a><span class="lineno">  641</span>        }</div>
+<div class="line"><a id="l00642" name="l00642"></a><span class="lineno">  642</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00643" name="l00643"></a><span class="lineno">  643</span>        {</div>
+<div class="line"><a id="l00644" name="l00644"></a><span class="lineno">  644</span>            <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00645" name="l00645"></a><span class="lineno">  645</span>        }</div>
+<div class="line"><a id="l00646" name="l00646"></a><span class="lineno">  646</span> </div>
+<div class="line"><a id="l00647" name="l00647"></a><span class="lineno">  647</span>        <span class="comment">// 如果K线数据创建成功，添加到缓存中</span></div>
+<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span>        <span class="keywordflow">if</span> (kData)</div>
+<div class="line"><a id="l00649" name="l00649"></a><span class="lineno">  649</span>        {</div>
+<div class="line"><a id="l00650" name="l00650"></a><span class="lineno">  650</span>            <a class="code hl_variable" href="classWtDtMgr.html#ae5ff65e58b85df5bb89bb013b412b087">_bars_cache</a>-&gt;<a class="code hl_function" href="classWTSHashMap.html#ad38538f62db5b2f37a18533f8192a01d">add</a>(key, kData, <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00651" name="l00651"></a><span class="lineno">  651</span>            <span class="comment">// 如果是多周期，输出重采样日志</span></div>
+<div class="line"><a id="l00652" name="l00652"></a><span class="lineno">  652</span>            <span class="keywordflow">if</span>(times != 1)</div>
+<div class="line"><a id="l00653" name="l00653"></a><span class="lineno">  653</span>                <a class="code hl_function" href="classWTSLogger.html#adcbb6a78b99a8c514a4b55677e5a1a28">WTSLogger::debug</a>(<span class="stringliteral">&quot;{} bars of {} resampled every {} bars: {} -&gt; {}&quot;</span>, </div>
+<div class="line"><a id="l00654" name="l00654"></a><span class="lineno">  654</span>                    <a class="code hl_variable" href="WTSTypes_8h.html#abc8e191df3b55718924e5c8ab3984fb4">PERIOD_NAME</a>[period], stdCode, times, realCount, kData-&gt;<a class="code hl_function" href="classWTSKlineData.html#a43fb5ca9e10d81ed94a21baede44b2d9">size</a>());</div>
+<div class="line"><a id="l00655" name="l00655"></a><span class="lineno">  655</span>        }</div>
+<div class="line"><a id="l00656" name="l00656"></a><span class="lineno">  656</span>    }</div>
+<div class="line"><a id="l00657" name="l00657"></a><span class="lineno">  657</span> </div>
+<div class="line"><a id="l00658" name="l00658"></a><span class="lineno">  658</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00659" name="l00659"></a><span class="lineno">  659</span><span class="comment">     *  By Wesley @ 2023.03.03</span></div>
+<div class="line"><a id="l00660" name="l00660"></a><span class="lineno">  660</span><span class="comment">     *  当多周期K线跨越小节时，如果重启了组合</span></div>
+<div class="line"><a id="l00661" name="l00661"></a><span class="lineno">  661</span><span class="comment">     *  这个时候就会在启动的时候拉到一条未闭合的K线</span></div>
+<div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span><span class="comment">     *  但是未闭合的K线等一下还会重新推一遍</span></div>
+<div class="line"><a id="l00663" name="l00663"></a><span class="lineno">  663</span><span class="comment">     *  所以这里必须要做一个修正</span></div>
+<div class="line"><a id="l00664" name="l00664"></a><span class="lineno">  664</span><span class="comment">     *  只处理已经闭合的K线</span></div>
+<div class="line"><a id="l00665" name="l00665"></a><span class="lineno">  665</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00666" name="l00666"></a><span class="lineno">  666</span>    <span class="comment">// 计算已闭合的K线数量</span></div>
+<div class="line"><a id="l00667" name="l00667"></a><span class="lineno">  667</span>    uint32_t closedSz = kData-&gt;<a class="code hl_function" href="classWTSKlineData.html#a43fb5ca9e10d81ed94a21baede44b2d9">size</a>();</div>
+<div class="line"><a id="l00668" name="l00668"></a><span class="lineno">  668</span>    <span class="keywordflow">if</span> (closedSz &gt; 0 &amp;&amp; !kData-&gt;<a class="code hl_function" href="classWTSKlineData.html#a74b21efb7193ebf027bbf4b831413a3d">isClosed</a>())</div>
+<div class="line"><a id="l00669" name="l00669"></a><span class="lineno">  669</span>        closedSz--; <span class="comment">// 如果最后一条未闭合，则不计入</span></div>
+<div class="line"><a id="l00670" name="l00670"></a><span class="lineno">  670</span> </div>
+<div class="line"><a id="l00671" name="l00671"></a><span class="lineno">  671</span>    <span class="comment">// 计算起始索引和返回的K线数量</span></div>
+<div class="line"><a id="l00672" name="l00672"></a><span class="lineno">  672</span>    int32_t sIdx = 0;</div>
+<div class="line"><a id="l00673" name="l00673"></a><span class="lineno">  673</span>    uint32_t rtCnt = min(closedSz, count); <span class="comment">// 取请求数量和可用数量的最小值</span></div>
+<div class="line"><a id="l00674" name="l00674"></a><span class="lineno">  674</span>    sIdx = closedSz - rtCnt; <span class="comment">// 计算起始索引</span></div>
+<div class="line"><a id="l00675" name="l00675"></a><span class="lineno">  675</span>    <span class="comment">// 获取起始位置的K线指针</span></div>
+<div class="line"><a id="l00676" name="l00676"></a><span class="lineno">  676</span>    <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* rtHead = kData-&gt;<a class="code hl_function" href="classWTSKlineData.html#a9b0b5ce2c4aef6633a94ec170180bbdb">at</a>(sIdx);</div>
+<div class="line"><a id="l00677" name="l00677"></a><span class="lineno">  677</span>    <span class="comment">// 创建K线切片并返回</span></div>
+<div class="line"><a id="l00678" name="l00678"></a><span class="lineno">  678</span>    <a class="code hl_class" href="classWTSKlineSlice.html">WTSKlineSlice</a>* slice = <a class="code hl_function" href="classWTSKlineSlice.html#a58a95fc9dcc6c1693d10adba8b25beb1">WTSKlineSlice::create</a>(stdCode, period, times, rtHead, rtCnt);</div>
+<div class="line"><a id="l00679" name="l00679"></a><span class="lineno">  679</span>    <span class="keywordflow">return</span> slice;</div>
+<div class="line"><a id="l00680" name="l00680"></a><span class="lineno">  680</span>}</div>
+</div>
+<div class="ttc" id="aCodeHelper_8hpp_html_a57589d4ee5ee7b3d186d8e3c6436bce7"><div class="ttname"><a href="CodeHelper_8hpp.html#a57589d4ee5ee7b3d186d8e3c6436bce7">SUFFIX_HFQ</a></div><div class="ttdeci">static const char SUFFIX_HFQ</div><div class="ttdef"><b>Definition</b> <a href="CodeHelper_8hpp_source.html#l00031">CodeHelper.hpp:31</a></div></div>
+<div class="ttc" id="aDLLHelper_8hpp_html_a40972742af38c16d3ab2f521abf0ca8a"><div class="ttname"><a href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a></div><div class="ttdeci">void * DllHandle</div><div class="ttdoc">动态库句柄类型（非Windows平台）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00032">DLLHelper.hpp:32</a></div></div>
+<div class="ttc" id="aIDataReader_8h_html_aa3b1986abaa355b0e287a96305d59086"><div class="ttname"><a href="IDataReader_8h.html#aa3b1986abaa355b0e287a96305d59086">FuncCreateDataReader</a></div><div class="ttdeci">IDataReader *(* FuncCreateDataReader)()</div><div class="ttdoc">创建数据读取器对象的函数指针类型</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00300">IDataReader.h:300</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_a27f5d8bd7208a5fc1d044c6f5961904c"><div class="ttname"><a href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a></div><div class="ttdeci">enum tagKlinePeriod WTSKlinePeriod</div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aa7b93f4aa2259e69e48f27448c247dc8"><div class="ttname"><a href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a></div><div class="ttdeci">enum tagLogLevel WTSLogLevel</div></div>
+<div class="ttc" id="aWTSTypes_8h_html_abc8e191df3b55718924e5c8ab3984fb4"><div class="ttname"><a href="WTSTypes_8h.html#abc8e191df3b55718924e5c8ab3984fb4">PERIOD_NAME</a></div><div class="ttdeci">static const char * PERIOD_NAME[]</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00112">WTSTypes.h:112</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_acac96eb977d20b3a6186f0ccede8a9d8a3b64a9f21f4bd5432a8b3f8424c4410e"><div class="ttname"><a href="WTSTypes_8h.html#acac96eb977d20b3a6186f0ccede8a9d8a3b64a9f21f4bd5432a8b3f8424c4410e">KP_Minute1</a></div><div class="ttdeci">@ KP_Minute1</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00105">WTSTypes.h:105</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_acac96eb977d20b3a6186f0ccede8a9d8adcd66f71c090964efdc8474bca5b9209"><div class="ttname"><a href="WTSTypes_8h.html#acac96eb977d20b3a6186f0ccede8a9d8adcd66f71c090964efdc8474bca5b9209">KP_Minute5</a></div><div class="ttdeci">@ KP_Minute5</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00106">WTSTypes.h:106</a></div></div>
+<div class="ttc" id="aWtDtMgr_8cpp_html_a226378f5907b16b0da57da97372f0af7"><div class="ttname"><a href="WtDtMgr_8cpp.html#a226378f5907b16b0da57da97372f0af7">g_dataFact</a></div><div class="ttdeci">WTSDataFactory g_dataFact</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00028">WtDtMgr.cpp:28</a></div></div>
+<div class="ttc" id="aWtDtMgr_8h_html"><div class="ttname"><a href="WtDtMgr_8h.html">WtDtMgr.h</a></div></div>
+<div class="ttc" id="aWtEngine_8h_html"><div class="ttname"><a href="WtEngine_8h.html">WtEngine.h</a></div><div class="ttdoc">WonderTrader核心交易引擎类头文件。</div></div>
+<div class="ttc" id="aWtUftCore_2WtHelper_8h_html"><div class="ttname"><a href="WtUftCore_2WtHelper_8h.html">WtHelper.h</a></div><div class="ttdoc">WonderTrader辅助工具类头文件</div></div>
+<div class="ttc" id="aclassDLLHelper_html_ac5d55450ea114206242d9ccbfd65ac82"><div class="ttname"><a href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a></div><div class="ttdeci">static DllHandle load_library(const char *filename)</div><div class="ttdoc">加载动态库</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00058">DLLHelper.hpp:58</a></div></div>
+<div class="ttc" id="aclassDLLHelper_html_adbde89a530ae734c57506bf9639ccc65"><div class="ttname"><a href="classDLLHelper.html#adbde89a530ae734c57506bf9639ccc65">DLLHelper::free_library</a></div><div class="ttdeci">static void free_library(DllHandle handle)</div><div class="ttdoc">释放动态库</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00085">DLLHelper.hpp:85</a></div></div>
+<div class="ttc" id="aclassDLLHelper_html_ae01c3a299dd418d0298d29fa5f5f9b2c"><div class="ttname"><a href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a></div><div class="ttdeci">static ProcHandle get_symbol(DllHandle handle, const char *name)</div><div class="ttdoc">获取动态库中的符号（函数或变量）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00107">DLLHelper.hpp:107</a></div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html"><div class="ttname"><a href="classIBaseDataMgr.html">IBaseDataMgr</a></div><div class="ttdoc">基础数据管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IBaseDataMgr_8h_source.html#l00075">IBaseDataMgr.h:76</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_a00af78e7b9dc47695af9ab2154bea387"><div class="ttname"><a href="classIDataReader.html#a00af78e7b9dc47695af9ab2154bea387">IDataReader::getAdjFactorByDate</a></div><div class="ttdeci">virtual double getAdjFactorByDate(const char *stdCode, uint32_t date=0)</div><div class="ttdoc">获取个股指定日期的复权因子</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00281">IDataReader.h:281</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_a40b6b830392806696c9f89799e396ab0"><div class="ttname"><a href="classIDataReader.html#a40b6b830392806696c9f89799e396ab0">IDataReader::init</a></div><div class="ttdeci">virtual void init(WTSVariant *cfg, IDataReaderSink *sink, IHisDataLoader *loader=NULL)</div><div class="ttdoc">初始化数据读取模块</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00206">IDataReader.h:206</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_a41855a6d24b61fd143daf72a3626da80"><div class="ttname"><a href="classIDataReader.html#a41855a6d24b61fd143daf72a3626da80">IDataReader::readOrdDtlSlice</a></div><div class="ttdeci">virtual WTSOrdDtlSlice * readOrdDtlSlice(const char *stdCode, uint32_t count, uint64_t etime=0)</div><div class="ttdoc">读取逐笔委托数据切片</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00238">IDataReader.h:238</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_a65b238e2eded61c2d7fab35ae9a0f832"><div class="ttname"><a href="classIDataReader.html#a65b238e2eded61c2d7fab35ae9a0f832">IDataReader::readTransSlice</a></div><div class="ttdeci">virtual WTSTransSlice * readTransSlice(const char *stdCode, uint32_t count, uint64_t etime=0)</div><div class="ttdoc">读取逐笔成交数据切片</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00259">IDataReader.h:259</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_a84dac45a85c9f65a5683a221ecfdba78"><div class="ttname"><a href="classIDataReader.html#a84dac45a85c9f65a5683a221ecfdba78">IDataReader::readTickSlice</a></div><div class="ttdeci">virtual WTSTickSlice * readTickSlice(const char *stdCode, uint32_t count, uint64_t etime=0)=0</div><div class="ttdoc">读取tick数据切片</div></div>
+<div class="ttc" id="aclassIDataReader_html_a8ac04a7cfb9e1767040bd403a65cd0db"><div class="ttname"><a href="classIDataReader.html#a8ac04a7cfb9e1767040bd403a65cd0db">IDataReader::readOrdQueSlice</a></div><div class="ttdeci">virtual WTSOrdQueSlice * readOrdQueSlice(const char *stdCode, uint32_t count, uint64_t etime=0)</div><div class="ttdoc">读取委托队列数据切片</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00248">IDataReader.h:248</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_a920676cb7d0bbd47e3e64f7155219503"><div class="ttname"><a href="classIDataReader.html#a920676cb7d0bbd47e3e64f7155219503">IDataReader::readKlineSlice</a></div><div class="ttdeci">virtual WTSKlineSlice * readKlineSlice(const char *stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime=0)=0</div><div class="ttdoc">读取K线序列，并返回一个存储容器类</div></div>
+<div class="ttc" id="aclassIDataReader_html_aa65fa7afd19e78560aff43f49cc69370"><div class="ttname"><a href="classIDataReader.html#aa65fa7afd19e78560aff43f49cc69370">IDataReader::getAdjustingFlag</a></div><div class="ttdeci">virtual uint32_t getAdjustingFlag()</div><div class="ttdoc">获取复权标记</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00289">IDataReader.h:289</a></div></div>
+<div class="ttc" id="aclassIHotMgr_html"><div class="ttname"><a href="classIHotMgr.html">IHotMgr</a></div><div class="ttdoc">主力合约管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IHotMgr_8h_source.html#l00066">IHotMgr.h:67</a></div></div>
+<div class="ttc" id="aclassWTSDataFactory_html"><div class="ttname"><a href="classWTSDataFactory.html">WTSDataFactory</a></div><div class="ttdoc">数据工厂类，负责K线数据的生成、更新和合并</div><div class="ttdef"><b>Definition</b> <a href="WTSDataFactory_8h_source.html#l00028">WTSDataFactory.h:29</a></div></div>
+<div class="ttc" id="aclassWTSDataFactory_html_a091516188f5425c7e122de89236b731a"><div class="ttname"><a href="classWTSDataFactory.html#a091516188f5425c7e122de89236b731a">WTSDataFactory::updateKlineData</a></div><div class="ttdeci">virtual WTSBarStruct * updateKlineData(WTSKlineData *klineData, WTSTickData *tick, WTSSessionInfo *sInfo, bool bAlignSec=false)</div><div class="ttdoc">利用tick数据更新K线</div><div class="ttdef"><b>Definition</b> <a href="WTSDataFactory_8cpp_source.html#l00033">WTSDataFactory.cpp:33</a></div></div>
+<div class="ttc" id="aclassWTSDataFactory_html_acf283ddb33effa4d3338d38ff76dc1a4"><div class="ttname"><a href="classWTSDataFactory.html#acf283ddb33effa4d3338d38ff76dc1a4">WTSDataFactory::extractKlineData</a></div><div class="ttdeci">virtual WTSKlineData * extractKlineData(WTSKlineSlice *baseKline, WTSKlinePeriod period, uint32_t times, WTSSessionInfo *sInfo, bool bIncludeOpen=true, bool bAlignSec=false)</div><div class="ttdoc">从基础周期K线数据提取非基础周期的K线数据</div><div class="ttdef"><b>Definition</b> <a href="WTSDataFactory_8cpp_source.html#l00719">WTSDataFactory.cpp:719</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html_a45357009b4f78b3c1d39da46d169d666"><div class="ttname"><a href="classWTSHashMap.html#a45357009b4f78b3c1d39da46d169d666">WTSHashMap::end</a></div><div class="ttdeci">ConstIterator end() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00703">WTSCollection.hpp:703</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html_a5a3e012444d1fa65ce0057d8263fa808"><div class="ttname"><a href="classWTSHashMap.html#a5a3e012444d1fa65ce0057d8263fa808">WTSHashMap::size</a></div><div class="ttdeci">uint32_t size() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00622">WTSCollection.hpp:622</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html_a61053c683d4af266c2b28da611bf455a"><div class="ttname"><a href="classWTSHashMap.html#a61053c683d4af266c2b28da611bf455a">WTSHashMap::release</a></div><div class="ttdeci">virtual void release()</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00731">WTSCollection.hpp:731</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html_a66e6536c6db604c162a415620264d747"><div class="ttname"><a href="classWTSHashMap.html#a66e6536c6db604c162a415620264d747">WTSHashMap::get</a></div><div class="ttdeci">WTSObject * get(const T &amp;_key) noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00629">WTSCollection.hpp:629</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html_a92728481e09486cd7200b2f91c446bd3"><div class="ttname"><a href="classWTSHashMap.html#a92728481e09486cd7200b2f91c446bd3">WTSHashMap::create</a></div><div class="ttdeci">static WTSHashMap&lt; T, Hash &gt; * create() noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00613">WTSCollection.hpp:613</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html_aba7f0195840c5bdf0314a10f4b961050"><div class="ttname"><a href="classWTSHashMap.html#aba7f0195840c5bdf0314a10f4b961050">WTSHashMap::begin</a></div><div class="ttdeci">ConstIterator begin() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00695">WTSCollection.hpp:695</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html_ad38538f62db5b2f37a18533f8192a01d"><div class="ttname"><a href="classWTSHashMap.html#ad38538f62db5b2f37a18533f8192a01d">WTSHashMap::add</a></div><div class="ttdeci">void add(const T &amp;_key, WTSObject *obj, bool bAutoRetain=true) noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00659">WTSCollection.hpp:659</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html_aef6a85184914bbf462de7ef37a98fd28"><div class="ttname"><a href="classWTSHashMap.html#aef6a85184914bbf462de7ef37a98fd28">WTSHashMap::find</a></div><div class="ttdeci">ConstIterator find(const T &amp;key) const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00708">WTSCollection.hpp:708</a></div></div>
+<div class="ttc" id="aclassWTSHisTickData_html"><div class="ttname"><a href="classWTSHisTickData.html">WTSHisTickData</a></div><div class="ttdoc">历史Tick数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01954">WTSDataDef.hpp:1955</a></div></div>
+<div class="ttc" id="aclassWTSHisTickData_html_a20365050de927f885a98f4e7b991d347"><div class="ttname"><a href="classWTSHisTickData.html#a20365050de927f885a98f4e7b991d347">WTSHisTickData::getDataRef</a></div><div class="ttdeci">std::vector&lt; WTSTickStruct &gt; &amp; getDataRef()</div><div class="ttdoc">获取Tick数据容器的引用</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02089">WTSDataDef.hpp:2089</a></div></div>
+<div class="ttc" id="aclassWTSHisTickData_html_a826a25a2d3e5370b43b0d261ca51ce26"><div class="ttname"><a href="classWTSHisTickData.html#a826a25a2d3e5370b43b0d261ca51ce26">WTSHisTickData::appendTick</a></div><div class="ttdeci">void appendTick(const WTSTickStruct &amp;ts)</div><div class="ttdoc">追加一条Tick数据</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02108">WTSDataDef.hpp:2108</a></div></div>
+<div class="ttc" id="aclassWTSHisTickData_html_aa3b8c04eebd78124cf13d24b31fc09f9"><div class="ttname"><a href="classWTSHisTickData.html#aa3b8c04eebd78124cf13d24b31fc09f9">WTSHisTickData::isValidOnly</a></div><div class="ttdeci">bool isValidOnly() const</div><div class="ttdoc">判断是否仅包含有效数据</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02098">WTSDataDef.hpp:2098</a></div></div>
+<div class="ttc" id="aclassWTSHisTickData_html_ad3e64605aa9877081bc8d133bc72453b"><div class="ttname"><a href="classWTSHisTickData.html#ad3e64605aa9877081bc8d133bc72453b">WTSHisTickData::create</a></div><div class="ttdeci">static WTSHisTickData * create(const char *stdCode, unsigned int nSize=0, bool bValidOnly=false, double factor=1.0)</div><div class="ttdoc">创建指定大小的历史Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02006">WTSDataDef.hpp:2006</a></div></div>
+<div class="ttc" id="aclassWTSKlineData_html"><div class="ttname"><a href="classWTSKlineData.html">WTSKlineData</a></div><div class="ttdoc">K线数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00649">WTSDataDef.hpp:650</a></div></div>
+<div class="ttc" id="aclassWTSKlineData_html_a1ff97a9a62dd22a6f7f2608e1b719bbf"><div class="ttname"><a href="classWTSKlineData.html#a1ff97a9a62dd22a6f7f2608e1b719bbf">WTSKlineData::create</a></div><div class="ttdeci">static WTSKlineData * create(const char *code, uint32_t size)</div><div class="ttdoc">创建一个K线数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00708">WTSDataDef.hpp:708</a></div></div>
+<div class="ttc" id="aclassWTSKlineData_html_a43fb5ca9e10d81ed94a21baede44b2d9"><div class="ttname"><a href="classWTSKlineData.html#a43fb5ca9e10d81ed94a21baede44b2d9">WTSKlineData::size</a></div><div class="ttdeci">uint32_t size() const</div><div class="ttdoc">返回K线数据的总数量</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00841">WTSDataDef.hpp:841</a></div></div>
+<div class="ttc" id="aclassWTSKlineData_html_a4c3ac297e1e2facfa2027fe18b76ffa9"><div class="ttname"><a href="classWTSKlineData.html#a4c3ac297e1e2facfa2027fe18b76ffa9">WTSKlineData::times</a></div><div class="ttdeci">uint32_t times() const</div><div class="ttdoc">获取K线周期倍数</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00765">WTSDataDef.hpp:765</a></div></div>
+<div class="ttc" id="aclassWTSKlineData_html_a5231e60be31ff49788b7ee311cbecaf4"><div class="ttname"><a href="classWTSKlineData.html#a5231e60be31ff49788b7ee311cbecaf4">WTSKlineData::getDataRef</a></div><div class="ttdeci">WTSBarList &amp; getDataRef()</div><div class="ttdoc">获取K线数据内部vector容器的引用</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01171">WTSDataDef.hpp:1171</a></div></div>
+<div class="ttc" id="aclassWTSKlineData_html_a669e83176a30e91885eaf71cd672fdb2"><div class="ttname"><a href="classWTSKlineData.html#a669e83176a30e91885eaf71cd672fdb2">WTSKlineData::setPeriod</a></div><div class="ttdeci">void setPeriod(WTSKlinePeriod period, uint32_t times=1)</div><div class="ttdoc">设置K线周期和倍数</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00742">WTSDataDef.hpp:742</a></div></div>
+<div class="ttc" id="aclassWTSKlineData_html_a74b21efb7193ebf027bbf4b831413a3d"><div class="ttname"><a href="classWTSKlineData.html#a74b21efb7193ebf027bbf4b831413a3d">WTSKlineData::isClosed</a></div><div class="ttdeci">bool isClosed() const</div><div class="ttdoc">判断K线是否闭合</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00732">WTSDataDef.hpp:732</a></div></div>
+<div class="ttc" id="aclassWTSKlineData_html_a96e8a3872278372d0da974ae7ac96705"><div class="ttname"><a href="classWTSKlineData.html#a96e8a3872278372d0da974ae7ac96705">WTSKlineData::setClosed</a></div><div class="ttdeci">void setClosed(bool bClosed)</div><div class="ttdoc">设置K线是否闭合</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00725">WTSDataDef.hpp:725</a></div></div>
+<div class="ttc" id="aclassWTSKlineData_html_a9b0b5ce2c4aef6633a94ec170180bbdb"><div class="ttname"><a href="classWTSKlineData.html#a9b0b5ce2c4aef6633a94ec170180bbdb">WTSKlineData::at</a></div><div class="ttdeci">WTSBarStruct * at(int32_t idx)</div><div class="ttdoc">访问指定位置的K线数据</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01182">WTSDataDef.hpp:1182</a></div></div>
+<div class="ttc" id="aclassWTSKlineSlice_html"><div class="ttname"><a href="classWTSKlineSlice.html">WTSKlineSlice</a></div><div class="ttdoc">K线数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00295">WTSDataDef.hpp:296</a></div></div>
+<div class="ttc" id="aclassWTSKlineSlice_html_a58a95fc9dcc6c1693d10adba8b25beb1"><div class="ttname"><a href="classWTSKlineSlice.html#a58a95fc9dcc6c1693d10adba8b25beb1">WTSKlineSlice::create</a></div><div class="ttdeci">static WTSKlineSlice * create(const char *code, WTSKlinePeriod period, uint32_t times, WTSBarStruct *bars=NULL, int32_t count=0)</div><div class="ttdoc">创建K线切片对象的工厂方法</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00355">WTSDataDef.hpp:355</a></div></div>
+<div class="ttc" id="aclassWTSKlineSlice_html_a6259e239f18e611007ef176259d836d9"><div class="ttname"><a href="classWTSKlineSlice.html#a6259e239f18e611007ef176259d836d9">WTSKlineSlice::get_block_addr</a></div><div class="ttdeci">WTSBarStruct * get_block_addr(std::size_t blkIdx)</div><div class="ttdoc">获取指定数据块的地址</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00401">WTSDataDef.hpp:401</a></div></div>
+<div class="ttc" id="aclassWTSKlineSlice_html_a763673e4cc73d6b28519c795411d098e"><div class="ttname"><a href="classWTSKlineSlice.html#a763673e4cc73d6b28519c795411d098e">WTSKlineSlice::get_block_size</a></div><div class="ttdeci">uint32_t get_block_size(std::size_t blkIdx)</div><div class="ttdoc">获取指定数据块的大小</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00417">WTSDataDef.hpp:417</a></div></div>
+<div class="ttc" id="aclassWTSKlineSlice_html_a86b5e048d687483ac6dc91014e503d09"><div class="ttname"><a href="classWTSKlineSlice.html#a86b5e048d687483ac6dc91014e503d09">WTSKlineSlice::size</a></div><div class="ttdeci">int32_t size() const</div><div class="ttdoc">返回K线切片中的K线总数</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00544">WTSDataDef.hpp:544</a></div></div>
+<div class="ttc" id="aclassWTSKlineSlice_html_abeabf480ff8ddfd412f20a9cf118c86c"><div class="ttname"><a href="classWTSKlineSlice.html#abeabf480ff8ddfd412f20a9cf118c86c">WTSKlineSlice::get_block_counts</a></div><div class="ttdeci">std::size_t get_block_counts() const</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00388">WTSDataDef.hpp:388</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a20d65255542e3ed5d694b529892a0f57"><div class="ttname"><a href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a></div><div class="ttdeci">static void info(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出信息级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00187">WTSLogger.h:187</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a618c41d0ff3c1f5ce0a70d83c28bc9fc"><div class="ttname"><a href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a></div><div class="ttdeci">static void error(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出错误级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00239">WTSLogger.h:239</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_aa3257bbd8e5b1db25f65cd936f50025c"><div class="ttname"><a href="classWTSLogger.html#aa3257bbd8e5b1db25f65cd936f50025c">WTSLogger::log_raw</a></div><div class="ttdeci">static void log_raw(WTSLogLevel ll, const char *message)</div><div class="ttdoc">直接输出日志消息</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00407">WTSLogger.cpp:407</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_adcbb6a78b99a8c514a4b55677e5a1a28"><div class="ttname"><a href="classWTSLogger.html#adcbb6a78b99a8c514a4b55677e5a1a28">WTSLogger::debug</a></div><div class="ttdeci">static void debug(const char *format, const Args &amp;...args)</div><div class="ttdoc">fmt格式化日志接口</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00161">WTSLogger.h:161</a></div></div>
+<div class="ttc" id="aclassWTSObject_html_a3e41434e26313af90b03c8c8b395b049"><div class="ttname"><a href="classWTSObject.html#a3e41434e26313af90b03c8c8b395b049">WTSObject::retain</a></div><div class="ttdeci">uint32_t retain()</div><div class="ttdef"><b>Definition</b> <a href="WTSObject_8hpp_source.html#l00027">WTSObject.hpp:27</a></div></div>
+<div class="ttc" id="aclassWTSObject_html_a57b87f47529974f735f4989eaf2dd55f"><div class="ttname"><a href="classWTSObject.html#a57b87f47529974f735f4989eaf2dd55f">WTSObject::release</a></div><div class="ttdeci">virtual void release()</div><div class="ttdef"><b>Definition</b> <a href="WTSObject_8hpp_source.html#l00029">WTSObject.hpp:29</a></div></div>
+<div class="ttc" id="aclassWTSOrdDtlSlice_html"><div class="ttname"><a href="classWTSOrdDtlSlice.html">WTSOrdDtlSlice</a></div><div class="ttdoc">委托明细数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02335">WTSDataDef.hpp:2336</a></div></div>
+<div class="ttc" id="aclassWTSOrdQueSlice_html"><div class="ttname"><a href="classWTSOrdQueSlice.html">WTSOrdQueSlice</a></div><div class="ttdoc">委托队列数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02442">WTSDataDef.hpp:2443</a></div></div>
+<div class="ttc" id="aclassWTSSessionInfo_html"><div class="ttname"><a href="classWTSSessionInfo.html">WTSSessionInfo</a></div><div class="ttdoc">会话信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSSessionInfo_8hpp_source.html#l00020">WTSSessionInfo.hpp:21</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a097548155cfbbf9a0a36e1ee1ce3ad38"><div class="ttname"><a href="classWTSTickData.html#a097548155cfbbf9a0a36e1ee1ce3ad38">WTSTickData::volume</a></div><div class="ttdeci">double volume() const</div><div class="ttdoc">获取当前成交量</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01428">WTSDataDef.hpp:1428</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a6a81212366831e7afe3eeac41b42e7b0"><div class="ttname"><a href="classWTSTickData.html#a6a81212366831e7afe3eeac41b42e7b0">WTSTickData::getTickStruct</a></div><div class="ttdeci">WTSTickStruct &amp; getTickStruct()</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01580">WTSDataDef.hpp:1580</a></div></div>
+<div class="ttc" id="aclassWTSTickSlice_html"><div class="ttname"><a href="classWTSTickSlice.html">WTSTickSlice</a></div><div class="ttdoc">Tick数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02128">WTSDataDef.hpp:2129</a></div></div>
+<div class="ttc" id="aclassWTSTickSlice_html_a370515e4189bc4bb6c69b17375704878"><div class="ttname"><a href="classWTSTickSlice.html#a370515e4189bc4bb6c69b17375704878">WTSTickSlice::create</a></div><div class="ttdeci">static WTSTickSlice * create(const char *code, WTSTickStruct *ticks=NULL, uint32_t count=0)</div><div class="ttdoc">创建一个Tick数据切片对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02177">WTSDataDef.hpp:2177</a></div></div>
+<div class="ttc" id="aclassWTSTickSlice_html_a521a6dc789392a657c5e12a560e16a4f"><div class="ttname"><a href="classWTSTickSlice.html#a521a6dc789392a657c5e12a560e16a4f">WTSTickSlice::get_block_addr</a></div><div class="ttdeci">WTSTickStruct * get_block_addr(std::size_t blkIdx)</div><div class="ttdoc">获取指定数据块的地址</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02254">WTSDataDef.hpp:2254</a></div></div>
+<div class="ttc" id="aclassWTSTickSlice_html_a80e65a26a9722f492cc5a525af2e12dc"><div class="ttname"><a href="classWTSTickSlice.html#a80e65a26a9722f492cc5a525af2e12dc">WTSTickSlice::get_block_size</a></div><div class="ttdeci">uint32_t get_block_size(std::size_t blkIdx)</div><div class="ttdoc">获取指定数据块的大小</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02270">WTSDataDef.hpp:2270</a></div></div>
+<div class="ttc" id="aclassWTSTickSlice_html_a926a036c5939d799ab46390c4542bbde"><div class="ttname"><a href="classWTSTickSlice.html#a926a036c5939d799ab46390c4542bbde">WTSTickSlice::get_block_counts</a></div><div class="ttdeci">std::size_t get_block_counts() const</div><div class="ttdoc">获取数据块数量</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02241">WTSDataDef.hpp:2241</a></div></div>
+<div class="ttc" id="aclassWTSTickSlice_html_aefe68c93c7a904a1daec29f2f10f6ea1"><div class="ttname"><a href="classWTSTickSlice.html#aefe68c93c7a904a1daec29f2f10f6ea1">WTSTickSlice::size</a></div><div class="ttdeci">uint32_t size() const</div><div class="ttdoc">获取切片的总数据数量</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02285">WTSDataDef.hpp:2285</a></div></div>
+<div class="ttc" id="aclassWTSTransSlice_html"><div class="ttname"><a href="classWTSTransSlice.html">WTSTransSlice</a></div><div class="ttdoc">逐笔成交数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02549">WTSDataDef.hpp:2550</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a4dacb2b4afd195d05dedb5323d7982f3"><div class="ttname"><a href="classWTSVariant.html#a4dacb2b4afd195d05dedb5323d7982f3">WTSVariant::get</a></div><div class="ttdeci">WTSVariant * get(const char *name) const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00357">WTSVariant.hpp:357</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a597bf32bfe71fb040721dc65dc786df6"><div class="ttname"><a href="classWTSVariant.html#a597bf32bfe71fb040721dc65dc786df6">WTSVariant::getBoolean</a></div><div class="ttdeci">bool getBoolean(const char *name) const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00348">WTSVariant.hpp:348</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a0e856283b2047e222e5ab07b056dbfc9"><div class="ttname"><a href="classWtDtMgr.html#a0e856283b2047e222e5ab07b056dbfc9">WtDtMgr::get_adjusting_flag</a></div><div class="ttdeci">virtual uint32_t get_adjusting_flag() override</div><div class="ttdoc">获取复权模式标志</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00395">WtDtMgr.cpp:395</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a132d8aa2a32936471ca1304c4c5693e9"><div class="ttname"><a href="classWtDtMgr.html#a132d8aa2a32936471ca1304c4c5693e9">WtDtMgr::_align_by_section</a></div><div class="ttdeci">bool _align_by_section</div><div class="ttdoc">强制小节对齐标志</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8h_source.html#l00262">WtDtMgr.h:262</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a1b7089bc5a99ea6e1e9797e4c5109309"><div class="ttname"><a href="classWtDtMgr.html#a1b7089bc5a99ea6e1e9797e4c5109309">WtDtMgr::_loader</a></div><div class="ttdeci">IHisDataLoader * _loader</div><div class="ttdoc">历史数据加载器指针</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8h_source.html#l00250">WtDtMgr.h:250</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a2243b5a049b39746a5ee54555167141f"><div class="ttname"><a href="classWtDtMgr.html#a2243b5a049b39746a5ee54555167141f">WtDtMgr::~WtDtMgr</a></div><div class="ttdeci">~WtDtMgr()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00052">WtDtMgr.cpp:52</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a2d72d81cd6030f57f5993feab1fe0911"><div class="ttname"><a href="classWtDtMgr.html#a2d72d81cd6030f57f5993feab1fe0911">WtDtMgr::initStore</a></div><div class="ttdeci">bool initStore(WTSVariant *cfg)</div><div class="ttdoc">初始化数据存储</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00075">WtDtMgr.cpp:75</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a2f3d13eb9383e83c0ca6e0d388bda248"><div class="ttname"><a href="classWtDtMgr.html#a2f3d13eb9383e83c0ca6e0d388bda248">WtDtMgr::get_basedata_mgr</a></div><div class="ttdeci">virtual IBaseDataMgr * get_basedata_mgr() override</div><div class="ttdoc">获取基础数据管理器</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00180">WtDtMgr.cpp:180</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a37e9c31e3357b5c043f12ed5aa27981d"><div class="ttname"><a href="classWtDtMgr.html#a37e9c31e3357b5c043f12ed5aa27981d">WtDtMgr::get_transaction_slice</a></div><div class="ttdeci">virtual WTSTransSlice * get_transaction_slice(const char *stdCode, uint32_t count, uint64_t etime=0) override</div><div class="ttdoc">获取成交明细数据切片</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00558">WtDtMgr.cpp:558</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a3cfb71c889bed5ec736cdb917d07d6ed"><div class="ttname"><a href="classWtDtMgr.html#a3cfb71c889bed5ec736cdb917d07d6ed">WtDtMgr::get_date</a></div><div class="ttdeci">virtual uint32_t get_date() override</div><div class="ttdoc">获取当前交易日期</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00202">WtDtMgr.cpp:202</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a3e3a1f265f439df9846c475348a12821"><div class="ttname"><a href="classWtDtMgr.html#a3e3a1f265f439df9846c475348a12821">WtDtMgr::handle_push_quote</a></div><div class="ttdeci">void handle_push_quote(const char *stdCode, WTSTickData *newTick)</div><div class="ttdoc">处理推送的行情数据</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00326">WtDtMgr.cpp:326</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a4d27e8b544eb01e0d4973ab62f3f967c"><div class="ttname"><a href="classWtDtMgr.html#a4d27e8b544eb01e0d4973ab62f3f967c">WtDtMgr::_reader</a></div><div class="ttdeci">IDataReader * _reader</div><div class="ttdoc">数据读取器指针</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8h_source.html#l00244">WtDtMgr.h:244</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a5029ac4ae07382b9b08eed9f5126858a"><div class="ttname"><a href="classWtDtMgr.html#a5029ac4ae07382b9b08eed9f5126858a">WtDtMgr::reader_log</a></div><div class="ttdeci">virtual void reader_log(WTSLogLevel ll, const char *message) override</div><div class="ttdoc">记录数据读取器日志</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00237">WtDtMgr.cpp:237</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a5b282002b22746c942895611c08b4f6c"><div class="ttname"><a href="classWtDtMgr.html#a5b282002b22746c942895611c08b4f6c">WtDtMgr::get_min_time</a></div><div class="ttdeci">virtual uint32_t get_min_time() override</div><div class="ttdoc">获取当前交易分钟时间</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00213">WtDtMgr.cpp:213</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a5e316e5c62acea26b774af7b500ce1b8"><div class="ttname"><a href="classWtDtMgr.html#a5e316e5c62acea26b774af7b500ce1b8">WtDtMgr::_ticks_adjusted</a></div><div class="ttdeci">DataCacheMap * _ticks_adjusted</div><div class="ttdoc">复权Tick缓存映射</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8h_source.html#l00301">WtDtMgr.h:301</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a6aeae6e632cdae36f9ffa5a2c965d746"><div class="ttname"><a href="classWtDtMgr.html#a6aeae6e632cdae36f9ffa5a2c965d746">WtDtMgr::_subed_basic_bars</a></div><div class="ttdeci">wt_hashset&lt; std::string &gt; _subed_basic_bars</div><div class="ttdoc">订阅的基础K线集合</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8h_source.html#l00274">WtDtMgr.h:274</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a6cd8f89ff3aa31eac4b0cc54d363a65d"><div class="ttname"><a href="classWtDtMgr.html#a6cd8f89ff3aa31eac4b0cc54d363a65d">WtDtMgr::grab_last_tick</a></div><div class="ttdeci">virtual WTSTickData * grab_last_tick(const char *stdCode) override</div><div class="ttdoc">获取最新的Tick数据</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00362">WtDtMgr.cpp:362</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a7621426df582e4c1a818623bb25b2d14"><div class="ttname"><a href="classWtDtMgr.html#a7621426df582e4c1a818623bb25b2d14">WtDtMgr::get_tick_slice</a></div><div class="ttdeci">virtual WTSTickSlice * get_tick_slice(const char *stdCode, uint32_t count, uint64_t etime=0) override</div><div class="ttdoc">获取Tick数据切片</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00417">WtDtMgr.cpp:417</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a96e6fd75e421de0396685eb69c2ea7bc"><div class="ttname"><a href="classWtDtMgr.html#a96e6fd75e421de0396685eb69c2ea7bc">WtDtMgr::NotifyItem</a></div><div class="ttdeci">struct WtDtMgr::_NotifyItem NotifyItem</div><div class="ttdoc">K线数据通知项结构</div></div>
+<div class="ttc" id="aclassWtDtMgr_html_a9a00c0f09063a9b6ef7079fa37a47d77"><div class="ttname"><a href="classWtDtMgr.html#a9a00c0f09063a9b6ef7079fa37a47d77">WtDtMgr::_bar_notifies</a></div><div class="ttdeci">std::vector&lt; NotifyItem &gt; _bar_notifies</div><div class="ttdoc">K线数据通知项列表</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8h_source.html#l00353">WtDtMgr.h:353</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_aa000040bdb2840101914dc0680219c8f"><div class="ttname"><a href="classWtDtMgr.html#aa000040bdb2840101914dc0680219c8f">WtDtMgr::get_hot_mgr</a></div><div class="ttdeci">virtual IHotMgr * get_hot_mgr() override</div><div class="ttdoc">获取主力合约管理器</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00191">WtDtMgr.cpp:191</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_aaa1a0112973676e0a2832c268a132586"><div class="ttname"><a href="classWtDtMgr.html#aaa1a0112973676e0a2832c268a132586">WtDtMgr::_rt_tick_map</a></div><div class="ttdeci">DataCacheMap * _rt_tick_map</div><div class="ttdoc">实时Tick缓存映射</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8h_source.html#l00292">WtDtMgr.h:292</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_ab4cdcf2a7c5069b105a9a89902e04c54"><div class="ttname"><a href="classWtDtMgr.html#ab4cdcf2a7c5069b105a9a89902e04c54">WtDtMgr::get_kline_slice</a></div><div class="ttdeci">virtual WTSKlineSlice * get_kline_slice(const char *stdCode, WTSKlinePeriod period, uint32_t times, uint32_t count, uint64_t etime=0) override</div><div class="ttdoc">获取K线数据切片</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00577">WtDtMgr.cpp:577</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_abc136030e4bf7954d9dcc0cc89929a45"><div class="ttname"><a href="classWtDtMgr.html#abc136030e4bf7954d9dcc0cc89929a45">WtDtMgr::init</a></div><div class="ttdeci">bool init(WTSVariant *cfg, WtEngine *engine, bool bForceCache=false)</div><div class="ttdoc">初始化数据管理器</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00129">WtDtMgr.cpp:129</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_abfaaf3a4147a851ef033d0ddb130579e"><div class="ttname"><a href="classWtDtMgr.html#abfaaf3a4147a851ef033d0ddb130579e">WtDtMgr::get_order_queue_slice</a></div><div class="ttdeci">virtual WTSOrdQueSlice * get_order_queue_slice(const char *stdCode, uint32_t count, uint64_t etime=0) override</div><div class="ttdoc">获取委托队列数据切片</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00526">WtDtMgr.cpp:526</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_ac62627be16dca058feaac9f3020dc137"><div class="ttname"><a href="classWtDtMgr.html#ac62627be16dca058feaac9f3020dc137">WtDtMgr::_engine</a></div><div class="ttdeci">WtEngine * _engine</div><div class="ttdoc">交易引擎指针</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8h_source.html#l00256">WtDtMgr.h:256</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_ad16ee5b66e8b4d52d7c218d242bdbae0"><div class="ttname"><a href="classWtDtMgr.html#ad16ee5b66e8b4d52d7c218d242bdbae0">WtDtMgr::get_order_detail_slice</a></div><div class="ttdeci">virtual WTSOrdDtlSlice * get_order_detail_slice(const char *stdCode, uint32_t count, uint64_t etime=0) override</div><div class="ttdoc">获取委托明细数据切片</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00542">WtDtMgr.cpp:542</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_ad95c02b7148be0d26851d8cb9ce32002"><div class="ttname"><a href="classWtDtMgr.html#ad95c02b7148be0d26851d8cb9ce32002">WtDtMgr::get_adjusting_factor</a></div><div class="ttdeci">virtual double get_adjusting_factor(const char *stdCode, uint32_t uDate) override</div><div class="ttdoc">获取复权因子</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00382">WtDtMgr.cpp:382</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_add84dcc76efdc00d2585e35fc8944b6a"><div class="ttname"><a href="classWtDtMgr.html#add84dcc76efdc00d2585e35fc8944b6a">WtDtMgr::on_all_bar_updated</a></div><div class="ttdeci">virtual void on_all_bar_updated(uint32_t updateTime) override</div><div class="ttdoc">所有K线数据更新完成回调</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00156">WtDtMgr.cpp:156</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_ae5ff65e58b85df5bb89bb013b412b087"><div class="ttname"><a href="classWtDtMgr.html#ae5ff65e58b85df5bb89bb013b412b087">WtDtMgr::_bars_cache</a></div><div class="ttdeci">DataCacheMap * _bars_cache</div><div class="ttdoc">K线缓存映射</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8h_source.html#l00286">WtDtMgr.h:286</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_aef1f5ebec303fe8ba9200709d9e6e93c"><div class="ttname"><a href="classWtDtMgr.html#aef1f5ebec303fe8ba9200709d9e6e93c">WtDtMgr::_force_cache</a></div><div class="ttdeci">bool _force_cache</div><div class="ttdoc">强制缓存K线标志</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8h_source.html#l00268">WtDtMgr.h:268</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_aeffbf9a1a25e574061a482af005d9640"><div class="ttname"><a href="classWtDtMgr.html#aeffbf9a1a25e574061a482af005d9640">WtDtMgr::WtDtMgr</a></div><div class="ttdeci">WtDtMgr()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00034">WtDtMgr.cpp:34</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_af512487bb1565b4934fea49b73477d7e"><div class="ttname"><a href="classWtDtMgr.html#af512487bb1565b4934fea49b73477d7e">WtDtMgr::on_bar</a></div><div class="ttdeci">virtual void on_bar(const char *code, WTSKlinePeriod period, WTSBarStruct *newBar) override</div><div class="ttdoc">K线数据回调</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00251">WtDtMgr.cpp:251</a></div></div>
+<div class="ttc" id="aclassWtDtMgr_html_affbcab1aed2602e8b66ae6fc1f8b4f74"><div class="ttname"><a href="classWtDtMgr.html#affbcab1aed2602e8b66ae6fc1f8b4f74">WtDtMgr::get_secs</a></div><div class="ttdeci">virtual uint32_t get_secs() override</div><div class="ttdoc">获取当前交易秒数</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8cpp_source.html#l00224">WtDtMgr.cpp:224</a></div></div>
+<div class="ttc" id="aclassWtEngine_html"><div class="ttname"><a href="classWtEngine.html">WtEngine</a></div><div class="ttdoc">WonderTrader核心交易引擎类</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8h_source.html#l00189">WtEngine.h:190</a></div></div>
+<div class="ttc" id="aclassWtEngine_html_a3fafa118edfedd8abe7ef1474a78d7f5"><div class="ttname"><a href="classWtEngine.html#a3fafa118edfedd8abe7ef1474a78d7f5">WtEngine::get_min_time</a></div><div class="ttdeci">uint32_t get_min_time()</div><div class="ttdoc">获取当前分钟时间</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8h_source.html#l00229">WtEngine.h:229</a></div></div>
+<div class="ttc" id="aclassWtEngine_html_a48ca1d0982f8362b0c00c004411ae34b"><div class="ttname"><a href="classWtEngine.html#a48ca1d0982f8362b0c00c004411ae34b">WtEngine::get_basedata_mgr</a></div><div class="ttdeci">IBaseDataMgr * get_basedata_mgr()</div><div class="ttdoc">获取基础数据管理器</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8h_source.html#l00253">WtEngine.h:253</a></div></div>
+<div class="ttc" id="aclassWtEngine_html_a491dfad66237c2f1e4a058c1981dc0a9"><div class="ttname"><a href="classWtEngine.html#a491dfad66237c2f1e4a058c1981dc0a9">WtEngine::on_bar</a></div><div class="ttdeci">virtual void on_bar(const char *stdCode, const char *period, uint32_t times, WTSBarStruct *newBar)=0</div><div class="ttdoc">K线数据到达事件</div></div>
+<div class="ttc" id="aclassWtEngine_html_a6a794ed143178b37084dd265826f93a7"><div class="ttname"><a href="classWtEngine.html#a6a794ed143178b37084dd265826f93a7">WtEngine::get_secs</a></div><div class="ttdeci">uint32_t get_secs()</div><div class="ttdoc">获取当前秒数</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8h_source.html#l00241">WtEngine.h:241</a></div></div>
+<div class="ttc" id="aclassWtEngine_html_a6c51ead2f0c35c0ae075bc55e91ea828"><div class="ttname"><a href="classWtEngine.html#a6c51ead2f0c35c0ae075bc55e91ea828">WtEngine::get_session_info</a></div><div class="ttdeci">WTSSessionInfo * get_session_info(const char *sid, bool isCode=false)</div><div class="ttdoc">获取交易时段信息</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8cpp_source.html#l00192">WtEngine.cpp:192</a></div></div>
+<div class="ttc" id="aclassWtEngine_html_a6d4697459f99aeaf394f277fc7000500"><div class="ttname"><a href="classWtEngine.html#a6d4697459f99aeaf394f277fc7000500">WtEngine::get_date</a></div><div class="ttdeci">uint32_t get_date()</div><div class="ttdoc">获取当前日期</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8h_source.html#l00223">WtEngine.h:223</a></div></div>
+<div class="ttc" id="aclassWtEngine_html_ab6464b8e3675226ef6b3c89f8bbe2e7a"><div class="ttname"><a href="classWtEngine.html#ab6464b8e3675226ef6b3c89f8bbe2e7a">WtEngine::get_exright_factor</a></div><div class="ttdeci">double get_exright_factor(const char *stdCode, WTSCommodityInfo *commInfo=NULL)</div><div class="ttdoc">获取复权因子</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8cpp_source.html#l01234">WtEngine.cpp:1234</a></div></div>
+<div class="ttc" id="aclassWtEngine_html_acb4fb6f1158643610d511916dc821a78"><div class="ttname"><a href="classWtEngine.html#acb4fb6f1158643610d511916dc821a78">WtEngine::get_hot_mgr</a></div><div class="ttdeci">IHotMgr * get_hot_mgr()</div><div class="ttdoc">获取主力合约管理器</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8h_source.html#l00259">WtEngine.h:259</a></div></div>
+<div class="ttc" id="anamespacefmtutil_html_a5bfccdc4da1277f2585e7b31c6395bb3"><div class="ttname"><a href="namespacefmtutil.html#a5bfccdc4da1277f2585e7b31c6395bb3">fmtutil::format_to</a></div><div class="ttdeci">char * format_to(char *buffer, const char *format, const Args &amp;...args)</div><div class="ttdoc">格式化字符串并输出到指定缓冲区</div><div class="ttdef"><b>Definition</b> <a href="fmtlib_8h_source.html#l00031">fmtlib.h:31</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html"><div class="ttname"><a href="structWTSTickStruct.html">WTSTickStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00158">WTSStruct.h:159</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a44aea5df719841d66b883c572ecd291d"><div class="ttname"><a href="structWTSTickStruct.html#a44aea5df719841d66b883c572ecd291d">WTSTickStruct::action_time</a></div><div class="ttdeci">uint32_t action_time</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00181">WTSStruct.h:181</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_afd2eb785cc5bfd6ca1f93375732a09ef"><div class="ttname"><a href="structWTSTickStruct.html#afd2eb785cc5bfd6ca1f93375732a09ef">WTSTickStruct::action_date</a></div><div class="ttdeci">uint32_t action_date</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00180">WTSStruct.h:180</a></div></div>
+<div class="ttc" id="astructWtDtMgr_1_1__NotifyItem_html"><div class="ttname"><a href="structWtDtMgr_1_1__NotifyItem.html">WtDtMgr::_NotifyItem</a></div><div class="ttdoc">K线数据通知项结构</div><div class="ttdef"><b>Definition</b> <a href="WtDtMgr_8h_source.html#l00307">WtDtMgr.h:308</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3ce996bf6400c0a215df0636043a382c.html">WtCore</a></li><li class="navelem"><a class="el" href="WtDtMgr_8cpp.html">WtDtMgr.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

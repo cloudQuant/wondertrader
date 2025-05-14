@@ -1,0 +1,278 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/ParserFemas/ParserFemas.h Ê∫êÊñá‰ª∂</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">È´òÊÄßËÉΩÈáèÂåñ‰∫§ÊòìÂπ≥Âè∞</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Âà∂‰ΩúËÄÖ Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','ÊêúÁ¥¢');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('ParserFemas_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">ËΩΩÂÖ•‰∏≠...</div>
+<div class="SRStatus" id="Searching">ÊêúÁ¥¢‰∏≠...</div>
+<div class="SRStatus" id="NoMatches">Êú™ÊâæÂà∞</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ParserFemas.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="ParserFemas_8h.html">ÊµèËßàËØ•Êñá‰ª∂ÁöÑÊñáÊ°£.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;../Includes/IParserApi.h&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;../Share/DLLHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;../API/Femas3.02/USTPFtdcMduserApi.h&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;map&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">class </span><a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>;</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="ParserFemas_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">   20</a></span><a class="code hl_variable" href="ParserFemas_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="foldopen" id="foldopen00022" data-start="{" data-end="};">
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classParserFemas.html">   22</a></span><span class="keyword">class </span><a class="code hl_class" href="classParserFemas.html">ParserFemas</a> : <span class="keyword">public</span> <a class="code hl_class" href="classIParserApi.html">IParserApi</a>, <span class="keyword">public</span> <a class="code hl_class" href="classCUstpFtdcMduserSpi.html">CUstpFtdcMduserSpi</a></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>{</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <a class="code hl_function" href="classParserFemas.html#aa43bc20a4e4319de591f5c9c8f9b3524">ParserFemas</a>();</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keyword">virtual</span> <a class="code hl_function" href="classParserFemas.html#a5d8d4ce31f6047c410b964afcc549c36">~ParserFemas</a>();</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="};">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classParserFemas.html#a7f51c9ef3f7ca6cdba2f769aa02134e6">   29</a></span>    <span class="keyword">enum</span> <a class="code hl_enumeration" href="classParserFemas.html#a7f51c9ef3f7ca6cdba2f769aa02134e6">LoginStatus</a></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    {</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classParserFemas.html#a7f51c9ef3f7ca6cdba2f769aa02134e6ae989ca3330181de505ad3cc1e21715a2">   31</a></span>        <a class="code hl_enumvalue" href="classParserFemas.html#a7f51c9ef3f7ca6cdba2f769aa02134e6ae989ca3330181de505ad3cc1e21715a2">LS_NOTLOGIN</a>,</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classParserFemas.html#a7f51c9ef3f7ca6cdba2f769aa02134e6a42aca8130c3ad3fc2678cf60f7532707">   32</a></span>        <a class="code hl_enumvalue" href="classParserFemas.html#a7f51c9ef3f7ca6cdba2f769aa02134e6a42aca8130c3ad3fc2678cf60f7532707">LS_LOGINING</a>,</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <a class="code hl_enumvalue" href="classParserFemas.html#a7f51c9ef3f7ca6cdba2f769aa02134e6a64cc1c42e9e9c4245df7fe64f0871688">LS_LOGINED</a></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classParserFemas.html#a7f51c9ef3f7ca6cdba2f769aa02134e6a64cc1c42e9e9c4245df7fe64f0871688">   34</a></span>    };</div>
+</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment">//IQuoteParser Êé•Âè£</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserFemas.html#ad78d41fe7d76870408bb370587588ebe">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* <a class="code hl_function" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#aeddafc16a6ccb6e02e9464f472d97c10">release</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserFemas.html#a4c8e482a3a306548264ec3631f196632">connect</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserFemas.html#aacf9fb6228836df694eb70fb7f95032d">disconnect</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserFemas.html#aea82220adb3626bb42996b62c9335d9b">isConnected</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#a48369420b310d35ef43af1fe8012902f">subscribe</a>(<span class="keyword">const</span> <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a> &amp;vecSymbols) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#a5a55399d5c93f18c57f2d39304ff774c">unsubscribe</a>(<span class="keyword">const</span> <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a> &amp;vecSymbols) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#a193471fb037fbee765a806bfb3dae851">registerSpi</a>(<a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>* listener) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="comment">//CUstpFtdcMdSpi Êé•Âè£</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#aec23e6da3726f36a05a2ea165766d204">OnRspError</a>( <a class="code hl_struct" href="structCUstpFtdcRspInfoField.html">CUstpFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast );</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#abdc3cd0704b1f0a18e32cef638e1730c">OnFrontConnected</a>();</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#a88c7a9f5c6d752f1788b11238f37a696">OnRspUserLogin</a>( <a class="code hl_struct" href="structCUstpFtdcRspUserLoginField.html">CUstpFtdcRspUserLoginField</a> *pRspUserLogin, <a class="code hl_struct" href="structCUstpFtdcRspInfoField.html">CUstpFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast );</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#acdda8d8c386dd4cb463c4c24b327952b">OnRspUserLogout</a>(<a class="code hl_struct" href="structCUstpFtdcRspUserLogoutField.html">CUstpFtdcRspUserLogoutField</a> *pUserLogout, <a class="code hl_struct" href="structCUstpFtdcRspInfoField.html">CUstpFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#a3f98c7e1ae4a7eb384927cbbb226a684">OnFrontDisconnected</a>( <span class="keywordtype">int</span> nReason );</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#a4719053a0c1655fca7ac5d39b87b1a31">OnRspUnSubMarketData</a>( <a class="code hl_struct" href="structCUstpFtdcSpecificInstrumentField.html">CUstpFtdcSpecificInstrumentField</a> *pSpecificInstrument, <a class="code hl_struct" href="structCUstpFtdcRspInfoField.html">CUstpFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast );</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#a76bc5522b8f9c803c3db6294e7b8a414">OnRtnDepthMarketData</a>( <a class="code hl_struct" href="structCUstpFtdcDepthMarketDataField.html">CUstpFtdcDepthMarketDataField</a> *pDepthMarketData );</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#a1e92ebab3269c6793c6790e1e612ca4a">OnRspSubMarketData</a>( <a class="code hl_struct" href="structCUstpFtdcSpecificInstrumentField.html">CUstpFtdcSpecificInstrumentField</a> *pSpecificInstrument, <a class="code hl_struct" href="structCUstpFtdcRspInfoField.html">CUstpFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast );</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#af9acc354756cbf9670d9895619cda260">OnHeartBeatWarning</a>( <span class="keywordtype">int</span> nTimeLapse );</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="comment">     *  ÂèëÈÄÅÁôªÂΩïËØ∑Ê±Ç</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#a25168bf529f21e580fd255e9fc77125f">ReqUserLogin</a>();</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="comment">     *  ËÆ¢ÈòÖÂìÅÁßçË°åÊÉÖ</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classParserFemas.html#ad8885f40424ae75c7cc244e9d3709129">SubscribeMarketData</a>();</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="comment">     *  Ê£ÄÊü•ÈîôËØØ‰ø°ÊÅØ</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserFemas.html#a3175a002867961887aff23f7416f67c4">IsErrorRspInfo</a>(<a class="code hl_struct" href="structCUstpFtdcRspInfoField.html">CUstpFtdcRspInfoField</a> *pRspInfo);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="classParserFemas.html#aa21b9e49248f85cc1479e440e6b6a2cd">   91</a></span>    uint32_t            <a class="code hl_variable" href="classParserFemas.html#aa21b9e49248f85cc1479e440e6b6a2cd">m_uTradingDate</a>;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="classParserFemas.html#a6767f00a510321f5baa21ab77ebf7360">   92</a></span>    <a class="code hl_enumeration" href="classParserFemas.html#a7f51c9ef3f7ca6cdba2f769aa02134e6">LoginStatus</a>         <a class="code hl_variable" href="classParserFemas.html#a6767f00a510321f5baa21ab77ebf7360">m_loginState</a>;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="classParserFemas.html#ae70c1b7e261de349d825338cdb9c4ef6">   93</a></span>    <a class="code hl_class" href="classCUstpFtdcMduserApi.html">CUstpFtdcMduserApi</a>* <a class="code hl_variable" href="classParserFemas.html#ae70c1b7e261de349d825338cdb9c4ef6">m_pUserAPI</a>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="classParserFemas.html#a0a9f6bff3b80c78420656c90602f8756">   95</a></span>    std::string         <a class="code hl_variable" href="classParserFemas.html#a0a9f6bff3b80c78420656c90602f8756">m_strFrontAddr</a>;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="classParserFemas.html#a6ed33be651512b457b3caf12fffa6330">   96</a></span>    std::string         <a class="code hl_variable" href="classParserFemas.html#a6ed33be651512b457b3caf12fffa6330">m_strBroker</a>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="classParserFemas.html#a5809298542414589221a83f1d718de70">   97</a></span>    std::string         <a class="code hl_variable" href="classParserFemas.html#a5809298542414589221a83f1d718de70">m_strUserID</a>;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="classParserFemas.html#ab2a6ac0f7f9baa320758b7829e5dbbbd">   98</a></span>    std::string         <a class="code hl_variable" href="classParserFemas.html#ab2a6ac0f7f9baa320758b7829e5dbbbd">m_strPassword</a>;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="classParserFemas.html#ac0349bfd5124d076db623198d2a189b6">   99</a></span>    std::string         <a class="code hl_variable" href="classParserFemas.html#ac0349bfd5124d076db623198d2a189b6">m_strFlowDir</a>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="classParserFemas.html#af61bae2bb6e92e841f33c5be0a4b7e0e">  101</a></span>    <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a>             <a class="code hl_variable" href="classParserFemas.html#af61bae2bb6e92e841f33c5be0a4b7e0e">m_filterSubs</a>;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="classParserFemas.html#a3aef3984cdb85577bfe4b88db78bf3e2">  103</a></span>    <span class="keywordtype">int</span>                 <a class="code hl_variable" href="classParserFemas.html#a3aef3984cdb85577bfe4b88db78bf3e2">m_iRequestID</a>;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="classParserFemas.html#af85c8583941e4f6397cc481e61d048f4">  105</a></span>    <a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>* <a class="code hl_variable" href="classParserFemas.html#af85c8583941e4f6397cc481e61d048f4">m_sink</a>;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno"><a class="line" href="classParserFemas.html#ab8113e7e28b8a1c086c9e68bea117cf8">  106</a></span>    <a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>*       <a class="code hl_variable" href="classParserFemas.html#ab8113e7e28b8a1c086c9e68bea117cf8">m_pBaseDataMgr</a>;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="classParserFemas.html#a4ebd5702b55671fc9d34cdbfcadee130">  108</a></span>    <a class="code hl_typedef" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a>       <a class="code hl_variable" href="classParserFemas.html#a4ebd5702b55671fc9d34cdbfcadee130">m_hInst</a>;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="classParserFemas.html#aa28ed68518c29faa68a30ea2fb89cab7">  109</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classCUstpFtdcMduserApi.html">CUstpFtdcMduserApi</a>* (*FemasCreator)(<span class="keyword">const</span> <span class="keywordtype">char</span> *);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno"><a class="line" href="classParserFemas.html#a54666eec4b2185a315f38ffd98cbd434">  110</a></span>    <a class="code hl_typedef" href="classParserFemas.html#aa28ed68518c29faa68a30ea2fb89cab7">FemasCreator</a>        <a class="code hl_variable" href="classParserFemas.html#a54666eec4b2185a315f38ffd98cbd434">m_funcCreator</a>;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>};</div>
+</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="ttc" id="aDLLHelper_8hpp_html_a40972742af38c16d3ab2f521abf0ca8a"><div class="ttname"><a href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a></div><div class="ttdeci">void * DllHandle</div><div class="ttdoc">Âä®ÊÄÅÂ∫ìÂè•ÊüÑÁ±ªÂûãÔºàÈùûWindowsÂπ≥Âè∞Ôºâ</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00032">DLLHelper.hpp:32</a></div></div>
+<div class="ttc" id="aParserFemas_8h_html_a9e1fc31194100ab43bbad77a2f5c12b3"><div class="ttname"><a href="ParserFemas_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a></div><div class="ttdeci">NS_WTP_END USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00020">ParserFemas.h:20</a></div></div>
+<div class="ttc" id="aTraderDumper_8cpp_html_abc68ad0fe9293fb2709e004ffe3fa333"><div class="ttname"><a href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a></div><div class="ttdeci">bool config(const char *cfgfile, bool isFile)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_8cpp_source.html#l00022">TraderDumper.cpp:22</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">ÂëΩÂêçÁ©∫Èó¥ÂÆö‰πâÂÆè</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aclassCUstpFtdcMduserApi_html"><div class="ttname"><a href="classCUstpFtdcMduserApi.html">CUstpFtdcMduserApi</a></div><div class="ttdef"><b>Definition</b> <a href="USTPFtdcMduserApi_8h_source.html#l00084">USTPFtdcMduserApi.h:85</a></div></div>
+<div class="ttc" id="aclassCUstpFtdcMduserSpi_html"><div class="ttname"><a href="classCUstpFtdcMduserSpi.html">CUstpFtdcMduserSpi</a></div><div class="ttdef"><b>Definition</b> <a href="USTPFtdcMduserApi_8h_source.html#l00029">USTPFtdcMduserApi.h:30</a></div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html"><div class="ttname"><a href="classIBaseDataMgr.html">IBaseDataMgr</a></div><div class="ttdoc">Âü∫Á°ÄÊï∞ÊçÆÁÆ°ÁêÜÂô®Êé•Âè£</div><div class="ttdef"><b>Definition</b> <a href="IBaseDataMgr_8h_source.html#l00075">IBaseDataMgr.h:76</a></div></div>
+<div class="ttc" id="aclassIParserApi_html"><div class="ttname"><a href="classIParserApi.html">IParserApi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00083">IParserApi.h:84</a></div></div>
+<div class="ttc" id="aclassIParserSpi_html"><div class="ttname"><a href="classIParserSpi.html">IParserSpi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00028">IParserApi.h:29</a></div></div>
+<div class="ttc" id="aclassParserFemas_html"><div class="ttname"><a href="classParserFemas.html">ParserFemas</a></div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00022">ParserFemas.h:23</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a0a9f6bff3b80c78420656c90602f8756"><div class="ttname"><a href="classParserFemas.html#a0a9f6bff3b80c78420656c90602f8756">ParserFemas::m_strFrontAddr</a></div><div class="ttdeci">std::string m_strFrontAddr</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00095">ParserFemas.h:95</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a193471fb037fbee765a806bfb3dae851"><div class="ttname"><a href="classParserFemas.html#a193471fb037fbee765a806bfb3dae851">ParserFemas::registerSpi</a></div><div class="ttdeci">virtual void registerSpi(IParserSpi *listener) override</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00459">ParserFemas.cpp:459</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a1e92ebab3269c6793c6790e1e612ca4a"><div class="ttname"><a href="classParserFemas.html#a1e92ebab3269c6793c6790e1e612ca4a">ParserFemas::OnRspSubMarketData</a></div><div class="ttdeci">virtual void OnRspSubMarketData(CUstpFtdcSpecificInstrumentField *pSpecificInstrument, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">∂©‘ƒ∫œ‘ºµƒœ‡πÿ–≈œ¢</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00333">ParserFemas.cpp:333</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a25168bf529f21e580fd255e9fc77125f"><div class="ttname"><a href="classParserFemas.html#a25168bf529f21e580fd255e9fc77125f">ParserFemas::ReqUserLogin</a></div><div class="ttdeci">void ReqUserLogin()</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00350">ParserFemas.cpp:350</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a3175a002867961887aff23f7416f67c4"><div class="ttname"><a href="classParserFemas.html#a3175a002867961887aff23f7416f67c4">ParserFemas::IsErrorRspInfo</a></div><div class="ttdeci">bool IsErrorRspInfo(CUstpFtdcRspInfoField *pRspInfo)</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00408">ParserFemas.cpp:408</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a3aef3984cdb85577bfe4b88db78bf3e2"><div class="ttname"><a href="classParserFemas.html#a3aef3984cdb85577bfe4b88db78bf3e2">ParserFemas::m_iRequestID</a></div><div class="ttdeci">int m_iRequestID</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00103">ParserFemas.h:103</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a3f98c7e1ae4a7eb384927cbbb226a684"><div class="ttname"><a href="classParserFemas.html#a3f98c7e1ae4a7eb384927cbbb226a684">ParserFemas::OnFrontDisconnected</a></div><div class="ttdeci">virtual void OnFrontDisconnected(int nReason)</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00201">ParserFemas.cpp:201</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a4719053a0c1655fca7ac5d39b87b1a31"><div class="ttname"><a href="classParserFemas.html#a4719053a0c1655fca7ac5d39b87b1a31">ParserFemas::OnRspUnSubMarketData</a></div><div class="ttdeci">virtual void OnRspUnSubMarketData(CUstpFtdcSpecificInstrumentField *pSpecificInstrument, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">ÕÀ∂©∫œ‘ºµƒœ‡πÿ–≈œ¢</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00210">ParserFemas.cpp:210</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a48369420b310d35ef43af1fe8012902f"><div class="ttname"><a href="classParserFemas.html#a48369420b310d35ef43af1fe8012902f">ParserFemas::subscribe</a></div><div class="ttdeci">virtual void subscribe(const CodeSet &amp;vecSymbols) override</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00413">ParserFemas.cpp:413</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a4c8e482a3a306548264ec3631f196632"><div class="ttname"><a href="classParserFemas.html#a4c8e482a3a306548264ec3631f196632">ParserFemas::connect</a></div><div class="ttdeci">virtual bool connect() override</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00139">ParserFemas.cpp:139</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a4ebd5702b55671fc9d34cdbfcadee130"><div class="ttname"><a href="classParserFemas.html#a4ebd5702b55671fc9d34cdbfcadee130">ParserFemas::m_hInst</a></div><div class="ttdeci">DllHandle m_hInst</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00108">ParserFemas.h:108</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a54666eec4b2185a315f38ffd98cbd434"><div class="ttname"><a href="classParserFemas.html#a54666eec4b2185a315f38ffd98cbd434">ParserFemas::m_funcCreator</a></div><div class="ttdeci">FemasCreator m_funcCreator</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00110">ParserFemas.h:110</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a5809298542414589221a83f1d718de70"><div class="ttname"><a href="classParserFemas.html#a5809298542414589221a83f1d718de70">ParserFemas::m_strUserID</a></div><div class="ttdeci">std::string m_strUserID</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00097">ParserFemas.h:97</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a5a55399d5c93f18c57f2d39304ff774c"><div class="ttname"><a href="classParserFemas.html#a5a55399d5c93f18c57f2d39304ff774c">ParserFemas::unsubscribe</a></div><div class="ttdeci">virtual void unsubscribe(const CodeSet &amp;vecSymbols) override</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00450">ParserFemas.cpp:450</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a5d8d4ce31f6047c410b964afcc549c36"><div class="ttname"><a href="classParserFemas.html#a5d8d4ce31f6047c410b964afcc549c36">ParserFemas::~ParserFemas</a></div><div class="ttdeci">virtual ~ParserFemas()</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00089">ParserFemas.cpp:89</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a6767f00a510321f5baa21ab77ebf7360"><div class="ttname"><a href="classParserFemas.html#a6767f00a510321f5baa21ab77ebf7360">ParserFemas::m_loginState</a></div><div class="ttdeci">LoginStatus m_loginState</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00092">ParserFemas.h:92</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a6ed33be651512b457b3caf12fffa6330"><div class="ttname"><a href="classParserFemas.html#a6ed33be651512b457b3caf12fffa6330">ParserFemas::m_strBroker</a></div><div class="ttdeci">std::string m_strBroker</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00096">ParserFemas.h:96</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a76bc5522b8f9c803c3db6294e7b8a414"><div class="ttname"><a href="classParserFemas.html#a76bc5522b8f9c803c3db6294e7b8a414">ParserFemas::OnRtnDepthMarketData</a></div><div class="ttdeci">virtual void OnRtnDepthMarketData(CUstpFtdcDepthMarketDataField *pDepthMarketData)</div><div class="ttdoc">…Ó∂»––«ÈÕ®÷™</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00215">ParserFemas.cpp:215</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a7f51c9ef3f7ca6cdba2f769aa02134e6"><div class="ttname"><a href="classParserFemas.html#a7f51c9ef3f7ca6cdba2f769aa02134e6">ParserFemas::LoginStatus</a></div><div class="ttdeci">LoginStatus</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00029">ParserFemas.h:30</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a7f51c9ef3f7ca6cdba2f769aa02134e6a42aca8130c3ad3fc2678cf60f7532707"><div class="ttname"><a href="classParserFemas.html#a7f51c9ef3f7ca6cdba2f769aa02134e6a42aca8130c3ad3fc2678cf60f7532707">ParserFemas::LS_LOGINING</a></div><div class="ttdeci">@ LS_LOGINING</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00032">ParserFemas.h:32</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a7f51c9ef3f7ca6cdba2f769aa02134e6a64cc1c42e9e9c4245df7fe64f0871688"><div class="ttname"><a href="classParserFemas.html#a7f51c9ef3f7ca6cdba2f769aa02134e6a64cc1c42e9e9c4245df7fe64f0871688">ParserFemas::LS_LOGINED</a></div><div class="ttdeci">@ LS_LOGINED</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00034">ParserFemas.h:33</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a7f51c9ef3f7ca6cdba2f769aa02134e6ae989ca3330181de505ad3cc1e21715a2"><div class="ttname"><a href="classParserFemas.html#a7f51c9ef3f7ca6cdba2f769aa02134e6ae989ca3330181de505ad3cc1e21715a2">ParserFemas::LS_NOTLOGIN</a></div><div class="ttdeci">@ LS_NOTLOGIN</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00031">ParserFemas.h:31</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_a88c7a9f5c6d752f1788b11238f37a696"><div class="ttname"><a href="classParserFemas.html#a88c7a9f5c6d752f1788b11238f37a696">ParserFemas::OnRspUserLogin</a></div><div class="ttdeci">virtual void OnRspUserLogin(CUstpFtdcRspUserLoginField *pRspUserLogin, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">∑Áøÿ«∞÷√œµÕ≥”√ªßµ«¬º”¶¥</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00177">ParserFemas.cpp:177</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_aa21b9e49248f85cc1479e440e6b6a2cd"><div class="ttname"><a href="classParserFemas.html#aa21b9e49248f85cc1479e440e6b6a2cd">ParserFemas::m_uTradingDate</a></div><div class="ttdeci">uint32_t m_uTradingDate</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00091">ParserFemas.h:91</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_aa28ed68518c29faa68a30ea2fb89cab7"><div class="ttname"><a href="classParserFemas.html#aa28ed68518c29faa68a30ea2fb89cab7">ParserFemas::FemasCreator</a></div><div class="ttdeci">CUstpFtdcMduserApi *(* FemasCreator)(const char *)</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00109">ParserFemas.h:109</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_aa43bc20a4e4319de591f5c9c8f9b3524"><div class="ttname"><a href="classParserFemas.html#aa43bc20a4e4319de591f5c9c8f9b3524">ParserFemas::ParserFemas</a></div><div class="ttdeci">ParserFemas()</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00081">ParserFemas.cpp:81</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_aacf9fb6228836df694eb70fb7f95032d"><div class="ttname"><a href="classParserFemas.html#aacf9fb6228836df694eb70fb7f95032d">ParserFemas::disconnect</a></div><div class="ttdeci">virtual bool disconnect() override</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00149">ParserFemas.cpp:149</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_ab2a6ac0f7f9baa320758b7829e5dbbbd"><div class="ttname"><a href="classParserFemas.html#ab2a6ac0f7f9baa320758b7829e5dbbbd">ParserFemas::m_strPassword</a></div><div class="ttdeci">std::string m_strPassword</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00098">ParserFemas.h:98</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_ab8113e7e28b8a1c086c9e68bea117cf8"><div class="ttname"><a href="classParserFemas.html#ab8113e7e28b8a1c086c9e68bea117cf8">ParserFemas::m_pBaseDataMgr</a></div><div class="ttdeci">IBaseDataMgr * m_pBaseDataMgr</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00106">ParserFemas.h:106</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_abdc3cd0704b1f0a18e32cef638e1730c"><div class="ttname"><a href="classParserFemas.html#abdc3cd0704b1f0a18e32cef638e1730c">ParserFemas::OnFrontConnected</a></div><div class="ttdeci">virtual void OnFrontConnected()</div><div class="ttdoc">µ±øÕªß∂À”ÎΩª“◊∫ÛÃ®Ω®¡¢∆Õ®–≈¡¨Ω” ±£®ªπŒ¥µ«¬º«∞£©£¨∏√∑Ω∑®±ªµ˜”√°£</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00166">ParserFemas.cpp:166</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_ac0349bfd5124d076db623198d2a189b6"><div class="ttname"><a href="classParserFemas.html#ac0349bfd5124d076db623198d2a189b6">ParserFemas::m_strFlowDir</a></div><div class="ttdeci">std::string m_strFlowDir</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00099">ParserFemas.h:99</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_acdda8d8c386dd4cb463c4c24b327952b"><div class="ttname"><a href="classParserFemas.html#acdda8d8c386dd4cb463c4c24b327952b">ParserFemas::OnRspUserLogout</a></div><div class="ttdeci">virtual void OnRspUserLogout(CUstpFtdcRspUserLogoutField *pUserLogout, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">ÁôªÂá∫ËØ∑Ê±ÇÂìçÂ∫î</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00193">ParserFemas.cpp:193</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_ad78d41fe7d76870408bb370587588ebe"><div class="ttname"><a href="classParserFemas.html#ad78d41fe7d76870408bb370587588ebe">ParserFemas::init</a></div><div class="ttdeci">virtual bool init(WTSVariant *config) override</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00094">ParserFemas.cpp:94</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_ad8885f40424ae75c7cc244e9d3709129"><div class="ttname"><a href="classParserFemas.html#ad8885f40424ae75c7cc244e9d3709129">ParserFemas::SubscribeMarketData</a></div><div class="ttdeci">void SubscribeMarketData()</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00371">ParserFemas.cpp:371</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_ae70c1b7e261de349d825338cdb9c4ef6"><div class="ttname"><a href="classParserFemas.html#ae70c1b7e261de349d825338cdb9c4ef6">ParserFemas::m_pUserAPI</a></div><div class="ttdeci">CUstpFtdcMduserApi * m_pUserAPI</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00093">ParserFemas.h:93</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_aea82220adb3626bb42996b62c9335d9b"><div class="ttname"><a href="classParserFemas.html#aea82220adb3626bb42996b62c9335d9b">ParserFemas::isConnected</a></div><div class="ttdeci">virtual bool isConnected() override</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00454">ParserFemas.cpp:454</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_aec23e6da3726f36a05a2ea165766d204"><div class="ttname"><a href="classParserFemas.html#aec23e6da3726f36a05a2ea165766d204">ParserFemas::OnRspError</a></div><div class="ttdeci">virtual void OnRspError(CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">¥ÌŒÛ”¶¥</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00161">ParserFemas.cpp:161</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_aeddafc16a6ccb6e02e9464f472d97c10"><div class="ttname"><a href="classParserFemas.html#aeddafc16a6ccb6e02e9464f472d97c10">ParserFemas::release</a></div><div class="ttdeci">virtual void release() override</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00134">ParserFemas.cpp:134</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_af61bae2bb6e92e841f33c5be0a4b7e0e"><div class="ttname"><a href="classParserFemas.html#af61bae2bb6e92e841f33c5be0a4b7e0e">ParserFemas::m_filterSubs</a></div><div class="ttdeci">CodeSet m_filterSubs</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00101">ParserFemas.h:101</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_af85c8583941e4f6397cc481e61d048f4"><div class="ttname"><a href="classParserFemas.html#af85c8583941e4f6397cc481e61d048f4">ParserFemas::m_sink</a></div><div class="ttdeci">IParserSpi * m_sink</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8h_source.html#l00105">ParserFemas.h:105</a></div></div>
+<div class="ttc" id="aclassParserFemas_html_af9acc354756cbf9670d9895619cda260"><div class="ttname"><a href="classParserFemas.html#af9acc354756cbf9670d9895619cda260">ParserFemas::OnHeartBeatWarning</a></div><div class="ttdeci">virtual void OnHeartBeatWarning(int nTimeLapse)</div><div class="ttdef"><b>Definition</b> <a href="ParserFemas_8cpp_source.html#l00344">ParserFemas.cpp:344</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">TickÊï∞ÊçÆÂØπË±°</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">ÂèòÈáèÁ±ª</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassfastest__hashset_3_01std_1_1string_01_4_html"><div class="ttname"><a href="classfastest__hashset_3_01std_1_1string_01_4.html">fastest_hashset&lt; std::string &gt;</a></div><div class="ttdoc">Â≠óÁ¨¶‰∏≤ÂÖÉÁ¥†ÁöÑÈ´òÊÄßËÉΩÂìàÂ∏åÈõÜÂêàÁ±ª</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00134">FasterDefs.h:135</a></div></div>
+<div class="ttc" id="astructCUstpFtdcDepthMarketDataField_html"><div class="ttname"><a href="structCUstpFtdcDepthMarketDataField.html">CUstpFtdcDepthMarketDataField</a></div><div class="ttdoc">…Ó∂»––«È</div><div class="ttdef"><b>Definition</b> <a href="USTPFtdcUserApiStruct_8h_source.html#l01363">USTPFtdcUserApiStruct.h:1364</a></div></div>
+<div class="ttc" id="astructCUstpFtdcRspInfoField_html"><div class="ttname"><a href="structCUstpFtdcRspInfoField.html">CUstpFtdcRspInfoField</a></div><div class="ttdoc">œÏ”¶–≈œ¢</div><div class="ttdef"><b>Definition</b> <a href="USTPFtdcUserApiStruct_8h_source.html#l00177">USTPFtdcUserApiStruct.h:178</a></div></div>
+<div class="ttc" id="astructCUstpFtdcRspUserLoginField_html"><div class="ttname"><a href="structCUstpFtdcRspUserLoginField.html">CUstpFtdcRspUserLoginField</a></div><div class="ttdoc">œµÕ≥”√ªßµ«¬º”¶¥</div><div class="ttdef"><b>Definition</b> <a href="USTPFtdcUserApiStruct_8h_source.html#l00019">USTPFtdcUserApiStruct.h:20</a></div></div>
+<div class="ttc" id="astructCUstpFtdcRspUserLogoutField_html"><div class="ttname"><a href="structCUstpFtdcRspUserLogoutField.html">CUstpFtdcRspUserLogoutField</a></div><div class="ttdoc">”√ªßµ«≥ˆœÏ”¶</div><div class="ttdef"><b>Definition</b> <a href="USTPFtdcUserApiStruct_8h_source.html#l00057">USTPFtdcUserApiStruct.h:58</a></div></div>
+<div class="ttc" id="astructCUstpFtdcSpecificInstrumentField_html"><div class="ttname"><a href="structCUstpFtdcSpecificInstrumentField.html">CUstpFtdcSpecificInstrumentField</a></div><div class="ttdoc">∂©‘ƒ∫œ‘ºµƒœ‡πÿ–≈œ¢</div><div class="ttdef"><b>Definition</b> <a href="USTPFtdcUserApiStruct_8h_source.html#l01481">USTPFtdcUserApiStruct.h:1482</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_0d64621afa33776e67095d57a53d24fc.html">ParserFemas</a></li><li class="navelem"><a class="el" href="ParserFemas_8h.html">ParserFemas.h</a></li>
+    <li class="footer">Âà∂‰ΩúËÄÖ <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

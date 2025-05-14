@@ -1,0 +1,28 @@
+var classWTSHotMgr =
+[
+    [ "CustomSwitchCodes", "classWTSHotMgr.html#a976e8cc145fa24ce87aeee089d673d57", null ],
+    [ "WTSHotMgr", "classWTSHotMgr.html#a72fb9deee2870191f53d628d9ca37d5d", null ],
+    [ "~WTSHotMgr", "classWTSHotMgr.html#ab7c39805871df267f6857c6e1ee4531d", null ],
+    [ "getCustomRawCode", "classWTSHotMgr.html#a27cb54b92f391819e351016d3423e516", null ],
+    [ "getPrevCustomRawCode", "classWTSHotMgr.html#a43a1722ece4a0be1c32df6bdc2978e7f", null ],
+    [ "getPrevRawCode", "classWTSHotMgr.html#a793914ca9876d3a159c137e92350ba9e", null ],
+    [ "getPrevSecondRawCode", "classWTSHotMgr.html#a2c8461ec2ee5683fc14db4cd38d7acd1", null ],
+    [ "getRawCode", "classWTSHotMgr.html#a5f177f4076a7090cd6c166b56538f1c0", null ],
+    [ "getRuleFactor", "classWTSHotMgr.html#a06bcea536e6a26c8b6376e0eee0bd7bb", null ],
+    [ "getRuleTag", "classWTSHotMgr.html#af21b6f42f09e9096e350803e442b91f2", null ],
+    [ "getSecondRawCode", "classWTSHotMgr.html#a5ad4c37a874c8a83bff62720538415af", null ],
+    [ "isCustomHot", "classWTSHotMgr.html#aa23caf5169325ec6a744d94b495c680d", null ],
+    [ "isHot", "classWTSHotMgr.html#aa560571d728b52d629ddc744d4bb2371", null ],
+    [ "isInitialized", "classWTSHotMgr.html#a4724d4f9bf7fa8c1f04ec59ad54e8cb6", null ],
+    [ "isSecond", "classWTSHotMgr.html#a8ccc2503183b11f1323849c0ec59f10a", null ],
+    [ "loadCustomRules", "classWTSHotMgr.html#aa7e2ffad8512d125d7682bc5c8c4c513", null ],
+    [ "loadHots", "classWTSHotMgr.html#a71b6166edde610379640b80ce8f4d556", null ],
+    [ "loadSeconds", "classWTSHotMgr.html#af260eb6c5857f8811e8c891196bece5e", null ],
+    [ "release", "classWTSHotMgr.html#a0440cf5c52262955eda60abe6b805658", null ],
+    [ "splitCustomSections", "classWTSHotMgr.html#aeb12140701c18c983835826f7e387721", null ],
+    [ "splitHotSecions", "classWTSHotMgr.html#a6584b38aa7d8396b73b303729c19d2b8", null ],
+    [ "splitSecondSecions", "classWTSHotMgr.html#a1fd4eef8806549d41395577cb1fb96aa", null ],
+    [ "m_bInitialized", "classWTSHotMgr.html#ab6557ffce79a2416227cf4ee7f7cc7c8", null ],
+    [ "m_mapCustCodes", "classWTSHotMgr.html#a3808dabe249a04089394b75e2c49744b", null ],
+    [ "m_mapCustRules", "classWTSHotMgr.html#a63fe6825a8405dd33e72b252f71cf16c", null ]
+];

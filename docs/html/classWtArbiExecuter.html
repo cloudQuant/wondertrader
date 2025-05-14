@@ -1,0 +1,2550 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: WtArbiExecuter类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classWtArbiExecuter.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-types">Private 类型</a> &#124;
+<a href="#pri-methods">Private 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classWtArbiExecuter-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">WtArbiExecuter类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>套利交易执行器  
+ <a href="classWtArbiExecuter.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structWtArbiExecuter_1_1__CodeGroup.html">_CodeGroup</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">代码组结构体  <a href="structWtArbiExecuter_1_1__CodeGroup.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a9cd8a70bdc9761157f2cdbbb151928b8" id="r_a9cd8a70bdc9761157f2cdbbb151928b8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a9cd8a70bdc9761157f2cdbbb151928b8">WtArbiExecuter</a> (<a class="el" href="classWtExecuterFactory.html">WtExecuterFactory</a> *factory, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="classIExecCommand.html#a219f6fab7624486ab96f4298ed304a7a">name</a>, <a class="el" href="classIDataManager.html">IDataManager</a> *dataMgr)</td></tr>
+<tr class="memdesc:a9cd8a70bdc9761157f2cdbbb151928b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a9cd8a70bdc9761157f2cdbbb151928b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af78f47ff41da48c93bdfed84dbe6afea" id="r_af78f47ff41da48c93bdfed84dbe6afea"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#af78f47ff41da48c93bdfed84dbe6afea">~WtArbiExecuter</a> ()</td></tr>
+<tr class="memdesc:af78f47ff41da48c93bdfed84dbe6afea"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:af78f47ff41da48c93bdfed84dbe6afea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6c49267ab14020788fba99cb181ccf6" id="r_af6c49267ab14020788fba99cb181ccf6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#af6c49267ab14020788fba99cb181ccf6">init</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *params)</td></tr>
+<tr class="memdesc:af6c49267ab14020788fba99cb181ccf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化执行器  <br /></td></tr>
+<tr class="separator:af6c49267ab14020788fba99cb181ccf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1ccea4e7479895ef7c3a7d689bcd0cd" id="r_ab1ccea4e7479895ef7c3a7d689bcd0cd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#ab1ccea4e7479895ef7c3a7d689bcd0cd">setTrader</a> (<a class="el" href="classTraderAdapter.html">TraderAdapter</a> *adapter)</td></tr>
+<tr class="memdesc:ab1ccea4e7479895ef7c3a7d689bcd0cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置交易适配器  <br /></td></tr>
+<tr class="separator:ab1ccea4e7479895ef7c3a7d689bcd0cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a503e9aba85bd3a4639fe6d6b3b135f5e" id="r_a503e9aba85bd3a4639fe6d6b3b135f5e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a503e9aba85bd3a4639fe6d6b3b135f5e">getTicks</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code, uint32_t count, uint64_t etime=0) override</td></tr>
+<tr class="memdesc:a503e9aba85bd3a4639fe6d6b3b135f5e"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取Tick切片数据  <br /></td></tr>
+<tr class="separator:a503e9aba85bd3a4639fe6d6b3b135f5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a958c8ca6d2f0335416f228691f6f4bd1" id="r_a958c8ca6d2f0335416f228691f6f4bd1"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a958c8ca6d2f0335416f228691f6f4bd1">grabLastTick</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code) override</td></tr>
+<tr class="memdesc:a958c8ca6d2f0335416f228691f6f4bd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取最新Tick数据  <br /></td></tr>
+<tr class="separator:a958c8ca6d2f0335416f228691f6f4bd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0761a4a75a3d740a608a0aefc8915122" id="r_a0761a4a75a3d740a608a0aefc8915122"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a0761a4a75a3d740a608a0aefc8915122">getPosition</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool validOnly=true, int32_t flag=3) override</td></tr>
+<tr class="memdesc:a0761a4a75a3d740a608a0aefc8915122"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取持仓量  <br /></td></tr>
+<tr class="separator:a0761a4a75a3d740a608a0aefc8915122"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9885f8e45c0ac457ef6b68cf8d3c7e45" id="r_a9885f8e45c0ac457ef6b68cf8d3c7e45"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="ExecuteDefs_8h.html#a424c526aff3f54c86ab554125b6873ba">OrderMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a9885f8e45c0ac457ef6b68cf8d3c7e45">getOrders</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code) override</td></tr>
+<tr class="memdesc:a9885f8e45c0ac457ef6b68cf8d3c7e45"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取当前委托  <br /></td></tr>
+<tr class="separator:a9885f8e45c0ac457ef6b68cf8d3c7e45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af16f95b8b4befa413a69db001d4e2b63" id="r_af16f95b8b4befa413a69db001d4e2b63"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#af16f95b8b4befa413a69db001d4e2b63">getUndoneQty</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code) override</td></tr>
+<tr class="memdesc:af16f95b8b4befa413a69db001d4e2b63"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取未完成数量  <br /></td></tr>
+<tr class="separator:af16f95b8b4befa413a69db001d4e2b63"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb28fcc2a6cd5f125bedf9c78b0d474d" id="r_aeb28fcc2a6cd5f125bedf9c78b0d474d"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#aeb28fcc2a6cd5f125bedf9c78b0d474d">buy</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, bool bForceClose=false) override</td></tr>
+<tr class="memdesc:aeb28fcc2a6cd5f125bedf9c78b0d474d"><td class="mdescLeft">&#160;</td><td class="mdescRight">买入委托  <br /></td></tr>
+<tr class="separator:aeb28fcc2a6cd5f125bedf9c78b0d474d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a910ca82ffa5f0649f3fae3d358d8c7c1" id="r_a910ca82ffa5f0649f3fae3d358d8c7c1"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a910ca82ffa5f0649f3fae3d358d8c7c1">sell</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, bool bForceClose=false) override</td></tr>
+<tr class="memdesc:a910ca82ffa5f0649f3fae3d358d8c7c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">卖出委托  <br /></td></tr>
+<tr class="separator:a910ca82ffa5f0649f3fae3d358d8c7c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0abeb395ce25e6f833a16201eab48fdb" id="r_a0abeb395ce25e6f833a16201eab48fdb"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a0abeb395ce25e6f833a16201eab48fdb">cancel</a> (uint32_t localid) override</td></tr>
+<tr class="memdesc:a0abeb395ce25e6f833a16201eab48fdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">撤销委托  <br /></td></tr>
+<tr class="separator:a0abeb395ce25e6f833a16201eab48fdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abfe856fafe0ba459db1ed682e789e1bf" id="r_abfe856fafe0ba459db1ed682e789e1bf"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#abfe856fafe0ba459db1ed682e789e1bf">cancel</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code, bool isBuy, double qty) override</td></tr>
+<tr class="memdesc:abfe856fafe0ba459db1ed682e789e1bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">撤销委托  <br /></td></tr>
+<tr class="separator:abfe856fafe0ba459db1ed682e789e1bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa52c67f4050a6909eb065b2a027c8093" id="r_aa52c67f4050a6909eb065b2a027c8093"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#aa52c67f4050a6909eb065b2a027c8093">writeLog</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message) override</td></tr>
+<tr class="memdesc:aa52c67f4050a6909eb065b2a027c8093"><td class="mdescLeft">&#160;</td><td class="mdescRight">输出日志  <br /></td></tr>
+<tr class="separator:aa52c67f4050a6909eb065b2a027c8093"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6bc12a112a7294ac58850818ca15b61" id="r_ad6bc12a112a7294ac58850818ca15b61"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSCommodityInfo.html">WTSCommodityInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#ad6bc12a112a7294ac58850818ca15b61">getCommodityInfo</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:ad6bc12a112a7294ac58850818ca15b61"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取商品信息  <br /></td></tr>
+<tr class="separator:ad6bc12a112a7294ac58850818ca15b61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a819121013b797554f706bff9fb02df23" id="r_a819121013b797554f706bff9fb02df23"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a819121013b797554f706bff9fb02df23">getSessionInfo</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a819121013b797554f706bff9fb02df23"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取交易时段信息  <br /></td></tr>
+<tr class="separator:a819121013b797554f706bff9fb02df23"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b98769a839f5ee17f24ef07c2c7f24f" id="r_a4b98769a839f5ee17f24ef07c2c7f24f"><td class="memItemLeft" align="right" valign="top">virtual uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a4b98769a839f5ee17f24ef07c2c7f24f">getCurTime</a> () override</td></tr>
+<tr class="memdesc:a4b98769a839f5ee17f24ef07c2c7f24f"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取当前时间  <br /></td></tr>
+<tr class="separator:a4b98769a839f5ee17f24ef07c2c7f24f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab41f1f069f961af5e8895095cacde75e" id="r_ab41f1f069f961af5e8895095cacde75e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#ab41f1f069f961af5e8895095cacde75e">set_position</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt; std::string, double &gt; &amp;targets) override</td></tr>
+<tr class="memdesc:ab41f1f069f961af5e8895095cacde75e"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置目标仓位  <br /></td></tr>
+<tr class="separator:ab41f1f069f961af5e8895095cacde75e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9ce943396215898ffc4c64a82f7287d" id="r_ac9ce943396215898ffc4c64a82f7287d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#ac9ce943396215898ffc4c64a82f7287d">on_position_changed</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double diffPos) override</td></tr>
+<tr class="memdesc:ac9ce943396215898ffc4c64a82f7287d"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理仓位变化  <br /></td></tr>
+<tr class="separator:ac9ce943396215898ffc4c64a82f7287d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af29d99212acc2ecfae41573687b71194" id="r_af29d99212acc2ecfae41573687b71194"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#af29d99212acc2ecfae41573687b71194">on_tick</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTickData.html">WTSTickData</a> *newTick) override</td></tr>
+<tr class="memdesc:af29d99212acc2ecfae41573687b71194"><td class="mdescLeft">&#160;</td><td class="mdescRight">行情数据回调  <br /></td></tr>
+<tr class="separator:af29d99212acc2ecfae41573687b71194"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca7e6c915a5d0b2f449aba2964d9e891" id="r_aca7e6c915a5d0b2f449aba2964d9e891"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#aca7e6c915a5d0b2f449aba2964d9e891">on_trade</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isBuy, double vol, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>) override</td></tr>
+<tr class="memdesc:aca7e6c915a5d0b2f449aba2964d9e891"><td class="mdescLeft">&#160;</td><td class="mdescRight">成交回报回调  <br /></td></tr>
+<tr class="separator:aca7e6c915a5d0b2f449aba2964d9e891"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab806e8521429ae06253d1fc146295aab" id="r_ab806e8521429ae06253d1fc146295aab"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#ab806e8521429ae06253d1fc146295aab">on_order</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isBuy, double totalQty, double leftQty, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, bool isCanceled=false) override</td></tr>
+<tr class="memdesc:ab806e8521429ae06253d1fc146295aab"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托回报回调  <br /></td></tr>
+<tr class="separator:ab806e8521429ae06253d1fc146295aab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1778def27d511707e8ea327b39fbc2f" id="r_ae1778def27d511707e8ea327b39fbc2f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#ae1778def27d511707e8ea327b39fbc2f">on_position</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday) override</td></tr>
+<tr class="memdesc:ae1778def27d511707e8ea327b39fbc2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">持仓更新回调  <br /></td></tr>
+<tr class="separator:ae1778def27d511707e8ea327b39fbc2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bc72d19849e53bca49005d0102b587d" id="r_a2bc72d19849e53bca49005d0102b587d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a2bc72d19849e53bca49005d0102b587d">on_entrust</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool bSuccess, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message) override</td></tr>
+<tr class="memdesc:a2bc72d19849e53bca49005d0102b587d"><td class="mdescLeft">&#160;</td><td class="mdescRight">下单结果回调  <br /></td></tr>
+<tr class="separator:a2bc72d19849e53bca49005d0102b587d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24405250b199827160a88a0e5759175f" id="r_a24405250b199827160a88a0e5759175f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a24405250b199827160a88a0e5759175f">on_channel_ready</a> () override</td></tr>
+<tr class="memdesc:a24405250b199827160a88a0e5759175f"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易通道就绪回调  <br /></td></tr>
+<tr class="separator:a24405250b199827160a88a0e5759175f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40c0a3af438c82f90e512cba0bb6d399" id="r_a40c0a3af438c82f90e512cba0bb6d399"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a40c0a3af438c82f90e512cba0bb6d399">on_channel_lost</a> () override</td></tr>
+<tr class="memdesc:a40c0a3af438c82f90e512cba0bb6d399"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易通道断开回调  <br /></td></tr>
+<tr class="separator:a40c0a3af438c82f90e512cba0bb6d399"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82471cd2a847fea4ab6c91525684236c" id="r_a82471cd2a847fea4ab6c91525684236c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a82471cd2a847fea4ab6c91525684236c">on_account</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="demo__send__order_8cpp.html#af75f83b1c7d27fcbd5fb60b382330d60">currency</a>, double prebalance, double balance, double dynbalance, double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw) override</td></tr>
+<tr class="memdesc:a82471cd2a847fea4ab6c91525684236c"><td class="mdescLeft">&#160;</td><td class="mdescRight">资金回报回调  <br /></td></tr>
+<tr class="separator:a82471cd2a847fea4ab6c91525684236c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classExecuteContext"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classExecuteContext')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classExecuteContext.html">ExecuteContext</a></td></tr>
+<tr class="memitem:a6b17848a559008190c5637c8d409ed02 inherit pub_methods_classExecuteContext" id="r_a6b17848a559008190c5637c8d409ed02"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExecuteContext.html#a6b17848a559008190c5637c8d409ed02">ExecuteContext</a> ()</td></tr>
+<tr class="separator:a6b17848a559008190c5637c8d409ed02 inherit pub_methods_classExecuteContext"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa12ae3e015f89e74a790e8c3c6b8ae13 inherit pub_methods_classExecuteContext" id="r_aa12ae3e015f89e74a790e8c3c6b8ae13"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExecuteContext.html#aa12ae3e015f89e74a790e8c3c6b8ae13">~ExecuteContext</a> ()</td></tr>
+<tr class="separator:aa12ae3e015f89e74a790e8c3c6b8ae13 inherit pub_methods_classExecuteContext"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17444bff7dd310a6a4ff876b2adb6e98 inherit pub_methods_classExecuteContext" id="r_a17444bff7dd310a6a4ff876b2adb6e98"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExecuteContext.html#a17444bff7dd310a6a4ff876b2adb6e98">registerTimer</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t elapse)</td></tr>
+<tr class="separator:a17444bff7dd310a6a4ff876b2adb6e98 inherit pub_methods_classExecuteContext"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classITrdNotifySink"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classITrdNotifySink')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classITrdNotifySink.html">ITrdNotifySink</a></td></tr>
+<tr class="memitem:a7996c695e786e2b9b1422941061f0955 inherit pub_methods_classITrdNotifySink" id="r_a7996c695e786e2b9b1422941061f0955"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#a7996c695e786e2b9b1422941061f0955">on_trade</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isLong, uint32_t offset, double vol, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>)=0</td></tr>
+<tr class="memdesc:a7996c695e786e2b9b1422941061f0955 inherit pub_methods_classITrdNotifySink"><td class="mdescLeft">&#160;</td><td class="mdescRight">成交回报回调函数  <br /></td></tr>
+<tr class="separator:a7996c695e786e2b9b1422941061f0955 inherit pub_methods_classITrdNotifySink"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7857e8863c1c0e8833782e62a1784b5 inherit pub_methods_classITrdNotifySink" id="r_ad7857e8863c1c0e8833782e62a1784b5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#ad7857e8863c1c0e8833782e62a1784b5">on_order</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, bool isCanceled=false)=0</td></tr>
+<tr class="memdesc:ad7857e8863c1c0e8833782e62a1784b5 inherit pub_methods_classITrdNotifySink"><td class="mdescLeft">&#160;</td><td class="mdescRight">订单回报回调函数  <br /></td></tr>
+<tr class="separator:ad7857e8863c1c0e8833782e62a1784b5 inherit pub_methods_classITrdNotifySink"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa504f5dec57747a86c1d17a392cabb2 inherit pub_methods_classITrdNotifySink" id="r_afa504f5dec57747a86c1d17a392cabb2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#afa504f5dec57747a86c1d17a392cabb2">on_channel_ready</a> (uint32_t tradingday)=0</td></tr>
+<tr class="memdesc:afa504f5dec57747a86c1d17a392cabb2 inherit pub_methods_classITrdNotifySink"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易通道就绪回调函数  <br /></td></tr>
+<tr class="separator:afa504f5dec57747a86c1d17a392cabb2 inherit pub_methods_classITrdNotifySink"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classIExecCommand"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classIExecCommand')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classIExecCommand.html">IExecCommand</a></td></tr>
+<tr class="memitem:a1f4a7e47f4fc600368b478519438db03 inherit pub_methods_classIExecCommand" id="r_a1f4a7e47f4fc600368b478519438db03"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIExecCommand.html#a1f4a7e47f4fc600368b478519438db03">IExecCommand</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="classIExecCommand.html#a219f6fab7624486ab96f4298ed304a7a">name</a>)</td></tr>
+<tr class="memdesc:a1f4a7e47f4fc600368b478519438db03 inherit pub_methods_classIExecCommand"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a1f4a7e47f4fc600368b478519438db03 inherit pub_methods_classIExecCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a788dd053e680e7a7198d1bd1f9690f2e inherit pub_methods_classIExecCommand" id="r_a788dd053e680e7a7198d1bd1f9690f2e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIExecCommand.html#a788dd053e680e7a7198d1bd1f9690f2e">setStub</a> (<a class="el" href="classIExecuterStub.html">IExecuterStub</a> *stub)</td></tr>
+<tr class="memdesc:a788dd053e680e7a7198d1bd1f9690f2e inherit pub_methods_classIExecCommand"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置执行器存根  <br /></td></tr>
+<tr class="separator:a788dd053e680e7a7198d1bd1f9690f2e inherit pub_methods_classIExecCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a219f6fab7624486ab96f4298ed304a7a inherit pub_methods_classIExecCommand" id="r_a219f6fab7624486ab96f4298ed304a7a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIExecCommand.html#a219f6fab7624486ab96f4298ed304a7a">name</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a219f6fab7624486ab96f4298ed304a7a inherit pub_methods_classIExecCommand"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取执行器名称  <br /></td></tr>
+<tr class="separator:a219f6fab7624486ab96f4298ed304a7a inherit pub_methods_classIExecCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6514449b049b0e7e6517ed24d3b6c1bc inherit pub_methods_classIExecCommand" id="r_a6514449b049b0e7e6517ed24d3b6c1bc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIExecCommand.html#a6514449b049b0e7e6517ed24d3b6c1bc">setName</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="classIExecCommand.html#a219f6fab7624486ab96f4298ed304a7a">name</a>)</td></tr>
+<tr class="memdesc:a6514449b049b0e7e6517ed24d3b6c1bc inherit pub_methods_classIExecCommand"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置执行器名称  <br /></td></tr>
+<tr class="separator:a6514449b049b0e7e6517ed24d3b6c1bc inherit pub_methods_classIExecCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 类型</h2></td></tr>
+<tr class="memitem:ab958be8f07059f6502d3624f65345f3a" id="r_ab958be8f07059f6502d3624f65345f3a"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structWtArbiExecuter_1_1__CodeGroup.html">WtArbiExecuter::_CodeGroup</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#ab958be8f07059f6502d3624f65345f3a">CodeGroup</a></td></tr>
+<tr class="memdesc:ab958be8f07059f6502d3624f65345f3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">代码组结构体  <br /></td></tr>
+<tr class="separator:ab958be8f07059f6502d3624f65345f3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf2bcbb4ae98edc59f3f9f0a71caa4f2" id="r_aaf2bcbb4ae98edc59f3f9f0a71caa4f2"><td class="memItemLeft" align="right" valign="top">typedef std::shared_ptr&lt; <a class="el" href="classWtArbiExecuter.html#ab958be8f07059f6502d3624f65345f3a">CodeGroup</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#aaf2bcbb4ae98edc59f3f9f0a71caa4f2">CodeGroupPtr</a></td></tr>
+<tr class="memdesc:aaf2bcbb4ae98edc59f3f9f0a71caa4f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">代码组共享指针类型定义  <br /></td></tr>
+<tr class="separator:aaf2bcbb4ae98edc59f3f9f0a71caa4f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c1c569b7ac1a6749a1520447e189e9d" id="r_a6c1c569b7ac1a6749a1520447e189e9d"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt; std::string, <a class="el" href="classWtArbiExecuter.html#aaf2bcbb4ae98edc59f3f9f0a71caa4f2">CodeGroupPtr</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a6c1c569b7ac1a6749a1520447e189e9d">CodeGroups</a></td></tr>
+<tr class="memdesc:a6c1c569b7ac1a6749a1520447e189e9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">代码组映射类型定义  <br /></td></tr>
+<tr class="separator:a6c1c569b7ac1a6749a1520447e189e9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1f05e6a66129859974a02ea8a76d231" id="r_ae1f05e6a66129859974a02ea8a76d231"><td class="memItemLeft" align="right" valign="top">typedef std::shared_ptr&lt; <a class="el" href="namespaceboost_1_1threadpool.html#a1e167909d0dce03e625576f80359b8fb">boost::threadpool::pool</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#ae1f05e6a66129859974a02ea8a76d231">ThreadPoolPtr</a></td></tr>
+<tr class="memdesc:ae1f05e6a66129859974a02ea8a76d231"><td class="mdescLeft">&#160;</td><td class="mdescRight">线程池指针类型定义  <br /></td></tr>
+<tr class="separator:ae1f05e6a66129859974a02ea8a76d231"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 成员函数</h2></td></tr>
+<tr class="memitem:a98e33eec307dc798b56a30c57ec91781" id="r_a98e33eec307dc798b56a30c57ec91781"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WtExecuterFactory_8h.html#a678dba302d5b187188bfd531f5db6963">ExecuteUnitPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a98e33eec307dc798b56a30c57ec91781">getUnit</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code, bool bAutoCreate=true)</td></tr>
+<tr class="memdesc:a98e33eec307dc798b56a30c57ec91781"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取单元执行器  <br /></td></tr>
+<tr class="separator:a98e33eec307dc798b56a30c57ec91781"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:a31be9d9623441466736b2aba7a55ea92" id="r_a31be9d9623441466736b2aba7a55ea92"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WtExecuterFactory_8h.html#a089ae60c07665a69a965819073af0eea">ExecuteUnitMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a31be9d9623441466736b2aba7a55ea92">_unit_map</a></td></tr>
+<tr class="memdesc:a31be9d9623441466736b2aba7a55ea92"><td class="mdescLeft">&#160;</td><td class="mdescRight">执行单元映射  <br /></td></tr>
+<tr class="separator:a31be9d9623441466736b2aba7a55ea92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab613f890053c75382dd6d7a3620d8b1c" id="r_ab613f890053c75382dd6d7a3620d8b1c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTraderAdapter.html">TraderAdapter</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#ab613f890053c75382dd6d7a3620d8b1c">_trader</a></td></tr>
+<tr class="memdesc:ab613f890053c75382dd6d7a3620d8b1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易适配器指针  <br /></td></tr>
+<tr class="separator:ab613f890053c75382dd6d7a3620d8b1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a581e26204a66a9e20b984473be666e47" id="r_a581e26204a66a9e20b984473be666e47"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtExecuterFactory.html">WtExecuterFactory</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a581e26204a66a9e20b984473be666e47">_factory</a></td></tr>
+<tr class="memdesc:a581e26204a66a9e20b984473be666e47"><td class="mdescLeft">&#160;</td><td class="mdescRight">执行器工厂指针  <br /></td></tr>
+<tr class="separator:a581e26204a66a9e20b984473be666e47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86df005671e4a94888ab52e05c265fd4" id="r_a86df005671e4a94888ab52e05c265fd4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIDataManager.html">IDataManager</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a86df005671e4a94888ab52e05c265fd4">_data_mgr</a></td></tr>
+<tr class="memdesc:a86df005671e4a94888ab52e05c265fd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">数据管理器指针  <br /></td></tr>
+<tr class="separator:a86df005671e4a94888ab52e05c265fd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a926ff2fdd5b73431e4a00028f740432e" id="r_a926ff2fdd5b73431e4a00028f740432e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a926ff2fdd5b73431e4a00028f740432e">_config</a></td></tr>
+<tr class="memdesc:a926ff2fdd5b73431e4a00028f740432e"><td class="mdescLeft">&#160;</td><td class="mdescRight">配置参数指针  <br /></td></tr>
+<tr class="separator:a926ff2fdd5b73431e4a00028f740432e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d74a0753a38a791fe1530331f8c42ef" id="r_a7d74a0753a38a791fe1530331f8c42ef"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a7d74a0753a38a791fe1530331f8c42ef">_scale</a></td></tr>
+<tr class="memdesc:a7d74a0753a38a791fe1530331f8c42ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">仓位放大倍数  <br /></td></tr>
+<tr class="separator:a7d74a0753a38a791fe1530331f8c42ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4bbc48087fdfec25c244cf615b1ffd0b" id="r_a4bbc48087fdfec25c244cf615b1ffd0b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a4bbc48087fdfec25c244cf615b1ffd0b">_auto_clear</a></td></tr>
+<tr class="memdesc:a4bbc48087fdfec25c244cf615b1ffd0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">是否自动清理上一期的主力合约头寸  <br /></td></tr>
+<tr class="separator:a4bbc48087fdfec25c244cf615b1ffd0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf5c3a865cc4441ae279ac9439666deb" id="r_aaf5c3a865cc4441ae279ac9439666deb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#aaf5c3a865cc4441ae279ac9439666deb">_strict_sync</a></td></tr>
+<tr class="memdesc:aaf5c3a865cc4441ae279ac9439666deb"><td class="mdescLeft">&#160;</td><td class="mdescRight">是否严格同步目标仓位  <br /></td></tr>
+<tr class="separator:aaf5c3a865cc4441ae279ac9439666deb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aacbe768c907f9f97b172af2feab7b82b" id="r_aacbe768c907f9f97b172af2feab7b82b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#aacbe768c907f9f97b172af2feab7b82b">_channel_ready</a></td></tr>
+<tr class="memdesc:aacbe768c907f9f97b172af2feab7b82b"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易通道是否就绪  <br /></td></tr>
+<tr class="separator:aacbe768c907f9f97b172af2feab7b82b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0656d9c61bbdcd0f2f7bb731fde9afa1" id="r_a0656d9c61bbdcd0f2f7bb731fde9afa1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classSpinMutex.html">SpinMutex</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a0656d9c61bbdcd0f2f7bb731fde9afa1">_mtx_units</a></td></tr>
+<tr class="memdesc:a0656d9c61bbdcd0f2f7bb731fde9afa1"><td class="mdescLeft">&#160;</td><td class="mdescRight">单元互斥锁  <br /></td></tr>
+<tr class="separator:a0656d9c61bbdcd0f2f7bb731fde9afa1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f2c2d05e85cc2df969704caac70cd55" id="r_a9f2c2d05e85cc2df969704caac70cd55"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtArbiExecuter.html#a6c1c569b7ac1a6749a1520447e189e9d">CodeGroups</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a9f2c2d05e85cc2df969704caac70cd55">_groups</a></td></tr>
+<tr class="memdesc:a9f2c2d05e85cc2df969704caac70cd55"><td class="mdescLeft">&#160;</td><td class="mdescRight">组映射集合  <br /></td></tr>
+<tr class="separator:a9f2c2d05e85cc2df969704caac70cd55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a093b6cd2d8ef6ee04b2786d238df5e77" id="r_a093b6cd2d8ef6ee04b2786d238df5e77"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtArbiExecuter.html#a6c1c569b7ac1a6749a1520447e189e9d">CodeGroups</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a093b6cd2d8ef6ee04b2786d238df5e77">_code_to_groups</a></td></tr>
+<tr class="memdesc:a093b6cd2d8ef6ee04b2786d238df5e77"><td class="mdescLeft">&#160;</td><td class="mdescRight">合约到组的映射  <br /></td></tr>
+<tr class="separator:a093b6cd2d8ef6ee04b2786d238df5e77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1606ee3ab8c09c30a8ec27b33d1632c2" id="r_a1606ee3ab8c09c30a8ec27b33d1632c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classwt__hashset.html">wt_hashset</a>&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a1606ee3ab8c09c30a8ec27b33d1632c2">_clear_includes</a></td></tr>
+<tr class="memdesc:a1606ee3ab8c09c30a8ec27b33d1632c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">自动清理包含品种集合  <br /></td></tr>
+<tr class="separator:a1606ee3ab8c09c30a8ec27b33d1632c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8a7d9d02437ac965ceb47a691db40b7" id="r_ab8a7d9d02437ac965ceb47a691db40b7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classwt__hashset.html">wt_hashset</a>&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#ab8a7d9d02437ac965ceb47a691db40b7">_clear_excludes</a></td></tr>
+<tr class="memdesc:ab8a7d9d02437ac965ceb47a691db40b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">自动清理排除品种集合  <br /></td></tr>
+<tr class="separator:ab8a7d9d02437ac965ceb47a691db40b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d1296cae293d92a913309080f4db91b" id="r_a5d1296cae293d92a913309080f4db91b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classwt__hashset.html">wt_hashset</a>&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a5d1296cae293d92a913309080f4db91b">_channel_holds</a></td></tr>
+<tr class="memdesc:a5d1296cae293d92a913309080f4db91b"><td class="mdescLeft">&#160;</td><td class="mdescRight">通道持仓集合  <br /></td></tr>
+<tr class="separator:a5d1296cae293d92a913309080f4db91b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab26a37e8765f17fdc160a6055354c3ca" id="r_ab26a37e8765f17fdc160a6055354c3ca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt; std::string, double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#ab26a37e8765f17fdc160a6055354c3ca">_target_pos</a></td></tr>
+<tr class="memdesc:ab26a37e8765f17fdc160a6055354c3ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">目标仓位映射  <br /></td></tr>
+<tr class="separator:ab26a37e8765f17fdc160a6055354c3ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55fae5eb4da82b50e766f0182ec0cf7b" id="r_a55fae5eb4da82b50e766f0182ec0cf7b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtArbiExecuter.html#ae1f05e6a66129859974a02ea8a76d231">ThreadPoolPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtArbiExecuter.html#a55fae5eb4da82b50e766f0182ec0cf7b">_pool</a></td></tr>
+<tr class="memdesc:a55fae5eb4da82b50e766f0182ec0cf7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">线程池指针  <br /></td></tr>
+<tr class="separator:a55fae5eb4da82b50e766f0182ec0cf7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+额外继承的成员函数</h2></td></tr>
+<tr class="inherit_header pro_attribs_classIExecCommand"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classIExecCommand')"><img src="closed.png" alt="-"/>&#160;Protected 属性 继承自 <a class="el" href="classIExecCommand.html">IExecCommand</a></td></tr>
+<tr class="memitem:adfcf1bd6b0df30e65a59a2e0b1bacbe8 inherit pro_attribs_classIExecCommand" id="r_adfcf1bd6b0df30e65a59a2e0b1bacbe8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIExecuterStub.html">IExecuterStub</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIExecCommand.html#adfcf1bd6b0df30e65a59a2e0b1bacbe8">_stub</a></td></tr>
+<tr class="memdesc:adfcf1bd6b0df30e65a59a2e0b1bacbe8 inherit pro_attribs_classIExecCommand"><td class="mdescLeft">&#160;</td><td class="mdescRight">执行器存根指针  <br /></td></tr>
+<tr class="separator:adfcf1bd6b0df30e65a59a2e0b1bacbe8 inherit pro_attribs_classIExecCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac942a1f4f5879866387d8971c0fa1c4d inherit pro_attribs_classIExecCommand" id="r_ac942a1f4f5879866387d8971c0fa1c4d"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIExecCommand.html#ac942a1f4f5879866387d8971c0fa1c4d">_name</a></td></tr>
+<tr class="memdesc:ac942a1f4f5879866387d8971c0fa1c4d inherit pro_attribs_classIExecCommand"><td class="mdescLeft">&#160;</td><td class="mdescRight">执行器名称  <br /></td></tr>
+<tr class="separator:ac942a1f4f5879866387d8971c0fa1c4d inherit pro_attribs_classIExecCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>套利交易执行器 </p>
+<p>用于处理多个相关合约的组合交易和套利策略执行，支持合约组管理及自动仓位清理</p>
+<p>继承自ExecuteContext、ITrdNotifySink和IExecCommand，实现执行环境、交易通知和执行命令接口 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00030">30</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="ab958be8f07059f6502d3624f65345f3a" name="ab958be8f07059f6502d3624f65345f3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab958be8f07059f6502d3624f65345f3a">&#9670;&#160;</a></span>CodeGroup</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structWtArbiExecuter_1_1__CodeGroup.html">WtArbiExecuter::_CodeGroup</a> <a class="el" href="classWtArbiExecuter.html#ab958be8f07059f6502d3624f65345f3a">WtArbiExecuter::CodeGroup</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>代码组结构体 </p>
+<p>定义了一组相关合约及其权重，用于套利交易 </p>
+
+</div>
+</div>
+<a id="aaf2bcbb4ae98edc59f3f9f0a71caa4f2" name="aaf2bcbb4ae98edc59f3f9f0a71caa4f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf2bcbb4ae98edc59f3f9f0a71caa4f2">&#9670;&#160;</a></span>CodeGroupPtr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::shared_ptr&lt;<a class="el" href="classWtArbiExecuter.html#ab958be8f07059f6502d3624f65345f3a">CodeGroup</a>&gt; <a class="el" href="classWtArbiExecuter.html#aaf2bcbb4ae98edc59f3f9f0a71caa4f2">WtArbiExecuter::CodeGroupPtr</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>代码组共享指针类型定义 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00377">377</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6c1c569b7ac1a6749a1520447e189e9d" name="a6c1c569b7ac1a6749a1520447e189e9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c1c569b7ac1a6749a1520447e189e9d">&#9670;&#160;</a></span>CodeGroups</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt;std::string, <a class="el" href="classWtArbiExecuter.html#aaf2bcbb4ae98edc59f3f9f0a71caa4f2">CodeGroupPtr</a>&gt; <a class="el" href="classWtArbiExecuter.html#a6c1c569b7ac1a6749a1520447e189e9d">WtArbiExecuter::CodeGroups</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>代码组映射类型定义 </p>
+<p>从字符串(组名或合约代码)到代码组的映射 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00383">383</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae1f05e6a66129859974a02ea8a76d231" name="ae1f05e6a66129859974a02ea8a76d231"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1f05e6a66129859974a02ea8a76d231">&#9670;&#160;</a></span>ThreadPoolPtr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::shared_ptr&lt;<a class="el" href="namespaceboost_1_1threadpool.html#a1e167909d0dce03e625576f80359b8fb">boost::threadpool::pool</a>&gt; <a class="el" href="classWtArbiExecuter.html#ae1f05e6a66129859974a02ea8a76d231">WtArbiExecuter::ThreadPoolPtr</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>线程池指针类型定义 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00424">424</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a9cd8a70bdc9761157f2cdbbb151928b8" name="a9cd8a70bdc9761157f2cdbbb151928b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9cd8a70bdc9761157f2cdbbb151928b8">&#9670;&#160;</a></span>WtArbiExecuter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">WtArbiExecuter::WtArbiExecuter </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWtExecuterFactory.html">WtExecuterFactory</a> *&#160;</td>
+          <td class="paramname"><em>factory</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classIDataManager.html">IDataManager</a> *&#160;</td>
+          <td class="paramname"><em>dataMgr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">factory</td><td>执行器工厂指针 </td></tr>
+    <tr><td class="paramname">name</td><td>执行器名称 </td></tr>
+    <tr><td class="paramname">dataMgr</td><td>数据管理器指针</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>初始化套利交易执行器对象，设置基本参数和初始状态 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">factory</td><td>执行器工厂指针，用于创建执行单元 </td></tr>
+    <tr><td class="paramname">name</td><td>执行器名称 </td></tr>
+    <tr><td class="paramname">dataMgr</td><td>数据管理器指针，用于获取市场数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00033">33</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af78f47ff41da48c93bdfed84dbe6afea" name="af78f47ff41da48c93bdfed84dbe6afea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af78f47ff41da48c93bdfed84dbe6afea">&#9670;&#160;</a></span>~WtArbiExecuter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">WtArbiExecuter::~WtArbiExecuter </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>析构函数 </p>
+<p>清理套利交易执行器资源，等待线程池中的任务完成 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00049">49</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="aeb28fcc2a6cd5f125bedf9c78b0d474d" name="aeb28fcc2a6cd5f125bedf9c78b0d474d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb28fcc2a6cd5f125bedf9c78b0d474d">&#9670;&#160;</a></span>buy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a> WtArbiExecuter::buy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>qty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bForceClose</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>买入委托 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">qty</td><td>委托数量 </td></tr>
+    <tr><td class="paramname">bForceClose</td><td>是否强制平仓，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>委托ID列表</dd></dl>
+<p>发出买入委托并返回委托ID列表</p>
+<p>发出买入委托，需要交易通道就绪 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">qty</td><td>委托数量 </td></tr>
+    <tr><td class="paramname">bForceClose</td><td>是否强制平仓，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>委托ID列表 </dd></dl>
+
+<p>实现了 <a class="el" href="classExecuteContext.html#ad5b96482a5adbffcbe6adcec85062069">ExecuteContext</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00292">292</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abfe856fafe0ba459db1ed682e789e1bf" name="abfe856fafe0ba459db1ed682e789e1bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abfe856fafe0ba459db1ed682e789e1bf">&#9670;&#160;</a></span>cancel() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a> WtArbiExecuter::cancel </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isBuy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>qty</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>撤销委托 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否买入方向 </td></tr>
+    <tr><td class="paramname">qty</td><td>要撤销的数量 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>撤销的委托ID列表</dd></dl>
+<p>根据合约代码、方向和数量撤销委托</p>
+<p>根据合约代码、方向和数量撤销委托，需要交易通道就绪 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否买入方向 </td></tr>
+    <tr><td class="paramname">qty</td><td>要撤销的数量 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>撤销的委托ID列表 </dd></dl>
+
+<p>实现了 <a class="el" href="classExecuteContext.html#a26e5d62824da7b8ed0608586c491a58e">ExecuteContext</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00339">339</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0abeb395ce25e6f833a16201eab48fdb" name="a0abeb395ce25e6f833a16201eab48fdb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0abeb395ce25e6f833a16201eab48fdb">&#9670;&#160;</a></span>cancel() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtArbiExecuter::cancel </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>撤销委托 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否撤销成功</dd></dl>
+<p>根据本地委托ID撤销对应的委托</p>
+<p>根据委托ID撤销指定委托，需要交易通道就绪 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否撤销成功 </dd></dl>
+
+<p>实现了 <a class="el" href="classExecuteContext.html#a88db874b39b748a48c7202b8e1afe465">ExecuteContext</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00323">323</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad6bc12a112a7294ac58850818ca15b61" name="ad6bc12a112a7294ac58850818ca15b61"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6bc12a112a7294ac58850818ca15b61">&#9670;&#160;</a></span>getCommodityInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSCommodityInfo.html">WTSCommodityInfo</a> * WtArbiExecuter::getCommodityInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取商品信息 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>商品信息指针</dd></dl>
+<p>获取指定合约的商品信息</p>
+<p>从执行器绑定的执行核心中获取商品信息 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>商品信息指针 </dd></dl>
+
+<p>实现了 <a class="el" href="classExecuteContext.html#ae6fa522f07edb6ac83433c85f1781701">ExecuteContext</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00366">366</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4b98769a839f5ee17f24ef07c2c7f24f" name="a4b98769a839f5ee17f24ef07c2c7f24f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b98769a839f5ee17f24ef07c2c7f24f">&#9670;&#160;</a></span>getCurTime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t WtArbiExecuter::getCurTime </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取当前时间 </p>
+<dl class="section return"><dt>返回</dt><dd>当前时间戳</dd></dl>
+<p>获取系统当前时间</p>
+<p>从执行器绑定的执行核心中获取当前时间 </p><dl class="section return"><dt>返回</dt><dd>当前时间戳 </dd></dl>
+
+<p>实现了 <a class="el" href="classExecuteContext.html#a0c5166e6ce2d5f9b1d35d8344168a60c">ExecuteContext</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00387">387</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9885f8e45c0ac457ef6b68cf8d3c7e45" name="a9885f8e45c0ac457ef6b68cf8d3c7e45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9885f8e45c0ac457ef6b68cf8d3c7e45">&#9670;&#160;</a></span>getOrders()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="ExecuteDefs_8h.html#a424c526aff3f54c86ab554125b6873ba">OrderMap</a> * WtArbiExecuter::getOrders </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取当前委托 </p>
+<p>获取委托映射</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>委托映射指针</dd></dl>
+<p>获取指定合约的当前委托映射</p>
+<p>从交易适配器中获取指定合约的委托映射 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>委托映射指针 </dd></dl>
+
+<p>实现了 <a class="el" href="classExecuteContext.html#ab30571e1d5ba4021234ee69e26ee46cf">ExecuteContext</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00275">275</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0761a4a75a3d740a608a0aefc8915122" name="a0761a4a75a3d740a608a0aefc8915122"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0761a4a75a3d740a608a0aefc8915122">&#9670;&#160;</a></span>getPosition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double WtArbiExecuter::getPosition </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>validOnly</em> = <code>true</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>flag</em> = <code>3</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取持仓量 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">validOnly</td><td>是否只计算有效仓位，默认为true </td></tr>
+    <tr><td class="paramname">flag</td><td>仓位标记，默认为3 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>持仓数量</dd></dl>
+<p>获取指定合约的持仓量</p>
+<p>从交易适配器中获取指定合约的持仓量 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">validOnly</td><td>是否只计算有效仓位，默认为true </td></tr>
+    <tr><td class="paramname">flag</td><td>仓位标记，默认为3 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>持仓数量 </dd></dl>
+
+<p>实现了 <a class="el" href="classExecuteContext.html#a6bb4ea0c60971f58aff468a66bf95ccc">ExecuteContext</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00247">247</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a819121013b797554f706bff9fb02df23" name="a819121013b797554f706bff9fb02df23"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a819121013b797554f706bff9fb02df23">&#9670;&#160;</a></span>getSessionInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSSessionInfo.html">WTSSessionInfo</a> * WtArbiExecuter::getSessionInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取交易时段信息 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>交易时段信息指针</dd></dl>
+<p>获取指定合约的交易时段信息</p>
+<p>从执行器绑定的执行核心中获取交易时段信息 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>交易时段信息指针 </dd></dl>
+
+<p>实现了 <a class="el" href="classExecuteContext.html#a635991621d7d5230139789ad1033b8b7">ExecuteContext</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00377">377</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a503e9aba85bd3a4639fe6d6b3b135f5e" name="a503e9aba85bd3a4639fe6d6b3b135f5e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a503e9aba85bd3a4639fe6d6b3b135f5e">&#9670;&#160;</a></span>getTicks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> * WtArbiExecuter::getTicks </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取Tick切片数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">count</td><td>请求的Tick数量 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0表示当前 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>Tick切片数据指针</dd></dl>
+<p>获取指定合约的历史Tick数据切片</p>
+<p>从数据管理器获取指定合约的Tick切片数据 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">count</td><td>请求的Tick数量 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0表示当前 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>Tick切片数据指针 </dd></dl>
+
+<p>实现了 <a class="el" href="classExecuteContext.html#a2f86a66347bf7e81d98ef882e373f563">ExecuteContext</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00217">217</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af16f95b8b4befa413a69db001d4e2b63" name="af16f95b8b4befa413a69db001d4e2b63"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af16f95b8b4befa413a69db001d4e2b63">&#9670;&#160;</a></span>getUndoneQty()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double WtArbiExecuter::getUndoneQty </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取未完成数量 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>未完成数量</dd></dl>
+<p>获取指定合约的未完成委托数量</p>
+<p>从交易适配器中获取指定合约的未完成委托数量 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>未完成委托数量 </dd></dl>
+
+<p>实现了 <a class="el" href="classExecuteContext.html#a86166d2d0a06026fed4e9f7c30df697a">ExecuteContext</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00261">261</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a98e33eec307dc798b56a30c57ec91781" name="a98e33eec307dc798b56a30c57ec91781"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98e33eec307dc798b56a30c57ec91781">&#9670;&#160;</a></span>getUnit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WtExecuterFactory_8h.html#a678dba302d5b187188bfd531f5db6963">ExecuteUnitPtr</a> WtArbiExecuter::getUnit </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAutoCreate</em> = <code>true</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取单元执行器 </p>
+<p>获取执行单元</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">bAutoCreate</td><td>是否自动创建，默认为true </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>单元执行器指针</dd></dl>
+<p>根据合约代码获取单元执行器，如果不存在且bAutoCreate为true则自动创建</p>
+<p>根据标准合约代码获取执行单元，如果单元不存在且允许自动创建，则创建新的执行单元 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">bAutoCreate</td><td>是否自动创建，默认为true </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>执行单元指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00163">163</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a958c8ca6d2f0335416f228691f6f4bd1" name="a958c8ca6d2f0335416f228691f6f4bd1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a958c8ca6d2f0335416f228691f6f4bd1">&#9670;&#160;</a></span>grabLastTick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSTickData.html">WTSTickData</a> * WtArbiExecuter::grabLastTick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取最新Tick数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>最新Tick数据指针</dd></dl>
+<p>获取指定合约的最新市场Tick数据</p>
+<p>从数据管理器中获取指定合约的最新Tick数据 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>最新Tick数据指针 </dd></dl>
+
+<p>实现了 <a class="el" href="classExecuteContext.html#ae2b3ad4268781a205e521afe2002ba0a">ExecuteContext</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00231">231</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af6c49267ab14020788fba99cb181ccf6" name="af6c49267ab14020788fba99cb181ccf6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6c49267ab14020788fba99cb181ccf6">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtArbiExecuter::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>params</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化执行器 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">params</td><td>初始化参数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否初始化成功</dd></dl>
+<p>根据传入的参数配置初始化套利执行器，设置参数如自动清理模式、放大倍数等</p>
+<p>根据传入的参数配置初始化套利执行器，设置缩放倍数、自动清理策略、线程池和合约组 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">params</td><td>初始化参数，包含执行器的各种配置 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否初始化成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00074">74</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a82471cd2a847fea4ab6c91525684236c" name="a82471cd2a847fea4ab6c91525684236c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82471cd2a847fea4ab6c91525684236c">&#9670;&#160;</a></span>on_account()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtArbiExecuter::on_account </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>currency</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>prebalance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>balance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>dynbalance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>avaliable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>closeprofit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>dynprofit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>margin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>fee</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>deposit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>withdraw</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>资金回报回调 </p>
+<p>处理账户资金更新</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">currency</td><td>货币代码 </td></tr>
+    <tr><td class="paramname">prebalance</td><td>之前的余额 </td></tr>
+    <tr><td class="paramname">balance</td><td>当前的余额 </td></tr>
+    <tr><td class="paramname">dynbalance</td><td>动态余额 </td></tr>
+    <tr><td class="paramname">avaliable</td><td>可用余额 </td></tr>
+    <tr><td class="paramname">closeprofit</td><td>平仓盈亏 </td></tr>
+    <tr><td class="paramname">dynprofit</td><td>动态盈亏 </td></tr>
+    <tr><td class="paramname">margin</td><td>保证金 </td></tr>
+    <tr><td class="paramname">fee</td><td>手续费 </td></tr>
+    <tr><td class="paramname">deposit</td><td>入金金额 </td></tr>
+    <tr><td class="paramname">withdraw</td><td>出金金额</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>处理资金变化的回调函数</p>
+<p>接收并处理账户资金更新通知，将资金信息转发给所有的执行单元 通过循环遍历所有执行单元，将账户资金信息转发给每一个执行单元 如果启用了线程池，则在独立线程中异步处理 否则在当前线程中同步处理 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">currency</td><td>货币代码 </td></tr>
+    <tr><td class="paramname">prebalance</td><td>前一交易日结算后的账户余额 </td></tr>
+    <tr><td class="paramname">balance</td><td>当前结算后的账户余额 </td></tr>
+    <tr><td class="paramname">dynbalance</td><td>动态权益（包含浮动盈亏） </td></tr>
+    <tr><td class="paramname">avaliable</td><td>可用资金 </td></tr>
+    <tr><td class="paramname">closeprofit</td><td>平仓盈亏 </td></tr>
+    <tr><td class="paramname">dynprofit</td><td>浮动盈亏 </td></tr>
+    <tr><td class="paramname">margin</td><td>保证金 </td></tr>
+    <tr><td class="paramname">fee</td><td>手续费 </td></tr>
+    <tr><td class="paramname">deposit</td><td>入金 </td></tr>
+    <tr><td class="paramname">withdraw</td><td>出金 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classITrdNotifySink.html#a48aff2eda862be2f42b06bfeb7fe8966">ITrdNotifySink</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00779">779</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a40c0a3af438c82f90e512cba0bb6d399" name="a40c0a3af438c82f90e512cba0bb6d399"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40c0a3af438c82f90e512cba0bb6d399">&#9670;&#160;</a></span>on_channel_lost()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtArbiExecuter::on_channel_lost </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易通道断开回调 </p>
+<p>处理交易通道丢失事件</p>
+<p>处理交易通道断开状态的回调函数</p>
+<p>当交易通道丢失时，更新内部通道状态并通知所有执行单元 通过循环遍历所有执行单元，将通道丢失事件转发给每一个执行单元 如果启用了线程池，则在独立线程中异步处理 否则在当前线程中同步处理 </p>
+
+<p>实现了 <a class="el" href="classITrdNotifySink.html#aeae96c9f4a81d07d8d818f764c5a2174">ITrdNotifySink</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00738">738</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a24405250b199827160a88a0e5759175f" name="a24405250b199827160a88a0e5759175f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24405250b199827160a88a0e5759175f">&#9670;&#160;</a></span>on_channel_ready()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtArbiExecuter::on_channel_ready </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易通道就绪回调 </p>
+<p>处理交易通道就绪事件</p>
+<p>处理交易通道就绪状态的回调函数</p>
+<p>当交易通道就绪时，更新内部通道就绪状态并通知所有执行单元 通过循环遍历所有执行单元，将通道就绪事件转发给每一个执行单元 如果启用了线程池，则在独立线程中异步处理 否则在当前线程中同步处理 </p>
+
+<p>实现了 <a class="el" href="classITrdNotifySink.html#a11c67f1886dfc6065f8dfd7114174f89">ITrdNotifySink</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00707">707</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2bc72d19849e53bca49005d0102b587d" name="a2bc72d19849e53bca49005d0102b587d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2bc72d19849e53bca49005d0102b587d">&#9670;&#160;</a></span>on_entrust()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtArbiExecuter::on_entrust </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bSuccess</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>下单结果回调 </p>
+<p>处理委托下达回报</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">bSuccess</td><td>是否成功 </td></tr>
+    <tr><td class="paramname">message</td><td>错误消息（如有）</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>处理下单请求结果的回调函数</p>
+<p>接收并处理委托下达回报，将委托下达结果转发给相应的执行单元 委托下达回报包含委托是否成功下达以及相关消息 如果启用了线程池，则在独立线程中异步处理 否则在当前线程中同步处理 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">bSuccess</td><td>委托是否成功下达 </td></tr>
+    <tr><td class="paramname">message</td><td>相关消息，如错误原因 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classITrdNotifySink.html#a07fdff40e8b5fc42c7d6f13e1fe23ab4">ITrdNotifySink</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00679">679</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab806e8521429ae06253d1fc146295aab" name="ab806e8521429ae06253d1fc146295aab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab806e8521429ae06253d1fc146295aab">&#9670;&#160;</a></span>on_order()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtArbiExecuter::on_order </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isBuy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>totalQty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>leftQty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isCanceled</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>委托回报回调 </p>
+<p>处理委托回报</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否买入方向 </td></tr>
+    <tr><td class="paramname">totalQty</td><td>总数量 </td></tr>
+    <tr><td class="paramname">leftQty</td><td>剩余数量 </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">isCanceled</td><td>是否已撤销，默认为false</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>处理委托状态变化的回调函数</p>
+<p>接收并处理委托回报，将委托信息转发给相应的执行单元 如果启用了线程池，则在独立线程中异步处理委托信息 否则在当前线程中同步处理 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否买入方向 </td></tr>
+    <tr><td class="paramname">totalQty</td><td>总委托数量 </td></tr>
+    <tr><td class="paramname">leftQty</td><td>剩余委托数量 </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">isCanceled</td><td>是否已撤销，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>实现了 <a class="el" href="classITrdNotifySink.html#a6d94f7d9a478a10b74aa5c22fd64442b">ITrdNotifySink</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00648">648</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae1778def27d511707e8ea327b39fbc2f" name="ae1778def27d511707e8ea327b39fbc2f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1778def27d511707e8ea327b39fbc2f">&#9670;&#160;</a></span>on_position()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtArbiExecuter::on_position </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isLong</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>prevol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>preavail</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>newvol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>newavail</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>tradingday</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>持仓更新回调 </p>
+<p>处理持仓更新通知</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isLong</td><td>是否多头仓位 </td></tr>
+    <tr><td class="paramname">prevol</td><td>之前的总仓位 </td></tr>
+    <tr><td class="paramname">preavail</td><td>之前的可用仓位 </td></tr>
+    <tr><td class="paramname">newvol</td><td>新的总仓位 </td></tr>
+    <tr><td class="paramname">newavail</td><td>新的可用仓位 </td></tr>
+    <tr><td class="paramname">tradingday</td><td>交易日</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>处理持仓变化的回调函数</p>
+<p>接收交易账户持仓更新通知，处理两个主要功能：</p><ol type="1">
+<li>记录交易通道持有的合约到集合中，用于后续严格同步功能</li>
+<li>实现过期主力合约自动清理功能：<ul>
+<li>首先检查是否启用了自动清理功能</li>
+<li>然后判断是否为分月期货合约</li>
+<li>确认当前合约是否为上一期的主力合约</li>
+<li>考虑排除列表和包含列表的设置</li>
+<li>最后执行自动清理操作 <dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isLong</td><td>是否为多头持仓 </td></tr>
+    <tr><td class="paramname">prevol</td><td>之前的持仓量 </td></tr>
+    <tr><td class="paramname">preavail</td><td>之前的可用持仓量 </td></tr>
+    <tr><td class="paramname">newvol</td><td>新的持仓量 </td></tr>
+    <tr><td class="paramname">newavail</td><td>新的可用持仓量 </td></tr>
+    <tr><td class="paramname">tradingday</td><td>交易日 </td></tr>
+  </table>
+  </dd>
+</dl>
+</li>
+</ul>
+</li>
+</ol>
+
+<p>重载 <a class="el" href="classITrdNotifySink.html#ac14573f6ffa6d514cd0623224bdef49c">ITrdNotifySink</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00821">821</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac9ce943396215898ffc4c64a82f7287d" name="ac9ce943396215898ffc4c64a82f7287d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9ce943396215898ffc4c64a82f7287d">&#9670;&#160;</a></span>on_position_changed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtArbiExecuter::on_position_changed </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>diffPos</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理仓位变化 </p>
+<p>处理仓位变更</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">diffPos</td><td>仓位变化量</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>处理合约仓位变化的回调函数</p>
+<p>接收仓位变更通知，并更新内部仓位缓存 如果合约已存在于仓位缓存中，则将差值叠加到现有仓位 如果合约不存在于仓位缓存中，则创建新的仓位记录 最后记录日志，输出最新的仓位信息 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">diffPos</td><td>仓位变化量 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classIExecCommand.html#a591d89a18dfabd7e487a9aefa7176bd6">IExecCommand</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00578">578</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af29d99212acc2ecfae41573687b71194" name="af29d99212acc2ecfae41573687b71194"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af29d99212acc2ecfae41573687b71194">&#9670;&#160;</a></span>on_tick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtArbiExecuter::on_tick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>newTick</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>行情数据回调 </p>
+<p>处理实时行情</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">newTick</td><td>新的Tick数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>处理新到的行情数据更新</p>
+<p>接收并处理实时行情数据，将行情转发给相应执行单元 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">newTick</td><td>最新的行情数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classIExecCommand.html#a5f585ccd2cec4146f2d95d4243615b57">IExecCommand</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00548">548</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aca7e6c915a5d0b2f449aba2964d9e891" name="aca7e6c915a5d0b2f449aba2964d9e891"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca7e6c915a5d0b2f449aba2964d9e891">&#9670;&#160;</a></span>on_trade()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtArbiExecuter::on_trade </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isBuy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>vol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>成交回报回调 </p>
+<p>处理成交回报</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否买入方向 </td></tr>
+    <tr><td class="paramname">vol</td><td>成交量 </td></tr>
+    <tr><td class="paramname">price</td><td>成交价格</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>处理成交回报的回调函数</p>
+<p>接收并处理成交回报，将成交信息转发给相应的执行单元 如果启用了线程池，则在独立线程中异步处理成交信息 否则在当前线程中同步处理 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否买入方向 </td></tr>
+    <tr><td class="paramname">vol</td><td>成交数量 </td></tr>
+    <tr><td class="paramname">price</td><td>成交价格 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>实现了 <a class="el" href="classITrdNotifySink.html#a5194a86c27cc25869664dc395ffc7a34">ITrdNotifySink</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00615">615</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a910ca82ffa5f0649f3fae3d358d8c7c1" name="a910ca82ffa5f0649f3fae3d358d8c7c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a910ca82ffa5f0649f3fae3d358d8c7c1">&#9670;&#160;</a></span>sell()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a> WtArbiExecuter::sell </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>qty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bForceClose</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>卖出委托 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">qty</td><td>委托数量 </td></tr>
+    <tr><td class="paramname">bForceClose</td><td>是否强制平仓，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>委托ID列表</dd></dl>
+<p>发出卖出委托并返回委托ID列表</p>
+<p>发出卖出委托，需要交易通道就绪 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">qty</td><td>委托数量 </td></tr>
+    <tr><td class="paramname">bForceClose</td><td>是否强制平仓，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>委托ID列表 </dd></dl>
+
+<p>实现了 <a class="el" href="classExecuteContext.html#a8cd2c38cb18b1cd8976a5d11ef8c3258">ExecuteContext</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00309">309</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab41f1f069f961af5e8895095cacde75e" name="ab41f1f069f961af5e8895095cacde75e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab41f1f069f961af5e8895095cacde75e">&#9670;&#160;</a></span>set_position()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtArbiExecuter::set_position </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt; std::string, double &gt; &amp;&#160;</td>
+          <td class="paramname"><em>targets</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>设置目标仓位 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">targets</td><td>目标仓位映射，存储合约代码到目标仓位的映射关系</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>设置各合约的目标仓位，由执行器根据目标调整实际仓位</p>
+<p>根据传入的目标仓位映射表设置合约的目标仓位，并自动处理交易逻辑 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">targets</td><td>目标仓位映射表，键为标准合约代码，值为目标仓位 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classIExecCommand.html#a1c9a2f87e25aec22fac500dd72c1f3f7">IExecCommand</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00404">404</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab1ccea4e7479895ef7c3a7d689bcd0cd" name="ab1ccea4e7479895ef7c3a7d689bcd0cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1ccea4e7479895ef7c3a7d689bcd0cd">&#9670;&#160;</a></span>setTrader()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtArbiExecuter::setTrader </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTraderAdapter.html">TraderAdapter</a> *&#160;</td>
+          <td class="paramname"><em>adapter</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置交易适配器 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">adapter</td><td>交易适配器指针</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>设置交易适配器，用于连接到交易接口</p>
+<p>设置交易适配器并读取其当前状态以更新通道就绪状态 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">adapter</td><td>交易适配器指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00060">60</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa52c67f4050a6909eb065b2a027c8093" name="aa52c67f4050a6909eb065b2a027c8093"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa52c67f4050a6909eb065b2a027c8093">&#9670;&#160;</a></span>writeLog()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtArbiExecuter::writeLog </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>输出日志 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">message</td><td>日志消息</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将消息写入日志</p>
+<p>输出日志信息，并添加执行器名称前缀 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">message</td><td>日志消息 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>实现了 <a class="el" href="classExecuteContext.html#a1d501e3137902e56471879cdb7046697">ExecuteContext</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a> 第 <a class="el" href="WtArbiExecuter_8cpp_source.html#l00352">352</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a4bbc48087fdfec25c244cf615b1ffd0b" name="a4bbc48087fdfec25c244cf615b1ffd0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4bbc48087fdfec25c244cf615b1ffd0b">&#9670;&#160;</a></span>_auto_clear</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtArbiExecuter::_auto_clear</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>是否自动清理上一期的主力合约头寸 </p>
+<p>当合约换月时，是否自动清理旧主力合约的仓位 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00336">336</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5d1296cae293d92a913309080f4db91b" name="a5d1296cae293d92a913309080f4db91b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d1296cae293d92a913309080f4db91b">&#9670;&#160;</a></span>_channel_holds</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classwt__hashset.html">wt_hashset</a>&lt;std::string&gt; WtArbiExecuter::_channel_holds</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>通道持仓集合 </p>
+<p>存储当前通道已有的持仓合约代码 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00413">413</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aacbe768c907f9f97b172af2feab7b82b" name="aacbe768c907f9f97b172af2feab7b82b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aacbe768c907f9f97b172af2feab7b82b">&#9670;&#160;</a></span>_channel_ready</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtArbiExecuter::_channel_ready</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易通道是否就绪 </p>
+<p>标记当前交易通道的连接状态 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00348">348</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab8a7d9d02437ac965ceb47a691db40b7" name="ab8a7d9d02437ac965ceb47a691db40b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab8a7d9d02437ac965ceb47a691db40b7">&#9670;&#160;</a></span>_clear_excludes</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classwt__hashset.html">wt_hashset</a>&lt;std::string&gt; WtArbiExecuter::_clear_excludes</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>自动清理排除品种集合 </p>
+<p>存储不需要自动清理的品种名称 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00407">407</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1606ee3ab8c09c30a8ec27b33d1632c2" name="a1606ee3ab8c09c30a8ec27b33d1632c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1606ee3ab8c09c30a8ec27b33d1632c2">&#9670;&#160;</a></span>_clear_includes</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classwt__hashset.html">wt_hashset</a>&lt;std::string&gt; WtArbiExecuter::_clear_includes</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>自动清理包含品种集合 </p>
+<p>存储需要自动清理的品种名称 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00401">401</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a093b6cd2d8ef6ee04b2786d238df5e77" name="a093b6cd2d8ef6ee04b2786d238df5e77"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a093b6cd2d8ef6ee04b2786d238df5e77">&#9670;&#160;</a></span>_code_to_groups</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtArbiExecuter.html#a6c1c569b7ac1a6749a1520447e189e9d">CodeGroups</a> WtArbiExecuter::_code_to_groups</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>合约到组的映射 </p>
+<p>存储合约代码到所属组的映射关系 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00395">395</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a926ff2fdd5b73431e4a00028f740432e" name="a926ff2fdd5b73431e4a00028f740432e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a926ff2fdd5b73431e4a00028f740432e">&#9670;&#160;</a></span>_config</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSVariant.html">WTSVariant</a>* WtArbiExecuter::_config</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>配置参数指针 </p>
+<p>存储执行器的配置参数 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00324">324</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a86df005671e4a94888ab52e05c265fd4" name="a86df005671e4a94888ab52e05c265fd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86df005671e4a94888ab52e05c265fd4">&#9670;&#160;</a></span>_data_mgr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIDataManager.html">IDataManager</a>* WtArbiExecuter::_data_mgr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>数据管理器指针 </p>
+<p>提供市场数据访问接口 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00318">318</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a581e26204a66a9e20b984473be666e47" name="a581e26204a66a9e20b984473be666e47"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a581e26204a66a9e20b984473be666e47">&#9670;&#160;</a></span>_factory</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtExecuterFactory.html">WtExecuterFactory</a>* WtArbiExecuter::_factory</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>执行器工厂指针 </p>
+<p>用于创建和管理执行器实例 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00312">312</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9f2c2d05e85cc2df969704caac70cd55" name="a9f2c2d05e85cc2df969704caac70cd55"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f2c2d05e85cc2df969704caac70cd55">&#9670;&#160;</a></span>_groups</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtArbiExecuter.html#a6c1c569b7ac1a6749a1520447e189e9d">CodeGroups</a> WtArbiExecuter::_groups</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>组映射集合 </p>
+<p>存储组名称到组对象的映射关系 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00389">389</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0656d9c61bbdcd0f2f7bb731fde9afa1" name="a0656d9c61bbdcd0f2f7bb731fde9afa1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0656d9c61bbdcd0f2f7bb731fde9afa1">&#9670;&#160;</a></span>_mtx_units</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classSpinMutex.html">SpinMutex</a> WtArbiExecuter::_mtx_units</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>单元互斥锁 </p>
+<p>用于保护执行单元映射的线程安全访问 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00354">354</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a55fae5eb4da82b50e766f0182ec0cf7b" name="a55fae5eb4da82b50e766f0182ec0cf7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55fae5eb4da82b50e766f0182ec0cf7b">&#9670;&#160;</a></span>_pool</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtArbiExecuter.html#ae1f05e6a66129859974a02ea8a76d231">ThreadPoolPtr</a> WtArbiExecuter::_pool</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>线程池指针 </p>
+<p>用于执行异步任务的线程池 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00430">430</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7d74a0753a38a791fe1530331f8c42ef" name="a7d74a0753a38a791fe1530331f8c42ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d74a0753a38a791fe1530331f8c42ef">&#9670;&#160;</a></span>_scale</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double WtArbiExecuter::_scale</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>仓位放大倍数 </p>
+<p>用于按比例放大交易仓位 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00330">330</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaf5c3a865cc4441ae279ac9439666deb" name="aaf5c3a865cc4441ae279ac9439666deb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf5c3a865cc4441ae279ac9439666deb">&#9670;&#160;</a></span>_strict_sync</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtArbiExecuter::_strict_sync</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>是否严格同步目标仓位 </p>
+<p>设置为true时，执行器会严格按照目标仓位进行调整 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00342">342</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab26a37e8765f17fdc160a6055354c3ca" name="ab26a37e8765f17fdc160a6055354c3ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab26a37e8765f17fdc160a6055354c3ca">&#9670;&#160;</a></span>_target_pos</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt;std::string, double&gt; WtArbiExecuter::_target_pos</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>目标仓位映射 </p>
+<p>存储合约代码到目标仓位的映射关系 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00419">419</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab613f890053c75382dd6d7a3620d8b1c" name="ab613f890053c75382dd6d7a3620d8b1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab613f890053c75382dd6d7a3620d8b1c">&#9670;&#160;</a></span>_trader</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTraderAdapter.html">TraderAdapter</a>* WtArbiExecuter::_trader</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易适配器指针 </p>
+<p>提供交易接口的适配器，用于发送交易指令 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00306">306</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a31be9d9623441466736b2aba7a55ea92" name="a31be9d9623441466736b2aba7a55ea92"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31be9d9623441466736b2aba7a55ea92">&#9670;&#160;</a></span>_unit_map</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WtExecuterFactory_8h.html#a089ae60c07665a69a965819073af0eea">ExecuteUnitMap</a> WtArbiExecuter::_unit_map</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>执行单元映射 </p>
+<p>存储合约代码到执行单元的映射关系 </p>
+
+<p class="definition">在文件 <a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a> 第 <a class="el" href="WtArbiExecuter_8h_source.html#l00300">300</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WtCore/<a class="el" href="WtArbiExecuter_8h_source.html">WtArbiExecuter.h</a></li>
+<li>src/WtCore/<a class="el" href="WtArbiExecuter_8cpp_source.html">WtArbiExecuter.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classWtArbiExecuter.html">WtArbiExecuter</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

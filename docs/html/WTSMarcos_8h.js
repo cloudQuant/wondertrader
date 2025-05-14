@@ -1,0 +1,25 @@
+var WTSMarcos_8h =
+[
+    [ "DBL_MAX", "WTSMarcos_8h.html#af78670ee54c1203d613f8fb0e022d214", null ],
+    [ "EXPORT_FLAG", "WTSMarcos_8h.html#ab21f8ef3ba992efc1eda405bccdde69a", null ],
+    [ "FLT_MAX", "WTSMarcos_8h.html#a7fbf1534f9e0f0bfdb86fb928902474c", null ],
+    [ "INVALID_DOUBLE", "WTSMarcos_8h.html#a9fa6ba5a28d266726a9227dbf5aa14a0", null ],
+    [ "INVALID_INT32", "WTSMarcos_8h.html#ad333413c22a9015cba094d3be9ab7026", null ],
+    [ "INVALID_INT64", "WTSMarcos_8h.html#aa7e1ec2d4af317a8490575179b4a96c2", null ],
+    [ "INVALID_UINT32", "WTSMarcos_8h.html#ab58070d1c518278febd8f11f08c7bd24", null ],
+    [ "INVALID_UINT64", "WTSMarcos_8h.html#a86053bf07ff538bd7460f68ad7841535", null ],
+    [ "MAX_EXCHANGE_LENGTH", "WTSMarcos_8h.html#a232f14b60209af4d7c2cfd10ebb0c3f4", null ],
+    [ "MAX_INSTRUMENT_LENGTH", "WTSMarcos_8h.html#a43110534aa06a6d801f0f875c3cf4f1c", null ],
+    [ "NOMINMAX", "WTSMarcos_8h.html#a9f918755b601cf4bffca775992e6fb90", null ],
+    [ "NS_WTP_BEGIN", "WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4", null ],
+    [ "NS_WTP_END", "WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee", null ],
+    [ "NULL", "WTSMarcos_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4", null ],
+    [ "PORTER_FLAG", "WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb", null ],
+    [ "STATIC_CONVERT", "WTSMarcos_8h.html#a34013394084da0ee3d3629fe5bbc0611", null ],
+    [ "USING_NS_WTP", "WTSMarcos_8h.html#a9b222981d720d82cc40675de1d08bcfd", null ],
+    [ "wt_stricmp", "WTSMarcos_8h.html#afc37b6316149e349c0d2081dc657ff72", null ],
+    [ "WtString", "WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e", null ],
+    [ "WtUInt32", "WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e", null ],
+    [ "WtUInt64", "WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d", null ],
+    [ "wt_strcpy", "WTSMarcos_8h.html#ae3e2cd00c20ce8b9ae0ae37a089d7d5e", null ]
+];

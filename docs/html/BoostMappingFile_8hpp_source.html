@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/Share/BoostMappingFile.hpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('BoostMappingFile_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">BoostMappingFile.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="BoostMappingFile_8hpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;boost/filesystem.hpp&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;boost/interprocess/file_mapping.hpp&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;boost/interprocess/mapped_region.hpp&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="foldopen" id="foldopen00024" data-start="{" data-end="};">
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="classBoostMappingFile.html">   24</a></span><span class="keyword">class </span><a class="code hl_class" href="classBoostMappingFile.html">BoostMappingFile</a></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>{</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00033" data-start="{" data-end="}">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classBoostMappingFile.html#af2b44fa4beaf0f771f0ab89813dc1b19">   33</a></span>    <a class="code hl_function" href="classBoostMappingFile.html#af2b44fa4beaf0f771f0ab89813dc1b19">BoostMappingFile</a>()</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    {</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        <a class="code hl_variable" href="classBoostMappingFile.html#a93c817a48978ffceb695426e1aeb3701">_file_map</a>=<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        <a class="code hl_variable" href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">_map_region</a>=<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    }</div>
+</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="foldopen" id="foldopen00046" data-start="{" data-end="}">
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classBoostMappingFile.html#ae7a1e77938ec02c430605467693a541e">   46</a></span>    <a class="code hl_function" href="classBoostMappingFile.html#ae7a1e77938ec02c430605467693a541e">~BoostMappingFile</a>()</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    {</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <a class="code hl_function" href="classBoostMappingFile.html#a8e4655b4fd9aa6c673f99e1906ab1546">close</a>();</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    }</div>
+</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="foldopen" id="foldopen00061" data-start="{" data-end="}">
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classBoostMappingFile.html#a8e4655b4fd9aa6c673f99e1906ab1546">   61</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classBoostMappingFile.html#a8e4655b4fd9aa6c673f99e1906ab1546">close</a>()</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    {</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="keywordflow">if</span>(<a class="code hl_variable" href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">_map_region</a>!=<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>            <span class="keyword">delete</span> <a class="code hl_variable" href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">_map_region</a>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keywordflow">if</span>(<a class="code hl_variable" href="classBoostMappingFile.html#a93c817a48978ffceb695426e1aeb3701">_file_map</a>!=<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>            <span class="keyword">delete</span> <a class="code hl_variable" href="classBoostMappingFile.html#a93c817a48978ffceb695426e1aeb3701">_file_map</a>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <a class="code hl_variable" href="classBoostMappingFile.html#a93c817a48978ffceb695426e1aeb3701">_file_map</a>=<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <a class="code hl_variable" href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">_map_region</a>=<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    }</div>
+</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="foldopen" id="foldopen00081" data-start="{" data-end="}">
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="classBoostMappingFile.html#a8494d740137a49660d28d980a7fe565d">   81</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classBoostMappingFile.html#a8494d740137a49660d28d980a7fe565d">sync</a>()</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    {</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        <span class="keywordflow">if</span>(<a class="code hl_variable" href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">_map_region</a>)</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>            <a class="code hl_variable" href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">_map_region</a>-&gt;flush();</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    }</div>
+</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="foldopen" id="foldopen00097" data-start="{" data-end="}">
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="classBoostMappingFile.html#a961573e8147287f2777181e3f5ac8a85">   97</a></span>    <span class="keywordtype">void</span> *<a class="code hl_function" href="classBoostMappingFile.html#a961573e8147287f2777181e3f5ac8a85">addr</a>()</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    {</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        <span class="keywordflow">if</span>(<a class="code hl_variable" href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">_map_region</a>)</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>            <span class="keywordflow">return</span> <a class="code hl_variable" href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">_map_region</a>-&gt;get_address();</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    }</div>
+</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="foldopen" id="foldopen00114" data-start="{" data-end="}">
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="classBoostMappingFile.html#a2506ca2166481bc7355e9c9bbe31fee5">  114</a></span>    <span class="keywordtype">size_t</span> <a class="code hl_function" href="classBoostMappingFile.html#a2506ca2166481bc7355e9c9bbe31fee5">size</a>()</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    {</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        <span class="keywordflow">if</span>(<a class="code hl_variable" href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">_map_region</a>)</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>            <span class="keywordflow">return</span> <a class="code hl_variable" href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">_map_region</a>-&gt;get_size();</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>        <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    }</div>
+</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="foldopen" id="foldopen00142" data-start="{" data-end="}">
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="classBoostMappingFile.html#a297d92d430afac37b30e5c15979fbe8b">  142</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostMappingFile.html#a297d92d430afac37b30e5c15979fbe8b">map</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_function" href="classBoostMappingFile.html#ae444affb0afea4ac3e5ab6e63564020c">filename</a>,</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        <span class="keywordtype">int</span> mode=boost::interprocess::read_write,</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>        <span class="keywordtype">int</span> mapmode=boost::interprocess::read_write,<span class="keywordtype">bool</span> zeroother=<span class="keyword">true</span>)</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    {</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>        <span class="keywordflow">if</span> (!boost::filesystem::exists(<a class="code hl_function" href="classBoostMappingFile.html#ae444affb0afea4ac3e5ab6e63564020c">filename</a>))</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>        {</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        }</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        <a class="code hl_variable" href="classBoostMappingFile.html#a24c29e86e13a59718ce66ab4fb57eb19">_file_name</a> = <a class="code hl_function" href="classBoostMappingFile.html#ae444affb0afea4ac3e5ab6e63564020c">filename</a>;</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>        <a class="code hl_variable" href="classBoostMappingFile.html#a93c817a48978ffceb695426e1aeb3701">_file_map</a> = <span class="keyword">new</span> boost::interprocess::file_mapping(<a class="code hl_function" href="classBoostMappingFile.html#ae444affb0afea4ac3e5ab6e63564020c">filename</a>,(boost::interprocess::mode_t)mode);</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>        <span class="keywordflow">if</span>(<a class="code hl_variable" href="classBoostMappingFile.html#a93c817a48978ffceb695426e1aeb3701">_file_map</a>==<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>        <a class="code hl_variable" href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">_map_region</a> = <span class="keyword">new</span> boost::interprocess::mapped_region(*<a class="code hl_variable" href="classBoostMappingFile.html#a93c817a48978ffceb695426e1aeb3701">_file_map</a>,(boost::interprocess::mode_t)mapmode);</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>        <span class="keywordflow">if</span>(<a class="code hl_variable" href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">_map_region</a>==<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>        {</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>            <span class="keyword">delete</span> <a class="code hl_variable" href="classBoostMappingFile.html#a93c817a48978ffceb695426e1aeb3701">_file_map</a>;</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>        }</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span> </div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    }</div>
+</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="foldopen" id="foldopen00176" data-start="{" data-end="}">
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno"><a class="line" href="classBoostMappingFile.html#ae444affb0afea4ac3e5ab6e63564020c">  176</a></span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classBoostMappingFile.html#ae444affb0afea4ac3e5ab6e63564020c">filename</a>()</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    {</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classBoostMappingFile.html#a24c29e86e13a59718ce66ab4fb57eb19">_file_name</a>.c_str();</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    }</div>
+</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
+<div class="foldopen" id="foldopen00191" data-start="{" data-end="}">
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno"><a class="line" href="classBoostMappingFile.html#aea3f03bc3d58d59bc2fb3d21c1e26426">  191</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostMappingFile.html#aea3f03bc3d58d59bc2fb3d21c1e26426">valid</a>()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classBoostMappingFile.html#a93c817a48978ffceb695426e1aeb3701">_file_map</a> != <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    }</div>
+</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno"><a class="line" href="classBoostMappingFile.html#a24c29e86e13a59718ce66ab4fb57eb19">  203</a></span>    std::string <a class="code hl_variable" href="classBoostMappingFile.html#a24c29e86e13a59718ce66ab4fb57eb19">_file_name</a>;</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno"><a class="line" href="classBoostMappingFile.html#a93c817a48978ffceb695426e1aeb3701">  211</a></span>    boost::interprocess::file_mapping *<a class="code hl_variable" href="classBoostMappingFile.html#a93c817a48978ffceb695426e1aeb3701">_file_map</a>;</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span> </div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno"><a class="line" href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">  220</a></span>    boost::interprocess::mapped_region *<a class="code hl_variable" href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">_map_region</a>;</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>};</div>
+</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span> </div>
+<div class="ttc" id="aclassBoostMappingFile_html"><div class="ttname"><a href="classBoostMappingFile.html">BoostMappingFile</a></div><div class="ttdoc">Boost内存映射文件的封装类</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00024">BoostMappingFile.hpp:25</a></div></div>
+<div class="ttc" id="aclassBoostMappingFile_html_a24c29e86e13a59718ce66ab4fb57eb19"><div class="ttname"><a href="classBoostMappingFile.html#a24c29e86e13a59718ce66ab4fb57eb19">BoostMappingFile::_file_name</a></div><div class="ttdeci">std::string _file_name</div><div class="ttdoc">映射文件的路径名称</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00203">BoostMappingFile.hpp:203</a></div></div>
+<div class="ttc" id="aclassBoostMappingFile_html_a2506ca2166481bc7355e9c9bbe31fee5"><div class="ttname"><a href="classBoostMappingFile.html#a2506ca2166481bc7355e9c9bbe31fee5">BoostMappingFile::size</a></div><div class="ttdeci">size_t size()</div><div class="ttdoc">获取内存映射区域的大小</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00114">BoostMappingFile.hpp:114</a></div></div>
+<div class="ttc" id="aclassBoostMappingFile_html_a297d92d430afac37b30e5c15979fbe8b"><div class="ttname"><a href="classBoostMappingFile.html#a297d92d430afac37b30e5c15979fbe8b">BoostMappingFile::map</a></div><div class="ttdeci">bool map(const char *filename, int mode=boost::interprocess::read_write, int mapmode=boost::interprocess::read_write, bool zeroother=true)</div><div class="ttdoc">将文件映射到内存</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00142">BoostMappingFile.hpp:142</a></div></div>
+<div class="ttc" id="aclassBoostMappingFile_html_a8494d740137a49660d28d980a7fe565d"><div class="ttname"><a href="classBoostMappingFile.html#a8494d740137a49660d28d980a7fe565d">BoostMappingFile::sync</a></div><div class="ttdeci">void sync()</div><div class="ttdoc">同步内存映射文件的内容到磁盘</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00081">BoostMappingFile.hpp:81</a></div></div>
+<div class="ttc" id="aclassBoostMappingFile_html_a8e4655b4fd9aa6c673f99e1906ab1546"><div class="ttname"><a href="classBoostMappingFile.html#a8e4655b4fd9aa6c673f99e1906ab1546">BoostMappingFile::close</a></div><div class="ttdeci">void close()</div><div class="ttdoc">关闭内存映射文件</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00061">BoostMappingFile.hpp:61</a></div></div>
+<div class="ttc" id="aclassBoostMappingFile_html_a93c817a48978ffceb695426e1aeb3701"><div class="ttname"><a href="classBoostMappingFile.html#a93c817a48978ffceb695426e1aeb3701">BoostMappingFile::_file_map</a></div><div class="ttdeci">boost::interprocess::file_mapping * _file_map</div><div class="ttdoc">文件映射对象指针</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00211">BoostMappingFile.hpp:211</a></div></div>
+<div class="ttc" id="aclassBoostMappingFile_html_a961573e8147287f2777181e3f5ac8a85"><div class="ttname"><a href="classBoostMappingFile.html#a961573e8147287f2777181e3f5ac8a85">BoostMappingFile::addr</a></div><div class="ttdeci">void * addr()</div><div class="ttdoc">获取内存映射区域的地址</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00097">BoostMappingFile.hpp:97</a></div></div>
+<div class="ttc" id="aclassBoostMappingFile_html_ac9b40ad33e544d032b3c529dd109b3b4"><div class="ttname"><a href="classBoostMappingFile.html#ac9b40ad33e544d032b3c529dd109b3b4">BoostMappingFile::_map_region</a></div><div class="ttdeci">boost::interprocess::mapped_region * _map_region</div><div class="ttdoc">映射区域对象指针</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00220">BoostMappingFile.hpp:220</a></div></div>
+<div class="ttc" id="aclassBoostMappingFile_html_ae444affb0afea4ac3e5ab6e63564020c"><div class="ttname"><a href="classBoostMappingFile.html#ae444affb0afea4ac3e5ab6e63564020c">BoostMappingFile::filename</a></div><div class="ttdeci">const char * filename()</div><div class="ttdoc">获取当前映射的文件名</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00176">BoostMappingFile.hpp:176</a></div></div>
+<div class="ttc" id="aclassBoostMappingFile_html_ae7a1e77938ec02c430605467693a541e"><div class="ttname"><a href="classBoostMappingFile.html#ae7a1e77938ec02c430605467693a541e">BoostMappingFile::~BoostMappingFile</a></div><div class="ttdeci">~BoostMappingFile()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00046">BoostMappingFile.hpp:46</a></div></div>
+<div class="ttc" id="aclassBoostMappingFile_html_aea3f03bc3d58d59bc2fb3d21c1e26426"><div class="ttname"><a href="classBoostMappingFile.html#aea3f03bc3d58d59bc2fb3d21c1e26426">BoostMappingFile::valid</a></div><div class="ttdeci">bool valid() const</div><div class="ttdoc">检查内存映射文件是否有效</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00191">BoostMappingFile.hpp:191</a></div></div>
+<div class="ttc" id="aclassBoostMappingFile_html_af2b44fa4beaf0f771f0ab89813dc1b19"><div class="ttname"><a href="classBoostMappingFile.html#af2b44fa4beaf0f771f0ab89813dc1b19">BoostMappingFile::BoostMappingFile</a></div><div class="ttdeci">BoostMappingFile()</div><div class="ttdoc">默认构造函数</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00033">BoostMappingFile.hpp:33</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_b415f7b135736b475386968edd2cefde.html">Share</a></li><li class="navelem"><a class="el" href="BoostMappingFile_8hpp.html">BoostMappingFile.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtMsgQue/MQClient.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('MQClient_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">MQClient.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="MQClient_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="WtPorter_2PorterDefs_8h.html">PorterDefs.h</a>&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;queue&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Includes/WTSMarcos.h&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/FasterDefs.h&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">class </span><a class="code hl_class" href="classMQManager.html">MQManager</a>;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="foldopen" id="foldopen00027" data-start="{" data-end="};">
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classMQClient.html">   27</a></span><span class="keyword">class </span><a class="code hl_class" href="classMQClient.html">MQClient</a></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>{</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <a class="code hl_class" href="classMQClient.html">MQClient</a>(<a class="code hl_class" href="classMQManager.html">MQManager</a>* mgr);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <a class="code hl_function" href="classMQClient.html#ac27d8640d03b3e7e5d0119575eceb114">~MQClient</a>();</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classMQClient.html#a6400f55221b4a99e269db440d2fcb3f2">extract_buffer</a>();</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="foldopen" id="foldopen00058" data-start="{" data-end="}">
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="classMQClient.html#a1e455d5d44536ed84d9d15491e2e2648">   58</a></span>    <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classMQClient.html#a1e455d5d44536ed84d9d15491e2e2648">is_allowed</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* topic)</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    {</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classMQClient.html#a3db3be5b195fadc688361137dba22a62">_topics</a>.empty())</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="keyword">auto</span> it = <a class="code hl_variable" href="classMQClient.html#a3db3be5b195fadc688361137dba22a62">_topics</a>.find(topic);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <span class="keywordflow">if</span> (it != <a class="code hl_variable" href="classMQClient.html#a3db3be5b195fadc688361137dba22a62">_topics</a>.end())</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    }</div>
+</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="classMQClient.html#a684db7ce490444344833e3f3366b868c">   76</a></span>    <span class="keyword">inline</span> uint32_t <a class="code hl_function" href="classMQClient.html#a684db7ce490444344833e3f3366b868c">id</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classMQClient.html#a60147e6ce1ab3b98b41cebf3e7743b89">_id</a>; }</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classMQClient.html#a9ee52b8c8a232b050c0e4dfdfdd93d25">init</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* url, <a class="code hl_typedef" href="WtMsgQue_2PorterDefs_8h.html#abfe504ced42fb9276c87c445aafadd09">FuncMQCallback</a> cb);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classMQClient.html#a867cdb990360601ee7afd58952e3f849">start</a>();</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="foldopen" id="foldopen00103" data-start="{" data-end="}">
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="classMQClient.html#a1f75630d5f8822ce2ba4cf9751e3145f">  103</a></span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classMQClient.html#a1f75630d5f8822ce2ba4cf9751e3145f">sub_topic</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* topic)</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    {</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        <a class="code hl_variable" href="classMQClient.html#a3db3be5b195fadc688361137dba22a62">_topics</a>.insert(topic);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    }</div>
+</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="classMQClient.html#a015dfdd40402f009fe4d93406a639558">  111</a></span>    std::string     <a class="code hl_variable" href="classMQClient.html#a015dfdd40402f009fe4d93406a639558">m_strURL</a>;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="classMQClient.html#a2cd26c89b617d3db5526bf3104cc6494">  115</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classMQClient.html#a2cd26c89b617d3db5526bf3104cc6494">m_bReady</a>;</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno"><a class="line" href="classMQClient.html#a1245809e32c99af61f2e54bb96fec402">  119</a></span>    <span class="keywordtype">int</span>             <a class="code hl_variable" href="classMQClient.html#a1245809e32c99af61f2e54bb96fec402">_sock</a>;</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="classMQClient.html#aa8848e5d23ce48c65875d95aa1e08573">  123</a></span>    <a class="code hl_class" href="classMQManager.html">MQManager</a>*      <a class="code hl_variable" href="classMQClient.html#aa8848e5d23ce48c65875d95aa1e08573">_mgr</a>;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="classMQClient.html#a60147e6ce1ab3b98b41cebf3e7743b89">  127</a></span>    uint32_t        <a class="code hl_variable" href="classMQClient.html#a60147e6ce1ab3b98b41cebf3e7743b89">_id</a>;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="classMQClient.html#abb0f552601e38a4b61717d138bc69a11">  131</a></span>    <a class="code hl_typedef" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>    <a class="code hl_variable" href="classMQClient.html#abb0f552601e38a4b61717d138bc69a11">m_thrdRecv</a>;</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno"><a class="line" href="classMQClient.html#a0b2c2afcf23ed98c92451c6cf639e91f">  135</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classMQClient.html#a0b2c2afcf23ed98c92451c6cf639e91f">m_bTerminated</a>;</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="classMQClient.html#ab9a0a90b8def91312dec8ac93ea8d42d">  139</a></span>    int64_t         <a class="code hl_variable" href="classMQClient.html#ab9a0a90b8def91312dec8ac93ea8d42d">m_iCheckTime</a>;</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="classMQClient.html#a452366fc81bab04b4a1a42dd009e300a">  143</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classMQClient.html#a452366fc81bab04b4a1a42dd009e300a">m_bNeedCheck</a>;</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno"><a class="line" href="classMQClient.html#a05c9abfb5654f5308fd2d318955de3db">  147</a></span>    std::string     <a class="code hl_variable" href="classMQClient.html#a05c9abfb5654f5308fd2d318955de3db">_buffer</a>;</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="classMQClient.html#a7a0eed02ff82325c93b7e7d359863eb6">  151</a></span>    <a class="code hl_typedef" href="WtMsgQue_2PorterDefs_8h.html#abfe504ced42fb9276c87c445aafadd09">FuncMQCallback</a>  <a class="code hl_variable" href="classMQClient.html#a7a0eed02ff82325c93b7e7d359863eb6">_cb_message</a>;</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno"><a class="line" href="classMQClient.html#a3db3be5b195fadc688361137dba22a62">  155</a></span>    <a class="code hl_class" href="classwt__hashset.html">wt_hashset&lt;std::string&gt;</a> <a class="code hl_variable" href="classMQClient.html#a3db3be5b195fadc688361137dba22a62">_topics</a>;</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno"><a class="line" href="classMQClient.html#a3d8590984f2b3879e292935b45037fd0">  159</a></span>    <span class="keywordtype">char</span>            <a class="code hl_variable" href="classMQClient.html#a3d8590984f2b3879e292935b45037fd0">_recv_buf</a>[1024 * 1024];</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>};</div>
+</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span> </div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aWtMsgQue_2PorterDefs_8h_html_abfe504ced42fb9276c87c445aafadd09"><div class="ttname"><a href="WtMsgQue_2PorterDefs_8h.html#abfe504ced42fb9276c87c445aafadd09">FuncMQCallback</a></div><div class="ttdeci">void(PORTER_FLAG * FuncMQCallback)(WtUInt32 id, const char *topic, const char *data, WtUInt32 dataLen)</div><div class="ttdoc">消息队列数据接收回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtMsgQue_2PorterDefs_8h_source.html#l00022">PorterDefs.h:22</a></div></div>
+<div class="ttc" id="aWtPorter_2PorterDefs_8h_html"><div class="ttname"><a href="WtPorter_2PorterDefs_8h.html">PorterDefs.h</a></div><div class="ttdoc">WonderTrader导出接口定义文件</div></div>
+<div class="ttc" id="aclassMQClient_html"><div class="ttname"><a href="classMQClient.html">MQClient</a></div><div class="ttdoc">消息队列客户端类</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00027">MQClient.h:28</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a015dfdd40402f009fe4d93406a639558"><div class="ttname"><a href="classMQClient.html#a015dfdd40402f009fe4d93406a639558">MQClient::m_strURL</a></div><div class="ttdeci">std::string m_strURL</div><div class="ttdoc">服务器连接地址</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00111">MQClient.h:111</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a05c9abfb5654f5308fd2d318955de3db"><div class="ttname"><a href="classMQClient.html#a05c9abfb5654f5308fd2d318955de3db">MQClient::_buffer</a></div><div class="ttdeci">std::string _buffer</div><div class="ttdoc">接收数据缓冲区</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00147">MQClient.h:147</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a0b2c2afcf23ed98c92451c6cf639e91f"><div class="ttname"><a href="classMQClient.html#a0b2c2afcf23ed98c92451c6cf639e91f">MQClient::m_bTerminated</a></div><div class="ttdeci">bool m_bTerminated</div><div class="ttdoc">终止标志</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00135">MQClient.h:135</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a1245809e32c99af61f2e54bb96fec402"><div class="ttname"><a href="classMQClient.html#a1245809e32c99af61f2e54bb96fec402">MQClient::_sock</a></div><div class="ttdeci">int _sock</div><div class="ttdoc">nanomsg套接字描述符</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00119">MQClient.h:119</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a1e455d5d44536ed84d9d15491e2e2648"><div class="ttname"><a href="classMQClient.html#a1e455d5d44536ed84d9d15491e2e2648">MQClient::is_allowed</a></div><div class="ttdeci">bool is_allowed(const char *topic)</div><div class="ttdoc">检查指定主题是否允许接收</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00058">MQClient.h:58</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a1f75630d5f8822ce2ba4cf9751e3145f"><div class="ttname"><a href="classMQClient.html#a1f75630d5f8822ce2ba4cf9751e3145f">MQClient::sub_topic</a></div><div class="ttdeci">void sub_topic(const char *topic)</div><div class="ttdoc">订阅指定主题</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00103">MQClient.h:103</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a2cd26c89b617d3db5526bf3104cc6494"><div class="ttname"><a href="classMQClient.html#a2cd26c89b617d3db5526bf3104cc6494">MQClient::m_bReady</a></div><div class="ttdeci">bool m_bReady</div><div class="ttdoc">客户端就绪状态标志</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00115">MQClient.h:115</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a3d8590984f2b3879e292935b45037fd0"><div class="ttname"><a href="classMQClient.html#a3d8590984f2b3879e292935b45037fd0">MQClient::_recv_buf</a></div><div class="ttdeci">char _recv_buf[1024 *1024]</div><div class="ttdoc">接收缓冲区</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00159">MQClient.h:159</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a3db3be5b195fadc688361137dba22a62"><div class="ttname"><a href="classMQClient.html#a3db3be5b195fadc688361137dba22a62">MQClient::_topics</a></div><div class="ttdeci">wt_hashset&lt; std::string &gt; _topics</div><div class="ttdoc">订阅主题集合</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00155">MQClient.h:155</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a452366fc81bab04b4a1a42dd009e300a"><div class="ttname"><a href="classMQClient.html#a452366fc81bab04b4a1a42dd009e300a">MQClient::m_bNeedCheck</a></div><div class="ttdeci">bool m_bNeedCheck</div><div class="ttdoc">需要检查连接状态的标志</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00143">MQClient.h:143</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a60147e6ce1ab3b98b41cebf3e7743b89"><div class="ttname"><a href="classMQClient.html#a60147e6ce1ab3b98b41cebf3e7743b89">MQClient::_id</a></div><div class="ttdeci">uint32_t _id</div><div class="ttdoc">客户端唯一标识符</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00127">MQClient.h:127</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a6400f55221b4a99e269db440d2fcb3f2"><div class="ttname"><a href="classMQClient.html#a6400f55221b4a99e269db440d2fcb3f2">MQClient::extract_buffer</a></div><div class="ttdeci">void extract_buffer()</div><div class="ttdoc">从接收缓冲区提取完整消息包</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8cpp_source.html#l00202">MQClient.cpp:202</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a684db7ce490444344833e3f3366b868c"><div class="ttname"><a href="classMQClient.html#a684db7ce490444344833e3f3366b868c">MQClient::id</a></div><div class="ttdeci">uint32_t id() const</div><div class="ttdoc">获取客户端唯一ID</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00076">MQClient.h:76</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a7a0eed02ff82325c93b7e7d359863eb6"><div class="ttname"><a href="classMQClient.html#a7a0eed02ff82325c93b7e7d359863eb6">MQClient::_cb_message</a></div><div class="ttdeci">FuncMQCallback _cb_message</div><div class="ttdoc">消息回调函数</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00151">MQClient.h:151</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a867cdb990360601ee7afd58952e3f849"><div class="ttname"><a href="classMQClient.html#a867cdb990360601ee7afd58952e3f849">MQClient::start</a></div><div class="ttdeci">void start()</div><div class="ttdoc">启动客户端</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8cpp_source.html#l00130">MQClient.cpp:130</a></div></div>
+<div class="ttc" id="aclassMQClient_html_a9ee52b8c8a232b050c0e4dfdfdd93d25"><div class="ttname"><a href="classMQClient.html#a9ee52b8c8a232b050c0e4dfdfdd93d25">MQClient::init</a></div><div class="ttdeci">bool init(const char *url, FuncMQCallback cb)</div><div class="ttdoc">初始化客户端</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8cpp_source.html#l00088">MQClient.cpp:88</a></div></div>
+<div class="ttc" id="aclassMQClient_html_aa8848e5d23ce48c65875d95aa1e08573"><div class="ttname"><a href="classMQClient.html#aa8848e5d23ce48c65875d95aa1e08573">MQClient::_mgr</a></div><div class="ttdeci">MQManager * _mgr</div><div class="ttdoc">消息队列管理器指针</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00123">MQClient.h:123</a></div></div>
+<div class="ttc" id="aclassMQClient_html_ab9a0a90b8def91312dec8ac93ea8d42d"><div class="ttname"><a href="classMQClient.html#ab9a0a90b8def91312dec8ac93ea8d42d">MQClient::m_iCheckTime</a></div><div class="ttdeci">int64_t m_iCheckTime</div><div class="ttdoc">最后一次接收数据的时间戳</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00139">MQClient.h:139</a></div></div>
+<div class="ttc" id="aclassMQClient_html_abb0f552601e38a4b61717d138bc69a11"><div class="ttname"><a href="classMQClient.html#abb0f552601e38a4b61717d138bc69a11">MQClient::m_thrdRecv</a></div><div class="ttdeci">StdThreadPtr m_thrdRecv</div><div class="ttdoc">接收线程指针</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8h_source.html#l00131">MQClient.h:131</a></div></div>
+<div class="ttc" id="aclassMQClient_html_ac27d8640d03b3e7e5d0119575eceb114"><div class="ttname"><a href="classMQClient.html#ac27d8640d03b3e7e5d0119575eceb114">MQClient::~MQClient</a></div><div class="ttdeci">~MQClient()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="MQClient_8cpp_source.html#l00066">MQClient.cpp:66</a></div></div>
+<div class="ttc" id="aclassMQManager_html"><div class="ttname"><a href="classMQManager.html">MQManager</a></div><div class="ttdoc">消息队列管理器类</div><div class="ttdef"><b>Definition</b> <a href="MQManager_8h_source.html#l00045">MQManager.h:46</a></div></div>
+<div class="ttc" id="aclasswt__hashset_html"><div class="ttname"><a href="classwt__hashset.html">wt_hashset</a></div><div class="ttdoc">WonderTrader通用高性能哈希集合模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00197">FasterDefs.h:198</a></div></div>
+<div class="ttc" id="agroup__ThreadUtils_html_gaf9ea8e1e64d43ab034614d39d0b35776"><div class="ttname"><a href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a></div><div class="ttdeci">std::shared_ptr&lt; StdThread &gt; StdThreadPtr</div><div class="ttdoc">线程智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00042">StdUtils.hpp:42</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_67f0927ed8325567405dded17dc3dbdc.html">WtMsgQue</a></li><li class="navelem"><a class="el" href="MQClient_8h.html">MQClient.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

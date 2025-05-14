@@ -1,0 +1,3252 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/zstdmt_compress.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('zstdmt__compress_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">zstdmt_compress.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;limits.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="mem_8h_source.html">mem.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="pool_8h_source.html">pool.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="threading_8h_source.html">threading.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="zstd__compress__internal_8h_source.html">zstd_compress_internal.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="zstd__ldm_8h_source.html">zstd_ldm.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="zstdmt__compress_8h_source.html">zstdmt_compress.h</a>&quot;</code><br />
+</div>
+<p><a href="zstdmt__compress_8c_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structbuffer__s.html">buffer_s</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTDMT__bufferPool__s.html">ZSTDMT_bufferPool_s</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structrange__t.html">range_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structserialState__t.html">serialState_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTDMT__jobDescription.html">ZSTDMT_jobDescription</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structinBuff__t.html">inBuff_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structroundBuff__t.html">roundBuff_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structrsyncState__t.html">rsyncState_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx_s</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsyncPoint__t.html">syncPoint_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a0b45f75660fb8e38f75f6615163565d8" id="r_a0b45f75660fb8e38f75f6615163565d8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a0b45f75660fb8e38f75f6615163565d8">ZSTDMT_OVERLAPLOG_DEFAULT</a>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:a0b45f75660fb8e38f75f6615163565d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80f090a8f6e5fe4a707a4b12b270ed70" id="r_a80f090a8f6e5fe4a707a4b12b270ed70"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a80f090a8f6e5fe4a707a4b12b270ed70">ZSTD_RESIZE_SEQPOOL</a>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:a80f090a8f6e5fe4a707a4b12b270ed70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58ededaeedbd332d69d237752f75d5b0" id="r_a58ededaeedbd332d69d237752f75d5b0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a58ededaeedbd332d69d237752f75d5b0">ZSTD_PTHREAD_MUTEX_LOCK</a>(m)&#160;&#160;&#160;<a class="el" href="threading_8h.html#a95e951617f02090ff44fe77387ae2a75">ZSTD_pthread_mutex_lock</a>(m)</td></tr>
+<tr class="separator:a58ededaeedbd332d69d237752f75d5b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91c7e97b01ab5c0123dc60dc2eeb0316" id="r_a91c7e97b01ab5c0123dc60dc2eeb0316"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a91c7e97b01ab5c0123dc60dc2eeb0316">DEBUG_PRINTHEX</a>(l,  p,  n)&#160;&#160;&#160;{}</td></tr>
+<tr class="separator:a91c7e97b01ab5c0123dc60dc2eeb0316"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2c4c67a29e924ad5c996621dddd866e" id="r_ab2c4c67a29e924ad5c996621dddd866e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#ab2c4c67a29e924ad5c996621dddd866e">JOB_ERROR</a>(e)</td></tr>
+<tr class="separator:ab2c4c67a29e924ad5c996621dddd866e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc39d3e291540ea7569e1e4f2428894c" id="r_afc39d3e291540ea7569e1e4f2428894c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#afc39d3e291540ea7569e1e4f2428894c">RSYNC_LENGTH</a>&#160;&#160;&#160;32</td></tr>
+<tr class="separator:afc39d3e291540ea7569e1e4f2428894c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a81b62558b8599f883304a26b742aa44f" id="r_a81b62558b8599f883304a26b742aa44f"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structbuffer__s.html">buffer_s</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a></td></tr>
+<tr class="separator:a81b62558b8599f883304a26b742aa44f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68a063e5c10aefde823f355df2940cb7" id="r_a68a063e5c10aefde823f355df2940cb7"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structZSTDMT__bufferPool__s.html">ZSTDMT_bufferPool_s</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a></td></tr>
+<tr class="separator:a68a063e5c10aefde823f355df2940cb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2af20bbd5b854f64c02af0fae4ce230a" id="r_a2af20bbd5b854f64c02af0fae4ce230a"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a></td></tr>
+<tr class="separator:a2af20bbd5b854f64c02af0fae4ce230a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a2ea01b69d1424febb27a95d93087a4f7" id="r_a2ea01b69d1424febb27a95d93087a4f7"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a2ea01b69d1424febb27a95d93087a4f7">ZSTDMT_createBufferPool</a> (unsigned nbWorkers, ZSTD_customMem cMem)</td></tr>
+<tr class="separator:a2ea01b69d1424febb27a95d93087a4f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c0fa3824551d45476d4f2dfb86c06d3" id="r_a9c0fa3824551d45476d4f2dfb86c06d3"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a9c0fa3824551d45476d4f2dfb86c06d3">ZSTDMT_freeBufferPool</a> (<a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> *bufPool)</td></tr>
+<tr class="separator:a9c0fa3824551d45476d4f2dfb86c06d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26525ec14e71f19afc2a2e459cc9118d" id="r_a26525ec14e71f19afc2a2e459cc9118d"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a26525ec14e71f19afc2a2e459cc9118d">ZSTDMT_sizeof_bufferPool</a> (<a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> *bufPool)</td></tr>
+<tr class="separator:a26525ec14e71f19afc2a2e459cc9118d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6561ca79f3800d774f754da4972774d" id="r_ab6561ca79f3800d774f754da4972774d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#ab6561ca79f3800d774f754da4972774d">ZSTDMT_setBufferSize</a> (<a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> bufPool, size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> bSize)</td></tr>
+<tr class="separator:ab6561ca79f3800d774f754da4972774d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac338ed336fb10c493127213b7d70b5cb" id="r_ac338ed336fb10c493127213b7d70b5cb"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#ac338ed336fb10c493127213b7d70b5cb">ZSTDMT_expandBufferPool</a> (<a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> *srcBufPool, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> nbWorkers)</td></tr>
+<tr class="separator:ac338ed336fb10c493127213b7d70b5cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae58c2db9b022846cce9cfe8e788127a8" id="r_ae58c2db9b022846cce9cfe8e788127a8"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#ae58c2db9b022846cce9cfe8e788127a8">ZSTDMT_getBuffer</a> (<a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> *bufPool)</td></tr>
+<tr class="separator:ae58c2db9b022846cce9cfe8e788127a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af197183d798d725ffd47714863467212" id="r_af197183d798d725ffd47714863467212"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#af197183d798d725ffd47714863467212">ZSTDMT_releaseBuffer</a> (<a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> *bufPool, <a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a> buf)</td></tr>
+<tr class="separator:af197183d798d725ffd47714863467212"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5227f1cd34366ef80b095770f5bceb1f" id="r_a5227f1cd34366ef80b095770f5bceb1f"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a5227f1cd34366ef80b095770f5bceb1f">ZSTDMT_sizeof_seqPool</a> (<a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *seqPool)</td></tr>
+<tr class="separator:a5227f1cd34366ef80b095770f5bceb1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:affe9e174a13f411e36aaa5fcd9ac5c06" id="r_affe9e174a13f411e36aaa5fcd9ac5c06"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#affe9e174a13f411e36aaa5fcd9ac5c06">bufferToSeq</a> (<a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a> buffer)</td></tr>
+<tr class="separator:affe9e174a13f411e36aaa5fcd9ac5c06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06d69c40d1386ca9f248183a28f97002" id="r_a06d69c40d1386ca9f248183a28f97002"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a06d69c40d1386ca9f248183a28f97002">seqToBuffer</a> (<a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> seq)</td></tr>
+<tr class="separator:a06d69c40d1386ca9f248183a28f97002"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae037f2129658bb78ac3b4eed991e1813" id="r_ae037f2129658bb78ac3b4eed991e1813"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#ae037f2129658bb78ac3b4eed991e1813">ZSTDMT_getSeq</a> (<a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *seqPool)</td></tr>
+<tr class="separator:ae037f2129658bb78ac3b4eed991e1813"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf8fcedef39a7111e0024dd7c536de09" id="r_adf8fcedef39a7111e0024dd7c536de09"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#adf8fcedef39a7111e0024dd7c536de09">ZSTDMT_releaseSeq</a> (<a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *seqPool, <a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> seq)</td></tr>
+<tr class="separator:adf8fcedef39a7111e0024dd7c536de09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f0f19556d9615c21e64fb8d01b7fade" id="r_a1f0f19556d9615c21e64fb8d01b7fade"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a1f0f19556d9615c21e64fb8d01b7fade">ZSTDMT_setNbSeq</a> (<a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> seqPool, size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> nbSeq)</td></tr>
+<tr class="separator:a1f0f19556d9615c21e64fb8d01b7fade"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a2c1fef7dcbecde8653d3fcb763ada5" id="r_a1a2c1fef7dcbecde8653d3fcb763ada5"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a1a2c1fef7dcbecde8653d3fcb763ada5">ZSTDMT_createSeqPool</a> (unsigned nbWorkers, ZSTD_customMem cMem)</td></tr>
+<tr class="separator:a1a2c1fef7dcbecde8653d3fcb763ada5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61bd428f048bd9198abf1bd42482c494" id="r_a61bd428f048bd9198abf1bd42482c494"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a61bd428f048bd9198abf1bd42482c494">ZSTDMT_freeSeqPool</a> (<a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *seqPool)</td></tr>
+<tr class="separator:a61bd428f048bd9198abf1bd42482c494"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a17cf466b66a8a8fb789b71a3fae516" id="r_a7a17cf466b66a8a8fb789b71a3fae516"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a7a17cf466b66a8a8fb789b71a3fae516">ZSTDMT_expandSeqPool</a> (<a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *pool, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> nbWorkers)</td></tr>
+<tr class="separator:a7a17cf466b66a8a8fb789b71a3fae516"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ed08b1b24b386708c3ad37916f0b4e7" id="r_a2ed08b1b24b386708c3ad37916f0b4e7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a2ed08b1b24b386708c3ad37916f0b4e7">ZSTDMT_freeCCtxPool</a> (<a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a> *pool)</td></tr>
+<tr class="separator:a2ed08b1b24b386708c3ad37916f0b4e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4c5a3526cc604b58d75cac4b4190e81" id="r_ae4c5a3526cc604b58d75cac4b4190e81"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#ae4c5a3526cc604b58d75cac4b4190e81">ZSTDMT_createCCtxPool</a> (int nbWorkers, ZSTD_customMem cMem)</td></tr>
+<tr class="separator:ae4c5a3526cc604b58d75cac4b4190e81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2dbb0d6ee973d7f032fc77d4873ff6e0" id="r_a2dbb0d6ee973d7f032fc77d4873ff6e0"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a2dbb0d6ee973d7f032fc77d4873ff6e0">ZSTDMT_expandCCtxPool</a> (<a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a> *srcPool, int nbWorkers)</td></tr>
+<tr class="separator:a2dbb0d6ee973d7f032fc77d4873ff6e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2085de61fccdde39a13d7470df914f7d" id="r_a2085de61fccdde39a13d7470df914f7d"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a2085de61fccdde39a13d7470df914f7d">ZSTDMT_sizeof_CCtxPool</a> (<a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a> *cctxPool)</td></tr>
+<tr class="separator:a2085de61fccdde39a13d7470df914f7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55e0fa701b098f37e77b2e0340992aa8" id="r_a55e0fa701b098f37e77b2e0340992aa8"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="zstd_8h.html#a9ccc575a7e1f1afd01e76c0fa98d957d">ZSTD_CCtx</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a55e0fa701b098f37e77b2e0340992aa8">ZSTDMT_getCCtx</a> (<a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a> *cctxPool)</td></tr>
+<tr class="separator:a55e0fa701b098f37e77b2e0340992aa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2da90ecaae8f43ec8848b3970d375d15" id="r_a2da90ecaae8f43ec8848b3970d375d15"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a2da90ecaae8f43ec8848b3970d375d15">ZSTDMT_releaseCCtx</a> (<a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a> *pool, <a class="el" href="zstd_8h.html#a9ccc575a7e1f1afd01e76c0fa98d957d">ZSTD_CCtx</a> *cctx)</td></tr>
+<tr class="separator:a2da90ecaae8f43ec8848b3970d375d15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add1f9f6a0046b9ee52cac3982c6455d2" id="r_add1f9f6a0046b9ee52cac3982c6455d2"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#add1f9f6a0046b9ee52cac3982c6455d2">ZSTDMT_serialState_reset</a> (<a class="el" href="structserialState__t.html">serialState_t</a> *serialState, <a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *seqPool, ZSTD_CCtx_params params, size_t jobSize)</td></tr>
+<tr class="separator:add1f9f6a0046b9ee52cac3982c6455d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc433aa989f3897f1780d58b06097adf" id="r_afc433aa989f3897f1780d58b06097adf"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#afc433aa989f3897f1780d58b06097adf">ZSTDMT_serialState_init</a> (<a class="el" href="structserialState__t.html">serialState_t</a> *serialState)</td></tr>
+<tr class="separator:afc433aa989f3897f1780d58b06097adf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ec6e515149e14447a09239fbf639f55" id="r_a3ec6e515149e14447a09239fbf639f55"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a3ec6e515149e14447a09239fbf639f55">ZSTDMT_serialState_free</a> (<a class="el" href="structserialState__t.html">serialState_t</a> *serialState)</td></tr>
+<tr class="separator:a3ec6e515149e14447a09239fbf639f55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67459eeb7f07c98c7a64f904f1ade632" id="r_a67459eeb7f07c98c7a64f904f1ade632"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a67459eeb7f07c98c7a64f904f1ade632">ZSTDMT_serialState_update</a> (<a class="el" href="structserialState__t.html">serialState_t</a> *serialState, <a class="el" href="zstd_8h.html#a9ccc575a7e1f1afd01e76c0fa98d957d">ZSTD_CCtx</a> *jobCCtx, <a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> seqStore, <a class="el" href="structrange__t.html">range_t</a> <a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, unsigned jobID)</td></tr>
+<tr class="separator:a67459eeb7f07c98c7a64f904f1ade632"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50ff20a5b5935f237d17bd5e5ffee5b5" id="r_a50ff20a5b5935f237d17bd5e5ffee5b5"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a50ff20a5b5935f237d17bd5e5ffee5b5">ZSTDMT_serialState_ensureFinished</a> (<a class="el" href="structserialState__t.html">serialState_t</a> *serialState, unsigned jobID, size_t cSize)</td></tr>
+<tr class="separator:a50ff20a5b5935f237d17bd5e5ffee5b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ae3d84cf90996bd2270d576c5a0a466" id="r_a5ae3d84cf90996bd2270d576c5a0a466"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a5ae3d84cf90996bd2270d576c5a0a466">ZSTDMT_compressionJob</a> (void *jobDescription)</td></tr>
+<tr class="separator:a5ae3d84cf90996bd2270d576c5a0a466"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ff66461402b0445d72b71b91d06e44d" id="r_a7ff66461402b0445d72b71b91d06e44d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a7ff66461402b0445d72b71b91d06e44d">ZSTDMT_freeJobsTable</a> (<a class="el" href="structZSTDMT__jobDescription.html">ZSTDMT_jobDescription</a> *jobTable, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> nbJobs, ZSTD_customMem cMem)</td></tr>
+<tr class="separator:a7ff66461402b0445d72b71b91d06e44d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1aaa2f722df4f504a8aae800f248d08f" id="r_a1aaa2f722df4f504a8aae800f248d08f"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structZSTDMT__jobDescription.html">ZSTDMT_jobDescription</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a1aaa2f722df4f504a8aae800f248d08f">ZSTDMT_createJobsTable</a> (<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *nbJobsPtr, ZSTD_customMem cMem)</td></tr>
+<tr class="separator:a1aaa2f722df4f504a8aae800f248d08f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08a2df9eaf1f813f5bbde5a846f2f567" id="r_a08a2df9eaf1f813f5bbde5a846f2f567"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a08a2df9eaf1f813f5bbde5a846f2f567">ZSTDMT_expandJobsTable</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> nbWorkers)</td></tr>
+<tr class="separator:a08a2df9eaf1f813f5bbde5a846f2f567"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c85d0dbbec85b437b17c99f05ba7305" id="r_a0c85d0dbbec85b437b17c99f05ba7305"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a0c85d0dbbec85b437b17c99f05ba7305">ZSTDMT_CCtxParam_setNbWorkers</a> (ZSTD_CCtx_params *params, unsigned nbWorkers)</td></tr>
+<tr class="separator:a0c85d0dbbec85b437b17c99f05ba7305"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a861f92058ef43f4a70014ccc5566f824" id="r_a861f92058ef43f4a70014ccc5566f824"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a861f92058ef43f4a70014ccc5566f824">ZSTDMT_createCCtx_advanced_internal</a> (unsigned nbWorkers, ZSTD_customMem cMem)</td></tr>
+<tr class="separator:a861f92058ef43f4a70014ccc5566f824"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4723512b2853a89e6fd5f8c69199fdcd" id="r_a4723512b2853a89e6fd5f8c69199fdcd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a4723512b2853a89e6fd5f8c69199fdcd">ZSTDMT_createCCtx_advanced</a> (unsigned nbWorkers, ZSTD_customMem cMem)</td></tr>
+<tr class="separator:a4723512b2853a89e6fd5f8c69199fdcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10ab479ce72ef3397476236c888867df" id="r_a10ab479ce72ef3397476236c888867df"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a10ab479ce72ef3397476236c888867df">ZSTDMT_createCCtx</a> (unsigned nbWorkers)</td></tr>
+<tr class="separator:a10ab479ce72ef3397476236c888867df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f6cc73d7f22a45699fecf068d978d83" id="r_a6f6cc73d7f22a45699fecf068d978d83"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a6f6cc73d7f22a45699fecf068d978d83">ZSTDMT_releaseAllJobResources</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx)</td></tr>
+<tr class="separator:a6f6cc73d7f22a45699fecf068d978d83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2015b5564dff4a4c10a9acdbb37015fb" id="r_a2015b5564dff4a4c10a9acdbb37015fb"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a2015b5564dff4a4c10a9acdbb37015fb">ZSTDMT_waitForAllJobsCompleted</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx)</td></tr>
+<tr class="separator:a2015b5564dff4a4c10a9acdbb37015fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c47c421163caa33164a894e87dccb1c" id="r_a7c47c421163caa33164a894e87dccb1c"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a7c47c421163caa33164a894e87dccb1c">ZSTDMT_freeCCtx</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx)</td></tr>
+<tr class="separator:a7c47c421163caa33164a894e87dccb1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a827cc3b54e66b16eeff38550cf534066" id="r_a827cc3b54e66b16eeff38550cf534066"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a827cc3b54e66b16eeff38550cf534066">ZSTDMT_sizeof_CCtx</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx)</td></tr>
+<tr class="separator:a827cc3b54e66b16eeff38550cf534066"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8145b29a95f86ea0ff1339828aa0af79" id="r_a8145b29a95f86ea0ff1339828aa0af79"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a8145b29a95f86ea0ff1339828aa0af79">ZSTDMT_CCtxParam_setMTCtxParameter</a> (ZSTD_CCtx_params *params, <a class="el" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292">ZSTDMT_parameter</a> parameter, int <a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>)</td></tr>
+<tr class="separator:a8145b29a95f86ea0ff1339828aa0af79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f16f4c850df86325d28d779bfcafb6f" id="r_a1f16f4c850df86325d28d779bfcafb6f"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a1f16f4c850df86325d28d779bfcafb6f">ZSTDMT_setMTCtxParameter</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, <a class="el" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292">ZSTDMT_parameter</a> parameter, int <a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>)</td></tr>
+<tr class="separator:a1f16f4c850df86325d28d779bfcafb6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8d7b68d0567a1a1e69cf6f89ff2f807" id="r_ac8d7b68d0567a1a1e69cf6f89ff2f807"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#ac8d7b68d0567a1a1e69cf6f89ff2f807">ZSTDMT_getMTCtxParameter</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, <a class="el" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292">ZSTDMT_parameter</a> parameter, int *<a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>)</td></tr>
+<tr class="separator:ac8d7b68d0567a1a1e69cf6f89ff2f807"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a174c5add4f6b561785fc6706f4514bf6" id="r_a174c5add4f6b561785fc6706f4514bf6"><td class="memItemLeft" align="right" valign="top">static ZSTD_CCtx_params&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a174c5add4f6b561785fc6706f4514bf6">ZSTDMT_initJobCCtxParams</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ZSTD_CCtx_params *params)</td></tr>
+<tr class="separator:a174c5add4f6b561785fc6706f4514bf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b939df9161b153a9e93d24ba988a9e1" id="r_a7b939df9161b153a9e93d24ba988a9e1"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a7b939df9161b153a9e93d24ba988a9e1">ZSTDMT_resize</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, unsigned nbWorkers)</td></tr>
+<tr class="separator:a7b939df9161b153a9e93d24ba988a9e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f5723a37881527037ffcdfbc157c121" id="r_a3f5723a37881527037ffcdfbc157c121"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a3f5723a37881527037ffcdfbc157c121">ZSTDMT_updateCParams_whileCompressing</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ZSTD_CCtx_params *cctxParams)</td></tr>
+<tr class="separator:a3f5723a37881527037ffcdfbc157c121"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c822c10aa6f503cebf7e35746b7c206" id="r_a3c822c10aa6f503cebf7e35746b7c206"><td class="memItemLeft" align="right" valign="top">ZSTD_frameProgression&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a3c822c10aa6f503cebf7e35746b7c206">ZSTDMT_getFrameProgression</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx)</td></tr>
+<tr class="separator:a3c822c10aa6f503cebf7e35746b7c206"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d200c4c6b7a3c7a045a181dfa29c322" id="r_a0d200c4c6b7a3c7a045a181dfa29c322"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a0d200c4c6b7a3c7a045a181dfa29c322">ZSTDMT_toFlushNow</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx)</td></tr>
+<tr class="separator:a0d200c4c6b7a3c7a045a181dfa29c322"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27d19648663349613a98d7272396b6dc" id="r_a27d19648663349613a98d7272396b6dc"><td class="memItemLeft" align="right" valign="top">static unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a27d19648663349613a98d7272396b6dc">ZSTDMT_computeTargetJobLog</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ZSTD_CCtx_params *params)</td></tr>
+<tr class="separator:a27d19648663349613a98d7272396b6dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34354f0a71b228f69b92b713158c52d6" id="r_a34354f0a71b228f69b92b713158c52d6"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a34354f0a71b228f69b92b713158c52d6">ZSTDMT_overlapLog_default</a> (<a class="el" href="zstd_8h.html#a852a7e43e763f198f70b9c93121717a3">ZSTD_strategy</a> strat)</td></tr>
+<tr class="separator:a34354f0a71b228f69b92b713158c52d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84df0ef1befca21ef2f483f40146ecb9" id="r_a84df0ef1befca21ef2f483f40146ecb9"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a84df0ef1befca21ef2f483f40146ecb9">ZSTDMT_overlapLog</a> (int ovlog, <a class="el" href="zstd_8h.html#a852a7e43e763f198f70b9c93121717a3">ZSTD_strategy</a> strat)</td></tr>
+<tr class="separator:a84df0ef1befca21ef2f483f40146ecb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29ff2d52d4ad054e8a6b94eb42785209" id="r_a29ff2d52d4ad054e8a6b94eb42785209"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a29ff2d52d4ad054e8a6b94eb42785209">ZSTDMT_computeOverlapSize</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ZSTD_CCtx_params *params)</td></tr>
+<tr class="separator:a29ff2d52d4ad054e8a6b94eb42785209"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab910142bad4d3fc239f708e3f28d7d4d" id="r_ab910142bad4d3fc239f708e3f28d7d4d"><td class="memItemLeft" align="right" valign="top">static unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#ab910142bad4d3fc239f708e3f28d7d4d">ZSTDMT_computeNbJobs</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ZSTD_CCtx_params *params, size_t srcSize, unsigned nbWorkers)</td></tr>
+<tr class="separator:ab910142bad4d3fc239f708e3f28d7d4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc7946551c840ec12b31a2ff966c08bd" id="r_acc7946551c840ec12b31a2ff966c08bd"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#acc7946551c840ec12b31a2ff966c08bd">ZSTDMT_compress_advanced_internal</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#a8f0f8ee84f4ef0190e41b73fd863d8d2">ZSTD_CDict</a> *cdict, ZSTD_CCtx_params params)</td></tr>
+<tr class="separator:acc7946551c840ec12b31a2ff966c08bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b97ef2f333acff7ab1261db96e2324d" id="r_a5b97ef2f333acff7ab1261db96e2324d"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a5b97ef2f333acff7ab1261db96e2324d">ZSTDMT_compress_advanced</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#a8f0f8ee84f4ef0190e41b73fd863d8d2">ZSTD_CDict</a> *cdict, ZSTD_parameters params, int overlapLog)</td></tr>
+<tr class="separator:a5b97ef2f333acff7ab1261db96e2324d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f96be6b847ceefe3f35d1fb32a5174a" id="r_a9f96be6b847ceefe3f35d1fb32a5174a"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a9f96be6b847ceefe3f35d1fb32a5174a">ZSTDMT_compressCCtx</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, int <a class="el" href="zbuff_8h.html#ade711b19285bdf476a4f753670ca3489">compressionLevel</a>)</td></tr>
+<tr class="separator:a9f96be6b847ceefe3f35d1fb32a5174a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa12f1edba314c587743801d624f71873" id="r_aa12f1edba314c587743801d624f71873"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#aa12f1edba314c587743801d624f71873">ZSTDMT_initCStream_internal</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a>, size_t <a class="el" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>, ZSTD_dictContentType_e dictContentType, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#a8f0f8ee84f4ef0190e41b73fd863d8d2">ZSTD_CDict</a> *cdict, ZSTD_CCtx_params params, unsigned long long pledgedSrcSize)</td></tr>
+<tr class="separator:aa12f1edba314c587743801d624f71873"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55f5e85bf14dc4091fc7bd4b79dcd680" id="r_a55f5e85bf14dc4091fc7bd4b79dcd680"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a55f5e85bf14dc4091fc7bd4b79dcd680">ZSTDMT_initCStream_advanced</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a>, size_t <a class="el" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>, ZSTD_parameters params, unsigned long long pledgedSrcSize)</td></tr>
+<tr class="separator:a55f5e85bf14dc4091fc7bd4b79dcd680"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba44e9cc57a0137d7259a55d3836d9d1" id="r_aba44e9cc57a0137d7259a55d3836d9d1"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#aba44e9cc57a0137d7259a55d3836d9d1">ZSTDMT_initCStream_usingCDict</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#a8f0f8ee84f4ef0190e41b73fd863d8d2">ZSTD_CDict</a> *cdict, ZSTD_frameParameters fParams, unsigned long long pledgedSrcSize)</td></tr>
+<tr class="separator:aba44e9cc57a0137d7259a55d3836d9d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8879cb348bb06f3106b6dada5418ec61" id="r_a8879cb348bb06f3106b6dada5418ec61"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a8879cb348bb06f3106b6dada5418ec61">ZSTDMT_resetCStream</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, unsigned long long pledgedSrcSize)</td></tr>
+<tr class="separator:a8879cb348bb06f3106b6dada5418ec61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78a2d72e9f0eec09cc2956e3c165233d" id="r_a78a2d72e9f0eec09cc2956e3c165233d"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a78a2d72e9f0eec09cc2956e3c165233d">ZSTDMT_initCStream</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, int <a class="el" href="zbuff_8h.html#ade711b19285bdf476a4f753670ca3489">compressionLevel</a>)</td></tr>
+<tr class="separator:a78a2d72e9f0eec09cc2956e3c165233d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33c0eaef2fb3ae3a19f7816e10142284" id="r_a33c0eaef2fb3ae3a19f7816e10142284"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a33c0eaef2fb3ae3a19f7816e10142284">ZSTDMT_writeLastEmptyBlock</a> (<a class="el" href="structZSTDMT__jobDescription.html">ZSTDMT_jobDescription</a> *job)</td></tr>
+<tr class="separator:a33c0eaef2fb3ae3a19f7816e10142284"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec9acb202c087d899723652890929b57" id="r_aec9acb202c087d899723652890929b57"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#aec9acb202c087d899723652890929b57">ZSTDMT_createCompressionJob</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, size_t srcSize, <a class="el" href="zstd_8h.html#a800deb274e46fda42839b5a7bbe261aa">ZSTD_EndDirective</a> endOp)</td></tr>
+<tr class="separator:aec9acb202c087d899723652890929b57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0621e1a65ead5a6a5f5f6a55ed0265fb" id="r_a0621e1a65ead5a6a5f5f6a55ed0265fb"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a0621e1a65ead5a6a5f5f6a55ed0265fb">ZSTDMT_flushProduced</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, <a class="el" href="zstd_8h.html#a88ef076a7b8c7ce6256040a1a033e657">ZSTD_outBuffer</a> *output, unsigned blockToFlush, <a class="el" href="zstd_8h.html#a800deb274e46fda42839b5a7bbe261aa">ZSTD_EndDirective</a> end)</td></tr>
+<tr class="separator:a0621e1a65ead5a6a5f5f6a55ed0265fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9cad41031447e031d635f494a3094e78" id="r_a9cad41031447e031d635f494a3094e78"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structrange__t.html">range_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a9cad41031447e031d635f494a3094e78">ZSTDMT_getInputDataInUse</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx)</td></tr>
+<tr class="separator:a9cad41031447e031d635f494a3094e78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5a1235f871bff4c543d626233caeb60" id="r_aa5a1235f871bff4c543d626233caeb60"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#aa5a1235f871bff4c543d626233caeb60">ZSTDMT_isOverlapped</a> (<a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a> buffer, <a class="el" href="structrange__t.html">range_t</a> range)</td></tr>
+<tr class="separator:aa5a1235f871bff4c543d626233caeb60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc353be8534c0b49ae6dd1ce19a66da2" id="r_adc353be8534c0b49ae6dd1ce19a66da2"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#adc353be8534c0b49ae6dd1ce19a66da2">ZSTDMT_doesOverlapWindow</a> (<a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a> buffer, <a class="el" href="structZSTD__window__t.html">ZSTD_window_t</a> window)</td></tr>
+<tr class="separator:adc353be8534c0b49ae6dd1ce19a66da2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae93d2f691987da685417c930c64a7ab2" id="r_ae93d2f691987da685417c930c64a7ab2"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#ae93d2f691987da685417c930c64a7ab2">ZSTDMT_waitForLdmComplete</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, <a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a> buffer)</td></tr>
+<tr class="separator:ae93d2f691987da685417c930c64a7ab2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92918832ed0f73b14dea96814ea3cfd2" id="r_a92918832ed0f73b14dea96814ea3cfd2"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a92918832ed0f73b14dea96814ea3cfd2">ZSTDMT_tryGetInputRange</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx)</td></tr>
+<tr class="separator:a92918832ed0f73b14dea96814ea3cfd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86a619011e7896dbb70604246b61d31c" id="r_a86a619011e7896dbb70604246b61d31c"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structsyncPoint__t.html">syncPoint_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a86a619011e7896dbb70604246b61d31c">findSynchronizationPoint</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *mtctx, <a class="el" href="zstd_8h.html#a1c5398613e678b0373333df2c455cc4d">ZSTD_inBuffer</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> input)</td></tr>
+<tr class="separator:a86a619011e7896dbb70604246b61d31c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7309a31a630ed75ed66c37d175477080" id="r_a7309a31a630ed75ed66c37d175477080"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a7309a31a630ed75ed66c37d175477080">ZSTDMT_nextInputSizeHint</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx)</td></tr>
+<tr class="separator:a7309a31a630ed75ed66c37d175477080"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ac5048ac979153a18b921b710e3e8d1" id="r_a1ac5048ac979153a18b921b710e3e8d1"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a1ac5048ac979153a18b921b710e3e8d1">ZSTDMT_compressStream_generic</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, <a class="el" href="zstd_8h.html#a88ef076a7b8c7ce6256040a1a033e657">ZSTD_outBuffer</a> *output, <a class="el" href="zstd_8h.html#a1c5398613e678b0373333df2c455cc4d">ZSTD_inBuffer</a> *input, <a class="el" href="zstd_8h.html#a800deb274e46fda42839b5a7bbe261aa">ZSTD_EndDirective</a> endOp)</td></tr>
+<tr class="separator:a1ac5048ac979153a18b921b710e3e8d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc311cc6184b18895c852696f4429fd7" id="r_afc311cc6184b18895c852696f4429fd7"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#afc311cc6184b18895c852696f4429fd7">ZSTDMT_compressStream</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, <a class="el" href="zstd_8h.html#a88ef076a7b8c7ce6256040a1a033e657">ZSTD_outBuffer</a> *output, <a class="el" href="zstd_8h.html#a1c5398613e678b0373333df2c455cc4d">ZSTD_inBuffer</a> *input)</td></tr>
+<tr class="separator:afc311cc6184b18895c852696f4429fd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23fcf8c8c255a0e29faf48bd419cd0bf" id="r_a23fcf8c8c255a0e29faf48bd419cd0bf"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a23fcf8c8c255a0e29faf48bd419cd0bf">ZSTDMT_flushStream_internal</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, <a class="el" href="zstd_8h.html#a88ef076a7b8c7ce6256040a1a033e657">ZSTD_outBuffer</a> *output, <a class="el" href="zstd_8h.html#a800deb274e46fda42839b5a7bbe261aa">ZSTD_EndDirective</a> endFrame)</td></tr>
+<tr class="separator:a23fcf8c8c255a0e29faf48bd419cd0bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a878f36a35e18967a8dc3874a6a1a67ee" id="r_a878f36a35e18967a8dc3874a6a1a67ee"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a878f36a35e18967a8dc3874a6a1a67ee">ZSTDMT_flushStream</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, <a class="el" href="zstd_8h.html#a88ef076a7b8c7ce6256040a1a033e657">ZSTD_outBuffer</a> *output)</td></tr>
+<tr class="separator:a878f36a35e18967a8dc3874a6a1a67ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36f9bc5bbd7a783e1b4f338764cda7da" id="r_a36f9bc5bbd7a783e1b4f338764cda7da"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a36f9bc5bbd7a783e1b4f338764cda7da">ZSTDMT_endStream</a> (<a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *mtctx, <a class="el" href="zstd_8h.html#a88ef076a7b8c7ce6256040a1a033e657">ZSTD_outBuffer</a> *output)</td></tr>
+<tr class="separator:a36f9bc5bbd7a783e1b4f338764cda7da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:ad8352f91e11f0b52d1d34f92c6ffe40d" id="r_ad8352f91e11f0b52d1d34f92c6ffe40d"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#ad8352f91e11f0b52d1d34f92c6ffe40d">g_nullBuffer</a> = { <a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, 0 }</td></tr>
+<tr class="separator:ad8352f91e11f0b52d1d34f92c6ffe40d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80214be5ee1c0c4e806e67d8e656b9bd" id="r_a80214be5ee1c0c4e806e67d8e656b9bd"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a80214be5ee1c0c4e806e67d8e656b9bd">kNullRawSeqStore</a> = {<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, 0, 0, 0}</td></tr>
+<tr class="separator:a80214be5ee1c0c4e806e67d8e656b9bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaddbb786df40a34add339a60c92178cc" id="r_aaddbb786df40a34add339a60c92178cc"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structrange__t.html">range_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#aaddbb786df40a34add339a60c92178cc">kNullRange</a> = { <a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, 0 }</td></tr>
+<tr class="separator:aaddbb786df40a34add339a60c92178cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ff28d36ba0f7b1e126a63379ba2a5e3" id="r_a1ff28d36ba0f7b1e126a63379ba2a5e3"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structroundBuff__t.html">roundBuff_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstdmt__compress_8c.html#a1ff28d36ba0f7b1e126a63379ba2a5e3">kNullRoundBuff</a> = {<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, 0, 0}</td></tr>
+<tr class="separator:a1ff28d36ba0f7b1e126a63379ba2a5e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a91c7e97b01ab5c0123dc60dc2eeb0316" name="a91c7e97b01ab5c0123dc60dc2eeb0316"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91c7e97b01ab5c0123dc60dc2eeb0316">&#9670;&#160;</a></span>DEBUG_PRINTHEX</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DEBUG_PRINTHEX</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">l, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">p, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">n&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;{}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00082">82</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab2c4c67a29e924ad5c996621dddd866e" name="ab2c4c67a29e924ad5c996621dddd866e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2c4c67a29e924ad5c996621dddd866e">&#9670;&#160;</a></span>JOB_ERROR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define JOB_ERROR</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">    {                          \</div>
+<div class="line">    ZSTD_PTHREAD_MUTEX_LOCK(&amp;job-&gt;job_mutex);   \</div>
+<div class="line">    job-&gt;cSize = e;                             \</div>
+<div class="line">    ZSTD_pthread_mutex_unlock(&amp;job-&gt;job_mutex); \</div>
+<div class="line">    <span class="keywordflow">goto</span> _endJob;                               \</div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00634">634</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afc39d3e291540ea7569e1e4f2428894c" name="afc39d3e291540ea7569e1e4f2428894c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc39d3e291540ea7569e1e4f2428894c">&#9670;&#160;</a></span>RSYNC_LENGTH</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define RSYNC_LENGTH&#160;&#160;&#160;32</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00779">779</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a58ededaeedbd332d69d237752f75d5b0" name="a58ededaeedbd332d69d237752f75d5b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58ededaeedbd332d69d237752f75d5b0">&#9670;&#160;</a></span>ZSTD_PTHREAD_MUTEX_LOCK</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZSTD_PTHREAD_MUTEX_LOCK</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">m</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="threading_8h.html#a95e951617f02090ff44fe77387ae2a75">ZSTD_pthread_mutex_lock</a>(m)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00081">81</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a80f090a8f6e5fe4a707a4b12b270ed70" name="a80f090a8f6e5fe4a707a4b12b270ed70"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80f090a8f6e5fe4a707a4b12b270ed70">&#9670;&#160;</a></span>ZSTD_RESIZE_SEQPOOL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZSTD_RESIZE_SEQPOOL&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00036">36</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0b45f75660fb8e38f75f6615163565d8" name="a0b45f75660fb8e38f75f6615163565d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b45f75660fb8e38f75f6615163565d8">&#9670;&#160;</a></span>ZSTDMT_OVERLAPLOG_DEFAULT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZSTDMT_OVERLAPLOG_DEFAULT&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00019">19</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类型定义说明</h2>
+<a id="a81b62558b8599f883304a26b742aa44f" name="a81b62558b8599f883304a26b742aa44f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81b62558b8599f883304a26b742aa44f">&#9670;&#160;</a></span>buffer_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structbuffer__s.html">buffer_s</a> <a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a68a063e5c10aefde823f355df2940cb7" name="a68a063e5c10aefde823f355df2940cb7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a68a063e5c10aefde823f355df2940cb7">&#9670;&#160;</a></span>ZSTDMT_bufferPool</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structZSTDMT__bufferPool__s.html">ZSTDMT_bufferPool_s</a> <a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2af20bbd5b854f64c02af0fae4ce230a" name="a2af20bbd5b854f64c02af0fae4ce230a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2af20bbd5b854f64c02af0fae4ce230a">&#9670;&#160;</a></span>ZSTDMT_seqPool</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> <a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00272">272</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="affe9e174a13f411e36aaa5fcd9ac5c06" name="affe9e174a13f411e36aaa5fcd9ac5c06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#affe9e174a13f411e36aaa5fcd9ac5c06">&#9670;&#160;</a></span>bufferToSeq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> bufferToSeq </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a>&#160;</td>
+          <td class="paramname"><em>buffer</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00279">279</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a86a619011e7896dbb70604246b61d31c" name="a86a619011e7896dbb70604246b61d31c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86a619011e7896dbb70604246b61d31c">&#9670;&#160;</a></span>findSynchronizationPoint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structsyncPoint__t.html">syncPoint_t</a> findSynchronizationPoint </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a1c5398613e678b0373333df2c455cc4d">ZSTD_inBuffer</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>input</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Searches through the input for a synchronization point. If one is found, we will instruct the caller to flush, and return the number of bytes to load. Otherwise, we will load as many bytes as possible and instruct the caller to continue as normal. </p>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01911">1911</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a06d69c40d1386ca9f248183a28f97002" name="a06d69c40d1386ca9f248183a28f97002"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06d69c40d1386ca9f248183a28f97002">&#9670;&#160;</a></span>seqToBuffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a> seqToBuffer </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a>&#160;</td>
+          <td class="paramname"><em>seq</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00287">287</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8145b29a95f86ea0ff1339828aa0af79" name="a8145b29a95f86ea0ff1339828aa0af79"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8145b29a95f86ea0ff1339828aa0af79">&#9670;&#160;</a></span>ZSTDMT_CCtxParam_setMTCtxParameter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_CCtxParam_setMTCtxParameter </td>
+          <td>(</td>
+          <td class="paramtype">ZSTD_CCtx_params *&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292">ZSTDMT_parameter</a>&#160;</td>
+          <td class="paramname"><em>parameter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstdmt__compress_8h.html#a8145b29a95f86ea0ff1339828aa0af79">ZSTDMT_CCtxParam_setMTCtxParameter()</a> like <a class="el" href="zstdmt__compress_8h.html#a20d2126232a4b6c4d1e760843b0432af">ZSTDMT_setMTCtxParameter()</a>, but into a ZSTD_CCtx_Params </p>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00994">994</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0c85d0dbbec85b437b17c99f05ba7305" name="a0c85d0dbbec85b437b17c99f05ba7305"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c85d0dbbec85b437b17c99f05ba7305">&#9670;&#160;</a></span>ZSTDMT_CCtxParam_setNbWorkers()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_CCtxParam_setNbWorkers </td>
+          <td>(</td>
+          <td class="paramtype">ZSTD_CCtx_params *&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbWorkers</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstdmt__compress_8h.html#a0c85d0dbbec85b437b17c99f05ba7305">ZSTDMT_CCtxParam_setNbWorkers()</a> Set nbWorkers, and clamp it. Also reset jobSize and overlapLog </p>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00866">866</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5b97ef2f333acff7ab1261db96e2324d" name="a5b97ef2f333acff7ab1261db96e2324d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b97ef2f333acff7ab1261db96e2324d">&#9670;&#160;</a></span>ZSTDMT_compress_advanced()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_compress_advanced </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#a8f0f8ee84f4ef0190e41b73fd863d8d2">ZSTD_CDict</a> *&#160;</td>
+          <td class="paramname"><em>cdict</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_parameters&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>overlapLog</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01356">1356</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acc7946551c840ec12b31a2ff966c08bd" name="acc7946551c840ec12b31a2ff966c08bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc7946551c840ec12b31a2ff966c08bd">&#9670;&#160;</a></span>ZSTDMT_compress_advanced_internal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTDMT_compress_advanced_internal </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#a8f0f8ee84f4ef0190e41b73fd863d8d2">ZSTD_CDict</a> *&#160;</td>
+          <td class="paramname"><em>cdict</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_CCtx_params&#160;</td>
+          <td class="paramname"><em>params</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01238">1238</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9f96be6b847ceefe3f35d1fb32a5174a" name="a9f96be6b847ceefe3f35d1fb32a5174a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f96be6b847ceefe3f35d1fb32a5174a">&#9670;&#160;</a></span>ZSTDMT_compressCCtx()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_compressCCtx </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>compressionLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01375">1375</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5ae3d84cf90996bd2270d576c5a0a466" name="a5ae3d84cf90996bd2270d576c5a0a466"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ae3d84cf90996bd2270d576c5a0a466">&#9670;&#160;</a></span>ZSTDMT_compressionJob()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_compressionJob </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>jobDescription</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00642">642</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afc311cc6184b18895c852696f4429fd7" name="afc311cc6184b18895c852696f4429fd7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc311cc6184b18895c852696f4429fd7">&#9670;&#160;</a></span>ZSTDMT_compressStream()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_compressStream </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a88ef076a7b8c7ce6256040a1a033e657">ZSTD_outBuffer</a> *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a1c5398613e678b0373333df2c455cc4d">ZSTD_inBuffer</a> *&#160;</td>
+          <td class="paramname"><em>input</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l02075">2075</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1ac5048ac979153a18b921b710e3e8d1" name="a1ac5048ac979153a18b921b710e3e8d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ac5048ac979153a18b921b710e3e8d1">&#9670;&#160;</a></span>ZSTDMT_compressStream_generic()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_compressStream_generic </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a88ef076a7b8c7ce6256040a1a033e657">ZSTD_outBuffer</a> *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a1c5398613e678b0373333df2c455cc4d">ZSTD_inBuffer</a> *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a800deb274e46fda42839b5a7bbe261aa">ZSTD_EndDirective</a>&#160;</td>
+          <td class="paramname"><em>endOp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstdmt__compress_8c.html#a1ac5048ac979153a18b921b710e3e8d1">ZSTDMT_compressStream_generic()</a> : internal use only - exposed to be invoked from <a class="el" href="zstd__compress_8c.html">zstd_compress.c</a> assumption : output and input are valid (pos &lt;= size) </p><dl class="section return"><dt>返回</dt><dd>: minimum amount of data remaining to flush, 0 if none </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01987">1987</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab910142bad4d3fc239f708e3f28d7d4d" name="ab910142bad4d3fc239f708e3f28d7d4d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab910142bad4d3fc239f708e3f28d7d4d">&#9670;&#160;</a></span>ZSTDMT_computeNbJobs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static unsigned ZSTDMT_computeNbJobs </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ZSTD_CCtx_params *&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbWorkers</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01222">1222</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a29ff2d52d4ad054e8a6b94eb42785209" name="a29ff2d52d4ad054e8a6b94eb42785209"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29ff2d52d4ad054e8a6b94eb42785209">&#9670;&#160;</a></span>ZSTDMT_computeOverlapSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTDMT_computeOverlapSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ZSTD_CCtx_params *&#160;</td>
+          <td class="paramname"><em>params</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01202">1202</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a27d19648663349613a98d7272396b6dc" name="a27d19648663349613a98d7272396b6dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27d19648663349613a98d7272396b6dc">&#9670;&#160;</a></span>ZSTDMT_computeTargetJobLog()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static unsigned ZSTDMT_computeTargetJobLog </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ZSTD_CCtx_params *&#160;</td>
+          <td class="paramname"><em>params</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01160">1160</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2ea01b69d1424febb27a95d93087a4f7" name="a2ea01b69d1424febb27a95d93087a4f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ea01b69d1424febb27a95d93087a4f7">&#9670;&#160;</a></span>ZSTDMT_createBufferPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> * ZSTDMT_createBufferPool </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbWorkers</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_customMem&#160;</td>
+          <td class="paramname"><em>cMem</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00106">106</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a10ab479ce72ef3397476236c888867df" name="a10ab479ce72ef3397476236c888867df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10ab479ce72ef3397476236c888867df">&#9670;&#160;</a></span>ZSTDMT_createCCtx()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> * ZSTDMT_createCCtx </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbWorkers</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00917">917</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4723512b2853a89e6fd5f8c69199fdcd" name="a4723512b2853a89e6fd5f8c69199fdcd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4723512b2853a89e6fd5f8c69199fdcd">&#9670;&#160;</a></span>ZSTDMT_createCCtx_advanced()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> * ZSTDMT_createCCtx_advanced </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbWorkers</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_customMem&#160;</td>
+          <td class="paramname"><em>cMem</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00906">906</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a861f92058ef43f4a70014ccc5566f824" name="a861f92058ef43f4a70014ccc5566f824"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a861f92058ef43f4a70014ccc5566f824">&#9670;&#160;</a></span>ZSTDMT_createCCtx_advanced_internal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> * ZSTDMT_createCCtx_advanced_internal </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbWorkers</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_customMem&#160;</td>
+          <td class="paramname"><em>cMem</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00871">871</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae4c5a3526cc604b58d75cac4b4190e81" name="ae4c5a3526cc604b58d75cac4b4190e81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4c5a3526cc604b58d75cac4b4190e81">&#9670;&#160;</a></span>ZSTDMT_createCCtxPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a> * ZSTDMT_createCCtxPool </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>nbWorkers</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_customMem&#160;</td>
+          <td class="paramname"><em>cMem</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00362">362</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aec9acb202c087d899723652890929b57" name="aec9acb202c087d899723652890929b57"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec9acb202c087d899723652890929b57">&#9670;&#160;</a></span>ZSTDMT_createCompressionJob()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTDMT_createCompressionJob </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a800deb274e46fda42839b5a7bbe261aa">ZSTD_EndDirective</a>&#160;</td>
+          <td class="paramname"><em>endOp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01579">1579</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1aaa2f722df4f504a8aae800f248d08f" name="a1aaa2f722df4f504a8aae800f248d08f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1aaa2f722df4f504a8aae800f248d08f">&#9670;&#160;</a></span>ZSTDMT_createJobsTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structZSTDMT__jobDescription.html">ZSTDMT_jobDescription</a> * ZSTDMT_createJobsTable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *&#160;</td>
+          <td class="paramname"><em>nbJobsPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_customMem&#160;</td>
+          <td class="paramname"><em>cMem</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00829">829</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1a2c1fef7dcbecde8653d3fcb763ada5" name="a1a2c1fef7dcbecde8653d3fcb763ada5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a2c1fef7dcbecde8653d3fcb763ada5">&#9670;&#160;</a></span>ZSTDMT_createSeqPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> * ZSTDMT_createSeqPool </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbWorkers</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_customMem&#160;</td>
+          <td class="paramname"><em>cMem</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00320">320</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adc353be8534c0b49ae6dd1ce19a66da2" name="adc353be8534c0b49ae6dd1ce19a66da2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc353be8534c0b49ae6dd1ce19a66da2">&#9670;&#160;</a></span>ZSTDMT_doesOverlapWindow()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int ZSTDMT_doesOverlapWindow </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a>&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structZSTD__window__t.html">ZSTD_window_t</a>&#160;</td>
+          <td class="paramname"><em>window</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01800">1800</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a36f9bc5bbd7a783e1b4f338764cda7da" name="a36f9bc5bbd7a783e1b4f338764cda7da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36f9bc5bbd7a783e1b4f338764cda7da">&#9670;&#160;</a></span>ZSTDMT_endStream()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_endStream </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a88ef076a7b8c7ce6256040a1a033e657">ZSTD_outBuffer</a> *&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>返回</dt><dd>: 0 == all flushed; &gt;0 : still some data to be flushed; or an error code (<a class="el" href="zstd__internal_8h.html#a665e5ea865f07b1c036fb5e84fdd6b1e">ZSTD_isError()</a>) </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l02110">2110</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac338ed336fb10c493127213b7d70b5cb" name="ac338ed336fb10c493127213b7d70b5cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac338ed336fb10c493127213b7d70b5cb">&#9670;&#160;</a></span>ZSTDMT_expandBufferPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> * ZSTDMT_expandBufferPool </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> *&#160;</td>
+          <td class="paramname"><em>srcBufPool</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>nbWorkers</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00164">164</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2dbb0d6ee973d7f032fc77d4873ff6e0" name="a2dbb0d6ee973d7f032fc77d4873ff6e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2dbb0d6ee973d7f032fc77d4873ff6e0">&#9670;&#160;</a></span>ZSTDMT_expandCCtxPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a> * ZSTDMT_expandCCtxPool </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a> *&#160;</td>
+          <td class="paramname"><em>srcPool</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>nbWorkers</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00382">382</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a08a2df9eaf1f813f5bbde5a846f2f567" name="a08a2df9eaf1f813f5bbde5a846f2f567"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08a2df9eaf1f813f5bbde5a846f2f567">&#9670;&#160;</a></span>ZSTDMT_expandJobsTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTDMT_expandJobsTable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>nbWorkers</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00850">850</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7a17cf466b66a8a8fb789b71a3fae516" name="a7a17cf466b66a8a8fb789b71a3fae516"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a17cf466b66a8a8fb789b71a3fae516">&#9670;&#160;</a></span>ZSTDMT_expandSeqPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> * ZSTDMT_expandSeqPool </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *&#160;</td>
+          <td class="paramname"><em>pool</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>nbWorkers</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00333">333</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0621e1a65ead5a6a5f5f6a55ed0265fb" name="a0621e1a65ead5a6a5f5f6a55ed0265fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0621e1a65ead5a6a5f5f6a55ed0265fb">&#9670;&#160;</a></span>ZSTDMT_flushProduced()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTDMT_flushProduced </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a88ef076a7b8c7ce6256040a1a033e657">ZSTD_outBuffer</a> *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>blockToFlush</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a800deb274e46fda42839b5a7bbe261aa">ZSTD_EndDirective</a>&#160;</td>
+          <td class="paramname"><em>end</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zstdmt__compress_8c.html#a0621e1a65ead5a6a5f5f6a55ed0265fb">ZSTDMT_flushProduced()</a> : flush whatever data has been produced but not yet flushed in current job. move to next job if current one is fully flushed. <code>output</code> : <code>pos</code> will be updated with amount of data flushed . <code>blockToFlush</code> : if &gt;0, the function will block and wait if there is no data available to flush . </p><dl class="section return"><dt>返回</dt><dd>: amount of data remaining within internal buffer, 0 if no more, 1 if unknown but &gt; 0, or an error code </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01664">1664</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a878f36a35e18967a8dc3874a6a1a67ee" name="a878f36a35e18967a8dc3874a6a1a67ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a878f36a35e18967a8dc3874a6a1a67ee">&#9670;&#160;</a></span>ZSTDMT_flushStream()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_flushStream </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a88ef076a7b8c7ce6256040a1a033e657">ZSTD_outBuffer</a> *&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>返回</dt><dd>: 0 == all flushed; &gt;0 : still some data to be flushed; or an error code (<a class="el" href="zstd__internal_8h.html#a665e5ea865f07b1c036fb5e84fdd6b1e">ZSTD_isError()</a>) </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l02102">2102</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a23fcf8c8c255a0e29faf48bd419cd0bf" name="a23fcf8c8c255a0e29faf48bd419cd0bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a23fcf8c8c255a0e29faf48bd419cd0bf">&#9670;&#160;</a></span>ZSTDMT_flushStream_internal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTDMT_flushStream_internal </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a88ef076a7b8c7ce6256040a1a033e657">ZSTD_outBuffer</a> *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a800deb274e46fda42839b5a7bbe261aa">ZSTD_EndDirective</a>&#160;</td>
+          <td class="paramname"><em>endFrame</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l02084">2084</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9c0fa3824551d45476d4f2dfb86c06d3" name="a9c0fa3824551d45476d4f2dfb86c06d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c0fa3824551d45476d4f2dfb86c06d3">&#9670;&#160;</a></span>ZSTDMT_freeBufferPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_freeBufferPool </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> *&#160;</td>
+          <td class="paramname"><em>bufPool</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00123">123</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7c47c421163caa33164a894e87dccb1c" name="a7c47c421163caa33164a894e87dccb1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c47c421163caa33164a894e87dccb1c">&#9670;&#160;</a></span>ZSTDMT_freeCCtx()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_freeCCtx </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00962">962</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2ed08b1b24b386708c3ad37916f0b4e7" name="a2ed08b1b24b386708c3ad37916f0b4e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ed08b1b24b386708c3ad37916f0b4e7">&#9670;&#160;</a></span>ZSTDMT_freeCCtxPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_freeCCtxPool </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a> *&#160;</td>
+          <td class="paramname"><em>pool</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00351">351</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7ff66461402b0445d72b71b91d06e44d" name="a7ff66461402b0445d72b71b91d06e44d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ff66461402b0445d72b71b91d06e44d">&#9670;&#160;</a></span>ZSTDMT_freeJobsTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_freeJobsTable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTDMT__jobDescription.html">ZSTDMT_jobDescription</a> *&#160;</td>
+          <td class="paramname"><em>jobTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>nbJobs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_customMem&#160;</td>
+          <td class="paramname"><em>cMem</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00815">815</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a61bd428f048bd9198abf1bd42482c494" name="a61bd428f048bd9198abf1bd42482c494"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61bd428f048bd9198abf1bd42482c494">&#9670;&#160;</a></span>ZSTDMT_freeSeqPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_freeSeqPool </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *&#160;</td>
+          <td class="paramname"><em>seqPool</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00328">328</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae58c2db9b022846cce9cfe8e788127a8" name="ae58c2db9b022846cce9cfe8e788127a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae58c2db9b022846cce9cfe8e788127a8">&#9670;&#160;</a></span>ZSTDMT_getBuffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a> ZSTDMT_getBuffer </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> *&#160;</td>
+          <td class="paramname"><em>bufPool</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zstdmt__compress_8c.html#ae58c2db9b022846cce9cfe8e788127a8">ZSTDMT_getBuffer()</a> : assumption : bufPool must be valid </p><dl class="section return"><dt>返回</dt><dd>: a buffer, with start pointer and size note: allocation may fail, in this case, start==NULL and size==0 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00186">186</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a55e0fa701b098f37e77b2e0340992aa8" name="a55e0fa701b098f37e77b2e0340992aa8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55e0fa701b098f37e77b2e0340992aa8">&#9670;&#160;</a></span>ZSTDMT_getCCtx()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="zstd_8h.html#a9ccc575a7e1f1afd01e76c0fa98d957d">ZSTD_CCtx</a> * ZSTDMT_getCCtx </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a> *&#160;</td>
+          <td class="paramname"><em>cctxPool</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00412">412</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3c822c10aa6f503cebf7e35746b7c206" name="a3c822c10aa6f503cebf7e35746b7c206"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c822c10aa6f503cebf7e35746b7c206">&#9670;&#160;</a></span>ZSTDMT_getFrameProgression()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZSTD_frameProgression ZSTDMT_getFrameProgression </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstdmt__compress_8h.html#a3c822c10aa6f503cebf7e35746b7c206">ZSTDMT_getFrameProgression()</a>: tells how much data has been consumed (input) and produced (output) for current frame. able to count progression inside worker threads. </p>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01089">1089</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9cad41031447e031d635f494a3094e78" name="a9cad41031447e031d635f494a3094e78"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9cad41031447e031d635f494a3094e78">&#9670;&#160;</a></span>ZSTDMT_getInputDataInUse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structrange__t.html">range_t</a> ZSTDMT_getInputDataInUse </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns the range of data used by the earliest job that is not yet complete. If the data of the first job is broken up into two segments, we cover both sections. </p>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01753">1753</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac8d7b68d0567a1a1e69cf6f89ff2f807" name="ac8d7b68d0567a1a1e69cf6f89ff2f807"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8d7b68d0567a1a1e69cf6f89ff2f807">&#9670;&#160;</a></span>ZSTDMT_getMTCtxParameter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_getMTCtxParameter </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292">ZSTDMT_parameter</a>&#160;</td>
+          <td class="paramname"><em>parameter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01021">1021</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae037f2129658bb78ac3b4eed991e1813" name="ae037f2129658bb78ac3b4eed991e1813"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae037f2129658bb78ac3b4eed991e1813">&#9670;&#160;</a></span>ZSTDMT_getSeq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> ZSTDMT_getSeq </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *&#160;</td>
+          <td class="paramname"><em>seqPool</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00295">295</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a78a2d72e9f0eec09cc2956e3c165233d" name="a78a2d72e9f0eec09cc2956e3c165233d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78a2d72e9f0eec09cc2956e3c165233d">&#9670;&#160;</a></span>ZSTDMT_initCStream()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_initCStream </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>compressionLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01546">1546</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a55f5e85bf14dc4091fc7bd4b79dcd680" name="a55f5e85bf14dc4091fc7bd4b79dcd680"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55f5e85bf14dc4091fc7bd4b79dcd680">&#9670;&#160;</a></span>ZSTDMT_initCStream_advanced()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_initCStream_advanced </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>dict</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_parameters&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long long&#160;</td>
+          <td class="paramname"><em>pledgedSrcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01508">1508</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa12f1edba314c587743801d624f71873" name="aa12f1edba314c587743801d624f71873"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa12f1edba314c587743801d624f71873">&#9670;&#160;</a></span>ZSTDMT_initCStream_internal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_initCStream_internal </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>zcs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>dict</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_dictContentType_e&#160;</td>
+          <td class="paramname"><em>dictContentType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#a8f0f8ee84f4ef0190e41b73fd863d8d2">ZSTD_CDict</a> *&#160;</td>
+          <td class="paramname"><em>cdict</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_CCtx_params&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long long&#160;</td>
+          <td class="paramname"><em>pledgedSrcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstdmt__compress_8h.html#af2842d56cf98c331f0a34193ffad05c9">ZSTDMT_initCStream_internal()</a> : Private use only. Init streaming operation. expects params to be valid. must receive dict, or cdict, or none, but not both. </p><dl class="section return"><dt>返回</dt><dd>: 0, or an error code </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01391">1391</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aba44e9cc57a0137d7259a55d3836d9d1" name="aba44e9cc57a0137d7259a55d3836d9d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba44e9cc57a0137d7259a55d3836d9d1">&#9670;&#160;</a></span>ZSTDMT_initCStream_usingCDict()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_initCStream_usingCDict </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#a8f0f8ee84f4ef0190e41b73fd863d8d2">ZSTD_CDict</a> *&#160;</td>
+          <td class="paramname"><em>cdict</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_frameParameters&#160;</td>
+          <td class="paramname"><em>fParams</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long long&#160;</td>
+          <td class="paramname"><em>pledgedSrcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01521">1521</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a174c5add4f6b561785fc6706f4514bf6" name="a174c5add4f6b561785fc6706f4514bf6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a174c5add4f6b561785fc6706f4514bf6">&#9670;&#160;</a></span>ZSTDMT_initJobCCtxParams()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static ZSTD_CCtx_params ZSTDMT_initJobCCtxParams </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ZSTD_CCtx_params *&#160;</td>
+          <td class="paramname"><em>params</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01037">1037</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa5a1235f871bff4c543d626233caeb60" name="aa5a1235f871bff4c543d626233caeb60"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5a1235f871bff4c543d626233caeb60">&#9670;&#160;</a></span>ZSTDMT_isOverlapped()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int ZSTDMT_isOverlapped </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a>&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structrange__t.html">range_t</a>&#160;</td>
+          <td class="paramname"><em>range</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns non-zero iff buffer and range overlap. </p>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01784">1784</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7309a31a630ed75ed66c37d175477080" name="a7309a31a630ed75ed66c37d175477080"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7309a31a630ed75ed66c37d175477080">&#9670;&#160;</a></span>ZSTDMT_nextInputSizeHint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_nextInputSizeHint </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01976">1976</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a84df0ef1befca21ef2f483f40146ecb9" name="a84df0ef1befca21ef2f483f40146ecb9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84df0ef1befca21ef2f483f40146ecb9">&#9670;&#160;</a></span>ZSTDMT_overlapLog()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int ZSTDMT_overlapLog </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>ovlog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a852a7e43e763f198f70b9c93121717a3">ZSTD_strategy</a>&#160;</td>
+          <td class="paramname"><em>strat</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01195">1195</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a34354f0a71b228f69b92b713158c52d6" name="a34354f0a71b228f69b92b713158c52d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34354f0a71b228f69b92b713158c52d6">&#9670;&#160;</a></span>ZSTDMT_overlapLog_default()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int ZSTDMT_overlapLog_default </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a852a7e43e763f198f70b9c93121717a3">ZSTD_strategy</a>&#160;</td>
+          <td class="paramname"><em>strat</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01174">1174</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6f6cc73d7f22a45699fecf068d978d83" name="a6f6cc73d7f22a45699fecf068d978d83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f6cc73d7f22a45699fecf068d978d83">&#9670;&#160;</a></span>ZSTDMT_releaseAllJobResources()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_releaseAllJobResources </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00925">925</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af197183d798d725ffd47714863467212" name="af197183d798d725ffd47714863467212"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af197183d798d725ffd47714863467212">&#9670;&#160;</a></span>ZSTDMT_releaseBuffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_releaseBuffer </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> *&#160;</td>
+          <td class="paramname"><em>bufPool</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a>&#160;</td>
+          <td class="paramname"><em>buf</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00249">249</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2da90ecaae8f43ec8848b3970d375d15" name="a2da90ecaae8f43ec8848b3970d375d15"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2da90ecaae8f43ec8848b3970d375d15">&#9670;&#160;</a></span>ZSTDMT_releaseCCtx()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_releaseCCtx </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a> *&#160;</td>
+          <td class="paramname"><em>pool</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a9ccc575a7e1f1afd01e76c0fa98d957d">ZSTD_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>cctx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00427">427</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adf8fcedef39a7111e0024dd7c536de09" name="adf8fcedef39a7111e0024dd7c536de09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf8fcedef39a7111e0024dd7c536de09">&#9670;&#160;</a></span>ZSTDMT_releaseSeq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_releaseSeq </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *&#160;</td>
+          <td class="paramname"><em>seqPool</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a>&#160;</td>
+          <td class="paramname"><em>seq</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00310">310</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8879cb348bb06f3106b6dada5418ec61" name="a8879cb348bb06f3106b6dada5418ec61"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8879cb348bb06f3106b6dada5418ec61">&#9670;&#160;</a></span>ZSTDMT_resetCStream()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_resetCStream </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long long&#160;</td>
+          <td class="paramname"><em>pledgedSrcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>if srcSize is not known at reset time, use ZSTD_CONTENTSIZE_UNKNOWN. Note: for compatibility with older programs, 0 means the same as ZSTD_CONTENTSIZE_UNKNOWN, but it will change in the future to mean "empty" </p>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01539">1539</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7b939df9161b153a9e93d24ba988a9e1" name="a7b939df9161b153a9e93d24ba988a9e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b939df9161b153a9e93d24ba988a9e1">&#9670;&#160;</a></span>ZSTDMT_resize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTDMT_resize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbWorkers</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01054">1054</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a50ff20a5b5935f237d17bd5e5ffee5b5" name="a50ff20a5b5935f237d17bd5e5ffee5b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50ff20a5b5935f237d17bd5e5ffee5b5">&#9670;&#160;</a></span>ZSTDMT_serialState_ensureFinished()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_serialState_ensureFinished </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structserialState__t.html">serialState_t</a> *&#160;</td>
+          <td class="paramname"><em>serialState</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>jobID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>cSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00586">586</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3ec6e515149e14447a09239fbf639f55" name="a3ec6e515149e14447a09239fbf639f55"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ec6e515149e14447a09239fbf639f55">&#9670;&#160;</a></span>ZSTDMT_serialState_free()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_serialState_free </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structserialState__t.html">serialState_t</a> *&#160;</td>
+          <td class="paramname"><em>serialState</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00526">526</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afc433aa989f3897f1780d58b06097adf" name="afc433aa989f3897f1780d58b06097adf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc433aa989f3897f1780d58b06097adf">&#9670;&#160;</a></span>ZSTDMT_serialState_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int ZSTDMT_serialState_init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structserialState__t.html">serialState_t</a> *&#160;</td>
+          <td class="paramname"><em>serialState</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00515">515</a> 行定义.</p>
+
+</div>
+</div>
+<a id="add1f9f6a0046b9ee52cac3982c6455d2" name="add1f9f6a0046b9ee52cac3982c6455d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add1f9f6a0046b9ee52cac3982c6455d2">&#9670;&#160;</a></span>ZSTDMT_serialState_reset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int ZSTDMT_serialState_reset </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structserialState__t.html">serialState_t</a> *&#160;</td>
+          <td class="paramname"><em>serialState</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *&#160;</td>
+          <td class="paramname"><em>seqPool</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_CCtx_params&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>jobSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00464">464</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a67459eeb7f07c98c7a64f904f1ade632" name="a67459eeb7f07c98c7a64f904f1ade632"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67459eeb7f07c98c7a64f904f1ade632">&#9670;&#160;</a></span>ZSTDMT_serialState_update()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_serialState_update </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structserialState__t.html">serialState_t</a> *&#160;</td>
+          <td class="paramname"><em>serialState</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a9ccc575a7e1f1afd01e76c0fa98d957d">ZSTD_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>jobCCtx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a>&#160;</td>
+          <td class="paramname"><em>seqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structrange__t.html">range_t</a>&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>jobID</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00537">537</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab6561ca79f3800d774f754da4972774d" name="ab6561ca79f3800d774f754da4972774d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6561ca79f3800d774f754da4972774d">&#9670;&#160;</a></span>ZSTDMT_setBufferSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_setBufferSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>bufPool</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>bSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00155">155</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1f16f4c850df86325d28d779bfcafb6f" name="a1f16f4c850df86325d28d779bfcafb6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f16f4c850df86325d28d779bfcafb6f">&#9670;&#160;</a></span>ZSTDMT_setMTCtxParameter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_setMTCtxParameter </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292">ZSTDMT_parameter</a>&#160;</td>
+          <td class="paramname"><em>parameter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01015">1015</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1f0f19556d9615c21e64fb8d01b7fade" name="a1f0f19556d9615c21e64fb8d01b7fade"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f0f19556d9615c21e64fb8d01b7fade">&#9670;&#160;</a></span>ZSTDMT_setNbSeq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_setNbSeq </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>seqPool</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>nbSeq</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00315">315</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a26525ec14e71f19afc2a2e459cc9118d" name="a26525ec14e71f19afc2a2e459cc9118d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26525ec14e71f19afc2a2e459cc9118d">&#9670;&#160;</a></span>ZSTDMT_sizeof_bufferPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTDMT_sizeof_bufferPool </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a68a063e5c10aefde823f355df2940cb7">ZSTDMT_bufferPool</a> *&#160;</td>
+          <td class="paramname"><em>bufPool</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00137">137</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a827cc3b54e66b16eeff38550cf534066" name="a827cc3b54e66b16eeff38550cf534066"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a827cc3b54e66b16eeff38550cf534066">&#9670;&#160;</a></span>ZSTDMT_sizeof_CCtx()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_sizeof_CCtx </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00979">979</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2085de61fccdde39a13d7470df914f7d" name="a2085de61fccdde39a13d7470df914f7d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2085de61fccdde39a13d7470df914f7d">&#9670;&#160;</a></span>ZSTDMT_sizeof_CCtxPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTDMT_sizeof_CCtxPool </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTDMT__CCtxPool.html">ZSTDMT_CCtxPool</a> *&#160;</td>
+          <td class="paramname"><em>cctxPool</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00395">395</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5227f1cd34366ef80b095770f5bceb1f" name="a5227f1cd34366ef80b095770f5bceb1f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5227f1cd34366ef80b095770f5bceb1f">&#9670;&#160;</a></span>ZSTDMT_sizeof_seqPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTDMT_sizeof_seqPool </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a2af20bbd5b854f64c02af0fae4ce230a">ZSTDMT_seqPool</a> *&#160;</td>
+          <td class="paramname"><em>seqPool</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00274">274</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0d200c4c6b7a3c7a045a181dfa29c322" name="a0d200c4c6b7a3c7a045a181dfa29c322"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d200c4c6b7a3c7a045a181dfa29c322">&#9670;&#160;</a></span>ZSTDMT_toFlushNow()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTDMT_toFlushNow </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstdmt__compress_8h.html#a0d200c4c6b7a3c7a045a181dfa29c322">ZSTDMT_toFlushNow()</a> Tell how many bytes are ready to be flushed immediately. Probe the oldest active job (not yet entirely flushed) and check its output buffer. If return 0, it means there is no active job, or, it means oldest job is still active, but everything produced has been flushed so far, therefore flushing is limited by speed of oldest job. </p>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01123">1123</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a92918832ed0f73b14dea96814ea3cfd2" name="a92918832ed0f73b14dea96814ea3cfd2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92918832ed0f73b14dea96814ea3cfd2">&#9670;&#160;</a></span>ZSTDMT_tryGetInputRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int ZSTDMT_tryGetInputRange </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Attempts to set the inBuff to the next section to fill. If any part of the new section is still in use we give up. Returns non-zero if the buffer is filled. </p>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01845">1845</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3f5723a37881527037ffcdfbc157c121" name="a3f5723a37881527037ffcdfbc157c121"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f5723a37881527037ffcdfbc157c121">&#9670;&#160;</a></span>ZSTDMT_updateCParams_whileCompressing()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ZSTDMT_updateCParams_whileCompressing </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ZSTD_CCtx_params *&#160;</td>
+          <td class="paramname"><em>cctxParams</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstdmt__compress_8c.html#a3f5723a37881527037ffcdfbc157c121">ZSTDMT_updateCParams_whileCompressing()</a> : Updates a selected set of compression parameters, remaining compatible with currently active frame. New parameters will be applied to next compression job. </p>
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01072">1072</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2015b5564dff4a4c10a9acdbb37015fb" name="a2015b5564dff4a4c10a9acdbb37015fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2015b5564dff4a4c10a9acdbb37015fb">&#9670;&#160;</a></span>ZSTDMT_waitForAllJobsCompleted()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_waitForAllJobsCompleted </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00947">947</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae93d2f691987da685417c930c64a7ab2" name="ae93d2f691987da685417c930c64a7ab2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae93d2f691987da685417c930c64a7ab2">&#9670;&#160;</a></span>ZSTDMT_waitForLdmComplete()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_waitForLdmComplete </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">ZSTDMT_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>mtctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a>&#160;</td>
+          <td class="paramname"><em>buffer</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01822">1822</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a33c0eaef2fb3ae3a19f7816e10142284" name="a33c0eaef2fb3ae3a19f7816e10142284"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33c0eaef2fb3ae3a19f7816e10142284">&#9670;&#160;</a></span>ZSTDMT_writeLastEmptyBlock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTDMT_writeLastEmptyBlock </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTDMT__jobDescription.html">ZSTDMT_jobDescription</a> *&#160;</td>
+          <td class="paramname"><em>job</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l01561">1561</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="ad8352f91e11f0b52d1d34f92c6ffe40d" name="ad8352f91e11f0b52d1d34f92c6ffe40d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8352f91e11f0b52d1d34f92c6ffe40d">&#9670;&#160;</a></span>g_nullBuffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f">buffer_t</a> g_nullBuffer = { <a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, 0 }</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00095">95</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaddbb786df40a34add339a60c92178cc" name="aaddbb786df40a34add339a60c92178cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaddbb786df40a34add339a60c92178cc">&#9670;&#160;</a></span>kNullRange</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structrange__t.html">range_t</a> kNullRange = { <a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, 0 }</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00610">610</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a80214be5ee1c0c4e806e67d8e656b9bd" name="a80214be5ee1c0c4e806e67d8e656b9bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80214be5ee1c0c4e806e67d8e656b9bd">&#9670;&#160;</a></span>kNullRawSeqStore</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> kNullRawSeqStore = {<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, 0, 0, 0}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00270">270</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1ff28d36ba0f7b1e126a63379ba2a5e3" name="a1ff28d36ba0f7b1e126a63379ba2a5e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ff28d36ba0f7b1e126a63379ba2a5e3">&#9670;&#160;</a></span>kNullRoundBuff</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structroundBuff__t.html">roundBuff_t</a> kNullRoundBuff = {<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, 0, 0}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstdmt__compress_8c_source.html">zstdmt_compress.c</a> 第 <a class="el" href="zstdmt__compress_8c_source.html#l00777">777</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="zstdmt__compress_8c.html">zstdmt_compress.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

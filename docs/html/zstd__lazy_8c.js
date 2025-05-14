@@ -1,0 +1,36 @@
+var zstd__lazy_8c =
+[
+    [ "NEXT_IN_CHAIN", "zstd__lazy_8c.html#acbac759cfc9e41069485919721137640", null ],
+    [ "searchMethod_e", "zstd__lazy_8c.html#a166037fa4a4135bc29ee47a92c899930", [
+      [ "search_hashChain", "zstd__lazy_8c.html#a166037fa4a4135bc29ee47a92c899930a58c1b9eaad98c0986d0ed2c5de887302", null ],
+      [ "search_binaryTree", "zstd__lazy_8c.html#a166037fa4a4135bc29ee47a92c899930aa54ba16cbda2fa9cb22da3d7ad2d1e65", null ]
+    ] ],
+    [ "ZSTD_BtFindBestMatch", "zstd__lazy_8c.html#a11c70e9ef9c7e541d4c973298030abf2", null ],
+    [ "ZSTD_BtFindBestMatch_dictMatchState_selectMLS", "zstd__lazy_8c.html#abe34c508013d96dc69a42ef8c853a55b", null ],
+    [ "ZSTD_BtFindBestMatch_extDict_selectMLS", "zstd__lazy_8c.html#ad5b1f6abf6195176bcdbbdddf869240c", null ],
+    [ "ZSTD_BtFindBestMatch_selectMLS", "zstd__lazy_8c.html#ace9bd9952c76f1b4b7e5adcd85bc494b", null ],
+    [ "ZSTD_compressBlock_btlazy2", "zstd__lazy_8c.html#a1004a8fa21b601a523072b1be447baff", null ],
+    [ "ZSTD_compressBlock_btlazy2_dictMatchState", "zstd__lazy_8c.html#af24f23298cb34694f44b43e1f8bc3943", null ],
+    [ "ZSTD_compressBlock_btlazy2_extDict", "zstd__lazy_8c.html#a7972d9312e2fe85079280bc11e4b1ce5", null ],
+    [ "ZSTD_compressBlock_greedy", "zstd__lazy_8c.html#a7e5dffbfb50ae28fe82d5212af1f1635", null ],
+    [ "ZSTD_compressBlock_greedy_dictMatchState", "zstd__lazy_8c.html#a6340aa4a27c645a01f214d5e94a1ba0c", null ],
+    [ "ZSTD_compressBlock_greedy_extDict", "zstd__lazy_8c.html#ade62ceb1bd70826a37868f417edd0341", null ],
+    [ "ZSTD_compressBlock_lazy", "zstd__lazy_8c.html#ac7226cc938549773ad2d53d7fed9b374", null ],
+    [ "ZSTD_compressBlock_lazy2", "zstd__lazy_8c.html#a9b73199c4d248b44b15aefbca69a8fec", null ],
+    [ "ZSTD_compressBlock_lazy2_dictMatchState", "zstd__lazy_8c.html#a68d43e5661ebf6229b11fcc429d7680e", null ],
+    [ "ZSTD_compressBlock_lazy2_extDict", "zstd__lazy_8c.html#ac527f5fbab004e1d702f9d7030266257", null ],
+    [ "ZSTD_compressBlock_lazy_dictMatchState", "zstd__lazy_8c.html#a35563f58c59ea82381b681b809741669", null ],
+    [ "ZSTD_compressBlock_lazy_extDict", "zstd__lazy_8c.html#a17c0d5bc3e0b9e9bbbe88d33737e28bf", null ],
+    [ "ZSTD_compressBlock_lazy_extDict_generic", "zstd__lazy_8c.html#ab392dc48ed0cd4a93971a0c67a86fc3b", null ],
+    [ "ZSTD_compressBlock_lazy_generic", "zstd__lazy_8c.html#a7548d10b482e42948ee00734825d5d99", null ],
+    [ "ZSTD_DUBT_findBestMatch", "zstd__lazy_8c.html#a238a8fcc5389fbe113f78bafbd86248c", null ],
+    [ "ZSTD_DUBT_findBetterDictMatch", "zstd__lazy_8c.html#a4cd168554962649886a95dd1372885b1", null ],
+    [ "ZSTD_HcFindBestMatch_dictMatchState_selectMLS", "zstd__lazy_8c.html#adb7896224d27d1233bb636a661476e3a", null ],
+    [ "ZSTD_HcFindBestMatch_extDict_selectMLS", "zstd__lazy_8c.html#adf19276e699514177d4f8d297e2bf2b5", null ],
+    [ "ZSTD_HcFindBestMatch_generic", "zstd__lazy_8c.html#a1cf32587befb1509687e6ac496585252", null ],
+    [ "ZSTD_HcFindBestMatch_selectMLS", "zstd__lazy_8c.html#a2df5786f4de098e8c2ea1559677436b3", null ],
+    [ "ZSTD_insertAndFindFirstIndex", "zstd__lazy_8c.html#a9a00baee8f23222d59bbca727da89715", null ],
+    [ "ZSTD_insertAndFindFirstIndex_internal", "zstd__lazy_8c.html#a72a0019e5a75d5423d82b45d8a978670", null ],
+    [ "ZSTD_insertDUBT1", "zstd__lazy_8c.html#a4cf6fdb4cd315b82667985ce54708803", null ],
+    [ "ZSTD_updateDUBT", "zstd__lazy_8c.html#aac4c9e03f7ed01207c065231b2beec2e", null ]
+];

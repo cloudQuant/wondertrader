@@ -1,0 +1,25 @@
+var structCRspOptAcctField =
+[
+    [ "chOpFlag", "structCRspOptAcctField.html#a39c6471414fab0049a6a83bc7216a53d", null ],
+    [ "chOptTrdacctLvl", "structCRspOptAcctField.html#a4c7e332665181b1aa67db3de4b68c5b4", null ],
+    [ "chStkex", "structCRspOptAcctField.html#a1ea12566ace1551f20ac3b0da80d8e64", null ],
+    [ "chTrdacctStatus", "structCRspOptAcctField.html#acbfc17e3b2d83953262d17aa9a50c2f6", null ],
+    [ "chTregStatus", "structCRspOptAcctField.html#ab9929e7a5ab1058342707168f6b5abf4", null ],
+    [ "iIntOrg", "structCRspOptAcctField.html#a853fafe8fcdcc7a9d7b123611c2bbac5", null ],
+    [ "iTrdacctSn", "structCRspOptAcctField.html#ab9712fcfbae2ca5e22770064a7e8eca7", null ],
+    [ "llCuacctCode", "structCRspOptAcctField.html#af3cbb3179da26e2de119eb7c121d0e65", null ],
+    [ "llCustCode", "structCRspOptAcctField.html#a30ee9a0106956e1fa7412d63f5de266a", null ],
+    [ "llDailyEnqryCount", "structCRspOptAcctField.html#a9692e97018d6b64f7526628aa80608bd", null ],
+    [ "szCustName", "structCRspOptAcctField.html#a65202d31a0c3ba72b7b0a528b64eb902", null ],
+    [ "szIdCode", "structCRspOptAcctField.html#a9280a77a09caf0bb3c1acca8812a84c0", null ],
+    [ "szIdType", "structCRspOptAcctField.html#ad08c3bb9b851ef7627f92f99c74ea981", null ],
+    [ "szOptTrdacct", "structCRspOptAcctField.html#acdf1384e4cfda2f26e0e9d35d1d8564f", null ],
+    [ "szQryPos", "structCRspOptAcctField.html#a915e5f7a9c85142bd80c54e100fa0e4a", null ],
+    [ "szQuotaVal", "structCRspOptAcctField.html#a6c862335affdf3472611e3869af028b8", null ],
+    [ "szQuotaValUsed", "structCRspOptAcctField.html#a920d461b92bb828e655a7b934f1ad251", null ],
+    [ "szStkbd", "structCRspOptAcctField.html#a5fc7acc0dc6a05957b8d5613c0ca1bd7", null ],
+    [ "szStkpbu", "structCRspOptAcctField.html#a9f49df053b80c166b73a92d0e7468b0c", null ],
+    [ "szSubacctCode", "structCRspOptAcctField.html#a71d75c7cfc1c4a5522db42c2113173c7", null ],
+    [ "szTrdacct", "structCRspOptAcctField.html#af09f786492105c1ba2c381787936f4f1", null ],
+    [ "szTrdacctExid", "structCRspOptAcctField.html#a1c46f2c98b0ac170afccd90f058fc883", null ]
+];

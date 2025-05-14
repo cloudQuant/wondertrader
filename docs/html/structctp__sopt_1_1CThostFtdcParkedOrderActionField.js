@@ -1,0 +1,25 @@
+var structctp__sopt_1_1CThostFtdcParkedOrderActionField =
+[
+    [ "ActionFlag", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a457761fbf510265e9b0b5580a74616fc", null ],
+    [ "BrokerID", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a4a8dd6bc670059614a91bf0e3e10486b", null ],
+    [ "ErrorID", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#aeee667adb32b97588f4d70f9a8db6719", null ],
+    [ "ErrorMsg", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a6a34eba5d2616bd74b9e7500c6bbfab2", null ],
+    [ "ExchangeID", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a17f9e952676410b3f8cb59ceee7d1805", null ],
+    [ "FrontID", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a0aaed1785d0d18f55b57501c7ee5d8d2", null ],
+    [ "InstrumentID", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a602d9d11044a41b92485c1518cb02094", null ],
+    [ "InvestorID", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a0f96814f8a4739aef60e138b3bbd95ac", null ],
+    [ "InvestUnitID", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a847bc0030e984b862d4ee8458475dffd", null ],
+    [ "IPAddress", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a43ddf044407df8740fa83e5e45d09756", null ],
+    [ "LimitPrice", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a2ce84ec5bc6241a21a14e295940beb55", null ],
+    [ "MacAddress", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a9a741b8e5e5d8826dfebf4a765534708", null ],
+    [ "OrderActionRef", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a3a2195357f72c0c7ce256a56d634380f", null ],
+    [ "OrderRef", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#ae21454418938c47e6d28aab4479c6133", null ],
+    [ "OrderSysID", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a40d2c5e06c37fffd7e644b486c37f55e", null ],
+    [ "ParkedOrderActionID", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a41cbc9df5bb3771377c6558ce7652e6d", null ],
+    [ "RequestID", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#ae4a8b3842bb46a33047172a725e60022", null ],
+    [ "SessionID", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#aabe24efe82e13d35a848f075cc560276", null ],
+    [ "Status", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#aa6bce3d4e6efb5e2012eddea85b824e9", null ],
+    [ "UserID", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a7036456baddde40a245b33736c690a16", null ],
+    [ "UserType", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#aa1376a2721c48691721c1fef89a37db7", null ],
+    [ "VolumeChange", "structctp__sopt_1_1CThostFtdcParkedOrderActionField.html#a8e7fdb6949d2f4e95fa84f892d3d1ea8", null ]
+];

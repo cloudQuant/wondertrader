@@ -1,0 +1,237 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSTools/WTSHotMgr.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WTSHotMgr_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WTSHotMgr.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WTSHotMgr_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/IHotMgr.h&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../Includes/FasterDefs.h&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../Includes/WTSCollection.hpp&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <span class="keyword">class </span><a class="code hl_class" href="classWTSSwitchItem.html">WTSSwitchItem</a>;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="WTSHotMgr_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">   24</a></span><a class="code hl_variable" href="WTSHotMgr_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="WTSHotMgr_8h.html#a6150cc408d8e5e5ba294a86b1a6689be">   27</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classWTSMap.html">WTSMap&lt;uint32_t&gt;</a>            <a class="code hl_typedef" href="WTSHotMgr_8h.html#a6150cc408d8e5e5ba294a86b1a6689be">WTSDateHotMap</a>;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="WTSHotMgr_8h.html#a57cb645b464afb4f35aac68147a144a1">   29</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classWTSHashMap.html">WTSHashMap&lt;std::string&gt;</a>     <a class="code hl_typedef" href="WTSHotMgr_8h.html#a57cb645b464afb4f35aac68147a144a1">WTSProductHotMap</a>;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="WTSHotMgr_8h.html#af84e0c81f22f8294178d8dd5dc786857">   31</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classWTSHashMap.html">WTSHashMap&lt;std::string&gt;</a>     <a class="code hl_typedef" href="WTSHotMgr_8h.html#af84e0c81f22f8294178d8dd5dc786857">WTSExchgHotMap</a>;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="WTSHotMgr_8h.html#aa2865932b8905a73fb3925e4990f86c5">   34</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classWTSHashMap.html">WTSHashMap&lt;std::string&gt;</a>     <a class="code hl_typedef" href="WTSHotMgr_8h.html#aa2865932b8905a73fb3925e4990f86c5">WTSCustomSwitchMap</a>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="foldopen" id="foldopen00044" data-start="{" data-end="};">
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="classWTSHotMgr.html">   44</a></span><span class="keyword">class </span><a class="code hl_class" href="classWTSHotMgr.html">WTSHotMgr</a> : <span class="keyword">public</span> <a class="code hl_class" href="classIHotMgr.html">IHotMgr</a></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>{</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <a class="code hl_function" href="classWTSHotMgr.html#a72fb9deee2870191f53d628d9ca37d5d">WTSHotMgr</a>();</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <a class="code hl_function" href="classWTSHotMgr.html#ab7c39805871df267f6857c6e1ee4531d">~WTSHotMgr</a>();</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWTSHotMgr.html#a71b6166edde610379640b80ce8f4d556">loadHots</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* filename);</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWTSHotMgr.html#af260eb6c5857f8811e8c891196bece5e">loadSeconds</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* filename);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classWTSHotMgr.html#a0440cf5c52262955eda60abe6b805658">release</a>();</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWTSHotMgr.html#aa7e2ffad8512d125d7682bc5c8c4c513">loadCustomRules</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* tag, <span class="keyword">const</span> <span class="keywordtype">char</span>* filename);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="classWTSHotMgr.html#a4724d4f9bf7fa8c1f04ec59ad54e8cb6">   93</a></span>    <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classWTSHotMgr.html#a4724d4f9bf7fa8c1f04ec59ad54e8cb6">isInitialized</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code hl_variable" href="classWTSHotMgr.html#ab6557ffce79a2416227cf4ee7f7cc7c8">m_bInitialized</a>;}</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWTSHotMgr.html#af21b6f42f09e9096e350803e442b91f2">getRuleTag</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <span class="keyword">virtual</span> <span class="keywordtype">double</span>      <a class="code hl_function" href="classWTSHotMgr.html#a06bcea536e6a26c8b6376e0eee0bd7bb">getRuleFactor</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* ruleTag, <span class="keyword">const</span> <span class="keywordtype">char</span>* fullPid, uint32_t uDate  = 0 ) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="comment">//主力接口</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWTSHotMgr.html#a5f177f4076a7090cd6c166b56538f1c0">getRawCode</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* pid, uint32_t dt = 0) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWTSHotMgr.html#a793914ca9876d3a159c137e92350ba9e">getPrevRawCode</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* pid, uint32_t dt = 0) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span>    <a class="code hl_function" href="classWTSHotMgr.html#aa560571d728b52d629ddc744d4bb2371">isHot</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* rawCode, uint32_t dt = 0) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span> </div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span>    <a class="code hl_function" href="classWTSHotMgr.html#a6584b38aa7d8396b73b303729c19d2b8">splitHotSecions</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* pid, uint32_t sDt, uint32_t eDt, <a class="code hl_typedef" href="IHotMgr_8h.html#a19a138614b519fa93a68a60a46330f30">HotSections</a>&amp; sections) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="comment">//次主力接口</span></div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWTSHotMgr.html#a5ad4c37a874c8a83bff62720538415af">getSecondRawCode</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* pid, uint32_t dt = 0) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWTSHotMgr.html#a2c8461ec2ee5683fc14db4cd38d7acd1">getPrevSecondRawCode</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* pid, uint32_t dt = 0) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span>        <a class="code hl_function" href="classWTSHotMgr.html#a8ccc2503183b11f1323849c0ec59f10a">isSecond</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* rawCode, uint32_t dt = 0) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span> </div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span>        <a class="code hl_function" href="classWTSHotMgr.html#a1fd4eef8806549d41395577cb1fb96aa">splitSecondSecions</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* pid, uint32_t sDt, uint32_t eDt, <a class="code hl_typedef" href="IHotMgr_8h.html#a19a138614b519fa93a68a60a46330f30">HotSections</a>&amp; sections) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    <span class="comment">//通用接口</span></div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWTSHotMgr.html#a27cb54b92f391819e351016d3423e516">getCustomRawCode</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* tag, <span class="keyword">const</span> <span class="keywordtype">char</span>* fullPid, uint32_t dt) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span> </div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWTSHotMgr.html#a43a1722ece4a0be1c32df6bdc2978e7f">getPrevCustomRawCode</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* tag, <span class="keyword">const</span> <span class="keywordtype">char</span>* fullPid, uint32_t dt) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span> </div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span>        <a class="code hl_function" href="classWTSHotMgr.html#aa23caf5169325ec6a744d94b495c680d">isCustomHot</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* tag, <span class="keyword">const</span> <span class="keywordtype">char</span>* fullCode, uint32_t dt) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span> </div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span>        <a class="code hl_function" href="classWTSHotMgr.html#aeb12140701c18c983835826f7e387721">splitCustomSections</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* tag, <span class="keyword">const</span> <span class="keywordtype">char</span>* fullPid, uint32_t sDt, uint32_t eDt, <a class="code hl_typedef" href="IHotMgr_8h.html#a19a138614b519fa93a68a60a46330f30">HotSections</a>&amp; sections) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> </div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span> </div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>    <span class="comment">//WTSExchgHotMap*   m_pExchgHotMap;</span></div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>    <span class="comment">//WTSExchgHotMap*   m_pExchgScndMap;</span></div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>    <span class="comment">//wt_hashset&lt;std::string&gt;   m_curHotCodes;</span></div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>    <span class="comment">//wt_hashset&lt;std::string&gt;   m_curSecCodes;</span></div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>    </div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno"><a class="line" href="classWTSHotMgr.html#ab6557ffce79a2416227cf4ee7f7cc7c8">  254</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classWTSHotMgr.html#ab6557ffce79a2416227cf4ee7f7cc7c8">m_bInitialized</a>;</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span> </div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno"><a class="line" href="classWTSHotMgr.html#a63fe6825a8405dd33e72b252f71cf16c">  257</a></span>    <a class="code hl_class" href="classWTSHashMap.html">WTSCustomSwitchMap</a>* <a class="code hl_variable" href="classWTSHotMgr.html#a63fe6825a8405dd33e72b252f71cf16c">m_mapCustRules</a>;</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    </div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno"><a class="line" href="classWTSHotMgr.html#a976e8cc145fa24ce87aeee089d673d57">  260</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, wt_hashset&lt;std::string&gt;</a>&gt;    <a class="code hl_typedef" href="classWTSHotMgr.html#a976e8cc145fa24ce87aeee089d673d57">CustomSwitchCodes</a>;</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    </div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno"><a class="line" href="classWTSHotMgr.html#a3808dabe249a04089394b75e2c49744b">  263</a></span>    <a class="code hl_class" href="classwt__hashmap.html">CustomSwitchCodes</a>   <a class="code hl_variable" href="classWTSHotMgr.html#a3808dabe249a04089394b75e2c49744b">m_mapCustCodes</a>;</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>};</div>
+</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span> </div>
+<div class="ttc" id="aIHotMgr_8h_html_a19a138614b519fa93a68a60a46330f30"><div class="ttname"><a href="IHotMgr_8h.html#a19a138614b519fa93a68a60a46330f30">HotSections</a></div><div class="ttdeci">std::vector&lt; HotSection &gt; HotSections</div><div class="ttdoc">主力合约切段列表类型</div><div class="ttdef"><b>Definition</b> <a href="IHotMgr_8h_source.html#l00046">IHotMgr.h:46</a></div></div>
+<div class="ttc" id="aWTSHotMgr_8h_html_a57cb645b464afb4f35aac68147a144a1"><div class="ttname"><a href="WTSHotMgr_8h.html#a57cb645b464afb4f35aac68147a144a1">WTSProductHotMap</a></div><div class="ttdeci">WTSHashMap&lt; std::string &gt; WTSProductHotMap</div><div class="ttdoc">品种主力映射，品种代码到日期主力映射的哈希表</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8h_source.html#l00029">WTSHotMgr.h:29</a></div></div>
+<div class="ttc" id="aWTSHotMgr_8h_html_a6150cc408d8e5e5ba294a86b1a6689be"><div class="ttname"><a href="WTSHotMgr_8h.html#a6150cc408d8e5e5ba294a86b1a6689be">WTSDateHotMap</a></div><div class="ttdeci">WTSMap&lt; uint32_t &gt; WTSDateHotMap</div><div class="ttdoc">换月主力映射，日期到主力合约切换项的映射</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8h_source.html#l00027">WTSHotMgr.h:27</a></div></div>
+<div class="ttc" id="aWTSHotMgr_8h_html_a9e1fc31194100ab43bbad77a2f5c12b3"><div class="ttname"><a href="WTSHotMgr_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a></div><div class="ttdeci">NS_WTP_END USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8h_source.html#l00024">WTSHotMgr.h:24</a></div></div>
+<div class="ttc" id="aWTSHotMgr_8h_html_aa2865932b8905a73fb3925e4990f86c5"><div class="ttname"><a href="WTSHotMgr_8h.html#aa2865932b8905a73fb3925e4990f86c5">WTSCustomSwitchMap</a></div><div class="ttdeci">WTSHashMap&lt; std::string &gt; WTSCustomSwitchMap</div><div class="ttdoc">自定义切换规则映射，规则标签到品种主力映射的哈希表</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8h_source.html#l00034">WTSHotMgr.h:34</a></div></div>
+<div class="ttc" id="aWTSHotMgr_8h_html_af84e0c81f22f8294178d8dd5dc786857"><div class="ttname"><a href="WTSHotMgr_8h.html#af84e0c81f22f8294178d8dd5dc786857">WTSExchgHotMap</a></div><div class="ttdeci">WTSHashMap&lt; std::string &gt; WTSExchgHotMap</div><div class="ttdoc">分市场主力映射，交易所代码到品种主力映射的哈希表</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8h_source.html#l00031">WTSHotMgr.h:31</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aclassIHotMgr_html"><div class="ttname"><a href="classIHotMgr.html">IHotMgr</a></div><div class="ttdoc">主力合约管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IHotMgr_8h_source.html#l00066">IHotMgr.h:67</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html"><div class="ttname"><a href="classWTSHashMap.html">WTSHashMap</a></div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00594">WTSCollection.hpp:595</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html"><div class="ttname"><a href="classWTSHotMgr.html">WTSHotMgr</a></div><div class="ttdoc">主力合约管理器类</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8h_source.html#l00044">WTSHotMgr.h:45</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a0440cf5c52262955eda60abe6b805658"><div class="ttname"><a href="classWTSHotMgr.html#a0440cf5c52262955eda60abe6b805658">WTSHotMgr::release</a></div><div class="ttdeci">void release()</div><div class="ttdoc">释放内存资源</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00658">WTSHotMgr.cpp:658</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a06bcea536e6a26c8b6376e0eee0bd7bb"><div class="ttname"><a href="classWTSHotMgr.html#a06bcea536e6a26c8b6376e0eee0bd7bb">WTSHotMgr::getRuleFactor</a></div><div class="ttdeci">virtual double getRuleFactor(const char *ruleTag, const char *fullPid, uint32_t uDate=0) override</div><div class="ttdoc">获取指定日期的复权因子</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00094">WTSHotMgr.cpp:94</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a1fd4eef8806549d41395577cb1fb96aa"><div class="ttname"><a href="classWTSHotMgr.html#a1fd4eef8806549d41395577cb1fb96aa">WTSHotMgr::splitSecondSecions</a></div><div class="ttdeci">virtual bool splitSecondSecions(const char *exchg, const char *pid, uint32_t sDt, uint32_t eDt, HotSections &amp;sections) override</div><div class="ttdoc">分割指定时间范围内的次主力合约切换区间</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00331">WTSHotMgr.cpp:331</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a27cb54b92f391819e351016d3423e516"><div class="ttname"><a href="classWTSHotMgr.html#a27cb54b92f391819e351016d3423e516">WTSHotMgr::getCustomRawCode</a></div><div class="ttdeci">virtual const char * getCustomRawCode(const char *tag, const char *fullPid, uint32_t dt) override</div><div class="ttdoc">获取指定日期的自定义规则合约代码</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00484">WTSHotMgr.cpp:484</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a2c8461ec2ee5683fc14db4cd38d7acd1"><div class="ttname"><a href="classWTSHotMgr.html#a2c8461ec2ee5683fc14db4cd38d7acd1">WTSHotMgr::getPrevSecondRawCode</a></div><div class="ttdeci">virtual const char * getPrevSecondRawCode(const char *exchg, const char *pid, uint32_t dt=0) override</div><div class="ttdoc">获取指定日期的前一次主力合约代码</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00271">WTSHotMgr.cpp:271</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a3808dabe249a04089394b75e2c49744b"><div class="ttname"><a href="classWTSHotMgr.html#a3808dabe249a04089394b75e2c49744b">WTSHotMgr::m_mapCustCodes</a></div><div class="ttdeci">CustomSwitchCodes m_mapCustCodes</div><div class="ttdoc">自定义规则的当前主力合约代码列表，按规则标签分组</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8h_source.html#l00263">WTSHotMgr.h:263</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a43a1722ece4a0be1c32df6bdc2978e7f"><div class="ttname"><a href="classWTSHotMgr.html#a43a1722ece4a0be1c32df6bdc2978e7f">WTSHotMgr::getPrevCustomRawCode</a></div><div class="ttdeci">virtual const char * getPrevCustomRawCode(const char *tag, const char *fullPid, uint32_t dt) override</div><div class="ttdoc">获取指定日期的前一自定义规则合约代码</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00424">WTSHotMgr.cpp:424</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a4724d4f9bf7fa8c1f04ec59ad54e8cb6"><div class="ttname"><a href="classWTSHotMgr.html#a4724d4f9bf7fa8c1f04ec59ad54e8cb6">WTSHotMgr::isInitialized</a></div><div class="ttdeci">bool isInitialized() const</div><div class="ttdoc">检查是否已初始化完成</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8h_source.html#l00093">WTSHotMgr.h:93</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a5ad4c37a874c8a83bff62720538415af"><div class="ttname"><a href="classWTSHotMgr.html#a5ad4c37a874c8a83bff62720538415af">WTSHotMgr::getSecondRawCode</a></div><div class="ttdeci">virtual const char * getSecondRawCode(const char *exchg, const char *pid, uint32_t dt=0) override</div><div class="ttdoc">获取指定日期的次主力合约代码</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00290">WTSHotMgr.cpp:290</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a5f177f4076a7090cd6c166b56538f1c0"><div class="ttname"><a href="classWTSHotMgr.html#a5f177f4076a7090cd6c166b56538f1c0">WTSHotMgr::getRawCode</a></div><div class="ttdeci">virtual const char * getRawCode(const char *exchg, const char *pid, uint32_t dt=0) override</div><div class="ttdoc">获取指定日期的主力合约代码</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00196">WTSHotMgr.cpp:196</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a63fe6825a8405dd33e72b252f71cf16c"><div class="ttname"><a href="classWTSHotMgr.html#a63fe6825a8405dd33e72b252f71cf16c">WTSHotMgr::m_mapCustRules</a></div><div class="ttdeci">WTSCustomSwitchMap * m_mapCustRules</div><div class="ttdoc">自定义规则映射表，将规则标签映射到品种主力映射</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8h_source.html#l00257">WTSHotMgr.h:257</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a6584b38aa7d8396b73b303729c19d2b8"><div class="ttname"><a href="classWTSHotMgr.html#a6584b38aa7d8396b73b303729c19d2b8">WTSHotMgr::splitHotSecions</a></div><div class="ttdeci">virtual bool splitHotSecions(const char *exchg, const char *pid, uint32_t sDt, uint32_t eDt, HotSections &amp;sections) override</div><div class="ttdoc">分割指定时间范围内的主力合约切换区间</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00237">WTSHotMgr.cpp:237</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a71b6166edde610379640b80ce8f4d556"><div class="ttname"><a href="classWTSHotMgr.html#a71b6166edde610379640b80ce8f4d556">WTSHotMgr::loadHots</a></div><div class="ttdeci">bool loadHots(const char *filename)</div><div class="ttdoc">加载主力合约切换规则配置文件</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00159">WTSHotMgr.cpp:159</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a72fb9deee2870191f53d628d9ca37d5d"><div class="ttname"><a href="classWTSHotMgr.html#a72fb9deee2870191f53d628d9ca37d5d">WTSHotMgr::WTSHotMgr</a></div><div class="ttdeci">WTSHotMgr()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00031">WTSHotMgr.cpp:31</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a793914ca9876d3a159c137e92350ba9e"><div class="ttname"><a href="classWTSHotMgr.html#a793914ca9876d3a159c137e92350ba9e">WTSHotMgr::getPrevRawCode</a></div><div class="ttdeci">virtual const char * getPrevRawCode(const char *exchg, const char *pid, uint32_t dt=0) override</div><div class="ttdoc">获取指定日期的前一主力合约代码</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00177">WTSHotMgr.cpp:177</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a8ccc2503183b11f1323849c0ec59f10a"><div class="ttname"><a href="classWTSHotMgr.html#a8ccc2503183b11f1323849c0ec59f10a">WTSHotMgr::isSecond</a></div><div class="ttdeci">virtual bool isSecond(const char *exchg, const char *rawCode, uint32_t dt=0) override</div><div class="ttdoc">判断指定合约是否为特定日期的次主力合约</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00309">WTSHotMgr.cpp:309</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_a976e8cc145fa24ce87aeee089d673d57"><div class="ttname"><a href="classWTSHotMgr.html#a976e8cc145fa24ce87aeee089d673d57">WTSHotMgr::CustomSwitchCodes</a></div><div class="ttdeci">wt_hashmap&lt; std::string, wt_hashset&lt; std::string &gt; &gt; CustomSwitchCodes</div><div class="ttdoc">自定义规则的当前主力合约代码存储类型</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8h_source.html#l00260">WTSHotMgr.h:260</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_aa23caf5169325ec6a744d94b495c680d"><div class="ttname"><a href="classWTSHotMgr.html#aa23caf5169325ec6a744d94b495c680d">WTSHotMgr::isCustomHot</a></div><div class="ttdeci">virtual bool isCustomHot(const char *tag, const char *fullCode, uint32_t dt) override</div><div class="ttdoc">判断指定合约是否为特定日期的自定义规则合约</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00532">WTSHotMgr.cpp:532</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_aa560571d728b52d629ddc744d4bb2371"><div class="ttname"><a href="classWTSHotMgr.html#aa560571d728b52d629ddc744d4bb2371">WTSHotMgr::isHot</a></div><div class="ttdeci">virtual bool isHot(const char *exchg, const char *rawCode, uint32_t dt=0) override</div><div class="ttdoc">判断指定合约是否为特定日期的主力合约</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00215">WTSHotMgr.cpp:215</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_aa7e2ffad8512d125d7682bc5c8c4c513"><div class="ttname"><a href="classWTSHotMgr.html#aa7e2ffad8512d125d7682bc5c8c4c513">WTSHotMgr::loadCustomRules</a></div><div class="ttdeci">bool loadCustomRules(const char *tag, const char *filename)</div><div class="ttdoc">加载自定义切换规则配置文件</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00352">WTSHotMgr.cpp:352</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_ab6557ffce79a2416227cf4ee7f7cc7c8"><div class="ttname"><a href="classWTSHotMgr.html#ab6557ffce79a2416227cf4ee7f7cc7c8">WTSHotMgr::m_bInitialized</a></div><div class="ttdeci">bool m_bInitialized</div><div class="ttdoc">是否已初始化标记</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8h_source.html#l00254">WTSHotMgr.h:254</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_ab7c39805871df267f6857c6e1ee4531d"><div class="ttname"><a href="classWTSHotMgr.html#ab7c39805871df267f6857c6e1ee4531d">WTSHotMgr::~WTSHotMgr</a></div><div class="ttdeci">~WTSHotMgr()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00043">WTSHotMgr.cpp:43</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_aeb12140701c18c983835826f7e387721"><div class="ttname"><a href="classWTSHotMgr.html#aeb12140701c18c983835826f7e387721">WTSHotMgr::splitCustomSections</a></div><div class="ttdeci">virtual bool splitCustomSections(const char *tag, const char *fullPid, uint32_t sDt, uint32_t eDt, HotSections &amp;sections) override</div><div class="ttdoc">分割指定时间范围内的自定义合约切换区间</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00600">WTSHotMgr.cpp:600</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_af21b6f42f09e9096e350803e442b91f2"><div class="ttname"><a href="classWTSHotMgr.html#af21b6f42f09e9096e350803e442b91f2">WTSHotMgr::getRuleTag</a></div><div class="ttdeci">virtual const char * getRuleTag(const char *stdCode) override</div><div class="ttdoc">获取标准合约代码对应的规则标签</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00056">WTSHotMgr.cpp:56</a></div></div>
+<div class="ttc" id="aclassWTSHotMgr_html_af260eb6c5857f8811e8c891196bece5e"><div class="ttname"><a href="classWTSHotMgr.html#af260eb6c5857f8811e8c891196bece5e">WTSHotMgr::loadSeconds</a></div><div class="ttdeci">bool loadSeconds(const char *filename)</div><div class="ttdoc">加载次主力合约切换规则配置文件</div><div class="ttdef"><b>Definition</b> <a href="WTSHotMgr_8cpp_source.html#l00255">WTSHotMgr.cpp:255</a></div></div>
+<div class="ttc" id="aclassWTSMap_html"><div class="ttname"><a href="classWTSMap.html">WTSMap</a></div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00314">WTSCollection.hpp:315</a></div></div>
+<div class="ttc" id="aclassWTSSwitchItem_html"><div class="ttname"><a href="classWTSSwitchItem.html">WTSSwitchItem</a></div><div class="ttdef"><b>Definition</b> <a href="WTSSwitchItem_8hpp_source.html#l00014">WTSSwitchItem.hpp:15</a></div></div>
+<div class="ttc" id="aclasswt__hashmap_html"><div class="ttname"><a href="classwt__hashmap.html">wt_hashmap</a></div><div class="ttdoc">WonderTrader通用高性能哈希表模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00162">FasterDefs.h:163</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_a16605e2dd51d97a5bcc8d8e1bf3d6c6.html">WTSTools</a></li><li class="navelem"><a class="el" href="WTSHotMgr_8h.html">WTSHotMgr.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

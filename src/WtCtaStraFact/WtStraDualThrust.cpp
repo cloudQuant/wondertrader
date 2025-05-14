@@ -7,7 +7,7 @@
  * 
  * \author Wesley
  */
-
+#include <iostream>
 #include "WtStraDualThrust.h"
 
 #include "../Includes/ICtaStraCtx.h"
@@ -78,6 +78,7 @@ const char* WtStraDualThrust::getName()
  */
 bool WtStraDualThrust::init(WTSVariant* cfg)
 {
+	std::cout << "WtStraDualThrust::init begins" << std::endl;
 	if (cfg == NULL)
 		return false;
 
@@ -93,7 +94,7 @@ bool WtStraDualThrust::init(WTSVariant* cfg)
 
 	// 读取是否为股票标的
 	_isstk = cfg->getBoolean("stock");
-
+	std::cout << "WtStraDualThrust::init ends" << std::endl;
 	return true;
 }
 
@@ -109,29 +110,29 @@ bool WtStraDualThrust::init(WTSVariant* cfg)
 void WtStraDualThrust::on_session_begin(ICtaStraCtx* ctx, uint32_t uTDate)
 {
 	// 获取当前的主力合约代码
-	std::string newMonCode = ctx->stra_get_rawcode(_code.c_str());
+	//std::string newMonCode = ctx->stra_get_rawcode(_code.c_str());
 	// 如果主力合约发生变化
-	if(newMonCode!=_moncode)
-	{
+	//if(newMonCode!=_moncode)
+	//{
 		// 如果已有之前的主力合约
-		if(!_moncode.empty())
-		{
+	//	if(!_moncode.empty())
+	//	{
 			// 获取当前持仓
-			double curPos = ctx->stra_get_position(_moncode.c_str());
+	//		double curPos = ctx->stra_get_position(_moncode.c_str());
 			// 如果有持仓，需要转移到新主力合约
-			if (!decimal::eq(curPos, 0))
-			{
-				ctx->stra_log_info(fmt::format("主力换月,  老主力{}[{}]将会被清理", _moncode, curPos).c_str());
+	//		if (!decimal::eq(curPos, 0))
+	//		{
+	//			ctx->stra_log_info(fmt::format("主力换月,  老主力{}[{}]将会被清理", _moncode, curPos).c_str());
 				// 将旧主力合约持仓清零
-				ctx->stra_set_position(_moncode.c_str(), 0, "switchout");
+	//			ctx->stra_set_position(_moncode.c_str(), 0, "switchout");
 				// 将相同持仓转移到新主力合约
-				ctx->stra_set_position(newMonCode.c_str(), curPos, "switchin");
-			}
-		}
+	//			ctx->stra_set_position(newMonCode.c_str(), curPos, "switchin");
+	//		}
+	//	}
 
 		// 更新当前主力合约代码
-		_moncode = newMonCode;
-	}
+	//	_moncode = newMonCode;
+	//}
 }
 
 /**

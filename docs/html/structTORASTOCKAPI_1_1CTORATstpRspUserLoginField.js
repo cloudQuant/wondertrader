@@ -1,0 +1,25 @@
+var structTORASTOCKAPI_1_1CTORATstpRspUserLoginField =
+[
+    [ "CertSerial", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#a213b5cc73a4fe9a5c50593db527711e3", null ],
+    [ "DepartmentID", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#a2c066d05c3f550763add772d1fdd0637", null ],
+    [ "FrontID", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#a8aa0bd54f1347203fcb829e1242b1b0e", null ],
+    [ "InnerIPAddress", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#a48c13d0a8b796c6be91a5471d89dc9d1", null ],
+    [ "LogInAccount", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#ae8f02cd639473a2683bd71489a5f6b9e", null ],
+    [ "LogInAccountType", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#a44f5f1a5554bd1c96e96433aefbc06b5", null ],
+    [ "LoginTime", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#af32c980c5f63b42e18e41b1a8b635314", null ],
+    [ "MacAddress", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#afe136dcb071a9fad40aa56a87a12d32b", null ],
+    [ "MaxOrderRef", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#a7fff4d1aa2907e60e88e128423e0afe6", null ],
+    [ "NeedUpdatePassword", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#afd37031d5a4998b8420fee98bdc8290a", null ],
+    [ "OrderActionCommFlux", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#a59b481eb15daa7727ef86d05d04b69dd", null ],
+    [ "OrderInsertCommFlux", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#aa24f44a0cd1bc3e2419624e7cc534a52", null ],
+    [ "OuterIPAddress", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#af2642ebe4ffcc29044e1968080e6a846", null ],
+    [ "PasswordExpiryDate", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#ab6bb8f03173002a44349610e8845cb1b", null ],
+    [ "PrivateFlowCount", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#a472d1fc8a34a1a48d4da76a9991baa2a", null ],
+    [ "PublicFlowCount", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#a58cd4b1bbee67e2bc91d70ac58f8bec6", null ],
+    [ "SessionID", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#a231345a06f876ce9c2c9f0729d053a9f", null ],
+    [ "SystemName", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#abb2c8daa8897475c4bd5f6aba326ea8b", null ],
+    [ "TradingDay", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#afc0bcddf638c5e88f42f725863790ade", null ],
+    [ "UserID", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#a73fb96d53ff2285296b606a6ba4c2a42", null ],
+    [ "UserName", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#a001cf8dad505b6700c43217b96a9c696", null ],
+    [ "UserType", "structTORASTOCKAPI_1_1CTORATstpRspUserLoginField.html#abff54a9f4603bfc4bffe34966dc16b79", null ]
+];

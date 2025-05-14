@@ -1,0 +1,25 @@
+var structXTPOptCombOrderInfoEx =
+[
+    [ "business_type", "structXTPOptCombOrderInfoEx.html#a1a92c56e9acc4f420a54b6cdd11663a4", null ],
+    [ "cancel_time", "structXTPOptCombOrderInfoEx.html#ad72eb70769d91ae50ec13280ee81bee2", null ],
+    [ "insert_time", "structXTPOptCombOrderInfoEx.html#a42611bce6fd426426bc4663044c0aa04", null ],
+    [ "market", "structXTPOptCombOrderInfoEx.html#abb753a939e33c1a3fc8ef50f9ac263ba", null ],
+    [ "opt_comb_info", "structXTPOptCombOrderInfoEx.html#a90d2338a8c52635e40da9023f18eef3c", null ],
+    [ "order_cancel_client_id", "structXTPOptCombOrderInfoEx.html#abc5741a5936c436004d73aa29fc38190", null ],
+    [ "order_cancel_xtp_id", "structXTPOptCombOrderInfoEx.html#a9500c42ea2313aea0fe1e54119887cbd", null ],
+    [ "order_client_id", "structXTPOptCombOrderInfoEx.html#a331ed90ad0db6640983ae2f7e43aaf01", null ],
+    [ "order_err_t", "structXTPOptCombOrderInfoEx.html#a7d7c471d1dc467a4f689e4aed50dee67", null ],
+    [ "order_exch_id", "structXTPOptCombOrderInfoEx.html#ad09706c4a7b3776713f9d35836c9b989", null ],
+    [ "order_local_id", "structXTPOptCombOrderInfoEx.html#a111a622688509c562f5f3fe6bb64b88c", null ],
+    [ "order_status", "structXTPOptCombOrderInfoEx.html#a7a3ea13844d02f5356b24a8d50dc1c59", null ],
+    [ "order_submit_status", "structXTPOptCombOrderInfoEx.html#a791919acd585fd60253ab54516d3c262", null ],
+    [ "order_type", "structXTPOptCombOrderInfoEx.html#a89403617de9efdd8016a41928a0275de", null ],
+    [ "order_xtp_id", "structXTPOptCombOrderInfoEx.html#a48ecbc93faf5d8d84842dab79dd3ac65", null ],
+    [ "qty_left", "structXTPOptCombOrderInfoEx.html#a6d0ea212d36cdaafe09b08f41ab78bd0", null ],
+    [ "qty_traded", "structXTPOptCombOrderInfoEx.html#af42629a8042366457dd33955d47421d6", null ],
+    [ "quantity", "structXTPOptCombOrderInfoEx.html#a0ad82ab7bb0dfcab7bd11c6e054adfb5", null ],
+    [ "side", "structXTPOptCombOrderInfoEx.html#ae9835445869390606262430256e58843", null ],
+    [ "trade_amount", "structXTPOptCombOrderInfoEx.html#a6b16ca68cd6b272de59b5ffb283ca76e", null ],
+    [ "unknown", "structXTPOptCombOrderInfoEx.html#a172b6d53e6f0465e839acc4e55ce0528", null ],
+    [ "update_time", "structXTPOptCombOrderInfoEx.html#a75ffd202e307a5579b0f54d31e1ecc07", null ]
+];

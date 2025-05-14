@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtCore/WtFilterMgr.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtFilterMgr_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtFilterMgr.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtFilterMgr_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;../Includes/FasterDefs.h&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;../Includes/WTSMarcos.h&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">class </span><a class="code hl_class" href="classEventNotifier.html">EventNotifier</a>;</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="foldopen" id="foldopen00021" data-start="{" data-end="};">
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html">   21</a></span><span class="keyword">class </span><a class="code hl_class" href="classWtFilterMgr.html">WtFilterMgr</a></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>{</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#a0d45d4e4ee18f6e7ba236f1dccfe818d">   28</a></span>    <a class="code hl_function" href="classWtFilterMgr.html#a0d45d4e4ee18f6e7ba236f1dccfe818d">WtFilterMgr</a>():<a class="code hl_variable" href="classWtFilterMgr.html#ae04deb3400457a7c1ed4516cee2b6128">_filter_timestamp</a>(0), <a class="code hl_variable" href="classWtFilterMgr.html#ae22d85b83e55de3603aa1c717b911171">_notifier</a>(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>){}</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#a5825155c6fb417d388fa2c3d5cb5e465">   35</a></span>    <span class="keywordtype">void</span>        <a class="code hl_function" href="classWtFilterMgr.html#a5825155c6fb417d388fa2c3d5cb5e465">set_notifier</a>(<a class="code hl_class" href="classEventNotifier.html">EventNotifier</a>* notifier) { <a class="code hl_variable" href="classWtFilterMgr.html#ae22d85b83e55de3603aa1c717b911171">_notifier</a> = notifier; }</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordtype">void</span>        <a class="code hl_function" href="classWtFilterMgr.html#a9a56b4340fb952158f647453b2e9bc99">load_filters</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* fileName = <span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordtype">bool</span>        <a class="code hl_function" href="classWtFilterMgr.html#ab39a0bf3ba83b250378a603179deec88">is_filtered_by_strategy</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* straName, <span class="keywordtype">double</span>&amp; targetPos, <span class="keywordtype">bool</span> isDiff = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keywordtype">bool</span>        <a class="code hl_function" href="classWtFilterMgr.html#adcd0c86edba1bf48d212d26b0f784ea5">is_filtered_by_code</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">double</span>&amp; targetPos);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keywordtype">bool</span>        <a class="code hl_function" href="classWtFilterMgr.html#a52d0103ad7b3d327583386f010656d6e">is_filtered_by_executer</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* execid);</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="foldopen" id="foldopen00079" data-start="{" data-end="};">
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#a5dacee4385db7133e5f4b2fff52f0250">   79</a></span>    <span class="keyword">typedef</span> <span class="keyword">enum</span> <a class="code hl_enumeration" href="classWtFilterMgr.html#a5dacee4385db7133e5f4b2fff52f0250">tagFilterAction</a></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    {</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#a5dacee4385db7133e5f4b2fff52f0250ad37227fdd1a7a235f0853b9050cfcd6c">   81</a></span>        <a class="code hl_enumvalue" href="classWtFilterMgr.html#a5dacee4385db7133e5f4b2fff52f0250ad37227fdd1a7a235f0853b9050cfcd6c">FA_Ignore</a>,      </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#a5dacee4385db7133e5f4b2fff52f0250a501a9ef4bb96c4924b2367f9e43718a8">   82</a></span>        <a class="code hl_enumvalue" href="classWtFilterMgr.html#a5dacee4385db7133e5f4b2fff52f0250a501a9ef4bb96c4924b2367f9e43718a8">FA_Redirect</a>,    </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        <a class="code hl_enumvalue" href="classWtFilterMgr.html#a5dacee4385db7133e5f4b2fff52f0250ac8f87c1df1a7fc03626fc344813c3f39">FA_None</a> = 99    </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#a5dacee4385db7133e5f4b2fff52f0250ac8f87c1df1a7fc03626fc344813c3f39">   84</a></span>    } <a class="code hl_typedef" href="classWtFilterMgr.html#accb206e5e90ff4996c19348c39c0a821">FilterAction</a>;</div>
+</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="foldopen" id="foldopen00090" data-start="{" data-end="};">
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="structWtFilterMgr_1_1__FilterItem.html">   90</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structWtFilterMgr_1_1__FilterItem.html">_FilterItem</a></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    {</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="structWtFilterMgr_1_1__FilterItem.html#a2155b457b5dc6bcb68494adbce7a3878">   92</a></span>        std::string     <a class="code hl_variable" href="structWtFilterMgr_1_1__FilterItem.html#a2155b457b5dc6bcb68494adbce7a3878">_key</a>;       </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="structWtFilterMgr_1_1__FilterItem.html#a2a28f70894fcdbad29b3368f91312f8f">   93</a></span>        <a class="code hl_typedef" href="classWtFilterMgr.html#accb206e5e90ff4996c19348c39c0a821">FilterAction</a>    <a class="code hl_variable" href="structWtFilterMgr_1_1__FilterItem.html#a2a28f70894fcdbad29b3368f91312f8f">_action</a>;    </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="structWtFilterMgr_1_1__FilterItem.html#a0bcec5bc011d2afdeb66936fdfc7be4c">   94</a></span>        <span class="keywordtype">double</span>          <a class="code hl_variable" href="structWtFilterMgr_1_1__FilterItem.html#a0bcec5bc011d2afdeb66936fdfc7be4c">_target</a>;    </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#a67531c73144190a038fc7d368df786e3">   95</a></span>    } <a class="code hl_typedef" href="classWtFilterMgr.html#a67531c73144190a038fc7d368df786e3">FilterItem</a>;</div>
+</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#ab3760f9035c45438a42738ebd321397c">  101</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, FilterItem&gt;</a> <a class="code hl_typedef" href="classWtFilterMgr.html#ab3760f9035c45438a42738ebd321397c">FilterMap</a>;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#a8a303b25f0b7e937ff5df54cb9067b56">  102</a></span>    <a class="code hl_class" href="classwt__hashmap.html">FilterMap</a>       <a class="code hl_variable" href="classWtFilterMgr.html#a8a303b25f0b7e937ff5df54cb9067b56">_stra_filters</a>;  </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#a307c03a0fe0b3d1467b80879448f2258">  104</a></span>    <a class="code hl_class" href="classwt__hashmap.html">FilterMap</a>       <a class="code hl_variable" href="classWtFilterMgr.html#a307c03a0fe0b3d1467b80879448f2258">_code_filters</a>;  </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#aa54b2a6aa22643463c8dd58739413cd8">  110</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, bool&gt;</a>   <a class="code hl_typedef" href="classWtFilterMgr.html#aa54b2a6aa22643463c8dd58739413cd8">ExecuterFilters</a>;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#aa2d192566ae758697d6ac1609d725f2c">  111</a></span>    <a class="code hl_class" href="classwt__hashmap.html">ExecuterFilters</a> <a class="code hl_variable" href="classWtFilterMgr.html#aa2d192566ae758697d6ac1609d725f2c">_exec_filters</a>;  </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#a175883e2c7a5b28e92361b92edf7f086">  113</a></span>    std::string     <a class="code hl_variable" href="classWtFilterMgr.html#a175883e2c7a5b28e92361b92edf7f086">_filter_file</a>;       </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#ae04deb3400457a7c1ed4516cee2b6128">  114</a></span>    uint64_t        <a class="code hl_variable" href="classWtFilterMgr.html#ae04deb3400457a7c1ed4516cee2b6128">_filter_timestamp</a>;  </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="classWtFilterMgr.html#ae22d85b83e55de3603aa1c717b911171">  115</a></span>    <a class="code hl_class" href="classEventNotifier.html">EventNotifier</a>*  <a class="code hl_variable" href="classWtFilterMgr.html#ae22d85b83e55de3603aa1c717b911171">_notifier</a>;          </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>};</div>
+</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html"><div class="ttname"><a href="classEventNotifier.html">EventNotifier</a></div><div class="ttdoc">事件通知器类，用于回测过程中的事件、数据和资金信息广播</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00063">EventNotifier.h:64</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html"><div class="ttname"><a href="classWtFilterMgr.html">WtFilterMgr</a></div><div class="ttdoc">信号过滤管理器类</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00021">WtFilterMgr.h:22</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_a0d45d4e4ee18f6e7ba236f1dccfe818d"><div class="ttname"><a href="classWtFilterMgr.html#a0d45d4e4ee18f6e7ba236f1dccfe818d">WtFilterMgr::WtFilterMgr</a></div><div class="ttdeci">WtFilterMgr()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00028">WtFilterMgr.h:28</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_a175883e2c7a5b28e92361b92edf7f086"><div class="ttname"><a href="classWtFilterMgr.html#a175883e2c7a5b28e92361b92edf7f086">WtFilterMgr::_filter_file</a></div><div class="ttdeci">std::string _filter_file</div><div class="ttdoc">过滤器配置文件路径</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00113">WtFilterMgr.h:113</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_a307c03a0fe0b3d1467b80879448f2258"><div class="ttname"><a href="classWtFilterMgr.html#a307c03a0fe0b3d1467b80879448f2258">WtFilterMgr::_code_filters</a></div><div class="ttdeci">FilterMap _code_filters</div><div class="ttdoc">代码过滤器映射，包括合约代码和品种代码，同一时间只有一个生效，合约代码优先级高于品种代码</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00104">WtFilterMgr.h:104</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_a52d0103ad7b3d327583386f010656d6e"><div class="ttname"><a href="classWtFilterMgr.html#a52d0103ad7b3d327583386f010656d6e">WtFilterMgr::is_filtered_by_executer</a></div><div class="ttdeci">bool is_filtered_by_executer(const char *execid)</div><div class="ttdoc">检查是否被执行器过滤器过滤掉了</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8cpp_source.html#l00164">WtFilterMgr.cpp:164</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_a5825155c6fb417d388fa2c3d5cb5e465"><div class="ttname"><a href="classWtFilterMgr.html#a5825155c6fb417d388fa2c3d5cb5e465">WtFilterMgr::set_notifier</a></div><div class="ttdeci">void set_notifier(EventNotifier *notifier)</div><div class="ttdoc">设置事件通知器</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00035">WtFilterMgr.h:35</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_a5dacee4385db7133e5f4b2fff52f0250"><div class="ttname"><a href="classWtFilterMgr.html#a5dacee4385db7133e5f4b2fff52f0250">WtFilterMgr::tagFilterAction</a></div><div class="ttdeci">tagFilterAction</div><div class="ttdoc">过滤器动作类型</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00079">WtFilterMgr.h:80</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_a5dacee4385db7133e5f4b2fff52f0250a501a9ef4bb96c4924b2367f9e43718a8"><div class="ttname"><a href="classWtFilterMgr.html#a5dacee4385db7133e5f4b2fff52f0250a501a9ef4bb96c4924b2367f9e43718a8">WtFilterMgr::FA_Redirect</a></div><div class="ttdeci">@ FA_Redirect</div><div class="ttdoc">重定向持仓，即同步到指定目标仓位</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00082">WtFilterMgr.h:82</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_a5dacee4385db7133e5f4b2fff52f0250ac8f87c1df1a7fc03626fc344813c3f39"><div class="ttname"><a href="classWtFilterMgr.html#a5dacee4385db7133e5f4b2fff52f0250ac8f87c1df1a7fc03626fc344813c3f39">WtFilterMgr::FA_None</a></div><div class="ttdeci">@ FA_None</div><div class="ttdoc">无动作</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00084">WtFilterMgr.h:83</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_a5dacee4385db7133e5f4b2fff52f0250ad37227fdd1a7a235f0853b9050cfcd6c"><div class="ttname"><a href="classWtFilterMgr.html#a5dacee4385db7133e5f4b2fff52f0250ad37227fdd1a7a235f0853b9050cfcd6c">WtFilterMgr::FA_Ignore</a></div><div class="ttdeci">@ FA_Ignore</div><div class="ttdoc">忽略，即维持原有仓位</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00081">WtFilterMgr.h:81</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_a67531c73144190a038fc7d368df786e3"><div class="ttname"><a href="classWtFilterMgr.html#a67531c73144190a038fc7d368df786e3">WtFilterMgr::FilterItem</a></div><div class="ttdeci">struct WtFilterMgr::_FilterItem FilterItem</div><div class="ttdoc">过滤器项结构</div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_a8a303b25f0b7e937ff5df54cb9067b56"><div class="ttname"><a href="classWtFilterMgr.html#a8a303b25f0b7e937ff5df54cb9067b56">WtFilterMgr::_stra_filters</a></div><div class="ttdeci">FilterMap _stra_filters</div><div class="ttdoc">策略过滤器映射，键为策略名称</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00102">WtFilterMgr.h:102</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_a9a56b4340fb952158f647453b2e9bc99"><div class="ttname"><a href="classWtFilterMgr.html#a9a56b4340fb952158f647453b2e9bc99">WtFilterMgr::load_filters</a></div><div class="ttdeci">void load_filters(const char *fileName=&quot;&quot;)</div><div class="ttdoc">加载信号过滤器</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8cpp_source.html#l00025">WtFilterMgr.cpp:25</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_aa2d192566ae758697d6ac1609d725f2c"><div class="ttname"><a href="classWtFilterMgr.html#aa2d192566ae758697d6ac1609d725f2c">WtFilterMgr::_exec_filters</a></div><div class="ttdeci">ExecuterFilters _exec_filters</div><div class="ttdoc">执行器过滤器映射，键为执行器ID，值为是否过滤</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00111">WtFilterMgr.h:111</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_aa54b2a6aa22643463c8dd58739413cd8"><div class="ttname"><a href="classWtFilterMgr.html#aa54b2a6aa22643463c8dd58739413cd8">WtFilterMgr::ExecuterFilters</a></div><div class="ttdeci">wt_hashmap&lt; std::string, bool &gt; ExecuterFilters</div><div class="ttdoc">执行器过滤器映射类型</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00110">WtFilterMgr.h:110</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_ab3760f9035c45438a42738ebd321397c"><div class="ttname"><a href="classWtFilterMgr.html#ab3760f9035c45438a42738ebd321397c">WtFilterMgr::FilterMap</a></div><div class="ttdeci">wt_hashmap&lt; std::string, FilterItem &gt; FilterMap</div><div class="ttdoc">过滤器映射类型</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00101">WtFilterMgr.h:101</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_ab39a0bf3ba83b250378a603179deec88"><div class="ttname"><a href="classWtFilterMgr.html#ab39a0bf3ba83b250378a603179deec88">WtFilterMgr::is_filtered_by_strategy</a></div><div class="ttdeci">bool is_filtered_by_strategy(const char *straName, double &amp;targetPos, bool isDiff=false)</div><div class="ttdoc">检查是否因为策略被过滤掉了</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8cpp_source.html#l00195">WtFilterMgr.cpp:195</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_accb206e5e90ff4996c19348c39c0a821"><div class="ttname"><a href="classWtFilterMgr.html#accb206e5e90ff4996c19348c39c0a821">WtFilterMgr::FilterAction</a></div><div class="ttdeci">enum WtFilterMgr::tagFilterAction FilterAction</div><div class="ttdoc">过滤器动作类型</div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_adcd0c86edba1bf48d212d26b0f784ea5"><div class="ttname"><a href="classWtFilterMgr.html#adcd0c86edba1bf48d212d26b0f784ea5">WtFilterMgr::is_filtered_by_code</a></div><div class="ttdeci">bool is_filtered_by_code(const char *stdCode, double &amp;targetPos)</div><div class="ttdoc">检查是否因为合约代码被过滤掉了</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8cpp_source.html#l00243">WtFilterMgr.cpp:243</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_ae04deb3400457a7c1ed4516cee2b6128"><div class="ttname"><a href="classWtFilterMgr.html#ae04deb3400457a7c1ed4516cee2b6128">WtFilterMgr::_filter_timestamp</a></div><div class="ttdeci">uint64_t _filter_timestamp</div><div class="ttdoc">过滤器文件时间戳，用于检测文件是否变化</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00114">WtFilterMgr.h:114</a></div></div>
+<div class="ttc" id="aclassWtFilterMgr_html_ae22d85b83e55de3603aa1c717b911171"><div class="ttname"><a href="classWtFilterMgr.html#ae22d85b83e55de3603aa1c717b911171">WtFilterMgr::_notifier</a></div><div class="ttdeci">EventNotifier * _notifier</div><div class="ttdoc">事件通知器指针，用于发送过滤器相关事件</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00115">WtFilterMgr.h:115</a></div></div>
+<div class="ttc" id="aclasswt__hashmap_html"><div class="ttname"><a href="classwt__hashmap.html">wt_hashmap</a></div><div class="ttdoc">WonderTrader通用高性能哈希表模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00162">FasterDefs.h:163</a></div></div>
+<div class="ttc" id="astructWtFilterMgr_1_1__FilterItem_html"><div class="ttname"><a href="structWtFilterMgr_1_1__FilterItem.html">WtFilterMgr::_FilterItem</a></div><div class="ttdoc">过滤器项结构</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00090">WtFilterMgr.h:91</a></div></div>
+<div class="ttc" id="astructWtFilterMgr_1_1__FilterItem_html_a0bcec5bc011d2afdeb66936fdfc7be4c"><div class="ttname"><a href="structWtFilterMgr_1_1__FilterItem.html#a0bcec5bc011d2afdeb66936fdfc7be4c">WtFilterMgr::_FilterItem::_target</a></div><div class="ttdeci">double _target</div><div class="ttdoc">目标仓位，只有当_action为FA_Redirect才生效</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00094">WtFilterMgr.h:94</a></div></div>
+<div class="ttc" id="astructWtFilterMgr_1_1__FilterItem_html_a2155b457b5dc6bcb68494adbce7a3878"><div class="ttname"><a href="structWtFilterMgr_1_1__FilterItem.html#a2155b457b5dc6bcb68494adbce7a3878">WtFilterMgr::_FilterItem::_key</a></div><div class="ttdeci">std::string _key</div><div class="ttdoc">关键字，用于匹配策略名称或合约代码</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00092">WtFilterMgr.h:92</a></div></div>
+<div class="ttc" id="astructWtFilterMgr_1_1__FilterItem_html_a2a28f70894fcdbad29b3368f91312f8f"><div class="ttname"><a href="structWtFilterMgr_1_1__FilterItem.html#a2a28f70894fcdbad29b3368f91312f8f">WtFilterMgr::_FilterItem::_action</a></div><div class="ttdeci">FilterAction _action</div><div class="ttdoc">过滤操作，忽略或重定向</div><div class="ttdef"><b>Definition</b> <a href="WtFilterMgr_8h_source.html#l00093">WtFilterMgr.h:93</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3ce996bf6400c0a215df0636043a382c.html">WtCore</a></li><li class="navelem"><a class="el" href="WtFilterMgr_8h.html">WtFilterMgr.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

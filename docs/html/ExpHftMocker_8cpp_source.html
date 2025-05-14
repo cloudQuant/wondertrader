@@ -1,0 +1,306 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtBtPorter/ExpHftMocker.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('ExpHftMocker_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ExpHftMocker.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="ExpHftMocker_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="ExpHftMocker_8h.html">ExpHftMocker.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="WtBtRunner_8h.html">WtBtRunner.h</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Share/StrUtil.hpp&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">extern</span> <a class="code hl_class" href="classWtBtRunner.html">WtBtRunner</a>&amp; <a class="code hl_function" href="ExpHftMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>();</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="foldopen" id="foldopen00033" data-start="{" data-end="}">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classExpHftMocker.html#a4c900c96889d4ce7bf097192b9263beb">   33</a></span><a class="code hl_function" href="classExpHftMocker.html#a4c900c96889d4ce7bf097192b9263beb">ExpHftMocker::ExpHftMocker</a>(<a class="code hl_class" href="classHisDataReplayer.html">HisDataReplayer</a>* replayer, <span class="keyword">const</span> <span class="keywordtype">char</span>* name)</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    : <a class="code hl_class" href="classHftMocker.html">HftMocker</a>(replayer, name)</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>{</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>}</div>
+</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="foldopen" id="foldopen00051" data-start="{" data-end="}">
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="classExpHftMocker.html#aa5d33369fc61f4f1b082908bcdaee4d0">   51</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftMocker.html#aa5d33369fc61f4f1b082908bcdaee4d0">ExpHftMocker::on_bar</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, uint32_t times, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* newBar)</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>{</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">if</span> (newBar == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    std::string realPeriod;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordflow">if</span> (period[0] == <span class="charliteral">&#39;d&#39;</span>)</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        realPeriod = <a class="code hl_function" href="classStrUtil.html#a26e29501b4702101a2e7780f5c0c989b">StrUtil::printf</a>(<span class="stringliteral">&quot;%s%u&quot;</span>, period, times);</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        realPeriod = <a class="code hl_function" href="classStrUtil.html#a26e29501b4702101a2e7780f5c0c989b">StrUtil::printf</a>(<span class="stringliteral">&quot;m%u&quot;</span>, times);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <a class="code hl_function" href="classHftMocker.html#ae4d8f8c71a2b3c758908d6680a4e1c62">HftMocker::on_bar</a>(stdCode, period, times, newBar);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a60337635dfbc52484aefb74f9cfc54e4">ctx_on_bar</a>(<a class="code hl_variable" href="classHftMocker.html#abdfad05d029695eb56523e8bc7ba8438">_context_id</a>, stdCode, realPeriod.c_str(), newBar, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67a7be9e5a52a4546148592c1415f8ba4c1">ET_HFT</a>);</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>}</div>
+</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="foldopen" id="foldopen00074" data-start="{" data-end="}">
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="classExpHftMocker.html#a91412edeaa55665ecb595f284d3edf0f">   74</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftMocker.html#a91412edeaa55665ecb595f284d3edf0f">ExpHftMocker::on_channel_ready</a>()</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>{</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <a class="code hl_function" href="classHftMocker.html#a34de491dfb14dbe78a67819a93b29294">HftMocker::on_channel_ready</a>();</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a20f8007959fd841aff75d1420fa4723f">hft_on_channel_ready</a>(<a class="code hl_variable" href="classHftMocker.html#abdfad05d029695eb56523e8bc7ba8438">_context_id</a>, <span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>}</div>
+</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="foldopen" id="foldopen00093" data-start="{" data-end="}">
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="classExpHftMocker.html#a64b6f794cd71c4ac4c92b8639a29511a">   93</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftMocker.html#a64b6f794cd71c4ac4c92b8639a29511a">ExpHftMocker::on_entrust</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> bSuccess, <span class="keyword">const</span> <span class="keywordtype">char</span>* message, <span class="keyword">const</span> <span class="keywordtype">char</span>* userTag)</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>{</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <a class="code hl_function" href="classHftMocker.html#a2b9d7f53110bea5e11a812e58046b18e">HftMocker::on_entrust</a>(localid, stdCode, bSuccess, message, userTag);</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#aa2a17e9c16659684b3bde024d809e996">hft_on_entrust</a>(<a class="code hl_variable" href="classHftMocker.html#abdfad05d029695eb56523e8bc7ba8438">_context_id</a>, localid, stdCode, bSuccess, message, userTag);</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>}</div>
+</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="foldopen" id="foldopen00108" data-start="{" data-end="}">
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="classExpHftMocker.html#a179ccc00c428877ec88610ace455ab22">  108</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftMocker.html#a179ccc00c428877ec88610ace455ab22">ExpHftMocker::on_init</a>()</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>{</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <a class="code hl_function" href="classHftMocker.html#a98d647524e23ac3e67ef68b28a848e67">HftMocker::on_init</a>();</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a38a0585c00d54c623c75f620897e5f5d">ctx_on_init</a>(<a class="code hl_variable" href="classHftMocker.html#abdfad05d029695eb56523e8bc7ba8438">_context_id</a>, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67a7be9e5a52a4546148592c1415f8ba4c1">ET_HFT</a>);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#aba06f502ee34376ec6045cd927506e88">on_initialize_event</a>();</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>}</div>
+</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="foldopen" id="foldopen00126" data-start="{" data-end="}">
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno"><a class="line" href="classExpHftMocker.html#a2f29c3e3e12f472241fc9b1507a57b99">  126</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftMocker.html#a2f29c3e3e12f472241fc9b1507a57b99">ExpHftMocker::on_session_begin</a>(uint32_t uDate)</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>{</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <a class="code hl_function" href="classHftMocker.html#adb62cffd1f0ab613f104556ed2f3486b">HftMocker::on_session_begin</a>(uDate);</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#ab5b1d4f5fb31efdc7e30844690f4a312">ctx_on_session_event</a>(<a class="code hl_variable" href="classHftMocker.html#abdfad05d029695eb56523e8bc7ba8438">_context_id</a>, uDate, <span class="keyword">true</span>, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67a7be9e5a52a4546148592c1415f8ba4c1">ET_HFT</a>);</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#afa5aa73fef748f60ac9cbe6cdc7a24c1">on_session_event</a>(uDate, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>}</div>
+</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
+<div class="foldopen" id="foldopen00143" data-start="{" data-end="}">
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="classExpHftMocker.html#a207e5e1f811f5504b3e70992bee3f91f">  143</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftMocker.html#a207e5e1f811f5504b3e70992bee3f91f">ExpHftMocker::on_session_end</a>(uint32_t uDate)</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>{</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    <a class="code hl_function" href="classHftMocker.html#a1432ce83a33c5e98d7790ef7eec107f1">HftMocker::on_session_end</a>(uDate);</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#ab5b1d4f5fb31efdc7e30844690f4a312">ctx_on_session_event</a>(<a class="code hl_variable" href="classHftMocker.html#abdfad05d029695eb56523e8bc7ba8438">_context_id</a>, uDate, <span class="keyword">false</span>, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67a7be9e5a52a4546148592c1415f8ba4c1">ET_HFT</a>);</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#afa5aa73fef748f60ac9cbe6cdc7a24c1">on_session_event</a>(uDate, <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>}</div>
+</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
+<div class="foldopen" id="foldopen00167" data-start="{" data-end="}">
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno"><a class="line" href="classExpHftMocker.html#aecdfb9ae8f3de32f04145e52c99475f0">  167</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftMocker.html#aecdfb9ae8f3de32f04145e52c99475f0">ExpHftMocker::on_order</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> totalQty, <span class="keywordtype">double</span> leftQty, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <span class="keywordtype">bool</span> isCanceled, <span class="keyword">const</span> <span class="keywordtype">char</span>* userTag)</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>{</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    <a class="code hl_function" href="classHftMocker.html#a3011ef0f877f49fcf450d12bc29710f1">HftMocker::on_order</a>(localid, stdCode, isBuy, totalQty, leftQty, <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, isCanceled, userTag);</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#ae4c01208ff4d3e1405e2ac0cb0a1fd75">hft_on_order</a>(<a class="code hl_variable" href="classHftMocker.html#abdfad05d029695eb56523e8bc7ba8438">_context_id</a>, localid, stdCode, isBuy, totalQty, leftQty, <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, isCanceled, userTag);</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>}</div>
+</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span> </div>
+<div class="foldopen" id="foldopen00184" data-start="{" data-end="}">
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno"><a class="line" href="classExpHftMocker.html#a0ad7ccbe666ddd8e6693305dc665d16f">  184</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftMocker.html#a0ad7ccbe666ddd8e6693305dc665d16f">ExpHftMocker::on_tick_updated</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick)</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>{</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="classHftMocker.html#afdd99f6733f42971519f3ffef4576cad">_tick_subs</a>.find(stdCode);</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="classHftMocker.html#afdd99f6733f42971519f3ffef4576cad">_tick_subs</a>.end())</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span> </div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>    <a class="code hl_function" href="classHftMocker.html#a6d791cb4eb5f850613ab1900fdd4f0f7">HftMocker::on_tick_updated</a>(stdCode, newTick);</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a70a32e8718b7663a7001a835d9c4e871">ctx_on_tick</a>(<a class="code hl_variable" href="classHftMocker.html#abdfad05d029695eb56523e8bc7ba8438">_context_id</a>, stdCode, newTick, <a class="code hl_enumvalue" href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67a7be9e5a52a4546148592c1415f8ba4c1">ET_HFT</a>);</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>}</div>
+</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="foldopen" id="foldopen00203" data-start="{" data-end="}">
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno"><a class="line" href="classExpHftMocker.html#a4a07f7cff2cab521ebd09b2188709887">  203</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftMocker.html#a4a07f7cff2cab521ebd09b2188709887">ExpHftMocker::on_ordque_updated</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSOrdQueData.html">WTSOrdQueData</a>* newOrdQue)</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>{</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#ac5695a5fef05b663a1d6622928b8e197">hft_on_order_queue</a>(<a class="code hl_variable" href="classHftMocker.html#abdfad05d029695eb56523e8bc7ba8438">_context_id</a>, stdCode, newOrdQue);</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>}</div>
+</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span> </div>
+<div class="foldopen" id="foldopen00217" data-start="{" data-end="}">
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno"><a class="line" href="classExpHftMocker.html#a08c48c7e639cb1fb54266d8209a5adf7">  217</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftMocker.html#a08c48c7e639cb1fb54266d8209a5adf7">ExpHftMocker::on_orddtl_updated</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSOrdDtlData.html">WTSOrdDtlData</a>* newOrdDtl)</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>{</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a96563531aa24378ae0ffbb90d5717487">hft_on_order_detail</a>(<a class="code hl_variable" href="classHftMocker.html#abdfad05d029695eb56523e8bc7ba8438">_context_id</a>, stdCode, newOrdDtl);</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>}</div>
+</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span> </div>
+<div class="foldopen" id="foldopen00232" data-start="{" data-end="}">
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno"><a class="line" href="classExpHftMocker.html#a48bb66500f744f529a7accd58dff3e5a">  232</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftMocker.html#a48bb66500f744f529a7accd58dff3e5a">ExpHftMocker::on_trans_updated</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTransData.html">WTSTransData</a>* newTrans)</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>{</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#ae7a1693253eb7d2cdb15b491552926e3">hft_on_transaction</a>(<a class="code hl_variable" href="classHftMocker.html#abdfad05d029695eb56523e8bc7ba8438">_context_id</a>, stdCode, newTrans);</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>}</div>
+</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span> </div>
+<div class="foldopen" id="foldopen00251" data-start="{" data-end="}">
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno"><a class="line" href="classExpHftMocker.html#a7401a29151268d40cde37ca944f520ca">  251</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftMocker.html#a7401a29151268d40cde37ca944f520ca">ExpHftMocker::on_trade</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> vol, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <span class="keyword">const</span> <span class="keywordtype">char</span>* userTag)</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>{</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    <a class="code hl_function" href="classHftMocker.html#ad029d356e187a5355ad7eddc5af8bb69">HftMocker::on_trade</a>(localid, stdCode, isBuy, vol, <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, userTag);</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span> </div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#a1885a954838885b8a4719035e8c02c94">hft_on_trade</a>(<a class="code hl_variable" href="classHftMocker.html#abdfad05d029695eb56523e8bc7ba8438">_context_id</a>, localid, stdCode, isBuy, vol, <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, userTag);</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>}</div>
+</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
+<div class="foldopen" id="foldopen00265" data-start="{" data-end="}">
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno"><a class="line" href="classExpHftMocker.html#a4952b213e1f9178d6019f72775f6a209">  265</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classExpHftMocker.html#a4952b213e1f9178d6019f72775f6a209">ExpHftMocker::on_bactest_end</a>()</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>{</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>    <a class="code hl_function" href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a>().<a class="code hl_function" href="classWtBtRunner.html#ae5c0bd8202f5b037f909639f8034ef6c">on_backtest_end</a>();</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>}</div>
+</div>
+<div class="ttc" id="aExpCtaMocker_8cpp_html_aeae7c7722f120a5b990f96dfced42ff0"><div class="ttname"><a href="ExpCtaMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a></div><div class="ttdeci">WtBtRunner &amp; getRunner()</div><div class="ttdoc">获取全局回测引擎实例</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_8cpp_source.html#l00040">WtBtPorter.cpp:40</a></div></div>
+<div class="ttc" id="aExpHftMocker_8cpp_html_aeae7c7722f120a5b990f96dfced42ff0"><div class="ttname"><a href="ExpHftMocker_8cpp.html#aeae7c7722f120a5b990f96dfced42ff0">getRunner</a></div><div class="ttdeci">WtBtRunner &amp; getRunner()</div><div class="ttdoc">获取全局回测引擎实例</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_8cpp_source.html#l00040">WtBtPorter.cpp:40</a></div></div>
+<div class="ttc" id="aExpHftMocker_8h_html"><div class="ttname"><a href="ExpHftMocker_8h.html">ExpHftMocker.h</a></div><div class="ttdoc">高频交易策略回测模拟器对外封装定义</div></div>
+<div class="ttc" id="aWtBtRunner_8h_html"><div class="ttname"><a href="WtBtRunner_8h.html">WtBtRunner.h</a></div><div class="ttdoc">回测引擎类定义文件</div></div>
+<div class="ttc" id="aWtBtRunner_8h_html_ad6bae4b8ec2ac5001b85aa4992e22d67a7be9e5a52a4546148592c1415f8ba4c1"><div class="ttname"><a href="WtBtRunner_8h.html#ad6bae4b8ec2ac5001b85aa4992e22d67a7be9e5a52a4546148592c1415f8ba4c1">ET_HFT</a></div><div class="ttdeci">@ ET_HFT</div><div class="ttdef"><b>Definition</b> <a href="WtBtRunner_8h_source.html#l00031">WtBtRunner.h:31</a></div></div>
+<div class="ttc" id="aclassExpHftMocker_html_a08c48c7e639cb1fb54266d8209a5adf7"><div class="ttname"><a href="classExpHftMocker.html#a08c48c7e639cb1fb54266d8209a5adf7">ExpHftMocker::on_orddtl_updated</a></div><div class="ttdeci">virtual void on_orddtl_updated(const char *stdCode, WTSOrdDtlData *newOrdDtl) override</div><div class="ttdoc">委托明细数据更新回调函数</div><div class="ttdef"><b>Definition</b> <a href="ExpHftMocker_8cpp_source.html#l00217">ExpHftMocker.cpp:217</a></div></div>
+<div class="ttc" id="aclassExpHftMocker_html_a0ad7ccbe666ddd8e6693305dc665d16f"><div class="ttname"><a href="classExpHftMocker.html#a0ad7ccbe666ddd8e6693305dc665d16f">ExpHftMocker::on_tick_updated</a></div><div class="ttdeci">virtual void on_tick_updated(const char *stdCode, WTSTickData *newTick) override</div><div class="ttdoc">Tick数据更新回调函数</div><div class="ttdef"><b>Definition</b> <a href="ExpHftMocker_8cpp_source.html#l00184">ExpHftMocker.cpp:184</a></div></div>
+<div class="ttc" id="aclassExpHftMocker_html_a179ccc00c428877ec88610ace455ab22"><div class="ttname"><a href="classExpHftMocker.html#a179ccc00c428877ec88610ace455ab22">ExpHftMocker::on_init</a></div><div class="ttdeci">virtual void on_init() override</div><div class="ttdoc">策略初始化回调函数</div><div class="ttdef"><b>Definition</b> <a href="ExpHftMocker_8cpp_source.html#l00108">ExpHftMocker.cpp:108</a></div></div>
+<div class="ttc" id="aclassExpHftMocker_html_a207e5e1f811f5504b3e70992bee3f91f"><div class="ttname"><a href="classExpHftMocker.html#a207e5e1f811f5504b3e70992bee3f91f">ExpHftMocker::on_session_end</a></div><div class="ttdeci">virtual void on_session_end(uint32_t uDate) override</div><div class="ttdoc">交易日结束回调函数</div><div class="ttdef"><b>Definition</b> <a href="ExpHftMocker_8cpp_source.html#l00143">ExpHftMocker.cpp:143</a></div></div>
+<div class="ttc" id="aclassExpHftMocker_html_a2f29c3e3e12f472241fc9b1507a57b99"><div class="ttname"><a href="classExpHftMocker.html#a2f29c3e3e12f472241fc9b1507a57b99">ExpHftMocker::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin(uint32_t uDate) override</div><div class="ttdoc">交易日开始回调函数</div><div class="ttdef"><b>Definition</b> <a href="ExpHftMocker_8cpp_source.html#l00126">ExpHftMocker.cpp:126</a></div></div>
+<div class="ttc" id="aclassExpHftMocker_html_a48bb66500f744f529a7accd58dff3e5a"><div class="ttname"><a href="classExpHftMocker.html#a48bb66500f744f529a7accd58dff3e5a">ExpHftMocker::on_trans_updated</a></div><div class="ttdeci">virtual void on_trans_updated(const char *stdCode, WTSTransData *newTrans) override</div><div class="ttdoc">成交明细数据更新回调函数</div><div class="ttdef"><b>Definition</b> <a href="ExpHftMocker_8cpp_source.html#l00232">ExpHftMocker.cpp:232</a></div></div>
+<div class="ttc" id="aclassExpHftMocker_html_a4952b213e1f9178d6019f72775f6a209"><div class="ttname"><a href="classExpHftMocker.html#a4952b213e1f9178d6019f72775f6a209">ExpHftMocker::on_bactest_end</a></div><div class="ttdeci">virtual void on_bactest_end() override</div><div class="ttdoc">回测结束回调函数</div><div class="ttdef"><b>Definition</b> <a href="ExpHftMocker_8cpp_source.html#l00265">ExpHftMocker.cpp:265</a></div></div>
+<div class="ttc" id="aclassExpHftMocker_html_a4a07f7cff2cab521ebd09b2188709887"><div class="ttname"><a href="classExpHftMocker.html#a4a07f7cff2cab521ebd09b2188709887">ExpHftMocker::on_ordque_updated</a></div><div class="ttdeci">virtual void on_ordque_updated(const char *stdCode, WTSOrdQueData *newOrdQue) override</div><div class="ttdoc">委托队列数据更新回调函数</div><div class="ttdef"><b>Definition</b> <a href="ExpHftMocker_8cpp_source.html#l00203">ExpHftMocker.cpp:203</a></div></div>
+<div class="ttc" id="aclassExpHftMocker_html_a4c900c96889d4ce7bf097192b9263beb"><div class="ttname"><a href="classExpHftMocker.html#a4c900c96889d4ce7bf097192b9263beb">ExpHftMocker::ExpHftMocker</a></div><div class="ttdeci">ExpHftMocker(HisDataReplayer *replayer, const char *name)</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="ExpHftMocker_8cpp_source.html#l00033">ExpHftMocker.cpp:33</a></div></div>
+<div class="ttc" id="aclassExpHftMocker_html_a64b6f794cd71c4ac4c92b8639a29511a"><div class="ttname"><a href="classExpHftMocker.html#a64b6f794cd71c4ac4c92b8639a29511a">ExpHftMocker::on_entrust</a></div><div class="ttdeci">virtual void on_entrust(uint32_t localid, const char *stdCode, bool bSuccess, const char *message, const char *userTag) override</div><div class="ttdoc">委托回报回调函数</div><div class="ttdef"><b>Definition</b> <a href="ExpHftMocker_8cpp_source.html#l00093">ExpHftMocker.cpp:93</a></div></div>
+<div class="ttc" id="aclassExpHftMocker_html_a7401a29151268d40cde37ca944f520ca"><div class="ttname"><a href="classExpHftMocker.html#a7401a29151268d40cde37ca944f520ca">ExpHftMocker::on_trade</a></div><div class="ttdeci">virtual void on_trade(uint32_t localid, const char *stdCode, bool isBuy, double vol, double price, const char *userTag) override</div><div class="ttdoc">交易成交回调函数</div><div class="ttdef"><b>Definition</b> <a href="ExpHftMocker_8cpp_source.html#l00251">ExpHftMocker.cpp:251</a></div></div>
+<div class="ttc" id="aclassExpHftMocker_html_a91412edeaa55665ecb595f284d3edf0f"><div class="ttname"><a href="classExpHftMocker.html#a91412edeaa55665ecb595f284d3edf0f">ExpHftMocker::on_channel_ready</a></div><div class="ttdeci">virtual void on_channel_ready() override</div><div class="ttdoc">交易通道就绪回调函数</div><div class="ttdef"><b>Definition</b> <a href="ExpHftMocker_8cpp_source.html#l00074">ExpHftMocker.cpp:74</a></div></div>
+<div class="ttc" id="aclassExpHftMocker_html_aa5d33369fc61f4f1b082908bcdaee4d0"><div class="ttname"><a href="classExpHftMocker.html#aa5d33369fc61f4f1b082908bcdaee4d0">ExpHftMocker::on_bar</a></div><div class="ttdeci">virtual void on_bar(const char *stdCode, const char *period, uint32_t times, WTSBarStruct *newBar) override</div><div class="ttdoc">K线数据回调函数</div><div class="ttdef"><b>Definition</b> <a href="ExpHftMocker_8cpp_source.html#l00051">ExpHftMocker.cpp:51</a></div></div>
+<div class="ttc" id="aclassExpHftMocker_html_aecdfb9ae8f3de32f04145e52c99475f0"><div class="ttname"><a href="classExpHftMocker.html#aecdfb9ae8f3de32f04145e52c99475f0">ExpHftMocker::on_order</a></div><div class="ttdeci">virtual void on_order(uint32_t localid, const char *stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled, const char *userTag) override</div><div class="ttdoc">委托记录回调函数</div><div class="ttdef"><b>Definition</b> <a href="ExpHftMocker_8cpp_source.html#l00167">ExpHftMocker.cpp:167</a></div></div>
+<div class="ttc" id="aclassHftMocker_html"><div class="ttname"><a href="classHftMocker.html">HftMocker</a></div><div class="ttdoc">高频策略回测模拟器类</div><div class="ttdef"><b>Definition</b> <a href="HftMocker_8h_source.html#l00039">HftMocker.h:40</a></div></div>
+<div class="ttc" id="aclassHftMocker_html_a1432ce83a33c5e98d7790ef7eec107f1"><div class="ttname"><a href="classHftMocker.html#a1432ce83a33c5e98d7790ef7eec107f1">HftMocker::on_session_end</a></div><div class="ttdeci">virtual void on_session_end(uint32_t curTDate) override</div><div class="ttdoc">交易日结束回调</div><div class="ttdef"><b>Definition</b> <a href="HftMocker_8cpp_source.html#l00760">HftMocker.cpp:760</a></div></div>
+<div class="ttc" id="aclassHftMocker_html_a2b9d7f53110bea5e11a812e58046b18e"><div class="ttname"><a href="classHftMocker.html#a2b9d7f53110bea5e11a812e58046b18e">HftMocker::on_entrust</a></div><div class="ttdeci">virtual void on_entrust(uint32_t localid, const char *stdCode, bool bSuccess, const char *message, const char *userTag)</div><div class="ttdoc">委托回报回调</div><div class="ttdef"><b>Definition</b> <a href="HftMocker_8cpp_source.html#l00997">HftMocker.cpp:997</a></div></div>
+<div class="ttc" id="aclassHftMocker_html_a3011ef0f877f49fcf450d12bc29710f1"><div class="ttname"><a href="classHftMocker.html#a3011ef0f877f49fcf450d12bc29710f1">HftMocker::on_order</a></div><div class="ttdeci">virtual void on_order(uint32_t localid, const char *stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled, const char *userTag)</div><div class="ttdoc">订单状态回调</div><div class="ttdef"><b>Definition</b> <a href="HftMocker_8cpp_source.html#l00959">HftMocker.cpp:959</a></div></div>
+<div class="ttc" id="aclassHftMocker_html_a34de491dfb14dbe78a67819a93b29294"><div class="ttname"><a href="classHftMocker.html#a34de491dfb14dbe78a67819a93b29294">HftMocker::on_channel_ready</a></div><div class="ttdeci">virtual void on_channel_ready()</div><div class="ttdoc">交易通道就绪回调</div><div class="ttdef"><b>Definition</b> <a href="HftMocker_8cpp_source.html#l01009">HftMocker.cpp:1009</a></div></div>
+<div class="ttc" id="aclassHftMocker_html_a6d791cb4eb5f850613ab1900fdd4f0f7"><div class="ttname"><a href="classHftMocker.html#a6d791cb4eb5f850613ab1900fdd4f0f7">HftMocker::on_tick_updated</a></div><div class="ttdeci">virtual void on_tick_updated(const char *stdCode, WTSTickData *newTick) override</div><div class="ttdoc">处理Tick数据更新</div><div class="ttdef"><b>Definition</b> <a href="HftMocker_8cpp_source.html#l00615">HftMocker.cpp:615</a></div></div>
+<div class="ttc" id="aclassHftMocker_html_a98d647524e23ac3e67ef68b28a848e67"><div class="ttname"><a href="classHftMocker.html#a98d647524e23ac3e67ef68b28a848e67">HftMocker::on_init</a></div><div class="ttdeci">virtual void on_init() override</div><div class="ttdoc">策略初始化回调</div><div class="ttdef"><b>Definition</b> <a href="HftMocker_8cpp_source.html#l00717">HftMocker.cpp:717</a></div></div>
+<div class="ttc" id="aclassHftMocker_html_abdfad05d029695eb56523e8bc7ba8438"><div class="ttname"><a href="classHftMocker.html#abdfad05d029695eb56523e8bc7ba8438">HftMocker::_context_id</a></div><div class="ttdeci">uint32_t _context_id</div><div class="ttdoc">上下文ID</div><div class="ttdef"><b>Definition</b> <a href="HftMocker_8h_source.html#l01221">HftMocker.h:1221</a></div></div>
+<div class="ttc" id="aclassHftMocker_html_ad029d356e187a5355ad7eddc5af8bb69"><div class="ttname"><a href="classHftMocker.html#ad029d356e187a5355ad7eddc5af8bb69">HftMocker::on_trade</a></div><div class="ttdeci">virtual void on_trade(uint32_t localid, const char *stdCode, bool isBuy, double vol, double price, const char *userTag)</div><div class="ttdoc">成交回调</div><div class="ttdef"><b>Definition</b> <a href="HftMocker_8cpp_source.html#l00977">HftMocker.cpp:977</a></div></div>
+<div class="ttc" id="aclassHftMocker_html_adb62cffd1f0ab613f104556ed2f3486b"><div class="ttname"><a href="classHftMocker.html#adb62cffd1f0ab613f104556ed2f3486b">HftMocker::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin(uint32_t curTDate) override</div><div class="ttdoc">交易日开始回调</div><div class="ttdef"><b>Definition</b> <a href="HftMocker_8cpp_source.html#l00732">HftMocker.cpp:732</a></div></div>
+<div class="ttc" id="aclassHftMocker_html_ae4d8f8c71a2b3c758908d6680a4e1c62"><div class="ttname"><a href="classHftMocker.html#ae4d8f8c71a2b3c758908d6680a4e1c62">HftMocker::on_bar</a></div><div class="ttdeci">virtual void on_bar(const char *stdCode, const char *period, uint32_t times, WTSBarStruct *newBar) override</div><div class="ttdoc">K线数据回调</div><div class="ttdef"><b>Definition</b> <a href="HftMocker_8cpp_source.html#l00454">HftMocker.cpp:454</a></div></div>
+<div class="ttc" id="aclassHftMocker_html_afdd99f6733f42971519f3ffef4576cad"><div class="ttname"><a href="classHftMocker.html#afdd99f6733f42971519f3ffef4576cad">HftMocker::_tick_subs</a></div><div class="ttdeci">wt_hashset&lt; std::string &gt; _tick_subs</div><div class="ttdoc">Tick数据订阅列表</div><div class="ttdef"><b>Definition</b> <a href="HftMocker_8h_source.html#l01258">HftMocker.h:1258</a></div></div>
+<div class="ttc" id="aclassHisDataReplayer_html"><div class="ttname"><a href="classHisDataReplayer.html">HisDataReplayer</a></div><div class="ttdoc">历史数据回放器类</div><div class="ttdef"><b>Definition</b> <a href="HisDataReplayer_8h_source.html#l00255">HisDataReplayer.h:256</a></div></div>
+<div class="ttc" id="aclassStrUtil_html_a26e29501b4702101a2e7780f5c0c989b"><div class="ttname"><a href="classStrUtil.html#a26e29501b4702101a2e7780f5c0c989b">StrUtil::printf</a></div><div class="ttdeci">static std::string printf(const char *pszFormat,...)</div><div class="ttdoc">格式化字符串，类似于 C 语言的 printf 函数</div><div class="ttdef"><b>Definition</b> <a href="StrUtil_8hpp_source.html#l00494">StrUtil.hpp:494</a></div></div>
+<div class="ttc" id="aclassWTSOrdDtlData_html"><div class="ttname"><a href="classWTSOrdDtlData.html">WTSOrdDtlData</a></div><div class="ttdoc">委托明细数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01726">WTSDataDef.hpp:1727</a></div></div>
+<div class="ttc" id="aclassWTSOrdQueData_html"><div class="ttname"><a href="classWTSOrdQueData.html">WTSOrdQueData</a></div><div class="ttdoc">委托队列数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01613">WTSDataDef.hpp:1614</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSTransData_html"><div class="ttname"><a href="classWTSTransData.html">WTSTransData</a></div><div class="ttdoc">成交数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01840">WTSDataDef.hpp:1841</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html"><div class="ttname"><a href="classWtBtRunner.html">WtBtRunner</a></div><div class="ttdoc">回测引擎类</div><div class="ttdef"><b>Definition</b> <a href="WtBtRunner_8h_source.html#l00047">WtBtRunner.h:48</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a1885a954838885b8a4719035e8c02c94"><div class="ttname"><a href="classWtBtRunner.html#a1885a954838885b8a4719035e8c02c94">WtBtRunner::hft_on_trade</a></div><div class="ttdeci">void hft_on_trade(uint32_t cHandle, WtUInt32 localid, const char *stdCode, bool isBuy, double vol, double price, const char *userTag)</div><div class="ttdoc">高频成交回报事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00768">WtBtRunner.cpp:768</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a20f8007959fd841aff75d1420fa4723f"><div class="ttname"><a href="classWtBtRunner.html#a20f8007959fd841aff75d1420fa4723f">WtBtRunner::hft_on_channel_ready</a></div><div class="ttdeci">void hft_on_channel_ready(uint32_t cHandle, const char *trader)</div><div class="ttdoc">高频交易通道就绪事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00707">WtBtRunner.cpp:707</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a38a0585c00d54c623c75f620897e5f5d"><div class="ttname"><a href="classWtBtRunner.html#a38a0585c00d54c623c75f620897e5f5d">WtBtRunner::ctx_on_init</a></div><div class="ttdeci">void ctx_on_init(uint32_t id, EngineType eType)</div><div class="ttdoc">策略上下文初始化事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00569">WtBtRunner.cpp:569</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a60337635dfbc52484aefb74f9cfc54e4"><div class="ttname"><a href="classWtBtRunner.html#a60337635dfbc52484aefb74f9cfc54e4">WtBtRunner::ctx_on_bar</a></div><div class="ttdeci">void ctx_on_bar(uint32_t id, const char *stdCode, const char *period, WTSBarStruct *newBar, EngineType eType)</div><div class="ttdoc">K线周期数据事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00505">WtBtRunner.cpp:505</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a70a32e8718b7663a7001a835d9c4e871"><div class="ttname"><a href="classWtBtRunner.html#a70a32e8718b7663a7001a835d9c4e871">WtBtRunner::ctx_on_tick</a></div><div class="ttdeci">void ctx_on_tick(uint32_t id, const char *stdCode, WTSTickData *newTick, EngineType eType)</div><div class="ttdoc">实时行情数据事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00638">WtBtRunner.cpp:638</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_a96563531aa24378ae0ffbb90d5717487"><div class="ttname"><a href="classWtBtRunner.html#a96563531aa24378ae0ffbb90d5717487">WtBtRunner::hft_on_order_detail</a></div><div class="ttdeci">void hft_on_order_detail(uint32_t id, const char *stdCode, WTSOrdDtlData *newOrdDtl)</div><div class="ttdoc">高频委托明细数据事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00676">WtBtRunner.cpp:676</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_aa2a17e9c16659684b3bde024d809e996"><div class="ttname"><a href="classWtBtRunner.html#aa2a17e9c16659684b3bde024d809e996">WtBtRunner::hft_on_entrust</a></div><div class="ttdeci">void hft_on_entrust(uint32_t cHandle, WtUInt32 localid, const char *stdCode, bool bSuccess, const char *message, const char *userTag)</div><div class="ttdoc">高频委托回报响应事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00726">WtBtRunner.cpp:726</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_ab5b1d4f5fb31efdc7e30844690f4a312"><div class="ttname"><a href="classWtBtRunner.html#ab5b1d4f5fb31efdc7e30844690f4a312">WtBtRunner::ctx_on_session_event</a></div><div class="ttdeci">void ctx_on_session_event(uint32_t id, uint32_t curTDate, bool isBegin=true, EngineType eType=ET_CTA)</div><div class="ttdoc">交易日事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00615">WtBtRunner.cpp:615</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_aba06f502ee34376ec6045cd927506e88"><div class="ttname"><a href="classWtBtRunner.html#aba06f502ee34376ec6045cd927506e88">WtBtRunner::on_initialize_event</a></div><div class="ttdeci">void on_initialize_event()</div><div class="ttdoc">初始化事件处理</div><div class="ttdef"><b>Definition</b> <a href="WtBtRunner_8h_source.html#l00548">WtBtRunner.h:548</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_ac5695a5fef05b663a1d6622928b8e197"><div class="ttname"><a href="classWtBtRunner.html#ac5695a5fef05b663a1d6622928b8e197">WtBtRunner::hft_on_order_queue</a></div><div class="ttdeci">void hft_on_order_queue(uint32_t id, const char *stdCode, WTSOrdQueData *newOrdQue)</div><div class="ttdoc">高频委托队列数据事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00660">WtBtRunner.cpp:660</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_ae4c01208ff4d3e1405e2ac0cb0a1fd75"><div class="ttname"><a href="classWtBtRunner.html#ae4c01208ff4d3e1405e2ac0cb0a1fd75">WtBtRunner::hft_on_order</a></div><div class="ttdeci">void hft_on_order(uint32_t cHandle, WtUInt32 localid, const char *stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled, const char *userTag)</div><div class="ttdoc">高频委托回报事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00748">WtBtRunner.cpp:748</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_ae5c0bd8202f5b037f909639f8034ef6c"><div class="ttname"><a href="classWtBtRunner.html#ae5c0bd8202f5b037f909639f8034ef6c">WtBtRunner::on_backtest_end</a></div><div class="ttdeci">void on_backtest_end()</div><div class="ttdoc">回测结束事件处理</div><div class="ttdef"><b>Definition</b> <a href="WtBtRunner_8h_source.html#l00592">WtBtRunner.h:592</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_ae7a1693253eb7d2cdb15b491552926e3"><div class="ttname"><a href="classWtBtRunner.html#ae7a1693253eb7d2cdb15b491552926e3">WtBtRunner::hft_on_transaction</a></div><div class="ttdeci">void hft_on_transaction(uint32_t id, const char *stdCode, WTSTransData *newTranns)</div><div class="ttdoc">高频逐笔成交数据事件</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2WtBtRunner_8cpp_source.html#l00692">WtBtRunner.cpp:692</a></div></div>
+<div class="ttc" id="aclassWtBtRunner_html_afa5aa73fef748f60ac9cbe6cdc7a24c1"><div class="ttname"><a href="classWtBtRunner.html#afa5aa73fef748f60ac9cbe6cdc7a24c1">WtBtRunner::on_session_event</a></div><div class="ttdeci">void on_session_event(uint32_t uDate, bool isBegin=true)</div><div class="ttdoc">交易日事件处理</div><div class="ttdef"><b>Definition</b> <a href="WtBtRunner_8h_source.html#l00577">WtBtRunner.h:577</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_a04f887fc8800d4727971dbb8eb550132"><div class="ttname"><a href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a></div><div class="ttdeci">ATPPriceType price</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00040">main.cpp:40</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3ac1b2fe9018e5736585a0b0609b2438.html">WtBtPorter</a></li><li class="navelem"><a class="el" href="ExpHftMocker_8cpp.html">ExpHftMocker.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

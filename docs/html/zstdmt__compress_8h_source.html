@@ -1,0 +1,315 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/zstdmt_compress.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('zstdmt__compress_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">zstdmt_compress.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="zstdmt__compress_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (c) 2016-present, Yann Collet, Facebook, Inc.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * This source code is licensed under both the BSD-style license (found in the</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * LICENSE file in the root directory of this source tree) and the GPLv2 (found</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * in the COPYING file in the root directory of this source tree).</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * You may select, at your option, one of the above-listed licenses.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor"> #ifndef ZSTDMT_COMPRESS_H</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor"> #define ZSTDMT_COMPRESS_H</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor"> #if defined (__cplusplus)</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor"> #endif</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">/* Note : This is an internal API.</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> *        These APIs used to be exposed with ZSTDLIB_API,</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> *        because it used to be the only way to invoke MT compression.</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> *        Now, it&#39;s recommended to use ZSTD_compress2 and ZSTD_compressStream2()</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *        instead.</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> *        If you depend on these APIs and can&#39;t switch, then define</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> *        ZSTD_LEGACY_MULTITHREADED_API when making the dynamic library.</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment"> *        However, we may completely remove these functions in a future</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment"> *        release, so please switch soon.</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment"> *        This API requires ZSTD_MULTITHREAD to be defined during compilation,</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment"> *        otherwise ZSTDMT_createCCtx*() will fail.</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#ifdef ZSTD_LEGACY_MULTITHREADED_API</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#  define ZSTDMT_API ZSTDLIB_API</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">   37</a></span><span class="preprocessor">#  define ZSTDMT_API</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">/* ===   Dependencies   === */</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#include &lt;stddef.h&gt;</span>                <span class="comment">/* size_t */</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="zstdmt__compress_8h.html#ad88034c8350c3d479ce0db09fd8ee0c8">   42</a></span><span class="preprocessor">#define ZSTD_STATIC_LINKING_ONLY   </span><span class="comment">/* ZSTD_parameters */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#include &quot;<a class="code" href="zstd_8h.html">zstd.h</a>&quot;</span>            <span class="comment">/* ZSTD_inBuffer, ZSTD_outBuffer, ZSTDLIB_API */</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment">/* ===   Constants   === */</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#ifndef ZSTDMT_NBWORKERS_MAX</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="zstdmt__compress_8h.html#acb964b940e15f616ee51c8be7580af5e">   48</a></span><span class="preprocessor">#  define ZSTDMT_NBWORKERS_MAX 200</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#ifndef ZSTDMT_JOBSIZE_MIN</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="zstdmt__compress_8h.html#a37af7fecd05e763718e0e3088871e68c">   51</a></span><span class="preprocessor">#  define ZSTDMT_JOBSIZE_MIN (1 MB)</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="zstdmt__compress_8h.html#a73b95d412674fc28c09614a65dd5d235">   53</a></span><span class="preprocessor">#define ZSTDMT_JOBLOG_MAX   (MEM_32bits() ? 29 : 30)</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="zstdmt__compress_8h.html#a0921c36729f41f35f3d5418dfcb7f813">   54</a></span><span class="preprocessor">#define ZSTDMT_JOBSIZE_MAX  (MEM_32bits() ? (512 MB) : (1024 MB))</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="comment">/* ===   Memory management   === */</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e">   58</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx_s</a> <a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">/* Requires ZSTD_MULTITHREAD to be defined during compilation, otherwise it will return NULL. */</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* <a class="code hl_function" href="zstdmt__compress_8h.html#ae18242a55eba4c064568fc1870b238ef">ZSTDMT_createCCtx</a>(<span class="keywordtype">unsigned</span> nbWorkers);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="comment">/* Requires ZSTD_MULTITHREAD to be defined during compilation, otherwise it will return NULL. */</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* <a class="code hl_function" href="zstdmt__compress_8h.html#a48d6036ab97516bc9b43b61ee98e9a04">ZSTDMT_createCCtx_advanced</a>(<span class="keywordtype">unsigned</span> nbWorkers,</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>                                                    ZSTD_customMem <a class="code hl_variable" href="structZSTDMT__CCtx__s.html#a7b6692c023f13cf647140848d2c37e36">cMem</a>);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#af0beb81dbf97eb2ae20099d7c6c42490">ZSTDMT_freeCCtx</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx);</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#aec9f7b7029733b36190bd93fece111c5">ZSTDMT_sizeof_CCtx</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx);</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="comment">/* ===   Simple one-pass compression function   === */</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#a57c817805b238376808633d7a82239a7">ZSTDMT_compressCCtx</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx,</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>                                       <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <span class="keywordtype">size_t</span> dstCapacity,</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>                                 <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, <span class="keywordtype">size_t</span> srcSize,</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>                                       <span class="keywordtype">int</span> <a class="code hl_variable" href="zbuff_8h.html#ade711b19285bdf476a4f753670ca3489">compressionLevel</a>);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="comment">/* ===   Streaming functions   === */</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#ab06c65c1d4221b3bd615580cf89f116d">ZSTDMT_initCStream</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx, <span class="keywordtype">int</span> <a class="code hl_variable" href="zbuff_8h.html#ade711b19285bdf476a4f753670ca3489">compressionLevel</a>);</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#afc7dd9131444278b60a3dfbb3a37c3ee">ZSTDMT_resetCStream</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx, <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <span class="keywordtype">long</span> pledgedSrcSize);  </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#a403e08428d4166af7856caf153696b33">ZSTDMT_nextInputSizeHint</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#ae726d7f3f8f256725fc9cb39fd7fbf3e">ZSTDMT_compressStream</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx, <a class="code hl_struct" href="structZSTD__outBuffer__s.html">ZSTD_outBuffer</a>* output, <a class="code hl_struct" href="structZSTD__inBuffer__s.html">ZSTD_inBuffer</a>* input);</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#aae6ce3d8e55c2381970882557796cc5c">ZSTDMT_flushStream</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx, <a class="code hl_struct" href="structZSTD__outBuffer__s.html">ZSTD_outBuffer</a>* output);   </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#a7a8bc34ab46cf96f3e99e285d78f64c5">ZSTDMT_endStream</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx, <a class="code hl_struct" href="structZSTD__outBuffer__s.html">ZSTD_outBuffer</a>* output);     </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="comment">/* ===   Advanced functions and parameters  === */</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#af0a69ac896a16e0067d13795d24eef51">ZSTDMT_compress_advanced</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx,</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>                                          <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <span class="keywordtype">size_t</span> dstCapacity,</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>                                    <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, <span class="keywordtype">size_t</span> srcSize,</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>                                    <span class="keyword">const</span> <a class="code hl_struct" href="structZSTD__CDict__s.html">ZSTD_CDict</a>* <a class="code hl_variable" href="structZSTDMT__CCtx__s.html#aa7aaa1edaaa4a438accd0082c75bf98c">cdict</a>,</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>                                          ZSTD_parameters <a class="code hl_variable" href="structZSTDMT__CCtx__s.html#af2016c4b733b86613efc83a3c1e8a648">params</a>,</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>                                          <span class="keywordtype">int</span> overlapLog);</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#aa6a29ccb53d84380f115d4a40d7b63fa">ZSTDMT_initCStream_advanced</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx,</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>                                        <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a>, <span class="keywordtype">size_t</span> <a class="code hl_variable" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>,   <span class="comment">/* dict can be released after init, a local copy is preserved within zcs */</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>                                        ZSTD_parameters <a class="code hl_variable" href="structZSTDMT__CCtx__s.html#af2016c4b733b86613efc83a3c1e8a648">params</a>,</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>                                        <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <span class="keywordtype">long</span> pledgedSrcSize);  <span class="comment">/* pledgedSrcSize is optional and can be zero == unknown */</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#a5ac8e2749245e955438710e69f6808b0">ZSTDMT_initCStream_usingCDict</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx,</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>                                        <span class="keyword">const</span> <a class="code hl_struct" href="structZSTD__CDict__s.html">ZSTD_CDict</a>* <a class="code hl_variable" href="structZSTDMT__CCtx__s.html#aa7aaa1edaaa4a438accd0082c75bf98c">cdict</a>,</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>                                        ZSTD_frameParameters fparams,</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>                                        <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <span class="keywordtype">long</span> pledgedSrcSize);  <span class="comment">/* note : zero means empty */</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="comment">/* ZSTDMT_parameter :</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="comment"> * List of parameters that can be set using ZSTDMT_setMTCtxParameter() */</span></div>
+<div class="foldopen" id="foldopen00111" data-start="{" data-end="};">
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292">  111</a></span><span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292a0df4dc819edfaa7417f5753f525d9c5f">  112</a></span>    <a class="code hl_enumvalue" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292a0df4dc819edfaa7417f5753f525d9c5f">ZSTDMT_p_jobSize</a>,     <span class="comment">/* Each job is compressed in parallel. By default, this value is dynamically determined depending on compression parameters. Can be set explicitly here. */</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292ae4adc3c2a8789d2253436c9a95a1b926">  113</a></span>    <a class="code hl_enumvalue" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292ae4adc3c2a8789d2253436c9a95a1b926">ZSTDMT_p_overlapLog</a>,  <span class="comment">/* Each job may reload a part of previous job to enhance compression ratio; 0 == no overlap, 6(default) == use 1/8th of window, &gt;=9 == use full window. This is a &quot;sticky&quot; parameter : its value will be re-used on next compression job */</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <a class="code hl_enumvalue" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292af0fa6ce22b922da2b689e611b6eda030">ZSTDMT_p_rsyncable</a>    <span class="comment">/* Enables rsyncable mode. */</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292af0fa6ce22b922da2b689e611b6eda030">  115</a></span>} <a class="code hl_enumeration" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292">ZSTDMT_parameter</a>;</div>
+</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="comment">/* ZSTDMT_setMTCtxParameter() :</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="comment"> * allow setting individual parameters, one at a time, among a list of enums defined in ZSTDMT_parameter.</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="comment"> * The function must be called typically after ZSTD_createCCtx() but __before ZSTDMT_init*() !__</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="comment"> * Parameters not explicitly reset by ZSTDMT_init*() remain the same in consecutive compression sessions.</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="comment"> * @return : 0, or an error code (which can be tested using ZSTD_isError()) */</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#a20d2126232a4b6c4d1e760843b0432af">ZSTDMT_setMTCtxParameter</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx, <a class="code hl_enumeration" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292">ZSTDMT_parameter</a> parameter, <span class="keywordtype">int</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>);</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="comment">/* ZSTDMT_getMTCtxParameter() :</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="comment"> * Query the ZSTDMT_CCtx for a parameter value.</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="comment"> * @return : 0, or an error code (which can be tested using ZSTD_isError()) */</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#a9312cb77a08205f0eb32e1520728af3e">ZSTDMT_getMTCtxParameter</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx, <a class="code hl_enumeration" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292">ZSTDMT_parameter</a> parameter, <span class="keywordtype">int</span>* <a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>);</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><a class="code hl_define" href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#a4d1371f4622b793fe908110db6f0570e">ZSTDMT_compressStream_generic</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx,</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>                                                <a class="code hl_struct" href="structZSTD__outBuffer__s.html">ZSTD_outBuffer</a>* output,</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>                                                <a class="code hl_struct" href="structZSTD__inBuffer__s.html">ZSTD_inBuffer</a>* input,</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>                                                <a class="code hl_enumeration" href="zstd_8h.html#a800deb274e46fda42839b5a7bbe261aa">ZSTD_EndDirective</a> endOp);</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span> </div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span><span class="comment">/* ========================================================</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="comment"> * ===  Private interface, for use by ZSTD_compress.c   ===</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="comment"> * ===  Not exposed in libzstd. Never invoke directly   ===</span></div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="comment"> * ======================================================== */</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#a0d200c4c6b7a3c7a045a181dfa29c322">ZSTDMT_toFlushNow</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx);</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#a8145b29a95f86ea0ff1339828aa0af79">ZSTDMT_CCtxParam_setMTCtxParameter</a>(ZSTD_CCtx_params* <a class="code hl_variable" href="structZSTDMT__CCtx__s.html#af2016c4b733b86613efc83a3c1e8a648">params</a>, <a class="code hl_enumeration" href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292">ZSTDMT_parameter</a> parameter, <span class="keywordtype">int</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>);</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span> </div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#a0c85d0dbbec85b437b17c99f05ba7305">ZSTDMT_CCtxParam_setNbWorkers</a>(ZSTD_CCtx_params* <a class="code hl_variable" href="structZSTDMT__CCtx__s.html#af2016c4b733b86613efc83a3c1e8a648">params</a>, <span class="keywordtype">unsigned</span> nbWorkers);</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span><span class="keywordtype">void</span> <a class="code hl_function" href="zstdmt__compress_8h.html#a3f5723a37881527037ffcdfbc157c121">ZSTDMT_updateCParams_whileCompressing</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx, <span class="keyword">const</span> ZSTD_CCtx_params* cctxParams);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>ZSTD_frameProgression <a class="code hl_function" href="zstdmt__compress_8h.html#a3c822c10aa6f503cebf7e35746b7c206">ZSTDMT_getFrameProgression</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* mtctx);</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zstdmt__compress_8h.html#af2842d56cf98c331f0a34193ffad05c9">ZSTDMT_initCStream_internal</a>(<a class="code hl_struct" href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx</a>* zcs,</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>                    <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a>, <span class="keywordtype">size_t</span> <a class="code hl_variable" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>, ZSTD_dictContentType_e dictContentType,</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>                    <span class="keyword">const</span> <a class="code hl_struct" href="structZSTD__CDict__s.html">ZSTD_CDict</a>* <a class="code hl_variable" href="structZSTDMT__CCtx__s.html#aa7aaa1edaaa4a438accd0082c75bf98c">cdict</a>,</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>                    ZSTD_CCtx_params <a class="code hl_variable" href="structZSTDMT__CCtx__s.html#af2016c4b733b86613efc83a3c1e8a648">params</a>, <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <span class="keywordtype">long</span> pledgedSrcSize);</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span> </div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span><span class="preprocessor">#if defined (__cplusplus)</span></div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>}</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span><span class="preprocessor">#endif   </span><span class="comment">/* ZSTDMT_COMPRESS_H */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_ab7c2d1d8d4198d62c34058543ea7cad3"><div class="ttname"><a href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a></div><div class="ttdeci">ATPAmtType value</div><div class="ttdoc">划拨金额 (必填)</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00125">main.cpp:125</a></div></div>
+<div class="ttc" id="astructZSTDMT__CCtx__s_html"><div class="ttname"><a href="structZSTDMT__CCtx__s.html">ZSTDMT_CCtx_s</a></div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l00787">zstdmt_compress.c:787</a></div></div>
+<div class="ttc" id="astructZSTDMT__CCtx__s_html_a7b6692c023f13cf647140848d2c37e36"><div class="ttname"><a href="structZSTDMT__CCtx__s.html#a7b6692c023f13cf647140848d2c37e36">ZSTDMT_CCtx_s::cMem</a></div><div class="ttdeci">ZSTD_customMem cMem</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l00810">zstdmt_compress.c:810</a></div></div>
+<div class="ttc" id="astructZSTDMT__CCtx__s_html_aa7aaa1edaaa4a438accd0082c75bf98c"><div class="ttname"><a href="structZSTDMT__CCtx__s.html#aa7aaa1edaaa4a438accd0082c75bf98c">ZSTDMT_CCtx_s::cdict</a></div><div class="ttdeci">const ZSTD_CDict * cdict</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l00812">zstdmt_compress.c:812</a></div></div>
+<div class="ttc" id="astructZSTDMT__CCtx__s_html_af2016c4b733b86613efc83a3c1e8a648"><div class="ttname"><a href="structZSTDMT__CCtx__s.html#af2016c4b733b86613efc83a3c1e8a648">ZSTDMT_CCtx_s::params</a></div><div class="ttdeci">ZSTD_CCtx_params params</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l00793">zstdmt_compress.c:793</a></div></div>
+<div class="ttc" id="astructZSTD__CDict__s_html"><div class="ttname"><a href="structZSTD__CDict__s.html">ZSTD_CDict_s</a></div><div class="ttdef"><b>Definition</b> <a href="zstd__compress_8c_source.html#l00044">zstd_compress.c:44</a></div></div>
+<div class="ttc" id="astructZSTD__inBuffer__s_html"><div class="ttname"><a href="structZSTD__inBuffer__s.html">ZSTD_inBuffer_s</a></div><div class="ttdef"><b>Definition</b> <a href="zstd_8h_source.html#l00561">zstd.h:561</a></div></div>
+<div class="ttc" id="astructZSTD__outBuffer__s_html"><div class="ttname"><a href="structZSTD__outBuffer__s.html">ZSTD_outBuffer_s</a></div><div class="ttdef"><b>Definition</b> <a href="zstd_8h_source.html#l00567">zstd.h:567</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a08f683b5840d86269fccb0ca7609598c"><div class="ttname"><a href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a></div><div class="ttdeci">void * dst</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00078">zbuff.h:78</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a2f73e10b74b7581a0d17ebd274ae6c7b"><div class="ttname"><a href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a></div><div class="ttdeci">const void * dict</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00076">zbuff.h:76</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a49286b6a0dd3728961b8ff1f1730a982"><div class="ttname"><a href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a></div><div class="ttdeci">void size_t const void * src</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00078">zbuff.h:78</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a7b276dd54a215af14d59cd30ff88a5ff"><div class="ttname"><a href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a></div><div class="ttdeci">const void size_t dictSize</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00076">zbuff.h:76</a></div></div>
+<div class="ttc" id="azbuff_8h_html_ade711b19285bdf476a4f753670ca3489"><div class="ttname"><a href="zbuff_8h.html#ade711b19285bdf476a4f753670ca3489">compressionLevel</a></div><div class="ttdeci">int compressionLevel</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00075">zbuff.h:75</a></div></div>
+<div class="ttc" id="azstd_8h_html"><div class="ttname"><a href="zstd_8h.html">zstd.h</a></div></div>
+<div class="ttc" id="azstd_8h_html_a800deb274e46fda42839b5a7bbe261aa"><div class="ttname"><a href="zstd_8h.html#a800deb274e46fda42839b5a7bbe261aa">ZSTD_EndDirective</a></div><div class="ttdeci">ZSTD_EndDirective</div><div class="ttdef"><b>Definition</b> <a href="zstd_8h_source.html#l00643">zstd.h:643</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_a0c85d0dbbec85b437b17c99f05ba7305"><div class="ttname"><a href="zstdmt__compress_8h.html#a0c85d0dbbec85b437b17c99f05ba7305">ZSTDMT_CCtxParam_setNbWorkers</a></div><div class="ttdeci">size_t ZSTDMT_CCtxParam_setNbWorkers(ZSTD_CCtx_params *params, unsigned nbWorkers)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l00866">zstdmt_compress.c:866</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_a0d200c4c6b7a3c7a045a181dfa29c322"><div class="ttname"><a href="zstdmt__compress_8h.html#a0d200c4c6b7a3c7a045a181dfa29c322">ZSTDMT_toFlushNow</a></div><div class="ttdeci">size_t ZSTDMT_toFlushNow(ZSTDMT_CCtx *mtctx)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l01123">zstdmt_compress.c:1123</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_a20d2126232a4b6c4d1e760843b0432af"><div class="ttname"><a href="zstdmt__compress_8h.html#a20d2126232a4b6c4d1e760843b0432af">ZSTDMT_setMTCtxParameter</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_setMTCtxParameter(ZSTDMT_CCtx *mtctx, ZSTDMT_parameter parameter, int value)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l01015">zstdmt_compress.c:1015</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_a3c822c10aa6f503cebf7e35746b7c206"><div class="ttname"><a href="zstdmt__compress_8h.html#a3c822c10aa6f503cebf7e35746b7c206">ZSTDMT_getFrameProgression</a></div><div class="ttdeci">ZSTD_frameProgression ZSTDMT_getFrameProgression(ZSTDMT_CCtx *mtctx)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l01089">zstdmt_compress.c:1089</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_a3f5723a37881527037ffcdfbc157c121"><div class="ttname"><a href="zstdmt__compress_8h.html#a3f5723a37881527037ffcdfbc157c121">ZSTDMT_updateCParams_whileCompressing</a></div><div class="ttdeci">void ZSTDMT_updateCParams_whileCompressing(ZSTDMT_CCtx *mtctx, const ZSTD_CCtx_params *cctxParams)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l01072">zstdmt_compress.c:1072</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_a403e08428d4166af7856caf153696b33"><div class="ttname"><a href="zstdmt__compress_8h.html#a403e08428d4166af7856caf153696b33">ZSTDMT_nextInputSizeHint</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_nextInputSizeHint(const ZSTDMT_CCtx *mtctx)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l01976">zstdmt_compress.c:1976</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_a48d6036ab97516bc9b43b61ee98e9a04"><div class="ttname"><a href="zstdmt__compress_8h.html#a48d6036ab97516bc9b43b61ee98e9a04">ZSTDMT_createCCtx_advanced</a></div><div class="ttdeci">ZSTDMT_API ZSTDMT_CCtx * ZSTDMT_createCCtx_advanced(unsigned nbWorkers, ZSTD_customMem cMem)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l00906">zstdmt_compress.c:906</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_a4d1371f4622b793fe908110db6f0570e"><div class="ttname"><a href="zstdmt__compress_8h.html#a4d1371f4622b793fe908110db6f0570e">ZSTDMT_compressStream_generic</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_compressStream_generic(ZSTDMT_CCtx *mtctx, ZSTD_outBuffer *output, ZSTD_inBuffer *input, ZSTD_EndDirective endOp)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l01987">zstdmt_compress.c:1987</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_a57c817805b238376808633d7a82239a7"><div class="ttname"><a href="zstdmt__compress_8h.html#a57c817805b238376808633d7a82239a7">ZSTDMT_compressCCtx</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_compressCCtx(ZSTDMT_CCtx *mtctx, void *dst, size_t dstCapacity, const void *src, size_t srcSize, int compressionLevel)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l01375">zstdmt_compress.c:1375</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_a5ac8e2749245e955438710e69f6808b0"><div class="ttname"><a href="zstdmt__compress_8h.html#a5ac8e2749245e955438710e69f6808b0">ZSTDMT_initCStream_usingCDict</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_initCStream_usingCDict(ZSTDMT_CCtx *mtctx, const ZSTD_CDict *cdict, ZSTD_frameParameters fparams, unsigned long long pledgedSrcSize)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l01521">zstdmt_compress.c:1521</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_a7a8bc34ab46cf96f3e99e285d78f64c5"><div class="ttname"><a href="zstdmt__compress_8h.html#a7a8bc34ab46cf96f3e99e285d78f64c5">ZSTDMT_endStream</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_endStream(ZSTDMT_CCtx *mtctx, ZSTD_outBuffer *output)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l02110">zstdmt_compress.c:2110</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_a8145b29a95f86ea0ff1339828aa0af79"><div class="ttname"><a href="zstdmt__compress_8h.html#a8145b29a95f86ea0ff1339828aa0af79">ZSTDMT_CCtxParam_setMTCtxParameter</a></div><div class="ttdeci">size_t ZSTDMT_CCtxParam_setMTCtxParameter(ZSTD_CCtx_params *params, ZSTDMT_parameter parameter, int value)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l00994">zstdmt_compress.c:994</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_a9312cb77a08205f0eb32e1520728af3e"><div class="ttname"><a href="zstdmt__compress_8h.html#a9312cb77a08205f0eb32e1520728af3e">ZSTDMT_getMTCtxParameter</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_getMTCtxParameter(ZSTDMT_CCtx *mtctx, ZSTDMT_parameter parameter, int *value)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l01021">zstdmt_compress.c:1021</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_aa6a29ccb53d84380f115d4a40d7b63fa"><div class="ttname"><a href="zstdmt__compress_8h.html#aa6a29ccb53d84380f115d4a40d7b63fa">ZSTDMT_initCStream_advanced</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_initCStream_advanced(ZSTDMT_CCtx *mtctx, const void *dict, size_t dictSize, ZSTD_parameters params, unsigned long long pledgedSrcSize)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l01508">zstdmt_compress.c:1508</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_aa83aab62586ce114e6d59a8e3ce3ddcb"><div class="ttname"><a href="zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb">ZSTDMT_API</a></div><div class="ttdeci">#define ZSTDMT_API</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8h_source.html#l00037">zstdmt_compress.h:37</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_aae6ce3d8e55c2381970882557796cc5c"><div class="ttname"><a href="zstdmt__compress_8h.html#aae6ce3d8e55c2381970882557796cc5c">ZSTDMT_flushStream</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_flushStream(ZSTDMT_CCtx *mtctx, ZSTD_outBuffer *output)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l02102">zstdmt_compress.c:2102</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_ab06c65c1d4221b3bd615580cf89f116d"><div class="ttname"><a href="zstdmt__compress_8h.html#ab06c65c1d4221b3bd615580cf89f116d">ZSTDMT_initCStream</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_initCStream(ZSTDMT_CCtx *mtctx, int compressionLevel)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l01546">zstdmt_compress.c:1546</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_acdbfb6a061ef26d5ed5b7464018ac292"><div class="ttname"><a href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292">ZSTDMT_parameter</a></div><div class="ttdeci">ZSTDMT_parameter</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8h_source.html#l00111">zstdmt_compress.h:111</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_acdbfb6a061ef26d5ed5b7464018ac292a0df4dc819edfaa7417f5753f525d9c5f"><div class="ttname"><a href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292a0df4dc819edfaa7417f5753f525d9c5f">ZSTDMT_p_jobSize</a></div><div class="ttdeci">@ ZSTDMT_p_jobSize</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8h_source.html#l00112">zstdmt_compress.h:112</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_acdbfb6a061ef26d5ed5b7464018ac292ae4adc3c2a8789d2253436c9a95a1b926"><div class="ttname"><a href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292ae4adc3c2a8789d2253436c9a95a1b926">ZSTDMT_p_overlapLog</a></div><div class="ttdeci">@ ZSTDMT_p_overlapLog</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8h_source.html#l00113">zstdmt_compress.h:113</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_acdbfb6a061ef26d5ed5b7464018ac292af0fa6ce22b922da2b689e611b6eda030"><div class="ttname"><a href="zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292af0fa6ce22b922da2b689e611b6eda030">ZSTDMT_p_rsyncable</a></div><div class="ttdeci">@ ZSTDMT_p_rsyncable</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8h_source.html#l00115">zstdmt_compress.h:114</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_ae18242a55eba4c064568fc1870b238ef"><div class="ttname"><a href="zstdmt__compress_8h.html#ae18242a55eba4c064568fc1870b238ef">ZSTDMT_createCCtx</a></div><div class="ttdeci">ZSTDMT_API ZSTDMT_CCtx * ZSTDMT_createCCtx(unsigned nbWorkers)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l00917">zstdmt_compress.c:917</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_ae726d7f3f8f256725fc9cb39fd7fbf3e"><div class="ttname"><a href="zstdmt__compress_8h.html#ae726d7f3f8f256725fc9cb39fd7fbf3e">ZSTDMT_compressStream</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_compressStream(ZSTDMT_CCtx *mtctx, ZSTD_outBuffer *output, ZSTD_inBuffer *input)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l02075">zstdmt_compress.c:2075</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_aec9f7b7029733b36190bd93fece111c5"><div class="ttname"><a href="zstdmt__compress_8h.html#aec9f7b7029733b36190bd93fece111c5">ZSTDMT_sizeof_CCtx</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_sizeof_CCtx(ZSTDMT_CCtx *mtctx)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l00979">zstdmt_compress.c:979</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_af0a69ac896a16e0067d13795d24eef51"><div class="ttname"><a href="zstdmt__compress_8h.html#af0a69ac896a16e0067d13795d24eef51">ZSTDMT_compress_advanced</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_compress_advanced(ZSTDMT_CCtx *mtctx, void *dst, size_t dstCapacity, const void *src, size_t srcSize, const ZSTD_CDict *cdict, ZSTD_parameters params, int overlapLog)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l01356">zstdmt_compress.c:1356</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_af0beb81dbf97eb2ae20099d7c6c42490"><div class="ttname"><a href="zstdmt__compress_8h.html#af0beb81dbf97eb2ae20099d7c6c42490">ZSTDMT_freeCCtx</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_freeCCtx(ZSTDMT_CCtx *mtctx)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l00962">zstdmt_compress.c:962</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_af2842d56cf98c331f0a34193ffad05c9"><div class="ttname"><a href="zstdmt__compress_8h.html#af2842d56cf98c331f0a34193ffad05c9">ZSTDMT_initCStream_internal</a></div><div class="ttdeci">size_t ZSTDMT_initCStream_internal(ZSTDMT_CCtx *zcs, const void *dict, size_t dictSize, ZSTD_dictContentType_e dictContentType, const ZSTD_CDict *cdict, ZSTD_CCtx_params params, unsigned long long pledgedSrcSize)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l01391">zstdmt_compress.c:1391</a></div></div>
+<div class="ttc" id="azstdmt__compress_8h_html_afc7dd9131444278b60a3dfbb3a37c3ee"><div class="ttname"><a href="zstdmt__compress_8h.html#afc7dd9131444278b60a3dfbb3a37c3ee">ZSTDMT_resetCStream</a></div><div class="ttdeci">ZSTDMT_API size_t ZSTDMT_resetCStream(ZSTDMT_CCtx *mtctx, unsigned long long pledgedSrcSize)</div><div class="ttdef"><b>Definition</b> <a href="zstdmt__compress_8c_source.html#l01539">zstdmt_compress.c:1539</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="zstdmt__compress_8h.html">zstdmt_compress.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

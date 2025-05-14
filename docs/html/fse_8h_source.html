@@ -1,0 +1,585 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/fse.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('fse_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">fse.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="fse_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ******************************************************************</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">   FSE : Finite State Entropy codec</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">   Public Prototypes declaration</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">   Copyright (C) 2013-2016, Yann Collet.</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"></span> </div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">   BSD 2-Clause License (http://www.opensource.org/licenses/bsd-license.php)</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"></span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">   Redistribution and use in source and binary forms, with or without</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">   modification, are permitted provided that the following conditions are</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">   met:</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"></span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">       * Redistributions of source code must retain the above copyright</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">   notice, this list of conditions and the following disclaimer.</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">       * Redistributions in binary form must reproduce the above</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">   copyright notice, this list of conditions and the following disclaimer</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">   in the documentation and/or other materials provided with the</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">   distribution.</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"></span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">   &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment">   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment">   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment"></span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">   You can contact the author at :</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">   - Source repository : https://github.com/Cyan4973/FiniteStateEntropy</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment">****************************************************************** */</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#if defined (__cplusplus)</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#ifndef FSE_H</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="fse_8h.html#a1cec868b238deb86970e093aae8d6b38">   40</a></span><span class="preprocessor">#define FSE_H</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">/*-*****************************************</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">*  Dependencies</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment">******************************************/</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#include &lt;stddef.h&gt;</span>    <span class="comment">/* size_t, ptrdiff_t */</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment">/*-*****************************************</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">*  FSE_PUBLIC_API : control library symbols visibility</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment">******************************************/</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#if defined(FSE_DLL_EXPORT) &amp;&amp; (FSE_DLL_EXPORT==1) &amp;&amp; defined(__GNUC__) &amp;&amp; (__GNUC__ &gt;= 4)</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#  define FSE_PUBLIC_API __attribute__ ((visibility (&quot;default&quot;)))</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#elif defined(FSE_DLL_EXPORT) &amp;&amp; (FSE_DLL_EXPORT==1)   </span><span class="comment">/* Visual expected */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#  define FSE_PUBLIC_API __declspec(dllexport)</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#elif defined(FSE_DLL_IMPORT) &amp;&amp; (FSE_DLL_IMPORT==1)</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#  define FSE_PUBLIC_API __declspec(dllimport) </span><span class="comment">/* It isn&#39;t required but allows to generate better code, saving a function pointer load from the IAT and an indirect jump.*/</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">   59</a></span><span class="preprocessor">#  define FSE_PUBLIC_API</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="comment">/*------   Version   ------*/</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="fse_8h.html#a5af5f622dcc34fd0a33b98c66fd358ff">   63</a></span><span class="preprocessor">#define FSE_VERSION_MAJOR    0</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="fse_8h.html#ac47997dfd178c4bf77ac40ffade1d24b">   64</a></span><span class="preprocessor">#define FSE_VERSION_MINOR    9</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="fse_8h.html#a8f7b5e77328e0f234a846d7cb6d1692a">   65</a></span><span class="preprocessor">#define FSE_VERSION_RELEASE  0</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="fse_8h.html#af0951d8b4dc1c667d953f9d60a8ba27a">   67</a></span><span class="preprocessor">#define FSE_LIB_VERSION FSE_VERSION_MAJOR.FSE_VERSION_MINOR.FSE_VERSION_RELEASE</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="fse_8h.html#aa1b19a697d63cebe17a2e6962e83595f">   68</a></span><span class="preprocessor">#define FSE_QUOTE(str) #str</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="fse_8h.html#a230320373751af9c40ec6d15a91e6e82">   69</a></span><span class="preprocessor">#define FSE_EXPAND_AND_QUOTE(str) FSE_QUOTE(str)</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="fse_8h.html#a6659b5c04342f9cadda7d69494384b26">   70</a></span><span class="preprocessor">#define FSE_VERSION_STRING FSE_EXPAND_AND_QUOTE(FSE_LIB_VERSION)</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="fse_8h.html#ada8e8fc30886fab320168bcd278ce33f">   72</a></span><span class="preprocessor">#define FSE_VERSION_NUMBER  (FSE_VERSION_MAJOR *100*100 + FSE_VERSION_MINOR *100 + FSE_VERSION_RELEASE)</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">unsigned</span> <a class="code hl_function" href="fse_8h.html#aa33652489acfb4285e8dff7280a1b1a1">FSE_versionNumber</a>(<span class="keywordtype">void</span>);   </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="comment">/*-****************************************</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="comment">*  FSE simple functions</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="comment">******************************************/</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="fse_8h.html#a2b86255881cbf4a6871cdd3d99a7fb8b">FSE_compress</a>(<span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <span class="keywordtype">size_t</span> dstCapacity,</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>                             <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, <span class="keywordtype">size_t</span> srcSize);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="fse_8h.html#a9b46224799b8207ebd31ab088ab7597e">FSE_decompress</a>(<span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>,  <span class="keywordtype">size_t</span> dstCapacity,</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>                               <span class="keyword">const</span> <span class="keywordtype">void</span>* cSrc, <span class="keywordtype">size_t</span> cSrcSize);</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="comment">/*-*****************************************</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="comment">*  Tool functions</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="comment">******************************************/</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="fse_8h.html#ae740e04e6a7422f50a249fe2c0425101">FSE_compressBound</a>(<span class="keywordtype">size_t</span> size);       <span class="comment">/* maximum compressed size */</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="comment">/* Error Management */</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">unsigned</span>    <a class="code hl_define" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError</a>(<span class="keywordtype">size_t</span> code);        <span class="comment">/* tells if a return value is an error code */</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="fse_8h.html#a30d9f19efc67ff932a9eadeeddbcd88e">FSE_getErrorName</a>(<span class="keywordtype">size_t</span> code);   <span class="comment">/* provides error code string (useful for debugging) */</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="comment">/*-*****************************************</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="comment">*  FSE advanced functions</span></div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="comment">******************************************/</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="fse_8h.html#ac20f5d7b7f2833ce6c78bfa50302db7b">FSE_compress2</a> (<span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <span class="keywordtype">size_t</span> dstSize, <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, <span class="keywordtype">size_t</span> srcSize, <span class="keywordtype">unsigned</span> maxSymbolValue, <span class="keywordtype">unsigned</span> tableLog);</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span><span class="comment">/*-*****************************************</span></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="comment">*  FSE detailed API</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="comment">******************************************/</span></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="comment">/* *** COMPRESSION *** */</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">unsigned</span> <a class="code hl_function" href="fse_8h.html#acf5c46f2ea45dd9838896af2574818ad">FSE_optimalTableLog</a>(<span class="keywordtype">unsigned</span> maxTableLog, <span class="keywordtype">size_t</span> srcSize, <span class="keywordtype">unsigned</span> maxSymbolValue);</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="fse_8h.html#aaca3dda2d78980dbaaf7bf9139193299">FSE_normalizeCount</a>(<span class="keywordtype">short</span>* normalizedCounter, <span class="keywordtype">unsigned</span> tableLog,</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>                    <span class="keyword">const</span> <span class="keywordtype">unsigned</span>* count, <span class="keywordtype">size_t</span> srcSize, <span class="keywordtype">unsigned</span> maxSymbolValue);</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="fse_8h.html#abe35c7de9117f8e367d3bc27072a7676">FSE_NCountWriteBound</a>(<span class="keywordtype">unsigned</span> maxSymbolValue, <span class="keywordtype">unsigned</span> tableLog);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="fse_8h.html#a1ed0b96f6184614c4d3ecded9d8e6c80">FSE_writeNCount</a> (<span class="keywordtype">void</span>* buffer, <span class="keywordtype">size_t</span> bufferSize,</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>                                 <span class="keyword">const</span> <span class="keywordtype">short</span>* normalizedCounter,</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>                                 <span class="keywordtype">unsigned</span> maxSymbolValue, <span class="keywordtype">unsigned</span> tableLog);</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno"><a class="line" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">  180</a></span><span class="keyword">typedef</span> <span class="keywordtype">unsigned</span> <a class="code hl_typedef" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a>;   <span class="comment">/* don&#39;t allocate that. It&#39;s only meant to be more restrictive than void* */</span></div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <a class="code hl_typedef" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a>* <a class="code hl_function" href="fse_8h.html#a275e277a2eb5c2368860dca80c749f7b">FSE_createCTable</a> (<span class="keywordtype">unsigned</span> maxSymbolValue, <span class="keywordtype">unsigned</span> tableLog);</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">void</span>        <a class="code hl_function" href="fse_8h.html#a6b33c74a7862ed197cb58bfe3d31da36">FSE_freeCTable</a> (<a class="code hl_typedef" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a>* ct);</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span> </div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="fse_8h.html#a79a83bf378068974a320feded073de7f">FSE_buildCTable</a>(<a class="code hl_typedef" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a>* ct, <span class="keyword">const</span> <span class="keywordtype">short</span>* normalizedCounter, <span class="keywordtype">unsigned</span> maxSymbolValue, <span class="keywordtype">unsigned</span> tableLog);</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span> </div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="fse_8h.html#ae88873b11d0ddea3ebe5a8750edccfdc">FSE_compress_usingCTable</a> (<span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <span class="keywordtype">size_t</span> dstCapacity, <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, <span class="keywordtype">size_t</span> srcSize, <span class="keyword">const</span> <a class="code hl_typedef" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a>* ct);</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span><span class="comment">/* *** DECOMPRESSION *** */</span></div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="fse_8h.html#a1d5d0fb669087c8407f572d86bd6c87a">FSE_readNCount</a> (<span class="keywordtype">short</span>* normalizedCounter,</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>                           <span class="keywordtype">unsigned</span>* maxSymbolValuePtr, <span class="keywordtype">unsigned</span>* tableLogPtr,</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>                           <span class="keyword">const</span> <span class="keywordtype">void</span>* rBuffer, <span class="keywordtype">size_t</span> rBuffSize);</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span> </div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno"><a class="line" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">  253</a></span><span class="keyword">typedef</span> <span class="keywordtype">unsigned</span> <a class="code hl_typedef" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a>;   <span class="comment">/* don&#39;t allocate that. It&#39;s just a way to be more restrictive than void* */</span></div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <a class="code hl_typedef" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a>* <a class="code hl_function" href="fse_8h.html#adfc3f310dd87128762c1141edccef01c">FSE_createDTable</a>(<span class="keywordtype">unsigned</span> tableLog);</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">void</span>        <a class="code hl_function" href="fse_8h.html#ae58fa772f25077f189caa819822c467b">FSE_freeDTable</a>(<a class="code hl_typedef" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a>* dt);</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span> </div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="fse_8h.html#a056c0865d3ba1e7e65bc950d6b980334">FSE_buildDTable</a> (<a class="code hl_typedef" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a>* dt, <span class="keyword">const</span> <span class="keywordtype">short</span>* normalizedCounter, <span class="keywordtype">unsigned</span> maxSymbolValue, <span class="keywordtype">unsigned</span> tableLog);</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span> </div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span><a class="code hl_define" href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="fse_8h.html#a911ee2b9e134c3767a504447da7e2123">FSE_decompress_usingDTable</a>(<span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <span class="keywordtype">size_t</span> dstCapacity, <span class="keyword">const</span> <span class="keywordtype">void</span>* cSrc, <span class="keywordtype">size_t</span> cSrcSize, <span class="keyword">const</span> <a class="code hl_typedef" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a>* dt);</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span><span class="preprocessor">#endif  </span><span class="comment">/* FSE_H */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span> </div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span><span class="preprocessor">#if defined(FSE_STATIC_LINKING_ONLY) &amp;&amp; !defined(FSE_H_FSE_STATIC_LINKING_ONLY)</span></div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span><span class="preprocessor">#define FSE_H_FSE_STATIC_LINKING_ONLY</span></div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span><span class="comment">/* *** Dependency *** */</span></div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span><span class="preprocessor">#include &quot;<a class="code" href="bitstream_8h.html">bitstream.h</a>&quot;</span></div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span> </div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span> </div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span><span class="comment">/* *****************************************</span></div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span><span class="comment">*  Static allocation</span></div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span><span class="comment">*******************************************/</span></div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span><span class="comment">/* FSE buffer bounds */</span></div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span><span class="preprocessor">#define FSE_NCOUNTBOUND 512</span></div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span><span class="preprocessor">#define FSE_BLOCKBOUND(size) (size + (size&gt;&gt;7) + 4 </span><span class="comment">/* fse states */</span><span class="preprocessor"> + sizeof(size_t) </span><span class="comment">/* bitContainer */</span><span class="preprocessor">)</span></div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span><span class="preprocessor">#define FSE_COMPRESSBOUND(size) (FSE_NCOUNTBOUND + FSE_BLOCKBOUND(size))   </span><span class="comment">/* Macro version, useful for static allocation */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span> </div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span><span class="comment">/* It is possible to statically allocate FSE CTable/DTable as a table of FSE_CTable/FSE_DTable using below macros */</span></div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span><span class="preprocessor">#define FSE_CTABLE_SIZE_U32(maxTableLog, maxSymbolValue)   (1 + (1&lt;&lt;(maxTableLog-1)) + ((maxSymbolValue+1)*2))</span></div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span><span class="preprocessor">#define FSE_DTABLE_SIZE_U32(maxTableLog)                   (1 + (1&lt;&lt;maxTableLog))</span></div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span> </div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span><span class="comment">/* or use the size to malloc() space directly. Pay attention to alignment restrictions though */</span></div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span><span class="preprocessor">#define FSE_CTABLE_SIZE(maxTableLog, maxSymbolValue)   (FSE_CTABLE_SIZE_U32(maxTableLog, maxSymbolValue) * sizeof(FSE_CTable))</span></div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span><span class="preprocessor">#define FSE_DTABLE_SIZE(maxTableLog)                   (FSE_DTABLE_SIZE_U32(maxTableLog) * sizeof(FSE_DTable))</span></div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span> </div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span> </div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span><span class="comment">/* *****************************************</span></div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span><span class="comment"> *  FSE advanced API</span></div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span><span class="comment"> ***************************************** */</span></div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span> </div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span><span class="keywordtype">unsigned</span> <a class="code hl_function" href="fse__compress_8c.html#a5b48bd698b011962206908be5c233e64">FSE_optimalTableLog_internal</a>(<span class="keywordtype">unsigned</span> maxTableLog, <span class="keywordtype">size_t</span> srcSize, <span class="keywordtype">unsigned</span> maxSymbolValue, <span class="keywordtype">unsigned</span> minus);</div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span><span class="comment">/* FSE_compress_wksp() :</span></div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span><span class="comment"> * Same as FSE_compress2(), but using an externally allocated scratch buffer (`workSpace`).</span></div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span><span class="comment"> * FSE_WKSP_SIZE_U32() provides the minimum size required for `workSpace` as a table of FSE_CTable.</span></div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span><span class="preprocessor">#define FSE_WKSP_SIZE_U32(maxTableLog, maxSymbolValue)   ( FSE_CTABLE_SIZE_U32(maxTableLog, maxSymbolValue) + ((maxTableLog &gt; 12) ? (1 &lt;&lt; (maxTableLog - 2)) : 1024) )</span></div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="fse__compress_8c.html#a21353abdc84db08c567dbb37375418e5">FSE_compress_wksp</a> (<span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <span class="keywordtype">size_t</span> dstSize, <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, <span class="keywordtype">size_t</span> srcSize, <span class="keywordtype">unsigned</span> maxSymbolValue, <span class="keywordtype">unsigned</span> tableLog, <span class="keywordtype">void</span>* workSpace, <span class="keywordtype">size_t</span> wkspSize);</div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span> </div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="fse__compress_8c.html#ab4c1058ec2a95100980630e566e50e98">FSE_buildCTable_raw</a> (<a class="code hl_typedef" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a>* ct, <span class="keywordtype">unsigned</span> nbBits);</div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="fse__compress_8c.html#a987b16610cb65033b716c6b18086e06e">FSE_buildCTable_rle</a> (<a class="code hl_typedef" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a>* ct, <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> symbolValue);</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span><span class="comment">/* FSE_buildCTable_wksp() :</span></div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span><span class="comment"> * Same as FSE_buildCTable(), but using an externally allocated scratch buffer (`workSpace`).</span></div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span><span class="comment"> * `wkspSize` must be &gt;= `(1&lt;&lt;tableLog)`.</span></div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="fse__compress_8c.html#a33ef3a630482b3e532474c50112421ec">FSE_buildCTable_wksp</a>(<a class="code hl_typedef" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a>* ct, <span class="keyword">const</span> <span class="keywordtype">short</span>* normalizedCounter, <span class="keywordtype">unsigned</span> maxSymbolValue, <span class="keywordtype">unsigned</span> tableLog, <span class="keywordtype">void</span>* workSpace, <span class="keywordtype">size_t</span> wkspSize);</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span> </div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="fse__decompress_8c.html#aa0aec5c6135c0554f900988f0e681886">FSE_buildDTable_raw</a> (<a class="code hl_typedef" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a>* dt, <span class="keywordtype">unsigned</span> nbBits);</div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="fse__decompress_8c.html#a0d9b456e775d5b8fa92a564ecf5a6ca5">FSE_buildDTable_rle</a> (<a class="code hl_typedef" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a>* dt, <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> symbolValue);</div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="fse__decompress_8c.html#a01b92286773782c30e204fe8e36e7850">FSE_decompress_wksp</a>(<span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <span class="keywordtype">size_t</span> dstCapacity, <span class="keyword">const</span> <span class="keywordtype">void</span>* cSrc, <span class="keywordtype">size_t</span> cSrcSize, <a class="code hl_typedef" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a>* workSpace, <span class="keywordtype">unsigned</span> maxLog);</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span><span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>   FSE_repeat_none,  </div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>   FSE_repeat_check, </div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>   FSE_repeat_valid  </div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span> } FSE_repeat;</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span> </div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span><span class="comment">/* *****************************************</span></div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span><span class="comment">*  FSE symbol compression API</span></div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span><span class="comment">*******************************************/</span></div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>    ptrdiff_t   <a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>;</div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>    <span class="keyword">const</span> <span class="keywordtype">void</span>* stateTable;</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>    <span class="keyword">const</span> <span class="keywordtype">void</span>* symbolTT;</div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>    <span class="keywordtype">unsigned</span>    stateLog;</div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>} FSE_CState_t;</div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span> </div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span><span class="keyword">static</span> <span class="keywordtype">void</span> FSE_initCState(FSE_CState_t* CStatePtr, <span class="keyword">const</span> <a class="code hl_typedef" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a>* ct);</div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span> </div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span><span class="keyword">static</span> <span class="keywordtype">void</span> FSE_encodeSymbol(<a class="code hl_struct" href="structBIT__CStream__t.html">BIT_CStream_t</a>* bitC, FSE_CState_t* CStatePtr, <span class="keywordtype">unsigned</span> symbol);</div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span> </div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span><span class="keyword">static</span> <span class="keywordtype">void</span> FSE_flushCState(<a class="code hl_struct" href="structBIT__CStream__t.html">BIT_CStream_t</a>* bitC, <span class="keyword">const</span> FSE_CState_t* CStatePtr);</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span> </div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span><span class="comment">/* *****************************************</span></div>
+<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span><span class="comment">*  FSE symbol decompression API</span></div>
+<div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span><span class="comment">*******************************************/</span></div>
+<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>    <span class="keywordtype">size_t</span>      state;</div>
+<div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span>    <span class="keyword">const</span> <span class="keywordtype">void</span>* table;   <span class="comment">/* precise table may vary, depending on U16 */</span></div>
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>} FSE_DState_t;</div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span> </div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span> </div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span><span class="keyword">static</span> <span class="keywordtype">void</span>     FSE_initDState(FSE_DState_t* DStatePtr, <a class="code hl_struct" href="structBIT__DStream__t.html">BIT_DStream_t</a>* bitD, <span class="keyword">const</span> <a class="code hl_typedef" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a>* dt);</div>
+<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span> </div>
+<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span><span class="keyword">static</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> FSE_decodeSymbol(FSE_DState_t* DStatePtr, <a class="code hl_struct" href="structBIT__DStream__t.html">BIT_DStream_t</a>* bitD);</div>
+<div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span> </div>
+<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span><span class="keyword">static</span> <span class="keywordtype">unsigned</span> FSE_endOfDState(<span class="keyword">const</span> FSE_DState_t* DStatePtr);</div>
+<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span> </div>
+<div class="line"><a id="l00493" name="l00493"></a><span class="lineno">  493</span><span class="comment">/* *****************************************</span></div>
+<div class="line"><a id="l00494" name="l00494"></a><span class="lineno">  494</span><span class="comment">*  FSE unsafe API</span></div>
+<div class="line"><a id="l00495" name="l00495"></a><span class="lineno">  495</span><span class="comment">*******************************************/</span></div>
+<div class="line"><a id="l00496" name="l00496"></a><span class="lineno">  496</span><span class="keyword">static</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> FSE_decodeSymbolFast(FSE_DState_t* DStatePtr, <a class="code hl_struct" href="structBIT__DStream__t.html">BIT_DStream_t</a>* bitD);</div>
+<div class="line"><a id="l00497" name="l00497"></a><span class="lineno">  497</span><span class="comment">/* faster, but works only if nbBits is always &gt;= 1 (otherwise, result will be corrupted) */</span></div>
+<div class="line"><a id="l00498" name="l00498"></a><span class="lineno">  498</span> </div>
+<div class="line"><a id="l00499" name="l00499"></a><span class="lineno">  499</span> </div>
+<div class="line"><a id="l00500" name="l00500"></a><span class="lineno">  500</span><span class="comment">/* *****************************************</span></div>
+<div class="line"><a id="l00501" name="l00501"></a><span class="lineno">  501</span><span class="comment">*  Implementation of inlined functions</span></div>
+<div class="line"><a id="l00502" name="l00502"></a><span class="lineno">  502</span><span class="comment">*******************************************/</span></div>
+<div class="line"><a id="l00503" name="l00503"></a><span class="lineno">  503</span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00504" name="l00504"></a><span class="lineno">  504</span>    <span class="keywordtype">int</span> deltaFindState;</div>
+<div class="line"><a id="l00505" name="l00505"></a><span class="lineno">  505</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> deltaNbBits;</div>
+<div class="line"><a id="l00506" name="l00506"></a><span class="lineno">  506</span>} FSE_symbolCompressionTransform; <span class="comment">/* total 8 bytes */</span></div>
+<div class="line"><a id="l00507" name="l00507"></a><span class="lineno">  507</span> </div>
+<div class="line"><a id="l00508" name="l00508"></a><span class="lineno">  508</span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> FSE_initCState(FSE_CState_t* statePtr, <span class="keyword">const</span> <a class="code hl_typedef" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a>* ct)</div>
+<div class="line"><a id="l00509" name="l00509"></a><span class="lineno">  509</span>{</div>
+<div class="line"><a id="l00510" name="l00510"></a><span class="lineno">  510</span>    <span class="keyword">const</span> <span class="keywordtype">void</span>* ptr = ct;</div>
+<div class="line"><a id="l00511" name="l00511"></a><span class="lineno">  511</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a>* u16ptr = (<span class="keyword">const</span> <a class="code hl_typedef" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a>*) ptr;</div>
+<div class="line"><a id="l00512" name="l00512"></a><span class="lineno">  512</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> tableLog = <a class="code hl_function" href="mem_8h.html#a2a8baa9c29ded9e4db53cc9fbaebcd48">MEM_read16</a>(ptr);</div>
+<div class="line"><a id="l00513" name="l00513"></a><span class="lineno">  513</span>    statePtr-&gt;value = (ptrdiff_t)1&lt;&lt;tableLog;</div>
+<div class="line"><a id="l00514" name="l00514"></a><span class="lineno">  514</span>    statePtr-&gt;stateTable = u16ptr+2;</div>
+<div class="line"><a id="l00515" name="l00515"></a><span class="lineno">  515</span>    statePtr-&gt;symbolTT = ct + 1 + (tableLog ? (1&lt;&lt;(tableLog-1)) : 1);</div>
+<div class="line"><a id="l00516" name="l00516"></a><span class="lineno">  516</span>    statePtr-&gt;stateLog = tableLog;</div>
+<div class="line"><a id="l00517" name="l00517"></a><span class="lineno">  517</span>}</div>
+<div class="line"><a id="l00518" name="l00518"></a><span class="lineno">  518</span> </div>
+<div class="line"><a id="l00519" name="l00519"></a><span class="lineno">  519</span> </div>
+<div class="line"><a id="l00523" name="l00523"></a><span class="lineno">  523</span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> FSE_initCState2(FSE_CState_t* statePtr, <span class="keyword">const</span> <a class="code hl_typedef" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a>* ct, <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> symbol)</div>
+<div class="line"><a id="l00524" name="l00524"></a><span class="lineno">  524</span>{</div>
+<div class="line"><a id="l00525" name="l00525"></a><span class="lineno">  525</span>    FSE_initCState(statePtr, ct);</div>
+<div class="line"><a id="l00526" name="l00526"></a><span class="lineno">  526</span>    {   <span class="keyword">const</span> FSE_symbolCompressionTransform symbolTT = ((<span class="keyword">const</span> FSE_symbolCompressionTransform*)(statePtr-&gt;symbolTT))[symbol];</div>
+<div class="line"><a id="l00527" name="l00527"></a><span class="lineno">  527</span>        <span class="keyword">const</span> <a class="code hl_typedef" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a>* stateTable = (<span class="keyword">const</span> <a class="code hl_typedef" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a>*)(statePtr-&gt;stateTable);</div>
+<div class="line"><a id="l00528" name="l00528"></a><span class="lineno">  528</span>        <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> nbBitsOut  = (<a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)((symbolTT.deltaNbBits + (1&lt;&lt;15)) &gt;&gt; 16);</div>
+<div class="line"><a id="l00529" name="l00529"></a><span class="lineno">  529</span>        statePtr-&gt;value = (nbBitsOut &lt;&lt; 16) - symbolTT.deltaNbBits;</div>
+<div class="line"><a id="l00530" name="l00530"></a><span class="lineno">  530</span>        statePtr-&gt;value = stateTable[(statePtr-&gt;value &gt;&gt; nbBitsOut) + symbolTT.deltaFindState];</div>
+<div class="line"><a id="l00531" name="l00531"></a><span class="lineno">  531</span>    }</div>
+<div class="line"><a id="l00532" name="l00532"></a><span class="lineno">  532</span>}</div>
+<div class="line"><a id="l00533" name="l00533"></a><span class="lineno">  533</span> </div>
+<div class="line"><a id="l00534" name="l00534"></a><span class="lineno">  534</span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> FSE_encodeSymbol(<a class="code hl_struct" href="structBIT__CStream__t.html">BIT_CStream_t</a>* bitC, FSE_CState_t* statePtr, <span class="keywordtype">unsigned</span> symbol)</div>
+<div class="line"><a id="l00535" name="l00535"></a><span class="lineno">  535</span>{</div>
+<div class="line"><a id="l00536" name="l00536"></a><span class="lineno">  536</span>    FSE_symbolCompressionTransform <span class="keyword">const</span> symbolTT = ((<span class="keyword">const</span> FSE_symbolCompressionTransform*)(statePtr-&gt;symbolTT))[symbol];</div>
+<div class="line"><a id="l00537" name="l00537"></a><span class="lineno">  537</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a>* <span class="keyword">const</span> stateTable = (<span class="keyword">const</span> <a class="code hl_typedef" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a>*)(statePtr-&gt;stateTable);</div>
+<div class="line"><a id="l00538" name="l00538"></a><span class="lineno">  538</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> nbBitsOut  = (<a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)((statePtr-&gt;value + symbolTT.deltaNbBits) &gt;&gt; 16);</div>
+<div class="line"><a id="l00539" name="l00539"></a><span class="lineno">  539</span>    <a class="code hl_function" href="bitstream_8h.html#a8ad13761fa066633057e1e46f43e9f67">BIT_addBits</a>(bitC, statePtr-&gt;value, nbBitsOut);</div>
+<div class="line"><a id="l00540" name="l00540"></a><span class="lineno">  540</span>    statePtr-&gt;value = stateTable[ (statePtr-&gt;value &gt;&gt; nbBitsOut) + symbolTT.deltaFindState];</div>
+<div class="line"><a id="l00541" name="l00541"></a><span class="lineno">  541</span>}</div>
+<div class="line"><a id="l00542" name="l00542"></a><span class="lineno">  542</span> </div>
+<div class="line"><a id="l00543" name="l00543"></a><span class="lineno">  543</span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> FSE_flushCState(<a class="code hl_struct" href="structBIT__CStream__t.html">BIT_CStream_t</a>* bitC, <span class="keyword">const</span> FSE_CState_t* statePtr)</div>
+<div class="line"><a id="l00544" name="l00544"></a><span class="lineno">  544</span>{</div>
+<div class="line"><a id="l00545" name="l00545"></a><span class="lineno">  545</span>    <a class="code hl_function" href="bitstream_8h.html#a8ad13761fa066633057e1e46f43e9f67">BIT_addBits</a>(bitC, statePtr-&gt;value, statePtr-&gt;stateLog);</div>
+<div class="line"><a id="l00546" name="l00546"></a><span class="lineno">  546</span>    <a class="code hl_function" href="bitstream_8h.html#a4c839965cf6a86f64d859153451ccab6">BIT_flushBits</a>(bitC);</div>
+<div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span>}</div>
+<div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span> </div>
+<div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span> </div>
+<div class="line"><a id="l00550" name="l00550"></a><span class="lineno">  550</span><span class="comment">/* FSE_getMaxNbBits() :</span></div>
+<div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span><span class="comment"> * Approximate maximum cost of a symbol, in bits.</span></div>
+<div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span><span class="comment"> * Fractional get rounded up (i.e : a symbol with a normalized frequency of 3 gives the same result as a frequency of 2)</span></div>
+<div class="line"><a id="l00553" name="l00553"></a><span class="lineno">  553</span><span class="comment"> * note 1 : assume symbolValue is valid (&lt;= maxSymbolValue)</span></div>
+<div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span><span class="comment"> * note 2 : if freq[symbolValue]==0, @return a fake cost of tableLog+1 bits */</span></div>
+<div class="line"><a id="l00555" name="l00555"></a><span class="lineno">  555</span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> FSE_getMaxNbBits(<span class="keyword">const</span> <span class="keywordtype">void</span>* symbolTTPtr, <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> symbolValue)</div>
+<div class="line"><a id="l00556" name="l00556"></a><span class="lineno">  556</span>{</div>
+<div class="line"><a id="l00557" name="l00557"></a><span class="lineno">  557</span>    <span class="keyword">const</span> FSE_symbolCompressionTransform* symbolTT = (<span class="keyword">const</span> FSE_symbolCompressionTransform*) symbolTTPtr;</div>
+<div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span>    <span class="keywordflow">return</span> (symbolTT[symbolValue].deltaNbBits + ((1&lt;&lt;16)-1)) &gt;&gt; 16;</div>
+<div class="line"><a id="l00559" name="l00559"></a><span class="lineno">  559</span>}</div>
+<div class="line"><a id="l00560" name="l00560"></a><span class="lineno">  560</span> </div>
+<div class="line"><a id="l00561" name="l00561"></a><span class="lineno">  561</span><span class="comment">/* FSE_bitCost() :</span></div>
+<div class="line"><a id="l00562" name="l00562"></a><span class="lineno">  562</span><span class="comment"> * Approximate symbol cost, as fractional value, using fixed-point format (accuracyLog fractional bits)</span></div>
+<div class="line"><a id="l00563" name="l00563"></a><span class="lineno">  563</span><span class="comment"> * note 1 : assume symbolValue is valid (&lt;= maxSymbolValue)</span></div>
+<div class="line"><a id="l00564" name="l00564"></a><span class="lineno">  564</span><span class="comment"> * note 2 : if freq[symbolValue]==0, @return a fake cost of tableLog+1 bits */</span></div>
+<div class="line"><a id="l00565" name="l00565"></a><span class="lineno">  565</span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> FSE_bitCost(<span class="keyword">const</span> <span class="keywordtype">void</span>* symbolTTPtr, <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> tableLog, <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> symbolValue, <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> accuracyLog)</div>
+<div class="line"><a id="l00566" name="l00566"></a><span class="lineno">  566</span>{</div>
+<div class="line"><a id="l00567" name="l00567"></a><span class="lineno">  567</span>    <span class="keyword">const</span> FSE_symbolCompressionTransform* symbolTT = (<span class="keyword">const</span> FSE_symbolCompressionTransform*) symbolTTPtr;</div>
+<div class="line"><a id="l00568" name="l00568"></a><span class="lineno">  568</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> minNbBits = symbolTT[symbolValue].deltaNbBits &gt;&gt; 16;</div>
+<div class="line"><a id="l00569" name="l00569"></a><span class="lineno">  569</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> threshold = (minNbBits+1) &lt;&lt; 16;</div>
+<div class="line"><a id="l00570" name="l00570"></a><span class="lineno">  570</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(tableLog &lt; 16);</div>
+<div class="line"><a id="l00571" name="l00571"></a><span class="lineno">  571</span>    <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(accuracyLog &lt; 31-tableLog);  <span class="comment">/* ensure enough room for renormalization double shift */</span></div>
+<div class="line"><a id="l00572" name="l00572"></a><span class="lineno">  572</span>    {   <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> tableSize = 1 &lt;&lt; tableLog;</div>
+<div class="line"><a id="l00573" name="l00573"></a><span class="lineno">  573</span>        <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> deltaFromThreshold = threshold - (symbolTT[symbolValue].deltaNbBits + tableSize);</div>
+<div class="line"><a id="l00574" name="l00574"></a><span class="lineno">  574</span>        <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> normalizedDeltaFromThreshold = (deltaFromThreshold &lt;&lt; accuracyLog) &gt;&gt; tableLog;   <span class="comment">/* linear interpolation (very approximate) */</span></div>
+<div class="line"><a id="l00575" name="l00575"></a><span class="lineno">  575</span>        <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> bitMultiplier = 1 &lt;&lt; accuracyLog;</div>
+<div class="line"><a id="l00576" name="l00576"></a><span class="lineno">  576</span>        <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(symbolTT[symbolValue].deltaNbBits + tableSize &lt;= threshold);</div>
+<div class="line"><a id="l00577" name="l00577"></a><span class="lineno">  577</span>        <a class="code hl_define" href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a>(normalizedDeltaFromThreshold &lt;= bitMultiplier);</div>
+<div class="line"><a id="l00578" name="l00578"></a><span class="lineno">  578</span>        <span class="keywordflow">return</span> (minNbBits+1)*bitMultiplier - normalizedDeltaFromThreshold;</div>
+<div class="line"><a id="l00579" name="l00579"></a><span class="lineno">  579</span>    }</div>
+<div class="line"><a id="l00580" name="l00580"></a><span class="lineno">  580</span>}</div>
+<div class="line"><a id="l00581" name="l00581"></a><span class="lineno">  581</span> </div>
+<div class="line"><a id="l00582" name="l00582"></a><span class="lineno">  582</span> </div>
+<div class="line"><a id="l00583" name="l00583"></a><span class="lineno">  583</span><span class="comment">/* ======    Decompression    ====== */</span></div>
+<div class="line"><a id="l00584" name="l00584"></a><span class="lineno">  584</span> </div>
+<div class="line"><a id="l00585" name="l00585"></a><span class="lineno">  585</span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00586" name="l00586"></a><span class="lineno">  586</span>    <a class="code hl_typedef" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a> tableLog;</div>
+<div class="line"><a id="l00587" name="l00587"></a><span class="lineno">  587</span>    <a class="code hl_typedef" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a> fastMode;</div>
+<div class="line"><a id="l00588" name="l00588"></a><span class="lineno">  588</span>} FSE_DTableHeader;   <span class="comment">/* sizeof U32 */</span></div>
+<div class="line"><a id="l00589" name="l00589"></a><span class="lineno">  589</span> </div>
+<div class="line"><a id="l00590" name="l00590"></a><span class="lineno">  590</span><span class="keyword">typedef</span> <span class="keyword">struct</span></div>
+<div class="line"><a id="l00591" name="l00591"></a><span class="lineno">  591</span>{</div>
+<div class="line"><a id="l00592" name="l00592"></a><span class="lineno">  592</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> newState;</div>
+<div class="line"><a id="l00593" name="l00593"></a><span class="lineno">  593</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  symbol;</div>
+<div class="line"><a id="l00594" name="l00594"></a><span class="lineno">  594</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  nbBits;</div>
+<div class="line"><a id="l00595" name="l00595"></a><span class="lineno">  595</span>} FSE_decode_t;   <span class="comment">/* size == U32 */</span></div>
+<div class="line"><a id="l00596" name="l00596"></a><span class="lineno">  596</span> </div>
+<div class="line"><a id="l00597" name="l00597"></a><span class="lineno">  597</span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> FSE_initDState(FSE_DState_t* DStatePtr, <a class="code hl_struct" href="structBIT__DStream__t.html">BIT_DStream_t</a>* bitD, <span class="keyword">const</span> <a class="code hl_typedef" href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a>* dt)</div>
+<div class="line"><a id="l00598" name="l00598"></a><span class="lineno">  598</span>{</div>
+<div class="line"><a id="l00599" name="l00599"></a><span class="lineno">  599</span>    <span class="keyword">const</span> <span class="keywordtype">void</span>* ptr = dt;</div>
+<div class="line"><a id="l00600" name="l00600"></a><span class="lineno">  600</span>    <span class="keyword">const</span> FSE_DTableHeader* <span class="keyword">const</span> DTableH = (<span class="keyword">const</span> FSE_DTableHeader*)ptr;</div>
+<div class="line"><a id="l00601" name="l00601"></a><span class="lineno">  601</span>    DStatePtr-&gt;state = <a class="code hl_function" href="bitstream_8h.html#a290134ce7b5c9b82c0425461a75631ee">BIT_readBits</a>(bitD, DTableH-&gt;tableLog);</div>
+<div class="line"><a id="l00602" name="l00602"></a><span class="lineno">  602</span>    <a class="code hl_function" href="bitstream_8h.html#a17753ccd470bc391190e023401e2f795">BIT_reloadDStream</a>(bitD);</div>
+<div class="line"><a id="l00603" name="l00603"></a><span class="lineno">  603</span>    DStatePtr-&gt;table = dt + 1;</div>
+<div class="line"><a id="l00604" name="l00604"></a><span class="lineno">  604</span>}</div>
+<div class="line"><a id="l00605" name="l00605"></a><span class="lineno">  605</span> </div>
+<div class="line"><a id="l00606" name="l00606"></a><span class="lineno">  606</span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> FSE_peekSymbol(<span class="keyword">const</span> FSE_DState_t* DStatePtr)</div>
+<div class="line"><a id="l00607" name="l00607"></a><span class="lineno">  607</span>{</div>
+<div class="line"><a id="l00608" name="l00608"></a><span class="lineno">  608</span>    FSE_decode_t <span class="keyword">const</span> DInfo = ((<span class="keyword">const</span> FSE_decode_t*)(DStatePtr-&gt;table))[DStatePtr-&gt;state];</div>
+<div class="line"><a id="l00609" name="l00609"></a><span class="lineno">  609</span>    <span class="keywordflow">return</span> DInfo.symbol;</div>
+<div class="line"><a id="l00610" name="l00610"></a><span class="lineno">  610</span>}</div>
+<div class="line"><a id="l00611" name="l00611"></a><span class="lineno">  611</span> </div>
+<div class="line"><a id="l00612" name="l00612"></a><span class="lineno">  612</span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">void</span> FSE_updateState(FSE_DState_t* DStatePtr, <a class="code hl_struct" href="structBIT__DStream__t.html">BIT_DStream_t</a>* bitD)</div>
+<div class="line"><a id="l00613" name="l00613"></a><span class="lineno">  613</span>{</div>
+<div class="line"><a id="l00614" name="l00614"></a><span class="lineno">  614</span>    FSE_decode_t <span class="keyword">const</span> DInfo = ((<span class="keyword">const</span> FSE_decode_t*)(DStatePtr-&gt;table))[DStatePtr-&gt;state];</div>
+<div class="line"><a id="l00615" name="l00615"></a><span class="lineno">  615</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> nbBits = DInfo.nbBits;</div>
+<div class="line"><a id="l00616" name="l00616"></a><span class="lineno">  616</span>    <span class="keywordtype">size_t</span> <span class="keyword">const</span> lowBits = <a class="code hl_function" href="bitstream_8h.html#a290134ce7b5c9b82c0425461a75631ee">BIT_readBits</a>(bitD, nbBits);</div>
+<div class="line"><a id="l00617" name="l00617"></a><span class="lineno">  617</span>    DStatePtr-&gt;state = DInfo.newState + lowBits;</div>
+<div class="line"><a id="l00618" name="l00618"></a><span class="lineno">  618</span>}</div>
+<div class="line"><a id="l00619" name="l00619"></a><span class="lineno">  619</span> </div>
+<div class="line"><a id="l00620" name="l00620"></a><span class="lineno">  620</span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> FSE_decodeSymbol(FSE_DState_t* DStatePtr, <a class="code hl_struct" href="structBIT__DStream__t.html">BIT_DStream_t</a>* bitD)</div>
+<div class="line"><a id="l00621" name="l00621"></a><span class="lineno">  621</span>{</div>
+<div class="line"><a id="l00622" name="l00622"></a><span class="lineno">  622</span>    FSE_decode_t <span class="keyword">const</span> DInfo = ((<span class="keyword">const</span> FSE_decode_t*)(DStatePtr-&gt;table))[DStatePtr-&gt;state];</div>
+<div class="line"><a id="l00623" name="l00623"></a><span class="lineno">  623</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> nbBits = DInfo.nbBits;</div>
+<div class="line"><a id="l00624" name="l00624"></a><span class="lineno">  624</span>    <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <span class="keyword">const</span> symbol = DInfo.symbol;</div>
+<div class="line"><a id="l00625" name="l00625"></a><span class="lineno">  625</span>    <span class="keywordtype">size_t</span> <span class="keyword">const</span> lowBits = <a class="code hl_function" href="bitstream_8h.html#a290134ce7b5c9b82c0425461a75631ee">BIT_readBits</a>(bitD, nbBits);</div>
+<div class="line"><a id="l00626" name="l00626"></a><span class="lineno">  626</span> </div>
+<div class="line"><a id="l00627" name="l00627"></a><span class="lineno">  627</span>    DStatePtr-&gt;state = DInfo.newState + lowBits;</div>
+<div class="line"><a id="l00628" name="l00628"></a><span class="lineno">  628</span>    <span class="keywordflow">return</span> symbol;</div>
+<div class="line"><a id="l00629" name="l00629"></a><span class="lineno">  629</span>}</div>
+<div class="line"><a id="l00630" name="l00630"></a><span class="lineno">  630</span> </div>
+<div class="line"><a id="l00633" name="l00633"></a><span class="lineno">  633</span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> FSE_decodeSymbolFast(FSE_DState_t* DStatePtr, <a class="code hl_struct" href="structBIT__DStream__t.html">BIT_DStream_t</a>* bitD)</div>
+<div class="line"><a id="l00634" name="l00634"></a><span class="lineno">  634</span>{</div>
+<div class="line"><a id="l00635" name="l00635"></a><span class="lineno">  635</span>    FSE_decode_t <span class="keyword">const</span> DInfo = ((<span class="keyword">const</span> FSE_decode_t*)(DStatePtr-&gt;table))[DStatePtr-&gt;state];</div>
+<div class="line"><a id="l00636" name="l00636"></a><span class="lineno">  636</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <span class="keyword">const</span> nbBits = DInfo.nbBits;</div>
+<div class="line"><a id="l00637" name="l00637"></a><span class="lineno">  637</span>    <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <span class="keyword">const</span> symbol = DInfo.symbol;</div>
+<div class="line"><a id="l00638" name="l00638"></a><span class="lineno">  638</span>    <span class="keywordtype">size_t</span> <span class="keyword">const</span> lowBits = <a class="code hl_function" href="bitstream_8h.html#a849084e406b9d3cd5aed35ed4bba7cda">BIT_readBitsFast</a>(bitD, nbBits);</div>
+<div class="line"><a id="l00639" name="l00639"></a><span class="lineno">  639</span> </div>
+<div class="line"><a id="l00640" name="l00640"></a><span class="lineno">  640</span>    DStatePtr-&gt;state = DInfo.newState + lowBits;</div>
+<div class="line"><a id="l00641" name="l00641"></a><span class="lineno">  641</span>    <span class="keywordflow">return</span> symbol;</div>
+<div class="line"><a id="l00642" name="l00642"></a><span class="lineno">  642</span>}</div>
+<div class="line"><a id="l00643" name="l00643"></a><span class="lineno">  643</span> </div>
+<div class="line"><a id="l00644" name="l00644"></a><span class="lineno">  644</span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">unsigned</span> FSE_endOfDState(<span class="keyword">const</span> FSE_DState_t* DStatePtr)</div>
+<div class="line"><a id="l00645" name="l00645"></a><span class="lineno">  645</span>{</div>
+<div class="line"><a id="l00646" name="l00646"></a><span class="lineno">  646</span>    <span class="keywordflow">return</span> DStatePtr-&gt;state == 0;</div>
+<div class="line"><a id="l00647" name="l00647"></a><span class="lineno">  647</span>}</div>
+<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span> </div>
+<div class="line"><a id="l00649" name="l00649"></a><span class="lineno">  649</span> </div>
+<div class="line"><a id="l00650" name="l00650"></a><span class="lineno">  650</span> </div>
+<div class="line"><a id="l00651" name="l00651"></a><span class="lineno">  651</span><span class="preprocessor">#ifndef FSE_COMMONDEFS_ONLY</span></div>
+<div class="line"><a id="l00652" name="l00652"></a><span class="lineno">  652</span> </div>
+<div class="line"><a id="l00653" name="l00653"></a><span class="lineno">  653</span><span class="comment">/* **************************************************************</span></div>
+<div class="line"><a id="l00654" name="l00654"></a><span class="lineno">  654</span><span class="comment">*  Tuning parameters</span></div>
+<div class="line"><a id="l00655" name="l00655"></a><span class="lineno">  655</span><span class="comment">****************************************************************/</span></div>
+<div class="line"><a id="l00661" name="l00661"></a><span class="lineno">  661</span><span class="preprocessor">#ifndef FSE_MAX_MEMORY_USAGE</span></div>
+<div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span><span class="preprocessor">#  define FSE_MAX_MEMORY_USAGE 14</span></div>
+<div class="line"><a id="l00663" name="l00663"></a><span class="lineno">  663</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00664" name="l00664"></a><span class="lineno">  664</span><span class="preprocessor">#ifndef FSE_DEFAULT_MEMORY_USAGE</span></div>
+<div class="line"><a id="l00665" name="l00665"></a><span class="lineno">  665</span><span class="preprocessor">#  define FSE_DEFAULT_MEMORY_USAGE 13</span></div>
+<div class="line"><a id="l00666" name="l00666"></a><span class="lineno">  666</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00667" name="l00667"></a><span class="lineno">  667</span> </div>
+<div class="line"><a id="l00671" name="l00671"></a><span class="lineno">  671</span><span class="preprocessor">#ifndef FSE_MAX_SYMBOL_VALUE</span></div>
+<div class="line"><a id="l00672" name="l00672"></a><span class="lineno">  672</span><span class="preprocessor">#  define FSE_MAX_SYMBOL_VALUE 255</span></div>
+<div class="line"><a id="l00673" name="l00673"></a><span class="lineno">  673</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00674" name="l00674"></a><span class="lineno">  674</span> </div>
+<div class="line"><a id="l00675" name="l00675"></a><span class="lineno">  675</span><span class="comment">/* **************************************************************</span></div>
+<div class="line"><a id="l00676" name="l00676"></a><span class="lineno">  676</span><span class="comment">*  template functions type &amp; suffix</span></div>
+<div class="line"><a id="l00677" name="l00677"></a><span class="lineno">  677</span><span class="comment">****************************************************************/</span></div>
+<div class="line"><a id="l00678" name="l00678"></a><span class="lineno">  678</span><span class="preprocessor">#define FSE_FUNCTION_TYPE BYTE</span></div>
+<div class="line"><a id="l00679" name="l00679"></a><span class="lineno">  679</span><span class="preprocessor">#define FSE_FUNCTION_EXTENSION</span></div>
+<div class="line"><a id="l00680" name="l00680"></a><span class="lineno">  680</span><span class="preprocessor">#define FSE_DECODE_TYPE FSE_decode_t</span></div>
+<div class="line"><a id="l00681" name="l00681"></a><span class="lineno">  681</span> </div>
+<div class="line"><a id="l00682" name="l00682"></a><span class="lineno">  682</span> </div>
+<div class="line"><a id="l00683" name="l00683"></a><span class="lineno">  683</span><span class="preprocessor">#endif   </span><span class="comment">/* !FSE_COMMONDEFS_ONLY */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00684" name="l00684"></a><span class="lineno">  684</span> </div>
+<div class="line"><a id="l00685" name="l00685"></a><span class="lineno">  685</span> </div>
+<div class="line"><a id="l00686" name="l00686"></a><span class="lineno">  686</span><span class="comment">/* ***************************************************************</span></div>
+<div class="line"><a id="l00687" name="l00687"></a><span class="lineno">  687</span><span class="comment">*  Constants</span></div>
+<div class="line"><a id="l00688" name="l00688"></a><span class="lineno">  688</span><span class="comment">*****************************************************************/</span></div>
+<div class="line"><a id="l00689" name="l00689"></a><span class="lineno">  689</span><span class="preprocessor">#define FSE_MAX_TABLELOG  (FSE_MAX_MEMORY_USAGE-2)</span></div>
+<div class="line"><a id="l00690" name="l00690"></a><span class="lineno">  690</span><span class="preprocessor">#define FSE_MAX_TABLESIZE (1U&lt;&lt;FSE_MAX_TABLELOG)</span></div>
+<div class="line"><a id="l00691" name="l00691"></a><span class="lineno">  691</span><span class="preprocessor">#define FSE_MAXTABLESIZE_MASK (FSE_MAX_TABLESIZE-1)</span></div>
+<div class="line"><a id="l00692" name="l00692"></a><span class="lineno">  692</span><span class="preprocessor">#define FSE_DEFAULT_TABLELOG (FSE_DEFAULT_MEMORY_USAGE-2)</span></div>
+<div class="line"><a id="l00693" name="l00693"></a><span class="lineno">  693</span><span class="preprocessor">#define FSE_MIN_TABLELOG 5</span></div>
+<div class="line"><a id="l00694" name="l00694"></a><span class="lineno">  694</span> </div>
+<div class="line"><a id="l00695" name="l00695"></a><span class="lineno">  695</span><span class="preprocessor">#define FSE_TABLELOG_ABSOLUTE_MAX 15</span></div>
+<div class="line"><a id="l00696" name="l00696"></a><span class="lineno">  696</span><span class="preprocessor">#if FSE_MAX_TABLELOG &gt; FSE_TABLELOG_ABSOLUTE_MAX</span></div>
+<div class="line"><a id="l00697" name="l00697"></a><span class="lineno">  697</span><span class="preprocessor">#  error &quot;FSE_MAX_TABLELOG &gt; FSE_TABLELOG_ABSOLUTE_MAX is not supported&quot;</span></div>
+<div class="line"><a id="l00698" name="l00698"></a><span class="lineno">  698</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00699" name="l00699"></a><span class="lineno">  699</span> </div>
+<div class="line"><a id="l00700" name="l00700"></a><span class="lineno">  700</span><span class="preprocessor">#define FSE_TABLESTEP(tableSize) ((tableSize&gt;&gt;1) + (tableSize&gt;&gt;3) + 3)</span></div>
+<div class="line"><a id="l00701" name="l00701"></a><span class="lineno">  701</span> </div>
+<div class="line"><a id="l00702" name="l00702"></a><span class="lineno">  702</span> </div>
+<div class="line"><a id="l00703" name="l00703"></a><span class="lineno">  703</span><span class="preprocessor">#endif </span><span class="comment">/* FSE_STATIC_LINKING_ONLY */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00704" name="l00704"></a><span class="lineno">  704</span> </div>
+<div class="line"><a id="l00705" name="l00705"></a><span class="lineno">  705</span> </div>
+<div class="line"><a id="l00706" name="l00706"></a><span class="lineno">  706</span><span class="preprocessor">#if defined (__cplusplus)</span></div>
+<div class="line"><a id="l00707" name="l00707"></a><span class="lineno">  707</span>}</div>
+<div class="line"><a id="l00708" name="l00708"></a><span class="lineno">  708</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aWTSExpressData_8hpp_html_a4ae1dab0fb4b072a66584546209e7d58"><div class="ttname"><a href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a></div><div class="ttdeci">unsigned char BYTE</div><div class="ttdef"><b>Definition</b> <a href="WTSExpressData_8hpp_source.html#l00019">WTSExpressData.hpp:19</a></div></div>
+<div class="ttc" id="abitstream_8h_html"><div class="ttname"><a href="bitstream_8h.html">bitstream.h</a></div></div>
+<div class="ttc" id="abitstream_8h_html_a17753ccd470bc391190e023401e2f795"><div class="ttname"><a href="bitstream_8h.html#a17753ccd470bc391190e023401e2f795">BIT_reloadDStream</a></div><div class="ttdeci">MEM_STATIC BIT_DStream_status BIT_reloadDStream(BIT_DStream_t *bitD)</div><div class="ttdef"><b>Definition</b> <a href="bitstream_8h_source.html#l00419">bitstream.h:419</a></div></div>
+<div class="ttc" id="abitstream_8h_html_a290134ce7b5c9b82c0425461a75631ee"><div class="ttname"><a href="bitstream_8h.html#a290134ce7b5c9b82c0425461a75631ee">BIT_readBits</a></div><div class="ttdeci">MEM_STATIC size_t BIT_readBits(BIT_DStream_t *bitD, unsigned nbBits)</div><div class="ttdef"><b>Definition</b> <a href="bitstream_8h_source.html#l00397">bitstream.h:397</a></div></div>
+<div class="ttc" id="abitstream_8h_html_a4c839965cf6a86f64d859153451ccab6"><div class="ttname"><a href="bitstream_8h.html#a4c839965cf6a86f64d859153451ccab6">BIT_flushBits</a></div><div class="ttdeci">MEM_STATIC void BIT_flushBits(BIT_CStream_t *bitC)</div><div class="ttdef"><b>Definition</b> <a href="bitstream_8h_source.html#l00259">bitstream.h:259</a></div></div>
+<div class="ttc" id="abitstream_8h_html_a849084e406b9d3cd5aed35ed4bba7cda"><div class="ttname"><a href="bitstream_8h.html#a849084e406b9d3cd5aed35ed4bba7cda">BIT_readBitsFast</a></div><div class="ttdeci">MEM_STATIC size_t BIT_readBitsFast(BIT_DStream_t *bitD, unsigned nbBits)</div><div class="ttdef"><b>Definition</b> <a href="bitstream_8h_source.html#l00406">bitstream.h:406</a></div></div>
+<div class="ttc" id="abitstream_8h_html_a8ad13761fa066633057e1e46f43e9f67"><div class="ttname"><a href="bitstream_8h.html#a8ad13761fa066633057e1e46f43e9f67">BIT_addBits</a></div><div class="ttdeci">MEM_STATIC void BIT_addBits(BIT_CStream_t *bitC, size_t value, unsigned nbBits)</div><div class="ttdef"><b>Definition</b> <a href="bitstream_8h_source.html#l00218">bitstream.h:218</a></div></div>
+<div class="ttc" id="adebug_8h_html_acdcc5aaebf3f273c1762f24a6ece2e5e"><div class="ttname"><a href="debug_8h.html#acdcc5aaebf3f273c1762f24a6ece2e5e">assert</a></div><div class="ttdeci">#define assert(condition)</div><div class="ttdef"><b>Definition</b> <a href="debug_8h_source.html#l00102">debug.h:102</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_ab7c2d1d8d4198d62c34058543ea7cad3"><div class="ttname"><a href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a></div><div class="ttdeci">ATPAmtType value</div><div class="ttdoc">划拨金额 (必填)</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00125">main.cpp:125</a></div></div>
+<div class="ttc" id="afse_8h_html_a056c0865d3ba1e7e65bc950d6b980334"><div class="ttname"><a href="fse_8h.html#a056c0865d3ba1e7e65bc950d6b980334">FSE_buildDTable</a></div><div class="ttdeci">FSE_PUBLIC_API size_t FSE_buildDTable(FSE_DTable *dt, const short *normalizedCounter, unsigned maxSymbolValue, unsigned tableLog)</div><div class="ttdef"><b>Definition</b> <a href="fse__decompress_8c_source.html#l00095">fse_decompress.c:95</a></div></div>
+<div class="ttc" id="afse_8h_html_a1d5d0fb669087c8407f572d86bd6c87a"><div class="ttname"><a href="fse_8h.html#a1d5d0fb669087c8407f572d86bd6c87a">FSE_readNCount</a></div><div class="ttdeci">FSE_PUBLIC_API size_t FSE_readNCount(short *normalizedCounter, unsigned *maxSymbolValuePtr, unsigned *tableLogPtr, const void *rBuffer, size_t rBuffSize)</div><div class="ttdef"><b>Definition</b> <a href="entropy__common_8c_source.html#l00061">entropy_common.c:61</a></div></div>
+<div class="ttc" id="afse_8h_html_a1ed0b96f6184614c4d3ecded9d8e6c80"><div class="ttname"><a href="fse_8h.html#a1ed0b96f6184614c4d3ecded9d8e6c80">FSE_writeNCount</a></div><div class="ttdeci">FSE_PUBLIC_API size_t FSE_writeNCount(void *buffer, size_t bufferSize, const short *normalizedCounter, unsigned maxSymbolValue, unsigned tableLog)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00308">fse_compress.c:308</a></div></div>
+<div class="ttc" id="afse_8h_html_a275e277a2eb5c2368860dca80c749f7b"><div class="ttname"><a href="fse_8h.html#a275e277a2eb5c2368860dca80c749f7b">FSE_createCTable</a></div><div class="ttdeci">FSE_PUBLIC_API FSE_CTable * FSE_createCTable(unsigned maxSymbolValue, unsigned tableLog)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00325">fse_compress.c:325</a></div></div>
+<div class="ttc" id="afse_8h_html_a2b86255881cbf4a6871cdd3d99a7fb8b"><div class="ttname"><a href="fse_8h.html#a2b86255881cbf4a6871cdd3d99a7fb8b">FSE_compress</a></div><div class="ttdeci">FSE_PUBLIC_API size_t FSE_compress(void *dst, size_t dstCapacity, const void *src, size_t srcSize)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00715">fse_compress.c:715</a></div></div>
+<div class="ttc" id="afse_8h_html_a30d9f19efc67ff932a9eadeeddbcd88e"><div class="ttname"><a href="fse_8h.html#a30d9f19efc67ff932a9eadeeddbcd88e">FSE_getErrorName</a></div><div class="ttdeci">FSE_PUBLIC_API const char * FSE_getErrorName(size_t code)</div><div class="ttdef"><b>Definition</b> <a href="entropy__common_8c_source.html#l00052">entropy_common.c:52</a></div></div>
+<div class="ttc" id="afse_8h_html_a54dd08a75764e9f6058b47735da04eea"><div class="ttname"><a href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a></div><div class="ttdeci">unsigned FSE_CTable</div><div class="ttdef"><b>Definition</b> <a href="fse_8h_source.html#l00180">fse.h:180</a></div></div>
+<div class="ttc" id="afse_8h_html_a6b33c74a7862ed197cb58bfe3d31da36"><div class="ttname"><a href="fse_8h.html#a6b33c74a7862ed197cb58bfe3d31da36">FSE_freeCTable</a></div><div class="ttdeci">FSE_PUBLIC_API void FSE_freeCTable(FSE_CTable *ct)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00333">fse_compress.c:333</a></div></div>
+<div class="ttc" id="afse_8h_html_a79a83bf378068974a320feded073de7f"><div class="ttname"><a href="fse_8h.html#a79a83bf378068974a320feded073de7f">FSE_buildCTable</a></div><div class="ttdeci">FSE_PUBLIC_API size_t FSE_buildCTable(FSE_CTable *ct, const short *normalizedCounter, unsigned maxSymbolValue, unsigned tableLog)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00192">fse_compress.c:192</a></div></div>
+<div class="ttc" id="afse_8h_html_a911ee2b9e134c3767a504447da7e2123"><div class="ttname"><a href="fse_8h.html#a911ee2b9e134c3767a504447da7e2123">FSE_decompress_usingDTable</a></div><div class="ttdeci">FSE_PUBLIC_API size_t FSE_decompress_usingDTable(void *dst, size_t dstCapacity, const void *cSrc, size_t cSrcSize, const FSE_DTable *dt)</div><div class="ttdef"><b>Definition</b> <a href="fse__decompress_8c_source.html#l00265">fse_decompress.c:265</a></div></div>
+<div class="ttc" id="afse_8h_html_a9b46224799b8207ebd31ab088ab7597e"><div class="ttname"><a href="fse_8h.html#a9b46224799b8207ebd31ab088ab7597e">FSE_decompress</a></div><div class="ttdeci">FSE_PUBLIC_API size_t FSE_decompress(void *dst, size_t dstCapacity, const void *cSrc, size_t cSrcSize)</div><div class="ttdef"><b>Definition</b> <a href="fse__decompress_8c_source.html#l00303">fse_decompress.c:303</a></div></div>
+<div class="ttc" id="afse_8h_html_aa33652489acfb4285e8dff7280a1b1a1"><div class="ttname"><a href="fse_8h.html#aa33652489acfb4285e8dff7280a1b1a1">FSE_versionNumber</a></div><div class="ttdeci">FSE_PUBLIC_API unsigned FSE_versionNumber(void)</div><div class="ttdef"><b>Definition</b> <a href="entropy__common_8c_source.html#l00047">entropy_common.c:47</a></div></div>
+<div class="ttc" id="afse_8h_html_aaca3dda2d78980dbaaf7bf9139193299"><div class="ttname"><a href="fse_8h.html#aaca3dda2d78980dbaaf7bf9139193299">FSE_normalizeCount</a></div><div class="ttdeci">FSE_PUBLIC_API size_t FSE_normalizeCount(short *normalizedCounter, unsigned tableLog, const unsigned *count, size_t srcSize, unsigned maxSymbolValue)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00455">fse_compress.c:455</a></div></div>
+<div class="ttc" id="afse_8h_html_abe35c7de9117f8e367d3bc27072a7676"><div class="ttname"><a href="fse_8h.html#abe35c7de9117f8e367d3bc27072a7676">FSE_NCountWriteBound</a></div><div class="ttdeci">FSE_PUBLIC_API size_t FSE_NCountWriteBound(unsigned maxSymbolValue, unsigned tableLog)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00206">fse_compress.c:206</a></div></div>
+<div class="ttc" id="afse_8h_html_ac20f5d7b7f2833ce6c78bfa50302db7b"><div class="ttname"><a href="fse_8h.html#ac20f5d7b7f2833ce6c78bfa50302db7b">FSE_compress2</a></div><div class="ttdeci">FSE_PUBLIC_API size_t FSE_compress2(void *dst, size_t dstSize, const void *src, size_t srcSize, unsigned maxSymbolValue, unsigned tableLog)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00707">fse_compress.c:707</a></div></div>
+<div class="ttc" id="afse_8h_html_acf5c46f2ea45dd9838896af2574818ad"><div class="ttname"><a href="fse_8h.html#acf5c46f2ea45dd9838896af2574818ad">FSE_optimalTableLog</a></div><div class="ttdeci">FSE_PUBLIC_API unsigned FSE_optimalTableLog(unsigned maxTableLog, size_t srcSize, unsigned maxSymbolValue)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00359">fse_compress.c:359</a></div></div>
+<div class="ttc" id="afse_8h_html_adfc3f310dd87128762c1141edccef01c"><div class="ttname"><a href="fse_8h.html#adfc3f310dd87128762c1141edccef01c">FSE_createDTable</a></div><div class="ttdeci">FSE_PUBLIC_API FSE_DTable * FSE_createDTable(unsigned tableLog)</div><div class="ttdef"><b>Definition</b> <a href="fse__decompress_8c_source.html#l00084">fse_decompress.c:84</a></div></div>
+<div class="ttc" id="afse_8h_html_ae58fa772f25077f189caa819822c467b"><div class="ttname"><a href="fse_8h.html#ae58fa772f25077f189caa819822c467b">FSE_freeDTable</a></div><div class="ttdeci">FSE_PUBLIC_API void FSE_freeDTable(FSE_DTable *dt)</div><div class="ttdef"><b>Definition</b> <a href="fse__decompress_8c_source.html#l00090">fse_decompress.c:90</a></div></div>
+<div class="ttc" id="afse_8h_html_ae740e04e6a7422f50a249fe2c0425101"><div class="ttname"><a href="fse_8h.html#ae740e04e6a7422f50a249fe2c0425101">FSE_compressBound</a></div><div class="ttdeci">FSE_PUBLIC_API size_t FSE_compressBound(size_t size)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00646">fse_compress.c:646</a></div></div>
+<div class="ttc" id="afse_8h_html_ae791b5272655c08c187054dde72b8aa4"><div class="ttname"><a href="fse_8h.html#ae791b5272655c08c187054dde72b8aa4">FSE_DTable</a></div><div class="ttdeci">unsigned FSE_DTable</div><div class="ttdef"><b>Definition</b> <a href="fse_8h_source.html#l00253">fse.h:253</a></div></div>
+<div class="ttc" id="afse_8h_html_ae88873b11d0ddea3ebe5a8750edccfdc"><div class="ttname"><a href="fse_8h.html#ae88873b11d0ddea3ebe5a8750edccfdc">FSE_compress_usingCTable</a></div><div class="ttdeci">FSE_PUBLIC_API size_t FSE_compress_usingCTable(void *dst, size_t dstCapacity, const void *src, size_t srcSize, const FSE_CTable *ct)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00633">fse_compress.c:633</a></div></div>
+<div class="ttc" id="afse_8h_html_af64c31fdae2f9c52905c234c012876f2"><div class="ttname"><a href="fse_8h.html#af64c31fdae2f9c52905c234c012876f2">FSE_PUBLIC_API</a></div><div class="ttdeci">#define FSE_PUBLIC_API</div><div class="ttdef"><b>Definition</b> <a href="fse_8h_source.html#l00059">fse.h:59</a></div></div>
+<div class="ttc" id="afse__compress_8c_html_a21353abdc84db08c567dbb37375418e5"><div class="ttname"><a href="fse__compress_8c.html#a21353abdc84db08c567dbb37375418e5">FSE_compress_wksp</a></div><div class="ttdeci">size_t FSE_compress_wksp(void *dst, size_t dstSize, const void *src, size_t srcSize, unsigned maxSymbolValue, unsigned tableLog, void *workSpace, size_t wkspSize)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00655">fse_compress.c:655</a></div></div>
+<div class="ttc" id="afse__compress_8c_html_a33ef3a630482b3e532474c50112421ec"><div class="ttname"><a href="fse__compress_8c.html#a33ef3a630482b3e532474c50112421ec">FSE_buildCTable_wksp</a></div><div class="ttdeci">size_t FSE_buildCTable_wksp(FSE_CTable *ct, const short *normalizedCounter, unsigned maxSymbolValue, unsigned tableLog, void *workSpace, size_t wkspSize)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00086">fse_compress.c:86</a></div></div>
+<div class="ttc" id="afse__compress_8c_html_a5b48bd698b011962206908be5c233e64"><div class="ttname"><a href="fse__compress_8c.html#a5b48bd698b011962206908be5c233e64">FSE_optimalTableLog_internal</a></div><div class="ttdeci">unsigned FSE_optimalTableLog_internal(unsigned maxTableLog, size_t srcSize, unsigned maxSymbolValue, unsigned minus)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00345">fse_compress.c:345</a></div></div>
+<div class="ttc" id="afse__compress_8c_html_a7ab2ee8300d3fe2724cf97953dac66d0"><div class="ttname"><a href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError</a></div><div class="ttdeci">#define FSE_isError</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00053">fse_compress.c:53</a></div></div>
+<div class="ttc" id="afse__compress_8c_html_a987b16610cb65033b716c6b18086e06e"><div class="ttname"><a href="fse__compress_8c.html#a987b16610cb65033b716c6b18086e06e">FSE_buildCTable_rle</a></div><div class="ttdeci">size_t FSE_buildCTable_rle(FSE_CTable *ct, BYTE symbolValue)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00551">fse_compress.c:551</a></div></div>
+<div class="ttc" id="afse__compress_8c_html_ab4c1058ec2a95100980630e566e50e98"><div class="ttname"><a href="fse__compress_8c.html#ab4c1058ec2a95100980630e566e50e98">FSE_buildCTable_raw</a></div><div class="ttdeci">size_t FSE_buildCTable_raw(FSE_CTable *ct, unsigned nbBits)</div><div class="ttdef"><b>Definition</b> <a href="fse__compress_8c_source.html#l00518">fse_compress.c:518</a></div></div>
+<div class="ttc" id="afse__decompress_8c_html_a01b92286773782c30e204fe8e36e7850"><div class="ttname"><a href="fse__decompress_8c.html#a01b92286773782c30e204fe8e36e7850">FSE_decompress_wksp</a></div><div class="ttdeci">size_t FSE_decompress_wksp(void *dst, size_t dstCapacity, const void *cSrc, size_t cSrcSize, FSE_DTable *workSpace, unsigned maxLog)</div><div class="ttdef"><b>Definition</b> <a href="fse__decompress_8c_source.html#l00279">fse_decompress.c:279</a></div></div>
+<div class="ttc" id="afse__decompress_8c_html_a0d9b456e775d5b8fa92a564ecf5a6ca5"><div class="ttname"><a href="fse__decompress_8c.html#a0d9b456e775d5b8fa92a564ecf5a6ca5">FSE_buildDTable_rle</a></div><div class="ttdeci">size_t FSE_buildDTable_rle(FSE_DTable *dt, BYTE symbolValue)</div><div class="ttdef"><b>Definition</b> <a href="fse__decompress_8c_source.html#l00158">fse_decompress.c:158</a></div></div>
+<div class="ttc" id="afse__decompress_8c_html_aa0aec5c6135c0554f900988f0e681886"><div class="ttname"><a href="fse__decompress_8c.html#aa0aec5c6135c0554f900988f0e681886">FSE_buildDTable_raw</a></div><div class="ttdeci">size_t FSE_buildDTable_raw(FSE_DTable *dt, unsigned nbBits)</div><div class="ttdef"><b>Definition</b> <a href="fse__decompress_8c_source.html#l00176">fse_decompress.c:176</a></div></div>
+<div class="ttc" id="amem_8h_html_a2a8baa9c29ded9e4db53cc9fbaebcd48"><div class="ttname"><a href="mem_8h.html#a2a8baa9c29ded9e4db53cc9fbaebcd48">MEM_read16</a></div><div class="ttdeci">MEM_STATIC U16 MEM_read16(const void *memPtr)</div><div class="ttdef"><b>Definition</b> <a href="mem_8h_source.html#l00237">mem.h:237</a></div></div>
+<div class="ttc" id="amem_8h_html_ac3df7cf3c8cb172a588adec881447d68"><div class="ttname"><a href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a></div><div class="ttdeci">unsigned int U32</div><div class="ttdef"><b>Definition</b> <a href="mem_8h_source.html#l00150">mem.h:150</a></div></div>
+<div class="ttc" id="amem_8h_html_acf4d568511d5e964c3579616a28ab62b"><div class="ttname"><a href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a></div><div class="ttdeci">#define MEM_STATIC</div><div class="ttdef"><b>Definition</b> <a href="mem_8h_source.html#l00039">mem.h:39</a></div></div>
+<div class="ttc" id="amem_8h_html_adf928e51a60dba0df29d615401cc55a8"><div class="ttname"><a href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a></div><div class="ttdeci">unsigned short U16</div><div class="ttdef"><b>Definition</b> <a href="mem_8h_source.html#l00145">mem.h:145</a></div></div>
+<div class="ttc" id="astructBIT__CStream__t_html"><div class="ttname"><a href="structBIT__CStream__t.html">BIT_CStream_t</a></div><div class="ttdef"><b>Definition</b> <a href="bitstream_8h_source.html#l00076">bitstream.h:76</a></div></div>
+<div class="ttc" id="astructBIT__DStream__t_html"><div class="ttname"><a href="structBIT__DStream__t.html">BIT_DStream_t</a></div><div class="ttdef"><b>Definition</b> <a href="bitstream_8h_source.html#l00110">bitstream.h:110</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a08f683b5840d86269fccb0ca7609598c"><div class="ttname"><a href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a></div><div class="ttdeci">void * dst</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00078">zbuff.h:78</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a49286b6a0dd3728961b8ff1f1730a982"><div class="ttname"><a href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a></div><div class="ttdeci">void size_t const void * src</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00078">zbuff.h:78</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="fse_8h.html">fse.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

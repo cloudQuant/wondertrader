@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtCore/IExecCommand.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('IExecCommand_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">IExecCommand.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="IExecCommand_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;../Includes/FasterDefs.h&quot;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">class </span><a class="code hl_class" href="classWTSCommodityInfo.html">WTSCommodityInfo</a>;</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="keyword">class </span><a class="code hl_class" href="classWTSSessionInfo.html">WTSSessionInfo</a>;</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="keyword">class </span><a class="code hl_class" href="classIHotMgr.html">IHotMgr</a>;</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">class </span><a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>;</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="foldopen" id="foldopen00021" data-start="{" data-end="};">
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="classIExecuterStub.html">   21</a></span><span class="keyword">class </span><a class="code hl_class" href="classIExecuterStub.html">IExecuterStub</a></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>{</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="classIExecuterStub.html#a668c5c047e1dc0a7fb6e53633c230395">   28</a></span>    <span class="keyword">virtual</span> uint64_t <a class="code hl_function" href="classIExecuterStub.html#a668c5c047e1dc0a7fb6e53633c230395">get_real_time</a>() = 0;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classIExecuterStub.html#a8318de96c4086228cfe425f2e1e9ed04">   35</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSCommodityInfo.html">WTSCommodityInfo</a>* <a class="code hl_function" href="classIExecuterStub.html#a8318de96c4086228cfe425f2e1e9ed04">get_comm_info</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) = 0;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="classIExecuterStub.html#a220c5b46ebdeaff7904890af39c79f87">   42</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSSessionInfo.html">WTSSessionInfo</a>* <a class="code hl_function" href="classIExecuterStub.html#a220c5b46ebdeaff7904890af39c79f87">get_sess_info</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) = 0;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="classIExecuterStub.html#a9e9825ae5a15a6b5774b86032e38e566">   48</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classIHotMgr.html">IHotMgr</a>* <a class="code hl_function" href="classIExecuterStub.html#a9e9825ae5a15a6b5774b86032e38e566">get_hot_mon</a>() = 0;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="classIExecuterStub.html#aa03c527cca0a135e5215757abd77bb54">   54</a></span>    <span class="keyword">virtual</span> uint32_t <a class="code hl_function" href="classIExecuterStub.html#aa03c527cca0a135e5215757abd77bb54">get_trading_day</a>() = 0;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>};</div>
+</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="foldopen" id="foldopen00061" data-start="{" data-end="};">
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classIExecCommand.html">   61</a></span><span class="keyword">class </span><a class="code hl_class" href="classIExecCommand.html">IExecCommand</a></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>{</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="classIExecCommand.html#a1f4a7e47f4fc600368b478519438db03">   68</a></span>    <a class="code hl_function" href="classIExecCommand.html#a1f4a7e47f4fc600368b478519438db03">IExecCommand</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classIExecCommand.html#a219f6fab7624486ab96f4298ed304a7a">name</a>) :<a class="code hl_variable" href="classIExecCommand.html#adfcf1bd6b0df30e65a59a2e0b1bacbe8">_stub</a>(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>), <a class="code hl_variable" href="classIExecCommand.html#ac942a1f4f5879866387d8971c0fa1c4d">_name</a>(<a class="code hl_function" href="classIExecCommand.html#a219f6fab7624486ab96f4298ed304a7a">name</a>){}</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="classIExecCommand.html#a1c9a2f87e25aec22fac500dd72c1f3f7">   75</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classIExecCommand.html#a1c9a2f87e25aec22fac500dd72c1f3f7">set_position</a>(<span class="keyword">const</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, double&gt;</a>&amp; targets) {}</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="classIExecCommand.html#a591d89a18dfabd7e487a9aefa7176bd6">   83</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classIExecCommand.html#a591d89a18dfabd7e487a9aefa7176bd6">on_position_changed</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">double</span> diffPos) {}</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="classIExecCommand.html#a5f585ccd2cec4146f2d95d4243615b57">   91</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classIExecCommand.html#a5f585ccd2cec4146f2d95d4243615b57">on_tick</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick) {}</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="classIExecCommand.html#a788dd053e680e7a7198d1bd1f9690f2e">   98</a></span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classIExecCommand.html#a788dd053e680e7a7198d1bd1f9690f2e">setStub</a>(<a class="code hl_class" href="classIExecuterStub.html">IExecuterStub</a>* stub) { <a class="code hl_variable" href="classIExecCommand.html#adfcf1bd6b0df30e65a59a2e0b1bacbe8">_stub</a> = stub; }</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="classIExecCommand.html#a219f6fab7624486ab96f4298ed304a7a">  104</a></span>    <span class="keyword">inline</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classIExecCommand.html#a219f6fab7624486ab96f4298ed304a7a">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classIExecCommand.html#ac942a1f4f5879866387d8971c0fa1c4d">_name</a>.c_str(); }</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno"><a class="line" href="classIExecCommand.html#a6514449b049b0e7e6517ed24d3b6c1bc">  110</a></span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classIExecCommand.html#a6514449b049b0e7e6517ed24d3b6c1bc">setName</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classIExecCommand.html#a219f6fab7624486ab96f4298ed304a7a">name</a>) { <a class="code hl_variable" href="classIExecCommand.html#ac942a1f4f5879866387d8971c0fa1c4d">_name</a> = <a class="code hl_function" href="classIExecCommand.html#a219f6fab7624486ab96f4298ed304a7a">name</a>; }</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="classIExecCommand.html#adfcf1bd6b0df30e65a59a2e0b1bacbe8">  113</a></span>    <a class="code hl_class" href="classIExecuterStub.html">IExecuterStub</a>*  <a class="code hl_variable" href="classIExecCommand.html#adfcf1bd6b0df30e65a59a2e0b1bacbe8">_stub</a>;  </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="classIExecCommand.html#ac942a1f4f5879866387d8971c0fa1c4d">  114</a></span>    std::string     <a class="code hl_variable" href="classIExecCommand.html#ac942a1f4f5879866387d8971c0fa1c4d">_name</a>;  </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>};</div>
+</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aclassIExecCommand_html"><div class="ttname"><a href="classIExecCommand.html">IExecCommand</a></div><div class="ttdoc">执行命令接口</div><div class="ttdef"><b>Definition</b> <a href="IExecCommand_8h_source.html#l00061">IExecCommand.h:62</a></div></div>
+<div class="ttc" id="aclassIExecCommand_html_a1c9a2f87e25aec22fac500dd72c1f3f7"><div class="ttname"><a href="classIExecCommand.html#a1c9a2f87e25aec22fac500dd72c1f3f7">IExecCommand::set_position</a></div><div class="ttdeci">virtual void set_position(const wt_hashmap&lt; std::string, double &gt; &amp;targets)</div><div class="ttdoc">设置目标仓位</div><div class="ttdef"><b>Definition</b> <a href="IExecCommand_8h_source.html#l00075">IExecCommand.h:75</a></div></div>
+<div class="ttc" id="aclassIExecCommand_html_a1f4a7e47f4fc600368b478519438db03"><div class="ttname"><a href="classIExecCommand.html#a1f4a7e47f4fc600368b478519438db03">IExecCommand::IExecCommand</a></div><div class="ttdeci">IExecCommand(const char *name)</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="IExecCommand_8h_source.html#l00068">IExecCommand.h:68</a></div></div>
+<div class="ttc" id="aclassIExecCommand_html_a219f6fab7624486ab96f4298ed304a7a"><div class="ttname"><a href="classIExecCommand.html#a219f6fab7624486ab96f4298ed304a7a">IExecCommand::name</a></div><div class="ttdeci">const char * name() const</div><div class="ttdoc">获取执行器名称</div><div class="ttdef"><b>Definition</b> <a href="IExecCommand_8h_source.html#l00104">IExecCommand.h:104</a></div></div>
+<div class="ttc" id="aclassIExecCommand_html_a591d89a18dfabd7e487a9aefa7176bd6"><div class="ttname"><a href="classIExecCommand.html#a591d89a18dfabd7e487a9aefa7176bd6">IExecCommand::on_position_changed</a></div><div class="ttdeci">virtual void on_position_changed(const char *stdCode, double diffPos)</div><div class="ttdoc">合约仓位变动通知</div><div class="ttdef"><b>Definition</b> <a href="IExecCommand_8h_source.html#l00083">IExecCommand.h:83</a></div></div>
+<div class="ttc" id="aclassIExecCommand_html_a5f585ccd2cec4146f2d95d4243615b57"><div class="ttname"><a href="classIExecCommand.html#a5f585ccd2cec4146f2d95d4243615b57">IExecCommand::on_tick</a></div><div class="ttdeci">virtual void on_tick(const char *stdCode, WTSTickData *newTick)</div><div class="ttdoc">实时行情回调</div><div class="ttdef"><b>Definition</b> <a href="IExecCommand_8h_source.html#l00091">IExecCommand.h:91</a></div></div>
+<div class="ttc" id="aclassIExecCommand_html_a6514449b049b0e7e6517ed24d3b6c1bc"><div class="ttname"><a href="classIExecCommand.html#a6514449b049b0e7e6517ed24d3b6c1bc">IExecCommand::setName</a></div><div class="ttdeci">void setName(const char *name)</div><div class="ttdoc">设置执行器名称</div><div class="ttdef"><b>Definition</b> <a href="IExecCommand_8h_source.html#l00110">IExecCommand.h:110</a></div></div>
+<div class="ttc" id="aclassIExecCommand_html_a788dd053e680e7a7198d1bd1f9690f2e"><div class="ttname"><a href="classIExecCommand.html#a788dd053e680e7a7198d1bd1f9690f2e">IExecCommand::setStub</a></div><div class="ttdeci">void setStub(IExecuterStub *stub)</div><div class="ttdoc">设置执行器存根</div><div class="ttdef"><b>Definition</b> <a href="IExecCommand_8h_source.html#l00098">IExecCommand.h:98</a></div></div>
+<div class="ttc" id="aclassIExecCommand_html_ac942a1f4f5879866387d8971c0fa1c4d"><div class="ttname"><a href="classIExecCommand.html#ac942a1f4f5879866387d8971c0fa1c4d">IExecCommand::_name</a></div><div class="ttdeci">std::string _name</div><div class="ttdoc">执行器名称</div><div class="ttdef"><b>Definition</b> <a href="IExecCommand_8h_source.html#l00114">IExecCommand.h:114</a></div></div>
+<div class="ttc" id="aclassIExecCommand_html_adfcf1bd6b0df30e65a59a2e0b1bacbe8"><div class="ttname"><a href="classIExecCommand.html#adfcf1bd6b0df30e65a59a2e0b1bacbe8">IExecCommand::_stub</a></div><div class="ttdeci">IExecuterStub * _stub</div><div class="ttdoc">执行器存根指针</div><div class="ttdef"><b>Definition</b> <a href="IExecCommand_8h_source.html#l00113">IExecCommand.h:113</a></div></div>
+<div class="ttc" id="aclassIExecuterStub_html"><div class="ttname"><a href="classIExecuterStub.html">IExecuterStub</a></div><div class="ttdoc">执行器存根接口</div><div class="ttdef"><b>Definition</b> <a href="IExecCommand_8h_source.html#l00021">IExecCommand.h:22</a></div></div>
+<div class="ttc" id="aclassIExecuterStub_html_a220c5b46ebdeaff7904890af39c79f87"><div class="ttname"><a href="classIExecuterStub.html#a220c5b46ebdeaff7904890af39c79f87">IExecuterStub::get_sess_info</a></div><div class="ttdeci">virtual WTSSessionInfo * get_sess_info(const char *stdCode)=0</div><div class="ttdoc">获取交易时段信息</div></div>
+<div class="ttc" id="aclassIExecuterStub_html_a668c5c047e1dc0a7fb6e53633c230395"><div class="ttname"><a href="classIExecuterStub.html#a668c5c047e1dc0a7fb6e53633c230395">IExecuterStub::get_real_time</a></div><div class="ttdeci">virtual uint64_t get_real_time()=0</div><div class="ttdoc">获取当前时间</div></div>
+<div class="ttc" id="aclassIExecuterStub_html_a8318de96c4086228cfe425f2e1e9ed04"><div class="ttname"><a href="classIExecuterStub.html#a8318de96c4086228cfe425f2e1e9ed04">IExecuterStub::get_comm_info</a></div><div class="ttdeci">virtual WTSCommodityInfo * get_comm_info(const char *stdCode)=0</div><div class="ttdoc">获取合约信息</div></div>
+<div class="ttc" id="aclassIExecuterStub_html_a9e9825ae5a15a6b5774b86032e38e566"><div class="ttname"><a href="classIExecuterStub.html#a9e9825ae5a15a6b5774b86032e38e566">IExecuterStub::get_hot_mon</a></div><div class="ttdeci">virtual IHotMgr * get_hot_mon()=0</div><div class="ttdoc">获取主力合约管理器</div></div>
+<div class="ttc" id="aclassIExecuterStub_html_aa03c527cca0a135e5215757abd77bb54"><div class="ttname"><a href="classIExecuterStub.html#aa03c527cca0a135e5215757abd77bb54">IExecuterStub::get_trading_day</a></div><div class="ttdeci">virtual uint32_t get_trading_day()=0</div><div class="ttdoc">获取当前交易日</div></div>
+<div class="ttc" id="aclassIHotMgr_html"><div class="ttname"><a href="classIHotMgr.html">IHotMgr</a></div><div class="ttdoc">主力合约管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IHotMgr_8h_source.html#l00066">IHotMgr.h:67</a></div></div>
+<div class="ttc" id="aclassWTSCommodityInfo_html"><div class="ttname"><a href="classWTSCommodityInfo.html">WTSCommodityInfo</a></div><div class="ttdoc">品种信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00020">WTSContractInfo.hpp:21</a></div></div>
+<div class="ttc" id="aclassWTSSessionInfo_html"><div class="ttname"><a href="classWTSSessionInfo.html">WTSSessionInfo</a></div><div class="ttdoc">会话信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSSessionInfo_8hpp_source.html#l00020">WTSSessionInfo.hpp:21</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclasswt__hashmap_html"><div class="ttname"><a href="classwt__hashmap.html">wt_hashmap</a></div><div class="ttdoc">WonderTrader通用高性能哈希表模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00162">FasterDefs.h:163</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3ce996bf6400c0a215df0636043a382c.html">WtCore</a></li><li class="navelem"><a class="el" href="IExecCommand_8h.html">IExecCommand.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

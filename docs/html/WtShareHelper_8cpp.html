@@ -1,0 +1,1712 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtShareHelper/WtShareHelper.cpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtShareHelper_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">WtShareHelper.cpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>WonderTrader共享内存帮助模块实现文件  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="WtShareHelper_8h_source.html">WtShareHelper.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="ShareBlocks_8h_source.html">ShareBlocks.h</a>&quot;</code><br />
+</div>
+<p><a href="WtShareHelper_8cpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a87bde9a53da7c19fca4615512e11e6f0" id="r_a87bde9a53da7c19fca4615512e11e6f0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a87bde9a53da7c19fca4615512e11e6f0">init_master</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *id, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *path)</td></tr>
+<tr class="memdesc:a87bde9a53da7c19fca4615512e11e6f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化主进程共享内存  <br /></td></tr>
+<tr class="separator:a87bde9a53da7c19fca4615512e11e6f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8ae6b618444d941e2a749f84316cf35" id="r_ac8ae6b618444d941e2a749f84316cf35"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#ac8ae6b618444d941e2a749f84316cf35">init_slave</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *id, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *path)</td></tr>
+<tr class="memdesc:ac8ae6b618444d941e2a749f84316cf35"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化从进程共享内存  <br /></td></tr>
+<tr class="separator:ac8ae6b618444d941e2a749f84316cf35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ea7a4a8f7ef21fb395cd96355b1e2a4" id="r_a3ea7a4a8f7ef21fb395cd96355b1e2a4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a3ea7a4a8f7ef21fb395cd96355b1e2a4">update_slave</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *id, bool bForce)</td></tr>
+<tr class="memdesc:a3ea7a4a8f7ef21fb395cd96355b1e2a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">更新从进程共享内存  <br /></td></tr>
+<tr class="separator:a3ea7a4a8f7ef21fb395cd96355b1e2a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ef00a7781425e4da99fce5a22feac59" id="r_a6ef00a7781425e4da99fce5a22feac59"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a6ef00a7781425e4da99fce5a22feac59">release_slave</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *name)</td></tr>
+<tr class="memdesc:a6ef00a7781425e4da99fce5a22feac59"><td class="mdescLeft">&#160;</td><td class="mdescRight">释放从进程共享内存  <br /></td></tr>
+<tr class="separator:a6ef00a7781425e4da99fce5a22feac59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab793e87d9ff1362655129c695d55e1d7" id="r_ab793e87d9ff1362655129c695d55e1d7"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#ab793e87d9ff1362655129c695d55e1d7">get_sections</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="WtShareHelper_8h.html#a56661b88cd31dacfe44b2de9def0f7dd">FuncGetSections</a> cb)</td></tr>
+<tr class="memdesc:ab793e87d9ff1362655129c695d55e1d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定域下的所有分区  <br /></td></tr>
+<tr class="separator:ab793e87d9ff1362655129c695d55e1d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d6978a9adbfa14a74b26e5615d414ce" id="r_a0d6978a9adbfa14a74b26e5615d414ce"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a0d6978a9adbfa14a74b26e5615d414ce">get_keys</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="WtShareHelper_8h.html#a53610fdd7d335e321d658bae38cfcbcd">FuncGetKeys</a> cb)</td></tr>
+<tr class="memdesc:a0d6978a9adbfa14a74b26e5615d414ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定域和分区下的所有键  <br /></td></tr>
+<tr class="separator:a0d6978a9adbfa14a74b26e5615d414ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79055eb82c7569d41f70c11fdd2f6f2e" id="r_a79055eb82c7569d41f70c11fdd2f6f2e"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a79055eb82c7569d41f70c11fdd2f6f2e">get_section_updatetime</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section)</td></tr>
+<tr class="memdesc:a79055eb82c7569d41f70c11fdd2f6f2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取分区的更新时间  <br /></td></tr>
+<tr class="separator:a79055eb82c7569d41f70c11fdd2f6f2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7f80528feb1b24c3c2d0f5e07f5e4f1" id="r_ae7f80528feb1b24c3c2d0f5e07f5e4f1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#ae7f80528feb1b24c3c2d0f5e07f5e4f1">commit_section</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section)</td></tr>
+<tr class="memdesc:ae7f80528feb1b24c3c2d0f5e07f5e4f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">提交分区的变更  <br /></td></tr>
+<tr class="separator:ae7f80528feb1b24c3c2d0f5e07f5e4f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad555d4379400c7ecb9d5d7bb68f977fe" id="r_ad555d4379400c7ecb9d5d7bb68f977fe"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#ad555d4379400c7ecb9d5d7bb68f977fe">delete_section</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section)</td></tr>
+<tr class="memdesc:ad555d4379400c7ecb9d5d7bb68f977fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">删除分区  <br /></td></tr>
+<tr class="separator:ad555d4379400c7ecb9d5d7bb68f977fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1014e47f1be4f03e3519342d3cc57c5" id="r_ae1014e47f1be4f03e3519342d3cc57c5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#ae1014e47f1be4f03e3519342d3cc57c5">allocate_string</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *initVal, bool bForceWrite)</td></tr>
+<tr class="memdesc:ae1014e47f1be4f03e3519342d3cc57c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">分配字符串类型的共享内存  <br /></td></tr>
+<tr class="separator:ae1014e47f1be4f03e3519342d3cc57c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54e1ce7e46cb94dd4f43aff341e17e05" id="r_a54e1ce7e46cb94dd4f43aff341e17e05"><td class="memItemLeft" align="right" valign="top">int32_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a54e1ce7e46cb94dd4f43aff341e17e05">allocate_int32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, int32_t initVal, bool bForceWrite)</td></tr>
+<tr class="memdesc:a54e1ce7e46cb94dd4f43aff341e17e05"><td class="mdescLeft">&#160;</td><td class="mdescRight">分配32位整数类型的共享内存  <br /></td></tr>
+<tr class="separator:a54e1ce7e46cb94dd4f43aff341e17e05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6c269e6f2fd9bf3fbac18b1a2f98b39" id="r_ab6c269e6f2fd9bf3fbac18b1a2f98b39"><td class="memItemLeft" align="right" valign="top">int64_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#ab6c269e6f2fd9bf3fbac18b1a2f98b39">allocate_int64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, int64_t initVal, bool bForceWrite)</td></tr>
+<tr class="memdesc:ab6c269e6f2fd9bf3fbac18b1a2f98b39"><td class="mdescLeft">&#160;</td><td class="mdescRight">分配64位整数类型的共享内存  <br /></td></tr>
+<tr class="separator:ab6c269e6f2fd9bf3fbac18b1a2f98b39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f39785d9c96cba56698403df6d346f8" id="r_a2f39785d9c96cba56698403df6d346f8"><td class="memItemLeft" align="right" valign="top">uint32_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a2f39785d9c96cba56698403df6d346f8">allocate_uint32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, uint32_t initVal, bool bForceWrite)</td></tr>
+<tr class="memdesc:a2f39785d9c96cba56698403df6d346f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">分配无符32位整数类型的共享内存  <br /></td></tr>
+<tr class="separator:a2f39785d9c96cba56698403df6d346f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6fed4dd31c8992f5d16519848a8b0bcc" id="r_a6fed4dd31c8992f5d16519848a8b0bcc"><td class="memItemLeft" align="right" valign="top">uint64_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a6fed4dd31c8992f5d16519848a8b0bcc">allocate_uint64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, uint64_t initVal, bool bForceWrite)</td></tr>
+<tr class="memdesc:a6fed4dd31c8992f5d16519848a8b0bcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">分配无符64位整数类型的共享内存  <br /></td></tr>
+<tr class="separator:a6fed4dd31c8992f5d16519848a8b0bcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4ab96a7b5a34f21e98c42a6b22e4053" id="r_ac4ab96a7b5a34f21e98c42a6b22e4053"><td class="memItemLeft" align="right" valign="top">double *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#ac4ab96a7b5a34f21e98c42a6b22e4053">allocate_double</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, double initVal, bool bForceWrite)</td></tr>
+<tr class="memdesc:ac4ab96a7b5a34f21e98c42a6b22e4053"><td class="mdescLeft">&#160;</td><td class="mdescRight">分配双精度浮点数类型的共享内存  <br /></td></tr>
+<tr class="separator:ac4ab96a7b5a34f21e98c42a6b22e4053"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab761715c4de9bc3babefbc5da49ab1ed" id="r_ab761715c4de9bc3babefbc5da49ab1ed"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#ab761715c4de9bc3babefbc5da49ab1ed">set_string</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *val)</td></tr>
+<tr class="memdesc:ab761715c4de9bc3babefbc5da49ab1ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置字符串类型的共享内存值  <br /></td></tr>
+<tr class="separator:ab761715c4de9bc3babefbc5da49ab1ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9bb470988526c13ee20771d50fb9b758" id="r_a9bb470988526c13ee20771d50fb9b758"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a9bb470988526c13ee20771d50fb9b758">set_int32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, int32_t val)</td></tr>
+<tr class="memdesc:a9bb470988526c13ee20771d50fb9b758"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置32位整数类型的共享内存值  <br /></td></tr>
+<tr class="separator:a9bb470988526c13ee20771d50fb9b758"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39e5c464e68458d64184fe0155459f9c" id="r_a39e5c464e68458d64184fe0155459f9c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a39e5c464e68458d64184fe0155459f9c">set_int64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, int64_t val)</td></tr>
+<tr class="memdesc:a39e5c464e68458d64184fe0155459f9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置64位整数类型的共享内存值  <br /></td></tr>
+<tr class="separator:a39e5c464e68458d64184fe0155459f9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50b5c99a563af59b97ae457b4f4dc03b" id="r_a50b5c99a563af59b97ae457b4f4dc03b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a50b5c99a563af59b97ae457b4f4dc03b">set_uint32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, uint32_t val)</td></tr>
+<tr class="memdesc:a50b5c99a563af59b97ae457b4f4dc03b"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置无符32位整数类型的共享内存值  <br /></td></tr>
+<tr class="separator:a50b5c99a563af59b97ae457b4f4dc03b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3493eb774384a6eb725ad21d9efbf986" id="r_a3493eb774384a6eb725ad21d9efbf986"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a3493eb774384a6eb725ad21d9efbf986">set_uint64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, uint64_t val)</td></tr>
+<tr class="memdesc:a3493eb774384a6eb725ad21d9efbf986"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置无符64位整数类型的共享内存值  <br /></td></tr>
+<tr class="separator:a3493eb774384a6eb725ad21d9efbf986"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb44f0d27e046355847a229acd9c9a2b" id="r_abb44f0d27e046355847a229acd9c9a2b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#abb44f0d27e046355847a229acd9c9a2b">set_double</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, double val)</td></tr>
+<tr class="memdesc:abb44f0d27e046355847a229acd9c9a2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置双精度浮点数类型的共享内存值  <br /></td></tr>
+<tr class="separator:abb44f0d27e046355847a229acd9c9a2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac491007c2aee3874b18439d3b855e0e5" id="r_ac491007c2aee3874b18439d3b855e0e5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#ac491007c2aee3874b18439d3b855e0e5">get_string</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *defVal)</td></tr>
+<tr class="memdesc:ac491007c2aee3874b18439d3b855e0e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取字符串类型的共享内存值  <br /></td></tr>
+<tr class="separator:ac491007c2aee3874b18439d3b855e0e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ddfce14d059c29481aea05bfba0d2a9" id="r_a0ddfce14d059c29481aea05bfba0d2a9"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a0ddfce14d059c29481aea05bfba0d2a9">get_int32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, int32_t defVal)</td></tr>
+<tr class="memdesc:a0ddfce14d059c29481aea05bfba0d2a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取32位整数类型的共享内存值  <br /></td></tr>
+<tr class="separator:a0ddfce14d059c29481aea05bfba0d2a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c61c815c6e94d70ebb88ad00d8233b5" id="r_a1c61c815c6e94d70ebb88ad00d8233b5"><td class="memItemLeft" align="right" valign="top">int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a1c61c815c6e94d70ebb88ad00d8233b5">get_int64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, int64_t defVal)</td></tr>
+<tr class="memdesc:a1c61c815c6e94d70ebb88ad00d8233b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取64位整数类型的共享内存值  <br /></td></tr>
+<tr class="separator:a1c61c815c6e94d70ebb88ad00d8233b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7038402e549c560ff8a2491f3f864a28" id="r_a7038402e549c560ff8a2491f3f864a28"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a7038402e549c560ff8a2491f3f864a28">get_uint32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, uint32_t defVal)</td></tr>
+<tr class="memdesc:a7038402e549c560ff8a2491f3f864a28"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取无符32位整数类型的共享内存值  <br /></td></tr>
+<tr class="separator:a7038402e549c560ff8a2491f3f864a28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b95e3ddf5857c9d7afd1f2969eccdd5" id="r_a5b95e3ddf5857c9d7afd1f2969eccdd5"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a5b95e3ddf5857c9d7afd1f2969eccdd5">get_uint64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, uint64_t defVal)</td></tr>
+<tr class="memdesc:a5b95e3ddf5857c9d7afd1f2969eccdd5"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取无符64位整数类型的共享内存值  <br /></td></tr>
+<tr class="separator:a5b95e3ddf5857c9d7afd1f2969eccdd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8742521b11f1637ec174332bbf7e824d" id="r_a8742521b11f1637ec174332bbf7e824d"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a8742521b11f1637ec174332bbf7e824d">get_double</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *domain, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *section, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, double defVal)</td></tr>
+<tr class="memdesc:a8742521b11f1637ec174332bbf7e824d"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取双精度浮点数类型的共享内存值  <br /></td></tr>
+<tr class="separator:a8742521b11f1637ec174332bbf7e824d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2aa2d3c579859f459c8c9fff6ca2f834" id="r_a2aa2d3c579859f459c8c9fff6ca2f834"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a2aa2d3c579859f459c8c9fff6ca2f834">init_cmder</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *name, bool isCmder, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *path)</td></tr>
+<tr class="memdesc:a2aa2d3c579859f459c8c9fff6ca2f834"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化命令器  <br /></td></tr>
+<tr class="separator:a2aa2d3c579859f459c8c9fff6ca2f834"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af143bd108d58cfde6717058cd4f1378c" id="r_af143bd108d58cfde6717058cd4f1378c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#af143bd108d58cfde6717058cd4f1378c">add_cmd</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *name, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *cmd)</td></tr>
+<tr class="memdesc:af143bd108d58cfde6717058cd4f1378c"><td class="mdescLeft">&#160;</td><td class="mdescRight">添加命令  <br /></td></tr>
+<tr class="separator:af143bd108d58cfde6717058cd4f1378c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86a24256be12fb662768b2375a9eee56" id="r_a86a24256be12fb662768b2375a9eee56"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtShareHelper_8cpp.html#a86a24256be12fb662768b2375a9eee56">get_cmd</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *name, uint32_t &amp;lastIdx)</td></tr>
+<tr class="memdesc:a86a24256be12fb662768b2375a9eee56"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取命令  <br /></td></tr>
+<tr class="separator:a86a24256be12fb662768b2375a9eee56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>WonderTrader共享内存帮助模块实现文件 </p>
+<p>实现跨进程共享内存管理的接口，包括初始化、读写和命令传递等功能 </p>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="af143bd108d58cfde6717058cd4f1378c" name="af143bd108d58cfde6717058cd4f1378c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af143bd108d58cfde6717058cd4f1378c">&#9670;&#160;</a></span>add_cmd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool add_cmd </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>cmd</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>添加命令 </p>
+<p>向命令器中添加一条命令 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>命令器名称 </td></tr>
+    <tr><td class="paramname">cmd</td><td>要添加的命令 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>添加是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00407">407</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac4ab96a7b5a34f21e98c42a6b22e4053" name="ac4ab96a7b5a34f21e98c42a6b22e4053"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4ab96a7b5a34f21e98c42a6b22e4053">&#9670;&#160;</a></span>allocate_double()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double * allocate_double </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>initVal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bForceWrite</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>分配双精度浮点数类型的共享内存 </p>
+<p>在共享内存中分配双精度浮点数类型的内存空间，并设置初始值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">initVal</td><td>初始值 </td></tr>
+    <tr><td class="paramname">bForceWrite</td><td>是否强制写入，即使键已存在，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分配的浮点数指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00214">214</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a54e1ce7e46cb94dd4f43aff341e17e05" name="a54e1ce7e46cb94dd4f43aff341e17e05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54e1ce7e46cb94dd4f43aff341e17e05">&#9670;&#160;</a></span>allocate_int32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t * allocate_int32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>initVal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bForceWrite</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>分配32位整数类型的共享内存 </p>
+<p>在共享内存中分配32位整数类型的内存空间，并设置初始值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">initVal</td><td>初始值 </td></tr>
+    <tr><td class="paramname">bForceWrite</td><td>是否强制写入，即使键已存在，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分配的整数指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00154">154</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab6c269e6f2fd9bf3fbac18b1a2f98b39" name="ab6c269e6f2fd9bf3fbac18b1a2f98b39"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6c269e6f2fd9bf3fbac18b1a2f98b39">&#9670;&#160;</a></span>allocate_int64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int64_t * allocate_int64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int64_t&#160;</td>
+          <td class="paramname"><em>initVal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bForceWrite</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>分配64位整数类型的共享内存 </p>
+<p>在共享内存中分配64位整数类型的内存空间，并设置初始值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">initVal</td><td>初始值 </td></tr>
+    <tr><td class="paramname">bForceWrite</td><td>是否强制写入，即使键已存在，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分配的整数指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00169">169</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae1014e47f1be4f03e3519342d3cc57c5" name="ae1014e47f1be4f03e3519342d3cc57c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1014e47f1be4f03e3519342d3cc57c5">&#9670;&#160;</a></span>allocate_string()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * allocate_string </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>initVal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bForceWrite</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>分配字符串类型的共享内存 </p>
+<p>在共享内存中分配字符串类型的内存空间，并设置初始值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">initVal</td><td>初始值 </td></tr>
+    <tr><td class="paramname">bForceWrite</td><td>是否强制写入，即使键已存在，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分配的字符串指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00139">139</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2f39785d9c96cba56698403df6d346f8" name="a2f39785d9c96cba56698403df6d346f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f39785d9c96cba56698403df6d346f8">&#9670;&#160;</a></span>allocate_uint32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t * allocate_uint32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>initVal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bForceWrite</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>分配无符32位整数类型的共享内存 </p>
+<p>在共享内存中分配无符32位整数类型的内存空间，并设置初始值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">initVal</td><td>初始值 </td></tr>
+    <tr><td class="paramname">bForceWrite</td><td>是否强制写入，即使键已存在，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分配的无符号整数指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00184">184</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6fed4dd31c8992f5d16519848a8b0bcc" name="a6fed4dd31c8992f5d16519848a8b0bcc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6fed4dd31c8992f5d16519848a8b0bcc">&#9670;&#160;</a></span>allocate_uint64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t * allocate_uint64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>initVal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bForceWrite</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>分配无符64位整数类型的共享内存 </p>
+<p>在共享内存中分配无符64位整数类型的内存空间，并设置初始值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">initVal</td><td>初始值 </td></tr>
+    <tr><td class="paramname">bForceWrite</td><td>是否强制写入，即使键已存在，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分配的无符号整数指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00199">199</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae7f80528feb1b24c3c2d0f5e07f5e4f1" name="ae7f80528feb1b24c3c2d0f5e07f5e4f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7f80528feb1b24c3c2d0f5e07f5e4f1">&#9670;&#160;</a></span>commit_section()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool commit_section </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>提交分区的变更 </p>
+<p>将共享内存中指定域和分区的变更提交到存储介质，并更新时间戳 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>提交是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00112">112</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad555d4379400c7ecb9d5d7bb68f977fe" name="ad555d4379400c7ecb9d5d7bb68f977fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad555d4379400c7ecb9d5d7bb68f977fe">&#9670;&#160;</a></span>delete_section()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool delete_section </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>删除分区 </p>
+<p>删除共享内存中指定域和分区的所有数据 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>删除是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00124">124</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a86a24256be12fb662768b2375a9eee56" name="a86a24256be12fb662768b2375a9eee56"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86a24256be12fb662768b2375a9eee56">&#9670;&#160;</a></span>get_cmd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * get_cmd </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t &amp;&#160;</td>
+          <td class="paramname"><em>lastIdx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取命令 </p>
+<p>从命令器中获取一条命令 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>命令器名称 </td></tr>
+    <tr><td class="paramname">lastIdx</td><td>上次获取的命令索引，会被更新为当前获取的命令索引 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>命令字符串，如果没有新命令则返回null </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00419">419</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8742521b11f1637ec174332bbf7e824d" name="a8742521b11f1637ec174332bbf7e824d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8742521b11f1637ec174332bbf7e824d">&#9670;&#160;</a></span>get_double()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double get_double </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>defVal</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取双精度浮点数类型的共享内存值 </p>
+<p>获取共享内存中指定域、分区和键的双精度浮点数值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">defVal</td><td>默认值，当键不存在时返回此值，默认为0 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>双精度浮点数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00382">382</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0ddfce14d059c29481aea05bfba0d2a9" name="a0ddfce14d059c29481aea05bfba0d2a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ddfce14d059c29481aea05bfba0d2a9">&#9670;&#160;</a></span>get_int32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t get_int32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>defVal</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取32位整数类型的共享内存值 </p>
+<p>获取共享内存中指定域、分区和键的32位整数值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">defVal</td><td>默认值，当键不存在时返回此值，默认为0 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>32位整数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00326">326</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1c61c815c6e94d70ebb88ad00d8233b5" name="a1c61c815c6e94d70ebb88ad00d8233b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c61c815c6e94d70ebb88ad00d8233b5">&#9670;&#160;</a></span>get_int64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int64_t get_int64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int64_t&#160;</td>
+          <td class="paramname"><em>defVal</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取64位整数类型的共享内存值 </p>
+<p>获取共享内存中指定域、分区和键的64位整数值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">defVal</td><td>默认值，当键不存在时返回此值，默认为0 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>64位整数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00340">340</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0d6978a9adbfa14a74b26e5615d414ce" name="a0d6978a9adbfa14a74b26e5615d414ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d6978a9adbfa14a74b26e5615d414ce">&#9670;&#160;</a></span>get_keys()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t get_keys </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtShareHelper_8h.html#a53610fdd7d335e321d658bae38cfcbcd">FuncGetKeys</a>&#160;</td>
+          <td class="paramname"><em>cb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取指定域和分区下的所有键 </p>
+<p>获取共享内存中指定域和分区下的所有键，并通过回调函数返回键名称及类型 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">cb</td><td>回调函数，用于处理每个键的名称和类型 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>键的数量 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00084">84</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a79055eb82c7569d41f70c11fdd2f6f2e" name="a79055eb82c7569d41f70c11fdd2f6f2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79055eb82c7569d41f70c11fdd2f6f2e">&#9670;&#160;</a></span>get_section_updatetime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t get_section_updatetime </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取分区的更新时间 </p>
+<p>获取共享内存中指定域和分区的最后更新时间 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>更新时间的时间戳 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00100">100</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab793e87d9ff1362655129c695d55e1d7" name="ab793e87d9ff1362655129c695d55e1d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab793e87d9ff1362655129c695d55e1d7">&#9670;&#160;</a></span>get_sections()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t get_sections </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtShareHelper_8h.html#a56661b88cd31dacfe44b2de9def0f7dd">FuncGetSections</a>&#160;</td>
+          <td class="paramname"><em>cb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取指定域下的所有分区 </p>
+<p>获取共享内存中指定域下的所有分区，并通过回调函数返回分区名称 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">cb</td><td>回调函数，用于处理每个分区名称 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分区数量 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00067">67</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac491007c2aee3874b18439d3b855e0e5" name="ac491007c2aee3874b18439d3b855e0e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac491007c2aee3874b18439d3b855e0e5">&#9670;&#160;</a></span>get_string()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * get_string </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>defVal</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取字符串类型的共享内存值 </p>
+<p>获取共享内存中指定域、分区和键的字符串值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">defVal</td><td>默认值，当键不存在时返回此值，默认为空字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>字符串值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00312">312</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7038402e549c560ff8a2491f3f864a28" name="a7038402e549c560ff8a2491f3f864a28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7038402e549c560ff8a2491f3f864a28">&#9670;&#160;</a></span>get_uint32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t get_uint32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>defVal</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取无符32位整数类型的共享内存值 </p>
+<p>获取共享内存中指定域、分区和键的无符32位整数值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">defVal</td><td>默认值，当键不存在时返回此值，默认为0 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>无符32位整数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00354">354</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5b95e3ddf5857c9d7afd1f2969eccdd5" name="a5b95e3ddf5857c9d7afd1f2969eccdd5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b95e3ddf5857c9d7afd1f2969eccdd5">&#9670;&#160;</a></span>get_uint64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t get_uint64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>defVal</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取无符64位整数类型的共享内存值 </p>
+<p>获取共享内存中指定域、分区和键的无符64位整数值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">defVal</td><td>默认值，当键不存在时返回此值，默认为0 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>无符64位整数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00368">368</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2aa2d3c579859f459c8c9fff6ca2f834" name="a2aa2d3c579859f459c8c9fff6ca2f834"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2aa2d3c579859f459c8c9fff6ca2f834">&#9670;&#160;</a></span>init_cmder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool init_cmder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isCmder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>path</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化命令器 </p>
+<p>初始化命令器，用于进程间命令传递 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>命令器名称 </td></tr>
+    <tr><td class="paramname">isCmder</td><td>是否为命令发送方，默认为false </td></tr>
+    <tr><td class="paramname">path</td><td>共享内存文件路径，默认为空字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>初始化是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00395">395</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a87bde9a53da7c19fca4615512e11e6f0" name="a87bde9a53da7c19fca4615512e11e6f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87bde9a53da7c19fca4615512e11e6f0">&#9670;&#160;</a></span>init_master()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool init_master </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>path</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化主进程共享内存 </p>
+<p>在主进程中初始化共享内存块，用于进程间数据共享 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>共享内存标识符 </td></tr>
+    <tr><td class="paramname">path</td><td>共享内存文件路径，默认为空字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>初始化是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00019">19</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac8ae6b618444d941e2a749f84316cf35" name="ac8ae6b618444d941e2a749f84316cf35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8ae6b618444d941e2a749f84316cf35">&#9670;&#160;</a></span>init_slave()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool init_slave </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>path</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化从进程共享内存 </p>
+<p>在从进程中初始化共享内存块，连接到主进程创建的共享内存 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>共享内存标识符，需要与主进程中的标识符相同 </td></tr>
+    <tr><td class="paramname">path</td><td>共享内存文件路径，默认为空字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>初始化是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00032">32</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6ef00a7781425e4da99fce5a22feac59" name="a6ef00a7781425e4da99fce5a22feac59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ef00a7781425e4da99fce5a22feac59">&#9670;&#160;</a></span>release_slave()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool release_slave </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>name</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>释放从进程共享内存 </p>
+<p>在从进程中释放共享内存块，断开与主进程的连接 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>共享内存名称 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>释放是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00055">55</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abb44f0d27e046355847a229acd9c9a2b" name="abb44f0d27e046355847a229acd9c9a2b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb44f0d27e046355847a229acd9c9a2b">&#9670;&#160;</a></span>set_double()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool set_double </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置双精度浮点数类型的共享内存值 </p>
+<p>设置共享内存中指定域、分区和键的双精度浮点数值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">val</td><td>要设置的浮点数值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>设置是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00298">298</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9bb470988526c13ee20771d50fb9b758" name="a9bb470988526c13ee20771d50fb9b758"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9bb470988526c13ee20771d50fb9b758">&#9670;&#160;</a></span>set_int32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool set_int32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置32位整数类型的共享内存值 </p>
+<p>设置共享内存中指定域、分区和键的32位整数值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">val</td><td>要设置的整数值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>设置是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00242">242</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a39e5c464e68458d64184fe0155459f9c" name="a39e5c464e68458d64184fe0155459f9c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39e5c464e68458d64184fe0155459f9c">&#9670;&#160;</a></span>set_int64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool set_int64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int64_t&#160;</td>
+          <td class="paramname"><em>val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置64位整数类型的共享内存值 </p>
+<p>设置共享内存中指定域、分区和键的64位整数值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">val</td><td>要设置的整数值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>设置是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00256">256</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab761715c4de9bc3babefbc5da49ab1ed" name="ab761715c4de9bc3babefbc5da49ab1ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab761715c4de9bc3babefbc5da49ab1ed">&#9670;&#160;</a></span>set_string()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool set_string </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置字符串类型的共享内存值 </p>
+<p>设置共享内存中指定域、分区和键的字符串值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">val</td><td>要设置的字符串值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>设置是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00228">228</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a50b5c99a563af59b97ae457b4f4dc03b" name="a50b5c99a563af59b97ae457b4f4dc03b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50b5c99a563af59b97ae457b4f4dc03b">&#9670;&#160;</a></span>set_uint32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool set_uint32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置无符32位整数类型的共享内存值 </p>
+<p>设置共享内存中指定域、分区和键的无符32位整数值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">val</td><td>要设置的无符号整数值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>设置是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00270">270</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3493eb774384a6eb725ad21d9efbf986" name="a3493eb774384a6eb725ad21d9efbf986"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3493eb774384a6eb725ad21d9efbf986">&#9670;&#160;</a></span>set_uint64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool set_uint64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>section</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置无符64位整数类型的共享内存值 </p>
+<p>设置共享内存中指定域、分区和键的无符64位整数值 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">domain</td><td>域名称 </td></tr>
+    <tr><td class="paramname">section</td><td>分区名称 </td></tr>
+    <tr><td class="paramname">key</td><td>键名称 </td></tr>
+    <tr><td class="paramname">val</td><td>要设置的无符号整数值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>设置是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00284">284</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3ea7a4a8f7ef21fb395cd96355b1e2a4" name="a3ea7a4a8f7ef21fb395cd96355b1e2a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ea7a4a8f7ef21fb395cd96355b1e2a4">&#9670;&#160;</a></span>update_slave()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool update_slave </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bForce</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>更新从进程共享内存 </p>
+<p>在从进程中更新共享内存块，同步主进程的最新数据 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>共享内存标识符 </td></tr>
+    <tr><td class="paramname">bForce</td><td>是否强制更新，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>更新是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtShareHelper_8cpp_source.html">WtShareHelper.cpp</a> 第 <a class="el" href="WtShareHelper_8cpp_source.html#l00044">44</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_94d095fd27b4c69c71136750cac86b3e.html">WtShareHelper</a></li><li class="navelem"><a class="el" href="WtShareHelper_8cpp.html">WtShareHelper.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

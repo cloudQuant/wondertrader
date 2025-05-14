@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtMsgQue/WtMsgQue.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtMsgQue_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtMsgQue.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtMsgQue_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="WtMsgQue_8h.html">WtMsgQue.h</a>&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="MQManager_8h.html">MQManager.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#ifdef _MSC_VER</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#pragma comment(lib, &quot;Ws2_32.lib&quot;)</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#pragma comment(lib, &quot;Mswsock.lib&quot;)</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#pragma comment(lib, &quot;nanomsg.lib&quot;)</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="WtMsgQue_8cpp.html#a17226795848decb565e90624584e5c0f">   20</a></span><a class="code hl_variable" href="WtMsgQue_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="foldopen" id="foldopen00027" data-start="{" data-end="}">
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="WtMsgQue_8cpp.html#a511581341e73e3cb6949e0fc6750e96c">   27</a></span><a class="code hl_class" href="classMQManager.html">MQManager</a>&amp; <a class="code hl_function" href="WtMsgQue_8cpp.html#a511581341e73e3cb6949e0fc6750e96c">getMgr</a>()</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>{</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keyword">static</span> <a class="code hl_class" href="classMQManager.html">MQManager</a> runner;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keywordflow">return</span> runner;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>}</div>
+</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="foldopen" id="foldopen00038" data-start="{" data-end="}">
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="WtMsgQue_8cpp.html#a0c1c36e643976e8571a08b94aca560f0">   38</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="WtMsgQue_8cpp.html#a0c1c36e643976e8571a08b94aca560f0">regiter_callbacks</a>(<a class="code hl_typedef" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLog)</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>{</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_function" href="WtMsgQue_8cpp.html#a511581341e73e3cb6949e0fc6750e96c">getMgr</a>().<a class="code hl_function" href="classMQManager.html#ae37f02de0488da5e6a0829511e3a0c27">regiter_callbacks</a>(cbLog);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>}</div>
+</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="foldopen" id="foldopen00050" data-start="{" data-end="}">
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="WtMsgQue_8cpp.html#a63853fada9418e030e3b1f1524f4167c">   50</a></span><a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> <a class="code hl_function" href="WtMsgQue_8cpp.html#a63853fada9418e030e3b1f1524f4167c">create_server</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* url, <span class="keywordtype">bool</span> confirm)</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>{</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    printf(<span class="stringliteral">&quot;create server\r\n&quot;</span>);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="WtMsgQue_8cpp.html#a511581341e73e3cb6949e0fc6750e96c">getMgr</a>().<a class="code hl_function" href="classMQManager.html#a997f250cc0b3fcbb4cbb0a904de96689">create_server</a>(url, confirm);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>}</div>
+</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="foldopen" id="foldopen00061" data-start="{" data-end="}">
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="WtMsgQue_8cpp.html#a6b2921c5b6d38b98612a1c3fdbf5710e">   61</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="WtMsgQue_8cpp.html#a6b2921c5b6d38b98612a1c3fdbf5710e">destroy_server</a>(<a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> <span class="keywordtype">id</span>)</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>{</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <a class="code hl_function" href="WtMsgQue_8cpp.html#a511581341e73e3cb6949e0fc6750e96c">getMgr</a>().<a class="code hl_function" href="classMQManager.html#a23bd10eb7bbedfef761bdb2ab7c9d363">destroy_server</a>(<span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>}</div>
+</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="foldopen" id="foldopen00074" data-start="{" data-end="}">
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="WtMsgQue_8cpp.html#a89af7a3898ef0183983910a56f531477">   74</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="WtMsgQue_8cpp.html#a89af7a3898ef0183983910a56f531477">publish_message</a>(<a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">char</span>* topic, <span class="keyword">const</span> <span class="keywordtype">char</span>* data, <a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> dataLen)</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>{</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <a class="code hl_function" href="WtMsgQue_8cpp.html#a511581341e73e3cb6949e0fc6750e96c">getMgr</a>().<a class="code hl_function" href="classMQManager.html#a1fa26d39ee28a6bd73d518566b5b6ef8">publish_message</a>(<span class="keywordtype">id</span>, topic, data, dataLen);</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>}</div>
+</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="foldopen" id="foldopen00086" data-start="{" data-end="}">
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="WtMsgQue_8cpp.html#a6a18f4c96c84f8825bba47f7a20b53f7">   86</a></span><a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> <a class="code hl_function" href="WtMsgQue_8cpp.html#a6a18f4c96c84f8825bba47f7a20b53f7">create_client</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* url, <a class="code hl_typedef" href="WtMsgQue_2PorterDefs_8h.html#abfe504ced42fb9276c87c445aafadd09">FuncMQCallback</a> cb)</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>{</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="WtMsgQue_8cpp.html#a511581341e73e3cb6949e0fc6750e96c">getMgr</a>().<a class="code hl_function" href="classMQManager.html#a7c9a5df3fda28ce1c501f9a8c239c859">create_client</a>(url, cb);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>}</div>
+</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="foldopen" id="foldopen00096" data-start="{" data-end="}">
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="WtMsgQue_8cpp.html#a3fcc8e97a5219b1f7f8d5b7f087aece0">   96</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="WtMsgQue_8cpp.html#a3fcc8e97a5219b1f7f8d5b7f087aece0">destroy_client</a>(<a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> <span class="keywordtype">id</span>)</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>{</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <a class="code hl_function" href="WtMsgQue_8cpp.html#a511581341e73e3cb6949e0fc6750e96c">getMgr</a>().<a class="code hl_function" href="classMQManager.html#af73ed7a70b966db128966663929d22d5">destroy_client</a>(<span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>}</div>
+</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="foldopen" id="foldopen00107" data-start="{" data-end="}">
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="WtMsgQue_8cpp.html#a9ff2f55b35c613bf582137a4cb9cf635">  107</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="WtMsgQue_8cpp.html#a9ff2f55b35c613bf582137a4cb9cf635">subscribe_topic</a>(<a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">char</span>* topic)</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>{</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="WtMsgQue_8cpp.html#a511581341e73e3cb6949e0fc6750e96c">getMgr</a>().<a class="code hl_function" href="classMQManager.html#a748b2a25e07ad00ecfae4853938222e7">sub_topic</a>(<span class="keywordtype">id</span>, topic);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>}</div>
+</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="foldopen" id="foldopen00117" data-start="{" data-end="}">
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="WtMsgQue_8cpp.html#a3d630686788f40c28e774d0081906bcf">  117</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="WtMsgQue_8cpp.html#a3d630686788f40c28e774d0081906bcf">start_client</a>(<a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> <span class="keywordtype">id</span>)</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>{</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <a class="code hl_function" href="WtMsgQue_8cpp.html#a511581341e73e3cb6949e0fc6750e96c">getMgr</a>().<a class="code hl_function" href="classMQManager.html#a1aae9b309c995731f5a1aeb476554698">start_client</a>(<span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>}</div>
+</div>
+<div class="ttc" id="aMQManager_8h_html"><div class="ttname"><a href="MQManager_8h.html">MQManager.h</a></div><div class="ttdoc">消息队列管理器定义</div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a137b118e8aaff7fc7ff0a17f2bd7141e"><div class="ttname"><a href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a></div><div class="ttdeci">unsigned int WtUInt32</div><div class="ttdoc">WonderTrader类型别名定义</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00121">WTSMarcos.h:121</a></div></div>
+<div class="ttc" id="aWtBtCore_2EventNotifier_8h_html_a749dc86d073c15a88e4a719af94bc813"><div class="ttname"><a href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a></div><div class="ttdeci">void(* FuncLogCallback)(unsigned long, const char *, bool)</div><div class="ttdoc">日志回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00047">EventNotifier.h:47</a></div></div>
+<div class="ttc" id="aWtMsgQue_2PorterDefs_8h_html_abfe504ced42fb9276c87c445aafadd09"><div class="ttname"><a href="WtMsgQue_2PorterDefs_8h.html#abfe504ced42fb9276c87c445aafadd09">FuncMQCallback</a></div><div class="ttdeci">void(PORTER_FLAG * FuncMQCallback)(WtUInt32 id, const char *topic, const char *data, WtUInt32 dataLen)</div><div class="ttdoc">消息队列数据接收回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtMsgQue_2PorterDefs_8h_source.html#l00022">PorterDefs.h:22</a></div></div>
+<div class="ttc" id="aWtMsgQue_8cpp_html_a0c1c36e643976e8571a08b94aca560f0"><div class="ttname"><a href="WtMsgQue_8cpp.html#a0c1c36e643976e8571a08b94aca560f0">regiter_callbacks</a></div><div class="ttdeci">void regiter_callbacks(FuncLogCallback cbLog)</div><div class="ttdoc">注册日志回调函数实现</div><div class="ttdef"><b>Definition</b> <a href="WtMsgQue_8cpp_source.html#l00038">WtMsgQue.cpp:38</a></div></div>
+<div class="ttc" id="aWtMsgQue_8cpp_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="WtMsgQue_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="WtMsgQue_8cpp_source.html#l00020">WtMsgQue.cpp:20</a></div></div>
+<div class="ttc" id="aWtMsgQue_8cpp_html_a3d630686788f40c28e774d0081906bcf"><div class="ttname"><a href="WtMsgQue_8cpp.html#a3d630686788f40c28e774d0081906bcf">start_client</a></div><div class="ttdeci">void start_client(WtUInt32 id)</div><div class="ttdoc">启动客户端实现</div><div class="ttdef"><b>Definition</b> <a href="WtMsgQue_8cpp_source.html#l00117">WtMsgQue.cpp:117</a></div></div>
+<div class="ttc" id="aWtMsgQue_8cpp_html_a3fcc8e97a5219b1f7f8d5b7f087aece0"><div class="ttname"><a href="WtMsgQue_8cpp.html#a3fcc8e97a5219b1f7f8d5b7f087aece0">destroy_client</a></div><div class="ttdeci">void destroy_client(WtUInt32 id)</div><div class="ttdoc">销毁消息队列客户端实现</div><div class="ttdef"><b>Definition</b> <a href="WtMsgQue_8cpp_source.html#l00096">WtMsgQue.cpp:96</a></div></div>
+<div class="ttc" id="aWtMsgQue_8cpp_html_a511581341e73e3cb6949e0fc6750e96c"><div class="ttname"><a href="WtMsgQue_8cpp.html#a511581341e73e3cb6949e0fc6750e96c">getMgr</a></div><div class="ttdeci">MQManager &amp; getMgr()</div><div class="ttdoc">获取MQManager单例</div><div class="ttdef"><b>Definition</b> <a href="WtMsgQue_8cpp_source.html#l00027">WtMsgQue.cpp:27</a></div></div>
+<div class="ttc" id="aWtMsgQue_8cpp_html_a63853fada9418e030e3b1f1524f4167c"><div class="ttname"><a href="WtMsgQue_8cpp.html#a63853fada9418e030e3b1f1524f4167c">create_server</a></div><div class="ttdeci">WtUInt32 create_server(const char *url, bool confirm)</div><div class="ttdoc">创建消息队列服务端实现</div><div class="ttdef"><b>Definition</b> <a href="WtMsgQue_8cpp_source.html#l00050">WtMsgQue.cpp:50</a></div></div>
+<div class="ttc" id="aWtMsgQue_8cpp_html_a6a18f4c96c84f8825bba47f7a20b53f7"><div class="ttname"><a href="WtMsgQue_8cpp.html#a6a18f4c96c84f8825bba47f7a20b53f7">create_client</a></div><div class="ttdeci">WtUInt32 create_client(const char *url, FuncMQCallback cb)</div><div class="ttdoc">创建消息队列客户端实现</div><div class="ttdef"><b>Definition</b> <a href="WtMsgQue_8cpp_source.html#l00086">WtMsgQue.cpp:86</a></div></div>
+<div class="ttc" id="aWtMsgQue_8cpp_html_a6b2921c5b6d38b98612a1c3fdbf5710e"><div class="ttname"><a href="WtMsgQue_8cpp.html#a6b2921c5b6d38b98612a1c3fdbf5710e">destroy_server</a></div><div class="ttdeci">void destroy_server(WtUInt32 id)</div><div class="ttdoc">销毁消息队列服务端实现</div><div class="ttdef"><b>Definition</b> <a href="WtMsgQue_8cpp_source.html#l00061">WtMsgQue.cpp:61</a></div></div>
+<div class="ttc" id="aWtMsgQue_8cpp_html_a89af7a3898ef0183983910a56f531477"><div class="ttname"><a href="WtMsgQue_8cpp.html#a89af7a3898ef0183983910a56f531477">publish_message</a></div><div class="ttdeci">void publish_message(WtUInt32 id, const char *topic, const char *data, WtUInt32 dataLen)</div><div class="ttdoc">发布消息实现</div><div class="ttdef"><b>Definition</b> <a href="WtMsgQue_8cpp_source.html#l00074">WtMsgQue.cpp:74</a></div></div>
+<div class="ttc" id="aWtMsgQue_8cpp_html_a9ff2f55b35c613bf582137a4cb9cf635"><div class="ttname"><a href="WtMsgQue_8cpp.html#a9ff2f55b35c613bf582137a4cb9cf635">subscribe_topic</a></div><div class="ttdeci">void subscribe_topic(WtUInt32 id, const char *topic)</div><div class="ttdoc">订阅主题实现</div><div class="ttdef"><b>Definition</b> <a href="WtMsgQue_8cpp_source.html#l00107">WtMsgQue.cpp:107</a></div></div>
+<div class="ttc" id="aWtMsgQue_8h_html"><div class="ttname"><a href="WtMsgQue_8h.html">WtMsgQue.h</a></div><div class="ttdoc">消息队列模块对外接口定义</div></div>
+<div class="ttc" id="aclassMQManager_html"><div class="ttname"><a href="classMQManager.html">MQManager</a></div><div class="ttdoc">消息队列管理器类</div><div class="ttdef"><b>Definition</b> <a href="MQManager_8h_source.html#l00045">MQManager.h:46</a></div></div>
+<div class="ttc" id="aclassMQManager_html_a1aae9b309c995731f5a1aeb476554698"><div class="ttname"><a href="classMQManager.html#a1aae9b309c995731f5a1aeb476554698">MQManager::start_client</a></div><div class="ttdeci">void start_client(WtUInt32 id)</div><div class="ttdoc">启动客户端</div><div class="ttdef"><b>Definition</b> <a href="MQManager_8cpp_source.html#l00168">MQManager.cpp:168</a></div></div>
+<div class="ttc" id="aclassMQManager_html_a1fa26d39ee28a6bd73d518566b5b6ef8"><div class="ttname"><a href="classMQManager.html#a1fa26d39ee28a6bd73d518566b5b6ef8">MQManager::publish_message</a></div><div class="ttdeci">void publish_message(WtUInt32 id, const char *topic, const void *data, WtUInt32 dataLen)</div><div class="ttdoc">发布消息</div><div class="ttdef"><b>Definition</b> <a href="MQManager_8cpp_source.html#l00065">MQManager.cpp:65</a></div></div>
+<div class="ttc" id="aclassMQManager_html_a23bd10eb7bbedfef761bdb2ab7c9d363"><div class="ttname"><a href="classMQManager.html#a23bd10eb7bbedfef761bdb2ab7c9d363">MQManager::destroy_server</a></div><div class="ttdeci">void destroy_server(WtUInt32 id)</div><div class="ttdoc">销毁消息队列服务端</div><div class="ttdef"><b>Definition</b> <a href="MQManager_8cpp_source.html#l00043">MQManager.cpp:43</a></div></div>
+<div class="ttc" id="aclassMQManager_html_a748b2a25e07ad00ecfae4853938222e7"><div class="ttname"><a href="classMQManager.html#a748b2a25e07ad00ecfae4853938222e7">MQManager::sub_topic</a></div><div class="ttdeci">void sub_topic(WtUInt32 id, const char *topic)</div><div class="ttdoc">订阅主题</div><div class="ttdef"><b>Definition</b> <a href="MQManager_8cpp_source.html#l00149">MQManager.cpp:149</a></div></div>
+<div class="ttc" id="aclassMQManager_html_a7c9a5df3fda28ce1c501f9a8c239c859"><div class="ttname"><a href="classMQManager.html#a7c9a5df3fda28ce1c501f9a8c239c859">MQManager::create_client</a></div><div class="ttdeci">WtUInt32 create_client(const char *url, FuncMQCallback cb)</div><div class="ttdoc">创建消息队列客户端</div><div class="ttdef"><b>Definition</b> <a href="MQManager_8cpp_source.html#l00112">MQManager.cpp:112</a></div></div>
+<div class="ttc" id="aclassMQManager_html_a997f250cc0b3fcbb4cbb0a904de96689"><div class="ttname"><a href="classMQManager.html#a997f250cc0b3fcbb4cbb0a904de96689">MQManager::create_server</a></div><div class="ttdeci">WtUInt32 create_server(const char *url, bool confirm)</div><div class="ttdoc">创建消息队列服务端</div><div class="ttdef"><b>Definition</b> <a href="MQManager_8cpp_source.html#l00024">MQManager.cpp:24</a></div></div>
+<div class="ttc" id="aclassMQManager_html_ae37f02de0488da5e6a0829511e3a0c27"><div class="ttname"><a href="classMQManager.html#ae37f02de0488da5e6a0829511e3a0c27">MQManager::regiter_callbacks</a></div><div class="ttdeci">void regiter_callbacks(FuncLogCallback cbLog)</div><div class="ttdoc">注册日志回调函数</div><div class="ttdef"><b>Definition</b> <a href="MQManager_8h_source.html#l00060">MQManager.h:60</a></div></div>
+<div class="ttc" id="aclassMQManager_html_af73ed7a70b966db128966663929d22d5"><div class="ttname"><a href="classMQManager.html#af73ed7a70b966db128966663929d22d5">MQManager::destroy_client</a></div><div class="ttdeci">void destroy_client(WtUInt32 id)</div><div class="ttdoc">销毁消息队列客户端</div><div class="ttdef"><b>Definition</b> <a href="MQManager_8cpp_source.html#l00129">MQManager.cpp:129</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_67f0927ed8325567405dded17dc3dbdc.html">WtMsgQue</a></li><li class="navelem"><a class="el" href="WtMsgQue_8cpp.html">WtMsgQue.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

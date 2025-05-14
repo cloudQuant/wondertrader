@@ -1,0 +1,28 @@
+var structATPShareNegotiabilityConst =
+[
+    [ "IsValid", "structATPShareNegotiabilityConst.html#a8cdc3251658d86fe96a0ea167218dc65", null ],
+    [ "IsValid", "structATPShareNegotiabilityConst.html#a8cdc3251658d86fe96a0ea167218dc65", null ],
+    [ "CirculationStock", "structATPShareNegotiabilityConst.html#a86c3a98c2007b3128442a075be705e1b", null ],
+    [ "CirculationUnconfirmedStock", "structATPShareNegotiabilityConst.html#a644e358b47e2d2e13eb8fbfc707d2841", null ],
+    [ "ExecutiveLockStock", "structATPShareNegotiabilityConst.html#aa6ca438537f076fb0e43c2f4d4a85432", null ],
+    [ "ExecutiveStock", "structATPShareNegotiabilityConst.html#a088b47d9905ff706b6ffd5f8f7286691", null ],
+    [ "IncentiveStock", "structATPShareNegotiabilityConst.html#a5323a6379457599128ff198b79cb0cb1", null ],
+    [ "InitiatorDomesticStock", "structATPShareNegotiabilityConst.html#ab279b6d637794a7cf380a32b51af203c", null ],
+    [ "InitiatorForeignStock", "structATPShareNegotiabilityConst.html#a1c92bca24d2899d64a28974c8f925963", null ],
+    [ "InitiatorNaturalStock", "structATPShareNegotiabilityConst.html#ac6edc8da3bad8fe145581993d91bd279", null ],
+    [ "InitiatorSLS", "structATPShareNegotiabilityConst.html#a7d88e49bb6c1386b81d980ef1e58c39b", null ],
+    [ "InitiatorStateStock", "structATPShareNegotiabilityConst.html#abe0f2939e63f9e36a654bbf9296eca14", null ],
+    [ "InstitutionStock", "structATPShareNegotiabilityConst.html#aeca07651d75f4afccd65d2f545967fbd", null ],
+    [ "InternalStaffStock", "structATPShareNegotiabilityConst.html#ad60c06faab66a2032ce7efe17685ffd8", null ],
+    [ "OrientationDomesticStock", "structATPShareNegotiabilityConst.html#a104e90e39cf7d9c815f9374a02a287cc", null ],
+    [ "OrientationForeignStock", "structATPShareNegotiabilityConst.html#a905943b3ebfef540356c04dec289f92f", null ],
+    [ "OrientationNaturalStock", "structATPShareNegotiabilityConst.html#af363b766cfe88919d49db86d10222e25", null ],
+    [ "OrientationSLS", "structATPShareNegotiabilityConst.html#a0e58f769cc3048d906e3f6e2638cc6f7", null ],
+    [ "OrientationStateStock", "structATPShareNegotiabilityConst.html#aa5c4185f5352f9479e64f0932bd7739b", null ],
+    [ "OtherInitiatorStock", "structATPShareNegotiabilityConst.html#a4f9961b1eb540b000498733b3a68ad70", null ],
+    [ "OtherOrientationStock", "structATPShareNegotiabilityConst.html#a8cbbd17482129cbab74af646246ed760", null ],
+    [ "PreHumanStock", "structATPShareNegotiabilityConst.html#ad46ca415c4aedc8148149e6a242a752f", null ],
+    [ "PreInstitutionStock", "structATPShareNegotiabilityConst.html#a062cfa8087c13d5bb9842cc651a5437b", null ],
+    [ "RestrictedStock", "structATPShareNegotiabilityConst.html#a0e39a74ffd4f600273f136a6fb998d54", null ],
+    [ "RestrictedUnconfirmedStock", "structATPShareNegotiabilityConst.html#aa73ae6bdeacc81788040dd60ef2189e0", null ]
+];

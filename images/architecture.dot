@@ -1,0 +1,42 @@
+digraph WonderTrader {
+    rankdir=TB;
+    node [shape=box, style=filled, fillcolor=lightblue, fontname="SimSun"];
+    edge [fontname="SimSun"];
+    
+    subgraph cluster_0 {
+        label="WonderTrader核心架构";
+        fontname="SimSun";
+        style=filled;
+        color=lightgrey;
+        
+        DataEngine [label="数据引擎\nData Engine"];
+        CoreEngine [label="核心引擎\nCore Engine"];
+        ExecEngine [label="执行引擎\nExecution Engine"];
+        StratEngine [label="策略引擎\nStrategy Engine"];
+        
+        DataAdapter [label="行情适配器\nData Adapters"];
+        TradeAdapter [label="交易适配器\nTrade Adapters"];
+        
+        DataEngine -> CoreEngine [dir=both];
+        CoreEngine -> ExecEngine [dir=both];
+        CoreEngine -> StratEngine [dir=both];
+        
+        DataAdapter -> DataEngine;
+        ExecEngine -> TradeAdapter;
+    }
+    
+    subgraph cluster_1 {
+        label="策略类型";
+        fontname="SimSun";
+        style=filled;
+        color=lightgreen;
+        
+        CTAStrat [label="CTA策略"];
+        HFTStrat [label="高频策略"];
+        SELStrat [label="选股策略"];
+        
+        StratEngine -> CTAStrat;
+        StratEngine -> HFTStrat;
+        StratEngine -> SELStrat;
+    }
+}

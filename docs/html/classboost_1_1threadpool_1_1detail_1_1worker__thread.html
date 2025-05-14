@@ -1,0 +1,425 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: boost::threadpool::detail::worker_thread&lt; Pool &gt; 模板类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classboost_1_1threadpool_1_1detail_1_1worker__thread.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Public 类型</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pub-static-methods">静态 Public 成员函数</a> &#124;
+<a href="#pri-methods">Private 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classboost_1_1threadpool_1_1detail_1_1worker__thread-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">boost::threadpool::detail::worker_thread&lt; Pool &gt; 模板类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>线程池工作线程  
+ <a href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="worker__thread_8hpp_source.html">worker_thread.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public 类型</h2></td></tr>
+<tr class="memitem:a0b7817927a93bb4aaa62ba028ca5167c" id="r_a0b7817927a93bb4aaa62ba028ca5167c"><td class="memItemLeft" align="right" valign="top">typedef Pool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a0b7817927a93bb4aaa62ba028ca5167c">pool_type</a></td></tr>
+<tr class="memdesc:a0b7817927a93bb4aaa62ba028ca5167c"><td class="mdescLeft">&#160;</td><td class="mdescRight">指定所属线程池的类型  <br /></td></tr>
+<tr class="separator:a0b7817927a93bb4aaa62ba028ca5167c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a944d1458ef00f8f73f9fbc410318d957" id="r_a944d1458ef00f8f73f9fbc410318d957"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a944d1458ef00f8f73f9fbc410318d957">run</a> ()</td></tr>
+<tr class="memdesc:a944d1458ef00f8f73f9fbc410318d957"><td class="mdescLeft">&#160;</td><td class="mdescRight">按顺序执行线程池的任务  <br /></td></tr>
+<tr class="separator:a944d1458ef00f8f73f9fbc410318d957"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31f61fa4d593d8ec461a077ea35b6c04" id="r_a31f61fa4d593d8ec461a077ea35b6c04"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a31f61fa4d593d8ec461a077ea35b6c04">join</a> ()</td></tr>
+<tr class="memdesc:a31f61fa4d593d8ec461a077ea35b6c04"><td class="mdescLeft">&#160;</td><td class="mdescRight">等待工作线程结束  <br /></td></tr>
+<tr class="separator:a31f61fa4d593d8ec461a077ea35b6c04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+静态 Public 成员函数</h2></td></tr>
+<tr class="memitem:a75b020279034bffb773b628376918fca" id="r_a75b020279034bffb773b628376918fca"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a75b020279034bffb773b628376918fca">create_and_attach</a> (shared_ptr&lt; <a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a0b7817927a93bb4aaa62ba028ca5167c">pool_type</a> &gt; <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;<a class="el" href="namespaceboost_1_1threadpool.html#a1e167909d0dce03e625576f80359b8fb">pool</a>)</td></tr>
+<tr class="memdesc:a75b020279034bffb773b628376918fca"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造新的工作线程并将其附加到线程池  <br /></td></tr>
+<tr class="separator:a75b020279034bffb773b628376918fca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 成员函数</h2></td></tr>
+<tr class="memitem:a09334d4d7d585c0f7c330691e83b0a88" id="r_a09334d4d7d585c0f7c330691e83b0a88"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a09334d4d7d585c0f7c330691e83b0a88">worker_thread</a> (shared_ptr&lt; <a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a0b7817927a93bb4aaa62ba028ca5167c">pool_type</a> &gt; <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;<a class="el" href="namespaceboost_1_1threadpool.html#a1e167909d0dce03e625576f80359b8fb">pool</a>)</td></tr>
+<tr class="memdesc:a09334d4d7d585c0f7c330691e83b0a88"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造一个新的工作线程  <br /></td></tr>
+<tr class="separator:a09334d4d7d585c0f7c330691e83b0a88"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ba3a83bcabe5598c4aeee68427939b7" id="r_a1ba3a83bcabe5598c4aeee68427939b7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a1ba3a83bcabe5598c4aeee68427939b7">died_unexpectedly</a> ()</td></tr>
+<tr class="memdesc:a1ba3a83bcabe5598c4aeee68427939b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">通知运行循环中发生了异常  <br /></td></tr>
+<tr class="separator:a1ba3a83bcabe5598c4aeee68427939b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:a61ff4b040d39339ba2054f4da64a9675" id="r_a61ff4b040d39339ba2054f4da64a9675"><td class="memItemLeft" align="right" valign="top">shared_ptr&lt; <a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a0b7817927a93bb4aaa62ba028ca5167c">pool_type</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a61ff4b040d39339ba2054f4da64a9675">m_pool</a></td></tr>
+<tr class="memdesc:a61ff4b040d39339ba2054f4da64a9675"><td class="mdescLeft">&#160;</td><td class="mdescRight">指向创建该工作线程的线程池的指针  <br /></td></tr>
+<tr class="separator:a61ff4b040d39339ba2054f4da64a9675"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a239c31bbcb817fc1687adbcde00ed716" id="r_a239c31bbcb817fc1687adbcde00ed716"><td class="memItemLeft" align="right" valign="top">shared_ptr&lt; boost::thread &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a239c31bbcb817fc1687adbcde00ed716">m_thread</a></td></tr>
+<tr class="memdesc:a239c31bbcb817fc1687adbcde00ed716"><td class="mdescLeft">&#160;</td><td class="mdescRight">执行运行循环的线程指针  <br /></td></tr>
+<tr class="separator:a239c31bbcb817fc1687adbcde00ed716"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename Pool&gt;<br />
+class boost::threadpool::detail::worker_thread&lt; Pool &gt;</div><p>线程池工作线程 </p>
+<p><a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html" title="线程池工作线程">worker_thread</a> 类表示一个执行线程。工作线程被附加到线程池并处理该池中的任务。 工作线程及其内部 boost::thread 的生命周期由系统自动管理。</p>
+<p>此类是一个辅助类，不能直接构造或访问。</p>
+<dl class="section see"><dt>参见</dt><dd><a class="el" href="classboost_1_1threadpool_1_1detail_1_1pool__core.html" title="线程池核心实现类">pool_core</a> </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="worker__thread_8hpp_source.html">worker_thread.hpp</a> 第 <a class="el" href="worker__thread_8hpp_source.html#l00045">45</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="a0b7817927a93bb4aaa62ba028ca5167c" name="a0b7817927a93bb4aaa62ba028ca5167c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b7817927a93bb4aaa62ba028ca5167c">&#9670;&#160;</a></span>pool_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Pool &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef Pool <a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html">boost::threadpool::detail::worker_thread</a>&lt; Pool &gt;::pool_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>指定所属线程池的类型 </p>
+<p>用于表示该工作线程关联的线程池类型 </p>
+
+<p class="definition">在文件 <a class="el" href="worker__thread_8hpp_source.html">worker_thread.hpp</a> 第 <a class="el" href="worker__thread_8hpp_source.html#l00054">54</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a09334d4d7d585c0f7c330691e83b0a88" name="a09334d4d7d585c0f7c330691e83b0a88"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09334d4d7d585c0f7c330691e83b0a88">&#9670;&#160;</a></span>worker_thread()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Pool &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html">boost::threadpool::detail::worker_thread</a>&lt; Pool &gt;::worker_thread </td>
+          <td>(</td>
+          <td class="paramtype">shared_ptr&lt; <a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a0b7817927a93bb4aaa62ba028ca5167c">pool_type</a> &gt; <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;&#160;</td>
+          <td class="paramname"><em>pool</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>构造一个新的工作线程 </p>
+<p>初始化工作线程并将其关联到指定的线程池 构造函数是私有的，防止直接创建工作线程实例 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pool</td><td>指向其父线程池的指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>参见</dt><dd>function <a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a75b020279034bffb773b628376918fca" title="构造新的工作线程并将其附加到线程池">create_and_attach</a> </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="worker__thread_8hpp_source.html">worker_thread.hpp</a> 第 <a class="el" href="worker__thread_8hpp_source.html#l00077">77</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a75b020279034bffb773b628376918fca" name="a75b020279034bffb773b628376918fca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75b020279034bffb773b628376918fca">&#9670;&#160;</a></span>create_and_attach()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Pool &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void <a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html">boost::threadpool::detail::worker_thread</a>&lt; Pool &gt;::create_and_attach </td>
+          <td>(</td>
+          <td class="paramtype">shared_ptr&lt; <a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a0b7817927a93bb4aaa62ba028ca5167c">pool_type</a> &gt; <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;&#160;</td>
+          <td class="paramname"><em>pool</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>构造新的工作线程并将其附加到线程池 </p>
+<p>这是创建工作线程的方法，实现了工厂模式 提供静态方法创建工作线程，并自动启动线程执行 run 方法 使用智能指针来管理工作线程的生命周期 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pool</td><td>指向线程池的指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="worker__thread_8hpp_source.html">worker_thread.hpp</a> 第 <a class="el" href="worker__thread_8hpp_source.html#l00131">131</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1ba3a83bcabe5598c4aeee68427939b7" name="a1ba3a83bcabe5598c4aeee68427939b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ba3a83bcabe5598c4aeee68427939b7">&#9670;&#160;</a></span>died_unexpectedly()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Pool &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html">boost::threadpool::detail::worker_thread</a>&lt; Pool &gt;::died_unexpectedly </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>通知运行循环中发生了异常 </p>
+<p>当工作线程在执行过程中发生未处理的异常时，通知线程池 此方法用于异常处理机制，确保线程池可以追踪工作线程的意外终止 </p>
+
+<p class="definition">在文件 <a class="el" href="worker__thread_8hpp_source.html">worker_thread.hpp</a> 第 <a class="el" href="worker__thread_8hpp_source.html#l00089">89</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a31f61fa4d593d8ec461a077ea35b6c04" name="a31f61fa4d593d8ec461a077ea35b6c04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31f61fa4d593d8ec461a077ea35b6c04">&#9670;&#160;</a></span>join()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Pool &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html">boost::threadpool::detail::worker_thread</a>&lt; Pool &gt;::join </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>等待工作线程结束 </p>
+<p>阻塞调用线程，直到该工作线程执行完成 这在关闭线程池时等待所有工作线程安全终止时非常有用 </p>
+
+<p class="definition">在文件 <a class="el" href="worker__thread_8hpp_source.html">worker_thread.hpp</a> 第 <a class="el" href="worker__thread_8hpp_source.html#l00118">118</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a944d1458ef00f8f73f9fbc410318d957" name="a944d1458ef00f8f73f9fbc410318d957"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a944d1458ef00f8f73f9fbc410318d957">&#9670;&#160;</a></span>run()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Pool &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html">boost::threadpool::detail::worker_thread</a>&lt; Pool &gt;::run </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>按顺序执行线程池的任务 </p>
+<p>这是工作线程的主执行函数，它在一个循环中不断从线程池获取并执行任务 实现了异常安全机制：如果发生异常，会通过 <a class="el" href="classboost_1_1threadpool_1_1detail_1_1scope__guard.html" title="作用域守卫类">scope_guard</a> 通知线程池 当没有更多任务要执行时，线程会结束并通知线程池已被析构 </p>
+
+<p class="definition">在文件 <a class="el" href="worker__thread_8hpp_source.html">worker_thread.hpp</a> 第 <a class="el" href="worker__thread_8hpp_source.html#l00102">102</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a61ff4b040d39339ba2054f4da64a9675" name="a61ff4b040d39339ba2054f4da64a9675"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61ff4b040d39339ba2054f4da64a9675">&#9670;&#160;</a></span>m_pool</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Pool &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">shared_ptr&lt;<a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html#a0b7817927a93bb4aaa62ba028ca5167c">pool_type</a>&gt; <a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html">boost::threadpool::detail::worker_thread</a>&lt; Pool &gt;::m_pool</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>指向创建该工作线程的线程池的指针 </p>
+<p>此智能指针保持对线程池的引用，确保工作线程可以访问线程池属性和方法 </p>
+
+<p class="definition">在文件 <a class="el" href="worker__thread_8hpp_source.html">worker_thread.hpp</a> 第 <a class="el" href="worker__thread_8hpp_source.html#l00061">61</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a239c31bbcb817fc1687adbcde00ed716" name="a239c31bbcb817fc1687adbcde00ed716"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a239c31bbcb817fc1687adbcde00ed716">&#9670;&#160;</a></span>m_thread</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Pool &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">shared_ptr&lt;boost::thread&gt; <a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html">boost::threadpool::detail::worker_thread</a>&lt; Pool &gt;::m_thread</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>执行运行循环的线程指针 </p>
+<p>指向实际执行 run 方法的 boost::thread 对象 </p>
+
+<p class="definition">在文件 <a class="el" href="worker__thread_8hpp_source.html">worker_thread.hpp</a> 第 <a class="el" href="worker__thread_8hpp_source.html#l00067">67</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/Share/threadpool/detail/<a class="el" href="worker__thread_8hpp_source.html">worker_thread.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespaceboost.html">boost</a></li><li class="navelem"><a class="el" href="namespaceboost_1_1threadpool.html">threadpool</a></li><li class="navelem"><a class="el" href="namespaceboost_1_1threadpool_1_1detail.html">detail</a></li><li class="navelem"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1worker__thread.html">worker_thread</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

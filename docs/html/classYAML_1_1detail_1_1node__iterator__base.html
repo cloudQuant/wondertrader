@@ -1,0 +1,839 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: YAML::detail::node_iterator_base&lt; V &gt; 模板类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classYAML_1_1detail_1_1node__iterator__base.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#pub-types">Public 类型</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="#friends">友元</a> &#124;
+<a href="classYAML_1_1detail_1_1node__iterator__base-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">YAML::detail::node_iterator_base&lt; V &gt; 模板类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="node__iterator_8h_source.html">node_iterator.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1detail_1_1node__iterator__base_1_1enabler.html">enabler</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1detail_1_1node__iterator__base_1_1proxy.html">proxy</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public 类型</h2></td></tr>
+<tr class="memitem:a6d2b6f512a1a0a5e4835574484c7e08b" id="r_a6d2b6f512a1a0a5e4835574484c7e08b"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a6d2b6f512a1a0a5e4835574484c7e08b">iterator_category</a> = std::forward_iterator_tag</td></tr>
+<tr class="separator:a6d2b6f512a1a0a5e4835574484c7e08b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d866db32cbdc35dcaeeca87f9d7cdf2" id="r_a6d866db32cbdc35dcaeeca87f9d7cdf2"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a6d866db32cbdc35dcaeeca87f9d7cdf2">value_type</a> = <a class="el" href="structYAML_1_1detail_1_1node__iterator__value.html">node_iterator_value</a>&lt; V &gt;</td></tr>
+<tr class="separator:a6d866db32cbdc35dcaeeca87f9d7cdf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5da3f82e0abb899b81fa0174962e7f97" id="r_a5da3f82e0abb899b81fa0174962e7f97"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a5da3f82e0abb899b81fa0174962e7f97">difference_type</a> = std::ptrdiff_t</td></tr>
+<tr class="separator:a5da3f82e0abb899b81fa0174962e7f97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac95afdb6e5e14528322a1838e9f370aa" id="r_ac95afdb6e5e14528322a1838e9f370aa"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#ac95afdb6e5e14528322a1838e9f370aa">pointer</a> = <a class="el" href="structYAML_1_1detail_1_1node__iterator__value.html">node_iterator_value</a>&lt; V &gt; *</td></tr>
+<tr class="separator:ac95afdb6e5e14528322a1838e9f370aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab51d6d76cce7755f8f1f9bfaa101a4d3" id="r_ab51d6d76cce7755f8f1f9bfaa101a4d3"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#ab51d6d76cce7755f8f1f9bfaa101a4d3">reference</a> = <a class="el" href="structYAML_1_1detail_1_1node__iterator__value.html">node_iterator_value</a>&lt; V &gt;</td></tr>
+<tr class="separator:ab51d6d76cce7755f8f1f9bfaa101a4d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a386924fc793e13c5ed831a30848a3be8" id="r_a386924fc793e13c5ed831a30848a3be8"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a386924fc793e13c5ed831a30848a3be8">SeqIter</a> = typename <a class="el" href="structYAML_1_1detail_1_1node__iterator__type.html">node_iterator_type</a>&lt; V &gt;::seq</td></tr>
+<tr class="separator:a386924fc793e13c5ed831a30848a3be8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b88923cf30880b0325e68b0f351dfc7" id="r_a2b88923cf30880b0325e68b0f351dfc7"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a> = typename <a class="el" href="structYAML_1_1detail_1_1node__iterator__type.html">node_iterator_type</a>&lt; V &gt;::map</td></tr>
+<tr class="separator:a2b88923cf30880b0325e68b0f351dfc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a97f427510ecc4ca463d74d8b0df6a5d8" id="r_a97f427510ecc4ca463d74d8b0df6a5d8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a97f427510ecc4ca463d74d8b0df6a5d8">node_iterator_base</a> ()</td></tr>
+<tr class="separator:a97f427510ecc4ca463d74d8b0df6a5d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2c5df530341a36f9c39bb59565a294e" id="r_ae2c5df530341a36f9c39bb59565a294e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#ae2c5df530341a36f9c39bb59565a294e">node_iterator_base</a> (<a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a386924fc793e13c5ed831a30848a3be8">SeqIter</a> seqIt)</td></tr>
+<tr class="separator:ae2c5df530341a36f9c39bb59565a294e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d889ebf8bb7b086680dbfed284a69f6" id="r_a2d889ebf8bb7b086680dbfed284a69f6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2d889ebf8bb7b086680dbfed284a69f6">node_iterator_base</a> (<a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a> mapIt, <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a> mapEnd)</td></tr>
+<tr class="separator:a2d889ebf8bb7b086680dbfed284a69f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b0fffffde84d495e328bb55b51d547b" id="r_a4b0fffffde84d495e328bb55b51d547b"><td class="memTemplParams" colspan="2">template&lt;typename W &gt; </td></tr>
+<tr class="memitem:a4b0fffffde84d495e328bb55b51d547b"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a4b0fffffde84d495e328bb55b51d547b">node_iterator_base</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">node_iterator_base</a>&lt; W &gt; &amp;rhs, typename std::enable_if&lt; std::is_convertible&lt; W *, V * &gt;<a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">::value</a>, <a class="el" href="structYAML_1_1detail_1_1node__iterator__base_1_1enabler.html">enabler</a> &gt;::type=<a class="el" href="structYAML_1_1detail_1_1node__iterator__base_1_1enabler.html">enabler</a>())</td></tr>
+<tr class="separator:a4b0fffffde84d495e328bb55b51d547b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbf381907a9b6dcebf45c31b78b9e3b1" id="r_abbf381907a9b6dcebf45c31b78b9e3b1"><td class="memTemplParams" colspan="2">template&lt;typename W &gt; </td></tr>
+<tr class="memitem:abbf381907a9b6dcebf45c31b78b9e3b1"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#abbf381907a9b6dcebf45c31b78b9e3b1">operator==</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">node_iterator_base</a>&lt; W &gt; &amp;rhs) <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:abbf381907a9b6dcebf45c31b78b9e3b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13d72e654af51b92c078864bddd9322d" id="r_a13d72e654af51b92c078864bddd9322d"><td class="memTemplParams" colspan="2">template&lt;typename W &gt; </td></tr>
+<tr class="memitem:a13d72e654af51b92c078864bddd9322d"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a13d72e654af51b92c078864bddd9322d">operator!=</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">node_iterator_base</a>&lt; W &gt; &amp;rhs) <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:a13d72e654af51b92c078864bddd9322d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2123cfd9ef9a3d2e64546ff2a117d33" id="r_af2123cfd9ef9a3d2e64546ff2a117d33"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">node_iterator_base</a>&lt; V &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#af2123cfd9ef9a3d2e64546ff2a117d33">operator++</a> ()</td></tr>
+<tr class="separator:af2123cfd9ef9a3d2e64546ff2a117d33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94f37fe0547cc014bbf50dd48315fa96" id="r_a94f37fe0547cc014bbf50dd48315fa96"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">node_iterator_base</a>&lt; V &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a94f37fe0547cc014bbf50dd48315fa96">operator++</a> (int)</td></tr>
+<tr class="separator:a94f37fe0547cc014bbf50dd48315fa96"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a390231308bc8b258ae35f202208b3ca4" id="r_a390231308bc8b258ae35f202208b3ca4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a6d866db32cbdc35dcaeeca87f9d7cdf2">value_type</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a390231308bc8b258ae35f202208b3ca4">operator*</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:a390231308bc8b258ae35f202208b3ca4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54424b0334f6f91ffd03609516d90cc5" id="r_a54424b0334f6f91ffd03609516d90cc5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structYAML_1_1detail_1_1node__iterator__base_1_1proxy.html">proxy</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a54424b0334f6f91ffd03609516d90cc5">operator-&gt;</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:a54424b0334f6f91ffd03609516d90cc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8afc276a387c723b8cf14e650b337a5" id="r_aa8afc276a387c723b8cf14e650b337a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#aa8afc276a387c723b8cf14e650b337a5">increment_until_defined</a> (<a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a> it)</td></tr>
+<tr class="separator:aa8afc276a387c723b8cf14e650b337a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9cd060bc5fb325a54705df7dd79f6e71" id="r_a9cd060bc5fb325a54705df7dd79f6e71"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a9cd060bc5fb325a54705df7dd79f6e71">is_defined</a> (<a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a> it) <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:a9cd060bc5fb325a54705df7dd79f6e71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:a13911430788f73f55212170f3d321128" id="r_a13911430788f73f55212170f3d321128"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structYAML_1_1detail_1_1iterator__type.html#a519b5a5c9c39274abe04ec2b1aedd819">iterator_type::value</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a13911430788f73f55212170f3d321128">m_type</a></td></tr>
+<tr class="separator:a13911430788f73f55212170f3d321128"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24a29f1b480f6d2d3f817110e72625a2" id="r_a24a29f1b480f6d2d3f817110e72625a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a386924fc793e13c5ed831a30848a3be8">SeqIter</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a24a29f1b480f6d2d3f817110e72625a2">m_seqIt</a></td></tr>
+<tr class="separator:a24a29f1b480f6d2d3f817110e72625a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bbeea2838171607715093d8f72e00b6" id="r_a2bbeea2838171607715093d8f72e00b6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2bbeea2838171607715093d8f72e00b6">m_mapIt</a></td></tr>
+<tr class="separator:a2bbeea2838171607715093d8f72e00b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17805fb1dc2d1468daf8bd7b8dbf0afe" id="r_a17805fb1dc2d1468daf8bd7b8dbf0afe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a17805fb1dc2d1468daf8bd7b8dbf0afe">m_mapEnd</a></td></tr>
+<tr class="separator:a17805fb1dc2d1468daf8bd7b8dbf0afe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
+友元</h2></td></tr>
+<tr class="memitem:af888868b67b8d48112c86fd093ebd2a1" id="r_af888868b67b8d48112c86fd093ebd2a1"><td class="memTemplParams" colspan="2">template&lt;typename &gt; </td></tr>
+<tr class="memitem:af888868b67b8d48112c86fd093ebd2a1"><td class="memTemplItemLeft" align="right" valign="top">class&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#af888868b67b8d48112c86fd093ebd2a1">node_iterator_base</a></td></tr>
+<tr class="separator:af888868b67b8d48112c86fd093ebd2a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename V&gt;<br />
+class YAML::detail::node_iterator_base&lt; V &gt;</div>
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00055">55</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="a5da3f82e0abb899b81fa0174962e7f97" name="a5da3f82e0abb899b81fa0174962e7f97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5da3f82e0abb899b81fa0174962e7f97">&#9670;&#160;</a></span>difference_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::difference_type =  std::ptrdiff_t</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00070">70</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6d2b6f512a1a0a5e4835574484c7e08b" name="a6d2b6f512a1a0a5e4835574484c7e08b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d2b6f512a1a0a5e4835574484c7e08b">&#9670;&#160;</a></span>iterator_category</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::iterator_category =  std::forward_iterator_tag</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00068">68</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2b88923cf30880b0325e68b0f351dfc7" name="a2b88923cf30880b0325e68b0f351dfc7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b88923cf30880b0325e68b0f351dfc7">&#9670;&#160;</a></span>MapIter</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::MapIter =  typename <a class="el" href="structYAML_1_1detail_1_1node__iterator__type.html">node_iterator_type</a>&lt;V&gt;::map</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00074">74</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac95afdb6e5e14528322a1838e9f370aa" name="ac95afdb6e5e14528322a1838e9f370aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac95afdb6e5e14528322a1838e9f370aa">&#9670;&#160;</a></span>pointer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::pointer =  <a class="el" href="structYAML_1_1detail_1_1node__iterator__value.html">node_iterator_value</a>&lt;V&gt;*</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00071">71</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab51d6d76cce7755f8f1f9bfaa101a4d3" name="ab51d6d76cce7755f8f1f9bfaa101a4d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab51d6d76cce7755f8f1f9bfaa101a4d3">&#9670;&#160;</a></span>reference</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::reference =  <a class="el" href="structYAML_1_1detail_1_1node__iterator__value.html">node_iterator_value</a>&lt;V&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00072">72</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a386924fc793e13c5ed831a30848a3be8" name="a386924fc793e13c5ed831a30848a3be8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a386924fc793e13c5ed831a30848a3be8">&#9670;&#160;</a></span>SeqIter</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::SeqIter =  typename <a class="el" href="structYAML_1_1detail_1_1node__iterator__type.html">node_iterator_type</a>&lt;V&gt;::seq</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00073">73</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6d866db32cbdc35dcaeeca87f9d7cdf2" name="a6d866db32cbdc35dcaeeca87f9d7cdf2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d866db32cbdc35dcaeeca87f9d7cdf2">&#9670;&#160;</a></span>value_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::value_type =  <a class="el" href="structYAML_1_1detail_1_1node__iterator__value.html">node_iterator_value</a>&lt;V&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00069">69</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a97f427510ecc4ca463d74d8b0df6a5d8" name="a97f427510ecc4ca463d74d8b0df6a5d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a97f427510ecc4ca463d74d8b0df6a5d8">&#9670;&#160;</a></span>node_iterator_base() <span class="overload">[1/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::node_iterator_base </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00076">76</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae2c5df530341a36f9c39bb59565a294e" name="ae2c5df530341a36f9c39bb59565a294e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae2c5df530341a36f9c39bb59565a294e">&#9670;&#160;</a></span>node_iterator_base() <span class="overload">[2/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::node_iterator_base </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a386924fc793e13c5ed831a30848a3be8">SeqIter</a>&#160;</td>
+          <td class="paramname"><em>seqIt</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00078">78</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2d889ebf8bb7b086680dbfed284a69f6" name="a2d889ebf8bb7b086680dbfed284a69f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d889ebf8bb7b086680dbfed284a69f6">&#9670;&#160;</a></span>node_iterator_base() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::node_iterator_base </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a>&#160;</td>
+          <td class="paramname"><em>mapIt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a>&#160;</td>
+          <td class="paramname"><em>mapEnd</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00083">83</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4b0fffffde84d495e328bb55b51d547b" name="a4b0fffffde84d495e328bb55b51d547b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b0fffffde84d495e328bb55b51d547b">&#9670;&#160;</a></span>node_iterator_base() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<div class="memtemplate">
+template&lt;typename W &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::node_iterator_base </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">node_iterator_base</a>&lt; W &gt; &amp;&#160;</td>
+          <td class="paramname"><em>rhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">typename std::enable_if&lt; std::is_convertible&lt; W *, V * &gt;<a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">::value</a>, <a class="el" href="structYAML_1_1detail_1_1node__iterator__base_1_1enabler.html">enabler</a> &gt;::type&#160;</td>
+          <td class="paramname"> = <code><a class="el" href="structYAML_1_1detail_1_1node__iterator__base_1_1enabler.html">enabler</a>()</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00092">92</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="aa8afc276a387c723b8cf14e650b337a5" name="aa8afc276a387c723b8cf14e650b337a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8afc276a387c723b8cf14e650b337a5">&#9670;&#160;</a></span>increment_until_defined()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a> <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::increment_until_defined </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a>&#160;</td>
+          <td class="paramname"><em>it</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00159">159</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9cd060bc5fb325a54705df7dd79f6e71" name="a9cd060bc5fb325a54705df7dd79f6e71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9cd060bc5fb325a54705df7dd79f6e71">&#9670;&#160;</a></span>is_defined()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::is_defined </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a>&#160;</td>
+          <td class="paramname"><em>it</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00165">165</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a13d72e654af51b92c078864bddd9322d" name="a13d72e654af51b92c078864bddd9322d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13d72e654af51b92c078864bddd9322d">&#9670;&#160;</a></span>operator!=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<div class="memtemplate">
+template&lt;typename W &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;<a class="el" href="namespaceYAML.html#a1e1f522940ab0016a28e1969ba4846c2">::operator!</a>= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">node_iterator_base</a>&lt; W &gt; &amp;&#160;</td>
+          <td class="paramname"><em>rhs</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00120">120</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a390231308bc8b258ae35f202208b3ca4" name="a390231308bc8b258ae35f202208b3ca4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a390231308bc8b258ae35f202208b3ca4">&#9670;&#160;</a></span>operator*()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a6d866db32cbdc35dcaeeca87f9d7cdf2">value_type</a> <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::operator* </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00145">145</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af2123cfd9ef9a3d2e64546ff2a117d33" name="af2123cfd9ef9a3d2e64546ff2a117d33"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2123cfd9ef9a3d2e64546ff2a117d33">&#9670;&#160;</a></span>operator++() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">node_iterator_base</a>&lt; V &gt; &amp; <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::operator++ </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00124">124</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a94f37fe0547cc014bbf50dd48315fa96" name="a94f37fe0547cc014bbf50dd48315fa96"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a94f37fe0547cc014bbf50dd48315fa96">&#9670;&#160;</a></span>operator++() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">node_iterator_base</a>&lt; V &gt; <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::operator++ </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00139">139</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a54424b0334f6f91ffd03609516d90cc5" name="a54424b0334f6f91ffd03609516d90cc5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54424b0334f6f91ffd03609516d90cc5">&#9670;&#160;</a></span>operator-&gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structYAML_1_1detail_1_1node__iterator__base_1_1proxy.html">proxy</a> <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::operator-&gt; </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00157">157</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abbf381907a9b6dcebf45c31b78b9e3b1" name="abbf381907a9b6dcebf45c31b78b9e3b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abbf381907a9b6dcebf45c31b78b9e3b1">&#9670;&#160;</a></span>operator==()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<div class="memtemplate">
+template&lt;typename W &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::operator== </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">node_iterator_base</a>&lt; W &gt; &amp;&#160;</td>
+          <td class="paramname"><em>rhs</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00104">104</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">友元及相关函数文档</h2>
+<a id="af888868b67b8d48112c86fd093ebd2a1" name="af888868b67b8d48112c86fd093ebd2a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af888868b67b8d48112c86fd093ebd2a1">&#9670;&#160;</a></span>node_iterator_base</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<div class="memtemplate">
+template&lt;typename &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">friend class <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">node_iterator_base</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">friend</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00101">101</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a17805fb1dc2d1468daf8bd7b8dbf0afe" name="a17805fb1dc2d1468daf8bd7b8dbf0afe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17805fb1dc2d1468daf8bd7b8dbf0afe">&#9670;&#160;</a></span>m_mapEnd</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a> <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::m_mapEnd</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00173">173</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2bbeea2838171607715093d8f72e00b6" name="a2bbeea2838171607715093d8f72e00b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2bbeea2838171607715093d8f72e00b6">&#9670;&#160;</a></span>m_mapIt</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a2b88923cf30880b0325e68b0f351dfc7">MapIter</a> <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::m_mapIt</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00173">173</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a24a29f1b480f6d2d3f817110e72625a2" name="a24a29f1b480f6d2d3f817110e72625a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24a29f1b480f6d2d3f817110e72625a2">&#9670;&#160;</a></span>m_seqIt</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html#a386924fc793e13c5ed831a30848a3be8">SeqIter</a> <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::m_seqIt</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00172">172</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a13911430788f73f55212170f3d321128" name="a13911430788f73f55212170f3d321128"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13911430788f73f55212170f3d321128">&#9670;&#160;</a></span>m_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename V &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structYAML_1_1detail_1_1iterator__type.html#a519b5a5c9c39274abe04ec2b1aedd819">iterator_type::value</a> <a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">YAML::detail::node_iterator_base</a>&lt; V &gt;::m_type</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="node__iterator_8h_source.html">node_iterator.h</a> 第 <a class="el" href="node__iterator_8h_source.html#l00170">170</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WTSUtils/yamlcpp/yaml-cpp/node/detail/<a class="el" href="node__iterator_8h_source.html">node_iterator.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespaceYAML.html">YAML</a></li><li class="navelem"><a class="el" href="namespaceYAML_1_1detail.html">detail</a></li><li class="navelem"><a class="el" href="classYAML_1_1detail_1_1node__iterator__base.html">node_iterator_base</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

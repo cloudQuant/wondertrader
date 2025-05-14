@@ -1,0 +1,455 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/Share/WtKVCache.hpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtKVCache_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtKVCache.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtKVCache_8hpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="SpinMutex_8hpp.html">SpinMutex.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="BoostFile_8hpp.html">BoostFile.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="BoostMappingFile_8hpp.html">BoostMappingFile.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../Includes/FasterDefs.h&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="WtKVCache_8hpp.html#a9e321c516bd4d6dcbc3efde5294b9b0d">   22</a></span><span class="preprocessor">#define SIZE_STEP 200</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="WtKVCache_8hpp.html#a67780142dd53e3992c519f253884526d">   28</a></span><span class="preprocessor">#define CACHE_FLAG &quot;&amp;^%$#@!\0&quot;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="WtKVCache_8hpp.html#acf826469d193892c7307ce6979587c98">   34</a></span><span class="preprocessor">#define FLAG_SIZE 8</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="WtKVCache_8hpp.html#a16644ae522884159c76caeb752193f4f">   40</a></span><span class="keyword">typedef</span> std::shared_ptr&lt;BoostMappingFile&gt; <a class="code hl_typedef" href="WtKVCache_8hpp.html#a16644ae522884159c76caeb752193f4f">BoostMFPtr</a>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#pragma warning(disable:4200)</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="WtKVCache_8hpp.html#a7267ecee6d147f4adb21fe1dd334c94c">   50</a></span><span class="keyword">typedef</span> std::function&lt;void(<span class="keyword">const</span> <span class="keywordtype">char</span>*)&gt; <a class="code hl_variable" href="WtKVCache_8hpp.html#a7267ecee6d147f4adb21fe1dd334c94c">CacheLogger</a>;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="foldopen" id="foldopen00058" data-start="{" data-end="};">
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="classWtKVCache.html">   58</a></span><span class="keyword">class </span><a class="code hl_class" href="classWtKVCache.html">WtKVCache</a></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>{</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classWtKVCache.html#a4c0348a7b938224380fea6c7c431edfb">   64</a></span>    <a class="code hl_function" href="classWtKVCache.html#a4c0348a7b938224380fea6c7c431edfb">WtKVCache</a>() {}</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="classWtKVCache.html#a83aec553486a443ce29bff2ee9c058ff">   70</a></span>    <a class="code hl_function" href="classWtKVCache.html#a83aec553486a443ce29bff2ee9c058ff">WtKVCache</a>(<span class="keyword">const</span> <a class="code hl_class" href="classWtKVCache.html">WtKVCache</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="classWtKVCache.html#a5d7403c386baef217d4d522dceb7a002">   76</a></span>    <a class="code hl_class" href="classWtKVCache.html">WtKVCache</a>&amp; <a class="code hl_function" href="classWtKVCache.html#a5d7403c386baef217d4d522dceb7a002">operator=</a>(<span class="keyword">const</span> <a class="code hl_class" href="classWtKVCache.html">WtKVCache</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    </div>
+<div class="foldopen" id="foldopen00084" data-start="{" data-end="};">
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="structWtKVCache_1_1__CacheItem.html">   84</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structWtKVCache_1_1__CacheItem.html">_CacheItem</a></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    {</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="structWtKVCache_1_1__CacheItem.html#aa32b8fb3e8dc9775b0c1f0ffd020831b">   89</a></span>        <span class="keywordtype">char</span>    <a class="code hl_variable" href="structWtKVCache_1_1__CacheItem.html#aa32b8fb3e8dc9775b0c1f0ffd020831b">_key</a>[64] = { 0 };</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="structWtKVCache_1_1__CacheItem.html#aaec8adfeff08a14145cca98e73191a1b">   94</a></span>        <span class="keywordtype">char</span>    <a class="code hl_variable" href="structWtKVCache_1_1__CacheItem.html#aaec8adfeff08a14145cca98e73191a1b">_val</a>[64] = { 0 };</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="classWtKVCache.html#afdb5205677a15c9dfff63d434645b9b6">   95</a></span>    } <a class="code hl_typedef" href="classWtKVCache.html#afdb5205677a15c9dfff63d434645b9b6">CacheItem</a>;</div>
+</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="foldopen" id="foldopen00101" data-start="{" data-end="};">
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="structWtKVCache_1_1CacheBlock.html">  101</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structWtKVCache_1_1CacheBlock.html">CacheBlock</a></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    {</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno"><a class="line" href="structWtKVCache_1_1CacheBlock.html#a980328e2cb095cca57673bce0e28839b">  106</a></span>        <span class="keywordtype">char</span>        <a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a980328e2cb095cca57673bce0e28839b">_blk_flag</a>[<a class="code hl_define" href="WtKVCache_8hpp.html#acf826469d193892c7307ce6979587c98">FLAG_SIZE</a>];</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="structWtKVCache_1_1CacheBlock.html#afd5fc94f4f576933f83f1502f75cc5ab">  111</a></span>        uint32_t    <a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#afd5fc94f4f576933f83f1502f75cc5ab">_size</a>;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">  116</a></span>        uint32_t    <a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">_capacity</a>;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno"><a class="line" href="structWtKVCache_1_1CacheBlock.html#ae89d02be10459481ad8240aa3e976401">  121</a></span>        uint32_t    <a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#ae89d02be10459481ad8240aa3e976401">_date</a>;</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="structWtKVCache_1_1CacheBlock.html#ab6e04f2900bc5726ebab4ad2915176b1">  127</a></span>        <a class="code hl_struct" href="structWtKVCache_1_1__CacheItem.html">CacheItem</a>   <a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#ab6e04f2900bc5726ebab4ad2915176b1">_items</a>[0];</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno"><a class="line" href="classWtKVCache.html#aa46013988659e07ffcdd2d0434b93595">  128</a></span>    } CacheBlock;</div>
+</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="foldopen" id="foldopen00134" data-start="{" data-end="};">
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno"><a class="line" href="structWtKVCache_1_1__CacheBlockPair.html">  134</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structWtKVCache_1_1__CacheBlockPair.html">_CacheBlockPair</a></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    {</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">  139</a></span>        <a class="code hl_struct" href="structWtKVCache_1_1CacheBlock.html">CacheBlock</a>*     <a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>;</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>        </div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno"><a class="line" href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">  144</a></span>        <a class="code hl_typedef" href="WtKVCache_8hpp.html#a16644ae522884159c76caeb752193f4f">BoostMFPtr</a>      <a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">_file</a>;</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span> </div>
+<div class="foldopen" id="foldopen00150" data-start="{" data-end="}">
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno"><a class="line" href="structWtKVCache_1_1__CacheBlockPair.html#ad9a095a217897928385105b7e6046f3b">  150</a></span>        <a class="code hl_function" href="structWtKVCache_1_1__CacheBlockPair.html#ad9a095a217897928385105b7e6046f3b">_CacheBlockPair</a>()</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>        {</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>            <a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a> = <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>            <a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">_file</a> = <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>        }</div>
+</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno"><a class="line" href="classWtKVCache.html#af0a7aaee35f994fffe02ca6e51227188">  155</a></span>    } <a class="code hl_typedef" href="classWtKVCache.html#af0a7aaee35f994fffe02ca6e51227188">CacheBlockPair</a>;</div>
+</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno"><a class="line" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">  160</a></span>    <a class="code hl_struct" href="structWtKVCache_1_1__CacheBlockPair.html">CacheBlockPair</a>  <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>;</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno"><a class="line" href="classWtKVCache.html#abb73b86bfb979beebac2f86b64b13ded">  166</a></span>    <a class="code hl_class" href="classSpinMutex.html">SpinMutex</a>       <a class="code hl_variable" href="classWtKVCache.html#abb73b86bfb979beebac2f86b64b13ded">_lock</a>;</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    </div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno"><a class="line" href="classWtKVCache.html#a6f3aaa3ee97f31f6644cb5c0a7837c57">  172</a></span>    <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, uint32_t&gt;</a> <a class="code hl_variable" href="classWtKVCache.html#a6f3aaa3ee97f31f6644cb5c0a7837c57">_indice</a>;</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span> </div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span><span class="keyword">private</span>:</div>
+<div class="foldopen" id="foldopen00183" data-start="{" data-end="}">
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno"><a class="line" href="classWtKVCache.html#aeccd6b88c0cb5c1c97b8a369f7e8d8a4">  183</a></span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classWtKVCache.html#aeccd6b88c0cb5c1c97b8a369f7e8d8a4">resize</a>(uint32_t newCap, <a class="code hl_variable" href="WtKVCache_8hpp.html#a7267ecee6d147f4adb21fe1dd334c94c">CacheLogger</a> logger = <span class="keyword">nullptr</span>)</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>    {</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">_file</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>        <span class="comment">//调用该函数之前,应该保证线程安全了</span></div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>        <a class="code hl_struct" href="structWtKVCache_1_1CacheBlock.html">CacheBlock</a>* cBlock = <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>;</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        <span class="keywordflow">if</span> (cBlock-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">_capacity</a> &gt;= newCap)</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>            <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">_file</a>-&gt;addr();</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span> </div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>        std::string filename = <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">_file</a>-&gt;filename();</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        uint64_t uOldSize = <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWtKVCache_1_1CacheBlock.html">CacheBlock</a>) + <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWtKVCache_1_1__CacheItem.html">CacheItem</a>)*cBlock-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">_capacity</a>;</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        uint64_t uNewSize = <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWtKVCache_1_1CacheBlock.html">CacheBlock</a>) + <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWtKVCache_1_1__CacheItem.html">CacheItem</a>)*newCap;</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        std::string data;</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        data.resize((std::size_t)(uNewSize - uOldSize), 0);</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        <span class="keywordflow">try</span></div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        {</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>            <a class="code hl_class" href="classBoostFile.html">BoostFile</a> f;</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>            f.<a class="code hl_function" href="classBoostFile.html#a1c5a0728e2a2f9f95ede282966424a4a">open_existing_file</a>(filename.c_str());</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>            f.<a class="code hl_function" href="classBoostFile.html#a35d44b29939730066ab6d69f8477a24e">seek_to_end</a>();</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>            f.<a class="code hl_function" href="classBoostFile.html#aca29c4c4ed11acc16411e3fcc986f6e3">write_file</a>(data.c_str(), data.size());</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>            f.<a class="code hl_function" href="classBoostFile.html#a5481db505f5c5d99c9aa9ba36806bff0">close_file</a>();</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>        }</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>        <span class="keywordflow">catch</span> (std::exception&amp;)</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>        {</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>            <span class="keywordflow">if</span> (logger) logger(<span class="stringliteral">&quot;Got an exception while resizing cache file&quot;</span>);</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        }</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span> </div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span> </div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>        <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">_file</a>.reset();</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        <a class="code hl_class" href="classBoostMappingFile.html">BoostMappingFile</a>* pNewMf = <span class="keyword">new</span> <a class="code hl_class" href="classBoostMappingFile.html">BoostMappingFile</a>();</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        <span class="keywordflow">try</span></div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        {</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>            <span class="keywordflow">if</span> (!pNewMf-&gt;<a class="code hl_function" href="classBoostMappingFile.html#a297d92d430afac37b30e5c15979fbe8b">map</a>(filename.c_str()))</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>            {</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>                <span class="keyword">delete</span> pNewMf;</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>                <span class="keywordflow">if</span> (logger) logger(<span class="stringliteral">&quot;Mapping cache file failed&quot;</span>);</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>            }</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        }</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        <span class="keywordflow">catch</span> (std::exception&amp;)</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>        {</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>            <span class="keywordflow">if</span> (logger) logger(<span class="stringliteral">&quot;Got an exception while mapping cache file&quot;</span>);</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        }</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span> </div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">_file</a>.reset(pNewMf);</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span> </div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a> = (<a class="code hl_struct" href="structWtKVCache_1_1CacheBlock.html">CacheBlock</a>*)<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">_file</a>-&gt;addr();</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">_capacity</a> = newCap;</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    }</div>
+</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span> </div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00248" data-start="{" data-end="}">
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno"><a class="line" href="classWtKVCache.html#ad9a813637cfc02fbfe0f5472c28c0998">  248</a></span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classWtKVCache.html#ad9a813637cfc02fbfe0f5472c28c0998">init</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* filename, uint32_t uDate, <a class="code hl_variable" href="WtKVCache_8hpp.html#a7267ecee6d147f4adb21fe1dd334c94c">CacheLogger</a> logger = <span class="keyword">nullptr</span>)</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>    {</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        <span class="keywordtype">bool</span> isNew = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        <span class="keywordflow">if</span> (!<a class="code hl_function" href="classBoostFile.html#aab642b9bcdfa02c81c2530110eb8a61e">BoostFile::exists</a>(filename))</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        {</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>            uint64_t uSize = <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWtKVCache_1_1CacheBlock.html">CacheBlock</a>) + <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWtKVCache_1_1__CacheItem.html">CacheItem</a>) * <a class="code hl_define" href="WtKVCache_8hpp.html#a9e321c516bd4d6dcbc3efde5294b9b0d">SIZE_STEP</a>;</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>            <a class="code hl_class" href="classBoostFile.html">BoostFile</a> bf;</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>            bf.<a class="code hl_function" href="classBoostFile.html#a5eab32a7044d5e65fb18aca7fd90b864">create_new_file</a>(filename);</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>            bf.<a class="code hl_function" href="classBoostFile.html#a0f2a2cd0d09d6ef067d3b600c8ce863d">truncate_file</a>((uint32_t)uSize);</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>            bf.<a class="code hl_function" href="classBoostFile.html#a5481db505f5c5d99c9aa9ba36806bff0">close_file</a>();</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span> </div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>            isNew = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>        }</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span> </div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>        <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">_file</a>.reset(<span class="keyword">new</span> <a class="code hl_class" href="classBoostMappingFile.html">BoostMappingFile</a>);</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">_file</a>-&gt;map(filename))</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>        {</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>            <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">_file</a>.reset();</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>            <span class="keywordflow">if</span> (logger) logger(<span class="stringliteral">&quot;Mapping cache file failed&quot;</span>);</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>        }</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>        <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a> = (<a class="code hl_struct" href="structWtKVCache_1_1CacheBlock.html">CacheBlock</a>*)<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">_file</a>-&gt;addr();</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span> </div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>        <span class="keywordflow">if</span> (!isNew &amp;&amp;  <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#ae89d02be10459481ad8240aa3e976401">_date</a> != uDate)</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>        {</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>             <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#afd5fc94f4f576933f83f1502f75cc5ab">_size</a> = 0;</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>             <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#ae89d02be10459481ad8240aa3e976401">_date</a> = uDate;</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span> </div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>            memset(&amp; <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#ab6e04f2900bc5726ebab4ad2915176b1">_items</a>, 0, <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWtKVCache_1_1__CacheItem.html">CacheItem</a>)* <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">_capacity</a>);</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span> </div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>            <span class="keywordflow">if</span> (logger) logger(<span class="stringliteral">&quot;Cache file reset due to a different date&quot;</span>);</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>        }</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span> </div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>        <span class="keywordflow">if</span> (isNew)</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>        {</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>             <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">_capacity</a> = <a class="code hl_define" href="WtKVCache_8hpp.html#a9e321c516bd4d6dcbc3efde5294b9b0d">SIZE_STEP</a>;</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>             <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#afd5fc94f4f576933f83f1502f75cc5ab">_size</a> = 0;</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>             <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#ae89d02be10459481ad8240aa3e976401">_date</a> = uDate;</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>            strcpy( <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a980328e2cb095cca57673bce0e28839b">_blk_flag</a>, <a class="code hl_define" href="WtKVCache_8hpp.html#a67780142dd53e3992c519f253884526d">CACHE_FLAG</a>);</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>        }</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>        {</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>            <span class="comment">//检查缓存文件是否有问题,要自动恢复</span></div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>            <span class="keywordflow">do</span></div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>            {</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>                uint64_t uSize = <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWtKVCache_1_1CacheBlock.html">CacheBlock</a>) + <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWtKVCache_1_1__CacheItem.html">CacheItem</a>) *  <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">_capacity</a>;</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>                uint64_t realSz =  <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">_file</a>-&gt;size();</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>                <span class="keywordflow">if</span> (realSz != uSize)</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>                {</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>                    uint32_t realCap = (uint32_t)((realSz - <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWtKVCache_1_1CacheBlock.html">CacheBlock</a>)) / <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWtKVCache_1_1__CacheItem.html">CacheItem</a>));</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>                    uint32_t markedCap =  <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">_capacity</a>;</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>                    <span class="comment">//文件大小不匹配,一般是因为capacity改了,但是实际没扩容</span></div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>                    <span class="comment">//这是做一次扩容即可</span></div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>                     <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">_capacity</a> = realCap;</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>                     <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#afd5fc94f4f576933f83f1502f75cc5ab">_size</a> = (realCap &lt; markedCap) ? realCap : markedCap;</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>                }</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span> </div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>            } <span class="keywordflow">while</span> (<span class="keyword">false</span>);</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>        }</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span> </div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>        <span class="comment">//这里把索引加到hashmap中</span></div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>        <span class="keywordflow">for</span> (uint32_t i = 0; i &lt; <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#afd5fc94f4f576933f83f1502f75cc5ab">_size</a>; i++)</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>            <a class="code hl_variable" href="classWtKVCache.html#a6f3aaa3ee97f31f6644cb5c0a7837c57">_indice</a>[<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#ab6e04f2900bc5726ebab4ad2915176b1">_items</a>[i].<a class="code hl_variable" href="structWtKVCache_1_1__CacheItem.html#aa32b8fb3e8dc9775b0c1f0ffd020831b">_key</a>] = i;</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span> </div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>    }</div>
+</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span> </div>
+<div class="foldopen" id="foldopen00320" data-start="{" data-end="}">
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno"><a class="line" href="classWtKVCache.html#aaf6e78312573e57e83edb3b8bb205f24">  320</a></span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtKVCache.html#aaf6e78312573e57e83edb3b8bb205f24">clear</a>()</div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>    {</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>        <a class="code hl_variable" href="classWtKVCache.html#abb73b86bfb979beebac2f86b64b13ded">_lock</a>.<a class="code hl_function" href="classSpinMutex.html#a736a7883332176a3eb2960406deeaf94">lock</a>();</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span> </div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span> </div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>        <a class="code hl_variable" href="classWtKVCache.html#a6f3aaa3ee97f31f6644cb5c0a7837c57">_indice</a>.clear();</div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span> </div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>        memset(<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#ab6e04f2900bc5726ebab4ad2915176b1">_items</a>, 0, <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWtKVCache_1_1__CacheItem.html">CacheItem</a>)*<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">_capacity</a>);</div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>        <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#afd5fc94f4f576933f83f1502f75cc5ab">_size</a> = 0;</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span> </div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>        <a class="code hl_variable" href="classWtKVCache.html#abb73b86bfb979beebac2f86b64b13ded">_lock</a>.<a class="code hl_function" href="classSpinMutex.html#a0bcc18e687d2f72821a22c76c8b09644">unlock</a>();</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>    }</div>
+</div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span> </div>
+<div class="foldopen" id="foldopen00341" data-start="{" data-end="}">
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno"><a class="line" href="classWtKVCache.html#affd3329dbb692211cf917a4a2f87930d">  341</a></span>    <span class="keyword">inline</span> <span class="keyword">const</span> <span class="keywordtype">char</span>*  <a class="code hl_function" href="classWtKVCache.html#affd3329dbb692211cf917a4a2f87930d">get</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* key)<span class="keyword"> const</span></div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>        <span class="keyword">auto</span> it = <a class="code hl_variable" href="classWtKVCache.html#a6f3aaa3ee97f31f6644cb5c0a7837c57">_indice</a>.find(key);</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>        <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="classWtKVCache.html#a6f3aaa3ee97f31f6644cb5c0a7837c57">_indice</a>.end())</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>            <span class="keywordflow">return</span> <span class="stringliteral">&quot;&quot;</span>;</div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span> </div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#ab6e04f2900bc5726ebab4ad2915176b1">_items</a>[it-&gt;second].<a class="code hl_variable" href="structWtKVCache_1_1__CacheItem.html#aaec8adfeff08a14145cca98e73191a1b">_val</a>;</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>    }</div>
+</div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span> </div>
+<div class="foldopen" id="foldopen00360" data-start="{" data-end="}">
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno"><a class="line" href="classWtKVCache.html#aae8583afe4a8085e333e80beb9d0e7ed">  360</a></span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classWtKVCache.html#aae8583afe4a8085e333e80beb9d0e7ed">put</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* key, <span class="keyword">const</span> <span class="keywordtype">char</span>*val, std::size_t len = 0, <a class="code hl_variable" href="WtKVCache_8hpp.html#a7267ecee6d147f4adb21fe1dd334c94c">CacheLogger</a> logger = <span class="keyword">nullptr</span>)</div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>    {</div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>        <span class="keyword">auto</span> it = <a class="code hl_variable" href="classWtKVCache.html#a6f3aaa3ee97f31f6644cb5c0a7837c57">_indice</a>.find(key);</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>        <span class="keywordflow">if</span> (it != <a class="code hl_variable" href="classWtKVCache.html#a6f3aaa3ee97f31f6644cb5c0a7837c57">_indice</a>.end())</div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>        {</div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>            <a class="code hl_function" href="WTSMarcos_8h.html#ae3e2cd00c20ce8b9ae0ae37a089d7d5e">wt_strcpy</a>(<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#ab6e04f2900bc5726ebab4ad2915176b1">_items</a>[it-&gt;second].<a class="code hl_variable" href="structWtKVCache_1_1__CacheItem.html#aaec8adfeff08a14145cca98e73191a1b">_val</a>, val, len);</div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>        }</div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>        {</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>            <a class="code hl_variable" href="classWtKVCache.html#abb73b86bfb979beebac2f86b64b13ded">_lock</a>.<a class="code hl_function" href="classSpinMutex.html#a736a7883332176a3eb2960406deeaf94">lock</a>();</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>            <span class="keywordflow">if</span>(<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#afd5fc94f4f576933f83f1502f75cc5ab">_size</a> == <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">_capacity</a>)</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>                <a class="code hl_function" href="classWtKVCache.html#aeccd6b88c0cb5c1c97b8a369f7e8d8a4">resize</a>(<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">_capacity</a>*2, logger);</div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span> </div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>            <a class="code hl_variable" href="classWtKVCache.html#a6f3aaa3ee97f31f6644cb5c0a7837c57">_indice</a>[key] = <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#afd5fc94f4f576933f83f1502f75cc5ab">_size</a>;</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>            <a class="code hl_function" href="WTSMarcos_8h.html#ae3e2cd00c20ce8b9ae0ae37a089d7d5e">wt_strcpy</a>(<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#ab6e04f2900bc5726ebab4ad2915176b1">_items</a>[<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#afd5fc94f4f576933f83f1502f75cc5ab">_size</a>].<a class="code hl_variable" href="structWtKVCache_1_1__CacheItem.html#aa32b8fb3e8dc9775b0c1f0ffd020831b">_key</a>, key);</div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>            <a class="code hl_function" href="WTSMarcos_8h.html#ae3e2cd00c20ce8b9ae0ae37a089d7d5e">wt_strcpy</a>(<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#ab6e04f2900bc5726ebab4ad2915176b1">_items</a>[<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#afd5fc94f4f576933f83f1502f75cc5ab">_size</a>].<a class="code hl_variable" href="structWtKVCache_1_1__CacheItem.html#aaec8adfeff08a14145cca98e73191a1b">_val</a>, val, len);</div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>            <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#afd5fc94f4f576933f83f1502f75cc5ab">_size</a> += 1;</div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>            <a class="code hl_variable" href="classWtKVCache.html#abb73b86bfb979beebac2f86b64b13ded">_lock</a>.<a class="code hl_function" href="classSpinMutex.html#a0bcc18e687d2f72821a22c76c8b09644">unlock</a>();</div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>        }</div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>    }</div>
+</div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span> </div>
+<div class="foldopen" id="foldopen00387" data-start="{" data-end="}">
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno"><a class="line" href="classWtKVCache.html#aecbef0b598b011e829a79c0c6bb35aa9">  387</a></span>    <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtKVCache.html#aecbef0b598b011e829a79c0c6bb35aa9">has</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* key)<span class="keyword"> const </span></div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>        <span class="keywordflow">return</span> (<a class="code hl_variable" href="classWtKVCache.html#a6f3aaa3ee97f31f6644cb5c0a7837c57">_indice</a>.find(key) != <a class="code hl_variable" href="classWtKVCache.html#a6f3aaa3ee97f31f6644cb5c0a7837c57">_indice</a>.end());</div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>    }</div>
+</div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span> </div>
+<div class="foldopen" id="foldopen00397" data-start="{" data-end="}">
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno"><a class="line" href="classWtKVCache.html#a32823a6892d2461d7f72fb1702160b6c">  397</a></span>    <span class="keyword">inline</span> uint32_t <a class="code hl_function" href="classWtKVCache.html#a32823a6892d2461d7f72fb1702160b6c">size</a>()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a> == 0)</div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>            <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span> </div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#afd5fc94f4f576933f83f1502f75cc5ab">_size</a>;</div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>    }</div>
+</div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span> </div>
+<div class="foldopen" id="foldopen00410" data-start="{" data-end="}">
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno"><a class="line" href="classWtKVCache.html#ab920d6c8bb8ce0263ab84c735daf67a1">  410</a></span>    <span class="keyword">inline</span> uint32_t <a class="code hl_function" href="classWtKVCache.html#ab920d6c8bb8ce0263ab84c735daf67a1">capacity</a>()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a> == 0)</div>
+<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>            <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span> </div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">_cache</a>.<a class="code hl_variable" href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">_block</a>-&gt;<a class="code hl_variable" href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">_capacity</a>;</div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>    }</div>
+</div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>};</div>
+</div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span> </div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="ttc" id="aBoostFile_8hpp_html"><div class="ttname"><a href="BoostFile_8hpp.html">BoostFile.hpp</a></div><div class="ttdoc">boost库文件操作的辅助对象</div></div>
+<div class="ttc" id="aBoostMappingFile_8hpp_html"><div class="ttname"><a href="BoostMappingFile_8hpp.html">BoostMappingFile.hpp</a></div><div class="ttdoc">boost的内存映射文件组件的封装,方便使用</div></div>
+<div class="ttc" id="aSpinMutex_8hpp_html"><div class="ttname"><a href="SpinMutex_8hpp.html">SpinMutex.hpp</a></div><div class="ttdoc">自旋互斥锁实现</div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_ae3e2cd00c20ce8b9ae0ae37a089d7d5e"><div class="ttname"><a href="WTSMarcos_8h.html#ae3e2cd00c20ce8b9ae0ae37a089d7d5e">wt_strcpy</a></div><div class="ttdeci">size_t wt_strcpy(char *des, const char *src, size_t len=0)</div><div class="ttdoc">字符串拷贝函数</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00155">WTSMarcos.h:155</a></div></div>
+<div class="ttc" id="aWtKVCache_8hpp_html_a16644ae522884159c76caeb752193f4f"><div class="ttname"><a href="WtKVCache_8hpp.html#a16644ae522884159c76caeb752193f4f">BoostMFPtr</a></div><div class="ttdeci">std::shared_ptr&lt; BoostMappingFile &gt; BoostMFPtr</div><div class="ttdoc">BoostMappingFile的智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00040">WtKVCache.hpp:40</a></div></div>
+<div class="ttc" id="aWtKVCache_8hpp_html_a67780142dd53e3992c519f253884526d"><div class="ttname"><a href="WtKVCache_8hpp.html#a67780142dd53e3992c519f253884526d">CACHE_FLAG</a></div><div class="ttdeci">#define CACHE_FLAG</div><div class="ttdoc">缓存文件标识符</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00028">WtKVCache.hpp:28</a></div></div>
+<div class="ttc" id="aWtKVCache_8hpp_html_a7267ecee6d147f4adb21fe1dd334c94c"><div class="ttname"><a href="WtKVCache_8hpp.html#a7267ecee6d147f4adb21fe1dd334c94c">CacheLogger</a></div><div class="ttdeci">NS_WTP_BEGIN typedef std::function&lt; void(const char *)&gt; CacheLogger</div><div class="ttdoc">缓存日志记录器类型</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00050">WtKVCache.hpp:50</a></div></div>
+<div class="ttc" id="aWtKVCache_8hpp_html_a9e321c516bd4d6dcbc3efde5294b9b0d"><div class="ttname"><a href="WtKVCache_8hpp.html#a9e321c516bd4d6dcbc3efde5294b9b0d">SIZE_STEP</a></div><div class="ttdeci">#define SIZE_STEP</div><div class="ttdoc">缓存初始容量递增步长</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00022">WtKVCache.hpp:22</a></div></div>
+<div class="ttc" id="aWtKVCache_8hpp_html_acf826469d193892c7307ce6979587c98"><div class="ttname"><a href="WtKVCache_8hpp.html#acf826469d193892c7307ce6979587c98">FLAG_SIZE</a></div><div class="ttdeci">#define FLAG_SIZE</div><div class="ttdoc">标识符长度</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00034">WtKVCache.hpp:34</a></div></div>
+<div class="ttc" id="aclassBoostFile_html"><div class="ttname"><a href="classBoostFile.html">BoostFile</a></div><div class="ttdoc">boost库文件操作的封装类</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00044">BoostFile.hpp:45</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a0f2a2cd0d09d6ef067d3b600c8ce863d"><div class="ttname"><a href="classBoostFile.html#a0f2a2cd0d09d6ef067d3b600c8ce863d">BoostFile::truncate_file</a></div><div class="ttdeci">bool truncate_file(std::size_t size)</div><div class="ttdoc">截断文件到指定大小</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00181">BoostFile.hpp:181</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a1c5a0728e2a2f9f95ede282966424a4a"><div class="ttname"><a href="classBoostFile.html#a1c5a0728e2a2f9f95ede282966424a4a">BoostFile::open_existing_file</a></div><div class="ttdeci">bool open_existing_file(const char *name, boost::interprocess::mode_t mode=boost::interprocess::read_write, bool temporary=false)</div><div class="ttdoc">打开现有文件</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00120">BoostFile.hpp:120</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a35d44b29939730066ab6d69f8477a24e"><div class="ttname"><a href="classBoostFile.html#a35d44b29939730066ab6d69f8477a24e">BoostFile::seek_to_end</a></div><div class="ttdeci">bool seek_to_end(int offsize=0)</div><div class="ttdoc">将文件指针移动到文件结尾</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00300">BoostFile.hpp:300</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a5481db505f5c5d99c9aa9ba36806bff0"><div class="ttname"><a href="classBoostFile.html#a5481db505f5c5d99c9aa9ba36806bff0">BoostFile::close_file</a></div><div class="ttdeci">void close_file()</div><div class="ttdoc">关闭文件</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00162">BoostFile.hpp:162</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a5eab32a7044d5e65fb18aca7fd90b864"><div class="ttname"><a href="classBoostFile.html#a5eab32a7044d5e65fb18aca7fd90b864">BoostFile::create_new_file</a></div><div class="ttdeci">bool create_new_file(const char *name, boost::interprocess::mode_t mode=boost::interprocess::read_write, bool temporary=false)</div><div class="ttdoc">创建新文件</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00080">BoostFile.hpp:80</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_aab642b9bcdfa02c81c2530110eb8a61e"><div class="ttname"><a href="classBoostFile.html#aab642b9bcdfa02c81c2530110eb8a61e">BoostFile::exists</a></div><div class="ttdeci">static bool exists(const char *name)</div><div class="ttdoc">检查文件或目录是否存在（静态方法）</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00546">BoostFile.hpp:546</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_aca29c4c4ed11acc16411e3fcc986f6e3"><div class="ttname"><a href="classBoostFile.html#aca29c4c4ed11acc16411e3fcc986f6e3">BoostFile::write_file</a></div><div class="ttdeci">bool write_file(const void *data, std::size_t numdata)</div><div class="ttdoc">写入数据到文件</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00350">BoostFile.hpp:350</a></div></div>
+<div class="ttc" id="aclassBoostMappingFile_html"><div class="ttname"><a href="classBoostMappingFile.html">BoostMappingFile</a></div><div class="ttdoc">Boost内存映射文件的封装类</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00024">BoostMappingFile.hpp:25</a></div></div>
+<div class="ttc" id="aclassBoostMappingFile_html_a297d92d430afac37b30e5c15979fbe8b"><div class="ttname"><a href="classBoostMappingFile.html#a297d92d430afac37b30e5c15979fbe8b">BoostMappingFile::map</a></div><div class="ttdeci">bool map(const char *filename, int mode=boost::interprocess::read_write, int mapmode=boost::interprocess::read_write, bool zeroother=true)</div><div class="ttdoc">将文件映射到内存</div><div class="ttdef"><b>Definition</b> <a href="BoostMappingFile_8hpp_source.html#l00142">BoostMappingFile.hpp:142</a></div></div>
+<div class="ttc" id="aclassSpinMutex_html"><div class="ttname"><a href="classSpinMutex.html">SpinMutex</a></div><div class="ttdoc">自旋互斥锁类</div><div class="ttdef"><b>Definition</b> <a href="SpinMutex_8hpp_source.html#l00024">SpinMutex.hpp:25</a></div></div>
+<div class="ttc" id="aclassSpinMutex_html_a0bcc18e687d2f72821a22c76c8b09644"><div class="ttname"><a href="classSpinMutex.html#a0bcc18e687d2f72821a22c76c8b09644">SpinMutex::unlock</a></div><div class="ttdeci">void unlock()</div><div class="ttdoc">释放锁</div><div class="ttdef"><b>Definition</b> <a href="SpinMutex_8hpp_source.html#l00077">SpinMutex.hpp:77</a></div></div>
+<div class="ttc" id="aclassSpinMutex_html_a736a7883332176a3eb2960406deeaf94"><div class="ttname"><a href="classSpinMutex.html#a736a7883332176a3eb2960406deeaf94">SpinMutex::lock</a></div><div class="ttdeci">void lock()</div><div class="ttdoc">获取锁</div><div class="ttdef"><b>Definition</b> <a href="SpinMutex_8hpp_source.html#l00043">SpinMutex.hpp:43</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html"><div class="ttname"><a href="classWtKVCache.html">WtKVCache</a></div><div class="ttdoc">键值对缓存实现类</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00058">WtKVCache.hpp:59</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_a32823a6892d2461d7f72fb1702160b6c"><div class="ttname"><a href="classWtKVCache.html#a32823a6892d2461d7f72fb1702160b6c">WtKVCache::size</a></div><div class="ttdeci">uint32_t size() const</div><div class="ttdoc">获取当前缓存中的键值对数量</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00397">WtKVCache.hpp:397</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_a4c0348a7b938224380fea6c7c431edfb"><div class="ttname"><a href="classWtKVCache.html#a4c0348a7b938224380fea6c7c431edfb">WtKVCache::WtKVCache</a></div><div class="ttdeci">WtKVCache()</div><div class="ttdoc">默认构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00064">WtKVCache.hpp:64</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_a5d7403c386baef217d4d522dceb7a002"><div class="ttname"><a href="classWtKVCache.html#a5d7403c386baef217d4d522dceb7a002">WtKVCache::operator=</a></div><div class="ttdeci">WtKVCache &amp; operator=(const WtKVCache &amp;)=delete</div><div class="ttdoc">赋值运算符（已删除）</div></div>
+<div class="ttc" id="aclassWtKVCache_html_a6f3aaa3ee97f31f6644cb5c0a7837c57"><div class="ttname"><a href="classWtKVCache.html#a6f3aaa3ee97f31f6644cb5c0a7837c57">WtKVCache::_indice</a></div><div class="ttdeci">wt_hashmap&lt; std::string, uint32_t &gt; _indice</div><div class="ttdoc">键值索引哈希表</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00172">WtKVCache.hpp:172</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_a80a0c4659ad2fa94b1ffef927784f16e"><div class="ttname"><a href="classWtKVCache.html#a80a0c4659ad2fa94b1ffef927784f16e">WtKVCache::_cache</a></div><div class="ttdeci">CacheBlockPair _cache</div><div class="ttdoc">当前缓存块和文件对象</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00160">WtKVCache.hpp:160</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_a83aec553486a443ce29bff2ee9c058ff"><div class="ttname"><a href="classWtKVCache.html#a83aec553486a443ce29bff2ee9c058ff">WtKVCache::WtKVCache</a></div><div class="ttdeci">WtKVCache(const WtKVCache &amp;)=delete</div><div class="ttdoc">复制构造函数（已删除）</div></div>
+<div class="ttc" id="aclassWtKVCache_html_aae8583afe4a8085e333e80beb9d0e7ed"><div class="ttname"><a href="classWtKVCache.html#aae8583afe4a8085e333e80beb9d0e7ed">WtKVCache::put</a></div><div class="ttdeci">void put(const char *key, const char *val, std::size_t len=0, CacheLogger logger=nullptr)</div><div class="ttdoc">添加或更新键值对</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00360">WtKVCache.hpp:360</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_aaf6e78312573e57e83edb3b8bb205f24"><div class="ttname"><a href="classWtKVCache.html#aaf6e78312573e57e83edb3b8bb205f24">WtKVCache::clear</a></div><div class="ttdeci">void clear()</div><div class="ttdoc">清空缓存</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00320">WtKVCache.hpp:320</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_ab920d6c8bb8ce0263ab84c735daf67a1"><div class="ttname"><a href="classWtKVCache.html#ab920d6c8bb8ce0263ab84c735daf67a1">WtKVCache::capacity</a></div><div class="ttdeci">uint32_t capacity() const</div><div class="ttdoc">获取当前缓存的总容量</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00410">WtKVCache.hpp:410</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_abb73b86bfb979beebac2f86b64b13ded"><div class="ttname"><a href="classWtKVCache.html#abb73b86bfb979beebac2f86b64b13ded">WtKVCache::_lock</a></div><div class="ttdeci">SpinMutex _lock</div><div class="ttdoc">内部索引更新锁</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00166">WtKVCache.hpp:166</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_ad9a813637cfc02fbfe0f5472c28c0998"><div class="ttname"><a href="classWtKVCache.html#ad9a813637cfc02fbfe0f5472c28c0998">WtKVCache::init</a></div><div class="ttdeci">bool init(const char *filename, uint32_t uDate, CacheLogger logger=nullptr)</div><div class="ttdoc">初始化缓存</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00248">WtKVCache.hpp:248</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_aecbef0b598b011e829a79c0c6bb35aa9"><div class="ttname"><a href="classWtKVCache.html#aecbef0b598b011e829a79c0c6bb35aa9">WtKVCache::has</a></div><div class="ttdeci">bool has(const char *key) const</div><div class="ttdoc">检查缓存中是否存在指定的键</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00387">WtKVCache.hpp:387</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_aeccd6b88c0cb5c1c97b8a369f7e8d8a4"><div class="ttname"><a href="classWtKVCache.html#aeccd6b88c0cb5c1c97b8a369f7e8d8a4">WtKVCache::resize</a></div><div class="ttdeci">bool resize(uint32_t newCap, CacheLogger logger=nullptr)</div><div class="ttdoc">调整缓存容量</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00183">WtKVCache.hpp:183</a></div></div>
+<div class="ttc" id="aclassWtKVCache_html_af0a7aaee35f994fffe02ca6e51227188"><div class="ttname"><a href="classWtKVCache.html#af0a7aaee35f994fffe02ca6e51227188">WtKVCache::CacheBlockPair</a></div><div class="ttdeci">struct WtKVCache::_CacheBlockPair CacheBlockPair</div><div class="ttdoc">缓存块和文件的关联结构</div></div>
+<div class="ttc" id="aclassWtKVCache_html_afdb5205677a15c9dfff63d434645b9b6"><div class="ttname"><a href="classWtKVCache.html#afdb5205677a15c9dfff63d434645b9b6">WtKVCache::CacheItem</a></div><div class="ttdeci">struct WtKVCache::_CacheItem CacheItem</div><div class="ttdoc">缓存项结构体</div></div>
+<div class="ttc" id="aclassWtKVCache_html_affd3329dbb692211cf917a4a2f87930d"><div class="ttname"><a href="classWtKVCache.html#affd3329dbb692211cf917a4a2f87930d">WtKVCache::get</a></div><div class="ttdeci">const char * get(const char *key) const</div><div class="ttdoc">获取指定键的值</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00341">WtKVCache.hpp:341</a></div></div>
+<div class="ttc" id="aclasswt__hashmap_html"><div class="ttname"><a href="classwt__hashmap.html">wt_hashmap</a></div><div class="ttdoc">WonderTrader通用高性能哈希表模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00162">FasterDefs.h:163</a></div></div>
+<div class="ttc" id="astructWtKVCache_1_1CacheBlock_html"><div class="ttname"><a href="structWtKVCache_1_1CacheBlock.html">WtKVCache::CacheBlock</a></div><div class="ttdoc">缓存块结构体</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00101">WtKVCache.hpp:102</a></div></div>
+<div class="ttc" id="astructWtKVCache_1_1CacheBlock_html_a16335c7ad058165c8cedb7df6a134298"><div class="ttname"><a href="structWtKVCache_1_1CacheBlock.html#a16335c7ad058165c8cedb7df6a134298">WtKVCache::CacheBlock::_capacity</a></div><div class="ttdeci">uint32_t _capacity</div><div class="ttdoc">当前缓存块的总容量</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00116">WtKVCache.hpp:116</a></div></div>
+<div class="ttc" id="astructWtKVCache_1_1CacheBlock_html_a980328e2cb095cca57673bce0e28839b"><div class="ttname"><a href="structWtKVCache_1_1CacheBlock.html#a980328e2cb095cca57673bce0e28839b">WtKVCache::CacheBlock::_blk_flag</a></div><div class="ttdeci">char _blk_flag[FLAG_SIZE]</div><div class="ttdoc">块标识符，用于验证缓存文件合法性</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00106">WtKVCache.hpp:106</a></div></div>
+<div class="ttc" id="astructWtKVCache_1_1CacheBlock_html_ab6e04f2900bc5726ebab4ad2915176b1"><div class="ttname"><a href="structWtKVCache_1_1CacheBlock.html#ab6e04f2900bc5726ebab4ad2915176b1">WtKVCache::CacheBlock::_items</a></div><div class="ttdeci">CacheItem _items[0]</div><div class="ttdoc">可变长度的缓存项数组</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00127">WtKVCache.hpp:127</a></div></div>
+<div class="ttc" id="astructWtKVCache_1_1CacheBlock_html_ae89d02be10459481ad8240aa3e976401"><div class="ttname"><a href="structWtKVCache_1_1CacheBlock.html#ae89d02be10459481ad8240aa3e976401">WtKVCache::CacheBlock::_date</a></div><div class="ttdeci">uint32_t _date</div><div class="ttdoc">缓存日期，用于验证缓存是否过期</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00121">WtKVCache.hpp:121</a></div></div>
+<div class="ttc" id="astructWtKVCache_1_1CacheBlock_html_afd5fc94f4f576933f83f1502f75cc5ab"><div class="ttname"><a href="structWtKVCache_1_1CacheBlock.html#afd5fc94f4f576933f83f1502f75cc5ab">WtKVCache::CacheBlock::_size</a></div><div class="ttdeci">uint32_t _size</div><div class="ttdoc">当前实际存储的缓存项数量</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00111">WtKVCache.hpp:111</a></div></div>
+<div class="ttc" id="astructWtKVCache_1_1__CacheBlockPair_html"><div class="ttname"><a href="structWtKVCache_1_1__CacheBlockPair.html">WtKVCache::_CacheBlockPair</a></div><div class="ttdoc">缓存块和文件的关联结构</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00134">WtKVCache.hpp:135</a></div></div>
+<div class="ttc" id="astructWtKVCache_1_1__CacheBlockPair_html_a2dcbd97e45e8caf298874044d5f6e7fc"><div class="ttname"><a href="structWtKVCache_1_1__CacheBlockPair.html#a2dcbd97e45e8caf298874044d5f6e7fc">WtKVCache::_CacheBlockPair::_file</a></div><div class="ttdeci">BoostMFPtr _file</div><div class="ttdoc">指向内存映射文件的智能指针</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00144">WtKVCache.hpp:144</a></div></div>
+<div class="ttc" id="astructWtKVCache_1_1__CacheBlockPair_html_a46425727ad6c08dde92773190fc9b10d"><div class="ttname"><a href="structWtKVCache_1_1__CacheBlockPair.html#a46425727ad6c08dde92773190fc9b10d">WtKVCache::_CacheBlockPair::_block</a></div><div class="ttdeci">CacheBlock * _block</div><div class="ttdoc">指向内存映射的缓存块的指针</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00139">WtKVCache.hpp:139</a></div></div>
+<div class="ttc" id="astructWtKVCache_1_1__CacheBlockPair_html_ad9a095a217897928385105b7e6046f3b"><div class="ttname"><a href="structWtKVCache_1_1__CacheBlockPair.html#ad9a095a217897928385105b7e6046f3b">WtKVCache::_CacheBlockPair::_CacheBlockPair</a></div><div class="ttdeci">_CacheBlockPair()</div><div class="ttdoc">默认构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00150">WtKVCache.hpp:150</a></div></div>
+<div class="ttc" id="astructWtKVCache_1_1__CacheItem_html"><div class="ttname"><a href="structWtKVCache_1_1__CacheItem.html">WtKVCache::_CacheItem</a></div><div class="ttdoc">缓存项结构体</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00084">WtKVCache.hpp:85</a></div></div>
+<div class="ttc" id="astructWtKVCache_1_1__CacheItem_html_aa32b8fb3e8dc9775b0c1f0ffd020831b"><div class="ttname"><a href="structWtKVCache_1_1__CacheItem.html#aa32b8fb3e8dc9775b0c1f0ffd020831b">WtKVCache::_CacheItem::_key</a></div><div class="ttdeci">char _key[64]</div><div class="ttdoc">键名字符数组，最大支持64字节</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00089">WtKVCache.hpp:89</a></div></div>
+<div class="ttc" id="astructWtKVCache_1_1__CacheItem_html_aaec8adfeff08a14145cca98e73191a1b"><div class="ttname"><a href="structWtKVCache_1_1__CacheItem.html#aaec8adfeff08a14145cca98e73191a1b">WtKVCache::_CacheItem::_val</a></div><div class="ttdeci">char _val[64]</div><div class="ttdoc">值字符数组，最大支持64字节</div><div class="ttdef"><b>Definition</b> <a href="WtKVCache_8hpp_source.html#l00094">WtKVCache.hpp:94</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_b415f7b135736b475386968edd2cefde.html">Share</a></li><li class="navelem"><a class="el" href="WtKVCache_8hpp.html">WtKVCache.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

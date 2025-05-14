@@ -1,0 +1,25 @@
+var structCThostFtdcParkedOrderActionField =
+[
+    [ "ActionFlag", "structCThostFtdcParkedOrderActionField.html#a5d0972f9ce338c44398d75404fdc10b8", null ],
+    [ "BrokerID", "structCThostFtdcParkedOrderActionField.html#af9fae2f9e493e65bf2cba17d2a5bc4b5", null ],
+    [ "ErrorID", "structCThostFtdcParkedOrderActionField.html#a3c2107f3f3483b6e1b9fef319bb4a7ee", null ],
+    [ "ErrorMsg", "structCThostFtdcParkedOrderActionField.html#a5b86c12219acd4d3ed2ee8c21bfa9d0f", null ],
+    [ "ExchangeID", "structCThostFtdcParkedOrderActionField.html#ab63e5bf63281797b1432b51b8c710cdd", null ],
+    [ "FrontID", "structCThostFtdcParkedOrderActionField.html#a09513846d16c5914b9213743090f22c2", null ],
+    [ "InstrumentID", "structCThostFtdcParkedOrderActionField.html#a71e74e9ba7f8590aae840d1bc3ef5a62", null ],
+    [ "InvestorID", "structCThostFtdcParkedOrderActionField.html#a3b6b3ba0925a2d03b7f2876a0e6e140d", null ],
+    [ "InvestUnitID", "structCThostFtdcParkedOrderActionField.html#abae4788062993272942a4cd4e216070b", null ],
+    [ "IPAddress", "structCThostFtdcParkedOrderActionField.html#a5c716536a7b113eca45c6eaa488c5e17", null ],
+    [ "LimitPrice", "structCThostFtdcParkedOrderActionField.html#a484f51bbc20522d4d81ab24afeab8aad", null ],
+    [ "MacAddress", "structCThostFtdcParkedOrderActionField.html#aa891247667e25c6df6fd0f7692b8e39c", null ],
+    [ "OrderActionRef", "structCThostFtdcParkedOrderActionField.html#a58609e4b110f514fd3f5671a7f2f3cce", null ],
+    [ "OrderRef", "structCThostFtdcParkedOrderActionField.html#a5a1fe407c45074755c2e30c192084c90", null ],
+    [ "OrderSysID", "structCThostFtdcParkedOrderActionField.html#a291c63a1e35c77e28dea4049dafc185b", null ],
+    [ "ParkedOrderActionID", "structCThostFtdcParkedOrderActionField.html#aab8a726678f5fbb8e1946f1f5013e228", null ],
+    [ "RequestID", "structCThostFtdcParkedOrderActionField.html#aceb4543bb18a21fd9926cfbe7c7755aa", null ],
+    [ "SessionID", "structCThostFtdcParkedOrderActionField.html#a8e6f5db885e19710c331644d558b70dc", null ],
+    [ "Status", "structCThostFtdcParkedOrderActionField.html#ad349e88c04234b81575519aaa0daa149", null ],
+    [ "UserID", "structCThostFtdcParkedOrderActionField.html#add32a07ee7734dd681b27ebfac9d8f33", null ],
+    [ "UserType", "structCThostFtdcParkedOrderActionField.html#ac305860c51bcb118581063cfdff644a9", null ],
+    [ "VolumeChange", "structCThostFtdcParkedOrderActionField.html#add8c426f4d6a15ef228267d0d258f372", null ]
+];

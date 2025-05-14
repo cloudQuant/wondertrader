@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtCore/SelStraContext.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('SelStraContext_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">SelStraContext.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="SelStraContext_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#include &quot;<a class="code" href="SelStraContext_8h.html">SelStraContext.h</a>&quot;</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &quot;../Includes/SelStrategyDefs.h&quot;</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
+<div class="foldopen" id="foldopen00005" data-start="{" data-end="}">
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno"><a class="line" href="classSelStraContext.html#a115e6a08a47c7b31dfaaba79f545edc8">    5</a></span><a class="code hl_function" href="classSelStraContext.html#a115e6a08a47c7b31dfaaba79f545edc8">SelStraContext::SelStraContext</a>(<a class="code hl_class" href="classWtSelEngine.html">WtSelEngine</a>* engine, <span class="keyword">const</span> <span class="keywordtype">char</span>* name, int32_t slippage)</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span>    : <a class="code hl_class" href="classSelStraBaseCtx.html">SelStraBaseCtx</a>(engine, name, slippage)</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span>    , _strategy(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>{</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>}</div>
+</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="foldopen" id="foldopen00012" data-start="{" data-end="}">
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="classSelStraContext.html#abd8f58164ec24b84925e39eb14435c1c">   12</a></span><a class="code hl_function" href="classSelStraContext.html#abd8f58164ec24b84925e39eb14435c1c">SelStraContext::~SelStraContext</a>()</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>{</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>}</div>
+</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="foldopen" id="foldopen00016" data-start="{" data-end="}">
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="classSelStraContext.html#a9d3aeed994c1726405699e61c5c2e87b">   16</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classSelStraContext.html#a9d3aeed994c1726405699e61c5c2e87b">SelStraContext::on_init</a>()</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>{</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <a class="code hl_function" href="classSelStraBaseCtx.html#a009d8de1498d20903441bbbb5f1d8e64">SelStraBaseCtx::on_init</a>();</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSelStraContext.html#ab544330e71614e472c78ddd3e2529516">_strategy</a>)</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        <a class="code hl_variable" href="classSelStraContext.html#ab544330e71614e472c78ddd3e2529516">_strategy</a>-&gt;<a class="code hl_function" href="classSelStrategy.html#aee334d61274021f1fd740ef68c8621d4">on_init</a>(<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>}</div>
+</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="foldopen" id="foldopen00024" data-start="{" data-end="}">
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="classSelStraContext.html#ae6efc0576885c510c6283e4e086f3a6d">   24</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classSelStraContext.html#ae6efc0576885c510c6283e4e086f3a6d">SelStraContext::on_session_begin</a>(uint32_t uTDate)</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>{</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <a class="code hl_function" href="classSelStraBaseCtx.html#ad2fb514670d3634abf72e09515f81ed9">SelStraBaseCtx::on_session_begin</a>(uTDate);</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSelStraContext.html#ab544330e71614e472c78ddd3e2529516">_strategy</a>)</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <a class="code hl_variable" href="classSelStraContext.html#ab544330e71614e472c78ddd3e2529516">_strategy</a>-&gt;<a class="code hl_function" href="classSelStrategy.html#acdb2b65a1e0360f2a871a8801ef308ba">on_session_begin</a>(<span class="keyword">this</span>, uTDate);</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>}</div>
+</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="foldopen" id="foldopen00032" data-start="{" data-end="}">
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classSelStraContext.html#ae8fd7d4cbb2b038055ec71fc4e2dc50f">   32</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classSelStraContext.html#ae8fd7d4cbb2b038055ec71fc4e2dc50f">SelStraContext::on_session_end</a>(uint32_t uTDate)</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>{</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSelStraContext.html#ab544330e71614e472c78ddd3e2529516">_strategy</a>)</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        <a class="code hl_variable" href="classSelStraContext.html#ab544330e71614e472c78ddd3e2529516">_strategy</a>-&gt;<a class="code hl_function" href="classSelStrategy.html#acfc24651b465ac7e90359e9ede9a07cf">on_session_end</a>(<span class="keyword">this</span>, uTDate);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <a class="code hl_function" href="classSelStraBaseCtx.html#a9d7ca5754415936f3e67f9c4f3d18f5d">SelStraBaseCtx::on_session_end</a>(uTDate);</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>}</div>
+</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="foldopen" id="foldopen00040" data-start="{" data-end="}">
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="classSelStraContext.html#aea93993ecea9dfac1bef2ca749e62141">   40</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classSelStraContext.html#aea93993ecea9dfac1bef2ca749e62141">SelStraContext::on_bar_close</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* newBar)</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>{</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSelStraContext.html#ab544330e71614e472c78ddd3e2529516">_strategy</a>)</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <a class="code hl_variable" href="classSelStraContext.html#ab544330e71614e472c78ddd3e2529516">_strategy</a>-&gt;<a class="code hl_function" href="classSelStrategy.html#af4f73fc7ed41091a3df72f46ed4a8d0e">on_bar</a>(<span class="keyword">this</span>, stdCode, period, newBar);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>}</div>
+</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="foldopen" id="foldopen00046" data-start="{" data-end="}">
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classSelStraContext.html#a81b0e40c2f9dc4f2c916075c0b5888ae">   46</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classSelStraContext.html#a81b0e40c2f9dc4f2c916075c0b5888ae">SelStraContext::on_tick_updated</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick)</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>{</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="classSelStraBaseCtx.html#ac0ff19da7ab2aac26b9a8c963240a4a5">_tick_subs</a>.find(stdCode);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="classSelStraBaseCtx.html#ac0ff19da7ab2aac26b9a8c963240a4a5">_tick_subs</a>.end())</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSelStraContext.html#ab544330e71614e472c78ddd3e2529516">_strategy</a>)</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        <a class="code hl_variable" href="classSelStraContext.html#ab544330e71614e472c78ddd3e2529516">_strategy</a>-&gt;<a class="code hl_function" href="classSelStrategy.html#a56154c4c0f3133f849f833424e1086f0">on_tick</a>(<span class="keyword">this</span>, stdCode, newTick);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>}</div>
+</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="foldopen" id="foldopen00056" data-start="{" data-end="}">
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="classSelStraContext.html#a5b3f358efe1ba56c9f669eb5c01d75fa">   56</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classSelStraContext.html#a5b3f358efe1ba56c9f669eb5c01d75fa">SelStraContext::on_strategy_schedule</a>(uint32_t curDate, uint32_t curTime)</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>{</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSelStraContext.html#ab544330e71614e472c78ddd3e2529516">_strategy</a>)</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <a class="code hl_variable" href="classSelStraContext.html#ab544330e71614e472c78ddd3e2529516">_strategy</a>-&gt;<a class="code hl_function" href="classSelStrategy.html#accdc9c248d9ad3ba11396e418616f635">on_schedule</a>(<span class="keyword">this</span>, curDate, curTime);</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>}</div>
+</div>
+<div class="ttc" id="aSelStraContext_8h_html"><div class="ttname"><a href="SelStraContext_8h.html">SelStraContext.h</a></div></div>
+<div class="ttc" id="aclassSelStraBaseCtx_html"><div class="ttname"><a href="classSelStraBaseCtx.html">SelStraBaseCtx</a></div><div class="ttdoc">选股策略基础上下文类</div><div class="ttdef"><b>Definition</b> <a href="SelStraBaseCtx_8h_source.html#l00032">SelStraBaseCtx.h:33</a></div></div>
+<div class="ttc" id="aclassSelStraBaseCtx_html_a009d8de1498d20903441bbbb5f1d8e64"><div class="ttname"><a href="classSelStraBaseCtx.html#a009d8de1498d20903441bbbb5f1d8e64">SelStraBaseCtx::on_init</a></div><div class="ttdeci">virtual void on_init() override</div><div class="ttdoc">策略初始化回调</div><div class="ttdef"><b>Definition</b> <a href="SelStraBaseCtx_8cpp_source.html#l00620">SelStraBaseCtx.cpp:620</a></div></div>
+<div class="ttc" id="aclassSelStraBaseCtx_html_a9d7ca5754415936f3e67f9c4f3d18f5d"><div class="ttname"><a href="classSelStraBaseCtx.html#a9d7ca5754415936f3e67f9c4f3d18f5d">SelStraBaseCtx::on_session_end</a></div><div class="ttdeci">virtual void on_session_end(uint32_t uTDate) override</div><div class="ttdoc">交易会话结束回调</div><div class="ttdef"><b>Definition</b> <a href="SelStraBaseCtx_8cpp_source.html#l00863">SelStraBaseCtx.cpp:863</a></div></div>
+<div class="ttc" id="aclassSelStraBaseCtx_html_ac0ff19da7ab2aac26b9a8c963240a4a5"><div class="ttname"><a href="classSelStraBaseCtx.html#ac0ff19da7ab2aac26b9a8c963240a4a5">SelStraBaseCtx::_tick_subs</a></div><div class="ttdeci">wt_hashset&lt; std::string &gt; _tick_subs</div><div class="ttdoc">Tick订阅列表</div><div class="ttdef"><b>Definition</b> <a href="SelStraBaseCtx_8h_source.html#l00925">SelStraBaseCtx.h:925</a></div></div>
+<div class="ttc" id="aclassSelStraBaseCtx_html_ad2fb514670d3634abf72e09515f81ed9"><div class="ttname"><a href="classSelStraBaseCtx.html#ad2fb514670d3634abf72e09515f81ed9">SelStraBaseCtx::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin(uint32_t uTDate) override</div><div class="ttdoc">交易会话开始回调</div><div class="ttdef"><b>Definition</b> <a href="SelStraBaseCtx_8cpp_source.html#l00799">SelStraBaseCtx.cpp:799</a></div></div>
+<div class="ttc" id="aclassSelStraContext_html_a115e6a08a47c7b31dfaaba79f545edc8"><div class="ttname"><a href="classSelStraContext.html#a115e6a08a47c7b31dfaaba79f545edc8">SelStraContext::SelStraContext</a></div><div class="ttdeci">SelStraContext(WtSelEngine *engine, const char *name, int32_t slippage)</div><div class="ttdef"><b>Definition</b> <a href="SelStraContext_8cpp_source.html#l00005">SelStraContext.cpp:5</a></div></div>
+<div class="ttc" id="aclassSelStraContext_html_a5b3f358efe1ba56c9f669eb5c01d75fa"><div class="ttname"><a href="classSelStraContext.html#a5b3f358efe1ba56c9f669eb5c01d75fa">SelStraContext::on_strategy_schedule</a></div><div class="ttdeci">virtual void on_strategy_schedule(uint32_t curDate, uint32_t curTime) override</div><div class="ttdoc">策略定时调度回调</div><div class="ttdef"><b>Definition</b> <a href="SelStraContext_8cpp_source.html#l00056">SelStraContext.cpp:56</a></div></div>
+<div class="ttc" id="aclassSelStraContext_html_a81b0e40c2f9dc4f2c916075c0b5888ae"><div class="ttname"><a href="classSelStraContext.html#a81b0e40c2f9dc4f2c916075c0b5888ae">SelStraContext::on_tick_updated</a></div><div class="ttdeci">virtual void on_tick_updated(const char *stdCode, WTSTickData *newTick) override</div><div class="ttdoc">Tick数据更新回调</div><div class="ttdef"><b>Definition</b> <a href="SelStraContext_8cpp_source.html#l00046">SelStraContext.cpp:46</a></div></div>
+<div class="ttc" id="aclassSelStraContext_html_a9d3aeed994c1726405699e61c5c2e87b"><div class="ttname"><a href="classSelStraContext.html#a9d3aeed994c1726405699e61c5c2e87b">SelStraContext::on_init</a></div><div class="ttdeci">virtual void on_init() override</div><div class="ttdoc">策略初始化回调</div><div class="ttdef"><b>Definition</b> <a href="SelStraContext_8cpp_source.html#l00016">SelStraContext.cpp:16</a></div></div>
+<div class="ttc" id="aclassSelStraContext_html_ab544330e71614e472c78ddd3e2529516"><div class="ttname"><a href="classSelStraContext.html#ab544330e71614e472c78ddd3e2529516">SelStraContext::_strategy</a></div><div class="ttdeci">SelStrategy * _strategy</div><div class="ttdef"><b>Definition</b> <a href="SelStraContext_8h_source.html#l00031">SelStraContext.h:31</a></div></div>
+<div class="ttc" id="aclassSelStraContext_html_abd8f58164ec24b84925e39eb14435c1c"><div class="ttname"><a href="classSelStraContext.html#abd8f58164ec24b84925e39eb14435c1c">SelStraContext::~SelStraContext</a></div><div class="ttdeci">virtual ~SelStraContext()</div><div class="ttdef"><b>Definition</b> <a href="SelStraContext_8cpp_source.html#l00012">SelStraContext.cpp:12</a></div></div>
+<div class="ttc" id="aclassSelStraContext_html_ae6efc0576885c510c6283e4e086f3a6d"><div class="ttname"><a href="classSelStraContext.html#ae6efc0576885c510c6283e4e086f3a6d">SelStraContext::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin(uint32_t uTDate) override</div><div class="ttdoc">交易会话开始回调</div><div class="ttdef"><b>Definition</b> <a href="SelStraContext_8cpp_source.html#l00024">SelStraContext.cpp:24</a></div></div>
+<div class="ttc" id="aclassSelStraContext_html_ae8fd7d4cbb2b038055ec71fc4e2dc50f"><div class="ttname"><a href="classSelStraContext.html#ae8fd7d4cbb2b038055ec71fc4e2dc50f">SelStraContext::on_session_end</a></div><div class="ttdeci">virtual void on_session_end(uint32_t uTDate) override</div><div class="ttdoc">交易会话结束回调</div><div class="ttdef"><b>Definition</b> <a href="SelStraContext_8cpp_source.html#l00032">SelStraContext.cpp:32</a></div></div>
+<div class="ttc" id="aclassSelStraContext_html_aea93993ecea9dfac1bef2ca749e62141"><div class="ttname"><a href="classSelStraContext.html#aea93993ecea9dfac1bef2ca749e62141">SelStraContext::on_bar_close</a></div><div class="ttdeci">virtual void on_bar_close(const char *stdCode, const char *period, WTSBarStruct *newBar) override</div><div class="ttdoc">K线收盘回调</div><div class="ttdef"><b>Definition</b> <a href="SelStraContext_8cpp_source.html#l00040">SelStraContext.cpp:40</a></div></div>
+<div class="ttc" id="aclassSelStrategy_html_a56154c4c0f3133f849f833424e1086f0"><div class="ttname"><a href="classSelStrategy.html#a56154c4c0f3133f849f833424e1086f0">SelStrategy::on_tick</a></div><div class="ttdeci">virtual void on_tick(ISelStraCtx *ctx, const char *stdCode, WTSTickData *newTick)</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyDefs_8h_source.html#l00072">SelStrategyDefs.h:72</a></div></div>
+<div class="ttc" id="aclassSelStrategy_html_accdc9c248d9ad3ba11396e418616f635"><div class="ttname"><a href="classSelStrategy.html#accdc9c248d9ad3ba11396e418616f635">SelStrategy::on_schedule</a></div><div class="ttdeci">virtual void on_schedule(ISelStraCtx *ctx, uint32_t uDate, uint32_t uTime)</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyDefs_8h_source.html#l00067">SelStrategyDefs.h:67</a></div></div>
+<div class="ttc" id="aclassSelStrategy_html_acdb2b65a1e0360f2a871a8801ef308ba"><div class="ttname"><a href="classSelStrategy.html#acdb2b65a1e0360f2a871a8801ef308ba">SelStrategy::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin(ISelStraCtx *ctx, uint32_t uTDate)</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyDefs_8h_source.html#l00057">SelStrategyDefs.h:57</a></div></div>
+<div class="ttc" id="aclassSelStrategy_html_acfc24651b465ac7e90359e9ede9a07cf"><div class="ttname"><a href="classSelStrategy.html#acfc24651b465ac7e90359e9ede9a07cf">SelStrategy::on_session_end</a></div><div class="ttdeci">virtual void on_session_end(ISelStraCtx *ctx, uint32_t uTDate)</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyDefs_8h_source.html#l00062">SelStrategyDefs.h:62</a></div></div>
+<div class="ttc" id="aclassSelStrategy_html_aee334d61274021f1fd740ef68c8621d4"><div class="ttname"><a href="classSelStrategy.html#aee334d61274021f1fd740ef68c8621d4">SelStrategy::on_init</a></div><div class="ttdeci">virtual void on_init(ISelStraCtx *ctx)</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyDefs_8h_source.html#l00052">SelStrategyDefs.h:52</a></div></div>
+<div class="ttc" id="aclassSelStrategy_html_af4f73fc7ed41091a3df72f46ed4a8d0e"><div class="ttname"><a href="classSelStrategy.html#af4f73fc7ed41091a3df72f46ed4a8d0e">SelStrategy::on_bar</a></div><div class="ttdeci">virtual void on_bar(ISelStraCtx *ctx, const char *stdCode, const char *period, WTSBarStruct *newBar)</div><div class="ttdef"><b>Definition</b> <a href="SelStrategyDefs_8h_source.html#l00077">SelStrategyDefs.h:77</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWtSelEngine_html"><div class="ttname"><a href="classWtSelEngine.html">WtSelEngine</a></div><div class="ttdoc">选股策略引擎类</div><div class="ttdef"><b>Definition</b> <a href="WtSelEngine_8h_source.html#l00081">WtSelEngine.h:82</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3ce996bf6400c0a215df0636043a382c.html">WtCore</a></li><li class="navelem"><a class="el" href="SelStraContext_8cpp.html">SelStraContext.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

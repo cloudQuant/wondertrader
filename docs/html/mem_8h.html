@@ -1,0 +1,1086 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/mem.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('mem_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#define-members">宏定义</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">mem.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;stddef.h&gt;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;limits.h&gt;</code><br />
+</div>
+<p><a href="mem_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:acf4d568511d5e964c3579616a28ab62b" id="r_acf4d568511d5e964c3579616a28ab62b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a>&#160;&#160;&#160;static  /* this version may generate warnings for unused static functions; disable the relevant warning */</td></tr>
+<tr class="separator:acf4d568511d5e964c3579616a28ab62b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a447121dcab4275b7839a56082b7a1ab8" id="r_a447121dcab4275b7839a56082b7a1ab8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a447121dcab4275b7839a56082b7a1ab8">__has_builtin</a>(x)&#160;&#160;&#160;0  /* compat. with non-clang compilers */</td></tr>
+<tr class="separator:a447121dcab4275b7839a56082b7a1ab8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1999a8b21b02063e6b7d0ddd54e6831e" id="r_a1999a8b21b02063e6b7d0ddd54e6831e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a1999a8b21b02063e6b7d0ddd54e6831e">MEM_STATIC_ASSERT</a>(c)&#160;&#160;&#160;{ enum { MEM_static_assert = 1/(int)(!!(c)) }; }</td></tr>
+<tr class="separator:a1999a8b21b02063e6b7d0ddd54e6831e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a4ae1dab0fb4b072a66584546209e7d58" id="r_a4ae1dab0fb4b072a66584546209e7d58"><td class="memItemLeft" align="right" valign="top">typedef unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a></td></tr>
+<tr class="separator:a4ae1dab0fb4b072a66584546209e7d58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf928e51a60dba0df29d615401cc55a8" id="r_adf928e51a60dba0df29d615401cc55a8"><td class="memItemLeft" align="right" valign="top">typedef unsigned short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a></td></tr>
+<tr class="separator:adf928e51a60dba0df29d615401cc55a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae08f9a6ee81e70f713a74a5860062841" id="r_ae08f9a6ee81e70f713a74a5860062841"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="stdc_8h.html#ae31516cd0c4adc3d52b93ef2e5c6117b">signed</a> short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#ae08f9a6ee81e70f713a74a5860062841">S16</a></td></tr>
+<tr class="separator:ae08f9a6ee81e70f713a74a5860062841"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3df7cf3c8cb172a588adec881447d68" id="r_ac3df7cf3c8cb172a588adec881447d68"><td class="memItemLeft" align="right" valign="top">typedef unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a></td></tr>
+<tr class="separator:ac3df7cf3c8cb172a588adec881447d68"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57a2244776e01ad620c556de58eb7880" id="r_a57a2244776e01ad620c556de58eb7880"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="stdc_8h.html#ae31516cd0c4adc3d52b93ef2e5c6117b">signed</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a57a2244776e01ad620c556de58eb7880">S32</a></td></tr>
+<tr class="separator:a57a2244776e01ad620c556de58eb7880"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24c386d3758eba951eb7532fdbb45804" id="r_a24c386d3758eba951eb7532fdbb45804"><td class="memItemLeft" align="right" valign="top">typedef unsigned long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a></td></tr>
+<tr class="separator:a24c386d3758eba951eb7532fdbb45804"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5200f9ca6402de77fd1a6f87db081f0b" id="r_a5200f9ca6402de77fd1a6f87db081f0b"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="stdc_8h.html#ae31516cd0c4adc3d52b93ef2e5c6117b">signed</a> long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a5200f9ca6402de77fd1a6f87db081f0b">S64</a></td></tr>
+<tr class="separator:a5200f9ca6402de77fd1a6f87db081f0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a7facc72c6a6a7d19c0cd418af86889f6" id="r_a7facc72c6a6a7d19c0cd418af86889f6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a7facc72c6a6a7d19c0cd418af86889f6">MEM_check</a> (void)</td></tr>
+<tr class="separator:a7facc72c6a6a7d19c0cd418af86889f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18e77a75ccecc21ae7bba184b9c15c98" id="r_a18e77a75ccecc21ae7bba184b9c15c98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a18e77a75ccecc21ae7bba184b9c15c98">MEM_32bits</a> (void)</td></tr>
+<tr class="separator:a18e77a75ccecc21ae7bba184b9c15c98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dde55c217c03b317ba03f77c65c33ff" id="r_a8dde55c217c03b317ba03f77c65c33ff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a8dde55c217c03b317ba03f77c65c33ff">MEM_64bits</a> (void)</td></tr>
+<tr class="separator:a8dde55c217c03b317ba03f77c65c33ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f55400481e77eaff572ca4810a75d8a" id="r_a6f55400481e77eaff572ca4810a75d8a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a6f55400481e77eaff572ca4810a75d8a">MEM_isLittleEndian</a> (void)</td></tr>
+<tr class="separator:a6f55400481e77eaff572ca4810a75d8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a8baa9c29ded9e4db53cc9fbaebcd48" id="r_a2a8baa9c29ded9e4db53cc9fbaebcd48"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a2a8baa9c29ded9e4db53cc9fbaebcd48">MEM_read16</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *memPtr)</td></tr>
+<tr class="separator:a2a8baa9c29ded9e4db53cc9fbaebcd48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a217bf2f0a72e98c9dd5b7c4777a7c5b1" id="r_a217bf2f0a72e98c9dd5b7c4777a7c5b1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a217bf2f0a72e98c9dd5b7c4777a7c5b1">MEM_read32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *memPtr)</td></tr>
+<tr class="separator:a217bf2f0a72e98c9dd5b7c4777a7c5b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9e8ac6fcc8f3719cee9e32df7d9a580" id="r_ae9e8ac6fcc8f3719cee9e32df7d9a580"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#ae9e8ac6fcc8f3719cee9e32df7d9a580">MEM_read64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *memPtr)</td></tr>
+<tr class="separator:ae9e8ac6fcc8f3719cee9e32df7d9a580"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43dbb8562260a955804c84e135c9d6a6" id="r_a43dbb8562260a955804c84e135c9d6a6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a43dbb8562260a955804c84e135c9d6a6">MEM_readST</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *memPtr)</td></tr>
+<tr class="separator:a43dbb8562260a955804c84e135c9d6a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc1f06850ab39a708b5828f1e6d98f54" id="r_acc1f06850ab39a708b5828f1e6d98f54"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#acc1f06850ab39a708b5828f1e6d98f54">MEM_write16</a> (void *memPtr, <a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a> <a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>)</td></tr>
+<tr class="separator:acc1f06850ab39a708b5828f1e6d98f54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98c41a4bffb616aa6f44fbafef54aa75" id="r_a98c41a4bffb616aa6f44fbafef54aa75"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a98c41a4bffb616aa6f44fbafef54aa75">MEM_write32</a> (void *memPtr, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>)</td></tr>
+<tr class="separator:a98c41a4bffb616aa6f44fbafef54aa75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14ae1fe53aa929a95ae11e9b87133577" id="r_a14ae1fe53aa929a95ae11e9b87133577"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a14ae1fe53aa929a95ae11e9b87133577">MEM_write64</a> (void *memPtr, <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> <a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>)</td></tr>
+<tr class="separator:a14ae1fe53aa929a95ae11e9b87133577"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23df46586bdbabc7acab5cd0bc8f78d0" id="r_a23df46586bdbabc7acab5cd0bc8f78d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a23df46586bdbabc7acab5cd0bc8f78d0">MEM_swap32</a> (<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> in)</td></tr>
+<tr class="separator:a23df46586bdbabc7acab5cd0bc8f78d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a2581ea2b65fee514fe7283f4058b6f" id="r_a1a2581ea2b65fee514fe7283f4058b6f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a1a2581ea2b65fee514fe7283f4058b6f">MEM_swap64</a> (<a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> in)</td></tr>
+<tr class="separator:a1a2581ea2b65fee514fe7283f4058b6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6228bfff649f9f5fda4b4d93e459e9bc" id="r_a6228bfff649f9f5fda4b4d93e459e9bc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a6228bfff649f9f5fda4b4d93e459e9bc">MEM_swapST</a> (size_t in)</td></tr>
+<tr class="separator:a6228bfff649f9f5fda4b4d93e459e9bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74bb46c7ca94b708d315466f6a965fca" id="r_a74bb46c7ca94b708d315466f6a965fca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a74bb46c7ca94b708d315466f6a965fca">MEM_readLE16</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *memPtr)</td></tr>
+<tr class="separator:a74bb46c7ca94b708d315466f6a965fca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ded5af45f44dfbd14f43d4912950d50" id="r_a4ded5af45f44dfbd14f43d4912950d50"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a4ded5af45f44dfbd14f43d4912950d50">MEM_writeLE16</a> (void *memPtr, <a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a> val)</td></tr>
+<tr class="separator:a4ded5af45f44dfbd14f43d4912950d50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1471303596c711ed17413576e85675bc" id="r_a1471303596c711ed17413576e85675bc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a1471303596c711ed17413576e85675bc">MEM_readLE24</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *memPtr)</td></tr>
+<tr class="separator:a1471303596c711ed17413576e85675bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada4f5ec0e393e2fad84fca54ba971816" id="r_ada4f5ec0e393e2fad84fca54ba971816"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#ada4f5ec0e393e2fad84fca54ba971816">MEM_writeLE24</a> (void *memPtr, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> val)</td></tr>
+<tr class="separator:ada4f5ec0e393e2fad84fca54ba971816"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae961ae5bbdbb98421b173c05a67c1cec" id="r_ae961ae5bbdbb98421b173c05a67c1cec"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#ae961ae5bbdbb98421b173c05a67c1cec">MEM_readLE32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *memPtr)</td></tr>
+<tr class="separator:ae961ae5bbdbb98421b173c05a67c1cec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f8c5ab3aa1eb7901adab8d65e2abd6e" id="r_a6f8c5ab3aa1eb7901adab8d65e2abd6e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a6f8c5ab3aa1eb7901adab8d65e2abd6e">MEM_writeLE32</a> (void *memPtr, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> val32)</td></tr>
+<tr class="separator:a6f8c5ab3aa1eb7901adab8d65e2abd6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a996497c67854d8927dd11e69cce49006" id="r_a996497c67854d8927dd11e69cce49006"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a996497c67854d8927dd11e69cce49006">MEM_readLE64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *memPtr)</td></tr>
+<tr class="separator:a996497c67854d8927dd11e69cce49006"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad39c28c12df129e8ad17c855b80ee3bb" id="r_ad39c28c12df129e8ad17c855b80ee3bb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#ad39c28c12df129e8ad17c855b80ee3bb">MEM_writeLE64</a> (void *memPtr, <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> val64)</td></tr>
+<tr class="separator:ad39c28c12df129e8ad17c855b80ee3bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a8cb1fdc13ead05ea44b41ae242e790" id="r_a3a8cb1fdc13ead05ea44b41ae242e790"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a3a8cb1fdc13ead05ea44b41ae242e790">MEM_readLEST</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *memPtr)</td></tr>
+<tr class="separator:a3a8cb1fdc13ead05ea44b41ae242e790"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba0028bdef9bf51707feddbf5d62d542" id="r_aba0028bdef9bf51707feddbf5d62d542"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#aba0028bdef9bf51707feddbf5d62d542">MEM_writeLEST</a> (void *memPtr, size_t val)</td></tr>
+<tr class="separator:aba0028bdef9bf51707feddbf5d62d542"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d776d11be8e5d61ef07b485df0010e1" id="r_a4d776d11be8e5d61ef07b485df0010e1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a4d776d11be8e5d61ef07b485df0010e1">MEM_readBE32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *memPtr)</td></tr>
+<tr class="separator:a4d776d11be8e5d61ef07b485df0010e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36b1fb799bbcbe77e601d75d65fc90f3" id="r_a36b1fb799bbcbe77e601d75d65fc90f3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a36b1fb799bbcbe77e601d75d65fc90f3">MEM_writeBE32</a> (void *memPtr, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> val32)</td></tr>
+<tr class="separator:a36b1fb799bbcbe77e601d75d65fc90f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d8d97285d5d46825f9c2d0a0341a1cc" id="r_a1d8d97285d5d46825f9c2d0a0341a1cc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a1d8d97285d5d46825f9c2d0a0341a1cc">MEM_readBE64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *memPtr)</td></tr>
+<tr class="separator:a1d8d97285d5d46825f9c2d0a0341a1cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5e3df5ac8f720c1e9af0a641b383eb5" id="r_af5e3df5ac8f720c1e9af0a641b383eb5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#af5e3df5ac8f720c1e9af0a641b383eb5">MEM_writeBE64</a> (void *memPtr, <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> val64)</td></tr>
+<tr class="separator:af5e3df5ac8f720c1e9af0a641b383eb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b1d1e609b1c3d5645ec9608802077eb" id="r_a4b1d1e609b1c3d5645ec9608802077eb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a4b1d1e609b1c3d5645ec9608802077eb">MEM_readBEST</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *memPtr)</td></tr>
+<tr class="separator:a4b1d1e609b1c3d5645ec9608802077eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b82b9f4943ed2ae9d503ee201f5d99f" id="r_a5b82b9f4943ed2ae9d503ee201f5d99f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mem_8h.html#a5b82b9f4943ed2ae9d503ee201f5d99f">MEM_writeBEST</a> (void *memPtr, size_t val)</td></tr>
+<tr class="separator:a5b82b9f4943ed2ae9d503ee201f5d99f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a447121dcab4275b7839a56082b7a1ab8" name="a447121dcab4275b7839a56082b7a1ab8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a447121dcab4275b7839a56082b7a1ab8">&#9670;&#160;</a></span>__has_builtin</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __has_builtin</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;0  /* compat. with non-clang compilers */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00043">43</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acf4d568511d5e964c3579616a28ab62b" name="acf4d568511d5e964c3579616a28ab62b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf4d568511d5e964c3579616a28ab62b">&#9670;&#160;</a></span>MEM_STATIC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MEM_STATIC&#160;&#160;&#160;static  /* this version may generate warnings for unused static functions; disable the relevant warning */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00039">39</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1999a8b21b02063e6b7d0ddd54e6831e" name="a1999a8b21b02063e6b7d0ddd54e6831e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1999a8b21b02063e6b7d0ddd54e6831e">&#9670;&#160;</a></span>MEM_STATIC_ASSERT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MEM_STATIC_ASSERT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">c</td><td>)</td>
+          <td>&#160;&#160;&#160;{ enum { MEM_static_assert = 1/(int)(!!(c)) }; }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00047">47</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类型定义说明</h2>
+<a id="a4ae1dab0fb4b072a66584546209e7d58" name="a4ae1dab0fb4b072a66584546209e7d58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ae1dab0fb4b072a66584546209e7d58">&#9670;&#160;</a></span>BYTE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef unsigned char <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00141">141</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae08f9a6ee81e70f713a74a5860062841" name="ae08f9a6ee81e70f713a74a5860062841"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae08f9a6ee81e70f713a74a5860062841">&#9670;&#160;</a></span>S16</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="stdc_8h.html#ae31516cd0c4adc3d52b93ef2e5c6117b">signed</a> short <a class="el" href="mem_8h.html#ae08f9a6ee81e70f713a74a5860062841">S16</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00146">146</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a57a2244776e01ad620c556de58eb7880" name="a57a2244776e01ad620c556de58eb7880"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57a2244776e01ad620c556de58eb7880">&#9670;&#160;</a></span>S32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="stdc_8h.html#ae31516cd0c4adc3d52b93ef2e5c6117b">signed</a> int <a class="el" href="mem_8h.html#a57a2244776e01ad620c556de58eb7880">S32</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00151">151</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5200f9ca6402de77fd1a6f87db081f0b" name="a5200f9ca6402de77fd1a6f87db081f0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5200f9ca6402de77fd1a6f87db081f0b">&#9670;&#160;</a></span>S64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="stdc_8h.html#ae31516cd0c4adc3d52b93ef2e5c6117b">signed</a> long long <a class="el" href="mem_8h.html#a5200f9ca6402de77fd1a6f87db081f0b">S64</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00155">155</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adf928e51a60dba0df29d615401cc55a8" name="adf928e51a60dba0df29d615401cc55a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf928e51a60dba0df29d615401cc55a8">&#9670;&#160;</a></span>U16</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef unsigned short <a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00145">145</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac3df7cf3c8cb172a588adec881447d68" name="ac3df7cf3c8cb172a588adec881447d68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3df7cf3c8cb172a588adec881447d68">&#9670;&#160;</a></span>U32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef unsigned int <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00150">150</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a24c386d3758eba951eb7532fdbb45804" name="a24c386d3758eba951eb7532fdbb45804"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24c386d3758eba951eb7532fdbb45804">&#9670;&#160;</a></span>U64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef unsigned long long <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00154">154</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a18e77a75ccecc21ae7bba184b9c15c98" name="a18e77a75ccecc21ae7bba184b9c15c98"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18e77a75ccecc21ae7bba184b9c15c98">&#9670;&#160;</a></span>MEM_32bits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> unsigned MEM_32bits </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00183">183</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8dde55c217c03b317ba03f77c65c33ff" name="a8dde55c217c03b317ba03f77c65c33ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8dde55c217c03b317ba03f77c65c33ff">&#9670;&#160;</a></span>MEM_64bits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> unsigned MEM_64bits </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00184">184</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7facc72c6a6a7d19c0cd418af86889f6" name="a7facc72c6a6a7d19c0cd418af86889f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7facc72c6a6a7d19c0cd418af86889f6">&#9670;&#160;</a></span>MEM_check()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void MEM_check </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00048">48</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6f55400481e77eaff572ca4810a75d8a" name="a6f55400481e77eaff572ca4810a75d8a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f55400481e77eaff572ca4810a75d8a">&#9670;&#160;</a></span>MEM_isLittleEndian()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> unsigned MEM_isLittleEndian </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00186">186</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2a8baa9c29ded9e4db53cc9fbaebcd48" name="a2a8baa9c29ded9e4db53cc9fbaebcd48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a8baa9c29ded9e4db53cc9fbaebcd48">&#9670;&#160;</a></span>MEM_read16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a> MEM_read16 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>memPtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00237">237</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a217bf2f0a72e98c9dd5b7c4777a7c5b1" name="a217bf2f0a72e98c9dd5b7c4777a7c5b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a217bf2f0a72e98c9dd5b7c4777a7c5b1">&#9670;&#160;</a></span>MEM_read32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> MEM_read32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>memPtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00242">242</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae9e8ac6fcc8f3719cee9e32df7d9a580" name="ae9e8ac6fcc8f3719cee9e32df7d9a580"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9e8ac6fcc8f3719cee9e32df7d9a580">&#9670;&#160;</a></span>MEM_read64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> MEM_read64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>memPtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00247">247</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4d776d11be8e5d61ef07b485df0010e1" name="a4d776d11be8e5d61ef07b485df0010e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d776d11be8e5d61ef07b485df0010e1">&#9670;&#160;</a></span>MEM_readBE32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> MEM_readBE32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>memPtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00400">400</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1d8d97285d5d46825f9c2d0a0341a1cc" name="a1d8d97285d5d46825f9c2d0a0341a1cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d8d97285d5d46825f9c2d0a0341a1cc">&#9670;&#160;</a></span>MEM_readBE64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> MEM_readBE64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>memPtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00416">416</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4b1d1e609b1c3d5645ec9608802077eb" name="a4b1d1e609b1c3d5645ec9608802077eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b1d1e609b1c3d5645ec9608802077eb">&#9670;&#160;</a></span>MEM_readBEST()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t MEM_readBEST </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>memPtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00432">432</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a74bb46c7ca94b708d315466f6a965fca" name="a74bb46c7ca94b708d315466f6a965fca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74bb46c7ca94b708d315466f6a965fca">&#9670;&#160;</a></span>MEM_readLE16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a> MEM_readLE16 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>memPtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00318">318</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1471303596c711ed17413576e85675bc" name="a1471303596c711ed17413576e85675bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1471303596c711ed17413576e85675bc">&#9670;&#160;</a></span>MEM_readLE24()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> MEM_readLE24 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>memPtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00339">339</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae961ae5bbdbb98421b173c05a67c1cec" name="ae961ae5bbdbb98421b173c05a67c1cec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae961ae5bbdbb98421b173c05a67c1cec">&#9670;&#160;</a></span>MEM_readLE32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> MEM_readLE32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>memPtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00350">350</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a996497c67854d8927dd11e69cce49006" name="a996497c67854d8927dd11e69cce49006"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a996497c67854d8927dd11e69cce49006">&#9670;&#160;</a></span>MEM_readLE64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> MEM_readLE64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>memPtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00366">366</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3a8cb1fdc13ead05ea44b41ae242e790" name="a3a8cb1fdc13ead05ea44b41ae242e790"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a8cb1fdc13ead05ea44b41ae242e790">&#9670;&#160;</a></span>MEM_readLEST()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t MEM_readLEST </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>memPtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00382">382</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a43dbb8562260a955804c84e135c9d6a6" name="a43dbb8562260a955804c84e135c9d6a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43dbb8562260a955804c84e135c9d6a6">&#9670;&#160;</a></span>MEM_readST()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t MEM_readST </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>memPtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00252">252</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a23df46586bdbabc7acab5cd0bc8f78d0" name="a23df46586bdbabc7acab5cd0bc8f78d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a23df46586bdbabc7acab5cd0bc8f78d0">&#9670;&#160;</a></span>MEM_swap32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> MEM_swap32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>in</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00274">274</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1a2581ea2b65fee514fe7283f4058b6f" name="a1a2581ea2b65fee514fe7283f4058b6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a2581ea2b65fee514fe7283f4058b6f">&#9670;&#160;</a></span>MEM_swap64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> MEM_swap64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>in</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00289">289</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6228bfff649f9f5fda4b4d93e459e9bc" name="a6228bfff649f9f5fda4b4d93e459e9bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6228bfff649f9f5fda4b4d93e459e9bc">&#9670;&#160;</a></span>MEM_swapST()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t MEM_swapST </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>in</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00308">308</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acc1f06850ab39a708b5828f1e6d98f54" name="acc1f06850ab39a708b5828f1e6d98f54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc1f06850ab39a708b5828f1e6d98f54">&#9670;&#160;</a></span>MEM_write16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void MEM_write16 </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>memPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a>&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00257">257</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a98c41a4bffb616aa6f44fbafef54aa75" name="a98c41a4bffb616aa6f44fbafef54aa75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98c41a4bffb616aa6f44fbafef54aa75">&#9670;&#160;</a></span>MEM_write32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void MEM_write32 </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>memPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00262">262</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a14ae1fe53aa929a95ae11e9b87133577" name="a14ae1fe53aa929a95ae11e9b87133577"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14ae1fe53aa929a95ae11e9b87133577">&#9670;&#160;</a></span>MEM_write64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void MEM_write64 </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>memPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00267">267</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a36b1fb799bbcbe77e601d75d65fc90f3" name="a36b1fb799bbcbe77e601d75d65fc90f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36b1fb799bbcbe77e601d75d65fc90f3">&#9670;&#160;</a></span>MEM_writeBE32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void MEM_writeBE32 </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>memPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>val32</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00408">408</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af5e3df5ac8f720c1e9af0a641b383eb5" name="af5e3df5ac8f720c1e9af0a641b383eb5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5e3df5ac8f720c1e9af0a641b383eb5">&#9670;&#160;</a></span>MEM_writeBE64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void MEM_writeBE64 </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>memPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>val64</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00424">424</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5b82b9f4943ed2ae9d503ee201f5d99f" name="a5b82b9f4943ed2ae9d503ee201f5d99f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b82b9f4943ed2ae9d503ee201f5d99f">&#9670;&#160;</a></span>MEM_writeBEST()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void MEM_writeBEST </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>memPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00440">440</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4ded5af45f44dfbd14f43d4912950d50" name="a4ded5af45f44dfbd14f43d4912950d50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ded5af45f44dfbd14f43d4912950d50">&#9670;&#160;</a></span>MEM_writeLE16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void MEM_writeLE16 </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>memPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a>&#160;</td>
+          <td class="paramname"><em>val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00328">328</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ada4f5ec0e393e2fad84fca54ba971816" name="ada4f5ec0e393e2fad84fca54ba971816"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada4f5ec0e393e2fad84fca54ba971816">&#9670;&#160;</a></span>MEM_writeLE24()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void MEM_writeLE24 </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>memPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00344">344</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6f8c5ab3aa1eb7901adab8d65e2abd6e" name="a6f8c5ab3aa1eb7901adab8d65e2abd6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f8c5ab3aa1eb7901adab8d65e2abd6e">&#9670;&#160;</a></span>MEM_writeLE32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void MEM_writeLE32 </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>memPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>val32</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00358">358</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad39c28c12df129e8ad17c855b80ee3bb" name="ad39c28c12df129e8ad17c855b80ee3bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad39c28c12df129e8ad17c855b80ee3bb">&#9670;&#160;</a></span>MEM_writeLE64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void MEM_writeLE64 </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>memPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>val64</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00374">374</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aba0028bdef9bf51707feddbf5d62d542" name="aba0028bdef9bf51707feddbf5d62d542"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba0028bdef9bf51707feddbf5d62d542">&#9670;&#160;</a></span>MEM_writeLEST()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void MEM_writeLEST </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>memPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="mem_8h_source.html">mem.h</a> 第 <a class="el" href="mem_8h_source.html#l00390">390</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="mem_8h.html">mem.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

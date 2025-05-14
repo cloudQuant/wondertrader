@@ -1,0 +1,28 @@
+var structctp__sopt_1_1CThostFtdcNotifyFutureSignInField =
+[
+    [ "BankBranchID", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#a4c48193f56c4f28f00c445617c6ab94a", null ],
+    [ "BankID", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#a289dacb34e422ea753c33577ea98c084", null ],
+    [ "BankSerial", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#affbb5a5144f4cbd915880fdc4af07ebf", null ],
+    [ "BrokerBranchID", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#a94a7d36e30f2ad663ceb72828401204e", null ],
+    [ "BrokerID", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#aa6d0bd3a8bee6115f37b8a607fbf1b83", null ],
+    [ "BrokerIDByBank", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#ae4b446979e7aa5419c662254a1af0e9c", null ],
+    [ "CurrencyID", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#a343f62769977fa6076bc446db3ed6874", null ],
+    [ "DeviceID", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#aa0b2722ea4c6ed3b38c382ef796ec47f", null ],
+    [ "Digest", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#ab85d3421249c3f1d606b27ba847d359f", null ],
+    [ "ErrorID", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#aee19f40cc27f2c85ab8499fbc0b2f9e9", null ],
+    [ "ErrorMsg", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#aa97bc8ac9a53e43e9c62942d50bfd15a", null ],
+    [ "InstallID", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#af304e463218503740953eeab9929e9b5", null ],
+    [ "LastFragment", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#a89b0247ec0b0d0953097749debe7372c", null ],
+    [ "MacKey", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#a03e2ec4a00636210cc7967c30e1a61f5", null ],
+    [ "OperNo", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#afae5d0e4e1b1575f9f1428f37e79a18f", null ],
+    [ "PinKey", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#ac88d9819e1a64d338f51a1a89e2b0fc0", null ],
+    [ "PlateSerial", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#ab38a38e0e6b85087591efe25465f4431", null ],
+    [ "RequestID", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#a5e404101c712a98c643e69392f84d73f", null ],
+    [ "SessionID", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#a5d1585b59528d1f407f686419db42f7d", null ],
+    [ "TID", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#a0b79f2b19008371e5a689c3ef725e5ba", null ],
+    [ "TradeCode", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#a164be905fec6e0ecf48c766f100f28fa", null ],
+    [ "TradeDate", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#acf4c833bc00fa9d6b40ded65f44ae916", null ],
+    [ "TradeTime", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#ae713e89abffc865bc1432c5b58df7a3b", null ],
+    [ "TradingDay", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#a56c73f43ea03de2cddbe4a2637f02720", null ],
+    [ "UserID", "structctp__sopt_1_1CThostFtdcNotifyFutureSignInField.html#a4bd673d83dcab6d0275783ef5001ee10", null ]
+];

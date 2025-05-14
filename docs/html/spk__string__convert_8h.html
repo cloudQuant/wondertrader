@@ -1,0 +1,1170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/sutil/string/spk_string_convert.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('spk__string__convert_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">spk_string_convert.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;<a class="el" href="types_8h_source.html">sutil/types.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">sutil/compiler.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__platforms_8h_source.html">sutil/platform/spk_platforms.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__string__var_8h_source.html">sutil/string/spk_string_var.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__multi__field__string_8h_source.html">sutil/string/spk_multi_field_string.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__console__masked__log_8h_source.html">sutil/logger/spk_console_masked_log.h</a>&gt;</code><br />
+</div>
+<p><a href="spk__string__convert_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a401f36f77ceadd6285c81245b095db6b" id="r_a401f36f77ceadd6285c81245b095db6b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a401f36f77ceadd6285c81245b095db6b">__spk_strtoll</a>&#160;&#160;&#160;strtoll</td></tr>
+<tr class="separator:a401f36f77ceadd6285c81245b095db6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:ac6ceb900ab06634211e5e929e843efe0" id="r_ac6ceb900ab06634211e5e929e843efe0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#ac6ceb900ab06634211e5e929e843efe0">SStr_Strtoi</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> *pValue)</td></tr>
+<tr class="separator:ac6ceb900ab06634211e5e929e843efe0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a232263ec6f472525a29f100dfcd075d8" id="r_a232263ec6f472525a29f100dfcd075d8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a232263ec6f472525a29f100dfcd075d8">SStr_Strtol</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, long *pValue)</td></tr>
+<tr class="separator:a232263ec6f472525a29f100dfcd075d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53a4c1c72ddd837c9dda2d53b9d6a6d0" id="r_a53a4c1c72ddd837c9dda2d53b9d6a6d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a53a4c1c72ddd837c9dda2d53b9d6a6d0">SStr_Strtoll</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a> *pValue)</td></tr>
+<tr class="separator:a53a4c1c72ddd837c9dda2d53b9d6a6d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2aad9ecd228ce8f811adb1190e3fe4f7" id="r_a2aad9ecd228ce8f811adb1190e3fe4f7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a2aad9ecd228ce8f811adb1190e3fe4f7">SStr_Strtof</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, float *pValue)</td></tr>
+<tr class="separator:a2aad9ecd228ce8f811adb1190e3fe4f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06364b912bdee6c2c96354e84035a784" id="r_a06364b912bdee6c2c96354e84035a784"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a06364b912bdee6c2c96354e84035a784">SStr_Strtod</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, double *pValue)</td></tr>
+<tr class="separator:a06364b912bdee6c2c96354e84035a784"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35e0f8d13d510f940bea8b308d20a36c" id="r_a35e0f8d13d510f940bea8b308d20a36c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a35e0f8d13d510f940bea8b308d20a36c">SStr_Strtold</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="types_8h.html#a096f676f3e33065d5e778bbfcb9683da">float128</a> *pValue)</td></tr>
+<tr class="separator:a35e0f8d13d510f940bea8b308d20a36c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac86096a63f2f5de909698e0a5ed3e0e8" id="r_ac86096a63f2f5de909698e0a5ed3e0e8"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#ac86096a63f2f5de909698e0a5ed3e0e8">SStr_ItoStr</a> (char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> num)</td></tr>
+<tr class="separator:ac86096a63f2f5de909698e0a5ed3e0e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5f97fbae95e2366e188fb760f68fc5e" id="r_ad5f97fbae95e2366e188fb760f68fc5e"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#ad5f97fbae95e2366e188fb760f68fc5e">SStr_LtoStr</a> (char *pBuf, long num)</td></tr>
+<tr class="separator:ad5f97fbae95e2366e188fb760f68fc5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed456c86f2ec45d4f5f2dbf1554918ea" id="r_aed456c86f2ec45d4f5f2dbf1554918ea"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#aed456c86f2ec45d4f5f2dbf1554918ea">SStr_LltoStr</a> (char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a> num)</td></tr>
+<tr class="separator:aed456c86f2ec45d4f5f2dbf1554918ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07883463d1d2806daaf882822b7c5642" id="r_a07883463d1d2806daaf882822b7c5642"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a07883463d1d2806daaf882822b7c5642">SStr_LdtoStr</a> (char *pBuf, <a class="el" href="types_8h.html#a096f676f3e33065d5e778bbfcb9683da">float128</a> num, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> scale)</td></tr>
+<tr class="separator:a07883463d1d2806daaf882822b7c5642"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00d0179449430614895fd126403c9097" id="r_a00d0179449430614895fd126403c9097"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a00d0179449430614895fd126403c9097">SStr_FixedLdtoStr</a> (char *pBuf, <a class="el" href="types_8h.html#a096f676f3e33065d5e778bbfcb9683da">float128</a> num, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> precision, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> scale)</td></tr>
+<tr class="separator:a00d0179449430614895fd126403c9097"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80eaa663179577add3f42a5783f1391c" id="r_a80eaa663179577add3f42a5783f1391c"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a80eaa663179577add3f42a5783f1391c">SStr_XtoStr</a> (char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> num)</td></tr>
+<tr class="separator:a80eaa663179577add3f42a5783f1391c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad32c6e4d8908cc02a771f79ed86cbba" id="r_aad32c6e4d8908cc02a771f79ed86cbba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#aad32c6e4d8908cc02a771f79ed86cbba">SStr_IsDecimalInteger</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr)</td></tr>
+<tr class="separator:aad32c6e4d8908cc02a771f79ed86cbba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af67e628cc2f18047f842b6d7c77672b7" id="r_af67e628cc2f18047f842b6d7c77672b7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#af67e628cc2f18047f842b6d7c77672b7">SStr_IsHexInteger</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr)</td></tr>
+<tr class="separator:af67e628cc2f18047f842b6d7c77672b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2398758f9266511cd8d8b93e1a1b9a0" id="r_ae2398758f9266511cd8d8b93e1a1b9a0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#ae2398758f9266511cd8d8b93e1a1b9a0">SStr_IsInteger</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> isUnitAble)</td></tr>
+<tr class="separator:ae2398758f9266511cd8d8b93e1a1b9a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7527f8a3af7ff649c7009bdedb43dd33" id="r_a7527f8a3af7ff649c7009bdedb43dd33"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a7527f8a3af7ff649c7009bdedb43dd33">SStr_IsNumeric</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> isUnitAble)</td></tr>
+<tr class="separator:a7527f8a3af7ff649c7009bdedb43dd33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7921a764216a3242c36799d5c584619f" id="r_a7921a764216a3242c36799d5c584619f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a7921a764216a3242c36799d5c584619f">SStr_ParseUnittedInteger</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr)</td></tr>
+<tr class="separator:a7921a764216a3242c36799d5c584619f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addaee34fdf8190515dc08ad8385a1e3b" id="r_addaee34fdf8190515dc08ad8385a1e3b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#addaee34fdf8190515dc08ad8385a1e3b">SStr_ParseUnittedInteger2</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> defaultValue)</td></tr>
+<tr class="separator:addaee34fdf8190515dc08ad8385a1e3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1269510460dc9a62de60ffc86351812c" id="r_a1269510460dc9a62de60ffc86351812c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a1269510460dc9a62de60ffc86351812c">SStr_ParseUnittedDouble</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, double *pOutValue)</td></tr>
+<tr class="separator:a1269510460dc9a62de60ffc86351812c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a6ccd0923d64f4877d5f82591a53ede" id="r_a0a6ccd0923d64f4877d5f82591a53ede"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a0a6ccd0923d64f4877d5f82591a53ede">SStr_ParseUnittedDouble2</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, double *pOutValue, double defaultValue)</td></tr>
+<tr class="separator:a0a6ccd0923d64f4877d5f82591a53ede"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adac0e6f503290c85eccbc3bf4b3437c4" id="r_adac0e6f503290c85eccbc3bf4b3437c4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#adac0e6f503290c85eccbc3bf4b3437c4">SStr_ParseBoolean</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr)</td></tr>
+<tr class="separator:adac0e6f503290c85eccbc3bf4b3437c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39c3b1a670b2b36fa7ebbc8ada553e8e" id="r_a39c3b1a670b2b36fa7ebbc8ada553e8e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a39c3b1a670b2b36fa7ebbc8ada553e8e">SStr_ParseBoolean2</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pStr, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> defaultValue)</td></tr>
+<tr class="separator:a39c3b1a670b2b36fa7ebbc8ada553e8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac22f62178ae7ad78b776f0b46f33ef3a" id="r_ac22f62178ae7ad78b776f0b46f33ef3a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#ac22f62178ae7ad78b776f0b46f33ef3a">SStr_StrtoL10</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pValue)</td></tr>
+<tr class="separator:ac22f62178ae7ad78b776f0b46f33ef3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f44e8e7f2006b303fdbe90819fa76f1" id="r_a8f44e8e7f2006b303fdbe90819fa76f1"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a8f44e8e7f2006b303fdbe90819fa76f1">SStr_StrtoL10Nullable</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pValue)</td></tr>
+<tr class="separator:a8f44e8e7f2006b303fdbe90819fa76f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73ba3a8c80467b4a9b5193fb13048807" id="r_a73ba3a8c80467b4a9b5193fb13048807"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a73ba3a8c80467b4a9b5193fb13048807">SStr_StrtoLL10</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pValue)</td></tr>
+<tr class="separator:a73ba3a8c80467b4a9b5193fb13048807"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e39547a95695b045d2f1406d7e49101" id="r_a9e39547a95695b045d2f1406d7e49101"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a9e39547a95695b045d2f1406d7e49101">SStr_StrtoLL10Nullable</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pValue)</td></tr>
+<tr class="separator:a9e39547a95695b045d2f1406d7e49101"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d47263848d58fa711a75292437326e8" id="r_a3d47263848d58fa711a75292437326e8"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a3d47263848d58fa711a75292437326e8">SStr_StrtoI10</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pValue)</td></tr>
+<tr class="separator:a3d47263848d58fa711a75292437326e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addff81008bbd54922f82a4e699b269c2" id="r_addff81008bbd54922f82a4e699b269c2"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#addff81008bbd54922f82a4e699b269c2">SStr_StrtoI10Nullable</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pValue)</td></tr>
+<tr class="separator:addff81008bbd54922f82a4e699b269c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad85cf8a8235aee569ae77b5b4965408b" id="r_ad85cf8a8235aee569ae77b5b4965408b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#ad85cf8a8235aee569ae77b5b4965408b">SStr_FixedStrtoL10</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pValue, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> len)</td></tr>
+<tr class="separator:ad85cf8a8235aee569ae77b5b4965408b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28bb4faef98ccffb13aae35f880f432d" id="r_a28bb4faef98ccffb13aae35f880f432d"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a28bb4faef98ccffb13aae35f880f432d">SStr_FixedStrtoLL10</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pValue, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> len)</td></tr>
+<tr class="separator:a28bb4faef98ccffb13aae35f880f432d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78f62fa697476f41327d609753bd8abf" id="r_a78f62fa697476f41327d609753bd8abf"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__string__convert_8h.html#a78f62fa697476f41327d609753bd8abf">SStr_FixedStrtoI10</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pValue, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> len)</td></tr>
+<tr class="separator:a78f62fa697476f41327d609753bd8abf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>字符串类型转换函数</p>
+<dl class="section version"><dt>版本</dt><dd>$Id$ </dd></dl>
+<dl class="section since"><dt>自从</dt><dd>2012/01/05 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__string__convert_8h_source.html">spk_string_convert.h</a> 中定义.</p>
+</div><h2 class="groupheader">宏定义说明</h2>
+<a id="a401f36f77ceadd6285c81245b095db6b" name="a401f36f77ceadd6285c81245b095db6b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a401f36f77ceadd6285c81245b095db6b">&#9670;&#160;</a></span>__spk_strtoll</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __spk_strtoll&#160;&#160;&#160;strtoll</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__string__convert_8h_source.html">spk_string_convert.h</a> 第 <a class="el" href="spk__string__convert_8h_source.html#l00063">63</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a00d0179449430614895fd126403c9097" name="a00d0179449430614895fd126403c9097"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00d0179449430614895fd126403c9097">&#9670;&#160;</a></span>SStr_FixedLdtoStr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * SStr_FixedLdtoStr </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="types_8h.html#a096f676f3e33065d5e778bbfcb9683da">float128</a>&#160;</td>
+          <td class="paramname"><em>num</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>precision</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a78f62fa697476f41327d609753bd8abf" name="a78f62fa697476f41327d609753bd8abf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78f62fa697476f41327d609753bd8abf">&#9670;&#160;</a></span>SStr_FixedStrtoI10()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_FixedStrtoI10 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>解析指定长度的10进制数值型字符串</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pValue</td><td>待转换的数值字符串 </td></tr>
+    <tr><td class="paramname">len</td><td>数值字符串的有效长度 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>转换后的数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__string__convert_8h_source.html">spk_string_convert.h</a> 第 <a class="el" href="spk__string__convert_8h_source.html#l00320">320</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad85cf8a8235aee569ae77b5b4965408b" name="ad85cf8a8235aee569ae77b5b4965408b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad85cf8a8235aee569ae77b5b4965408b">&#9670;&#160;</a></span>SStr_FixedStrtoL10()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> long SStr_FixedStrtoL10 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>解析指定长度的10进制数值型字符串</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pValue</td><td>待转换的数值字符串 </td></tr>
+    <tr><td class="paramname">len</td><td>数值字符串的有效长度 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>转换后的数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__string__convert_8h_source.html">spk_string_convert.h</a> 第 <a class="el" href="spk__string__convert_8h_source.html#l00282">282</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a28bb4faef98ccffb13aae35f880f432d" name="a28bb4faef98ccffb13aae35f880f432d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28bb4faef98ccffb13aae35f880f432d">&#9670;&#160;</a></span>SStr_FixedStrtoLL10()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a> SStr_FixedStrtoLL10 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>解析指定长度的10进制数值型字符串</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pValue</td><td>待转换的数值字符串 </td></tr>
+    <tr><td class="paramname">len</td><td>数值字符串的有效长度 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>转换后的数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__string__convert_8h_source.html">spk_string_convert.h</a> 第 <a class="el" href="spk__string__convert_8h_source.html#l00301">301</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aad32c6e4d8908cc02a771f79ed86cbba" name="aad32c6e4d8908cc02a771f79ed86cbba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad32c6e4d8908cc02a771f79ed86cbba">&#9670;&#160;</a></span>SStr_IsDecimalInteger()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsDecimalInteger </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af67e628cc2f18047f842b6d7c77672b7" name="af67e628cc2f18047f842b6d7c77672b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af67e628cc2f18047f842b6d7c77672b7">&#9670;&#160;</a></span>SStr_IsHexInteger()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsHexInteger </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>校验字符串是否是有效的十六进制整型数值字符串 </p>
+
+</div>
+</div>
+<a id="ae2398758f9266511cd8d8b93e1a1b9a0" name="ae2398758f9266511cd8d8b93e1a1b9a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae2398758f9266511cd8d8b93e1a1b9a0">&#9670;&#160;</a></span>SStr_IsInteger()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsInteger </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td>
+          <td class="paramname"><em>isUnitAble</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7527f8a3af7ff649c7009bdedb43dd33" name="a7527f8a3af7ff649c7009bdedb43dd33"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7527f8a3af7ff649c7009bdedb43dd33">&#9670;&#160;</a></span>SStr_IsNumeric()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SStr_IsNumeric </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td>
+          <td class="paramname"><em>isUnitAble</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac86096a63f2f5de909698e0a5ed3e0e8" name="ac86096a63f2f5de909698e0a5ed3e0e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac86096a63f2f5de909698e0a5ed3e0e8">&#9670;&#160;</a></span>SStr_ItoStr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * SStr_ItoStr </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>num</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a07883463d1d2806daaf882822b7c5642" name="a07883463d1d2806daaf882822b7c5642"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07883463d1d2806daaf882822b7c5642">&#9670;&#160;</a></span>SStr_LdtoStr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * SStr_LdtoStr </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="types_8h.html#a096f676f3e33065d5e778bbfcb9683da">float128</a>&#160;</td>
+          <td class="paramname"><em>num</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aed456c86f2ec45d4f5f2dbf1554918ea" name="aed456c86f2ec45d4f5f2dbf1554918ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed456c86f2ec45d4f5f2dbf1554918ea">&#9670;&#160;</a></span>SStr_LltoStr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * SStr_LltoStr </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a>&#160;</td>
+          <td class="paramname"><em>num</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad5f97fbae95e2366e188fb760f68fc5e" name="ad5f97fbae95e2366e188fb760f68fc5e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5f97fbae95e2366e188fb760f68fc5e">&#9670;&#160;</a></span>SStr_LtoStr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * SStr_LtoStr </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">long&#160;</td>
+          <td class="paramname"><em>num</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adac0e6f503290c85eccbc3bf4b3437c4" name="adac0e6f503290c85eccbc3bf4b3437c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adac0e6f503290c85eccbc3bf4b3437c4">&#9670;&#160;</a></span>SStr_ParseBoolean()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_ParseBoolean </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a39c3b1a670b2b36fa7ebbc8ada553e8e" name="a39c3b1a670b2b36fa7ebbc8ada553e8e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39c3b1a670b2b36fa7ebbc8ada553e8e">&#9670;&#160;</a></span>SStr_ParseBoolean2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_ParseBoolean2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>defaultValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1269510460dc9a62de60ffc86351812c" name="a1269510460dc9a62de60ffc86351812c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1269510460dc9a62de60ffc86351812c">&#9670;&#160;</a></span>SStr_ParseUnittedDouble()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_ParseUnittedDouble </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>pOutValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0a6ccd0923d64f4877d5f82591a53ede" name="a0a6ccd0923d64f4877d5f82591a53ede"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a6ccd0923d64f4877d5f82591a53ede">&#9670;&#160;</a></span>SStr_ParseUnittedDouble2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_ParseUnittedDouble2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>pOutValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>defaultValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7921a764216a3242c36799d5c584619f" name="a7921a764216a3242c36799d5c584619f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7921a764216a3242c36799d5c584619f">&#9670;&#160;</a></span>SStr_ParseUnittedInteger()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a> SStr_ParseUnittedInteger </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="addaee34fdf8190515dc08ad8385a1e3b" name="addaee34fdf8190515dc08ad8385a1e3b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#addaee34fdf8190515dc08ad8385a1e3b">&#9670;&#160;</a></span>SStr_ParseUnittedInteger2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a> SStr_ParseUnittedInteger2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>defaultValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a06364b912bdee6c2c96354e84035a784" name="a06364b912bdee6c2c96354e84035a784"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06364b912bdee6c2c96354e84035a784">&#9670;&#160;</a></span>SStr_Strtod()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_Strtod </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>pValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2aad9ecd228ce8f811adb1190e3fe4f7" name="a2aad9ecd228ce8f811adb1190e3fe4f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2aad9ecd228ce8f811adb1190e3fe4f7">&#9670;&#160;</a></span>SStr_Strtof()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_Strtof </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>pValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac6ceb900ab06634211e5e929e843efe0" name="ac6ceb900ab06634211e5e929e843efe0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6ceb900ab06634211e5e929e843efe0">&#9670;&#160;</a></span>SStr_Strtoi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_Strtoi </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> *&#160;</td>
+          <td class="paramname"><em>pValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3d47263848d58fa711a75292437326e8" name="a3d47263848d58fa711a75292437326e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d47263848d58fa711a75292437326e8">&#9670;&#160;</a></span>SStr_StrtoI10()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_StrtoI10 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pValue</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>解析10进制数值型字符串</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pValue</td><td>待转换的数值字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>转换后的数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__string__convert_8h_source.html">spk_string_convert.h</a> 第 <a class="el" href="spk__string__convert_8h_source.html#l00254">254</a> 行定义.</p>
+
+</div>
+</div>
+<a id="addff81008bbd54922f82a4e699b269c2" name="addff81008bbd54922f82a4e699b269c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#addff81008bbd54922f82a4e699b269c2">&#9670;&#160;</a></span>SStr_StrtoI10Nullable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_StrtoI10Nullable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pValue</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>解析10进制数值型字符串 (若参数为空则返回0)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pValue</td><td>待转换的数值字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>转换后的数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__string__convert_8h_source.html">spk_string_convert.h</a> 第 <a class="el" href="spk__string__convert_8h_source.html#l00266">266</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a232263ec6f472525a29f100dfcd075d8" name="a232263ec6f472525a29f100dfcd075d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a232263ec6f472525a29f100dfcd075d8">&#9670;&#160;</a></span>SStr_Strtol()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_Strtol </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">long *&#160;</td>
+          <td class="paramname"><em>pValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac22f62178ae7ad78b776f0b46f33ef3a" name="ac22f62178ae7ad78b776f0b46f33ef3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac22f62178ae7ad78b776f0b46f33ef3a">&#9670;&#160;</a></span>SStr_StrtoL10()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> long SStr_StrtoL10 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pValue</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>解析10进制数值型字符串</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pValue</td><td>待转换的数值字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>转换后的数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__string__convert_8h_source.html">spk_string_convert.h</a> 第 <a class="el" href="spk__string__convert_8h_source.html#l00200">200</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8f44e8e7f2006b303fdbe90819fa76f1" name="a8f44e8e7f2006b303fdbe90819fa76f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f44e8e7f2006b303fdbe90819fa76f1">&#9670;&#160;</a></span>SStr_StrtoL10Nullable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> long SStr_StrtoL10Nullable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pValue</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>解析10进制数值型字符串 (若参数为空则返回0)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pValue</td><td>待转换的数值字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>转换后的数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__string__convert_8h_source.html">spk_string_convert.h</a> 第 <a class="el" href="spk__string__convert_8h_source.html#l00212">212</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a35e0f8d13d510f940bea8b308d20a36c" name="a35e0f8d13d510f940bea8b308d20a36c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35e0f8d13d510f940bea8b308d20a36c">&#9670;&#160;</a></span>SStr_Strtold()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_Strtold </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="types_8h.html#a096f676f3e33065d5e778bbfcb9683da">float128</a> *&#160;</td>
+          <td class="paramname"><em>pValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a53a4c1c72ddd837c9dda2d53b9d6a6d0" name="a53a4c1c72ddd837c9dda2d53b9d6a6d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53a4c1c72ddd837c9dda2d53b9d6a6d0">&#9670;&#160;</a></span>SStr_Strtoll()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SStr_Strtoll </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pStr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a> *&#160;</td>
+          <td class="paramname"><em>pValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a73ba3a8c80467b4a9b5193fb13048807" name="a73ba3a8c80467b4a9b5193fb13048807"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73ba3a8c80467b4a9b5193fb13048807">&#9670;&#160;</a></span>SStr_StrtoLL10()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a> SStr_StrtoLL10 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pValue</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>解析10进制数值型字符串</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pValue</td><td>待转换的数值字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>转换后的数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__string__convert_8h_source.html">spk_string_convert.h</a> 第 <a class="el" href="spk__string__convert_8h_source.html#l00227">227</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9e39547a95695b045d2f1406d7e49101" name="a9e39547a95695b045d2f1406d7e49101"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e39547a95695b045d2f1406d7e49101">&#9670;&#160;</a></span>SStr_StrtoLL10Nullable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a> SStr_StrtoLL10Nullable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pValue</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>解析10进制数值型字符串 (若参数为空则返回0)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pValue</td><td>待转换的数值字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>转换后的数值 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__string__convert_8h_source.html">spk_string_convert.h</a> 第 <a class="el" href="spk__string__convert_8h_source.html#l00239">239</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a80eaa663179577add3f42a5783f1391c" name="a80eaa663179577add3f42a5783f1391c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80eaa663179577add3f42a5783f1391c">&#9670;&#160;</a></span>SStr_XtoStr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * SStr_XtoStr </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>num</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_248d918e0c46523948aef7b06f6106c0.html">sutil</a></li><li class="navelem"><a class="el" href="dir_bdb4f1a6a1bf518a71fb3fe714c9221a.html">string</a></li><li class="navelem"><a class="el" href="spk__string__convert_8h.html">spk_string_convert.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

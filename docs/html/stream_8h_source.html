@@ -1,0 +1,241 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/stream.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('stream_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">stream.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="stream_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef STREAM_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define STREAM_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#if defined(_MSC_VER) ||                                            \</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">    (defined(__GNUC__) &amp;&amp; (__GNUC__ == 3 &amp;&amp; __GNUC_MINOR__ &gt;= 4) || \</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">     (__GNUC__ &gt;= 4))  </span><span class="comment">// GCC supports &quot;pragma once&quot; correctly since 3.4</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="mark_8h.html">yaml-cpp/mark.h</a>&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;cstddef&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;deque&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;ios&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;set&gt;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceYAML.html">YAML</a> {</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">class </span>StreamCharSource;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="foldopen" id="foldopen00022" data-start="{" data-end="};">
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html">   22</a></span><span class="keyword">class </span><a class="code hl_class" href="classYAML_1_1Stream.html">Stream</a> {</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#ab86b2135b1417f3c5782b5b7163f0758">   24</a></span>  <span class="keyword">friend</span> <span class="keyword">class </span><a class="code hl_class" href="classYAML_1_1StreamCharSource.html">StreamCharSource</a>;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <a class="code hl_class" href="classYAML_1_1Stream.html">Stream</a>(std::istream&amp; input);</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a0ef2538bae425bf413f0130290f30da9">   27</a></span>  <a class="code hl_function" href="classYAML_1_1Stream.html#a0ef2538bae425bf413f0130290f30da9">Stream</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1Stream.html">Stream</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a4e4cb943155e16a6fc215ccfe786cc0c">   28</a></span>  <a class="code hl_function" href="classYAML_1_1Stream.html#a4e4cb943155e16a6fc215ccfe786cc0c">Stream</a>(<a class="code hl_class" href="classYAML_1_1Stream.html">Stream</a>&amp;&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a6e49714682715d92e2a767027ff31f5d">   29</a></span>  <a class="code hl_class" href="classYAML_1_1Stream.html">Stream</a>&amp; <a class="code hl_function" href="classYAML_1_1Stream.html#a6e49714682715d92e2a767027ff31f5d">operator=</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1Stream.html">Stream</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#ad7e2daa0fe401959fe5903c11a1d9a3e">   30</a></span>  <a class="code hl_class" href="classYAML_1_1Stream.html">Stream</a>&amp; <a class="code hl_function" href="classYAML_1_1Stream.html#ad7e2daa0fe401959fe5903c11a1d9a3e">operator=</a>(<a class="code hl_class" href="classYAML_1_1Stream.html">Stream</a>&amp;&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  <a class="code hl_function" href="classYAML_1_1Stream.html#a3d32d1c9e0091000a21494379d2812c7">~Stream</a>();</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  <span class="keyword">operator</span> bool() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a62b4d0c8b6d764d75e8d5359b4dce670">   34</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classYAML_1_1Stream.html#a62b4d0c8b6d764d75e8d5359b4dce670">operator!</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> !<span class="keyword">static_cast&lt;</span><span class="keywordtype">bool</span><span class="keyword">&gt;</span>(*this); }</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <span class="keywordtype">char</span> <a class="code hl_function" href="classYAML_1_1Stream.html#ab131746d2a9bb7bf8ab8765d16445fbc">peek</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="keywordtype">char</span> <a class="code hl_function" href="classYAML_1_1Stream.html#a98a6753995450fd1af5b9069da66e3a5">get</a>();</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  std::string <a class="code hl_function" href="classYAML_1_1Stream.html#a98a6753995450fd1af5b9069da66e3a5">get</a>(<span class="keywordtype">int</span> n);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1Stream.html#ac79171e6d96a34e9edde03edbc6c3e2e">eat</a>(<span class="keywordtype">int</span> n = 1);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a250498ea5d09cd3f65da475d46ecd9ae">   41</a></span>  <span class="keyword">static</span> <span class="keywordtype">char</span> <a class="code hl_function" href="classYAML_1_1Stream.html#a250498ea5d09cd3f65da475d46ecd9ae">eof</a>() { <span class="keywordflow">return</span> 0x04; }</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a1984b6def1e7f09e8be1e2ded43e7c22">   43</a></span>  <span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a> <a class="code hl_function" href="classYAML_1_1Stream.html#a1984b6def1e7f09e8be1e2ded43e7c22">mark</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classYAML_1_1Stream.html#aeaadb50136d633ce713eca8a4b7af6b1">m_mark</a>; }</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a497b0f9891b3f62b3101c54df60b6eb2">   44</a></span>  <span class="keywordtype">int</span> <a class="code hl_function" href="classYAML_1_1Stream.html#a497b0f9891b3f62b3101c54df60b6eb2">pos</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classYAML_1_1Stream.html#aeaadb50136d633ce713eca8a4b7af6b1">m_mark</a>.<a class="code hl_variable" href="structYAML_1_1Mark.html#ae77fbebfc1c81a3e431a0674759092c2">pos</a>; }</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a871e35c3a11e57e33b26c62be7db6d72">   45</a></span>  <span class="keywordtype">int</span> <a class="code hl_function" href="classYAML_1_1Stream.html#a871e35c3a11e57e33b26c62be7db6d72">line</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classYAML_1_1Stream.html#aeaadb50136d633ce713eca8a4b7af6b1">m_mark</a>.<a class="code hl_variable" href="structYAML_1_1Mark.html#a30f6ac28c5002a88f1109ce64ca7f4ec">line</a>; }</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a5bf908c973c4ca1969e69c051ba8a33f">   46</a></span>  <span class="keywordtype">int</span> <a class="code hl_function" href="classYAML_1_1Stream.html#a5bf908c973c4ca1969e69c051ba8a33f">column</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classYAML_1_1Stream.html#aeaadb50136d633ce713eca8a4b7af6b1">m_mark</a>.<a class="code hl_variable" href="structYAML_1_1Mark.html#a1e3db10ef37e390ea51bc3540ac560d0">column</a>; }</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a34f1b7be035ae5862daac235159cd3cf">   47</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1Stream.html#a34f1b7be035ae5862daac235159cd3cf">ResetColumn</a>() { <a class="code hl_variable" href="classYAML_1_1Stream.html#aeaadb50136d633ce713eca8a4b7af6b1">m_mark</a>.<a class="code hl_variable" href="structYAML_1_1Mark.html#a1e3db10ef37e390ea51bc3540ac560d0">column</a> = 0; }</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a04949f12687996e86ba013d1dbf10f62">   50</a></span>  <span class="keyword">enum</span> <a class="code hl_enumeration" href="classYAML_1_1Stream.html#a04949f12687996e86ba013d1dbf10f62">CharacterSet</a> { <a class="code hl_enumvalue" href="classYAML_1_1Stream.html#a04949f12687996e86ba013d1dbf10f62a086343cd795fbd2c9061c36f20b8667d">utf8</a>, <a class="code hl_enumvalue" href="classYAML_1_1Stream.html#a04949f12687996e86ba013d1dbf10f62aa8482ac2d4bfe41eabb9e17f283f6603">utf16le</a>, <a class="code hl_enumvalue" href="classYAML_1_1Stream.html#a04949f12687996e86ba013d1dbf10f62a0e7a8aad497a566f70e38b4373a3d777">utf16be</a>, <a class="code hl_enumvalue" href="classYAML_1_1Stream.html#a04949f12687996e86ba013d1dbf10f62a37d9b72730f817a1036c3bb8bf60598b">utf32le</a>, <a class="code hl_enumvalue" href="classYAML_1_1Stream.html#a04949f12687996e86ba013d1dbf10f62a6b01566ea87237490ed1148b6de5a12b">utf32be</a> };</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a13d97ececb392f52b3161d4ac406ddc1">   52</a></span>  std::istream&amp; <a class="code hl_variable" href="classYAML_1_1Stream.html#a13d97ececb392f52b3161d4ac406ddc1">m_input</a>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#aeaadb50136d633ce713eca8a4b7af6b1">   53</a></span>  <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a> <a class="code hl_variable" href="classYAML_1_1Stream.html#aeaadb50136d633ce713eca8a4b7af6b1">m_mark</a>;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#abf2acf2215606447eaf9dbe0d8607a1c">   55</a></span>  <a class="code hl_enumeration" href="classYAML_1_1Stream.html#a04949f12687996e86ba013d1dbf10f62">CharacterSet</a> <a class="code hl_variable" href="classYAML_1_1Stream.html#abf2acf2215606447eaf9dbe0d8607a1c">m_charSet</a>;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#af49d4778df5efcf5b0757d1b1377d743">   56</a></span>  <span class="keyword">mutable</span> std::deque&lt;char&gt; <a class="code hl_variable" href="classYAML_1_1Stream.html#af49d4778df5efcf5b0757d1b1377d743">m_readahead</a>;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a960d8579ea06ff4a61c9404faadb467e">   57</a></span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>* <span class="keyword">const</span> <a class="code hl_variable" href="classYAML_1_1Stream.html#a960d8579ea06ff4a61c9404faadb467e">m_pPrefetched</a>;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a644ca65d1d0b0fd4f022a11fad413a2c">   58</a></span>  <span class="keyword">mutable</span> <span class="keywordtype">size_t</span> <a class="code hl_variable" href="classYAML_1_1Stream.html#a644ca65d1d0b0fd4f022a11fad413a2c">m_nPrefetchedAvailable</a>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#ae0ca8b51625636afc1414940261e48a5">   59</a></span>  <span class="keyword">mutable</span> <span class="keywordtype">size_t</span> <a class="code hl_variable" href="classYAML_1_1Stream.html#ae0ca8b51625636afc1414940261e48a5">m_nPrefetchedUsed</a>;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1Stream.html#aa1ac8dc58dee7fcfc55a5d9db6a9b87f">AdvanceCurrent</a>();</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  <span class="keywordtype">char</span> <a class="code hl_function" href="classYAML_1_1Stream.html#a3fe0c864bf6b02f2ef81b2e49f7d5bdb">CharAt</a>(<span class="keywordtype">size_t</span> i) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classYAML_1_1Stream.html#a7eba1cfebe37752ad7eb649dfadc21c6">ReadAheadTo</a>(<span class="keywordtype">size_t</span> i) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classYAML_1_1Stream.html#a3a739bb5b63ecdbe8f16432c308f43d0">_ReadAheadTo</a>(<span class="keywordtype">size_t</span> i) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1Stream.html#acfde02fa6972d9630c10a39c3f5cc688">StreamInUtf8</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1Stream.html#ab22fed82bdea9d7bfa4671106c04597f">StreamInUtf16</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1Stream.html#a397289f7c64bb99e72c3a17fd00eff71">StreamInUtf32</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code hl_function" href="classYAML_1_1Stream.html#aa3bb63022611f31b66778e2fd0793015">GetNextByte</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>};</div>
+</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="comment">// CharAt</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="comment">// . Unchecked access</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a3fe0c864bf6b02f2ef81b2e49f7d5bdb">   73</a></span><span class="keyword">inline</span> <span class="keywordtype">char</span> <a class="code hl_function" href="classYAML_1_1Stream.html#a3fe0c864bf6b02f2ef81b2e49f7d5bdb">Stream::CharAt</a>(<span class="keywordtype">size_t</span> i)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classYAML_1_1Stream.html#af49d4778df5efcf5b0757d1b1377d743">m_readahead</a>[i]; }</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="foldopen" id="foldopen00075" data-start="{" data-end="}">
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="classYAML_1_1Stream.html#a7eba1cfebe37752ad7eb649dfadc21c6">   75</a></span><span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classYAML_1_1Stream.html#a7eba1cfebe37752ad7eb649dfadc21c6">Stream::ReadAheadTo</a>(<span class="keywordtype">size_t</span> i)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classYAML_1_1Stream.html#af49d4778df5efcf5b0757d1b1377d743">m_readahead</a>.size() &gt; i)</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="classYAML_1_1Stream.html#a3a739bb5b63ecdbe8f16432c308f43d0">_ReadAheadTo</a>(i);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>}</div>
+</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>}  <span class="comment">// namespace YAML</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="preprocessor">#endif  </span><span class="comment">// STREAM_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="ttc" id="aclassYAML_1_1StreamCharSource_html"><div class="ttname"><a href="classYAML_1_1StreamCharSource.html">YAML::StreamCharSource</a></div><div class="ttdef"><b>Definition</b> <a href="streamcharsource_8h_source.html#l00016">streamcharsource.h:16</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html"><div class="ttname"><a href="classYAML_1_1Stream.html">YAML::Stream</a></div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00022">stream.h:22</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a04949f12687996e86ba013d1dbf10f62"><div class="ttname"><a href="classYAML_1_1Stream.html#a04949f12687996e86ba013d1dbf10f62">YAML::Stream::CharacterSet</a></div><div class="ttdeci">CharacterSet</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00050">stream.h:50</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a04949f12687996e86ba013d1dbf10f62a086343cd795fbd2c9061c36f20b8667d"><div class="ttname"><a href="classYAML_1_1Stream.html#a04949f12687996e86ba013d1dbf10f62a086343cd795fbd2c9061c36f20b8667d">YAML::Stream::utf8</a></div><div class="ttdeci">@ utf8</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00050">stream.h:50</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a04949f12687996e86ba013d1dbf10f62a0e7a8aad497a566f70e38b4373a3d777"><div class="ttname"><a href="classYAML_1_1Stream.html#a04949f12687996e86ba013d1dbf10f62a0e7a8aad497a566f70e38b4373a3d777">YAML::Stream::utf16be</a></div><div class="ttdeci">@ utf16be</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00050">stream.h:50</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a04949f12687996e86ba013d1dbf10f62a37d9b72730f817a1036c3bb8bf60598b"><div class="ttname"><a href="classYAML_1_1Stream.html#a04949f12687996e86ba013d1dbf10f62a37d9b72730f817a1036c3bb8bf60598b">YAML::Stream::utf32le</a></div><div class="ttdeci">@ utf32le</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00050">stream.h:50</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a04949f12687996e86ba013d1dbf10f62a6b01566ea87237490ed1148b6de5a12b"><div class="ttname"><a href="classYAML_1_1Stream.html#a04949f12687996e86ba013d1dbf10f62a6b01566ea87237490ed1148b6de5a12b">YAML::Stream::utf32be</a></div><div class="ttdeci">@ utf32be</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00050">stream.h:50</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a04949f12687996e86ba013d1dbf10f62aa8482ac2d4bfe41eabb9e17f283f6603"><div class="ttname"><a href="classYAML_1_1Stream.html#a04949f12687996e86ba013d1dbf10f62aa8482ac2d4bfe41eabb9e17f283f6603">YAML::Stream::utf16le</a></div><div class="ttdeci">@ utf16le</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00050">stream.h:50</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a0ef2538bae425bf413f0130290f30da9"><div class="ttname"><a href="classYAML_1_1Stream.html#a0ef2538bae425bf413f0130290f30da9">YAML::Stream::Stream</a></div><div class="ttdeci">Stream(const Stream &amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a13d97ececb392f52b3161d4ac406ddc1"><div class="ttname"><a href="classYAML_1_1Stream.html#a13d97ececb392f52b3161d4ac406ddc1">YAML::Stream::m_input</a></div><div class="ttdeci">std::istream &amp; m_input</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00052">stream.h:52</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a1984b6def1e7f09e8be1e2ded43e7c22"><div class="ttname"><a href="classYAML_1_1Stream.html#a1984b6def1e7f09e8be1e2ded43e7c22">YAML::Stream::mark</a></div><div class="ttdeci">const Mark mark() const</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00043">stream.h:43</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a250498ea5d09cd3f65da475d46ecd9ae"><div class="ttname"><a href="classYAML_1_1Stream.html#a250498ea5d09cd3f65da475d46ecd9ae">YAML::Stream::eof</a></div><div class="ttdeci">static char eof()</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00041">stream.h:41</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a34f1b7be035ae5862daac235159cd3cf"><div class="ttname"><a href="classYAML_1_1Stream.html#a34f1b7be035ae5862daac235159cd3cf">YAML::Stream::ResetColumn</a></div><div class="ttdeci">void ResetColumn()</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00047">stream.h:47</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a397289f7c64bb99e72c3a17fd00eff71"><div class="ttname"><a href="classYAML_1_1Stream.html#a397289f7c64bb99e72c3a17fd00eff71">YAML::Stream::StreamInUtf32</a></div><div class="ttdeci">void StreamInUtf32() const</div><div class="ttdef"><b>Definition</b> <a href="stream_8cpp_source.html#l00424">stream.cpp:424</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a3a739bb5b63ecdbe8f16432c308f43d0"><div class="ttname"><a href="classYAML_1_1Stream.html#a3a739bb5b63ecdbe8f16432c308f43d0">YAML::Stream::_ReadAheadTo</a></div><div class="ttdeci">bool _ReadAheadTo(size_t i) const</div><div class="ttdef"><b>Definition</b> <a href="stream_8cpp_source.html#l00301">stream.cpp:301</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a3d32d1c9e0091000a21494379d2812c7"><div class="ttname"><a href="classYAML_1_1Stream.html#a3d32d1c9e0091000a21494379d2812c7">YAML::Stream::~Stream</a></div><div class="ttdeci">~Stream()</div><div class="ttdef"><b>Definition</b> <a href="stream_8cpp_source.html#l00243">stream.cpp:243</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a3fe0c864bf6b02f2ef81b2e49f7d5bdb"><div class="ttname"><a href="classYAML_1_1Stream.html#a3fe0c864bf6b02f2ef81b2e49f7d5bdb">YAML::Stream::CharAt</a></div><div class="ttdeci">char CharAt(size_t i) const</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00073">stream.h:73</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a497b0f9891b3f62b3101c54df60b6eb2"><div class="ttname"><a href="classYAML_1_1Stream.html#a497b0f9891b3f62b3101c54df60b6eb2">YAML::Stream::pos</a></div><div class="ttdeci">int pos() const</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00044">stream.h:44</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a4e4cb943155e16a6fc215ccfe786cc0c"><div class="ttname"><a href="classYAML_1_1Stream.html#a4e4cb943155e16a6fc215ccfe786cc0c">YAML::Stream::Stream</a></div><div class="ttdeci">Stream(Stream &amp;&amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a5bf908c973c4ca1969e69c051ba8a33f"><div class="ttname"><a href="classYAML_1_1Stream.html#a5bf908c973c4ca1969e69c051ba8a33f">YAML::Stream::column</a></div><div class="ttdeci">int column() const</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00046">stream.h:46</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a62b4d0c8b6d764d75e8d5359b4dce670"><div class="ttname"><a href="classYAML_1_1Stream.html#a62b4d0c8b6d764d75e8d5359b4dce670">YAML::Stream::operator!</a></div><div class="ttdeci">bool operator!() const</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00034">stream.h:34</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a644ca65d1d0b0fd4f022a11fad413a2c"><div class="ttname"><a href="classYAML_1_1Stream.html#a644ca65d1d0b0fd4f022a11fad413a2c">YAML::Stream::m_nPrefetchedAvailable</a></div><div class="ttdeci">size_t m_nPrefetchedAvailable</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00058">stream.h:58</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a6e49714682715d92e2a767027ff31f5d"><div class="ttname"><a href="classYAML_1_1Stream.html#a6e49714682715d92e2a767027ff31f5d">YAML::Stream::operator=</a></div><div class="ttdeci">Stream &amp; operator=(const Stream &amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a7eba1cfebe37752ad7eb649dfadc21c6"><div class="ttname"><a href="classYAML_1_1Stream.html#a7eba1cfebe37752ad7eb649dfadc21c6">YAML::Stream::ReadAheadTo</a></div><div class="ttdeci">bool ReadAheadTo(size_t i) const</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00075">stream.h:75</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a871e35c3a11e57e33b26c62be7db6d72"><div class="ttname"><a href="classYAML_1_1Stream.html#a871e35c3a11e57e33b26c62be7db6d72">YAML::Stream::line</a></div><div class="ttdeci">int line() const</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00045">stream.h:45</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a960d8579ea06ff4a61c9404faadb467e"><div class="ttname"><a href="classYAML_1_1Stream.html#a960d8579ea06ff4a61c9404faadb467e">YAML::Stream::m_pPrefetched</a></div><div class="ttdeci">unsigned char *const m_pPrefetched</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00057">stream.h:57</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a98a6753995450fd1af5b9069da66e3a5"><div class="ttname"><a href="classYAML_1_1Stream.html#a98a6753995450fd1af5b9069da66e3a5">YAML::Stream::get</a></div><div class="ttdeci">char get()</div><div class="ttdef"><b>Definition</b> <a href="stream_8cpp_source.html#l00260">stream.cpp:260</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_aa1ac8dc58dee7fcfc55a5d9db6a9b87f"><div class="ttname"><a href="classYAML_1_1Stream.html#aa1ac8dc58dee7fcfc55a5d9db6a9b87f">YAML::Stream::AdvanceCurrent</a></div><div class="ttdeci">void AdvanceCurrent()</div><div class="ttdef"><b>Definition</b> <a href="stream_8cpp_source.html#l00292">stream.cpp:292</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_aa3bb63022611f31b66778e2fd0793015"><div class="ttname"><a href="classYAML_1_1Stream.html#aa3bb63022611f31b66778e2fd0793015">YAML::Stream::GetNextByte</a></div><div class="ttdeci">unsigned char GetNextByte() const</div><div class="ttdef"><b>Definition</b> <a href="stream_8cpp_source.html#l00406">stream.cpp:406</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_ab131746d2a9bb7bf8ab8765d16445fbc"><div class="ttname"><a href="classYAML_1_1Stream.html#ab131746d2a9bb7bf8ab8765d16445fbc">YAML::Stream::peek</a></div><div class="ttdeci">char peek() const</div><div class="ttdef"><b>Definition</b> <a href="stream_8cpp_source.html#l00245">stream.cpp:245</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_ab22fed82bdea9d7bfa4671106c04597f"><div class="ttname"><a href="classYAML_1_1Stream.html#ab22fed82bdea9d7bfa4671106c04597f">YAML::Stream::StreamInUtf16</a></div><div class="ttdeci">void StreamInUtf16() const</div><div class="ttdef"><b>Definition</b> <a href="stream_8cpp_source.html#l00336">stream.cpp:336</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_abf2acf2215606447eaf9dbe0d8607a1c"><div class="ttname"><a href="classYAML_1_1Stream.html#abf2acf2215606447eaf9dbe0d8607a1c">YAML::Stream::m_charSet</a></div><div class="ttdeci">CharacterSet m_charSet</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00055">stream.h:55</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_ac79171e6d96a34e9edde03edbc6c3e2e"><div class="ttname"><a href="classYAML_1_1Stream.html#ac79171e6d96a34e9edde03edbc6c3e2e">YAML::Stream::eat</a></div><div class="ttdeci">void eat(int n=1)</div><div class="ttdef"><b>Definition</b> <a href="stream_8cpp_source.html#l00287">stream.cpp:287</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_acfde02fa6972d9630c10a39c3f5cc688"><div class="ttname"><a href="classYAML_1_1Stream.html#acfde02fa6972d9630c10a39c3f5cc688">YAML::Stream::StreamInUtf8</a></div><div class="ttdeci">void StreamInUtf8() const</div><div class="ttdef"><b>Definition</b> <a href="stream_8cpp_source.html#l00329">stream.cpp:329</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_ad7e2daa0fe401959fe5903c11a1d9a3e"><div class="ttname"><a href="classYAML_1_1Stream.html#ad7e2daa0fe401959fe5903c11a1d9a3e">YAML::Stream::operator=</a></div><div class="ttdeci">Stream &amp; operator=(Stream &amp;&amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_ae0ca8b51625636afc1414940261e48a5"><div class="ttname"><a href="classYAML_1_1Stream.html#ae0ca8b51625636afc1414940261e48a5">YAML::Stream::m_nPrefetchedUsed</a></div><div class="ttdeci">size_t m_nPrefetchedUsed</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00059">stream.h:59</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_aeaadb50136d633ce713eca8a4b7af6b1"><div class="ttname"><a href="classYAML_1_1Stream.html#aeaadb50136d633ce713eca8a4b7af6b1">YAML::Stream::m_mark</a></div><div class="ttdeci">Mark m_mark</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00053">stream.h:53</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_af49d4778df5efcf5b0757d1b1377d743"><div class="ttname"><a href="classYAML_1_1Stream.html#af49d4778df5efcf5b0757d1b1377d743">YAML::Stream::m_readahead</a></div><div class="ttdeci">std::deque&lt; char &gt; m_readahead</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00056">stream.h:56</a></div></div>
+<div class="ttc" id="amark_8h_html"><div class="ttname"><a href="mark_8h.html">mark.h</a></div></div>
+<div class="ttc" id="anamespaceYAML_html"><div class="ttname"><a href="namespaceYAML.html">YAML</a></div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00005">binary.cpp:5</a></div></div>
+<div class="ttc" id="astructYAML_1_1Mark_html"><div class="ttname"><a href="structYAML_1_1Mark.html">YAML::Mark</a></div><div class="ttdef"><b>Definition</b> <a href="mark_8h_source.html#l00013">mark.h:13</a></div></div>
+<div class="ttc" id="astructYAML_1_1Mark_html_a1e3db10ef37e390ea51bc3540ac560d0"><div class="ttname"><a href="structYAML_1_1Mark.html#a1e3db10ef37e390ea51bc3540ac560d0">YAML::Mark::column</a></div><div class="ttdeci">int column</div><div class="ttdef"><b>Definition</b> <a href="mark_8h_source.html#l00021">mark.h:21</a></div></div>
+<div class="ttc" id="astructYAML_1_1Mark_html_a30f6ac28c5002a88f1109ce64ca7f4ec"><div class="ttname"><a href="structYAML_1_1Mark.html#a30f6ac28c5002a88f1109ce64ca7f4ec">YAML::Mark::line</a></div><div class="ttdeci">int line</div><div class="ttdef"><b>Definition</b> <a href="mark_8h_source.html#l00021">mark.h:21</a></div></div>
+<div class="ttc" id="astructYAML_1_1Mark_html_ae77fbebfc1c81a3e431a0674759092c2"><div class="ttname"><a href="structYAML_1_1Mark.html#ae77fbebfc1c81a3e431a0674759092c2">YAML::Mark::pos</a></div><div class="ttdeci">int pos</div><div class="ttdef"><b>Definition</b> <a href="mark_8h_source.html#l00020">mark.h:20</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="stream_8h.html">stream.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

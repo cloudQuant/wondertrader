@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/Includes/ISelStraCtx.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('ISelStraCtx_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ISelStraCtx.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="ISelStraCtx_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;functional&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Includes/WTSMarcos.h&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">class </span><a class="code hl_class" href="classWTSCommodityInfo.html">WTSCommodityInfo</a>;</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">class </span><a class="code hl_class" href="classWTSSessionInfo.html">WTSSessionInfo</a>;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">class </span><a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">struct </span><a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">class </span><a class="code hl_class" href="classWTSKlineSlice.html">WTSKlineSlice</a>;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">class </span><a class="code hl_class" href="classWTSTickSlice.html">WTSTickSlice</a>;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">//typedef void(*FuncEnumPositionCallBack)(const char* stdCode, int32_t qty);</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="ISelStraCtx_8h.html#a6d8718f70ddb619b966a723f80ace644">   31</a></span><span class="keyword">typedef</span> std::function&lt;void(<span class="keyword">const</span> <span class="keywordtype">char</span>*, <span class="keywordtype">double</span>)&gt; <a class="code hl_typedef" href="ISelStraCtx_8h.html#a6d8718f70ddb619b966a723f80ace644">FuncEnumSelPositionCallBack</a>;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="foldopen" id="foldopen00038" data-start="{" data-end="};">
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="classISelStraCtx.html">   38</a></span><span class="keyword">class </span><a class="code hl_class" href="classISelStraCtx.html">ISelStraCtx</a></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>{</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a078b9689f8633af7f8bb2208b983c64b">   45</a></span>    <a class="code hl_function" href="classISelStraCtx.html#a078b9689f8633af7f8bb2208b983c64b">ISelStraCtx</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classISelStraCtx.html#a7850680e26d8576534a7415b69be3a30">name</a>) :<a class="code hl_variable" href="classISelStraCtx.html#a2a48d8b3d666799c9d0ea3f2b8368f4c">_name</a>(<a class="code hl_function" href="classISelStraCtx.html#a7850680e26d8576534a7415b69be3a30">name</a>){}</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#aa808dd43ab23311975faff4c71ca2608">   50</a></span>    <span class="keyword">virtual</span> <a class="code hl_function" href="classISelStraCtx.html#aa808dd43ab23311975faff4c71ca2608">~ISelStraCtx</a>(){}</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a7850680e26d8576534a7415b69be3a30">   56</a></span>    <span class="keyword">inline</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classISelStraCtx.html#a7850680e26d8576534a7415b69be3a30">name</a>()<span class="keyword"> const</span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classISelStraCtx.html#a2a48d8b3d666799c9d0ea3f2b8368f4c">_name</a>.c_str(); }</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a1712b1778d45fd7c93c55b3bf48d01a6">   63</a></span>    <span class="keyword">virtual</span> uint32_t <a class="code hl_function" href="classISelStraCtx.html#a1712b1778d45fd7c93c55b3bf48d01a6">id</a>() = 0;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#aba559a590d9588c08eb2c5846b1f806c">   74</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#aba559a590d9588c08eb2c5846b1f806c">on_init</a>() = 0;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#af9a83a49572fba39af0f9078743e8727">   80</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#af9a83a49572fba39af0f9078743e8727">on_session_begin</a>(uint32_t uTDate) = 0;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a1b29e255993cd79baff8e1aac1363969">   86</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#a1b29e255993cd79baff8e1aac1363969">on_session_end</a>(uint32_t uTDate) = 0;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a50d6bd8fa5140bb8b7b78c1e3b2fb9ac">   94</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#a50d6bd8fa5140bb8b7b78c1e3b2fb9ac">on_tick</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick, <span class="keywordtype">bool</span> bEmitStrategy = <span class="keyword">true</span>) = 0;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a576fcd7d1525e03b4348f9da34874868">  103</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#a576fcd7d1525e03b4348f9da34874868">on_bar</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, uint32_t times, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* newBar) = 0;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a83906c1e8931d19ca98ce1d97314043c">  112</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classISelStraCtx.html#a83906c1e8931d19ca98ce1d97314043c">on_schedule</a>(uint32_t curDate, uint32_t curTime, uint32_t fireTime) = 0;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a6b1dd0378a44a88dd8d59f33c438c0e3">  117</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#a6b1dd0378a44a88dd8d59f33c438c0e3">on_bactest_end</a>() {};</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a37f643252ce92f48de2d52e399a5e826">  125</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#a37f643252ce92f48de2d52e399a5e826">on_bar_close</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* newBar) = 0;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#afd15dc135fe45ad60e1eb824cacab984">  132</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#afd15dc135fe45ad60e1eb824cacab984">on_tick_updated</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick){}</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a02754b56a8112ea6a51205bc99bb7110">  139</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#a02754b56a8112ea6a51205bc99bb7110">on_strategy_schedule</a>(uint32_t curDate, uint32_t curTime) {}</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#ae56b560917390d8d2b15e808d18c756d">  145</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#ae56b560917390d8d2b15e808d18c756d">enum_position</a>(<a class="code hl_typedef" href="ISelStraCtx_8h.html#a6d8718f70ddb619b966a723f80ace644">FuncEnumSelPositionCallBack</a> cb) = 0;</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a024a59938fab7f0fd1a0f6988b77c3ad">  159</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">double</span> <a class="code hl_function" href="classISelStraCtx.html#a024a59938fab7f0fd1a0f6988b77c3ad">stra_get_position</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> bOnlyValid = <span class="keyword">false</span>, <span class="keyword">const</span> <span class="keywordtype">char</span>* userTag = <span class="stringliteral">&quot;&quot;</span>) = 0;</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#ac7890535f9a5ea760de62f57bc3a60e7">  167</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#ac7890535f9a5ea760de62f57bc3a60e7">stra_set_position</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">double</span> qty, <span class="keyword">const</span> <span class="keywordtype">char</span>* userTag = <span class="stringliteral">&quot;&quot;</span>) = 0;</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a3066f3e35128498534f59931b930469d">  174</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">double</span> <a class="code hl_function" href="classISelStraCtx.html#a3066f3e35128498534f59931b930469d">stra_get_price</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) = 0;</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a4ce1146f0aa7438a5e93840ff7bca4a8">  186</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">double</span> <a class="code hl_function" href="classISelStraCtx.html#a4ce1146f0aa7438a5e93840ff7bca4a8">stra_get_day_price</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">int</span> flag = 0) = 0;</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a1db3f5da994789302e8cab62576d3f25">  192</a></span>    <span class="keyword">virtual</span> uint32_t <a class="code hl_function" href="classISelStraCtx.html#a1db3f5da994789302e8cab62576d3f25">stra_get_tdate</a>() = 0;</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a85acea08ad08ca22808111248d92a94f">  198</a></span>    <span class="keyword">virtual</span> uint32_t <a class="code hl_function" href="classISelStraCtx.html#a85acea08ad08ca22808111248d92a94f">stra_get_date</a>() = 0;</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span> </div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#ae3f387333b6800df2249f12ab26a50da">  204</a></span>    <span class="keyword">virtual</span> uint32_t <a class="code hl_function" href="classISelStraCtx.html#ae3f387333b6800df2249f12ab26a50da">stra_get_time</a>() = 0;</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#ab54a471ce29511cf1c9e4d849bd636d9">  214</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">double</span> <a class="code hl_function" href="classISelStraCtx.html#ab54a471ce29511cf1c9e4d849bd636d9">stra_get_fund_data</a>(<span class="keywordtype">int</span> flag = 0) = 0;</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span> </div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a3e525f17163fd9942d90c764ca3da39c">  221</a></span>    <span class="keyword">virtual</span> uint64_t <a class="code hl_function" href="classISelStraCtx.html#a3e525f17163fd9942d90c764ca3da39c">stra_get_first_entertime</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) = 0;</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span> </div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#aad5de683f59542d62028389c4095a444">  228</a></span>    <span class="keyword">virtual</span> uint64_t <a class="code hl_function" href="classISelStraCtx.html#aad5de683f59542d62028389c4095a444">stra_get_last_entertime</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) = 0;</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span> </div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a5c43c188a93ef0f3f55775842e118345">  235</a></span>    <span class="keyword">virtual</span> uint64_t <a class="code hl_function" href="classISelStraCtx.html#a5c43c188a93ef0f3f55775842e118345">stra_get_last_exittime</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) = 0;</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span> </div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#af32031830de17d7907f2023bb7b7228d">  242</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">double</span> <a class="code hl_function" href="classISelStraCtx.html#af32031830de17d7907f2023bb7b7228d">stra_get_last_enterprice</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) = 0;</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span> </div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a715adb4c2a1d42d32987c18f5698e7de">  249</a></span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classISelStraCtx.html#a715adb4c2a1d42d32987c18f5698e7de">stra_get_last_entertag</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode)  = 0;</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span> </div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#adf25aa04f8054ff82a8ff9be7193997b">  256</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">double</span> <a class="code hl_function" href="classISelStraCtx.html#adf25aa04f8054ff82a8ff9be7193997b">stra_get_position_avgpx</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) = 0;</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a58cf8a8f4dd2de7829c9e8f653fc8d51">  263</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">double</span> <a class="code hl_function" href="classISelStraCtx.html#a58cf8a8f4dd2de7829c9e8f653fc8d51">stra_get_position_profit</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) = 0;</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span> </div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a28c1e3ec665a57021ced0dafe3bc9fa7">  271</a></span>    <span class="keyword">virtual</span> uint64_t <a class="code hl_function" href="classISelStraCtx.html#a28c1e3ec665a57021ced0dafe3bc9fa7">stra_get_detail_entertime</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keyword">const</span> <span class="keywordtype">char</span>* userTag) = 0;</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span> </div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a6597bceee56afb58ac747c341df0f8fb">  279</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">double</span> <a class="code hl_function" href="classISelStraCtx.html#a6597bceee56afb58ac747c341df0f8fb">stra_get_detail_cost</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keyword">const</span> <span class="keywordtype">char</span>* userTag) = 0;</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span> </div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a87b076c322645d24ba17b17ddf03c02d">  293</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">double</span> <a class="code hl_function" href="classISelStraCtx.html#a87b076c322645d24ba17b17ddf03c02d">stra_get_detail_profit</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keyword">const</span> <span class="keywordtype">char</span>* userTag, <span class="keywordtype">int</span> flag = 0) = 0;</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span> </div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a1978fdfc60e09aa9205940840fcf6b4e">  300</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSCommodityInfo.html">WTSCommodityInfo</a>* <a class="code hl_function" href="classISelStraCtx.html#a1978fdfc60e09aa9205940840fcf6b4e">stra_get_comminfo</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) = 0;</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a830e3b63cffef510a6e083e7628bcd6e">  307</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSSessionInfo.html">WTSSessionInfo</a>* <a class="code hl_function" href="classISelStraCtx.html#a830e3b63cffef510a6e083e7628bcd6e">stra_get_sessinfo</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) = 0;</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span> </div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a12320d18ce2d89bf78d0c3e5d0503c65">  316</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSKlineSlice.html">WTSKlineSlice</a>*  <a class="code hl_function" href="classISelStraCtx.html#a12320d18ce2d89bf78d0c3e5d0503c65">stra_get_bars</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, uint32_t count) = 0;</div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span> </div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a71c6e382c2606afe9b609ffa78134966">  324</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSTickSlice.html">WTSTickSlice</a>*   <a class="code hl_function" href="classISelStraCtx.html#a71c6e382c2606afe9b609ffa78134966">stra_get_ticks</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, uint32_t count) = 0;</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span> </div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#ab85fc2da86f954dadf7319a9d0dc98b4">  331</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>*    <a class="code hl_function" href="classISelStraCtx.html#ab85fc2da86f954dadf7319a9d0dc98b4">stra_get_last_tick</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) = 0;</div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span> </div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a2eaf3518a15912a89eca8b73e18c1395">  339</a></span>    <span class="keyword">virtual</span> std::string     <a class="code hl_function" href="classISelStraCtx.html#a2eaf3518a15912a89eca8b73e18c1395">stra_get_rawcode</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) = 0;</div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span> </div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#afe0fffb94287540bc321374018c0fcd1">  346</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#afe0fffb94287540bc321374018c0fcd1">stra_sub_ticks</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode) = 0;</div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span> </div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#adae21e39b9dae93153eae199cd823b2b">  352</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#adae21e39b9dae93153eae199cd823b2b">stra_log_info</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* message) = 0;</div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span> </div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a30f39365ac2dad4dc37f039779c50acd">  358</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#a30f39365ac2dad4dc37f039779c50acd">stra_log_debug</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* message) = 0;</div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span> </div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#ab8c11ab8f842258c2c59c6ef01cf1224">  364</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#ab8c11ab8f842258c2c59c6ef01cf1224">stra_log_error</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* message) = 0;</div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span> </div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a82c30aec0c1353c50e558da2e9416d18">  370</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#a82c30aec0c1353c50e558da2e9416d18">stra_log_warn</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* message) {}</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span> </div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#ab46096c9be31584e5e802825fbf0758b">  378</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classISelStraCtx.html#ab46096c9be31584e5e802825fbf0758b">stra_save_user_data</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* key, <span class="keyword">const</span> <span class="keywordtype">char</span>* val){}</div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span> </div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#ad88563a872daad9e2f5f55108cd9eb01">  387</a></span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classISelStraCtx.html#ad88563a872daad9e2f5f55108cd9eb01">stra_load_user_data</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* key, <span class="keyword">const</span> <span class="keywordtype">char</span>* defVal = <span class="stringliteral">&quot;&quot;</span>) { <span class="keywordflow">return</span> defVal; }</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span> </div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span><span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno"><a class="line" href="classISelStraCtx.html#a2a48d8b3d666799c9d0ea3f2b8368f4c">  393</a></span>    std::string <a class="code hl_variable" href="classISelStraCtx.html#a2a48d8b3d666799c9d0ea3f2b8368f4c">_name</a>;</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>};</div>
+</div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span> </div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="ttc" id="aISelStraCtx_8h_html_a6d8718f70ddb619b966a723f80ace644"><div class="ttname"><a href="ISelStraCtx_8h.html#a6d8718f70ddb619b966a723f80ace644">FuncEnumSelPositionCallBack</a></div><div class="ttdeci">std::function&lt; void(const char *, double)&gt; FuncEnumSelPositionCallBack</div><div class="ttdoc">选股策略持仓枚举回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="ISelStraCtx_8h_source.html#l00031">ISelStraCtx.h:31</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aclassISelStraCtx_html"><div class="ttname"><a href="classISelStraCtx.html">ISelStraCtx</a></div><div class="ttdoc">选股策略上下文接口</div><div class="ttdef"><b>Definition</b> <a href="ISelStraCtx_8h_source.html#l00038">ISelStraCtx.h:39</a></div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a024a59938fab7f0fd1a0f6988b77c3ad"><div class="ttname"><a href="classISelStraCtx.html#a024a59938fab7f0fd1a0f6988b77c3ad">ISelStraCtx::stra_get_position</a></div><div class="ttdeci">virtual double stra_get_position(const char *stdCode, bool bOnlyValid=false, const char *userTag=&quot;&quot;)=0</div><div class="ttdoc">策略接口</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a02754b56a8112ea6a51205bc99bb7110"><div class="ttname"><a href="classISelStraCtx.html#a02754b56a8112ea6a51205bc99bb7110">ISelStraCtx::on_strategy_schedule</a></div><div class="ttdeci">virtual void on_strategy_schedule(uint32_t curDate, uint32_t curTime)</div><div class="ttdoc">策略定时调度回调</div><div class="ttdef"><b>Definition</b> <a href="ISelStraCtx_8h_source.html#l00139">ISelStraCtx.h:139</a></div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a078b9689f8633af7f8bb2208b983c64b"><div class="ttname"><a href="classISelStraCtx.html#a078b9689f8633af7f8bb2208b983c64b">ISelStraCtx::ISelStraCtx</a></div><div class="ttdeci">ISelStraCtx(const char *name)</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="ISelStraCtx_8h_source.html#l00045">ISelStraCtx.h:45</a></div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a12320d18ce2d89bf78d0c3e5d0503c65"><div class="ttname"><a href="classISelStraCtx.html#a12320d18ce2d89bf78d0c3e5d0503c65">ISelStraCtx::stra_get_bars</a></div><div class="ttdeci">virtual WTSKlineSlice * stra_get_bars(const char *stdCode, const char *period, uint32_t count)=0</div><div class="ttdoc">获取K线切片数据</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a1712b1778d45fd7c93c55b3bf48d01a6"><div class="ttname"><a href="classISelStraCtx.html#a1712b1778d45fd7c93c55b3bf48d01a6">ISelStraCtx::id</a></div><div class="ttdeci">virtual uint32_t id()=0</div><div class="ttdoc">获取策略ID</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a1978fdfc60e09aa9205940840fcf6b4e"><div class="ttname"><a href="classISelStraCtx.html#a1978fdfc60e09aa9205940840fcf6b4e">ISelStraCtx::stra_get_comminfo</a></div><div class="ttdeci">virtual WTSCommodityInfo * stra_get_comminfo(const char *stdCode)=0</div><div class="ttdoc">获取合约品种信息</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a1b29e255993cd79baff8e1aac1363969"><div class="ttname"><a href="classISelStraCtx.html#a1b29e255993cd79baff8e1aac1363969">ISelStraCtx::on_session_end</a></div><div class="ttdeci">virtual void on_session_end(uint32_t uTDate)=0</div><div class="ttdoc">交易日结束回调</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a1db3f5da994789302e8cab62576d3f25"><div class="ttname"><a href="classISelStraCtx.html#a1db3f5da994789302e8cab62576d3f25">ISelStraCtx::stra_get_tdate</a></div><div class="ttdeci">virtual uint32_t stra_get_tdate()=0</div><div class="ttdoc">获取当前交易日</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a28c1e3ec665a57021ced0dafe3bc9fa7"><div class="ttname"><a href="classISelStraCtx.html#a28c1e3ec665a57021ced0dafe3bc9fa7">ISelStraCtx::stra_get_detail_entertime</a></div><div class="ttdeci">virtual uint64_t stra_get_detail_entertime(const char *stdCode, const char *userTag)=0</div><div class="ttdoc">获取指定标签持仓的进场时间</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a2a48d8b3d666799c9d0ea3f2b8368f4c"><div class="ttname"><a href="classISelStraCtx.html#a2a48d8b3d666799c9d0ea3f2b8368f4c">ISelStraCtx::_name</a></div><div class="ttdeci">std::string _name</div><div class="ttdoc">策略名称</div><div class="ttdef"><b>Definition</b> <a href="ISelStraCtx_8h_source.html#l00393">ISelStraCtx.h:393</a></div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a2eaf3518a15912a89eca8b73e18c1395"><div class="ttname"><a href="classISelStraCtx.html#a2eaf3518a15912a89eca8b73e18c1395">ISelStraCtx::stra_get_rawcode</a></div><div class="ttdeci">virtual std::string stra_get_rawcode(const char *stdCode)=0</div><div class="ttdoc">获取原始合约代码（分月合约代码）</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a3066f3e35128498534f59931b930469d"><div class="ttname"><a href="classISelStraCtx.html#a3066f3e35128498534f59931b930469d">ISelStraCtx::stra_get_price</a></div><div class="ttdeci">virtual double stra_get_price(const char *stdCode)=0</div><div class="ttdoc">获取合约当前市场价格</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a30f39365ac2dad4dc37f039779c50acd"><div class="ttname"><a href="classISelStraCtx.html#a30f39365ac2dad4dc37f039779c50acd">ISelStraCtx::stra_log_debug</a></div><div class="ttdeci">virtual void stra_log_debug(const char *message)=0</div><div class="ttdoc">输出调试级别的日志</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a37f643252ce92f48de2d52e399a5e826"><div class="ttname"><a href="classISelStraCtx.html#a37f643252ce92f48de2d52e399a5e826">ISelStraCtx::on_bar_close</a></div><div class="ttdeci">virtual void on_bar_close(const char *stdCode, const char *period, WTSBarStruct *newBar)=0</div><div class="ttdoc">K线收盘回调</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a3e525f17163fd9942d90c764ca3da39c"><div class="ttname"><a href="classISelStraCtx.html#a3e525f17163fd9942d90c764ca3da39c">ISelStraCtx::stra_get_first_entertime</a></div><div class="ttdeci">virtual uint64_t stra_get_first_entertime(const char *stdCode)=0</div><div class="ttdoc">获取指定合约的首次建仓时间</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a4ce1146f0aa7438a5e93840ff7bca4a8"><div class="ttname"><a href="classISelStraCtx.html#a4ce1146f0aa7438a5e93840ff7bca4a8">ISelStraCtx::stra_get_day_price</a></div><div class="ttdeci">virtual double stra_get_day_price(const char *stdCode, int flag=0)=0</div><div class="ttdoc">读取当日特定类型的价格</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a50d6bd8fa5140bb8b7b78c1e3b2fb9ac"><div class="ttname"><a href="classISelStraCtx.html#a50d6bd8fa5140bb8b7b78c1e3b2fb9ac">ISelStraCtx::on_tick</a></div><div class="ttdeci">virtual void on_tick(const char *stdCode, WTSTickData *newTick, bool bEmitStrategy=true)=0</div><div class="ttdoc">逐笔数据回调</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a576fcd7d1525e03b4348f9da34874868"><div class="ttname"><a href="classISelStraCtx.html#a576fcd7d1525e03b4348f9da34874868">ISelStraCtx::on_bar</a></div><div class="ttdeci">virtual void on_bar(const char *stdCode, const char *period, uint32_t times, WTSBarStruct *newBar)=0</div><div class="ttdoc">K线数据回调</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a58cf8a8f4dd2de7829c9e8f653fc8d51"><div class="ttname"><a href="classISelStraCtx.html#a58cf8a8f4dd2de7829c9e8f653fc8d51">ISelStraCtx::stra_get_position_profit</a></div><div class="ttdeci">virtual double stra_get_position_profit(const char *stdCode)=0</div><div class="ttdoc">获取指定合约持仓的浮动盈亏</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a5c43c188a93ef0f3f55775842e118345"><div class="ttname"><a href="classISelStraCtx.html#a5c43c188a93ef0f3f55775842e118345">ISelStraCtx::stra_get_last_exittime</a></div><div class="ttdeci">virtual uint64_t stra_get_last_exittime(const char *stdCode)=0</div><div class="ttdoc">获取指定合约的最近平仓时间</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a6597bceee56afb58ac747c341df0f8fb"><div class="ttname"><a href="classISelStraCtx.html#a6597bceee56afb58ac747c341df0f8fb">ISelStraCtx::stra_get_detail_cost</a></div><div class="ttdeci">virtual double stra_get_detail_cost(const char *stdCode, const char *userTag)=0</div><div class="ttdoc">获取指定标签持仓的成本</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a6b1dd0378a44a88dd8d59f33c438c0e3"><div class="ttname"><a href="classISelStraCtx.html#a6b1dd0378a44a88dd8d59f33c438c0e3">ISelStraCtx::on_bactest_end</a></div><div class="ttdeci">virtual void on_bactest_end()</div><div class="ttdoc">回测结束事件回调</div><div class="ttdef"><b>Definition</b> <a href="ISelStraCtx_8h_source.html#l00117">ISelStraCtx.h:117</a></div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a715adb4c2a1d42d32987c18f5698e7de"><div class="ttname"><a href="classISelStraCtx.html#a715adb4c2a1d42d32987c18f5698e7de">ISelStraCtx::stra_get_last_entertag</a></div><div class="ttdeci">virtual const char * stra_get_last_entertag(const char *stdCode)=0</div><div class="ttdoc">获取指定合约的最近建仓标签</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a71c6e382c2606afe9b609ffa78134966"><div class="ttname"><a href="classISelStraCtx.html#a71c6e382c2606afe9b609ffa78134966">ISelStraCtx::stra_get_ticks</a></div><div class="ttdeci">virtual WTSTickSlice * stra_get_ticks(const char *stdCode, uint32_t count)=0</div><div class="ttdoc">获取Tick切片数据</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a7850680e26d8576534a7415b69be3a30"><div class="ttname"><a href="classISelStraCtx.html#a7850680e26d8576534a7415b69be3a30">ISelStraCtx::name</a></div><div class="ttdeci">const char * name() const</div><div class="ttdoc">获取策略名称</div><div class="ttdef"><b>Definition</b> <a href="ISelStraCtx_8h_source.html#l00056">ISelStraCtx.h:56</a></div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a82c30aec0c1353c50e558da2e9416d18"><div class="ttname"><a href="classISelStraCtx.html#a82c30aec0c1353c50e558da2e9416d18">ISelStraCtx::stra_log_warn</a></div><div class="ttdeci">virtual void stra_log_warn(const char *message)</div><div class="ttdoc">输出警告级别的日志</div><div class="ttdef"><b>Definition</b> <a href="ISelStraCtx_8h_source.html#l00370">ISelStraCtx.h:370</a></div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a830e3b63cffef510a6e083e7628bcd6e"><div class="ttname"><a href="classISelStraCtx.html#a830e3b63cffef510a6e083e7628bcd6e">ISelStraCtx::stra_get_sessinfo</a></div><div class="ttdeci">virtual WTSSessionInfo * stra_get_sessinfo(const char *stdCode)=0</div><div class="ttdoc">获取交易时段信息</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a83906c1e8931d19ca98ce1d97314043c"><div class="ttname"><a href="classISelStraCtx.html#a83906c1e8931d19ca98ce1d97314043c">ISelStraCtx::on_schedule</a></div><div class="ttdeci">virtual bool on_schedule(uint32_t curDate, uint32_t curTime, uint32_t fireTime)=0</div><div class="ttdoc">定时回调</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a85acea08ad08ca22808111248d92a94f"><div class="ttname"><a href="classISelStraCtx.html#a85acea08ad08ca22808111248d92a94f">ISelStraCtx::stra_get_date</a></div><div class="ttdeci">virtual uint32_t stra_get_date()=0</div><div class="ttdoc">获取当前日期</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_a87b076c322645d24ba17b17ddf03c02d"><div class="ttname"><a href="classISelStraCtx.html#a87b076c322645d24ba17b17ddf03c02d">ISelStraCtx::stra_get_detail_profit</a></div><div class="ttdeci">virtual double stra_get_detail_profit(const char *stdCode, const char *userTag, int flag=0)=0</div><div class="ttdoc">读取指定标签持仓的浮动盈亏信息</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_aa808dd43ab23311975faff4c71ca2608"><div class="ttname"><a href="classISelStraCtx.html#aa808dd43ab23311975faff4c71ca2608">ISelStraCtx::~ISelStraCtx</a></div><div class="ttdeci">virtual ~ISelStraCtx()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="ISelStraCtx_8h_source.html#l00050">ISelStraCtx.h:50</a></div></div>
+<div class="ttc" id="aclassISelStraCtx_html_aad5de683f59542d62028389c4095a444"><div class="ttname"><a href="classISelStraCtx.html#aad5de683f59542d62028389c4095a444">ISelStraCtx::stra_get_last_entertime</a></div><div class="ttdeci">virtual uint64_t stra_get_last_entertime(const char *stdCode)=0</div><div class="ttdoc">获取指定合约的最近建仓时间</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_ab46096c9be31584e5e802825fbf0758b"><div class="ttname"><a href="classISelStraCtx.html#ab46096c9be31584e5e802825fbf0758b">ISelStraCtx::stra_save_user_data</a></div><div class="ttdeci">virtual void stra_save_user_data(const char *key, const char *val)</div><div class="ttdoc">保存用户自定义数据</div><div class="ttdef"><b>Definition</b> <a href="ISelStraCtx_8h_source.html#l00378">ISelStraCtx.h:378</a></div></div>
+<div class="ttc" id="aclassISelStraCtx_html_ab54a471ce29511cf1c9e4d849bd636d9"><div class="ttname"><a href="classISelStraCtx.html#ab54a471ce29511cf1c9e4d849bd636d9">ISelStraCtx::stra_get_fund_data</a></div><div class="ttdeci">virtual double stra_get_fund_data(int flag=0)=0</div><div class="ttdoc">获取资金数据</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_ab85fc2da86f954dadf7319a9d0dc98b4"><div class="ttname"><a href="classISelStraCtx.html#ab85fc2da86f954dadf7319a9d0dc98b4">ISelStraCtx::stra_get_last_tick</a></div><div class="ttdeci">virtual WTSTickData * stra_get_last_tick(const char *stdCode)=0</div><div class="ttdoc">获取最新的Tick数据</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_ab8c11ab8f842258c2c59c6ef01cf1224"><div class="ttname"><a href="classISelStraCtx.html#ab8c11ab8f842258c2c59c6ef01cf1224">ISelStraCtx::stra_log_error</a></div><div class="ttdeci">virtual void stra_log_error(const char *message)=0</div><div class="ttdoc">输出错误级别的日志</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_aba559a590d9588c08eb2c5846b1f806c"><div class="ttname"><a href="classISelStraCtx.html#aba559a590d9588c08eb2c5846b1f806c">ISelStraCtx::on_init</a></div><div class="ttdeci">virtual void on_init()=0</div><div class="ttdoc">回调函数组</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_ac7890535f9a5ea760de62f57bc3a60e7"><div class="ttname"><a href="classISelStraCtx.html#ac7890535f9a5ea760de62f57bc3a60e7">ISelStraCtx::stra_set_position</a></div><div class="ttdeci">virtual void stra_set_position(const char *stdCode, double qty, const char *userTag=&quot;&quot;)=0</div><div class="ttdoc">设置指定合约的目标持仓量</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_ad88563a872daad9e2f5f55108cd9eb01"><div class="ttname"><a href="classISelStraCtx.html#ad88563a872daad9e2f5f55108cd9eb01">ISelStraCtx::stra_load_user_data</a></div><div class="ttdeci">virtual const char * stra_load_user_data(const char *key, const char *defVal=&quot;&quot;)</div><div class="ttdoc">加载用户自定义数据</div><div class="ttdef"><b>Definition</b> <a href="ISelStraCtx_8h_source.html#l00387">ISelStraCtx.h:387</a></div></div>
+<div class="ttc" id="aclassISelStraCtx_html_adae21e39b9dae93153eae199cd823b2b"><div class="ttname"><a href="classISelStraCtx.html#adae21e39b9dae93153eae199cd823b2b">ISelStraCtx::stra_log_info</a></div><div class="ttdeci">virtual void stra_log_info(const char *message)=0</div><div class="ttdoc">输出信息级别的日志</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_adf25aa04f8054ff82a8ff9be7193997b"><div class="ttname"><a href="classISelStraCtx.html#adf25aa04f8054ff82a8ff9be7193997b">ISelStraCtx::stra_get_position_avgpx</a></div><div class="ttdeci">virtual double stra_get_position_avgpx(const char *stdCode)=0</div><div class="ttdoc">获取指定合约持仓的平均价格</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_ae3f387333b6800df2249f12ab26a50da"><div class="ttname"><a href="classISelStraCtx.html#ae3f387333b6800df2249f12ab26a50da">ISelStraCtx::stra_get_time</a></div><div class="ttdeci">virtual uint32_t stra_get_time()=0</div><div class="ttdoc">获取当前时间</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_ae56b560917390d8d2b15e808d18c756d"><div class="ttname"><a href="classISelStraCtx.html#ae56b560917390d8d2b15e808d18c756d">ISelStraCtx::enum_position</a></div><div class="ttdeci">virtual void enum_position(FuncEnumSelPositionCallBack cb)=0</div><div class="ttdoc">枚举策略持仓</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_af32031830de17d7907f2023bb7b7228d"><div class="ttname"><a href="classISelStraCtx.html#af32031830de17d7907f2023bb7b7228d">ISelStraCtx::stra_get_last_enterprice</a></div><div class="ttdeci">virtual double stra_get_last_enterprice(const char *stdCode)=0</div><div class="ttdoc">获取指定合约的最近建仓价格</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_af9a83a49572fba39af0f9078743e8727"><div class="ttname"><a href="classISelStraCtx.html#af9a83a49572fba39af0f9078743e8727">ISelStraCtx::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin(uint32_t uTDate)=0</div><div class="ttdoc">交易日开始回调</div></div>
+<div class="ttc" id="aclassISelStraCtx_html_afd15dc135fe45ad60e1eb824cacab984"><div class="ttname"><a href="classISelStraCtx.html#afd15dc135fe45ad60e1eb824cacab984">ISelStraCtx::on_tick_updated</a></div><div class="ttdeci">virtual void on_tick_updated(const char *stdCode, WTSTickData *newTick)</div><div class="ttdoc">Tick数据更新回调</div><div class="ttdef"><b>Definition</b> <a href="ISelStraCtx_8h_source.html#l00132">ISelStraCtx.h:132</a></div></div>
+<div class="ttc" id="aclassISelStraCtx_html_afe0fffb94287540bc321374018c0fcd1"><div class="ttname"><a href="classISelStraCtx.html#afe0fffb94287540bc321374018c0fcd1">ISelStraCtx::stra_sub_ticks</a></div><div class="ttdeci">virtual void stra_sub_ticks(const char *stdCode)=0</div><div class="ttdoc">订阅合约的Tick数据</div></div>
+<div class="ttc" id="aclassWTSCommodityInfo_html"><div class="ttname"><a href="classWTSCommodityInfo.html">WTSCommodityInfo</a></div><div class="ttdoc">品种信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00020">WTSContractInfo.hpp:21</a></div></div>
+<div class="ttc" id="aclassWTSKlineSlice_html"><div class="ttname"><a href="classWTSKlineSlice.html">WTSKlineSlice</a></div><div class="ttdoc">K线数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00295">WTSDataDef.hpp:296</a></div></div>
+<div class="ttc" id="aclassWTSSessionInfo_html"><div class="ttname"><a href="classWTSSessionInfo.html">WTSSessionInfo</a></div><div class="ttdoc">会话信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSSessionInfo_8hpp_source.html#l00020">WTSSessionInfo.hpp:21</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSTickSlice_html"><div class="ttname"><a href="classWTSTickSlice.html">WTSTickSlice</a></div><div class="ttdoc">Tick数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l02128">WTSDataDef.hpp:2129</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_2a2e13dd651d9f4dfc9d1ceadd85b622.html">Includes</a></li><li class="navelem"><a class="el" href="ISelStraCtx_8h.html">ISelStraCtx.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

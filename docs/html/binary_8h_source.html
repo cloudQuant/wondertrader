@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/yaml-cpp/binary.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('binary_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">binary.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="binary_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef BASE64_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define BASE64_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#if defined(_MSC_VER) ||                                            \</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">    (defined(__GNUC__) &amp;&amp; (__GNUC__ == 3 &amp;&amp; __GNUC_MINOR__ &gt;= 4) || \</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">     (__GNUC__ &gt;= 4))  </span><span class="comment">// GCC supports &quot;pragma once&quot; correctly since 3.4</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="dll_8h.html">yaml-cpp/dll.h</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceYAML.html">YAML</a> {</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><a class="code hl_define" href="dll_8h.html#a70903db05b58f40db9aa4f966658fa65">YAML_CPP_API</a> std::string <a class="code hl_function" href="namespaceYAML.html#adb3060aef5e98ff8c5fc50220c4aad77">EncodeBase64</a>(<span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *data,</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>                                      std::size_t size);</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><a class="code hl_define" href="dll_8h.html#a70903db05b58f40db9aa4f966658fa65">YAML_CPP_API</a> std::vector&lt;unsigned char&gt; <a class="code hl_function" href="namespaceYAML.html#a275ebcde62e7f033e2b40ddde5152a17">DecodeBase64</a>(<span class="keyword">const</span> std::string &amp;input);</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="foldopen" id="foldopen00020" data-start="{" data-end="};">
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html">   20</a></span><span class="keyword">class </span><a class="code hl_define" href="dll_8h.html#a70903db05b58f40db9aa4f966658fa65">YAML_CPP_API</a> <a class="code hl_class" href="classYAML_1_1Binary.html">Binary</a> {</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> <span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00022" data-start="{" data-end="}">
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#a4eae01da78eb8386a4d405f497baf33c">   22</a></span>  <a class="code hl_function" href="classYAML_1_1Binary.html#a4eae01da78eb8386a4d405f497baf33c">Binary</a>(<span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *data_, std::size_t size_)</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>      : m_data{}, m_unownedData(data_), m_unownedSize(size_) {}</div>
+</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#a65696964578e5f5c5f9ec1ee9f06e1ab">   24</a></span>  <a class="code hl_function" href="classYAML_1_1Binary.html#a65696964578e5f5c5f9ec1ee9f06e1ab">Binary</a>() : <a class="code hl_class" href="classYAML_1_1Binary.html">Binary</a>(nullptr, 0) {}</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#a404eefb26378bd8c98f04510b317ffd0">   25</a></span>  <a class="code hl_function" href="classYAML_1_1Binary.html#a404eefb26378bd8c98f04510b317ffd0">Binary</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1Binary.html">Binary</a> &amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#afacd9fcc0b29ce503fcd421a1fb9759f">   26</a></span>  <a class="code hl_function" href="classYAML_1_1Binary.html#afacd9fcc0b29ce503fcd421a1fb9759f">Binary</a>(<a class="code hl_class" href="classYAML_1_1Binary.html">Binary</a> &amp;&amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#a541f7e73e459018ff08721952d930f46">   27</a></span>  <a class="code hl_class" href="classYAML_1_1Binary.html">Binary</a> &amp;<a class="code hl_function" href="classYAML_1_1Binary.html#a541f7e73e459018ff08721952d930f46">operator=</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1Binary.html">Binary</a> &amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#a368f7beac485ce2506ec1420b186f659">   28</a></span>  <a class="code hl_class" href="classYAML_1_1Binary.html">Binary</a> &amp;<a class="code hl_function" href="classYAML_1_1Binary.html#a368f7beac485ce2506ec1420b186f659">operator=</a>(<a class="code hl_class" href="classYAML_1_1Binary.html">Binary</a> &amp;&amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#aef431ce07caa242dce5041d7a1665c51">   30</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classYAML_1_1Binary.html#aef431ce07caa242dce5041d7a1665c51">owned</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> !m_unownedData; }</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#ad8e9df84af8d99b005992163aeb6c956">   31</a></span>  std::size_t <a class="code hl_function" href="classYAML_1_1Binary.html#ad8e9df84af8d99b005992163aeb6c956">size</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> owned() ? m_data.size() : m_unownedSize; }</div>
+<div class="foldopen" id="foldopen00032" data-start="{" data-end="}">
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#a2d324fd6e7efdacc4c3362fe860bcec7">   32</a></span>  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *<a class="code hl_function" href="classYAML_1_1Binary.html#a2d324fd6e7efdacc4c3362fe860bcec7">data</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keywordflow">return</span> owned() ? &amp;m_data[0] : m_unownedData;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  }</div>
+</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="foldopen" id="foldopen00036" data-start="{" data-end="}">
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#a7fb9a73d0230d3f9b551ce20c7d3920a">   36</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1Binary.html#a7fb9a73d0230d3f9b551ce20c7d3920a">swap</a>(std::vector&lt;unsigned char&gt; &amp;rhs) {</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keywordflow">if</span> (m_unownedData) {</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>      m_data.swap(rhs);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>      rhs.clear();</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>      rhs.resize(m_unownedSize);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>      std::copy(m_unownedData, m_unownedData + m_unownedSize, rhs.begin());</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>      m_unownedData = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>      m_unownedSize = 0;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>      m_data.swap(rhs);</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    }</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  }</div>
+</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="foldopen" id="foldopen00049" data-start="{" data-end="}">
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#a6696e8d22d09dcc1bab30fe257b5db36">   49</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classYAML_1_1Binary.html#a6696e8d22d09dcc1bab30fe257b5db36">operator==</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1Binary.html">Binary</a> &amp;rhs)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keyword">const</span> std::size_t s = size();</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordflow">if</span> (s != rhs.<a class="code hl_function" href="classYAML_1_1Binary.html#ad8e9df84af8d99b005992163aeb6c956">size</a>())</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *d1 = data();</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *d2 = rhs.<a class="code hl_function" href="classYAML_1_1Binary.html#a2d324fd6e7efdacc4c3362fe860bcec7">data</a>();</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; s; i++) {</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>      <span class="keywordflow">if</span> (*d1++ != *d2++)</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    }</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  }</div>
+</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#af31e8ec0277113eace7f0508be989653">   62</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classYAML_1_1Binary.html#af31e8ec0277113eace7f0508be989653">operator!=</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1Binary.html">Binary</a> &amp;rhs)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> !(*<span class="keyword">this</span> == rhs); }</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#a80fd1d7206bc5428393afc032a741ff8">   65</a></span>  std::vector&lt;unsigned char&gt; <a class="code hl_variable" href="classYAML_1_1Binary.html#a80fd1d7206bc5428393afc032a741ff8">m_data</a>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#a67432ee99db4cad49917eb0b9ed24157">   66</a></span>  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *<a class="code hl_variable" href="classYAML_1_1Binary.html#a67432ee99db4cad49917eb0b9ed24157">m_unownedData</a>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classYAML_1_1Binary.html#a062c274e97aaa4f7acdef89cedaf1e27">   67</a></span>  std::size_t <a class="code hl_variable" href="classYAML_1_1Binary.html#a062c274e97aaa4f7acdef89cedaf1e27">m_unownedSize</a>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>};</div>
+</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>}  <span class="comment">// namespace YAML</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#endif  </span><span class="comment">// BASE64_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html"><div class="ttname"><a href="classYAML_1_1Binary.html">YAML::Binary</a></div><div class="ttdef"><b>Definition</b> <a href="binary_8h_source.html#l00020">binary.h:20</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_a062c274e97aaa4f7acdef89cedaf1e27"><div class="ttname"><a href="classYAML_1_1Binary.html#a062c274e97aaa4f7acdef89cedaf1e27">YAML::Binary::m_unownedSize</a></div><div class="ttdeci">std::size_t m_unownedSize</div><div class="ttdef"><b>Definition</b> <a href="binary_8h_source.html#l00067">binary.h:67</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_a2d324fd6e7efdacc4c3362fe860bcec7"><div class="ttname"><a href="classYAML_1_1Binary.html#a2d324fd6e7efdacc4c3362fe860bcec7">YAML::Binary::data</a></div><div class="ttdeci">const unsigned char * data() const</div><div class="ttdef"><b>Definition</b> <a href="binary_8h_source.html#l00032">binary.h:32</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_a368f7beac485ce2506ec1420b186f659"><div class="ttname"><a href="classYAML_1_1Binary.html#a368f7beac485ce2506ec1420b186f659">YAML::Binary::operator=</a></div><div class="ttdeci">Binary &amp; operator=(Binary &amp;&amp;)=default</div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_a404eefb26378bd8c98f04510b317ffd0"><div class="ttname"><a href="classYAML_1_1Binary.html#a404eefb26378bd8c98f04510b317ffd0">YAML::Binary::Binary</a></div><div class="ttdeci">Binary(const Binary &amp;)=default</div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_a4eae01da78eb8386a4d405f497baf33c"><div class="ttname"><a href="classYAML_1_1Binary.html#a4eae01da78eb8386a4d405f497baf33c">YAML::Binary::Binary</a></div><div class="ttdeci">Binary(const unsigned char *data_, std::size_t size_)</div><div class="ttdef"><b>Definition</b> <a href="binary_8h_source.html#l00022">binary.h:22</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_a541f7e73e459018ff08721952d930f46"><div class="ttname"><a href="classYAML_1_1Binary.html#a541f7e73e459018ff08721952d930f46">YAML::Binary::operator=</a></div><div class="ttdeci">Binary &amp; operator=(const Binary &amp;)=default</div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_a65696964578e5f5c5f9ec1ee9f06e1ab"><div class="ttname"><a href="classYAML_1_1Binary.html#a65696964578e5f5c5f9ec1ee9f06e1ab">YAML::Binary::Binary</a></div><div class="ttdeci">Binary()</div><div class="ttdef"><b>Definition</b> <a href="binary_8h_source.html#l00024">binary.h:24</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_a6696e8d22d09dcc1bab30fe257b5db36"><div class="ttname"><a href="classYAML_1_1Binary.html#a6696e8d22d09dcc1bab30fe257b5db36">YAML::Binary::operator==</a></div><div class="ttdeci">bool operator==(const Binary &amp;rhs) const</div><div class="ttdef"><b>Definition</b> <a href="binary_8h_source.html#l00049">binary.h:49</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_a67432ee99db4cad49917eb0b9ed24157"><div class="ttname"><a href="classYAML_1_1Binary.html#a67432ee99db4cad49917eb0b9ed24157">YAML::Binary::m_unownedData</a></div><div class="ttdeci">const unsigned char * m_unownedData</div><div class="ttdef"><b>Definition</b> <a href="binary_8h_source.html#l00066">binary.h:66</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_a7fb9a73d0230d3f9b551ce20c7d3920a"><div class="ttname"><a href="classYAML_1_1Binary.html#a7fb9a73d0230d3f9b551ce20c7d3920a">YAML::Binary::swap</a></div><div class="ttdeci">void swap(std::vector&lt; unsigned char &gt; &amp;rhs)</div><div class="ttdef"><b>Definition</b> <a href="binary_8h_source.html#l00036">binary.h:36</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_a80fd1d7206bc5428393afc032a741ff8"><div class="ttname"><a href="classYAML_1_1Binary.html#a80fd1d7206bc5428393afc032a741ff8">YAML::Binary::m_data</a></div><div class="ttdeci">std::vector&lt; unsigned char &gt; m_data</div><div class="ttdef"><b>Definition</b> <a href="binary_8h_source.html#l00065">binary.h:65</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_ad8e9df84af8d99b005992163aeb6c956"><div class="ttname"><a href="classYAML_1_1Binary.html#ad8e9df84af8d99b005992163aeb6c956">YAML::Binary::size</a></div><div class="ttdeci">std::size_t size() const</div><div class="ttdef"><b>Definition</b> <a href="binary_8h_source.html#l00031">binary.h:31</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_aef431ce07caa242dce5041d7a1665c51"><div class="ttname"><a href="classYAML_1_1Binary.html#aef431ce07caa242dce5041d7a1665c51">YAML::Binary::owned</a></div><div class="ttdeci">bool owned() const</div><div class="ttdef"><b>Definition</b> <a href="binary_8h_source.html#l00030">binary.h:30</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_af31e8ec0277113eace7f0508be989653"><div class="ttname"><a href="classYAML_1_1Binary.html#af31e8ec0277113eace7f0508be989653">YAML::Binary::operator!=</a></div><div class="ttdeci">bool operator!=(const Binary &amp;rhs) const</div><div class="ttdef"><b>Definition</b> <a href="binary_8h_source.html#l00062">binary.h:62</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Binary_html_afacd9fcc0b29ce503fcd421a1fb9759f"><div class="ttname"><a href="classYAML_1_1Binary.html#afacd9fcc0b29ce503fcd421a1fb9759f">YAML::Binary::Binary</a></div><div class="ttdeci">Binary(Binary &amp;&amp;)=default</div></div>
+<div class="ttc" id="adll_8h_html"><div class="ttname"><a href="dll_8h.html">dll.h</a></div></div>
+<div class="ttc" id="adll_8h_html_a70903db05b58f40db9aa4f966658fa65"><div class="ttname"><a href="dll_8h.html#a70903db05b58f40db9aa4f966658fa65">YAML_CPP_API</a></div><div class="ttdeci">#define YAML_CPP_API</div><div class="ttdef"><b>Definition</b> <a href="dll_8h_source.html#l00030">dll.h:30</a></div></div>
+<div class="ttc" id="anamespaceYAML_html"><div class="ttname"><a href="namespaceYAML.html">YAML</a></div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00005">binary.cpp:5</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_a275ebcde62e7f033e2b40ddde5152a17"><div class="ttname"><a href="namespaceYAML.html#a275ebcde62e7f033e2b40ddde5152a17">YAML::DecodeBase64</a></div><div class="ttdeci">std::vector&lt; unsigned char &gt; DecodeBase64(const std::string &amp;input)</div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00068">binary.cpp:68</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_adb3060aef5e98ff8c5fc50220c4aad77"><div class="ttname"><a href="namespaceYAML.html#adb3060aef5e98ff8c5fc50220c4aad77">YAML::EncodeBase64</a></div><div class="ttdeci">std::string EncodeBase64(const unsigned char *data, std::size_t size)</div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00009">binary.cpp:9</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="dir_8ca95df02d0e181a4cddee9d3a76ea3e.html">yaml-cpp</a></li><li class="navelem"><a class="el" href="binary_8h.html">binary.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

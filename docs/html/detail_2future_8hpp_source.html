@@ -1,0 +1,380 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/Share/threadpool/detail/future.hpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('detail_2future_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">future.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="detail_2future_8hpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#ifndef THREADPOOL_DETAIL_FUTURE_IMPL_HPP_INCLUDED</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#define THREADPOOL_DETAIL_FUTURE_IMPL_HPP_INCLUDED</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;<a class="code" href="locking__ptr_8hpp.html">locking_ptr.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;boost/smart_ptr.hpp&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;boost/optional.hpp&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;boost/thread/mutex.hpp&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;boost/thread/condition.hpp&gt;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;boost/thread/xtime.hpp&gt;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;boost/utility/result_of.hpp&gt;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;boost/static_assert.hpp&gt;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;boost/type_traits.hpp&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="foldopen" id="foldopen00037" data-start="{" data-end="}">
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="namespaceboost.html">   37</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceboost.html">boost</a> { <span class="keyword">namespace </span>threadpool { <span class="keyword">namespace </span><a class="code hl_namespace" href="namespacedetail.html">detail</a> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>{</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="keyword">template</span>&lt;<span class="keyword">class</span> Result&gt; </div>
+<div class="foldopen" id="foldopen00047" data-start="{" data-end="};">
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">   47</a></span><span class="keyword">class </span><a class="code hl_class" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">future_impl</a></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>{</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ab3fcdeabd2ce45a5abfa950beb8081f1">   54</a></span>  <span class="keyword">typedef</span> Result <span class="keyword">const</span> &amp; <a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ab3fcdeabd2ce45a5abfa950beb8081f1">result_type</a>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ac678957fa267fb3c1164f7ab4f0ecc3f">   60</a></span>  <span class="keyword">typedef</span> Result <a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ac678957fa267fb3c1164f7ab4f0ecc3f">future_result_type</a>;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a35c27a51b83ff32314629cbcdb680cfe">   66</a></span>  <span class="keyword">typedef</span> <a class="code hl_class" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">future_impl&lt;future_result_type&gt;</a> <a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a35c27a51b83ff32314629cbcdb680cfe">future_type</a>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a4e9c3df8e837cfc96d5e10feba7b8b15">   73</a></span>    <span class="keyword">volatile</span> <span class="keywordtype">bool</span> <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a4e9c3df8e837cfc96d5e10feba7b8b15">m_ready</a>;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a60a9bb8ab280e5518887d9bbb9e9bed2">   79</a></span>    <span class="keyword">volatile</span> <a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ac678957fa267fb3c1164f7ab4f0ecc3f">future_result_type</a> <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a60a9bb8ab280e5518887d9bbb9e9bed2">m_result</a>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a5148419b5a7ece53dd8614845484b6ea">   85</a></span>    <span class="keyword">mutable</span> mutex <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a5148419b5a7ece53dd8614845484b6ea">m_monitor</a>;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aea94c188c6ff4cb7919c91da229d3af0">   91</a></span>    <span class="keyword">mutable</span> condition <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aea94c188c6ff4cb7919c91da229d3af0">m_condition_ready</a>;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a75b98cbd2fb8c4a133f4c23eadf8b237">   97</a></span>    <span class="keyword">volatile</span> <span class="keywordtype">bool</span> <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a75b98cbd2fb8c4a133f4c23eadf8b237">m_is_cancelled</a>;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aaeac3fd5eea95300f2c8cecad3c7eabc">  103</a></span>    <span class="keyword">volatile</span> <span class="keywordtype">bool</span> <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aaeac3fd5eea95300f2c8cecad3c7eabc">m_executing</a>;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
+<div class="foldopen" id="foldopen00114" data-start="{" data-end="}">
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aa390dff0d9887dbd24965c6f4d017f5b">  114</a></span>  <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aa390dff0d9887dbd24965c6f4d017f5b">future_impl</a>()</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  : <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a4e9c3df8e837cfc96d5e10feba7b8b15">m_ready</a>(false)</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  , <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a75b98cbd2fb8c4a133f4c23eadf8b237">m_is_cancelled</a>(false)</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  , <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aaeac3fd5eea95300f2c8cecad3c7eabc">m_executing</a>(false)</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>  {</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  }</div>
+</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="foldopen" id="foldopen00126" data-start="{" data-end="}">
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a178496f6637e72f2fe79012b41ef925f">  126</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a178496f6637e72f2fe79012b41ef925f">ready</a>()<span class="keyword"> const volatile</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="keyword">  </span>{</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a4e9c3df8e837cfc96d5e10feba7b8b15">m_ready</a>; </div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>  }</div>
+</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
+<div class="foldopen" id="foldopen00136" data-start="{" data-end="}">
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a01b85fac8a6aa04ab9787816329f51d8">  136</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a01b85fac8a6aa04ab9787816329f51d8">wait</a>()<span class="keyword"> const volatile</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="keyword">  </span>{</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="keyword">const</span> <a class="code hl_class" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">future_type</a>* self = <span class="keyword">const_cast&lt;</span><span class="keyword">const </span><a class="code hl_class" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">future_type</a>*<span class="keyword">&gt;</span>(<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    mutex::scoped_lock lock(self-&gt;<a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a5148419b5a7ece53dd8614845484b6ea">m_monitor</a>);</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    <span class="keywordflow">while</span>(!<a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a4e9c3df8e837cfc96d5e10feba7b8b15">m_ready</a>)</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>    {</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>      self-&gt;<a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aea94c188c6ff4cb7919c91da229d3af0">m_condition_ready</a>.wait(lock);</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    }</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>  }</div>
+</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="foldopen" id="foldopen00154" data-start="{" data-end="}">
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a3e7c501350b2f417490a5f8efe164615">  154</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a3e7c501350b2f417490a5f8efe164615">timed_wait</a>(boost::xtime <span class="keyword">const</span> &amp; timestamp)<span class="keyword"> const</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span><span class="keyword">  </span>{</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    <span class="keyword">const</span> <a class="code hl_class" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">future_type</a>* self = <span class="keyword">const_cast&lt;</span><span class="keyword">const </span><a class="code hl_class" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">future_type</a>*<span class="keyword">&gt;</span>(<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    mutex::scoped_lock lock(self-&gt;<a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a5148419b5a7ece53dd8614845484b6ea">m_monitor</a>);</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="keywordflow">while</span>(!<a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a4e9c3df8e837cfc96d5e10feba7b8b15">m_ready</a>)</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    {</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>      <span class="keywordflow">if</span>(!self-&gt;<a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aea94c188c6ff4cb7919c91da229d3af0">m_condition_ready</a>.timed_wait(lock, timestamp)) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    }</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>  }</div>
+</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
+<div class="foldopen" id="foldopen00173" data-start="{" data-end="}">
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#adf2796f878501c1e11afe3d8dcf3b1e2">  173</a></span>  <a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ab3fcdeabd2ce45a5abfa950beb8081f1">result_type</a> <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#adf2796f878501c1e11afe3d8dcf3b1e2">operator()</a>()<span class="keyword"> const volatile</span></div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span><span class="keyword">  </span>{</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a01b85fac8a6aa04ab9787816329f51d8">wait</a>();</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span><span class="comment">    if( throw_exception_ != 0 )</span></div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span><span class="comment">    {</span></div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span><span class="comment">      throw_exception_( this );</span></div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span><span class="comment">    }</span></div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span><span class="comment">*/</span></div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span> </div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    <span class="keywordflow">return</span> *(<span class="keyword">const_cast&lt;</span><span class="keyword">const </span><a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ac678957fa267fb3c1164f7ab4f0ecc3f">future_result_type</a>*<span class="keyword">&gt;</span>(&amp;<a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a60a9bb8ab280e5518887d9bbb9e9bed2">m_result</a>));</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>  }</div>
+</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span> </div>
+<div class="foldopen" id="foldopen00193" data-start="{" data-end="}">
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a356c650f20f154920bcca0223bf06f83">  193</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a356c650f20f154920bcca0223bf06f83">set_value</a>(<a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ac678957fa267fb3c1164f7ab4f0ecc3f">future_result_type</a> <span class="keyword">const</span> &amp; r)<span class="keyword"> volatile</span></div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span><span class="keyword">  </span>{</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    <a class="code hl_class" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html">locking_ptr&lt;future_type, mutex&gt;</a> lockedThis(*<span class="keyword">this</span>, <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a5148419b5a7ece53dd8614845484b6ea">m_monitor</a>);</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    <span class="keywordflow">if</span>(!<a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a4e9c3df8e837cfc96d5e10feba7b8b15">m_ready</a> &amp;&amp; !<a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a75b98cbd2fb8c4a133f4c23eadf8b237">m_is_cancelled</a>)</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    {</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>      lockedThis-&gt;m_result = r;</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>      lockedThis-&gt;m_ready = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>      lockedThis-&gt;m_condition_ready.notify_all();</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    }</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>  }</div>
+</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span><span class="comment">  template&lt;class E&gt; void set_exception() // throw()</span></div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span><span class="comment">  {</span></div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span><span class="comment">    m_impl-&gt;template set_exception&lt;E&gt;();</span></div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span><span class="comment">  }</span></div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span><span class="comment"></span> </div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span><span class="comment">  template&lt;class E&gt; void set_exception( char const * what ) // throw()</span></div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span><span class="comment">  {</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span><span class="comment">    m_impl-&gt;template set_exception&lt;E&gt;( what );</span></div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span><span class="comment">  }</span></div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span><span class="comment">  */</span></div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span> </div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span> </div>
+<div class="foldopen" id="foldopen00222" data-start="{" data-end="}">
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a66a7c8ceebd11d815cd689ef71baedab">  222</a></span>   <span class="keywordtype">bool</span> <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a66a7c8ceebd11d815cd689ef71baedab">cancel</a>()<span class="keyword"> volatile</span></div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span><span class="keyword">   </span>{</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>     <span class="keywordflow">if</span>(!<a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a4e9c3df8e837cfc96d5e10feba7b8b15">m_ready</a> || <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aaeac3fd5eea95300f2c8cecad3c7eabc">m_executing</a>)</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>     {</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a75b98cbd2fb8c4a133f4c23eadf8b237">m_is_cancelled</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>     }</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>     <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>     {</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>       <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>     }</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>   }</div>
+</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span> </div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span> </div>
+<div class="foldopen" id="foldopen00241" data-start="{" data-end="}">
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a9f6b02342312ba7fd5ffab15a3a590f1">  241</a></span>   <span class="keywordtype">bool</span> <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a9f6b02342312ba7fd5ffab15a3a590f1">is_cancelled</a>()<span class="keyword"> const volatile</span></div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span><span class="keyword">   </span>{</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>     <span class="keywordflow">return</span> <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a75b98cbd2fb8c4a133f4c23eadf8b237">m_is_cancelled</a>;</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>   }</div>
+</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> </div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span> </div>
+<div class="foldopen" id="foldopen00252" data-start="{" data-end="}">
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a9456efc58cb244c468a295c5bf113528">  252</a></span>   <span class="keywordtype">void</span> <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a9456efc58cb244c468a295c5bf113528">set_execution_status</a>(<span class="keywordtype">bool</span> executing)<span class="keyword"> volatile</span></div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span><span class="keyword">   </span>{</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>     <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aaeac3fd5eea95300f2c8cecad3c7eabc">m_executing</a> = executing;</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>   }</div>
+</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>};</div>
+</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span> </div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span><span class="keyword">template</span>&lt;</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span>&gt; <span class="keyword">class </span>Future,</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>  <span class="keyword">typename</span> Function</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>&gt;</div>
+<div class="foldopen" id="foldopen00270" data-start="{" data-end="};">
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html">  270</a></span><span class="keyword">class </span><a class="code hl_class" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html">future_impl_task_func</a></div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>{</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span> </div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a1d9096165a6071ab72595f61087acf41">  278</a></span>  <span class="keyword">typedef</span> <span class="keywordtype">void</span> <a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a1d9096165a6071ab72595f61087acf41">result_type</a>;</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a288d608ffced384fcf65b9ebbd107387">  284</a></span>  <span class="keyword">typedef</span> Function <a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a288d608ffced384fcf65b9ebbd107387">function_type</a>;</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>  </div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#aa881e677d819263092fa1fed3aa4ce61">  290</a></span>  <span class="keyword">typedef</span> <span class="keyword">typename</span> result_of&lt;<a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a288d608ffced384fcf65b9ebbd107387">function_type</a>()&gt;::type <a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#aa881e677d819263092fa1fed3aa4ce61">future_result_type</a>;</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>  </div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#abdd8010c655599e19ed18a38980b687d">  296</a></span>  <span class="keyword">typedef</span> Future&lt;future_result_type&gt; <a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#abdd8010c655599e19ed18a38980b687d">future_type</a>;</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span> </div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a812b44b255e5001fa6ed3e0bbdadd67f">  301</a></span>  <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a812b44b255e5001fa6ed3e0bbdadd67f">BOOST_STATIC_ASSERT</a>(function_traits&lt;<a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a288d608ffced384fcf65b9ebbd107387">function_type</a>()&gt;::arity == 0);</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span> </div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#accd20a15d151ef526035525600d37cd9">  306</a></span>  <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#accd20a15d151ef526035525600d37cd9">BOOST_STATIC_ASSERT</a>(!is_void&lt;future_result_type&gt;::value);</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span> </div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#af24d46d9ee5a589db4142bd1d1a4f2a4">  313</a></span>  <a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a288d608ffced384fcf65b9ebbd107387">function_type</a>             <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#af24d46d9ee5a589db4142bd1d1a4f2a4">m_function</a>;</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>  </div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#ab0c608733f9d950c69bc403766858c7f">  319</a></span>  shared_ptr&lt;future_type&gt;   <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#ab0c608733f9d950c69bc403766858c7f">m_future</a>;</div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span> </div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00328" data-start="{" data-end="}">
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a760c542a68a73929e2a4f4ce1a3714c6">  328</a></span>  <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a760c542a68a73929e2a4f4ce1a3714c6">future_impl_task_func</a>(<a class="code hl_typedef" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a288d608ffced384fcf65b9ebbd107387">function_type</a> <span class="keyword">const</span> &amp; function, shared_ptr&lt;future_type&gt; <span class="keyword">const</span> &amp; <a class="code hl_class" href="classboost_1_1threadpool_1_1future.html">future</a>)</div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>  : <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#af24d46d9ee5a589db4142bd1d1a4f2a4">m_function</a>(function)</div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>  , <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#ab0c608733f9d950c69bc403766858c7f">m_future</a>(<a class="code hl_class" href="classboost_1_1threadpool_1_1future.html">future</a>)</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>  {</div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>  }</div>
+</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span> </div>
+<div class="foldopen" id="foldopen00339" data-start="{" data-end="}">
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno"><a class="line" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#ad3593c36fea1fbc6440099246a180142">  339</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#ad3593c36fea1fbc6440099246a180142">operator()</a>()</div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>  {</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#af24d46d9ee5a589db4142bd1d1a4f2a4">m_function</a>)</div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>    {</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>      <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#ab0c608733f9d950c69bc403766858c7f">m_future</a>-&gt;set_execution_status(<span class="keyword">true</span>);</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>      <span class="keywordflow">if</span>(!<a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#ab0c608733f9d950c69bc403766858c7f">m_future</a>-&gt;is_cancelled())</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>      {</div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>        <span class="comment">// TODO future exeception handling </span></div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>        <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#ab0c608733f9d950c69bc403766858c7f">m_future</a>-&gt;set_value(<a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#af24d46d9ee5a589db4142bd1d1a4f2a4">m_function</a>());</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>      }</div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>      <a class="code hl_variable" href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#ab0c608733f9d950c69bc403766858c7f">m_future</a>-&gt;set_execution_status(<span class="keyword">false</span>); <span class="comment">// TODO consider exceptions</span></div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>    }</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>  }</div>
+</div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span> </div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>};</div>
+</div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span> </div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span> </div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span> </div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span> </div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span> </div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>} } } <span class="comment">// namespace boost::threadpool::detail</span></div>
+</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span> </div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span><span class="preprocessor">#endif </span><span class="comment">// THREADPOOL_DETAIL_FUTURE_IMPL_HPP_INCLUDED</span></div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span> </div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span> </div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl__task__func_html"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html">boost::threadpool::detail::future_impl_task_func</a></div><div class="ttdoc">Future 任务函数对象的实现</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00270">future.hpp:271</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl__task__func_html_a1d9096165a6071ab72595f61087acf41"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a1d9096165a6071ab72595f61087acf41">boost::threadpool::detail::future_impl_task_func::result_type</a></div><div class="ttdeci">void result_type</div><div class="ttdoc">函数对象的结果类型</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00278">future.hpp:278</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl__task__func_html_a288d608ffced384fcf65b9ebbd107387"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a288d608ffced384fcf65b9ebbd107387">boost::threadpool::detail::future_impl_task_func::function_type</a></div><div class="ttdeci">Function function_type</div><div class="ttdoc">原始函数类型</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00284">future.hpp:284</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl__task__func_html_a760c542a68a73929e2a4f4ce1a3714c6"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a760c542a68a73929e2a4f4ce1a3714c6">boost::threadpool::detail::future_impl_task_func::future_impl_task_func</a></div><div class="ttdeci">future_impl_task_func(function_type const &amp;function, shared_ptr&lt; future_type &gt; const &amp;future)</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00328">future.hpp:328</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl__task__func_html_a812b44b255e5001fa6ed3e0bbdadd67f"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#a812b44b255e5001fa6ed3e0bbdadd67f">boost::threadpool::detail::future_impl_task_func::BOOST_STATIC_ASSERT</a></div><div class="ttdeci">BOOST_STATIC_ASSERT(function_traits&lt; function_type()&gt;::arity==0)</div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl__task__func_html_aa881e677d819263092fa1fed3aa4ce61"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#aa881e677d819263092fa1fed3aa4ce61">boost::threadpool::detail::future_impl_task_func::future_result_type</a></div><div class="ttdeci">result_of&lt; function_type()&gt;::type future_result_type</div><div class="ttdoc">Future 的结果类型</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00290">future.hpp:290</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl__task__func_html_ab0c608733f9d950c69bc403766858c7f"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#ab0c608733f9d950c69bc403766858c7f">boost::threadpool::detail::future_impl_task_func::m_future</a></div><div class="ttdeci">shared_ptr&lt; future_type &gt; m_future</div><div class="ttdoc">Future 对象的共享指针</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00319">future.hpp:319</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl__task__func_html_abdd8010c655599e19ed18a38980b687d"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#abdd8010c655599e19ed18a38980b687d">boost::threadpool::detail::future_impl_task_func::future_type</a></div><div class="ttdeci">Future&lt; future_result_type &gt; future_type</div><div class="ttdoc">Future 对象类型</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00296">future.hpp:296</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl__task__func_html_accd20a15d151ef526035525600d37cd9"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#accd20a15d151ef526035525600d37cd9">boost::threadpool::detail::future_impl_task_func::BOOST_STATIC_ASSERT</a></div><div class="ttdeci">BOOST_STATIC_ASSERT(!is_void&lt; future_result_type &gt;::value)</div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl__task__func_html_ad3593c36fea1fbc6440099246a180142"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#ad3593c36fea1fbc6440099246a180142">boost::threadpool::detail::future_impl_task_func::operator()</a></div><div class="ttdeci">void operator()()</div><div class="ttdoc">函数调用操作符</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00339">future.hpp:339</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl__task__func_html_af24d46d9ee5a589db4142bd1d1a4f2a4"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl__task__func.html#af24d46d9ee5a589db4142bd1d1a4f2a4">boost::threadpool::detail::future_impl_task_func::m_function</a></div><div class="ttdeci">function_type m_function</div><div class="ttdoc">原始函数对象</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00313">future.hpp:313</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html">boost::threadpool::detail::future_impl</a></div><div class="ttdoc">Future 模式的内部实现类</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00047">future.hpp:48</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_a01b85fac8a6aa04ab9787816329f51d8"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a01b85fac8a6aa04ab9787816329f51d8">boost::threadpool::detail::future_impl::wait</a></div><div class="ttdeci">void wait() const volatile</div><div class="ttdoc">等待结果可用</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00136">future.hpp:136</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_a178496f6637e72f2fe79012b41ef925f"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a178496f6637e72f2fe79012b41ef925f">boost::threadpool::detail::future_impl::ready</a></div><div class="ttdeci">bool ready() const volatile</div><div class="ttdoc">检查结果是否就绪</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00126">future.hpp:126</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_a356c650f20f154920bcca0223bf06f83"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a356c650f20f154920bcca0223bf06f83">boost::threadpool::detail::future_impl::set_value</a></div><div class="ttdeci">void set_value(future_result_type const &amp;r) volatile</div><div class="ttdoc">设置任务的执行结果</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00193">future.hpp:193</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_a35c27a51b83ff32314629cbcdb680cfe"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a35c27a51b83ff32314629cbcdb680cfe">boost::threadpool::detail::future_impl::future_type</a></div><div class="ttdeci">future_impl&lt; future_result_type &gt; future_type</div><div class="ttdoc">Future 实现类的类型</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00066">future.hpp:66</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_a3e7c501350b2f417490a5f8efe164615"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a3e7c501350b2f417490a5f8efe164615">boost::threadpool::detail::future_impl::timed_wait</a></div><div class="ttdeci">bool timed_wait(boost::xtime const &amp;timestamp) const</div><div class="ttdoc">带超时的结果等待</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00154">future.hpp:154</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_a4e9c3df8e837cfc96d5e10feba7b8b15"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a4e9c3df8e837cfc96d5e10feba7b8b15">boost::threadpool::detail::future_impl::m_ready</a></div><div class="ttdeci">volatile bool m_ready</div><div class="ttdoc">结果就绪状态标志</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00073">future.hpp:73</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_a5148419b5a7ece53dd8614845484b6ea"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a5148419b5a7ece53dd8614845484b6ea">boost::threadpool::detail::future_impl::m_monitor</a></div><div class="ttdeci">mutex m_monitor</div><div class="ttdoc">互斥锁，用于保护对共享数据的访问</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00085">future.hpp:85</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_a60a9bb8ab280e5518887d9bbb9e9bed2"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a60a9bb8ab280e5518887d9bbb9e9bed2">boost::threadpool::detail::future_impl::m_result</a></div><div class="ttdeci">volatile future_result_type m_result</div><div class="ttdoc">存储任务执行的结果</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00079">future.hpp:79</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_a66a7c8ceebd11d815cd689ef71baedab"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a66a7c8ceebd11d815cd689ef71baedab">boost::threadpool::detail::future_impl::cancel</a></div><div class="ttdeci">bool cancel() volatile</div><div class="ttdoc">取消任务</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00222">future.hpp:222</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_a75b98cbd2fb8c4a133f4c23eadf8b237"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a75b98cbd2fb8c4a133f4c23eadf8b237">boost::threadpool::detail::future_impl::m_is_cancelled</a></div><div class="ttdeci">volatile bool m_is_cancelled</div><div class="ttdoc">取消状态标志</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00097">future.hpp:97</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_a9456efc58cb244c468a295c5bf113528"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a9456efc58cb244c468a295c5bf113528">boost::threadpool::detail::future_impl::set_execution_status</a></div><div class="ttdeci">void set_execution_status(bool executing) volatile</div><div class="ttdoc">设置任务的执行状态</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00252">future.hpp:252</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_a9f6b02342312ba7fd5ffab15a3a590f1"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#a9f6b02342312ba7fd5ffab15a3a590f1">boost::threadpool::detail::future_impl::is_cancelled</a></div><div class="ttdeci">bool is_cancelled() const volatile</div><div class="ttdoc">检查任务是否已取消</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00241">future.hpp:241</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_aa390dff0d9887dbd24965c6f4d017f5b"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aa390dff0d9887dbd24965c6f4d017f5b">boost::threadpool::detail::future_impl::future_impl</a></div><div class="ttdeci">future_impl()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00114">future.hpp:114</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_aaeac3fd5eea95300f2c8cecad3c7eabc"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aaeac3fd5eea95300f2c8cecad3c7eabc">boost::threadpool::detail::future_impl::m_executing</a></div><div class="ttdeci">volatile bool m_executing</div><div class="ttdoc">执行状态标志</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00103">future.hpp:103</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_ab3fcdeabd2ce45a5abfa950beb8081f1"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ab3fcdeabd2ce45a5abfa950beb8081f1">boost::threadpool::detail::future_impl::result_type</a></div><div class="ttdeci">Result const  &amp; result_type</div><div class="ttdoc">任务函数的结果类型</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00054">future.hpp:54</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_ac678957fa267fb3c1164f7ab4f0ecc3f"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#ac678957fa267fb3c1164f7ab4f0ecc3f">boost::threadpool::detail::future_impl::future_result_type</a></div><div class="ttdeci">Result future_result_type</div><div class="ttdoc">Future 对象的结果类型</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00060">future.hpp:60</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_adf2796f878501c1e11afe3d8dcf3b1e2"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#adf2796f878501c1e11afe3d8dcf3b1e2">boost::threadpool::detail::future_impl::operator()</a></div><div class="ttdeci">result_type operator()() const volatile</div><div class="ttdoc">函数调用操作符，获取任务结果</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00173">future.hpp:173</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1future__impl_html_aea94c188c6ff4cb7919c91da229d3af0"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1future__impl.html#aea94c188c6ff4cb7919c91da229d3af0">boost::threadpool::detail::future_impl::m_condition_ready</a></div><div class="ttdeci">condition m_condition_ready</div><div class="ttdoc">条件变量，用于等待结果准备就绪</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00091">future.hpp:91</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1detail_1_1locking__ptr_html"><div class="ttname"><a href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html">boost::threadpool::detail::locking_ptr</a></div><div class="ttdoc">带有作用域锁定机制的智能指针</div><div class="ttdef"><b>Definition</b> <a href="locking__ptr_8hpp_source.html#l00045">locking_ptr.hpp:47</a></div></div>
+<div class="ttc" id="aclassboost_1_1threadpool_1_1future_html"><div class="ttname"><a href="classboost_1_1threadpool_1_1future.html">boost::threadpool::future</a></div><div class="ttdoc">Future 模式的实现类模板</div><div class="ttdef"><b>Definition</b> <a href="future_8hpp_source.html#l00047">future.hpp:48</a></div></div>
+<div class="ttc" id="alocking__ptr_8hpp_html"><div class="ttname"><a href="locking__ptr_8hpp.html">locking_ptr.hpp</a></div><div class="ttdoc">带有作用域锁定机制的智能指针</div></div>
+<div class="ttc" id="anamespaceboost_html"><div class="ttname"><a href="namespaceboost.html">boost</a></div><div class="ttdoc">boost::threadpool::detail 命名空间包含了线程池库的内部实现细节</div><div class="ttdef"><b>Definition</b> <a href="detail_2future_8hpp_source.html#l00037">future.hpp:37</a></div></div>
+<div class="ttc" id="anamespacedetail_html"><div class="ttname"><a href="namespacedetail.html">detail</a></div><div class="ttdoc">内部实现细节的命名空间</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_b415f7b135736b475386968edd2cefde.html">Share</a></li><li class="navelem"><a class="el" href="dir_cde2ca495d87b0f6351e3c62be53575e.html">threadpool</a></li><li class="navelem"><a class="el" href="dir_10ded6ddb3436b7d7fe5fd9ee17682de.html">detail</a></li><li class="navelem"><a class="el" href="detail_2future_8hpp.html">future.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

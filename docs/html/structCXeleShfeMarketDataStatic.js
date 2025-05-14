@@ -1,0 +1,28 @@
+var structCXeleShfeMarketDataStatic =
+[
+    [ "ClosePrice", "structCXeleShfeMarketDataStatic.html#a71c63dd5f0e76fab520cf755d540aa6a", null ],
+    [ "CodecPrice", "structCXeleShfeMarketDataStatic.html#ae22f17fb03ee3bcec57d6d04199e230f", null ],
+    [ "CurrDelta", "structCXeleShfeMarketDataStatic.html#aa203aed0ccfe8de9cd30a980fc16b38e", null ],
+    [ "CurrencyID", "structCXeleShfeMarketDataStatic.html#a0249ab253bfbd12f2f39da7223b15479", null ],
+    [ "HighestPrice", "structCXeleShfeMarketDataStatic.html#a2d3ac94a954fbbf786089d41c0dc93d2", null ],
+    [ "InstrumentID", "structCXeleShfeMarketDataStatic.html#a4e84561404370c0f89a0f7258889138f", null ],
+    [ "InstrumentNo", "structCXeleShfeMarketDataStatic.html#a5ab7071e038526b0c15758d952beb5f8", null ],
+    [ "IsTrading", "structCXeleShfeMarketDataStatic.html#a8f8be769af32a12a1464bdaf32da02cf", null ],
+    [ "Length", "structCXeleShfeMarketDataStatic.html#acaf82b27334ef65acdb767587f4e4b42", null ],
+    [ "LowerLimitPrice", "structCXeleShfeMarketDataStatic.html#a7df5f3ae857b3cec8c1df536a3ebd701", null ],
+    [ "LowestPrice", "structCXeleShfeMarketDataStatic.html#a6e474f3bf3198d59cefd7283848e11e4", null ],
+    [ "OpenPrice", "structCXeleShfeMarketDataStatic.html#a5ea642c39d7696925191c1e35891ce09", null ],
+    [ "OptionsType", "structCXeleShfeMarketDataStatic.html#ab9b115e2f25135e8b4c2d0b674593aac", null ],
+    [ "PreClosePrice", "structCXeleShfeMarketDataStatic.html#abd835d1f158978143d8b5d6b5874d7f6", null ],
+    [ "PreDelta", "structCXeleShfeMarketDataStatic.html#a6fcd6d595b387aebcabe7714f029cc48", null ],
+    [ "PreOpenInterest", "structCXeleShfeMarketDataStatic.html#ae614a40b30b1d721cdeca6fc1dfbb714", null ],
+    [ "PreSettlementPrice", "structCXeleShfeMarketDataStatic.html#a3fec2d59b280d277b29a6cdf4d291168", null ],
+    [ "PriceTick", "structCXeleShfeMarketDataStatic.html#a40c4fcf71ab877d5c73d5c1ce359afe9", null ],
+    [ "ProductClass", "structCXeleShfeMarketDataStatic.html#aa5cba2c6c4d0a094ea01a44bd9146e4c", null ],
+    [ "SettlementPrice", "structCXeleShfeMarketDataStatic.html#adfb6b0acdeb2912afeca092b03a21c71", null ],
+    [ "StrikePrice", "structCXeleShfeMarketDataStatic.html#a58b633572f3ffb75e319e7f7f86604b5", null ],
+    [ "UnderlyingInstrID", "structCXeleShfeMarketDataStatic.html#ab6327a2af667ebf413b8223754dacb70", null ],
+    [ "UnderlyingMultiple", "structCXeleShfeMarketDataStatic.html#a8c929c4d7cf48165a3bfd8fc75b23fac", null ],
+    [ "UpperLimitPrice", "structCXeleShfeMarketDataStatic.html#a5bf1964e687d9483c39a2fa4f995924a", null ],
+    [ "VolumeMultiple", "structCXeleShfeMarketDataStatic.html#a16ec3a1aecd168afe951434fa9f32ddd", null ]
+];

@@ -1,0 +1,375 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtDataStorageAD/WtBtDtReaderAD.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtBtDtReaderAD_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtBtDtReaderAD.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtBtDtReaderAD_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="WtBtDtReaderAD_8h.html">WtBtDtReaderAD.h</a>&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="LMDBKeys_8h.html">LMDBKeys.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Includes/WTSStruct.h&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/WTSVariant.hpp&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../Share/StrUtil.hpp&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="WtBtDtReaderAD_8cpp.html#a17226795848decb565e90624584e5c0f">   19</a></span><a class="code hl_variable" href="WtBtDtReaderAD_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">//By Wesley @ 2022.01.05</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;../Share/fmtlib.h&quot;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="foldopen" id="foldopen00034" data-start="{" data-end="}">
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="WtBtDtReaderAD_8cpp.html#a68f720cecd28976e3ea2c6061f3f3929">   34</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="WtBtDtReaderAD_8cpp.html#a68f720cecd28976e3ea2c6061f3f3929">pipe_btreader_log</a>(<a class="code hl_class" href="classIBtDtReaderSink.html">IBtDtReaderSink</a>* sink, <a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* format, <span class="keyword">const</span> Args&amp;... args)</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>{</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keywordflow">if</span> (sink == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">static</span> <span class="keyword">thread_local</span> <span class="keywordtype">char</span> buffer[512] = { 0 };</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    memset(buffer, 0, 512);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    fmt::format_to(buffer, format, args...);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    sink-&gt;<a class="code hl_function" href="classIBtDtReaderSink.html#a315374b8cf5e693091605fde7ff72cba">reader_log</a>(ll, buffer);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>}</div>
+</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>{</div>
+<div class="foldopen" id="foldopen00056" data-start="{" data-end="}">
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="WtBtDtReaderAD_8cpp.html#ac30f50fbc6f454147241b643f43741f1">   56</a></span>    <a class="code hl_define" href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a> <a class="code hl_class" href="classIBtDtReader.html">IBtDtReader</a>* <a class="code hl_function" href="WtBtDtReaderAD_8cpp.html#ac30f50fbc6f454147241b643f43741f1">createBtDtReader</a>()</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    {</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        <a class="code hl_class" href="classIBtDtReader.html">IBtDtReader</a>* ret = <span class="keyword">new</span> <a class="code hl_class" href="classWtBtDtReaderAD.html">WtBtDtReaderAD</a>();</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    }</div>
+</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="foldopen" id="foldopen00067" data-start="{" data-end="}">
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="WtBtDtReaderAD_8cpp.html#af340f26726465d64f399ac4fd831632c">   67</a></span>    <a class="code hl_define" href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a> <span class="keywordtype">void</span> <a class="code hl_function" href="WtBtDtReaderAD_8cpp.html#af340f26726465d64f399ac4fd831632c">deleteBtDtReader</a>(<a class="code hl_class" href="classIBtDtReader.html">IBtDtReader</a>* reader)</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    {</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keywordflow">if</span> (reader != <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>            <span class="keyword">delete</span> reader;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    }</div>
+</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>};</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="foldopen" id="foldopen00077" data-start="{" data-end="}">
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="classWtBtDtReaderAD.html#a8edb277d6f6e99ecc81527d0cfd99063">   77</a></span><a class="code hl_function" href="classWtBtDtReaderAD.html#a8edb277d6f6e99ecc81527d0cfd99063">WtBtDtReaderAD::WtBtDtReaderAD</a>()</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>{</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>}</div>
+</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="foldopen" id="foldopen00087" data-start="{" data-end="}">
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="classWtBtDtReaderAD.html#a973380cf4483317b4d37a6696b085260">   87</a></span><a class="code hl_function" href="classWtBtDtReaderAD.html#a973380cf4483317b4d37a6696b085260">WtBtDtReaderAD::~WtBtDtReaderAD</a>()</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>{</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>}</div>
+</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="foldopen" id="foldopen00100" data-start="{" data-end="}">
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="classWtBtDtReaderAD.html#a701f84987d1553149a8c331b9c975698">  100</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtBtDtReaderAD.html#a701f84987d1553149a8c331b9c975698">WtBtDtReaderAD::init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg, <a class="code hl_class" href="classIBtDtReaderSink.html">IBtDtReaderSink</a>* sink)</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>{</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    <a class="code hl_variable" href="classIBtDtReader.html#ad84b72f01d758bddbd72a5918616bea1">_sink</a> = sink;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="keywordflow">if</span> (cfg == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <a class="code hl_variable" href="classWtBtDtReaderAD.html#ac5776704f6e2a55f9cbdf9eacd14232e">_base_dir</a> = cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#a830db11fc8daceff409fdbebaa7bea8a">getCString</a>(<span class="stringliteral">&quot;path&quot;</span>);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <a class="code hl_variable" href="classWtBtDtReaderAD.html#ac5776704f6e2a55f9cbdf9eacd14232e">_base_dir</a> = <a class="code hl_function" href="classStrUtil.html#a6d993d2350e32ceedca3811eee1370db">StrUtil::standardisePath</a>(<a class="code hl_variable" href="classWtBtDtReaderAD.html#ac5776704f6e2a55f9cbdf9eacd14232e">_base_dir</a>);</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <a class="code hl_function" href="WtBtDtReader_8cpp.html#a68f720cecd28976e3ea2c6061f3f3929">pipe_btreader_log</a>(<a class="code hl_variable" href="classIBtDtReader.html#ad84b72f01d758bddbd72a5918616bea1">_sink</a>, <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba3d0aabc1a000a1668922ab44aeca5771">LL_INFO</a>, <span class="stringliteral">&quot;WtBtDtReaderAD initialized, root data dir is {}&quot;</span>, <a class="code hl_variable" href="classWtBtDtReaderAD.html#ac5776704f6e2a55f9cbdf9eacd14232e">_base_dir</a>);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>}</div>
+</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="foldopen" id="foldopen00124" data-start="{" data-end="}">
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="classWtBtDtReaderAD.html#ab6e7eabc0e04ae4be97712c216cb1ec8">  124</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classWtBtDtReaderAD.html#ab6e7eabc0e04ae4be97712c216cb1ec8">WtBtDtReaderAD::read_raw_bars</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, <a class="code hl_typedef" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, std::string&amp; buffer)</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>{</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="comment">//直接从LMDB读取</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <a class="code hl_typedef" href="classWtBtDtReaderAD.html#a216e048342b191ab8a4cbfe4c37fe9a0">WtLMDBPtr</a> db = <a class="code hl_function" href="classWtBtDtReaderAD.html#a28332bc27c6dfb2a16e2e8ca87c7b203">get_k_db</a>(exchg, period);</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="keywordflow">if</span> (db == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <a class="code hl_function" href="WtBtDtReader_8cpp.html#a68f720cecd28976e3ea2c6061f3f3929">pipe_btreader_log</a>(<a class="code hl_variable" href="classIBtDtReader.html#ad84b72f01d758bddbd72a5918616bea1">_sink</a>, <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba4739b8d0b3d22bcb07c145601a79c358">LL_DEBUG</a>, <span class="stringliteral">&quot;Reading back {} bars of {}.{}...&quot;</span>, <a class="code hl_variable" href="WTSTypes_8h.html#abc8e191df3b55718924e5c8ab3984fb4">PERIOD_NAME</a>[period], exchg, code);</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <a class="code hl_class" href="classWtLMDBQuery.html">WtLMDBQuery</a> query(*db);</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <a class="code hl_struct" href="struct__LMDBBarKey.html">LMDBBarKey</a> rKey(exchg, code, 0xffffffff);</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <a class="code hl_struct" href="struct__LMDBBarKey.html">LMDBBarKey</a> lKey(exchg, code, 0);</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <span class="keywordtype">int</span> cnt = query.<a class="code hl_function" href="classWtLMDBQuery.html#a7a135dd774c0e8f40f82a3a6dba78c41">get_range</a>(std::string((<span class="keyword">const</span> <span class="keywordtype">char</span>*)&amp;lKey, <span class="keyword">sizeof</span>(lKey)), std::string((<span class="keyword">const</span> <span class="keywordtype">char</span>*)&amp;rKey, <span class="keyword">sizeof</span>(rKey)),</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>        [<span class="keyword">this</span>, &amp;buffer, &amp;lKey](<span class="keyword">const</span> <a class="code hl_variable" href="WtLMDB_8hpp.html#a50dea8b3647d6fb33fc4037ec96cb6ef">ValueArray</a>&amp; ayKeys, <span class="keyword">const</span> <a class="code hl_variable" href="WtLMDB_8hpp.html#a50dea8b3647d6fb33fc4037ec96cb6ef">ValueArray</a>&amp; ayVals) {</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        <span class="keywordflow">if</span> (ayVals.empty())</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span> </div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>        std::size_t cnt = ayVals.size();</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>        <span class="keyword">auto</span> szUnit = <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>);</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        buffer.resize(szUnit*cnt);</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        <span class="keywordtype">char</span>* cursor = (<span class="keywordtype">char</span>*)buffer.data();</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>        <span class="keywordflow">for</span>(<span class="keyword">const</span> std::string&amp; item : ayVals)</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>        {</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>            memcpy(cursor, item.data(), szUnit);</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>            cursor += szUnit;</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        }</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>    });</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>}</div>
+</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
+<div class="foldopen" id="foldopen00165" data-start="{" data-end="}">
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno"><a class="line" href="classWtBtDtReaderAD.html#ac7c551a22007c3ab820e23b9d55fdb22">  165</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classWtBtDtReaderAD.html#ac7c551a22007c3ab820e23b9d55fdb22">WtBtDtReaderAD::read_raw_ticks</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, uint32_t uDate, std::string&amp; buffer)</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>{</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    <span class="comment">//直接从LMDB读取</span></div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    <a class="code hl_typedef" href="classWtBtDtReaderAD.html#a216e048342b191ab8a4cbfe4c37fe9a0">WtLMDBPtr</a> db = <a class="code hl_function" href="classWtBtDtReaderAD.html#a776fd8898ae8541a4cc204c671d450b8">get_t_db</a>(exchg, code);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    <span class="keywordflow">if</span> (db == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    <a class="code hl_function" href="WtBtDtReader_8cpp.html#a68f720cecd28976e3ea2c6061f3f3929">pipe_btreader_log</a>(<a class="code hl_variable" href="classIBtDtReader.html#ad84b72f01d758bddbd72a5918616bea1">_sink</a>, <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba4739b8d0b3d22bcb07c145601a79c358">LL_DEBUG</a>, <span class="stringliteral">&quot;Reading back ticks on {} of {}.{}...&quot;</span>, uDate, exchg, code);</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    <a class="code hl_class" href="classWtLMDBQuery.html">WtLMDBQuery</a> query(*db);</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    <a class="code hl_struct" href="struct__LMDBHftKey.html">LMDBHftKey</a> rKey(exchg, code, uDate, 240000000);</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    <a class="code hl_struct" href="struct__LMDBHftKey.html">LMDBHftKey</a> lKey(exchg, code, uDate, 0);</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    <span class="keywordtype">int</span> cnt = query.<a class="code hl_function" href="classWtLMDBQuery.html#a7a135dd774c0e8f40f82a3a6dba78c41">get_range</a>(std::string((<span class="keyword">const</span> <span class="keywordtype">char</span>*)&amp;lKey, <span class="keyword">sizeof</span>(lKey)), std::string((<span class="keyword">const</span> <span class="keywordtype">char</span>*)&amp;rKey, <span class="keyword">sizeof</span>(rKey)),</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        [<span class="keyword">this</span>, &amp;buffer, &amp;lKey](<span class="keyword">const</span> <a class="code hl_variable" href="WtLMDB_8hpp.html#a50dea8b3647d6fb33fc4037ec96cb6ef">ValueArray</a>&amp; ayKeys, <span class="keyword">const</span> <a class="code hl_variable" href="WtLMDB_8hpp.html#a50dea8b3647d6fb33fc4037ec96cb6ef">ValueArray</a>&amp; ayVals) {</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        <span class="keywordflow">if</span> (ayVals.empty())</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        std::size_t cnt = ayVals.size();</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>        <span class="keyword">auto</span> szUnit = <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>);</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>        buffer.resize(szUnit*cnt);</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>        <span class="keywordtype">char</span>* cursor = (<span class="keywordtype">char</span>*)buffer.data();</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> std::string&amp; item : ayVals)</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>        {</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>            memcpy(cursor, item.data(), szUnit);</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>            cursor += szUnit;</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>        }</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>    });</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>}</div>
+</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
+<div class="foldopen" id="foldopen00206" data-start="{" data-end="}">
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno"><a class="line" href="classWtBtDtReaderAD.html#a28332bc27c6dfb2a16e2e8ca87c7b203">  206</a></span><a class="code hl_typedef" href="classWtBtDtReaderAD.html#a216e048342b191ab8a4cbfe4c37fe9a0">WtBtDtReaderAD::WtLMDBPtr</a> <a class="code hl_function" href="classWtBtDtReaderAD.html#a28332bc27c6dfb2a16e2e8ca87c7b203">WtBtDtReaderAD::get_k_db</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <a class="code hl_typedef" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period)</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>{</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>    <a class="code hl_class" href="classwt__hashmap.html">WtLMDBMap</a>* the_map = <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>    std::string subdir;</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>    <span class="keywordflow">if</span> (period == <a class="code hl_enumvalue" href="WTSTypes_8h.html#acac96eb977d20b3a6186f0ccede8a9d8a3b64a9f21f4bd5432a8b3f8424c4410e">KP_Minute1</a>)</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    {</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>        the_map = &amp;<a class="code hl_variable" href="classWtBtDtReaderAD.html#adf16c5d3f852850127d2a883060f77f3">_exchg_m1_dbs</a>;</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>        subdir = <span class="stringliteral">&quot;min1&quot;</span>;</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    }</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (period == <a class="code hl_enumvalue" href="WTSTypes_8h.html#acac96eb977d20b3a6186f0ccede8a9d8adcd66f71c090964efdc8474bca5b9209">KP_Minute5</a>)</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    {</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>        the_map = &amp;<a class="code hl_variable" href="classWtBtDtReaderAD.html#a55c94f13e51202365f162f33272f7777">_exchg_m5_dbs</a>;</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>        subdir = <span class="stringliteral">&quot;min5&quot;</span>;</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>    }</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (period == <a class="code hl_enumvalue" href="WTSTypes_8h.html#acac96eb977d20b3a6186f0ccede8a9d8a048058b5939234978e278291866f6cd2">KP_DAY</a>)</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>    {</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>        the_map = &amp;<a class="code hl_variable" href="classWtBtDtReaderAD.html#abe917d0d8b5b1e6c138fdb89e7638fee">_exchg_d1_dbs</a>;</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        subdir = <span class="stringliteral">&quot;day&quot;</span>;</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    }</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        <span class="keywordflow">return</span> std::move(<a class="code hl_typedef" href="classWtBtDtReaderAD.html#a216e048342b191ab8a4cbfe4c37fe9a0">WtLMDBPtr</a>());</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span> </div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    <span class="keyword">auto</span> it = the_map-&gt;find(exchg);</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    <span class="keywordflow">if</span> (it != the_map-&gt;end())</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        <span class="keywordflow">return</span> std::move(it-&gt;second);</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span> </div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <a class="code hl_typedef" href="classWtBtDtReaderAD.html#a216e048342b191ab8a4cbfe4c37fe9a0">WtLMDBPtr</a> dbPtr(<span class="keyword">new</span> <a class="code hl_class" href="classWtLMDB.html">WtLMDB</a>(<span class="keyword">true</span>));</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>    std::string path = <a class="code hl_function" href="classStrUtil.html#a26e29501b4702101a2e7780f5c0c989b">StrUtil::printf</a>(<span class="stringliteral">&quot;%s%s/%s/&quot;</span>, <a class="code hl_variable" href="classWtBtDtReaderAD.html#ac5776704f6e2a55f9cbdf9eacd14232e">_base_dir</a>.c_str(), subdir.c_str(), exchg);</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="classStdFile.html#a65778f7268857f981a2e19acb8379761">StdFile::exists</a>(path.c_str()))</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <span class="keywordflow">return</span> std::move(<a class="code hl_typedef" href="classWtBtDtReaderAD.html#a216e048342b191ab8a4cbfe4c37fe9a0">WtLMDBPtr</a>());</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span> </div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    <span class="keywordflow">if</span> (!dbPtr-&gt;open(path.c_str()))</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    {</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        <a class="code hl_function" href="WtBtDtReader_8cpp.html#a68f720cecd28976e3ea2c6061f3f3929">pipe_btreader_log</a>(<a class="code hl_variable" href="classIBtDtReader.html#ad84b72f01d758bddbd72a5918616bea1">_sink</a>, <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba50717458baf49c204bb0645418e0da15">LL_ERROR</a>, <span class="stringliteral">&quot;Opening {} db if {} failed: {}&quot;</span>, subdir, exchg, dbPtr-&gt;errmsg());</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        <span class="keywordflow">return</span> std::move(<a class="code hl_typedef" href="classWtBtDtReaderAD.html#a216e048342b191ab8a4cbfe4c37fe9a0">WtLMDBPtr</a>());</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    }</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    {</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>        <a class="code hl_function" href="WtBtDtReader_8cpp.html#a68f720cecd28976e3ea2c6061f3f3929">pipe_btreader_log</a>(<a class="code hl_variable" href="classIBtDtReader.html#ad84b72f01d758bddbd72a5918616bea1">_sink</a>, <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba4739b8d0b3d22bcb07c145601a79c358">LL_DEBUG</a>, <span class="stringliteral">&quot;{} db of {} opened&quot;</span>, subdir, exchg);</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    }</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span> </div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>    (*the_map)[exchg] = dbPtr;</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>    <span class="keywordflow">return</span> std::move(dbPtr);</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>}</div>
+</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span> </div>
+<div class="foldopen" id="foldopen00262" data-start="{" data-end="}">
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno"><a class="line" href="classWtBtDtReaderAD.html#a776fd8898ae8541a4cc204c671d450b8">  262</a></span><a class="code hl_typedef" href="classWtBtDtReaderAD.html#a216e048342b191ab8a4cbfe4c37fe9a0">WtBtDtReaderAD::WtLMDBPtr</a> <a class="code hl_function" href="classWtBtDtReaderAD.html#a776fd8898ae8541a4cc204c671d450b8">WtBtDtReaderAD::get_t_db</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* code)</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>{</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>    std::string key = <a class="code hl_function" href="classStrUtil.html#a26e29501b4702101a2e7780f5c0c989b">StrUtil::printf</a>(<span class="stringliteral">&quot;%s.%s&quot;</span>, exchg, code);</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="classWtBtDtReaderAD.html#aca345befbc484f5353ca81436da78e63">_tick_dbs</a>.find(key);</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>    <span class="keywordflow">if</span> (it != <a class="code hl_variable" href="classWtBtDtReaderAD.html#aca345befbc484f5353ca81436da78e63">_tick_dbs</a>.end())</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>        <span class="keywordflow">return</span> std::move(it-&gt;second);</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    <a class="code hl_typedef" href="classWtBtDtReaderAD.html#a216e048342b191ab8a4cbfe4c37fe9a0">WtLMDBPtr</a> dbPtr(<span class="keyword">new</span> <a class="code hl_class" href="classWtLMDB.html">WtLMDB</a>(<span class="keyword">true</span>));</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>    std::string path = <a class="code hl_function" href="classStrUtil.html#a26e29501b4702101a2e7780f5c0c989b">StrUtil::printf</a>(<span class="stringliteral">&quot;%sticks/%s/%s&quot;</span>, <a class="code hl_variable" href="classWtBtDtReaderAD.html#ac5776704f6e2a55f9cbdf9eacd14232e">_base_dir</a>.c_str(), exchg, code);</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="classStdFile.html#a65778f7268857f981a2e19acb8379761">StdFile::exists</a>(path.c_str()))</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>        <span class="keywordflow">return</span> std::move(<a class="code hl_typedef" href="classWtBtDtReaderAD.html#a216e048342b191ab8a4cbfe4c37fe9a0">WtLMDBPtr</a>());</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span> </div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>    <span class="keywordflow">if</span> (!dbPtr-&gt;open(path.c_str()))</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    {</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>        <a class="code hl_function" href="WtBtDtReader_8cpp.html#a68f720cecd28976e3ea2c6061f3f3929">pipe_btreader_log</a>(<a class="code hl_variable" href="classIBtDtReader.html#ad84b72f01d758bddbd72a5918616bea1">_sink</a>, <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba50717458baf49c204bb0645418e0da15">LL_ERROR</a>, <span class="stringliteral">&quot;Opening tick db of {}.{} failed: {}&quot;</span>, exchg, code, dbPtr-&gt;errmsg());</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>        <span class="keywordflow">return</span> std::move(<a class="code hl_typedef" href="classWtBtDtReaderAD.html#a216e048342b191ab8a4cbfe4c37fe9a0">WtLMDBPtr</a>());</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>    }</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>    {</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>        <a class="code hl_function" href="WtBtDtReader_8cpp.html#a68f720cecd28976e3ea2c6061f3f3929">pipe_btreader_log</a>(<a class="code hl_variable" href="classIBtDtReader.html#ad84b72f01d758bddbd72a5918616bea1">_sink</a>, <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba4739b8d0b3d22bcb07c145601a79c358">LL_DEBUG</a>, <span class="stringliteral">&quot;Tick db of {}.{} opened&quot;</span>, exchg, code);</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>    }</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span> </div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>    <a class="code hl_variable" href="classWtBtDtReaderAD.html#aca345befbc484f5353ca81436da78e63">_tick_dbs</a>[exchg] = dbPtr;</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>    <span class="keywordflow">return</span> std::move(dbPtr);</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>}</div>
+</div>
+<div class="ttc" id="aCTPLoader_8cpp_html_ab21f8ef3ba992efc1eda405bccdde69a"><div class="ttname"><a href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a></div><div class="ttdeci">#define EXPORT_FLAG</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_8cpp_source.html#l00098">CTPLoader.cpp:98</a></div></div>
+<div class="ttc" id="aLMDBKeys_8h_html"><div class="ttname"><a href="LMDBKeys_8h.html">LMDBKeys.h</a></div><div class="ttdoc">LMDB数据库键定义文件</div></div>
+<div class="ttc" id="aWTSTypes_8h_html_a27f5d8bd7208a5fc1d044c6f5961904c"><div class="ttname"><a href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a></div><div class="ttdeci">enum tagKlinePeriod WTSKlinePeriod</div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aa7b93f4aa2259e69e48f27448c247dc8"><div class="ttname"><a href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a></div><div class="ttdeci">enum tagLogLevel WTSLogLevel</div></div>
+<div class="ttc" id="aWTSTypes_8h_html_abc8e191df3b55718924e5c8ab3984fb4"><div class="ttname"><a href="WTSTypes_8h.html#abc8e191df3b55718924e5c8ab3984fb4">PERIOD_NAME</a></div><div class="ttdeci">static const char * PERIOD_NAME[]</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00112">WTSTypes.h:112</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_acac96eb977d20b3a6186f0ccede8a9d8a048058b5939234978e278291866f6cd2"><div class="ttname"><a href="WTSTypes_8h.html#acac96eb977d20b3a6186f0ccede8a9d8a048058b5939234978e278291866f6cd2">KP_DAY</a></div><div class="ttdeci">@ KP_DAY</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00107">WTSTypes.h:107</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_acac96eb977d20b3a6186f0ccede8a9d8a3b64a9f21f4bd5432a8b3f8424c4410e"><div class="ttname"><a href="WTSTypes_8h.html#acac96eb977d20b3a6186f0ccede8a9d8a3b64a9f21f4bd5432a8b3f8424c4410e">KP_Minute1</a></div><div class="ttdeci">@ KP_Minute1</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00105">WTSTypes.h:105</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_acac96eb977d20b3a6186f0ccede8a9d8adcd66f71c090964efdc8474bca5b9209"><div class="ttname"><a href="WTSTypes_8h.html#acac96eb977d20b3a6186f0ccede8a9d8adcd66f71c090964efdc8474bca5b9209">KP_Minute5</a></div><div class="ttdeci">@ KP_Minute5</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00106">WTSTypes.h:106</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aed5503152b508c68a90229e513a8e15ba3d0aabc1a000a1668922ab44aeca5771"><div class="ttname"><a href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba3d0aabc1a000a1668922ab44aeca5771">LL_INFO</a></div><div class="ttdeci">@ LL_INFO</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00129">WTSTypes.h:129</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aed5503152b508c68a90229e513a8e15ba4739b8d0b3d22bcb07c145601a79c358"><div class="ttname"><a href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba4739b8d0b3d22bcb07c145601a79c358">LL_DEBUG</a></div><div class="ttdeci">@ LL_DEBUG</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00128">WTSTypes.h:128</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aed5503152b508c68a90229e513a8e15ba50717458baf49c204bb0645418e0da15"><div class="ttname"><a href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba50717458baf49c204bb0645418e0da15">LL_ERROR</a></div><div class="ttdeci">@ LL_ERROR</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00131">WTSTypes.h:131</a></div></div>
+<div class="ttc" id="aWtBtDtReaderAD_8cpp_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="WtBtDtReaderAD_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8cpp_source.html#l00019">WtBtDtReaderAD.cpp:19</a></div></div>
+<div class="ttc" id="aWtBtDtReaderAD_8cpp_html_a68f720cecd28976e3ea2c6061f3f3929"><div class="ttname"><a href="WtBtDtReaderAD_8cpp.html#a68f720cecd28976e3ea2c6061f3f3929">pipe_btreader_log</a></div><div class="ttdeci">void pipe_btreader_log(IBtDtReaderSink *sink, WTSLogLevel ll, const char *format, const Args &amp;... args)</div><div class="ttdoc">日志输出函数</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8cpp_source.html#l00034">WtBtDtReaderAD.cpp:34</a></div></div>
+<div class="ttc" id="aWtBtDtReaderAD_8cpp_html_ac30f50fbc6f454147241b643f43741f1"><div class="ttname"><a href="WtBtDtReaderAD_8cpp.html#ac30f50fbc6f454147241b643f43741f1">createBtDtReader</a></div><div class="ttdeci">EXPORT_FLAG IBtDtReader * createBtDtReader()</div><div class="ttdoc">导出函数声明</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8cpp_source.html#l00056">WtBtDtReaderAD.cpp:56</a></div></div>
+<div class="ttc" id="aWtBtDtReaderAD_8cpp_html_af340f26726465d64f399ac4fd831632c"><div class="ttname"><a href="WtBtDtReaderAD_8cpp.html#af340f26726465d64f399ac4fd831632c">deleteBtDtReader</a></div><div class="ttdeci">EXPORT_FLAG void deleteBtDtReader(IBtDtReader *reader)</div><div class="ttdoc">删除回测数据读取器实例</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8cpp_source.html#l00067">WtBtDtReaderAD.cpp:67</a></div></div>
+<div class="ttc" id="aWtBtDtReaderAD_8h_html"><div class="ttname"><a href="WtBtDtReaderAD_8h.html">WtBtDtReaderAD.h</a></div><div class="ttdoc">基于LMDB的回测数据读取器定义</div></div>
+<div class="ttc" id="aWtBtDtReader_8cpp_html_a68f720cecd28976e3ea2c6061f3f3929"><div class="ttname"><a href="WtBtDtReader_8cpp.html#a68f720cecd28976e3ea2c6061f3f3929">pipe_btreader_log</a></div><div class="ttdeci">void pipe_btreader_log(IBtDtReaderSink *sink, WTSLogLevel ll, const char *format, const Args &amp;... args)</div><div class="ttdoc">日志输出辅助函数</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReader_8cpp_source.html#l00032">WtBtDtReader.cpp:32</a></div></div>
+<div class="ttc" id="aWtLMDB_8hpp_html_a50dea8b3647d6fb33fc4037ec96cb6ef"><div class="ttname"><a href="WtLMDB_8hpp.html#a50dea8b3647d6fb33fc4037ec96cb6ef">ValueArray</a></div><div class="ttdeci">NS_WTP_BEGIN typedef std::vector&lt; std::string &gt; ValueArray</div><div class="ttdoc">字符串数组类型</div><div class="ttdef"><b>Definition</b> <a href="WtLMDB_8hpp_source.html#l00041">WtLMDB.hpp:41</a></div></div>
+<div class="ttc" id="aclassIBtDtReaderSink_html"><div class="ttname"><a href="classIBtDtReaderSink.html">IBtDtReaderSink</a></div><div class="ttdef"><b>Definition</b> <a href="IBtDtReader_8h_source.html#l00022">IBtDtReader.h:23</a></div></div>
+<div class="ttc" id="aclassIBtDtReaderSink_html_a315374b8cf5e693091605fde7ff72cba"><div class="ttname"><a href="classIBtDtReaderSink.html#a315374b8cf5e693091605fde7ff72cba">IBtDtReaderSink::reader_log</a></div><div class="ttdeci">virtual void reader_log(WTSLogLevel ll, const char *message)=0</div></div>
+<div class="ttc" id="aclassIBtDtReader_html"><div class="ttname"><a href="classIBtDtReader.html">IBtDtReader</a></div><div class="ttdef"><b>Definition</b> <a href="IBtDtReader_8h_source.html#l00036">IBtDtReader.h:37</a></div></div>
+<div class="ttc" id="aclassIBtDtReader_html_ad84b72f01d758bddbd72a5918616bea1"><div class="ttname"><a href="classIBtDtReader.html#ad84b72f01d758bddbd72a5918616bea1">IBtDtReader::_sink</a></div><div class="ttdeci">IBtDtReaderSink * _sink</div><div class="ttdef"><b>Definition</b> <a href="IBtDtReader_8h_source.html#l00053">IBtDtReader.h:53</a></div></div>
+<div class="ttc" id="aclassStdFile_html_a65778f7268857f981a2e19acb8379761"><div class="ttname"><a href="classStdFile.html#a65778f7268857f981a2e19acb8379761">StdFile::exists</a></div><div class="ttdeci">static bool exists(const char *filename)</div><div class="ttdoc">检查文件是否存在</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00221">StdUtils.hpp:221</a></div></div>
+<div class="ttc" id="aclassStrUtil_html_a26e29501b4702101a2e7780f5c0c989b"><div class="ttname"><a href="classStrUtil.html#a26e29501b4702101a2e7780f5c0c989b">StrUtil::printf</a></div><div class="ttdeci">static std::string printf(const char *pszFormat,...)</div><div class="ttdoc">格式化字符串，类似于 C 语言的 printf 函数</div><div class="ttdef"><b>Definition</b> <a href="StrUtil_8hpp_source.html#l00494">StrUtil.hpp:494</a></div></div>
+<div class="ttc" id="aclassStrUtil_html_a6d993d2350e32ceedca3811eee1370db"><div class="ttname"><a href="classStrUtil.html#a6d993d2350e32ceedca3811eee1370db">StrUtil::standardisePath</a></div><div class="ttdeci">static std::string standardisePath(const std::string &amp;init, bool bIsDir=true)</div><div class="ttdoc">标准化路径格式 - 仅使用正斜杠，目录以斜杠结尾</div><div class="ttdef"><b>Definition</b> <a href="StrUtil_8hpp_source.html#l00360">StrUtil.hpp:360</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a830db11fc8daceff409fdbebaa7bea8a"><div class="ttname"><a href="classWTSVariant.html#a830db11fc8daceff409fdbebaa7bea8a">WTSVariant::getCString</a></div><div class="ttdeci">const char * getCString(const char *name) const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00339">WTSVariant.hpp:339</a></div></div>
+<div class="ttc" id="aclassWtBtDtReaderAD_html"><div class="ttname"><a href="classWtBtDtReaderAD.html">WtBtDtReaderAD</a></div><div class="ttdoc">基于LMDB的回测数据读取器类</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8h_source.html#l00027">WtBtDtReaderAD.h:28</a></div></div>
+<div class="ttc" id="aclassWtBtDtReaderAD_html_a216e048342b191ab8a4cbfe4c37fe9a0"><div class="ttname"><a href="classWtBtDtReaderAD.html#a216e048342b191ab8a4cbfe4c37fe9a0">WtBtDtReaderAD::WtLMDBPtr</a></div><div class="ttdeci">std::shared_ptr&lt; WtLMDB &gt; WtLMDBPtr</div><div class="ttdoc">LMDB数据库的智能指针类型定义</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8h_source.html#l00093">WtBtDtReaderAD.h:93</a></div></div>
+<div class="ttc" id="aclassWtBtDtReaderAD_html_a28332bc27c6dfb2a16e2e8ca87c7b203"><div class="ttname"><a href="classWtBtDtReaderAD.html#a28332bc27c6dfb2a16e2e8ca87c7b203">WtBtDtReaderAD::get_k_db</a></div><div class="ttdeci">WtLMDBPtr get_k_db(const char *exchg, WTSKlinePeriod period)</div><div class="ttdoc">获取指定交易所和周期的K线数据库</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8cpp_source.html#l00206">WtBtDtReaderAD.cpp:206</a></div></div>
+<div class="ttc" id="aclassWtBtDtReaderAD_html_a55c94f13e51202365f162f33272f7777"><div class="ttname"><a href="classWtBtDtReaderAD.html#a55c94f13e51202365f162f33272f7777">WtBtDtReaderAD::_exchg_m5_dbs</a></div><div class="ttdeci">WtLMDBMap _exchg_m5_dbs</div><div class="ttdoc">5分钟K线数据库映射，以交易所为键</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8h_source.html#l00108">WtBtDtReaderAD.h:108</a></div></div>
+<div class="ttc" id="aclassWtBtDtReaderAD_html_a701f84987d1553149a8c331b9c975698"><div class="ttname"><a href="classWtBtDtReaderAD.html#a701f84987d1553149a8c331b9c975698">WtBtDtReaderAD::init</a></div><div class="ttdeci">virtual void init(WTSVariant *cfg, IBtDtReaderSink *sink)</div><div class="ttdoc">初始化回测数据读取器</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8cpp_source.html#l00100">WtBtDtReaderAD.cpp:100</a></div></div>
+<div class="ttc" id="aclassWtBtDtReaderAD_html_a776fd8898ae8541a4cc204c671d450b8"><div class="ttname"><a href="classWtBtDtReaderAD.html#a776fd8898ae8541a4cc204c671d450b8">WtBtDtReaderAD::get_t_db</a></div><div class="ttdeci">WtLMDBPtr get_t_db(const char *exchg, const char *code)</div><div class="ttdoc">获取指定交易所和合约的Tick数据库</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8cpp_source.html#l00262">WtBtDtReaderAD.cpp:262</a></div></div>
+<div class="ttc" id="aclassWtBtDtReaderAD_html_a8edb277d6f6e99ecc81527d0cfd99063"><div class="ttname"><a href="classWtBtDtReaderAD.html#a8edb277d6f6e99ecc81527d0cfd99063">WtBtDtReaderAD::WtBtDtReaderAD</a></div><div class="ttdeci">WtBtDtReaderAD()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8cpp_source.html#l00077">WtBtDtReaderAD.cpp:77</a></div></div>
+<div class="ttc" id="aclassWtBtDtReaderAD_html_a973380cf4483317b4d37a6696b085260"><div class="ttname"><a href="classWtBtDtReaderAD.html#a973380cf4483317b4d37a6696b085260">WtBtDtReaderAD::~WtBtDtReaderAD</a></div><div class="ttdeci">virtual ~WtBtDtReaderAD()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8cpp_source.html#l00087">WtBtDtReaderAD.cpp:87</a></div></div>
+<div class="ttc" id="aclassWtBtDtReaderAD_html_ab6e7eabc0e04ae4be97712c216cb1ec8"><div class="ttname"><a href="classWtBtDtReaderAD.html#ab6e7eabc0e04ae4be97712c216cb1ec8">WtBtDtReaderAD::read_raw_bars</a></div><div class="ttdeci">virtual bool read_raw_bars(const char *exchg, const char *code, WTSKlinePeriod period, std::string &amp;buffer) override</div><div class="ttdoc">读取原始K线数据</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8cpp_source.html#l00124">WtBtDtReaderAD.cpp:124</a></div></div>
+<div class="ttc" id="aclassWtBtDtReaderAD_html_abe917d0d8b5b1e6c138fdb89e7638fee"><div class="ttname"><a href="classWtBtDtReaderAD.html#abe917d0d8b5b1e6c138fdb89e7638fee">WtBtDtReaderAD::_exchg_d1_dbs</a></div><div class="ttdeci">WtLMDBMap _exchg_d1_dbs</div><div class="ttdoc">日线K线数据库映射，以交易所为键</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8h_source.html#l00113">WtBtDtReaderAD.h:113</a></div></div>
+<div class="ttc" id="aclassWtBtDtReaderAD_html_ac5776704f6e2a55f9cbdf9eacd14232e"><div class="ttname"><a href="classWtBtDtReaderAD.html#ac5776704f6e2a55f9cbdf9eacd14232e">WtBtDtReaderAD::_base_dir</a></div><div class="ttdeci">std::string _base_dir</div><div class="ttdoc">数据存储的基础目录</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8h_source.html#l00081">WtBtDtReaderAD.h:81</a></div></div>
+<div class="ttc" id="aclassWtBtDtReaderAD_html_ac7c551a22007c3ab820e23b9d55fdb22"><div class="ttname"><a href="classWtBtDtReaderAD.html#ac7c551a22007c3ab820e23b9d55fdb22">WtBtDtReaderAD::read_raw_ticks</a></div><div class="ttdeci">virtual bool read_raw_ticks(const char *exchg, const char *code, uint32_t uDate, std::string &amp;buffer) override</div><div class="ttdoc">读取原始Tick数据</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8cpp_source.html#l00165">WtBtDtReaderAD.cpp:165</a></div></div>
+<div class="ttc" id="aclassWtBtDtReaderAD_html_aca345befbc484f5353ca81436da78e63"><div class="ttname"><a href="classWtBtDtReaderAD.html#aca345befbc484f5353ca81436da78e63">WtBtDtReaderAD::_tick_dbs</a></div><div class="ttdeci">WtLMDBMap _tick_dbs</div><div class="ttdoc">Tick数据库映射，用exchg.code作为key，如BINANCE.BTCUSDT</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8h_source.html#l00118">WtBtDtReaderAD.h:118</a></div></div>
+<div class="ttc" id="aclassWtBtDtReaderAD_html_adf16c5d3f852850127d2a883060f77f3"><div class="ttname"><a href="classWtBtDtReaderAD.html#adf16c5d3f852850127d2a883060f77f3">WtBtDtReaderAD::_exchg_m1_dbs</a></div><div class="ttdeci">WtLMDBMap _exchg_m1_dbs</div><div class="ttdoc">1分钟K线数据库映射，以交易所为键</div><div class="ttdef"><b>Definition</b> <a href="WtBtDtReaderAD_8h_source.html#l00103">WtBtDtReaderAD.h:103</a></div></div>
+<div class="ttc" id="aclassWtLMDBQuery_html"><div class="ttname"><a href="classWtLMDBQuery.html">WtLMDBQuery</a></div><div class="ttdoc">LMDB数据库查询和操作类</div><div class="ttdef"><b>Definition</b> <a href="WtLMDB_8hpp_source.html#l00198">WtLMDB.hpp:199</a></div></div>
+<div class="ttc" id="aclassWtLMDBQuery_html_a7a135dd774c0e8f40f82a3a6dba78c41"><div class="ttname"><a href="classWtLMDBQuery.html#a7a135dd774c0e8f40f82a3a6dba78c41">WtLMDBQuery::get_range</a></div><div class="ttdeci">int get_range(const std::string &amp;lower_key, const std::string &amp;upper_key, LMDBQueryCallback cb)</div><div class="ttdoc">获取指定区间内的数据</div><div class="ttdef"><b>Definition</b> <a href="WtLMDB_8hpp_source.html#l00402">WtLMDB.hpp:402</a></div></div>
+<div class="ttc" id="aclassWtLMDB_html"><div class="ttname"><a href="classWtLMDB.html">WtLMDB</a></div><div class="ttdoc">LMDB数据库封装基础类</div><div class="ttdef"><b>Definition</b> <a href="WtLMDB_8hpp_source.html#l00057">WtLMDB.hpp:58</a></div></div>
+<div class="ttc" id="aclasswt__hashmap_html"><div class="ttname"><a href="classwt__hashmap.html">wt_hashmap&lt; std::string, WtLMDBPtr &gt;</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html"><div class="ttname"><a href="structWTSTickStruct.html">WTSTickStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00158">WTSStruct.h:159</a></div></div>
+<div class="ttc" id="astruct__LMDBBarKey_html"><div class="ttname"><a href="struct__LMDBBarKey.html">_LMDBBarKey</a></div><div class="ttdoc">LMDB K线数据的键结构</div><div class="ttdef"><b>Definition</b> <a href="LMDBKeys_8h_source.html#l00104">LMDBKeys.h:105</a></div></div>
+<div class="ttc" id="astruct__LMDBHftKey_html"><div class="ttname"><a href="struct__LMDBHftKey.html">_LMDBHftKey</a></div><div class="ttdoc">字节对齐指令，确保结构体在内存中紧凑排列，没有填充字节</div><div class="ttdef"><b>Definition</b> <a href="LMDBKeys_8h_source.html#l00057">LMDBKeys.h:58</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3dc1ccdfd94cac7fd9518acc7c6dc1c9.html">WtDataStorageAD</a></li><li class="navelem"><a class="el" href="WtBtDtReaderAD_8cpp.html">WtBtDtReaderAD.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

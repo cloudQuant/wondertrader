@@ -1,0 +1,1856 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: WTSLogger类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classWTSLogger.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-static-methods">静态 Public 成员函数</a> &#124;
+<a href="#pri-types">Private 类型</a> &#124;
+<a href="#pri-static-methods">静态 Private 成员函数</a> &#124;
+<a href="#pri-static-attribs">静态 Private 属性</a> &#124;
+<a href="classWTSLogger-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">WTSLogger类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>WonderTrader的日志系统类  
+ <a href="classWTSLogger.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+静态 Public 成员函数</h2></td></tr>
+<tr class="memitem:aa3257bbd8e5b1db25f65cd936f50025c" id="r_aa3257bbd8e5b1db25f65cd936f50025c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#aa3257bbd8e5b1db25f65cd936f50025c">log_raw</a> (<a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:aa3257bbd8e5b1db25f65cd936f50025c"><td class="mdescLeft">&#160;</td><td class="mdescRight">直接输出日志消息  <br /></td></tr>
+<tr class="separator:aa3257bbd8e5b1db25f65cd936f50025c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01fb1b92bf14e993751ce211b00e7dd2" id="r_a01fb1b92bf14e993751ce211b00e7dd2"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a01fb1b92bf14e993751ce211b00e7dd2">log_raw_by_cat</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *catName, <a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:a01fb1b92bf14e993751ce211b00e7dd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">按分类输出日志消息  <br /></td></tr>
+<tr class="separator:a01fb1b92bf14e993751ce211b00e7dd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4cde1222e609623189a4be2b345680a" id="r_ae4cde1222e609623189a4be2b345680a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#ae4cde1222e609623189a4be2b345680a">log_dyn_raw</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *patttern, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *catName, <a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:ae4cde1222e609623189a4be2b345680a"><td class="mdescLeft">&#160;</td><td class="mdescRight">使用动态分类模式输出日志消息  <br /></td></tr>
+<tr class="separator:ae4cde1222e609623189a4be2b345680a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adcbb6a78b99a8c514a4b55677e5a1a28" id="r_adcbb6a78b99a8c514a4b55677e5a1a28"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:adcbb6a78b99a8c514a4b55677e5a1a28"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#adcbb6a78b99a8c514a4b55677e5a1a28">debug</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...args)</td></tr>
+<tr class="memdesc:adcbb6a78b99a8c514a4b55677e5a1a28"><td class="mdescLeft">&#160;</td><td class="mdescRight">fmt格式化日志接口  <br /></td></tr>
+<tr class="separator:adcbb6a78b99a8c514a4b55677e5a1a28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20d65255542e3ed5d694b529892a0f57" id="r_a20d65255542e3ed5d694b529892a0f57"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a20d65255542e3ed5d694b529892a0f57"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">info</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...args)</td></tr>
+<tr class="memdesc:a20d65255542e3ed5d694b529892a0f57"><td class="mdescLeft">&#160;</td><td class="mdescRight">输出信息级别日志  <br /></td></tr>
+<tr class="separator:a20d65255542e3ed5d694b529892a0f57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a147defb6e1fb287cc8d95bfb753f6f11" id="r_a147defb6e1fb287cc8d95bfb753f6f11"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a147defb6e1fb287cc8d95bfb753f6f11"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a147defb6e1fb287cc8d95bfb753f6f11">warn</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...args)</td></tr>
+<tr class="memdesc:a147defb6e1fb287cc8d95bfb753f6f11"><td class="mdescLeft">&#160;</td><td class="mdescRight">输出警告级别日志  <br /></td></tr>
+<tr class="separator:a147defb6e1fb287cc8d95bfb753f6f11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a618c41d0ff3c1f5ce0a70d83c28bc9fc" id="r_a618c41d0ff3c1f5ce0a70d83c28bc9fc"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a618c41d0ff3c1f5ce0a70d83c28bc9fc"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">error</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...args)</td></tr>
+<tr class="memdesc:a618c41d0ff3c1f5ce0a70d83c28bc9fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">输出错误级别日志  <br /></td></tr>
+<tr class="separator:a618c41d0ff3c1f5ce0a70d83c28bc9fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c480a7fbe8d2753e0075ecfd5e4af17" id="r_a8c480a7fbe8d2753e0075ecfd5e4af17"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a8c480a7fbe8d2753e0075ecfd5e4af17"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a8c480a7fbe8d2753e0075ecfd5e4af17">fatal</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...args)</td></tr>
+<tr class="memdesc:a8c480a7fbe8d2753e0075ecfd5e4af17"><td class="mdescLeft">&#160;</td><td class="mdescRight">输出致命错误级别日志  <br /></td></tr>
+<tr class="separator:a8c480a7fbe8d2753e0075ecfd5e4af17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac71887d8d8643f4fb3c61cf525e21cb2" id="r_ac71887d8d8643f4fb3c61cf525e21cb2"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:ac71887d8d8643f4fb3c61cf525e21cb2"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#ac71887d8d8643f4fb3c61cf525e21cb2">log</a> (<a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...args)</td></tr>
+<tr class="memdesc:ac71887d8d8643f4fb3c61cf525e21cb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">使用指定级别输出格式化日志  <br /></td></tr>
+<tr class="separator:ac71887d8d8643f4fb3c61cf525e21cb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50df3d38d311e4792f52f0a7b0fa205e" id="r_a50df3d38d311e4792f52f0a7b0fa205e"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a50df3d38d311e4792f52f0a7b0fa205e"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a50df3d38d311e4792f52f0a7b0fa205e">log_by_cat</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *catName, <a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...args)</td></tr>
+<tr class="memdesc:a50df3d38d311e4792f52f0a7b0fa205e"><td class="mdescLeft">&#160;</td><td class="mdescRight">使用指定分类和级别输出格式化日志  <br /></td></tr>
+<tr class="separator:a50df3d38d311e4792f52f0a7b0fa205e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd80034e322873b7ebf05d52e2174b15" id="r_abd80034e322873b7ebf05d52e2174b15"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:abd80034e322873b7ebf05d52e2174b15"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#abd80034e322873b7ebf05d52e2174b15">log_by_cat_prefix</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *catName, <a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...args)</td></tr>
+<tr class="memdesc:abd80034e322873b7ebf05d52e2174b15"><td class="mdescLeft">&#160;</td><td class="mdescRight">使用指定分类和级别输出格式化日志，并添加分类前缀  <br /></td></tr>
+<tr class="separator:abd80034e322873b7ebf05d52e2174b15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2696cbfac7e6567192142b5a6d073e65" id="r_a2696cbfac7e6567192142b5a6d073e65"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a2696cbfac7e6567192142b5a6d073e65"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a2696cbfac7e6567192142b5a6d073e65">log_dyn</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *patttern, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *catName, <a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...args)</td></tr>
+<tr class="memdesc:a2696cbfac7e6567192142b5a6d073e65"><td class="mdescLeft">&#160;</td><td class="mdescRight">使用动态日志模式和分类输出格式化日志  <br /></td></tr>
+<tr class="separator:a2696cbfac7e6567192142b5a6d073e65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa79de9d0d80dc742f23082cf9f08e518" id="r_aa79de9d0d80dc742f23082cf9f08e518"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:aa79de9d0d80dc742f23082cf9f08e518"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#aa79de9d0d80dc742f23082cf9f08e518">log_dyn_prefix</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *patttern, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *catName, <a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...args)</td></tr>
+<tr class="memdesc:aa79de9d0d80dc742f23082cf9f08e518"><td class="mdescLeft">&#160;</td><td class="mdescRight">使用动态日志模式和分类输出格式化日志，并添加分类前缀  <br /></td></tr>
+<tr class="separator:aa79de9d0d80dc742f23082cf9f08e518"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a316399910d3af4aef6c4a6e85c50c729" id="r_a316399910d3af4aef6c4a6e85c50c729"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a316399910d3af4aef6c4a6e85c50c729">init</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *propFile=&quot;logcfg.json&quot;, bool isFile=true, <a class="el" href="classILogHandler.html">ILogHandler</a> *handler=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</td></tr>
+<tr class="memdesc:a316399910d3af4aef6c4a6e85c50c729"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化日志系统  <br /></td></tr>
+<tr class="separator:a316399910d3af4aef6c4a6e85c50c729"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77ce5a61af3730f633708093fdf6671a" id="r_a77ce5a61af3730f633708093fdf6671a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a77ce5a61af3730f633708093fdf6671a">registerHandler</a> (<a class="el" href="classILogHandler.html">ILogHandler</a> *handler=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</td></tr>
+<tr class="memdesc:a77ce5a61af3730f633708093fdf6671a"><td class="mdescLeft">&#160;</td><td class="mdescRight">注册自定义日志处理器  <br /></td></tr>
+<tr class="separator:a77ce5a61af3730f633708093fdf6671a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66085fc4127f10a615a0e5c661f7bdc6" id="r_a66085fc4127f10a615a0e5c661f7bdc6"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a66085fc4127f10a615a0e5c661f7bdc6">stop</a> ()</td></tr>
+<tr class="memdesc:a66085fc4127f10a615a0e5c661f7bdc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">停止日志系统  <br /></td></tr>
+<tr class="separator:a66085fc4127f10a615a0e5c661f7bdc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aada6defd2e5fb449774e313ecb639555" id="r_aada6defd2e5fb449774e313ecb639555"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#aada6defd2e5fb449774e313ecb639555">freeAllDynLoggers</a> ()</td></tr>
+<tr class="memdesc:aada6defd2e5fb449774e313ecb639555"><td class="mdescLeft">&#160;</td><td class="mdescRight">释放所有动态创建的日志器  <br /></td></tr>
+<tr class="separator:aada6defd2e5fb449774e313ecb639555"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 类型</h2></td></tr>
+<tr class="memitem:a1d8ed6d33f3ad8f2826311334163ce65" id="r_a1d8ed6d33f3ad8f2826311334163ce65"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classWTSHashMap.html">WTSHashMap</a>&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a1d8ed6d33f3ad8f2826311334163ce65">LogPatterns</a></td></tr>
+<tr class="separator:a1d8ed6d33f3ad8f2826311334163ce65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-methods" name="pri-static-methods"></a>
+静态 Private 成员函数</h2></td></tr>
+<tr class="memitem:a0c31b9b74f24da14899492880d0e5966" id="r_a0c31b9b74f24da14899492880d0e5966"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a0c31b9b74f24da14899492880d0e5966">debug_imp</a> (<a class="el" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a> logger, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:a0c31b9b74f24da14899492880d0e5966"><td class="mdescLeft">&#160;</td><td class="mdescRight">调试级别日志实现函数  <br /></td></tr>
+<tr class="separator:a0c31b9b74f24da14899492880d0e5966"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a7b4936f40b40ec071856bcb40bc986" id="r_a0a7b4936f40b40ec071856bcb40bc986"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a0a7b4936f40b40ec071856bcb40bc986">info_imp</a> (<a class="el" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a> logger, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:a0a7b4936f40b40ec071856bcb40bc986"><td class="mdescLeft">&#160;</td><td class="mdescRight">信息级别日志实现函数  <br /></td></tr>
+<tr class="separator:a0a7b4936f40b40ec071856bcb40bc986"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12f6c55ee4b70927838991b8e440f097" id="r_a12f6c55ee4b70927838991b8e440f097"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a12f6c55ee4b70927838991b8e440f097">warn_imp</a> (<a class="el" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a> logger, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:a12f6c55ee4b70927838991b8e440f097"><td class="mdescLeft">&#160;</td><td class="mdescRight">警告级别日志实现函数  <br /></td></tr>
+<tr class="separator:a12f6c55ee4b70927838991b8e440f097"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9f4873ba75225becd83325ad22fde62" id="r_ab9f4873ba75225becd83325ad22fde62"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#ab9f4873ba75225becd83325ad22fde62">error_imp</a> (<a class="el" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a> logger, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:ab9f4873ba75225becd83325ad22fde62"><td class="mdescLeft">&#160;</td><td class="mdescRight">错误级别日志实现函数  <br /></td></tr>
+<tr class="separator:ab9f4873ba75225becd83325ad22fde62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b01eab04d4cea3be7ea7b1652c5a5b7" id="r_a3b01eab04d4cea3be7ea7b1652c5a5b7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a3b01eab04d4cea3be7ea7b1652c5a5b7">fatal_imp</a> (<a class="el" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a> logger, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:a3b01eab04d4cea3be7ea7b1652c5a5b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">致命错误级别日志实现函数  <br /></td></tr>
+<tr class="separator:a3b01eab04d4cea3be7ea7b1652c5a5b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90b800bc3b450e4d28c5784cc088fde2" id="r_a90b800bc3b450e4d28c5784cc088fde2"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a90b800bc3b450e4d28c5784cc088fde2">initLogger</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *catName, <a class="el" href="classWTSVariant.html">WTSVariant</a> *cfgLogger)</td></tr>
+<tr class="memdesc:a90b800bc3b450e4d28c5784cc088fde2"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化指定分类的日志器  <br /></td></tr>
+<tr class="separator:a90b800bc3b450e4d28c5784cc088fde2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b69ddb72430c136a1bf736975df1e6e" id="r_a9b69ddb72430c136a1bf736975df1e6e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a9b69ddb72430c136a1bf736975df1e6e">getLogger</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *logger, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pattern=&quot;&quot;)</td></tr>
+<tr class="memdesc:a9b69ddb72430c136a1bf736975df1e6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定名称的日志器  <br /></td></tr>
+<tr class="separator:a9b69ddb72430c136a1bf736975df1e6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad083d911e7c7eb24a4b58081fab7fe9c" id="r_ad083d911e7c7eb24a4b58081fab7fe9c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#ad083d911e7c7eb24a4b58081fab7fe9c">print_message</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *buffer)</td></tr>
+<tr class="memdesc:ad083d911e7c7eb24a4b58081fab7fe9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">打印消息到控制台  <br /></td></tr>
+<tr class="separator:ad083d911e7c7eb24a4b58081fab7fe9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-attribs" name="pri-static-attribs"></a>
+静态 Private 属性</h2></td></tr>
+<tr class="memitem:aa20f88bdea9232804a41470e8e9fd9b8" id="r_aa20f88bdea9232804a41470e8e9fd9b8"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#aa20f88bdea9232804a41470e8e9fd9b8">m_bInited</a> = false</td></tr>
+<tr class="separator:aa20f88bdea9232804a41470e8e9fd9b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e570032cda24f991f0f65a56f674c00" id="r_a2e570032cda24f991f0f65a56f674c00"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a2e570032cda24f991f0f65a56f674c00">m_bTpInited</a> = false</td></tr>
+<tr class="separator:a2e570032cda24f991f0f65a56f674c00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71203f56b58d7bce13f5808602be430d" id="r_a71203f56b58d7bce13f5808602be430d"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a71203f56b58d7bce13f5808602be430d">m_bStopped</a> = false</td></tr>
+<tr class="separator:a71203f56b58d7bce13f5808602be430d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aadd9e32db9294cff72be1b12a444865c" id="r_aadd9e32db9294cff72be1b12a444865c"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classILogHandler.html">ILogHandler</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#aadd9e32db9294cff72be1b12a444865c">m_logHandler</a> = <a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></td></tr>
+<tr class="separator:aadd9e32db9294cff72be1b12a444865c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeafac60eb27e92d3d241432dfd3dbee4" id="r_aeafac60eb27e92d3d241432dfd3dbee4"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#aeafac60eb27e92d3d241432dfd3dbee4">m_logLevel</a> = <a class="el" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba6d981d7d88e5e7ae982e5514e0a6ceac">LL_NONE</a></td></tr>
+<tr class="separator:aeafac60eb27e92d3d241432dfd3dbee4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5f5ec4d7bf748c8419ba49270443a45" id="r_af5f5ec4d7bf748c8419ba49270443a45"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#af5f5ec4d7bf748c8419ba49270443a45">m_rootLogger</a> = <a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></td></tr>
+<tr class="separator:af5f5ec4d7bf748c8419ba49270443a45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3182f526cc7e8c2fcfdeed57fcf4d6a" id="r_ac3182f526cc7e8c2fcfdeed57fcf4d6a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classWTSLogger.html#a1d8ed6d33f3ad8f2826311334163ce65">LogPatterns</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#ac3182f526cc7e8c2fcfdeed57fcf4d6a">m_mapPatterns</a> = <a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></td></tr>
+<tr class="separator:ac3182f526cc7e8c2fcfdeed57fcf4d6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad14436a11fcf1952c3ae3d6c13b63342" id="r_ad14436a11fcf1952c3ae3d6c13b63342"><td class="memItemLeft" align="right" valign="top">static std::set&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#ad14436a11fcf1952c3ae3d6c13b63342">m_setDynLoggers</a></td></tr>
+<tr class="separator:ad14436a11fcf1952c3ae3d6c13b63342"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a3c0a39d929f10f6b52f641ed21f0db" id="r_a7a3c0a39d929f10f6b52f641ed21f0db"><td class="memItemLeft" align="right" valign="top">static thread_local char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSLogger.html#a7a3c0a39d929f10f6b52f641ed21f0db">m_buffer</a> [<a class="el" href="WTSLogger_8h.html#ac012774dee1dd97afaf303e841ca46c9">MAX_LOG_BUF_SIZE</a>]</td></tr>
+<tr class="separator:a7a3c0a39d929f10f6b52f641ed21f0db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>WonderTrader的日志系统类 </p>
+<p>基于spdlog实现的日志系统，提供了多种日志级别的输出方式 包括基本的调试、信息、警告、错误和致命错误等多级别日志 支持日志分类、动态日志和定制日志格式 该类的所有方法都是静态的，不需要创建类的实例 </p>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00049">49</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="a1d8ed6d33f3ad8f2826311334163ce65" name="a1d8ed6d33f3ad8f2826311334163ce65"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d8ed6d33f3ad8f2826311334163ce65">&#9670;&#160;</a></span>LogPatterns</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="classWTSHashMap.html">WTSHashMap</a>&lt;std::string&gt; <a class="el" href="classWTSLogger.html#a1d8ed6d33f3ad8f2826311334163ce65">WTSLogger::LogPatterns</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00443">443</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="adcbb6a78b99a8c514a4b55677e5a1a28" name="adcbb6a78b99a8c514a4b55677e5a1a28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adcbb6a78b99a8c514a4b55677e5a1a28">&#9670;&#160;</a></span>debug()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void WTSLogger::debug </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>fmt格式化日志接口 </p>
+<p>以下方法使用fmt格式化库提供格式化日志输出能力 支持多种数据类型的格式化并输出为日志</p>
+<p>输出调试级别日志</p>
+<p>使用fmt格式化库将参数格式化后输出调试级别日志</p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Args</td><td>参数类型列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">format</td><td>格式化字符串 </td></tr>
+    <tr><td class="paramname">args</td><td>参数列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00161">161</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0c31b9b74f24da14899492880d0e5966" name="a0c31b9b74f24da14899492880d0e5966"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c31b9b74f24da14899492880d0e5966">&#9670;&#160;</a></span>debug_imp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSLogger::debug_imp </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a>&#160;</td>
+          <td class="paramname"><em>logger</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>调试级别日志实现函数 </p>
+<p>调试级别日志输出的实现函数</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">logger</td><td>日志器指针 </td></tr>
+    <tr><td class="paramname">message</td><td>日志消息</td></tr>
+    <tr><td class="paramname">logger</td><td>日志器指针，用于实际输出日志 </td></tr>
+    <tr><td class="paramname">message</td><td>要输出的日志消息 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00322">322</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a618c41d0ff3c1f5ce0a70d83c28bc9fc" name="a618c41d0ff3c1f5ce0a70d83c28bc9fc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a618c41d0ff3c1f5ce0a70d83c28bc9fc">&#9670;&#160;</a></span>error()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void WTSLogger::error </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>输出错误级别日志 </p>
+<p>使用fmt格式化库将参数格式化后输出错误级别日志</p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Args</td><td>参数类型列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">format</td><td>格式化字符串 </td></tr>
+    <tr><td class="paramname">args</td><td>参数列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00239">239</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab9f4873ba75225becd83325ad22fde62" name="ab9f4873ba75225becd83325ad22fde62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9f4873ba75225becd83325ad22fde62">&#9670;&#160;</a></span>error_imp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSLogger::error_imp </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a>&#160;</td>
+          <td class="paramname"><em>logger</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>错误级别日志实现函数 </p>
+<p>错误级别日志输出的实现函数</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">logger</td><td>日志器指针 </td></tr>
+    <tr><td class="paramname">message</td><td>日志消息</td></tr>
+    <tr><td class="paramname">logger</td><td>日志器指针，用于实际输出日志 </td></tr>
+    <tr><td class="paramname">message</td><td>要输出的日志消息 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00373">373</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8c480a7fbe8d2753e0075ecfd5e4af17" name="a8c480a7fbe8d2753e0075ecfd5e4af17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c480a7fbe8d2753e0075ecfd5e4af17">&#9670;&#160;</a></span>fatal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void WTSLogger::fatal </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>输出致命错误级别日志 </p>
+<p>使用fmt格式化库将参数格式化后输出致命错误级别日志</p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Args</td><td>参数类型列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">format</td><td>格式化字符串 </td></tr>
+    <tr><td class="paramname">args</td><td>参数列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00265">265</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3b01eab04d4cea3be7ea7b1652c5a5b7" name="a3b01eab04d4cea3be7ea7b1652c5a5b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b01eab04d4cea3be7ea7b1652c5a5b7">&#9670;&#160;</a></span>fatal_imp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSLogger::fatal_imp </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a>&#160;</td>
+          <td class="paramname"><em>logger</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>致命错误级别日志实现函数 </p>
+<p>致命错误级别日志输出的实现函数</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">logger</td><td>日志器指针 </td></tr>
+    <tr><td class="paramname">message</td><td>日志消息</td></tr>
+    <tr><td class="paramname">logger</td><td>日志器指针，用于实际输出日志 </td></tr>
+    <tr><td class="paramname">message</td><td>要输出的日志消息 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00390">390</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aada6defd2e5fb449774e313ecb639555" name="aada6defd2e5fb449774e313ecb639555"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aada6defd2e5fb449774e313ecb639555">&#9670;&#160;</a></span>freeAllDynLoggers()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSLogger::freeAllDynLoggers </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>释放所有动态创建的日志器 </p>
+<p>遍历并释放所有通过动态模式创建的日志器资源</p>
+<p>遍历m_setDynLoggers集合中所有记录的动态日志器名称， 通过spdlog::drop方法释放对应的日志器资源 </p>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00574">574</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9b69ddb72430c136a1bf736975df1e6e" name="a9b69ddb72430c136a1bf736975df1e6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b69ddb72430c136a1bf736975df1e6e">&#9670;&#160;</a></span>getLogger()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a> WTSLogger::getLogger </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>logger</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pattern</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取指定名称的日志器 </p>
+<p>获取指定名称的日志器，如果不存在且指定了模式则动态创建</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">logger</td><td>日志器名称 </td></tr>
+    <tr><td class="paramname">pattern</td><td>日志模式，默认为空字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>SpdLoggerPtr 日志器指针，如果不存在且模式为空则返回null</dd></dl>
+<p>尝试获取指定名称的日志器，如果不存在且指定了有效的模式， 则根据模式和名称动态创建一个新的日志器</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">logger</td><td>要获取的日志器名称 </td></tr>
+    <tr><td class="paramname">pattern</td><td>日志模式名称，默认为空字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>SpdLoggerPtr 返回找到或创建的日志器指针，如果失败则返回NULL </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00545">545</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a20d65255542e3ed5d694b529892a0f57" name="a20d65255542e3ed5d694b529892a0f57"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20d65255542e3ed5d694b529892a0f57">&#9670;&#160;</a></span>info()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void WTSLogger::info </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>输出信息级别日志 </p>
+<p>使用fmt格式化库将参数格式化后输出信息级别日志</p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Args</td><td>参数类型列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">format</td><td>格式化字符串 </td></tr>
+    <tr><td class="paramname">args</td><td>参数列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00187">187</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0a7b4936f40b40ec071856bcb40bc986" name="a0a7b4936f40b40ec071856bcb40bc986"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a7b4936f40b40ec071856bcb40bc986">&#9670;&#160;</a></span>info_imp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSLogger::info_imp </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a>&#160;</td>
+          <td class="paramname"><em>logger</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>信息级别日志实现函数 </p>
+<p>信息级别日志输出的实现函数</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">logger</td><td>日志器指针 </td></tr>
+    <tr><td class="paramname">message</td><td>日志消息</td></tr>
+    <tr><td class="paramname">logger</td><td>日志器指针，用于实际输出日志 </td></tr>
+    <tr><td class="paramname">message</td><td>要输出的日志消息 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00339">339</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a316399910d3af4aef6c4a6e85c50c729" name="a316399910d3af4aef6c4a6e85c50c729"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a316399910d3af4aef6c4a6e85c50c729">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSLogger::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>propFile</em> = <code>&quot;logcfg.json&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isFile</em> = <code>true</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classILogHandler.html">ILogHandler</a> *&#160;</td>
+          <td class="paramname"><em>handler</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>初始化日志系统 </p>
+<p>根据配置文件初始化日志系统，设置日志级别、输出目标等</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">propFile</td><td>配置文件路径，默认为"logcfg.json" </td></tr>
+    <tr><td class="paramname">isFile</td><td>是否为文件路径，为false时propFile为配置内容字符串 </td></tr>
+    <tr><td class="paramname">handler</td><td>自定义日志处理器，默认为NULL</td></tr>
+    <tr><td class="paramname">propFile</td><td>配置文件路径或配置内容字符串，默认为"logcfg.json" </td></tr>
+    <tr><td class="paramname">isFile</td><td>是否为文件路径，为false时propFile被视为配置内容字符串 </td></tr>
+    <tr><td class="paramname">handler</td><td>自定义日志处理器，默认为NULL </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00249">249</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a90b800bc3b450e4d28c5784cc088fde2" name="a90b800bc3b450e4d28c5784cc088fde2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90b800bc3b450e4d28c5784cc088fde2">&#9670;&#160;</a></span>initLogger()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSLogger::initLogger </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>catName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>cfgLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>初始化指定分类的日志器 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">catName</td><td>日志分类名称 </td></tr>
+    <tr><td class="paramname">cfgLogger</td><td>日志器配置</td></tr>
+    <tr><td class="paramname">catName</td><td>分类名称，用于识别和管理日志器 </td></tr>
+    <tr><td class="paramname">cfgLogger</td><td>日志器的配置信息，包含异步设置、日志级别、输出目标等 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00175">175</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac71887d8d8643f4fb3c61cf525e21cb2" name="ac71887d8d8643f4fb3c61cf525e21cb2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac71887d8d8643f4fb3c61cf525e21cb2">&#9670;&#160;</a></span>log()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void WTSLogger::log </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>&#160;</td>
+          <td class="paramname"><em>ll</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>使用指定级别输出格式化日志 </p>
+<p>将格式化参数按指定级别输出日志，使用默认日志器</p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Args</td><td>参数类型列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ll</td><td>日志级别 </td></tr>
+    <tr><td class="paramname">format</td><td>格式化字符串 </td></tr>
+    <tr><td class="paramname">args</td><td>参数列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00292">292</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a50df3d38d311e4792f52f0a7b0fa205e" name="a50df3d38d311e4792f52f0a7b0fa205e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50df3d38d311e4792f52f0a7b0fa205e">&#9670;&#160;</a></span>log_by_cat()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void WTSLogger::log_by_cat </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>catName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>&#160;</td>
+          <td class="paramname"><em>ll</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>使用指定分类和级别输出格式化日志 </p>
+<p>根据分类名称和级别格式化输出日志</p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Args</td><td>参数类型列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">catName</td><td>日志分类名称 </td></tr>
+    <tr><td class="paramname">ll</td><td>日志级别 </td></tr>
+    <tr><td class="paramname">format</td><td>格式化字符串 </td></tr>
+    <tr><td class="paramname">args</td><td>参数列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00314">314</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abd80034e322873b7ebf05d52e2174b15" name="abd80034e322873b7ebf05d52e2174b15"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd80034e322873b7ebf05d52e2174b15">&#9670;&#160;</a></span>log_by_cat_prefix()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void WTSLogger::log_by_cat_prefix </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>catName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>&#160;</td>
+          <td class="paramname"><em>ll</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>使用指定分类和级别输出格式化日志，并添加分类前缀 </p>
+<p>根据分类名称和级别格式化输出日志，日志内容前会添加[catName]前缀</p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Args</td><td>参数类型列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">catName</td><td>日志分类名称 </td></tr>
+    <tr><td class="paramname">ll</td><td>日志级别 </td></tr>
+    <tr><td class="paramname">format</td><td>格式化字符串 </td></tr>
+    <tr><td class="paramname">args</td><td>参数列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00336">336</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2696cbfac7e6567192142b5a6d073e65" name="a2696cbfac7e6567192142b5a6d073e65"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2696cbfac7e6567192142b5a6d073e65">&#9670;&#160;</a></span>log_dyn()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void WTSLogger::log_dyn </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>patttern</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>catName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>&#160;</td>
+          <td class="paramname"><em>ll</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>使用动态日志模式和分类输出格式化日志 </p>
+<p>根据指定的日志模式、分类名称和级别格式化输出日志</p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Args</td><td>参数类型列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">patttern</td><td>日志模式 </td></tr>
+    <tr><td class="paramname">catName</td><td>日志分类名称 </td></tr>
+    <tr><td class="paramname">ll</td><td>日志级别 </td></tr>
+    <tr><td class="paramname">format</td><td>格式化字符串 </td></tr>
+    <tr><td class="paramname">args</td><td>参数列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00362">362</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa79de9d0d80dc742f23082cf9f08e518" name="aa79de9d0d80dc742f23082cf9f08e518"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa79de9d0d80dc742f23082cf9f08e518">&#9670;&#160;</a></span>log_dyn_prefix()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void WTSLogger::log_dyn_prefix </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>patttern</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>catName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>&#160;</td>
+          <td class="paramname"><em>ll</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>使用动态日志模式和分类输出格式化日志，并添加分类前缀 </p>
+<p>根据指定的日志模式、分类名称和级别格式化输出日志，日志内容前会添加[catName]前缀</p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Args</td><td>参数类型列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">patttern</td><td>日志模式 </td></tr>
+    <tr><td class="paramname">catName</td><td>日志分类名称 </td></tr>
+    <tr><td class="paramname">ll</td><td>日志级别 </td></tr>
+    <tr><td class="paramname">format</td><td>格式化字符串 </td></tr>
+    <tr><td class="paramname">args</td><td>参数列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00385">385</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae4cde1222e609623189a4be2b345680a" name="ae4cde1222e609623189a4be2b345680a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4cde1222e609623189a4be2b345680a">&#9670;&#160;</a></span>log_dyn_raw()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSLogger::log_dyn_raw </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>patttern</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>catName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>&#160;</td>
+          <td class="paramname"><em>ll</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>使用动态分类模式输出日志消息 </p>
+<p>使用动态日志模式直接输出指定级别的日志消息</p>
+<p>使用指定模式和分类的日志器输出指定级别的日志消息</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">patttern</td><td>日志模式 </td></tr>
+    <tr><td class="paramname">catName</td><td>分类名称 </td></tr>
+    <tr><td class="paramname">ll</td><td>日志级别 </td></tr>
+    <tr><td class="paramname">message</td><td>日志消息</td></tr>
+    <tr><td class="paramname">patttern</td><td>日志模式，影响日志输出的格式和目标 </td></tr>
+    <tr><td class="paramname">catName</td><td>分类名称，用于获取或创建对应的日志器 </td></tr>
+    <tr><td class="paramname">ll</td><td>日志级别，决定使用哪个日志函数来输出 </td></tr>
+    <tr><td class="paramname">message</td><td>要输出的日志消息 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00495">495</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa3257bbd8e5b1db25f65cd936f50025c" name="aa3257bbd8e5b1db25f65cd936f50025c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3257bbd8e5b1db25f65cd936f50025c">&#9670;&#160;</a></span>log_raw()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSLogger::log_raw </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>&#160;</td>
+          <td class="paramname"><em>ll</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>直接输出日志消息 </p>
+<p>直接输出指定级别的原始日志消息</p>
+<p>使用默认的日志器输出指定级别的日志消息</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ll</td><td>日志级别 </td></tr>
+    <tr><td class="paramname">message</td><td>日志消息</td></tr>
+    <tr><td class="paramname">ll</td><td>日志级别，决定使用哪个日志函数来输出 </td></tr>
+    <tr><td class="paramname">message</td><td>要输出的日志消息 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00407">407</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a01fb1b92bf14e993751ce211b00e7dd2" name="a01fb1b92bf14e993751ce211b00e7dd2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01fb1b92bf14e993751ce211b00e7dd2">&#9670;&#160;</a></span>log_raw_by_cat()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSLogger::log_raw_by_cat </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>catName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>&#160;</td>
+          <td class="paramname"><em>ll</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>按分类输出日志消息 </p>
+<p>按分类直接输出指定级别的原始日志消息</p>
+<p>使用指定分类的日志器输出指定级别的日志消息</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">catName</td><td>分类名称 </td></tr>
+    <tr><td class="paramname">ll</td><td>日志级别 </td></tr>
+    <tr><td class="paramname">message</td><td>日志消息</td></tr>
+    <tr><td class="paramname">catName</td><td>分类名称，用于获取对应的日志器 </td></tr>
+    <tr><td class="paramname">ll</td><td>日志级别，决定使用哪个日志函数来输出 </td></tr>
+    <tr><td class="paramname">message</td><td>要输出的日志消息 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00446">446</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad083d911e7c7eb24a4b58081fab7fe9c" name="ad083d911e7c7eb24a4b58081fab7fe9c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad083d911e7c7eb24a4b58081fab7fe9c">&#9670;&#160;</a></span>print_message()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSLogger::print_message </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>buffer</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>打印消息到控制台 </p>
+<p>直接打印日志消息到控制台</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">buffer</td><td>消息内容</td></tr>
+    <tr><td class="paramname">buffer</td><td>要打印的消息内容 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00163">163</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a77ce5a61af3730f633708093fdf6671a" name="a77ce5a61af3730f633708093fdf6671a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77ce5a61af3730f633708093fdf6671a">&#9670;&#160;</a></span>registerHandler()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSLogger::registerHandler </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classILogHandler.html">ILogHandler</a> *&#160;</td>
+          <td class="paramname"><em>handler</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>注册自定义日志处理器 </p>
+<p>允许外部注册自定义日志处理器来处理日志消息</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">handler</td><td>自定义日志处理器，默认为NULL</td></tr>
+    <tr><td class="paramname">handler</td><td>日志处理器实例，默认为NULL </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00299">299</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a66085fc4127f10a615a0e5c661f7bdc6" name="a66085fc4127f10a615a0e5c661f7bdc6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66085fc4127f10a615a0e5c661f7bdc6">&#9670;&#160;</a></span>stop()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSLogger::stop </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>停止日志系统 </p>
+<p>停止所有日志输出并释放相关资源</p>
+<p>释放日志系统相关资源，包括关闭所有日志器和释放模式映射 </p>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00309">309</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a147defb6e1fb287cc8d95bfb753f6f11" name="a147defb6e1fb287cc8d95bfb753f6f11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a147defb6e1fb287cc8d95bfb753f6f11">&#9670;&#160;</a></span>warn()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void WTSLogger::warn </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>输出警告级别日志 </p>
+<p>使用fmt格式化库将参数格式化后输出警告级别日志</p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Args</td><td>参数类型列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">format</td><td>格式化字符串 </td></tr>
+    <tr><td class="paramname">args</td><td>参数列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00213">213</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a12f6c55ee4b70927838991b8e440f097" name="a12f6c55ee4b70927838991b8e440f097"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12f6c55ee4b70927838991b8e440f097">&#9670;&#160;</a></span>warn_imp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WTSLogger::warn_imp </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a>&#160;</td>
+          <td class="paramname"><em>logger</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>警告级别日志实现函数 </p>
+<p>警告级别日志输出的实现函数</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">logger</td><td>日志器指针 </td></tr>
+    <tr><td class="paramname">message</td><td>日志消息</td></tr>
+    <tr><td class="paramname">logger</td><td>日志器指针，用于实际输出日志 </td></tr>
+    <tr><td class="paramname">message</td><td>要输出的日志消息 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a> 第 <a class="el" href="WTSLogger_8cpp_source.html#l00356">356</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="aa20f88bdea9232804a41470e8e9fd9b8" name="aa20f88bdea9232804a41470e8e9fd9b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa20f88bdea9232804a41470e8e9fd9b8">&#9670;&#160;</a></span>m_bInited</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WTSLogger::m_bInited = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00435">435</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a71203f56b58d7bce13f5808602be430d" name="a71203f56b58d7bce13f5808602be430d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71203f56b58d7bce13f5808602be430d">&#9670;&#160;</a></span>m_bStopped</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WTSLogger::m_bStopped = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00437">437</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2e570032cda24f991f0f65a56f674c00" name="a2e570032cda24f991f0f65a56f674c00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e570032cda24f991f0f65a56f674c00">&#9670;&#160;</a></span>m_bTpInited</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WTSLogger::m_bTpInited = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00436">436</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7a3c0a39d929f10f6b52f641ed21f0db" name="a7a3c0a39d929f10f6b52f641ed21f0db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a3c0a39d929f10f6b52f641ed21f0db">&#9670;&#160;</a></span>m_buffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">thread_local char WTSLogger::m_buffer</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00447">447</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aadd9e32db9294cff72be1b12a444865c" name="aadd9e32db9294cff72be1b12a444865c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aadd9e32db9294cff72be1b12a444865c">&#9670;&#160;</a></span>m_logHandler</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classILogHandler.html">ILogHandler</a> * WTSLogger::m_logHandler = <a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00438">438</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aeafac60eb27e92d3d241432dfd3dbee4" name="aeafac60eb27e92d3d241432dfd3dbee4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeafac60eb27e92d3d241432dfd3dbee4">&#9670;&#160;</a></span>m_logLevel</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> WTSLogger::m_logLevel = <a class="el" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba6d981d7d88e5e7ae982e5514e0a6ceac">LL_NONE</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00439">439</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac3182f526cc7e8c2fcfdeed57fcf4d6a" name="ac3182f526cc7e8c2fcfdeed57fcf4d6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3182f526cc7e8c2fcfdeed57fcf4d6a">&#9670;&#160;</a></span>m_mapPatterns</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSLogger.html#a1d8ed6d33f3ad8f2826311334163ce65">WTSLogger::LogPatterns</a> * WTSLogger::m_mapPatterns = <a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00444">444</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af5f5ec4d7bf748c8419ba49270443a45" name="af5f5ec4d7bf748c8419ba49270443a45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5f5ec4d7bf748c8419ba49270443a45">&#9670;&#160;</a></span>m_rootLogger</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSLogger_8h.html#aa1e860f1fca62880a96b1fb6719c2968">SpdLoggerPtr</a> WTSLogger::m_rootLogger = <a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00441">441</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad14436a11fcf1952c3ae3d6c13b63342" name="ad14436a11fcf1952c3ae3d6c13b63342"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad14436a11fcf1952c3ae3d6c13b63342">&#9670;&#160;</a></span>m_setDynLoggers</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::set&lt; std::string &gt; WTSLogger::m_setDynLoggers</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a> 第 <a class="el" href="WTSLogger_8h_source.html#l00445">445</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WTSTools/<a class="el" href="WTSLogger_8h_source.html">WTSLogger.h</a></li>
+<li>src/WTSTools/<a class="el" href="WTSLogger_8cpp_source.html">WTSLogger.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classWTSLogger.html">WTSLogger</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+var classCsvReader =
+[
+    [ "CsvReader", "classCsvReader.html#acf4c9e8c1960a2bfaa6e2fcf480f3fb9", null ],
+    [ "check_cell", "classCsvReader.html#a7ad65b4b670aaece2f65779e7d87a0e4", null ],
+    [ "col_count", "classCsvReader.html#ae30835c13c53e72ae5353c36f888bee2", null ],
+    [ "fields", "classCsvReader.html#a206a8e7a7b02441b8bde1ebc1cbc4699", null ],
+    [ "get_col_by_filed", "classCsvReader.html#ab2f0af64bad0875c8fe92c47b4a1c132", null ],
+    [ "get_double", "classCsvReader.html#a785e02733ef64a43f80c5a6c24f46b3b", null ],
+    [ "get_double", "classCsvReader.html#a3d475909d51d3a731ab87f2287531797", null ],
+    [ "get_int32", "classCsvReader.html#a2901b1258c30a4c8346523c2a76d8411", null ],
+    [ "get_int32", "classCsvReader.html#a244dad7f98c135125a44f836e300f4f0", null ],
+    [ "get_int64", "classCsvReader.html#a632b8ffb9e65ae3dcf0d0fb573198e40", null ],
+    [ "get_int64", "classCsvReader.html#ac0c9b6c1a7958fe4dce928d236980545", null ],
+    [ "get_string", "classCsvReader.html#a89d855b2e00bcecf631b18f116f26176", null ],
+    [ "get_string", "classCsvReader.html#aa9b837943b8969ce1ad33dc894ffa137", null ],
+    [ "get_uint32", "classCsvReader.html#a60517a115b470da483b04ca538aab5e0", null ],
+    [ "get_uint32", "classCsvReader.html#a8c0ae3d0ba89a1564eab92ca92995623", null ],
+    [ "get_uint64", "classCsvReader.html#afed488107dbe91fc05dd1b3c14a6fd88", null ],
+    [ "get_uint64", "classCsvReader.html#a34f9ee97ce4b292e63b7cfd53057a5f1", null ],
+    [ "load_from_file", "classCsvReader.html#a58620553a5d28321c617b7896615acaa", null ],
+    [ "next_row", "classCsvReader.html#ae4b43d7a3aaa3e9f4c0d8d8a9a9c4af4", null ],
+    [ "_buffer", "classCsvReader.html#a0ec8017ff560c2208d9ff21953de9a8d", null ],
+    [ "_current_cells", "classCsvReader.html#a7f285c1406064d2f2f5541a6fa61fbea", null ],
+    [ "_fields_map", "classCsvReader.html#ac4e171df7a32c587fe5e7afb0ad408fc", null ],
+    [ "_ifs", "classCsvReader.html#aa2d90e05c1b56ffae8862b10c4b9c21b", null ],
+    [ "_item_splitter", "classCsvReader.html#ac58b57a44a9c0ad9154bde12c194427d", null ]
+];

@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/singledocparser.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('singledocparser_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">singledocparser.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="singledocparser_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef SINGLEDOCPARSER_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define SINGLEDOCPARSER_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#if defined(_MSC_VER) ||                                            \</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">    (defined(__GNUC__) &amp;&amp; (__GNUC__ == 3 &amp;&amp; __GNUC_MINOR__ &gt;= 4) || \</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">     (__GNUC__ &gt;= 4))  </span><span class="comment">// GCC supports &quot;pragma once&quot; correctly since 3.4</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;map&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="anchor_8h.html">yaml-cpp/anchor.h</a>&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceYAML.html">YAML</a> {</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">class </span>CollectionStack;</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">template</span> &lt;<span class="keywordtype">int</span>&gt; <span class="keyword">class </span>DepthGuard; <span class="comment">// depthguard.h</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">class </span>EventHandler;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">class </span>Node;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">class </span>Scanner;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">struct </span>Directives;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">struct </span>Mark;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">struct </span>Token;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="foldopen" id="foldopen00026" data-start="{" data-end="};">
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="classYAML_1_1SingleDocParser.html">   26</a></span><span class="keyword">class </span><a class="code hl_class" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a> {</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  <a class="code hl_class" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a>(<a class="code hl_class" href="classYAML_1_1Scanner.html">Scanner</a>&amp; scanner, <span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Directives.html">Directives</a>&amp; directives);</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classYAML_1_1SingleDocParser.html#ab4ff96c5ae000df0bfa1eae72cdfc6e9">   29</a></span>  <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#ab4ff96c5ae000df0bfa1eae72cdfc6e9">SingleDocParser</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classYAML_1_1SingleDocParser.html#a0076f4801ccdf57b97a56d238c33ce46">   30</a></span>  <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#a0076f4801ccdf57b97a56d238c33ce46">SingleDocParser</a>(<a class="code hl_class" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a>&amp;&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classYAML_1_1SingleDocParser.html#a5ac53e3f3a1f63fcaced936d451ca225">   31</a></span>  <a class="code hl_class" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a>&amp; <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#a5ac53e3f3a1f63fcaced936d451ca225">operator=</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classYAML_1_1SingleDocParser.html#a31fd8041fe99859476b204942133cecd">   32</a></span>  <a class="code hl_class" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a>&amp; <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#a31fd8041fe99859476b204942133cecd">operator=</a>(<a class="code hl_class" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a>&amp;&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classYAML_1_1SingleDocParser.html#a3cb841ba024f59aee663aa3e260c4ed4">   33</a></span>  <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#a3cb841ba024f59aee663aa3e260c4ed4">~SingleDocParser</a>();</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#a7f5d60caf212161d978be553e803d615">HandleDocument</a>(<a class="code hl_class" href="classYAML_1_1EventHandler.html">EventHandler</a>&amp; eventHandler);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#a39a10304c10ea81d765960bcc1f19dd4">HandleNode</a>(<a class="code hl_class" href="classYAML_1_1EventHandler.html">EventHandler</a>&amp; eventHandler);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#a47b86177653a2dda91d5ea048056cae1">HandleSequence</a>(<a class="code hl_class" href="classYAML_1_1EventHandler.html">EventHandler</a>&amp; eventHandler);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#ae91d52320ec176023f85e61d92fd975c">HandleBlockSequence</a>(<a class="code hl_class" href="classYAML_1_1EventHandler.html">EventHandler</a>&amp; eventHandler);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#ae254cbf79e97719026b88c10fd2eef7a">HandleFlowSequence</a>(<a class="code hl_class" href="classYAML_1_1EventHandler.html">EventHandler</a>&amp; eventHandler);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#ada3312a9f70ab32e7c222fbffcf4be1f">HandleMap</a>(<a class="code hl_class" href="classYAML_1_1EventHandler.html">EventHandler</a>&amp; eventHandler);</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#a3b75da5626894e7ae188349adfd73e01">HandleBlockMap</a>(<a class="code hl_class" href="classYAML_1_1EventHandler.html">EventHandler</a>&amp; eventHandler);</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#ae48a7acad9ff9c507c227caf577cdd3f">HandleFlowMap</a>(<a class="code hl_class" href="classYAML_1_1EventHandler.html">EventHandler</a>&amp; eventHandler);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#a52baa6e3302bd04a8a444776041b9bec">HandleCompactMap</a>(<a class="code hl_class" href="classYAML_1_1EventHandler.html">EventHandler</a>&amp; eventHandler);</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#a6a79abd9566c395252f17592b3bbabe5">HandleCompactMapWithNoKey</a>(<a class="code hl_class" href="classYAML_1_1EventHandler.html">EventHandler</a>&amp; eventHandler);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#a89a3787f282de8907168919e357a7c56">ParseProperties</a>(std::string&amp; tag, <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a>&amp; anchor,</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>                       std::string&amp; anchor_name);</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#a7589242b328cd5f33a7e8b010ca0e4b4">ParseTag</a>(std::string&amp; tag);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#af22166ab27b55f88e91e97060df64b9c">ParseAnchor</a>(<a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a>&amp; anchor, std::string&amp; anchor_name);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#a67a5b37dd64968b3c9439f92019d3d84">RegisterAnchor</a>(<span class="keyword">const</span> std::string&amp; name);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> <a class="code hl_function" href="classYAML_1_1SingleDocParser.html#af8c99ee7dcfc9e328a60c6e09da820f0">LookupAnchor</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark, <span class="keyword">const</span> std::string&amp; name) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="classYAML_1_1SingleDocParser.html#aa738023830de9231fdb908ea2f633eda">   59</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="classYAML_1_1SingleDocParser.html#aa738023830de9231fdb908ea2f633eda">depth</a> = 0;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="classYAML_1_1SingleDocParser.html#ae48f92157c43d59bef0a51e813bd09ea">   60</a></span>  <a class="code hl_class" href="classYAML_1_1Scanner.html">Scanner</a>&amp; <a class="code hl_variable" href="classYAML_1_1SingleDocParser.html#ae48f92157c43d59bef0a51e813bd09ea">m_scanner</a>;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classYAML_1_1SingleDocParser.html#aaee10ea57bf3cda0a258bf02e6b59d08">   61</a></span>  <span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Directives.html">Directives</a>&amp; <a class="code hl_variable" href="classYAML_1_1SingleDocParser.html#aaee10ea57bf3cda0a258bf02e6b59d08">m_directives</a>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="classYAML_1_1SingleDocParser.html#a53a93a64dd5d4ad8f846f90e2c802159">   62</a></span>  std::unique_ptr&lt;CollectionStack&gt; <a class="code hl_variable" href="classYAML_1_1SingleDocParser.html#a53a93a64dd5d4ad8f846f90e2c802159">m_pCollectionStack</a>;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classYAML_1_1SingleDocParser.html#a61e5114292ff648f70d5d4834269970b">   64</a></span>  <span class="keyword">using </span><a class="code hl_typedef" href="classYAML_1_1SingleDocParser.html#a61e5114292ff648f70d5d4834269970b">Anchors</a> = std::map&lt;std::string, anchor_t&gt;;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classYAML_1_1SingleDocParser.html#ad2cf5f514cdbd44292b7ed6f938d0d06">   65</a></span>  <a class="code hl_typedef" href="classYAML_1_1SingleDocParser.html#a61e5114292ff648f70d5d4834269970b">Anchors</a> <a class="code hl_variable" href="classYAML_1_1SingleDocParser.html#ad2cf5f514cdbd44292b7ed6f938d0d06">m_anchors</a>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classYAML_1_1SingleDocParser.html#a4453c39d37c035fa3f5d761240055bb6">   67</a></span>  <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> <a class="code hl_variable" href="classYAML_1_1SingleDocParser.html#a4453c39d37c035fa3f5d761240055bb6">m_curAnchor</a>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>};</div>
+</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>}  <span class="comment">// namespace YAML</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#endif  </span><span class="comment">// SINGLEDOCPARSER_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="ttc" id="aanchor_8h_html"><div class="ttname"><a href="anchor_8h.html">anchor.h</a></div></div>
+<div class="ttc" id="aclassYAML_1_1EventHandler_html"><div class="ttname"><a href="classYAML_1_1EventHandler.html">YAML::EventHandler</a></div><div class="ttdef"><b>Definition</b> <a href="eventhandler_8h_source.html#l00018">eventhandler.h:18</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Scanner_html"><div class="ttname"><a href="classYAML_1_1Scanner.html">YAML::Scanner</a></div><div class="ttdef"><b>Definition</b> <a href="scanner_8h_source.html#l00030">scanner.h:30</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html">YAML::SingleDocParser</a></div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8h_source.html#l00026">singledocparser.h:26</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a0076f4801ccdf57b97a56d238c33ce46"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a0076f4801ccdf57b97a56d238c33ce46">YAML::SingleDocParser::SingleDocParser</a></div><div class="ttdeci">SingleDocParser(SingleDocParser &amp;&amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a31fd8041fe99859476b204942133cecd"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a31fd8041fe99859476b204942133cecd">YAML::SingleDocParser::operator=</a></div><div class="ttdeci">SingleDocParser &amp; operator=(SingleDocParser &amp;&amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a39a10304c10ea81d765960bcc1f19dd4"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a39a10304c10ea81d765960bcc1f19dd4">YAML::SingleDocParser::HandleNode</a></div><div class="ttdeci">void HandleNode(EventHandler &amp;eventHandler)</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00050">singledocparser.cpp:50</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a3b75da5626894e7ae188349adfd73e01"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a3b75da5626894e7ae188349adfd73e01">YAML::SingleDocParser::HandleBlockMap</a></div><div class="ttdeci">void HandleBlockMap(EventHandler &amp;eventHandler)</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00251">singledocparser.cpp:251</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a3cb841ba024f59aee663aa3e260c4ed4"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a3cb841ba024f59aee663aa3e260c4ed4">YAML::SingleDocParser::~SingleDocParser</a></div><div class="ttdeci">~SingleDocParser()</div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a4453c39d37c035fa3f5d761240055bb6"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a4453c39d37c035fa3f5d761240055bb6">YAML::SingleDocParser::m_curAnchor</a></div><div class="ttdeci">anchor_t m_curAnchor</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8h_source.html#l00067">singledocparser.h:67</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a47b86177653a2dda91d5ea048056cae1"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a47b86177653a2dda91d5ea048056cae1">YAML::SingleDocParser::HandleSequence</a></div><div class="ttdeci">void HandleSequence(EventHandler &amp;eventHandler)</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00151">singledocparser.cpp:151</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a52baa6e3302bd04a8a444776041b9bec"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a52baa6e3302bd04a8a444776041b9bec">YAML::SingleDocParser::HandleCompactMap</a></div><div class="ttdeci">void HandleCompactMap(EventHandler &amp;eventHandler)</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00339">singledocparser.cpp:339</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a53a93a64dd5d4ad8f846f90e2c802159"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a53a93a64dd5d4ad8f846f90e2c802159">YAML::SingleDocParser::m_pCollectionStack</a></div><div class="ttdeci">std::unique_ptr&lt; CollectionStack &gt; m_pCollectionStack</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8h_source.html#l00062">singledocparser.h:62</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a5ac53e3f3a1f63fcaced936d451ca225"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a5ac53e3f3a1f63fcaced936d451ca225">YAML::SingleDocParser::operator=</a></div><div class="ttdeci">SingleDocParser &amp; operator=(const SingleDocParser &amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a61e5114292ff648f70d5d4834269970b"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a61e5114292ff648f70d5d4834269970b">YAML::SingleDocParser::Anchors</a></div><div class="ttdeci">std::map&lt; std::string, anchor_t &gt; Anchors</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8h_source.html#l00064">singledocparser.h:64</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a67a5b37dd64968b3c9439f92019d3d84"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a67a5b37dd64968b3c9439f92019d3d84">YAML::SingleDocParser::RegisterAnchor</a></div><div class="ttdeci">anchor_t RegisterAnchor(const std::string &amp;name)</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00417">singledocparser.cpp:417</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a6a79abd9566c395252f17592b3bbabe5"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a6a79abd9566c395252f17592b3bbabe5">YAML::SingleDocParser::HandleCompactMapWithNoKey</a></div><div class="ttdeci">void HandleCompactMapWithNoKey(EventHandler &amp;eventHandler)</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00359">singledocparser.cpp:359</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a7589242b328cd5f33a7e8b010ca0e4b4"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a7589242b328cd5f33a7e8b010ca0e4b4">YAML::SingleDocParser::ParseTag</a></div><div class="ttdeci">void ParseTag(std::string &amp;tag)</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00397">singledocparser.cpp:397</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a7f5d60caf212161d978be553e803d615"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a7f5d60caf212161d978be553e803d615">YAML::SingleDocParser::HandleDocument</a></div><div class="ttdeci">void HandleDocument(EventHandler &amp;eventHandler)</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00030">singledocparser.cpp:30</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_a89a3787f282de8907168919e357a7c56"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#a89a3787f282de8907168919e357a7c56">YAML::SingleDocParser::ParseProperties</a></div><div class="ttdeci">void ParseProperties(std::string &amp;tag, anchor_t &amp;anchor, std::string &amp;anchor_name)</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00374">singledocparser.cpp:374</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_aa738023830de9231fdb908ea2f633eda"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#aa738023830de9231fdb908ea2f633eda">YAML::SingleDocParser::depth</a></div><div class="ttdeci">int depth</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8h_source.html#l00059">singledocparser.h:59</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_aaee10ea57bf3cda0a258bf02e6b59d08"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#aaee10ea57bf3cda0a258bf02e6b59d08">YAML::SingleDocParser::m_directives</a></div><div class="ttdeci">const Directives &amp; m_directives</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8h_source.html#l00061">singledocparser.h:61</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_ab4ff96c5ae000df0bfa1eae72cdfc6e9"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#ab4ff96c5ae000df0bfa1eae72cdfc6e9">YAML::SingleDocParser::SingleDocParser</a></div><div class="ttdeci">SingleDocParser(const SingleDocParser &amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_ad2cf5f514cdbd44292b7ed6f938d0d06"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#ad2cf5f514cdbd44292b7ed6f938d0d06">YAML::SingleDocParser::m_anchors</a></div><div class="ttdeci">Anchors m_anchors</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8h_source.html#l00065">singledocparser.h:65</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_ada3312a9f70ab32e7c222fbffcf4be1f"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#ada3312a9f70ab32e7c222fbffcf4be1f">YAML::SingleDocParser::HandleMap</a></div><div class="ttdeci">void HandleMap(EventHandler &amp;eventHandler)</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00231">singledocparser.cpp:231</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_ae254cbf79e97719026b88c10fd2eef7a"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#ae254cbf79e97719026b88c10fd2eef7a">YAML::SingleDocParser::HandleFlowSequence</a></div><div class="ttdeci">void HandleFlowSequence(EventHandler &amp;eventHandler)</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00198">singledocparser.cpp:198</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_ae48a7acad9ff9c507c227caf577cdd3f"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#ae48a7acad9ff9c507c227caf577cdd3f">YAML::SingleDocParser::HandleFlowMap</a></div><div class="ttdeci">void HandleFlowMap(EventHandler &amp;eventHandler)</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00290">singledocparser.cpp:290</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_ae48f92157c43d59bef0a51e813bd09ea"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#ae48f92157c43d59bef0a51e813bd09ea">YAML::SingleDocParser::m_scanner</a></div><div class="ttdeci">Scanner &amp; m_scanner</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8h_source.html#l00060">singledocparser.h:60</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_ae91d52320ec176023f85e61d92fd975c"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#ae91d52320ec176023f85e61d92fd975c">YAML::SingleDocParser::HandleBlockSequence</a></div><div class="ttdeci">void HandleBlockSequence(EventHandler &amp;eventHandler)</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00165">singledocparser.cpp:165</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_af22166ab27b55f88e91e97060df64b9c"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#af22166ab27b55f88e91e97060df64b9c">YAML::SingleDocParser::ParseAnchor</a></div><div class="ttdeci">void ParseAnchor(anchor_t &amp;anchor, std::string &amp;anchor_name)</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00407">singledocparser.cpp:407</a></div></div>
+<div class="ttc" id="aclassYAML_1_1SingleDocParser_html_af8c99ee7dcfc9e328a60c6e09da820f0"><div class="ttname"><a href="classYAML_1_1SingleDocParser.html#af8c99ee7dcfc9e328a60c6e09da820f0">YAML::SingleDocParser::LookupAnchor</a></div><div class="ttdeci">anchor_t LookupAnchor(const Mark &amp;mark, const std::string &amp;name) const</div><div class="ttdef"><b>Definition</b> <a href="singledocparser_8cpp_source.html#l00424">singledocparser.cpp:424</a></div></div>
+<div class="ttc" id="anamespaceYAML_html"><div class="ttname"><a href="namespaceYAML.html">YAML</a></div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00005">binary.cpp:5</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_ab5748184c36c2ff7b8229010c7259a0f"><div class="ttname"><a href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">YAML::anchor_t</a></div><div class="ttdeci">std::size_t anchor_t</div><div class="ttdef"><b>Definition</b> <a href="anchor_8h_source.html#l00013">anchor.h:13</a></div></div>
+<div class="ttc" id="astructYAML_1_1Directives_html"><div class="ttname"><a href="structYAML_1_1Directives.html">YAML::Directives</a></div><div class="ttdef"><b>Definition</b> <a href="directives_8h_source.html#l00019">directives.h:19</a></div></div>
+<div class="ttc" id="astructYAML_1_1Mark_html"><div class="ttname"><a href="structYAML_1_1Mark.html">YAML::Mark</a></div><div class="ttdef"><b>Definition</b> <a href="mark_8h_source.html#l00013">mark.h:13</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="singledocparser_8h.html">singledocparser.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

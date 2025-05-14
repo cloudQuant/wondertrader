@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/nodebuilder.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('nodebuilder_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">nodebuilder.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="nodebuilder_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef NODE_NODEBUILDER_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define NODE_NODEBUILDER_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#if defined(_MSC_VER) ||                                            \</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">    (defined(__GNUC__) &amp;&amp; (__GNUC__ == 3 &amp;&amp; __GNUC_MINOR__ &gt;= 4) || \</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">     (__GNUC__ &gt;= 4))  </span><span class="comment">// GCC supports &quot;pragma once&quot; correctly since 3.4</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="anchor_8h.html">yaml-cpp/anchor.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="emitterstyle_8h.html">yaml-cpp/emitterstyle.h</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="eventhandler_8h.html">yaml-cpp/eventhandler.h</a>&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="ptr_8h.html">yaml-cpp/node/ptr.h</a>&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceYAML.html">YAML</a> {</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacedetail.html">detail</a> {</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">class </span>node;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>}  <span class="comment">// namespace detail</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">struct </span>Mark;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>}  <span class="comment">// namespace YAML</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceYAML.html">YAML</a> {</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">class </span>Node;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="foldopen" id="foldopen00027" data-start="{" data-end="};">
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classYAML_1_1NodeBuilder.html">   27</a></span><span class="keyword">class </span><a class="code hl_class" href="classYAML_1_1NodeBuilder.html">NodeBuilder</a> : <span class="keyword">public</span> <a class="code hl_class" href="classYAML_1_1EventHandler.html">EventHandler</a> {</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#aa49e445eb75f93a714e6cb5682313daa">NodeBuilder</a>();</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classYAML_1_1NodeBuilder.html#a6d70411ab26f00493619515f54157dd2">   30</a></span>  <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#a6d70411ab26f00493619515f54157dd2">NodeBuilder</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1NodeBuilder.html">NodeBuilder</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classYAML_1_1NodeBuilder.html#ae2ba6bb03a1f2e370021c4fc9161a6d6">   31</a></span>  <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#ae2ba6bb03a1f2e370021c4fc9161a6d6">NodeBuilder</a>(<a class="code hl_class" href="classYAML_1_1NodeBuilder.html">NodeBuilder</a>&amp;&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classYAML_1_1NodeBuilder.html#ad5ec44a6de8595575ce4276cf2b9c82f">   32</a></span>  <a class="code hl_class" href="classYAML_1_1NodeBuilder.html">NodeBuilder</a>&amp; <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#ad5ec44a6de8595575ce4276cf2b9c82f">operator=</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1NodeBuilder.html">NodeBuilder</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classYAML_1_1NodeBuilder.html#a9898ebab337db655ff3659cec538f710">   33</a></span>  <a class="code hl_class" href="classYAML_1_1NodeBuilder.html">NodeBuilder</a>&amp; <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#a9898ebab337db655ff3659cec538f710">operator=</a>(<a class="code hl_class" href="classYAML_1_1NodeBuilder.html">NodeBuilder</a>&amp;&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classYAML_1_1NodeBuilder.html#a3f36d6b71868092619d6e631e86f80aa">   34</a></span>  <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#a3f36d6b71868092619d6e631e86f80aa">~NodeBuilder</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <a class="code hl_class" href="classYAML_1_1Node.html">Node</a> <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#a04a3a526a145110393efac4905714bb1">Root</a>();</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#a8373cecf209190edb6bdcefe65e57da1">OnDocumentStart</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#ae21eefa8c8593badb3d93437280e1967">OnDocumentEnd</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#a3db5d16aa31f996206f92dd1edbf3bb8">OnNull</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark, <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> anchor) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#ad194f67598d34a220d9f2ff832714759">OnAlias</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark, <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> anchor) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#a9ec0492a52c65b48dbd8c67f03c14ac7">OnScalar</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark, <span class="keyword">const</span> std::string&amp; tag,</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>                        <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> anchor, <span class="keyword">const</span> std::string&amp; <a class="code hl_variable" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#ae91de0a44092adb69ad9738c1b904130">OnSequenceStart</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark, <span class="keyword">const</span> std::string&amp; tag,</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>                               <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> anchor, <a class="code hl_enumeration" href="structYAML_1_1EmitterStyle.html#ae86640662c85ce6062a37f9636b6959f">EmitterStyle::value</a> style) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#a4d299274bbdc1aac3d3b2c248ba0b96d">OnSequenceEnd</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#a0bac731f4b3db3360f7853139d044d44">OnMapStart</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark, <span class="keyword">const</span> std::string&amp; tag,</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>                          <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> anchor, <a class="code hl_enumeration" href="structYAML_1_1EmitterStyle.html#ae86640662c85ce6062a37f9636b6959f">EmitterStyle::value</a> style) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#afdb0f793bf07b39c5ec8379147cd7511">OnMapEnd</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  <a class="code hl_class" href="classYAML_1_1detail_1_1node.html">detail::node</a>&amp; <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#a23d8342a6620f3b0f745926d4b9f84f2">Push</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structYAML_1_1Mark.html">Mark</a>&amp; mark, <a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> anchor);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#a23d8342a6620f3b0f745926d4b9f84f2">Push</a>(<a class="code hl_class" href="classYAML_1_1detail_1_1node.html">detail::node</a>&amp; node);</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#a7c652a28d2a17076d02925a94284e72c">Pop</a>();</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1NodeBuilder.html#a660f2c115cdf770d96441241d5eb52cd">RegisterAnchor</a>(<a class="code hl_typedef" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> anchor, <a class="code hl_class" href="classYAML_1_1detail_1_1node.html">detail::node</a>&amp; node);</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classYAML_1_1NodeBuilder.html#a8adab7b4c9e8fba0d7d06c41e1eae339">   61</a></span>  <a class="code hl_typedef" href="namespaceYAML_1_1detail.html#a02dee2ddd5c753bedbd194328e1913c4">detail::shared_memory_holder</a> <a class="code hl_variable" href="classYAML_1_1NodeBuilder.html#a8adab7b4c9e8fba0d7d06c41e1eae339">m_pMemory</a>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="classYAML_1_1NodeBuilder.html#a77180bbecd927c402f35522f6a46032f">   62</a></span>  <a class="code hl_class" href="classYAML_1_1detail_1_1node.html">detail::node</a>* <a class="code hl_variable" href="classYAML_1_1NodeBuilder.html#a77180bbecd927c402f35522f6a46032f">m_pRoot</a>;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classYAML_1_1NodeBuilder.html#ae42a221a478f560f7fe16658e98fb380">   64</a></span>  <span class="keyword">using </span><a class="code hl_typedef" href="classYAML_1_1NodeBuilder.html#ae42a221a478f560f7fe16658e98fb380">Nodes</a> = std::vector&lt;detail::node *&gt;;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classYAML_1_1NodeBuilder.html#a45023437c50d4b7fc1167d7e54f20b0a">   65</a></span>  <a class="code hl_typedef" href="classYAML_1_1NodeBuilder.html#ae42a221a478f560f7fe16658e98fb380">Nodes</a> <a class="code hl_variable" href="classYAML_1_1NodeBuilder.html#a45023437c50d4b7fc1167d7e54f20b0a">m_stack</a>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="classYAML_1_1NodeBuilder.html#a6642dca1bdfdc11a19e536851ad123da">   66</a></span>  <a class="code hl_typedef" href="classYAML_1_1NodeBuilder.html#ae42a221a478f560f7fe16658e98fb380">Nodes</a> <a class="code hl_variable" href="classYAML_1_1NodeBuilder.html#a6642dca1bdfdc11a19e536851ad123da">m_anchors</a>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="classYAML_1_1NodeBuilder.html#a89bbeaf7e0e34b4f139c50cd53797a9a">   68</a></span>  <span class="keyword">using </span><a class="code hl_typedef" href="classYAML_1_1NodeBuilder.html#a89bbeaf7e0e34b4f139c50cd53797a9a">PushedKey</a> = std::pair&lt;detail::node*, bool&gt;;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="classYAML_1_1NodeBuilder.html#ab2407861c242bc4eb632cd1166858294">   69</a></span>  std::vector&lt;PushedKey&gt; <a class="code hl_variable" href="classYAML_1_1NodeBuilder.html#ab2407861c242bc4eb632cd1166858294">m_keys</a>;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="classYAML_1_1NodeBuilder.html#a1e4360d8bc4953102259d48144f621a5">   70</a></span>  std::size_t <a class="code hl_variable" href="classYAML_1_1NodeBuilder.html#a1e4360d8bc4953102259d48144f621a5">m_mapDepth</a>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>};</div>
+</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>}  <span class="comment">// namespace YAML</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#endif  </span><span class="comment">// NODE_NODEBUILDER_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="ttc" id="aanchor_8h_html"><div class="ttname"><a href="anchor_8h.html">anchor.h</a></div></div>
+<div class="ttc" id="aclassYAML_1_1EventHandler_html"><div class="ttname"><a href="classYAML_1_1EventHandler.html">YAML::EventHandler</a></div><div class="ttdef"><b>Definition</b> <a href="eventhandler_8h_source.html#l00018">eventhandler.h:18</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html">YAML::NodeBuilder</a></div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8h_source.html#l00027">nodebuilder.h:27</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a04a3a526a145110393efac4905714bb1"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a04a3a526a145110393efac4905714bb1">YAML::NodeBuilder::Root</a></div><div class="ttdeci">Node Root()</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8cpp_source.html#l00024">nodebuilder.cpp:24</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a0bac731f4b3db3360f7853139d044d44"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a0bac731f4b3db3360f7853139d044d44">YAML::NodeBuilder::OnMapStart</a></div><div class="ttdeci">void OnMapStart(const Mark &amp;mark, const std::string &amp;tag, anchor_t anchor, EmitterStyle::value style) override</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8cpp_source.html#l00065">nodebuilder.cpp:65</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a1e4360d8bc4953102259d48144f621a5"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a1e4360d8bc4953102259d48144f621a5">YAML::NodeBuilder::m_mapDepth</a></div><div class="ttdeci">std::size_t m_mapDepth</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8h_source.html#l00070">nodebuilder.h:70</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a23d8342a6620f3b0f745926d4b9f84f2"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a23d8342a6620f3b0f745926d4b9f84f2">YAML::NodeBuilder::Push</a></div><div class="ttdeci">detail::node &amp; Push(const Mark &amp;mark, anchor_t anchor)</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8cpp_source.html#l00080">nodebuilder.cpp:80</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a3db5d16aa31f996206f92dd1edbf3bb8"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a3db5d16aa31f996206f92dd1edbf3bb8">YAML::NodeBuilder::OnNull</a></div><div class="ttdeci">void OnNull(const Mark &amp;mark, anchor_t anchor) override</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8cpp_source.html#l00035">nodebuilder.cpp:35</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a3f36d6b71868092619d6e631e86f80aa"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a3f36d6b71868092619d6e631e86f80aa">YAML::NodeBuilder::~NodeBuilder</a></div><div class="ttdeci">~NodeBuilder() override</div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a45023437c50d4b7fc1167d7e54f20b0a"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a45023437c50d4b7fc1167d7e54f20b0a">YAML::NodeBuilder::m_stack</a></div><div class="ttdeci">Nodes m_stack</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8h_source.html#l00065">nodebuilder.h:65</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a4d299274bbdc1aac3d3b2c248ba0b96d"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a4d299274bbdc1aac3d3b2c248ba0b96d">YAML::NodeBuilder::OnSequenceEnd</a></div><div class="ttdeci">void OnSequenceEnd() override</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8cpp_source.html#l00063">nodebuilder.cpp:63</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a660f2c115cdf770d96441241d5eb52cd"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a660f2c115cdf770d96441241d5eb52cd">YAML::NodeBuilder::RegisterAnchor</a></div><div class="ttdeci">void RegisterAnchor(anchor_t anchor, detail::node &amp;node)</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8cpp_source.html#l00128">nodebuilder.cpp:128</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a6642dca1bdfdc11a19e536851ad123da"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a6642dca1bdfdc11a19e536851ad123da">YAML::NodeBuilder::m_anchors</a></div><div class="ttdeci">Nodes m_anchors</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8h_source.html#l00066">nodebuilder.h:66</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a6d70411ab26f00493619515f54157dd2"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a6d70411ab26f00493619515f54157dd2">YAML::NodeBuilder::NodeBuilder</a></div><div class="ttdeci">NodeBuilder(const NodeBuilder &amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a77180bbecd927c402f35522f6a46032f"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a77180bbecd927c402f35522f6a46032f">YAML::NodeBuilder::m_pRoot</a></div><div class="ttdeci">detail::node * m_pRoot</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8h_source.html#l00062">nodebuilder.h:62</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a7c652a28d2a17076d02925a94284e72c"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a7c652a28d2a17076d02925a94284e72c">YAML::NodeBuilder::Pop</a></div><div class="ttdeci">void Pop()</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8cpp_source.html#l00098">nodebuilder.cpp:98</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a8373cecf209190edb6bdcefe65e57da1"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a8373cecf209190edb6bdcefe65e57da1">YAML::NodeBuilder::OnDocumentStart</a></div><div class="ttdeci">void OnDocumentStart(const Mark &amp;mark) override</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8cpp_source.html#l00031">nodebuilder.cpp:31</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a89bbeaf7e0e34b4f139c50cd53797a9a"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a89bbeaf7e0e34b4f139c50cd53797a9a">YAML::NodeBuilder::PushedKey</a></div><div class="ttdeci">std::pair&lt; detail::node *, bool &gt; PushedKey</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8h_source.html#l00068">nodebuilder.h:68</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a8adab7b4c9e8fba0d7d06c41e1eae339"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a8adab7b4c9e8fba0d7d06c41e1eae339">YAML::NodeBuilder::m_pMemory</a></div><div class="ttdeci">detail::shared_memory_holder m_pMemory</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8h_source.html#l00061">nodebuilder.h:61</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a9898ebab337db655ff3659cec538f710"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a9898ebab337db655ff3659cec538f710">YAML::NodeBuilder::operator=</a></div><div class="ttdeci">NodeBuilder &amp; operator=(NodeBuilder &amp;&amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_a9ec0492a52c65b48dbd8c67f03c14ac7"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#a9ec0492a52c65b48dbd8c67f03c14ac7">YAML::NodeBuilder::OnScalar</a></div><div class="ttdeci">void OnScalar(const Mark &amp;mark, const std::string &amp;tag, anchor_t anchor, const std::string &amp;value) override</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8cpp_source.html#l00047">nodebuilder.cpp:47</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_aa49e445eb75f93a714e6cb5682313daa"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#aa49e445eb75f93a714e6cb5682313daa">YAML::NodeBuilder::NodeBuilder</a></div><div class="ttdeci">NodeBuilder()</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8cpp_source.html#l00012">nodebuilder.cpp:12</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_ab2407861c242bc4eb632cd1166858294"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#ab2407861c242bc4eb632cd1166858294">YAML::NodeBuilder::m_keys</a></div><div class="ttdeci">std::vector&lt; PushedKey &gt; m_keys</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8h_source.html#l00069">nodebuilder.h:69</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_ad194f67598d34a220d9f2ff832714759"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#ad194f67598d34a220d9f2ff832714759">YAML::NodeBuilder::OnAlias</a></div><div class="ttdeci">void OnAlias(const Mark &amp;mark, anchor_t anchor) override</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8cpp_source.html#l00041">nodebuilder.cpp:41</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_ad5ec44a6de8595575ce4276cf2b9c82f"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#ad5ec44a6de8595575ce4276cf2b9c82f">YAML::NodeBuilder::operator=</a></div><div class="ttdeci">NodeBuilder &amp; operator=(const NodeBuilder &amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_ae21eefa8c8593badb3d93437280e1967"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#ae21eefa8c8593badb3d93437280e1967">YAML::NodeBuilder::OnDocumentEnd</a></div><div class="ttdeci">void OnDocumentEnd() override</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8cpp_source.html#l00033">nodebuilder.cpp:33</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_ae2ba6bb03a1f2e370021c4fc9161a6d6"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#ae2ba6bb03a1f2e370021c4fc9161a6d6">YAML::NodeBuilder::NodeBuilder</a></div><div class="ttdeci">NodeBuilder(NodeBuilder &amp;&amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_ae42a221a478f560f7fe16658e98fb380"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#ae42a221a478f560f7fe16658e98fb380">YAML::NodeBuilder::Nodes</a></div><div class="ttdeci">std::vector&lt; detail::node * &gt; Nodes</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8h_source.html#l00064">nodebuilder.h:64</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_ae91de0a44092adb69ad9738c1b904130"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#ae91de0a44092adb69ad9738c1b904130">YAML::NodeBuilder::OnSequenceStart</a></div><div class="ttdeci">void OnSequenceStart(const Mark &amp;mark, const std::string &amp;tag, anchor_t anchor, EmitterStyle::value style) override</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8cpp_source.html#l00055">nodebuilder.cpp:55</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeBuilder_html_afdb0f793bf07b39c5ec8379147cd7511"><div class="ttname"><a href="classYAML_1_1NodeBuilder.html#afdb0f793bf07b39c5ec8379147cd7511">YAML::NodeBuilder::OnMapEnd</a></div><div class="ttdeci">void OnMapEnd() override</div><div class="ttdef"><b>Definition</b> <a href="nodebuilder_8cpp_source.html#l00074">nodebuilder.cpp:74</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Node_html"><div class="ttname"><a href="classYAML_1_1Node.html">YAML::Node</a></div><div class="ttdef"><b>Definition</b> <a href="node_8h_source.html#l00029">node.h:29</a></div></div>
+<div class="ttc" id="aclassYAML_1_1detail_1_1node_html"><div class="ttname"><a href="classYAML_1_1detail_1_1node.html">YAML::detail::node</a></div><div class="ttdef"><b>Definition</b> <a href="detail_2node_8h_source.html#l00020">node.h:20</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_ab7c2d1d8d4198d62c34058543ea7cad3"><div class="ttname"><a href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a></div><div class="ttdeci">ATPAmtType value</div><div class="ttdoc">划拨金额 (必填)</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00125">main.cpp:125</a></div></div>
+<div class="ttc" id="aemitterstyle_8h_html"><div class="ttname"><a href="emitterstyle_8h.html">emitterstyle.h</a></div></div>
+<div class="ttc" id="aeventhandler_8h_html"><div class="ttname"><a href="eventhandler_8h.html">eventhandler.h</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1detail_html_a02dee2ddd5c753bedbd194328e1913c4"><div class="ttname"><a href="namespaceYAML_1_1detail.html#a02dee2ddd5c753bedbd194328e1913c4">YAML::detail::shared_memory_holder</a></div><div class="ttdeci">std::shared_ptr&lt; memory_holder &gt; shared_memory_holder</div><div class="ttdef"><b>Definition</b> <a href="ptr_8h_source.html#l00024">ptr.h:24</a></div></div>
+<div class="ttc" id="anamespaceYAML_html"><div class="ttname"><a href="namespaceYAML.html">YAML</a></div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00005">binary.cpp:5</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_ab5748184c36c2ff7b8229010c7259a0f"><div class="ttname"><a href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">YAML::anchor_t</a></div><div class="ttdeci">std::size_t anchor_t</div><div class="ttdef"><b>Definition</b> <a href="anchor_8h_source.html#l00013">anchor.h:13</a></div></div>
+<div class="ttc" id="anamespacedetail_html"><div class="ttname"><a href="namespacedetail.html">detail</a></div><div class="ttdoc">内部实现细节的命名空间</div></div>
+<div class="ttc" id="aptr_8h_html"><div class="ttname"><a href="ptr_8h.html">ptr.h</a></div></div>
+<div class="ttc" id="astructYAML_1_1EmitterStyle_html_ae86640662c85ce6062a37f9636b6959f"><div class="ttname"><a href="structYAML_1_1EmitterStyle.html#ae86640662c85ce6062a37f9636b6959f">YAML::EmitterStyle::value</a></div><div class="ttdeci">value</div><div class="ttdef"><b>Definition</b> <a href="emitterstyle_8h_source.html#l00012">emitterstyle.h:12</a></div></div>
+<div class="ttc" id="astructYAML_1_1Mark_html"><div class="ttname"><a href="structYAML_1_1Mark.html">YAML::Mark</a></div><div class="ttdef"><b>Definition</b> <a href="mark_8h_source.html#l00013">mark.h:13</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="nodebuilder_8h.html">nodebuilder.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/ptr_vector.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('ptr__vector_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ptr_vector.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="ptr__vector_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef PTR_VECTOR_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define PTR_VECTOR_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#if defined(_MSC_VER) ||                                            \</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">    (defined(__GNUC__) &amp;&amp; (__GNUC__ == 3 &amp;&amp; __GNUC_MINOR__ &gt;= 4) || \</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">     (__GNUC__ &gt;= 4))  </span><span class="comment">// GCC supports &quot;pragma once&quot; correctly since 3.4</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;cstddef&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;cstdlib&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceYAML.html">YAML</a> {</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">// TODO: This class is no longer needed</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="foldopen" id="foldopen00019" data-start="{" data-end="};">
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html">   19</a></span><span class="keyword">class </span><a class="code hl_class" href="classYAML_1_1ptr__vector.html">ptr_vector</a> {</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html#ae42ba97dcff66ca160a55ad2b7bc3009">   21</a></span>  <a class="code hl_function" href="classYAML_1_1ptr__vector.html#ae42ba97dcff66ca160a55ad2b7bc3009">ptr_vector</a>() : <a class="code hl_variable" href="classYAML_1_1ptr__vector.html#ae3c13cd4404c36ecde6b6487c1c1c561">m_data</a>{} {}</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html#a2249c8dd5ba06a7e26e8d25340e215b2">   22</a></span>  <a class="code hl_function" href="classYAML_1_1ptr__vector.html#a2249c8dd5ba06a7e26e8d25340e215b2">ptr_vector</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1ptr__vector.html">ptr_vector</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html#a3fc1364eda0a9b01752ef570c12bf326">   23</a></span>  <a class="code hl_function" href="classYAML_1_1ptr__vector.html#a3fc1364eda0a9b01752ef570c12bf326">ptr_vector</a>(<a class="code hl_class" href="classYAML_1_1ptr__vector.html">ptr_vector</a>&amp;&amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html#a7a673c0a478890eec8914c04f62653bb">   24</a></span>  <a class="code hl_class" href="classYAML_1_1ptr__vector.html">ptr_vector</a>&amp; <a class="code hl_function" href="classYAML_1_1ptr__vector.html#a7a673c0a478890eec8914c04f62653bb">operator=</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1ptr__vector.html">ptr_vector</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html#aeddc4a88c5d7df0080dea8488e591ef0">   25</a></span>  <a class="code hl_class" href="classYAML_1_1ptr__vector.html">ptr_vector</a>&amp; <a class="code hl_function" href="classYAML_1_1ptr__vector.html#aeddc4a88c5d7df0080dea8488e591ef0">operator=</a>(<a class="code hl_class" href="classYAML_1_1ptr__vector.html">ptr_vector</a>&amp;&amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html#a7ee95eb6be5454a6ba9031387c8881de">   27</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1ptr__vector.html#a7ee95eb6be5454a6ba9031387c8881de">clear</a>() { <a class="code hl_variable" href="classYAML_1_1ptr__vector.html#ae3c13cd4404c36ecde6b6487c1c1c561">m_data</a>.clear(); }</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html#a4e3ff811626d9436a768db19bfc515eb">   29</a></span>  std::size_t <a class="code hl_function" href="classYAML_1_1ptr__vector.html#a4e3ff811626d9436a768db19bfc515eb">size</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classYAML_1_1ptr__vector.html#ae3c13cd4404c36ecde6b6487c1c1c561">m_data</a>.size(); }</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html#a9ee7d7961a73ce06dcfa08f3e02a25ee">   30</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classYAML_1_1ptr__vector.html#a9ee7d7961a73ce06dcfa08f3e02a25ee">empty</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="classYAML_1_1ptr__vector.html#ae3c13cd4404c36ecde6b6487c1c1c561">m_data</a>.empty(); }</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html#a45d56913599355615236efdb7a1b7f56">   32</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classYAML_1_1ptr__vector.html#a45d56913599355615236efdb7a1b7f56">push_back</a>(std::unique_ptr&lt;T&gt;&amp;&amp; t) { <a class="code hl_variable" href="classYAML_1_1ptr__vector.html#ae3c13cd4404c36ecde6b6487c1c1c561">m_data</a>.push_back(std::move(t)); }</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html#aff6dd19fbf00cf5d69420cffdaebd7c7">   33</a></span>  T&amp; <a class="code hl_function" href="classYAML_1_1ptr__vector.html#aff6dd19fbf00cf5d69420cffdaebd7c7">operator[]</a>(std::size_t i) { <span class="keywordflow">return</span> *<a class="code hl_variable" href="classYAML_1_1ptr__vector.html#ae3c13cd4404c36ecde6b6487c1c1c561">m_data</a>[i]; }</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html#aad9222fa26e30e59c8d6b52fe1e5e9c1">   34</a></span>  <span class="keyword">const</span> T&amp; <a class="code hl_function" href="classYAML_1_1ptr__vector.html#aad9222fa26e30e59c8d6b52fe1e5e9c1">operator[]</a>(std::size_t i)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> *<a class="code hl_variable" href="classYAML_1_1ptr__vector.html#ae3c13cd4404c36ecde6b6487c1c1c561">m_data</a>[i]; }</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html#a4798e1aae36c4105f65be2a2720282d8">   36</a></span>  T&amp; <a class="code hl_function" href="classYAML_1_1ptr__vector.html#a4798e1aae36c4105f65be2a2720282d8">back</a>() { <span class="keywordflow">return</span> *(<a class="code hl_variable" href="classYAML_1_1ptr__vector.html#ae3c13cd4404c36ecde6b6487c1c1c561">m_data</a>.back().get()); }</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html#a6e067320187b82446f7f1c02d8b4a9e5">   38</a></span>  <span class="keyword">const</span> T&amp; <a class="code hl_function" href="classYAML_1_1ptr__vector.html#a6e067320187b82446f7f1c02d8b4a9e5">back</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> *(<a class="code hl_variable" href="classYAML_1_1ptr__vector.html#ae3c13cd4404c36ecde6b6487c1c1c561">m_data</a>.back().get()); }</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="classYAML_1_1ptr__vector.html#ae3c13cd4404c36ecde6b6487c1c1c561">   41</a></span>  std::vector&lt;std::unique_ptr&lt;T&gt;&gt; <a class="code hl_variable" href="classYAML_1_1ptr__vector.html#ae3c13cd4404c36ecde6b6487c1c1c561">m_data</a>;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>};</div>
+</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>}  <span class="comment">// namespace YAML</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#endif  </span><span class="comment">// PTR_VECTOR_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html"><div class="ttname"><a href="classYAML_1_1ptr__vector.html">YAML::ptr_vector</a></div><div class="ttdef"><b>Definition</b> <a href="ptr__vector_8h_source.html#l00019">ptr_vector.h:19</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html_a2249c8dd5ba06a7e26e8d25340e215b2"><div class="ttname"><a href="classYAML_1_1ptr__vector.html#a2249c8dd5ba06a7e26e8d25340e215b2">YAML::ptr_vector::ptr_vector</a></div><div class="ttdeci">ptr_vector(const ptr_vector &amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html_a3fc1364eda0a9b01752ef570c12bf326"><div class="ttname"><a href="classYAML_1_1ptr__vector.html#a3fc1364eda0a9b01752ef570c12bf326">YAML::ptr_vector::ptr_vector</a></div><div class="ttdeci">ptr_vector(ptr_vector &amp;&amp;)=default</div></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html_a45d56913599355615236efdb7a1b7f56"><div class="ttname"><a href="classYAML_1_1ptr__vector.html#a45d56913599355615236efdb7a1b7f56">YAML::ptr_vector::push_back</a></div><div class="ttdeci">void push_back(std::unique_ptr&lt; T &gt; &amp;&amp;t)</div><div class="ttdef"><b>Definition</b> <a href="ptr__vector_8h_source.html#l00032">ptr_vector.h:32</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html_a4798e1aae36c4105f65be2a2720282d8"><div class="ttname"><a href="classYAML_1_1ptr__vector.html#a4798e1aae36c4105f65be2a2720282d8">YAML::ptr_vector::back</a></div><div class="ttdeci">T &amp; back()</div><div class="ttdef"><b>Definition</b> <a href="ptr__vector_8h_source.html#l00036">ptr_vector.h:36</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html_a4e3ff811626d9436a768db19bfc515eb"><div class="ttname"><a href="classYAML_1_1ptr__vector.html#a4e3ff811626d9436a768db19bfc515eb">YAML::ptr_vector::size</a></div><div class="ttdeci">std::size_t size() const</div><div class="ttdef"><b>Definition</b> <a href="ptr__vector_8h_source.html#l00029">ptr_vector.h:29</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html_a6e067320187b82446f7f1c02d8b4a9e5"><div class="ttname"><a href="classYAML_1_1ptr__vector.html#a6e067320187b82446f7f1c02d8b4a9e5">YAML::ptr_vector::back</a></div><div class="ttdeci">const T &amp; back() const</div><div class="ttdef"><b>Definition</b> <a href="ptr__vector_8h_source.html#l00038">ptr_vector.h:38</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html_a7a673c0a478890eec8914c04f62653bb"><div class="ttname"><a href="classYAML_1_1ptr__vector.html#a7a673c0a478890eec8914c04f62653bb">YAML::ptr_vector::operator=</a></div><div class="ttdeci">ptr_vector &amp; operator=(const ptr_vector &amp;)=delete</div></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html_a7ee95eb6be5454a6ba9031387c8881de"><div class="ttname"><a href="classYAML_1_1ptr__vector.html#a7ee95eb6be5454a6ba9031387c8881de">YAML::ptr_vector::clear</a></div><div class="ttdeci">void clear()</div><div class="ttdef"><b>Definition</b> <a href="ptr__vector_8h_source.html#l00027">ptr_vector.h:27</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html_a9ee7d7961a73ce06dcfa08f3e02a25ee"><div class="ttname"><a href="classYAML_1_1ptr__vector.html#a9ee7d7961a73ce06dcfa08f3e02a25ee">YAML::ptr_vector::empty</a></div><div class="ttdeci">bool empty() const</div><div class="ttdef"><b>Definition</b> <a href="ptr__vector_8h_source.html#l00030">ptr_vector.h:30</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html_aad9222fa26e30e59c8d6b52fe1e5e9c1"><div class="ttname"><a href="classYAML_1_1ptr__vector.html#aad9222fa26e30e59c8d6b52fe1e5e9c1">YAML::ptr_vector::operator[]</a></div><div class="ttdeci">const T &amp; operator[](std::size_t i) const</div><div class="ttdef"><b>Definition</b> <a href="ptr__vector_8h_source.html#l00034">ptr_vector.h:34</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html_ae3c13cd4404c36ecde6b6487c1c1c561"><div class="ttname"><a href="classYAML_1_1ptr__vector.html#ae3c13cd4404c36ecde6b6487c1c1c561">YAML::ptr_vector::m_data</a></div><div class="ttdeci">std::vector&lt; std::unique_ptr&lt; T &gt; &gt; m_data</div><div class="ttdef"><b>Definition</b> <a href="ptr__vector_8h_source.html#l00041">ptr_vector.h:41</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html_ae42ba97dcff66ca160a55ad2b7bc3009"><div class="ttname"><a href="classYAML_1_1ptr__vector.html#ae42ba97dcff66ca160a55ad2b7bc3009">YAML::ptr_vector::ptr_vector</a></div><div class="ttdeci">ptr_vector()</div><div class="ttdef"><b>Definition</b> <a href="ptr__vector_8h_source.html#l00021">ptr_vector.h:21</a></div></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html_aeddc4a88c5d7df0080dea8488e591ef0"><div class="ttname"><a href="classYAML_1_1ptr__vector.html#aeddc4a88c5d7df0080dea8488e591ef0">YAML::ptr_vector::operator=</a></div><div class="ttdeci">ptr_vector &amp; operator=(ptr_vector &amp;&amp;)=default</div></div>
+<div class="ttc" id="aclassYAML_1_1ptr__vector_html_aff6dd19fbf00cf5d69420cffdaebd7c7"><div class="ttname"><a href="classYAML_1_1ptr__vector.html#aff6dd19fbf00cf5d69420cffdaebd7c7">YAML::ptr_vector::operator[]</a></div><div class="ttdeci">T &amp; operator[](std::size_t i)</div><div class="ttdef"><b>Definition</b> <a href="ptr__vector_8h_source.html#l00033">ptr_vector.h:33</a></div></div>
+<div class="ttc" id="anamespaceYAML_html"><div class="ttname"><a href="namespaceYAML.html">YAML</a></div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00005">binary.cpp:5</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="ptr__vector_8h.html">ptr_vector.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

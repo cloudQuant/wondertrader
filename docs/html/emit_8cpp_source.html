@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/emit.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('emit_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">emit.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="emit_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#include &quot;<a class="code" href="emit_8h.html">yaml-cpp/node/emit.h</a>&quot;</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &quot;<a class="code" href="nodeevents_8h.html">nodeevents.h</a>&quot;</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;<a class="code" href="emitfromevents_8h.html">yaml-cpp/emitfromevents.h</a>&quot;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;<a class="code" href="emitter_8h.html">yaml-cpp/emitter.h</a>&quot;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceYAML.html">YAML</a> {</div>
+<div class="foldopen" id="foldopen00007" data-start="{" data-end="}">
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno"><a class="line" href="namespaceYAML.html#a3d200321eb9b9124d02f118d85f3b280">    7</a></span><a class="code hl_class" href="classYAML_1_1Emitter.html">Emitter</a>&amp; <a class="code hl_function" href="namespaceYAML.html#a3d200321eb9b9124d02f118d85f3b280">operator&lt;&lt;</a>(<a class="code hl_class" href="classYAML_1_1Emitter.html">Emitter</a>&amp; out, <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1Node.html">Node</a>&amp; node) {</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>  <a class="code hl_class" href="classYAML_1_1EmitFromEvents.html">EmitFromEvents</a> emitFromEvents(out);</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>  <a class="code hl_class" href="classYAML_1_1NodeEvents.html">NodeEvents</a> events(node);</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>  events.<a class="code hl_function" href="classYAML_1_1NodeEvents.html#a78054559195250e112ee535d32b984e3">Emit</a>(emitFromEvents);</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>  <span class="keywordflow">return</span> out;</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>}</div>
+</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="foldopen" id="foldopen00014" data-start="{" data-end="}">
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="namespaceYAML.html#a8e9af11395fcf8f46c65e829cd29b5c8">   14</a></span>std::ostream&amp; <a class="code hl_function" href="namespaceYAML.html#a3d200321eb9b9124d02f118d85f3b280">operator&lt;&lt;</a>(std::ostream&amp; out, <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1Node.html">Node</a>&amp; node) {</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>  <a class="code hl_class" href="classYAML_1_1Emitter.html">Emitter</a> emitter(out);</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>  emitter &lt;&lt; node;</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>  <span class="keywordflow">return</span> out;</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>}</div>
+</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="foldopen" id="foldopen00020" data-start="{" data-end="}">
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="namespaceYAML.html#a34e822f0b871c477969a160e529f879f">   20</a></span>std::string <a class="code hl_function" href="namespaceYAML.html#a34e822f0b871c477969a160e529f879f">Dump</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1Node.html">Node</a>&amp; node) {</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  <a class="code hl_class" href="classYAML_1_1Emitter.html">Emitter</a> emitter;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>  emitter &lt;&lt; node;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  <span class="keywordflow">return</span> emitter.<a class="code hl_function" href="classYAML_1_1Emitter.html#a0b965b7db9006956e8448aaac8db2b13">c_str</a>();</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>}</div>
+</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>}  <span class="comment">// namespace YAML</span></div>
+<div class="ttc" id="aclassYAML_1_1EmitFromEvents_html"><div class="ttname"><a href="classYAML_1_1EmitFromEvents.html">YAML::EmitFromEvents</a></div><div class="ttdef"><b>Definition</b> <a href="emitfromevents_8h_source.html#l00023">emitfromevents.h:23</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Emitter_html"><div class="ttname"><a href="classYAML_1_1Emitter.html">YAML::Emitter</a></div><div class="ttdef"><b>Definition</b> <a href="emitter_8h_source.html#l00033">emitter.h:33</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Emitter_html_a0b965b7db9006956e8448aaac8db2b13"><div class="ttname"><a href="classYAML_1_1Emitter.html#a0b965b7db9006956e8448aaac8db2b13">YAML::Emitter::c_str</a></div><div class="ttdeci">const char * c_str() const</div><div class="ttdef"><b>Definition</b> <a href="emitter_8cpp_source.html#l00021">emitter.cpp:21</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeEvents_html"><div class="ttname"><a href="classYAML_1_1NodeEvents.html">YAML::NodeEvents</a></div><div class="ttdef"><b>Definition</b> <a href="nodeevents_8h_source.html#l00026">nodeevents.h:26</a></div></div>
+<div class="ttc" id="aclassYAML_1_1NodeEvents_html_a78054559195250e112ee535d32b984e3"><div class="ttname"><a href="classYAML_1_1NodeEvents.html#a78054559195250e112ee535d32b984e3">YAML::NodeEvents::Emit</a></div><div class="ttdeci">void Emit(EventHandler &amp;handler)</div><div class="ttdef"><b>Definition</b> <a href="nodeevents_8cpp_source.html#l00045">nodeevents.cpp:45</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Node_html"><div class="ttname"><a href="classYAML_1_1Node.html">YAML::Node</a></div><div class="ttdef"><b>Definition</b> <a href="node_8h_source.html#l00029">node.h:29</a></div></div>
+<div class="ttc" id="aemit_8h_html"><div class="ttname"><a href="emit_8h.html">emit.h</a></div></div>
+<div class="ttc" id="aemitfromevents_8h_html"><div class="ttname"><a href="emitfromevents_8h.html">emitfromevents.h</a></div></div>
+<div class="ttc" id="aemitter_8h_html"><div class="ttname"><a href="emitter_8h.html">emitter.h</a></div></div>
+<div class="ttc" id="anamespaceYAML_html"><div class="ttname"><a href="namespaceYAML.html">YAML</a></div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00005">binary.cpp:5</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_a34e822f0b871c477969a160e529f879f"><div class="ttname"><a href="namespaceYAML.html#a34e822f0b871c477969a160e529f879f">YAML::Dump</a></div><div class="ttdeci">std::string Dump(const Node &amp;node)</div><div class="ttdef"><b>Definition</b> <a href="emit_8cpp_source.html#l00020">emit.cpp:20</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_a3d200321eb9b9124d02f118d85f3b280"><div class="ttname"><a href="namespaceYAML.html#a3d200321eb9b9124d02f118d85f3b280">YAML::operator&lt;&lt;</a></div><div class="ttdeci">Emitter &amp; operator&lt;&lt;(Emitter &amp;out, const Node &amp;node)</div><div class="ttdef"><b>Definition</b> <a href="emit_8cpp_source.html#l00007">emit.cpp:7</a></div></div>
+<div class="ttc" id="anodeevents_8h_html"><div class="ttname"><a href="nodeevents_8h.html">nodeevents.h</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="emit_8cpp.html">emit.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

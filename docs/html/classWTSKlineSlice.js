@@ -1,0 +1,25 @@
+var classWTSKlineSlice =
+[
+    [ "BarBlock", "classWTSKlineSlice.html#a47fff81e914cd5062c0341fecc35172c", null ],
+    [ "WTSKlineSlice", "classWTSKlineSlice.html#abd932fcad04d4b7feb3c307f230172c8", null ],
+    [ "appendBlock", "classWTSKlineSlice.html#a51faa13cd01bf3569c4483c4a3498fef", null ],
+    [ "at", "classWTSKlineSlice.html#a158eda11c49a9ada165dce6c0df54042", null ],
+    [ "at", "classWTSKlineSlice.html#a2b44d1c8a48a3377f13d2de8eec17c2c", null ],
+    [ "code", "classWTSKlineSlice.html#aa30b17fc1bfa8bc449f448632489472a", null ],
+    [ "create", "classWTSKlineSlice.html#a58a95fc9dcc6c1693d10adba8b25beb1", null ],
+    [ "empty", "classWTSKlineSlice.html#ad1fd5441c8b4129309daca77f24812da", null ],
+    [ "extractData", "classWTSKlineSlice.html#a55a924203195b459bef3164bde067f3b", null ],
+    [ "get_block_addr", "classWTSKlineSlice.html#a6259e239f18e611007ef176259d836d9", null ],
+    [ "get_block_counts", "classWTSKlineSlice.html#abeabf480ff8ddfd412f20a9cf118c86c", null ],
+    [ "get_block_size", "classWTSKlineSlice.html#a763673e4cc73d6b28519c795411d098e", null ],
+    [ "maxprice", "classWTSKlineSlice.html#ac64f1b180abebf5805164ca7cc203626", null ],
+    [ "minprice", "classWTSKlineSlice.html#a1ae6fc27c30c3af4dd0f0e41843e9b7f", null ],
+    [ "setCode", "classWTSKlineSlice.html#a379f75e379cb006d1444785f2c29a56c", null ],
+    [ "size", "classWTSKlineSlice.html#a86b5e048d687483ac6dc91014e503d09", null ],
+    [ "translateIdx", "classWTSKlineSlice.html#a7e7629efa75839161ab70474edf401e7", null ],
+    [ "_blocks", "classWTSKlineSlice.html#ace7552bb9f0438d3a22f395cb98b9255", null ],
+    [ "_code", "classWTSKlineSlice.html#a7dd654f58f3144c5a69e56be2480db66", null ],
+    [ "_count", "classWTSKlineSlice.html#a0ab6892ac7eeedb64e52bdde40f70c1e", null ],
+    [ "_period", "classWTSKlineSlice.html#a59e3c3f2d1574db28d6b6841372b3a4c", null ],
+    [ "_times", "classWTSKlineSlice.html#a1a4ce1417a29ac69e14ea20ac52a5f93", null ]
+];

@@ -1,0 +1,395 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/entropy_common.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('entropy__common_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">entropy_common.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;<a class="el" href="mem_8h_source.html">mem.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="error__private_8h_source.html">error_private.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="fse_8h_source.html">fse.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="huf_8h_source.html">huf.h</a>&quot;</code><br />
+</div>
+<p><a href="entropy__common_8c_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a0d2a6fcfd814db079898717019641487" id="r_a0d2a6fcfd814db079898717019641487"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="entropy__common_8c.html#a0d2a6fcfd814db079898717019641487">FSE_STATIC_LINKING_ONLY</a>&#160;&#160;&#160;/* FSE_MIN_TABLELOG */</td></tr>
+<tr class="separator:a0d2a6fcfd814db079898717019641487"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7691fd75a0d8bc9d2b1544f0df8e381c" id="r_a7691fd75a0d8bc9d2b1544f0df8e381c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="entropy__common_8c.html#a7691fd75a0d8bc9d2b1544f0df8e381c">HUF_STATIC_LINKING_ONLY</a>&#160;&#160;&#160;/* HUF_TABLELOG_ABSOLUTEMAX */</td></tr>
+<tr class="separator:a7691fd75a0d8bc9d2b1544f0df8e381c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:aadd4435599681e40d938131f35b71208" id="r_aadd4435599681e40d938131f35b71208"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="entropy__common_8c.html#aadd4435599681e40d938131f35b71208">FSE_versionNumber</a> (void)</td></tr>
+<tr class="separator:aadd4435599681e40d938131f35b71208"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b72bf1d6ebac556c0bcb7e5eafd72f7" id="r_a3b72bf1d6ebac556c0bcb7e5eafd72f7"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="entropy__common_8c.html#a3b72bf1d6ebac556c0bcb7e5eafd72f7">FSE_isError</a> (size_t code)</td></tr>
+<tr class="separator:a3b72bf1d6ebac556c0bcb7e5eafd72f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7363e311b8ac13bf80e0f458415727b" id="r_af7363e311b8ac13bf80e0f458415727b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="entropy__common_8c.html#af7363e311b8ac13bf80e0f458415727b">FSE_getErrorName</a> (size_t code)</td></tr>
+<tr class="separator:af7363e311b8ac13bf80e0f458415727b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd113fa90a875ceddf133a530db912bc" id="r_abd113fa90a875ceddf133a530db912bc"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="entropy__common_8c.html#abd113fa90a875ceddf133a530db912bc">HUF_isError</a> (size_t code)</td></tr>
+<tr class="separator:abd113fa90a875ceddf133a530db912bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2058676a94d9959e656bd0024e7fde97" id="r_a2058676a94d9959e656bd0024e7fde97"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="entropy__common_8c.html#a2058676a94d9959e656bd0024e7fde97">HUF_getErrorName</a> (size_t code)</td></tr>
+<tr class="separator:a2058676a94d9959e656bd0024e7fde97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd8f1367fec27b3d559c18a2dbcb7de9" id="r_abd8f1367fec27b3d559c18a2dbcb7de9"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="entropy__common_8c.html#abd8f1367fec27b3d559c18a2dbcb7de9">FSE_readNCount</a> (short *normalizedCounter, unsigned *maxSVPtr, unsigned *tableLogPtr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *headerBuffer, size_t hbSize)</td></tr>
+<tr class="separator:abd8f1367fec27b3d559c18a2dbcb7de9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe44467e2590965c0dafba8df4d206c0" id="r_abe44467e2590965c0dafba8df4d206c0"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="entropy__common_8c.html#abe44467e2590965c0dafba8df4d206c0">HUF_readStats</a> (<a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *huffWeight, size_t hwSize, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *rankStats, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *nbSymbolsPtr, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *tableLogPtr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:abe44467e2590965c0dafba8df4d206c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a0d2a6fcfd814db079898717019641487" name="a0d2a6fcfd814db079898717019641487"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d2a6fcfd814db079898717019641487">&#9670;&#160;</a></span>FSE_STATIC_LINKING_ONLY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_STATIC_LINKING_ONLY&#160;&#160;&#160;/* FSE_MIN_TABLELOG */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00040">40</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7691fd75a0d8bc9d2b1544f0df8e381c" name="a7691fd75a0d8bc9d2b1544f0df8e381c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7691fd75a0d8bc9d2b1544f0df8e381c">&#9670;&#160;</a></span>HUF_STATIC_LINKING_ONLY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_STATIC_LINKING_ONLY&#160;&#160;&#160;/* HUF_TABLELOG_ABSOLUTEMAX */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00042">42</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="af7363e311b8ac13bf80e0f458415727b" name="af7363e311b8ac13bf80e0f458415727b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7363e311b8ac13bf80e0f458415727b">&#9670;&#160;</a></span>FSE_getErrorName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * FSE_getErrorName </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>code</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00052">52</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3b72bf1d6ebac556c0bcb7e5eafd72f7" name="a3b72bf1d6ebac556c0bcb7e5eafd72f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b72bf1d6ebac556c0bcb7e5eafd72f7">&#9670;&#160;</a></span>FSE_isError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned FSE_isError </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>code</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00051">51</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abd8f1367fec27b3d559c18a2dbcb7de9" name="abd8f1367fec27b3d559c18a2dbcb7de9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd8f1367fec27b3d559c18a2dbcb7de9">&#9670;&#160;</a></span>FSE_readNCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t FSE_readNCount </td>
+          <td>(</td>
+          <td class="paramtype">short *&#160;</td>
+          <td class="paramname"><em>normalizedCounter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned *&#160;</td>
+          <td class="paramname"><em>maxSymbolValuePtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned *&#160;</td>
+          <td class="paramname"><em>tableLogPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>rBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>rBuffSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<h2><a class="anchor" id="autotoc_md3"></a>
+Tutorial :</h2>
+<p>The first step is to count all symbols. FSE_count() does this job very fast. Result will be saved into 'count', a table of unsigned int, which must be already allocated, and have 'maxSymbolValuePtr[0]+1' cells. 'src' is a table of bytes of size 'srcSize'. All values within 'src' MUST be &lt;= maxSymbolValuePtr[0] maxSymbolValuePtr[0] will be updated, with its real value (necessarily &lt;= original value) FSE_count() will return the number of occurrence of the most frequent symbol. This can be used to know if there is a single symbol within 'src', and to quickly evaluate its compressibility. If there is an error, the function will return an ErrorCode (which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a>).</p>
+<p>The next step is to normalize the frequencies. <a class="el" href="fse_8h.html#aaca3dda2d78980dbaaf7bf9139193299">FSE_normalizeCount()</a> will ensure that sum of frequencies is == 2 ^'tableLog'. It also guarantees a minimum of 1 to any Symbol with frequency &gt;= 1. You can use 'tableLog'==0 to mean "use default tableLog value". If you are unsure of which tableLog value to use, you can ask <a class="el" href="fse_8h.html#acf5c46f2ea45dd9838896af2574818ad">FSE_optimalTableLog()</a>, which will provide the optimal valid tableLog given sourceSize, maxSymbolValue, and a user-defined maximum (0 means "default").</p>
+<p>The result of <a class="el" href="fse_8h.html#aaca3dda2d78980dbaaf7bf9139193299">FSE_normalizeCount()</a> will be saved into a table, called 'normalizedCounter', which is a table of signed short. 'normalizedCounter' must be already allocated, and have at least 'maxSymbolValue+1' cells. The return value is tableLog if everything proceeded as expected. It is 0 if there is a single symbol within distribution. If there is an error (ex: invalid tableLog value), the function will return an ErrorCode (which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a>).</p>
+<p>'normalizedCounter' can be saved in a compact manner to a memory area using <a class="el" href="fse_8h.html#a1ed0b96f6184614c4d3ecded9d8e6c80">FSE_writeNCount()</a>. 'buffer' must be already allocated. For guaranteed success, buffer size must be at least FSE_headerBound(). The result of the function is the number of bytes written into 'buffer'. If there is an error, the function will return an ErrorCode (which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a>; ex : buffer size too small).</p>
+<p>'normalizedCounter' can then be used to create the compression table 'CTable'. The space required by 'CTable' must be already allocated, using <a class="el" href="fse_8h.html#a275e277a2eb5c2368860dca80c749f7b">FSE_createCTable()</a>. You can then use <a class="el" href="fse_8h.html#a79a83bf378068974a320feded073de7f">FSE_buildCTable()</a> to fill 'CTable'. If there is an error, both functions will return an ErrorCode (which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a>).</p>
+<p>'CTable' can then be used to compress 'src', with <a class="el" href="fse_8h.html#ae88873b11d0ddea3ebe5a8750edccfdc">FSE_compress_usingCTable()</a>. Similar to FSE_count(), the convention is that 'src' is assumed to be a table of char of size 'srcSize' The function returns the size of compressed data (without header), necessarily &lt;= <code>dstCapacity</code>. If it returns '0', compressed data could not fit into 'dst'. If there is an error, the function will return an ErrorCode (which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a>).</p>
+<p><a class="el" href="fse_8h.html#a1d5d0fb669087c8407f572d86bd6c87a">FSE_readNCount()</a>: Read compactly saved 'normalizedCounter' from 'rBuffer'. </p><dl class="section return"><dt>返回</dt><dd>: size read from 'rBuffer', or an errorCode, which can be tested using <a class="el" href="fse__compress_8c.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError()</a>. maxSymbolValuePtr[0] and tableLogPtr[0] will also be updated with their respective values </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00061">61</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aadd4435599681e40d938131f35b71208" name="aadd4435599681e40d938131f35b71208"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aadd4435599681e40d938131f35b71208">&#9670;&#160;</a></span>FSE_versionNumber()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned FSE_versionNumber </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>library version number; to be used when checking dll version </p>
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00047">47</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2058676a94d9959e656bd0024e7fde97" name="a2058676a94d9959e656bd0024e7fde97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2058676a94d9959e656bd0024e7fde97">&#9670;&#160;</a></span>HUF_getErrorName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * HUF_getErrorName </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>code</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>provides error code string (useful for debugging) </p>
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00055">55</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abd113fa90a875ceddf133a530db912bc" name="abd113fa90a875ceddf133a530db912bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd113fa90a875ceddf133a530db912bc">&#9670;&#160;</a></span>HUF_isError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned HUF_isError </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>code</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>tells if a return value is an error code </p>
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00054">54</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abe44467e2590965c0dafba8df4d206c0" name="abe44467e2590965c0dafba8df4d206c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe44467e2590965c0dafba8df4d206c0">&#9670;&#160;</a></span>HUF_readStats()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t HUF_readStats </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>huffWeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>hwSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *&#160;</td>
+          <td class="paramname"><em>rankStats</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *&#160;</td>
+          <td class="paramname"><em>nbSymbolsPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *&#160;</td>
+          <td class="paramname"><em>tableLogPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="entropy__common_8c.html#abe44467e2590965c0dafba8df4d206c0">HUF_readStats()</a> : Read compact Huffman tree, saved by <a class="el" href="huf__compress_8c.html#a61719d18f234f972c136bc36dd7eb784">HUF_writeCTable()</a>. <code>huffWeight</code> is destination buffer. <code>rankStats</code> is assumed to be a table of at least HUF_TABLELOG_MAX U32. </p><dl class="section return"><dt>返回</dt><dd>: size read from <code>src</code> , or an error Code . Note : Needed by <a class="el" href="huf__compress_8c.html#af54934fceaf8318ba8900a2f315b7ebf">HUF_readCTable()</a> and HUF_readDTableX?() . </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00175">175</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="entropy__common_8c.html">entropy_common.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

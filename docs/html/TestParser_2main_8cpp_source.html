@@ -1,0 +1,384 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/TestParser/main.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('TestParser_2main_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">main.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="TestParser_2main_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &lt;boost/filesystem.hpp&gt;</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;../Includes/IParserApi.h&quot;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;../Includes/WTSVariant.hpp&quot;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;../Includes/WTSContractInfo.hpp&quot;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;../Includes/WTSDataDef.hpp&quot;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;../Share/DLLHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;../Share/StrUtil.hpp&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;../WTSTools/WTSBaseDataMgr.h&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;../WTSTools/WTSLogger.h&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../WTSUtils/WTSCfgLoader.h&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="TestParser_2main_8cpp.html#af06f4d6c756835f0f06a723e266d59cc">   16</a></span><a class="code hl_class" href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a>  <a class="code hl_variable" href="TestParser_2main_8cpp.html#af06f4d6c756835f0f06a723e266d59cc">g_bdMgr</a>;</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="TestParser_2main_8cpp.html#a17226795848decb565e90624584e5c0f">   18</a></span><a class="code hl_variable" href="TestParser_2main_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="foldopen" id="foldopen00020" data-start="{" data-end="};">
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="classParserSpi.html">   20</a></span><span class="keyword">class </span><a class="code hl_class" href="classParserSpi.html">ParserSpi</a> : <span class="keyword">public</span> <a class="code hl_class" href="classIParserSpi.html">IParserSpi</a></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>{</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classParserSpi.html#adac569d86025b8085840b03ad11f943c">   23</a></span>    <a class="code hl_function" href="classParserSpi.html#adac569d86025b8085840b03ad11f943c">ParserSpi</a>(){}</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="foldopen" id="foldopen00025" data-start="{" data-end="}">
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classParserSpi.html#a49359c0815bd95f11bbf84604f94c46c">   25</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserSpi.html#a49359c0815bd95f11bbf84604f94c46c">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* params, <span class="keyword">const</span> <span class="keywordtype">char</span>* ttype)</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    {</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        <a class="code hl_variable" href="classParserSpi.html#ad106ca884bddf758de75219099cec688">m_pParams</a> = params;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classParserSpi.html#ad106ca884bddf758de75219099cec688">m_pParams</a>)</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>            <a class="code hl_variable" href="classParserSpi.html#ad106ca884bddf758de75219099cec688">m_pParams</a>-&gt;<a class="code hl_function" href="classWTSObject.html#a3e41434e26313af90b03c8c8b395b049">retain</a>();</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <a class="code hl_variable" href="classParserSpi.html#a02d41459a6986afab530d84a4fb1ccec">m_strModule</a> = ttype;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    }</div>
+</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="foldopen" id="foldopen00035" data-start="{" data-end="}">
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classParserSpi.html#aeab4178c51ba9b49a7e097658db164f9">   35</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classParserSpi.html#aeab4178c51ba9b49a7e097658db164f9">release</a>()</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    {</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classParserSpi.html#afa76c83ebca6cad3cc42c4453fa28116">_api</a>)</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        {</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>            <a class="code hl_variable" href="classParserSpi.html#afa76c83ebca6cad3cc42c4453fa28116">_api</a>-&gt;<a class="code hl_function" href="classIParserApi.html#a9053ed20289653de487d5fe5d9e88690">release</a>();</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        }</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    }</div>
+</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="foldopen" id="foldopen00043" data-start="{" data-end="}">
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="classParserSpi.html#a1a6fd25e39adc6725fca7789c25ada22">   43</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classParserSpi.html#a1a6fd25e39adc6725fca7789c25ada22">run</a>(<span class="keywordtype">bool</span> bRestart = <span class="keyword">false</span>)</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    {</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="keywordflow">if</span> (!<a class="code hl_function" href="ParserCTP_8cpp.html#ab387d2901e2c0ea868a0ecee850a575e">createParser</a>(<a class="code hl_variable" href="classParserSpi.html#a02d41459a6986afab530d84a4fb1ccec">m_strModule</a>.c_str()))</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        {</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        }</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        <a class="code hl_variable" href="classParserSpi.html#afa76c83ebca6cad3cc42c4453fa28116">_api</a>-&gt;<a class="code hl_function" href="classIParserApi.html#a37ba828035dff6492ab185b462d070ec">registerSpi</a>(<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classParserSpi.html#afa76c83ebca6cad3cc42c4453fa28116">_api</a>-&gt;<a class="code hl_function" href="classIParserApi.html#a9b6eb9509e68e7bbc5901629ff7dcc43">init</a>(<a class="code hl_variable" href="classParserSpi.html#ad106ca884bddf758de75219099cec688">m_pParams</a>))</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        {</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        }</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        <a class="code hl_variable" href="IBaseDataMgr_8h.html#aa189517ad8e51030884413938e18bd86">ContractSet</a> contractSet;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        <a class="code hl_class" href="classWTSArray.html">WTSArray</a>* ayContract = <a class="code hl_variable" href="TestParser_2main_8cpp.html#af06f4d6c756835f0f06a723e266d59cc">g_bdMgr</a>.<a class="code hl_function" href="classWTSBaseDataMgr.html#a63885c8ed3b5a721b6ac7a5a82f93102">getContracts</a>();</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <a class="code hl_typedef" href="classWTSArray.html#aa16bfca83e36f14e970edae5611f197d">WTSArray::Iterator</a> it = ayContract-&gt;<a class="code hl_function" href="classWTSArray.html#aeb41360de7a6a483de71006af2de8074">begin</a>();</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <span class="keywordflow">for</span> (; it != ayContract-&gt;<a class="code hl_function" href="classWTSArray.html#abf2b1b8d07394ea3c09b0cf10621ab90">end</a>(); it++)</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        {</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>            <a class="code hl_class" href="classWTSContractInfo.html">WTSContractInfo</a>* contract = <a class="code hl_define" href="WTSMarcos_8h.html#a34013394084da0ee3d3629fe5bbc0611">STATIC_CONVERT</a>(*it, <a class="code hl_class" href="classWTSContractInfo.html">WTSContractInfo</a>*);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>            contractSet.insert(contract-&gt;<a class="code hl_function" href="classWTSContractInfo.html#ab9c43c1c16758aa2ee95c3fc23f9b214">getFullCode</a>());</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        }</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        ayContract-&gt;<a class="code hl_function" href="classWTSArray.html#aa7b9968d4931b28cfb02a367d67cbfe3">release</a>();</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <a class="code hl_variable" href="classParserSpi.html#afa76c83ebca6cad3cc42c4453fa28116">_api</a>-&gt;<a class="code hl_function" href="classIParserApi.html#ab20f1e4ddb820ef80e2aa0f31ac46e2b">subscribe</a>(contractSet);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <a class="code hl_variable" href="classParserSpi.html#afa76c83ebca6cad3cc42c4453fa28116">_api</a>-&gt;<a class="code hl_function" href="classIParserApi.html#ab318c4ada41576a863f75028f90b4d06">connect</a>();</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    }</div>
+</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="foldopen" id="foldopen00071" data-start="{" data-end="}">
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="classParserSpi.html#a02553ae3a2c58e85221c08f24526ac01">   71</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserSpi.html#a02553ae3a2c58e85221c08f24526ac01">createParser</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* moduleName)</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    {</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        <a class="code hl_typedef" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a> hInst = <a class="code hl_function" href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a>(moduleName);</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordflow">if</span> (hInst == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        {</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>            <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;Loading module {} failed&quot;</span>, moduleName);</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        }</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        <a class="code hl_variable" href="IParserApi_8h.html#a182ec7cbd3be693196f288a464e078e0">FuncCreateParser</a> pCreator = (<a class="code hl_variable" href="IParserApi_8h.html#a182ec7cbd3be693196f288a464e078e0">FuncCreateParser</a>)<a class="code hl_function" href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a>(hInst, <span class="stringliteral">&quot;createParser&quot;</span>);</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <span class="keywordflow">if</span> (<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a> == pCreator)</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        {</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>            <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;Entry function createParser not found&quot;</span>);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        }</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        <a class="code hl_variable" href="classParserSpi.html#afa76c83ebca6cad3cc42c4453fa28116">_api</a> = pCreator();</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        <span class="keywordflow">if</span> (<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a> == <a class="code hl_variable" href="classParserSpi.html#afa76c83ebca6cad3cc42c4453fa28116">_api</a>)</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        {</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>            <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;Creating parser api failed&quot;</span>);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        }</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <a class="code hl_variable" href="classParserSpi.html#a532ea0cd23cad46dff4949c59419cc2a">m_funcRemover</a> = (<a class="code hl_typedef" href="IParserApi_8h.html#a65aa6357f9298ff0268f773acac61f42">FuncDeleteParser</a>)<a class="code hl_function" href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a>(hInst, <span class="stringliteral">&quot;deleteParser&quot;</span>);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    }</div>
+</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00099" data-start="{" data-end="}">
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="classParserSpi.html#ae98ccfec035f7a8a8386b6a44a7e2ebb">   99</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserSpi.html#ae98ccfec035f7a8a8386b6a44a7e2ebb">handleParserLog</a>(<a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* message)<span class="keyword"> override</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <a class="code hl_function" href="classWTSLogger.html#aa3257bbd8e5b1db25f65cd936f50025c">WTSLogger::log_raw</a>(ll, message);</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    }</div>
+</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="foldopen" id="foldopen00104" data-start="{" data-end="}">
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="classParserSpi.html#a40edaeb2355af57e5c4b1dd928a34a9b">  104</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserSpi.html#a40edaeb2355af57e5c4b1dd928a34a9b">handleQuote</a>(<a class="code hl_class" href="classWTSTickData.html">WTSTickData</a> *quote, uint32_t procFlag)<span class="keyword"> override</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        <a class="code hl_function" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a>(<span class="stringliteral">&quot;{}@{}.{}, price:{}, voume:{}&quot;</span>, quote-&gt;<a class="code hl_function" href="classWTSTickData.html#ae40aac80fd30843224b6e88d007b1d05">code</a>(), quote-&gt;<a class="code hl_function" href="classWTSTickData.html#a9f8dfcc3630181284346338f2049cfb3">actiondate</a>(), quote-&gt;<a class="code hl_function" href="classWTSTickData.html#a12aa24165f23c4dacd1e4f686a2f5879">actiontime</a>(), quote-&gt;<a class="code hl_function" href="classWTSTickData.html#ae502123e14736815e734b7f6456cfd13">price</a>(), quote-&gt;<a class="code hl_function" href="classWTSTickData.html#a9aaeae2b996a6d2e2dc8c813b622e6e0">totalvolume</a>());</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    }</div>
+</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="foldopen" id="foldopen00109" data-start="{" data-end="}">
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="classParserSpi.html#a198d60ba8ff5835bf788d22a475a5104">  109</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserSpi.html#a198d60ba8ff5835bf788d22a475a5104">handleSymbolList</a>(<span class="keyword">const</span> <a class="code hl_class" href="classWTSArray.html">WTSArray</a>* aySymbols)<span class="keyword"> override</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    }</div>
+</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00115" data-start="{" data-end="}">
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="classParserSpi.html#adbade6a2dab6f597c140025531c0dafa">  115</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>*   <a class="code hl_function" href="classParserSpi.html#adbade6a2dab6f597c140025531c0dafa">getBaseDataMgr</a>()</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    {</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        <span class="keywordflow">return</span> &amp;<a class="code hl_variable" href="TestParser_2main_8cpp.html#af06f4d6c756835f0f06a723e266d59cc">g_bdMgr</a>;</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    }</div>
+</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="classParserSpi.html#afa76c83ebca6cad3cc42c4453fa28116">  122</a></span>    <a class="code hl_class" href="classIParserApi.html">IParserApi</a>*         <a class="code hl_variable" href="classParserSpi.html#afa76c83ebca6cad3cc42c4453fa28116">_api</a>;</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="classParserSpi.html#a532ea0cd23cad46dff4949c59419cc2a">  123</a></span>    <a class="code hl_typedef" href="IParserApi_8h.html#a65aa6357f9298ff0268f773acac61f42">FuncDeleteParser</a>    <a class="code hl_variable" href="classParserSpi.html#a532ea0cd23cad46dff4949c59419cc2a">m_funcRemover</a>;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="classParserSpi.html#a02d41459a6986afab530d84a4fb1ccec">  124</a></span>    std::string         <a class="code hl_variable" href="classParserSpi.html#a02d41459a6986afab530d84a4fb1ccec">m_strModule</a>;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="classParserSpi.html#ad106ca884bddf758de75219099cec688">  125</a></span>    <a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>*         <a class="code hl_variable" href="classParserSpi.html#ad106ca884bddf758de75219099cec688">m_pParams</a>;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>};</div>
+</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
+<div class="foldopen" id="foldopen00128" data-start="{" data-end="}">
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno"><a class="line" href="TestParser_2main_8cpp.html#ac594b3f4124c84f707df45a2e35457cd">  128</a></span>std::string <a class="code hl_function" href="TestParser_2main_8cpp.html#ac594b3f4124c84f707df45a2e35457cd">getBaseFolder</a>()</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>{</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keyword">static</span> std::string basePath;</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keywordflow">if</span> (basePath.empty())</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    {</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>        basePath = boost::filesystem::initial_path&lt;boost::filesystem::path&gt;().string();</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        basePath = <a class="code hl_function" href="classStrUtil.html#a6d993d2350e32ceedca3811eee1370db">StrUtil::standardisePath</a>(basePath);</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    }</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="keywordflow">return</span> basePath.c_str();</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>}</div>
+</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="foldopen" id="foldopen00141" data-start="{" data-end="}">
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="TestParser_2main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">  141</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="TestParser_2main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main</a>()</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>{</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>    <a class="code hl_function" href="classWTSLogger.html#a316399910d3af4aef6c4a6e85c50c729">WTSLogger::init</a>(<span class="stringliteral">&quot;logcfg.yaml&quot;</span>);</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    <a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* root = <a class="code hl_function" href="classWTSCfgLoader.html#a222f42e290bc1aa38b4f67c005e10887">WTSCfgLoader::load_from_file</a>(<span class="stringliteral">&quot;config.yaml&quot;</span>);</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>    <span class="keywordflow">if</span> (root == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    {</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        <a class="code hl_function" href="classWTSLogger.html#aa3257bbd8e5b1db25f65cd936f50025c">WTSLogger::log_raw</a>(<a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba50717458baf49c204bb0645418e0da15">LL_ERROR</a>, <span class="stringliteral">&quot;Loading config.yaml failed&quot;</span>);</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    }</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    <a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg = root-&gt;<a class="code hl_function" href="classWTSVariant.html#a4dacb2b4afd195d05dedb5323d7982f3">get</a>(<span class="stringliteral">&quot;config&quot;</span>);</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    <span class="keywordflow">if</span> (cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#acbd1ff48af9becbdc0b6bf49061f8fce">has</a>(<span class="stringliteral">&quot;session&quot;</span>))</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>        <a class="code hl_variable" href="TestParser_2main_8cpp.html#af06f4d6c756835f0f06a723e266d59cc">g_bdMgr</a>.<a class="code hl_function" href="classWTSBaseDataMgr.html#a57021af47b2f06c2be9f8b4c4656c497">loadSessions</a>(cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#a830db11fc8daceff409fdbebaa7bea8a">getCString</a>(<span class="stringliteral">&quot;session&quot;</span>));</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    <span class="keywordflow">if</span> (cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#acbd1ff48af9becbdc0b6bf49061f8fce">has</a>(<span class="stringliteral">&quot;commodity&quot;</span>))</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>        <a class="code hl_variable" href="TestParser_2main_8cpp.html#af06f4d6c756835f0f06a723e266d59cc">g_bdMgr</a>.<a class="code hl_function" href="classWTSBaseDataMgr.html#a4a497f559d9cef1296216ddab48ecdc4">loadCommodities</a>(cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#a830db11fc8daceff409fdbebaa7bea8a">getCString</a>(<span class="stringliteral">&quot;commodity&quot;</span>));</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="keywordflow">if</span> (cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#acbd1ff48af9becbdc0b6bf49061f8fce">has</a>(<span class="stringliteral">&quot;contract&quot;</span>))</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        <a class="code hl_variable" href="TestParser_2main_8cpp.html#af06f4d6c756835f0f06a723e266d59cc">g_bdMgr</a>.<a class="code hl_function" href="classWTSBaseDataMgr.html#af6af96bd4a0b191460c36d572febf80a">loadContracts</a>(cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#a830db11fc8daceff409fdbebaa7bea8a">getCString</a>(<span class="stringliteral">&quot;contract&quot;</span>));</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span> </div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    std::string <span class="keyword">module</span> = cfg-&gt;getCString(&quot;parser&quot;);</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    std::string profile = cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#a830db11fc8daceff409fdbebaa7bea8a">getCString</a>(<span class="stringliteral">&quot;profile&quot;</span>);</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* params = root-&gt;<a class="code hl_function" href="classWTSVariant.html#a4dacb2b4afd195d05dedb5323d7982f3">get</a>(profile.c_str());</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    <span class="keywordflow">if</span> (params == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    {</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>        <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;Configure {} not exist&quot;</span>, profile);</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>        <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    }</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    <a class="code hl_class" href="classParserSpi.html">ParserSpi</a>* parser = <span class="keyword">new</span> <a class="code hl_class" href="classParserSpi.html">ParserSpi</a>;</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    parser-&gt;<a class="code hl_function" href="classParserSpi.html#a49359c0815bd95f11bbf84604f94c46c">init</a>(params, module.c_str());</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    parser-&gt;<a class="code hl_function" href="classParserSpi.html#a1a6fd25e39adc6725fca7789c25ada22">run</a>();</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    root-&gt;<a class="code hl_function" href="classWTSVariant.html#a888d00f531f1a3ae9d0f12543f302522">release</a>();</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    getchar();</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    <span class="comment">//exit(9);</span></div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>    parser-&gt;<a class="code hl_function" href="classParserSpi.html#aeab4178c51ba9b49a7e097658db164f9">release</a>();</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>    <span class="keyword">delete</span> parser;</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span> </div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>}</div>
+</div>
+<div class="ttc" id="aDLLHelper_8hpp_html_a40972742af38c16d3ab2f521abf0ca8a"><div class="ttname"><a href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a></div><div class="ttdeci">void * DllHandle</div><div class="ttdoc">动态库句柄类型（非Windows平台）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00032">DLLHelper.hpp:32</a></div></div>
+<div class="ttc" id="aIBaseDataMgr_8h_html_aa189517ad8e51030884413938e18bd86"><div class="ttname"><a href="IBaseDataMgr_8h.html#aa189517ad8e51030884413938e18bd86">ContractSet</a></div><div class="ttdeci">NS_WTP_BEGIN typedef CodeSet ContractSet</div><div class="ttdoc">合约集合类型</div><div class="ttdef"><b>Definition</b> <a href="IBaseDataMgr_8h_source.html#l00023">IBaseDataMgr.h:23</a></div></div>
+<div class="ttc" id="aIParserApi_8h_html_a182ec7cbd3be693196f288a464e078e0"><div class="ttname"><a href="IParserApi_8h.html#a182ec7cbd3be693196f288a464e078e0">FuncCreateParser</a></div><div class="ttdeci">NS_WTP_END typedef wtp::IParserApi *(* FuncCreateParser)()</div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00139">IParserApi.h:139</a></div></div>
+<div class="ttc" id="aIParserApi_8h_html_a65aa6357f9298ff0268f773acac61f42"><div class="ttname"><a href="IParserApi_8h.html#a65aa6357f9298ff0268f773acac61f42">FuncDeleteParser</a></div><div class="ttdeci">void(* FuncDeleteParser)(wtp::IParserApi *&amp;parser)</div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00140">IParserApi.h:140</a></div></div>
+<div class="ttc" id="aParserCTP_8cpp_html_ab387d2901e2c0ea868a0ecee850a575e"><div class="ttname"><a href="ParserCTP_8cpp.html#ab387d2901e2c0ea868a0ecee850a575e">createParser</a></div><div class="ttdeci">EXPORT_FLAG IParserApi * createParser()</div><div class="ttdoc">DLL导出函数声明</div><div class="ttdef"><b>Definition</b> <a href="ParserCTP_8cpp_source.html#l00061">ParserCTP.cpp:61</a></div></div>
+<div class="ttc" id="aTestParser_2main_8cpp_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="TestParser_2main_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00018">main.cpp:18</a></div></div>
+<div class="ttc" id="aTestParser_2main_8cpp_html_ac594b3f4124c84f707df45a2e35457cd"><div class="ttname"><a href="TestParser_2main_8cpp.html#ac594b3f4124c84f707df45a2e35457cd">getBaseFolder</a></div><div class="ttdeci">std::string getBaseFolder()</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00128">main.cpp:128</a></div></div>
+<div class="ttc" id="aTestParser_2main_8cpp_html_ae66f6b31b5ad750f1fe042a706a4e3d4"><div class="ttname"><a href="TestParser_2main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main</a></div><div class="ttdeci">int main()</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00141">main.cpp:141</a></div></div>
+<div class="ttc" id="aTestParser_2main_8cpp_html_af06f4d6c756835f0f06a723e266d59cc"><div class="ttname"><a href="TestParser_2main_8cpp.html#af06f4d6c756835f0f06a723e266d59cc">g_bdMgr</a></div><div class="ttdeci">WTSBaseDataMgr g_bdMgr</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00016">main.cpp:16</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a34013394084da0ee3d3629fe5bbc0611"><div class="ttname"><a href="WTSMarcos_8h.html#a34013394084da0ee3d3629fe5bbc0611">STATIC_CONVERT</a></div><div class="ttdeci">#define STATIC_CONVERT(x, T)</div><div class="ttdoc">静态类型转换宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00042">WTSMarcos.h:42</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aa7b93f4aa2259e69e48f27448c247dc8"><div class="ttname"><a href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a></div><div class="ttdeci">enum tagLogLevel WTSLogLevel</div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aed5503152b508c68a90229e513a8e15ba50717458baf49c204bb0645418e0da15"><div class="ttname"><a href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba50717458baf49c204bb0645418e0da15">LL_ERROR</a></div><div class="ttdeci">@ LL_ERROR</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00131">WTSTypes.h:131</a></div></div>
+<div class="ttc" id="aclassDLLHelper_html_ac5d55450ea114206242d9ccbfd65ac82"><div class="ttname"><a href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a></div><div class="ttdeci">static DllHandle load_library(const char *filename)</div><div class="ttdoc">加载动态库</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00058">DLLHelper.hpp:58</a></div></div>
+<div class="ttc" id="aclassDLLHelper_html_ae01c3a299dd418d0298d29fa5f5f9b2c"><div class="ttname"><a href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a></div><div class="ttdeci">static ProcHandle get_symbol(DllHandle handle, const char *name)</div><div class="ttdoc">获取动态库中的符号（函数或变量）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00107">DLLHelper.hpp:107</a></div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html"><div class="ttname"><a href="classIBaseDataMgr.html">IBaseDataMgr</a></div><div class="ttdoc">基础数据管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IBaseDataMgr_8h_source.html#l00075">IBaseDataMgr.h:76</a></div></div>
+<div class="ttc" id="aclassIParserApi_html"><div class="ttname"><a href="classIParserApi.html">IParserApi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00083">IParserApi.h:84</a></div></div>
+<div class="ttc" id="aclassIParserApi_html_a37ba828035dff6492ab185b462d070ec"><div class="ttname"><a href="classIParserApi.html#a37ba828035dff6492ab185b462d070ec">IParserApi::registerSpi</a></div><div class="ttdeci">virtual void registerSpi(IParserSpi *spi)</div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00133">IParserApi.h:133</a></div></div>
+<div class="ttc" id="aclassIParserApi_html_a9053ed20289653de487d5fe5d9e88690"><div class="ttname"><a href="classIParserApi.html#a9053ed20289653de487d5fe5d9e88690">IParserApi::release</a></div><div class="ttdeci">virtual void release()</div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00100">IParserApi.h:100</a></div></div>
+<div class="ttc" id="aclassIParserApi_html_a9b6eb9509e68e7bbc5901629ff7dcc43"><div class="ttname"><a href="classIParserApi.html#a9b6eb9509e68e7bbc5901629ff7dcc43">IParserApi::init</a></div><div class="ttdeci">virtual bool init(WTSVariant *config)</div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00094">IParserApi.h:94</a></div></div>
+<div class="ttc" id="aclassIParserApi_html_ab20f1e4ddb820ef80e2aa0f31ac46e2b"><div class="ttname"><a href="classIParserApi.html#ab20f1e4ddb820ef80e2aa0f31ac46e2b">IParserApi::subscribe</a></div><div class="ttdeci">virtual void subscribe(const CodeSet &amp;setCodes)</div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00123">IParserApi.h:123</a></div></div>
+<div class="ttc" id="aclassIParserApi_html_ab318c4ada41576a863f75028f90b4d06"><div class="ttname"><a href="classIParserApi.html#ab318c4ada41576a863f75028f90b4d06">IParserApi::connect</a></div><div class="ttdeci">virtual bool connect()</div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00106">IParserApi.h:106</a></div></div>
+<div class="ttc" id="aclassIParserSpi_html"><div class="ttname"><a href="classIParserSpi.html">IParserSpi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00028">IParserApi.h:29</a></div></div>
+<div class="ttc" id="aclassParserSpi_html"><div class="ttname"><a href="classParserSpi.html">ParserSpi</a></div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00020">main.cpp:21</a></div></div>
+<div class="ttc" id="aclassParserSpi_html_a02553ae3a2c58e85221c08f24526ac01"><div class="ttname"><a href="classParserSpi.html#a02553ae3a2c58e85221c08f24526ac01">ParserSpi::createParser</a></div><div class="ttdeci">bool createParser(const char *moduleName)</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00071">main.cpp:71</a></div></div>
+<div class="ttc" id="aclassParserSpi_html_a02d41459a6986afab530d84a4fb1ccec"><div class="ttname"><a href="classParserSpi.html#a02d41459a6986afab530d84a4fb1ccec">ParserSpi::m_strModule</a></div><div class="ttdeci">std::string m_strModule</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00124">main.cpp:124</a></div></div>
+<div class="ttc" id="aclassParserSpi_html_a198d60ba8ff5835bf788d22a475a5104"><div class="ttname"><a href="classParserSpi.html#a198d60ba8ff5835bf788d22a475a5104">ParserSpi::handleSymbolList</a></div><div class="ttdeci">virtual void handleSymbolList(const WTSArray *aySymbols) override</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00109">main.cpp:109</a></div></div>
+<div class="ttc" id="aclassParserSpi_html_a1a6fd25e39adc6725fca7789c25ada22"><div class="ttname"><a href="classParserSpi.html#a1a6fd25e39adc6725fca7789c25ada22">ParserSpi::run</a></div><div class="ttdeci">void run(bool bRestart=false)</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00043">main.cpp:43</a></div></div>
+<div class="ttc" id="aclassParserSpi_html_a40edaeb2355af57e5c4b1dd928a34a9b"><div class="ttname"><a href="classParserSpi.html#a40edaeb2355af57e5c4b1dd928a34a9b">ParserSpi::handleQuote</a></div><div class="ttdeci">virtual void handleQuote(WTSTickData *quote, uint32_t procFlag) override</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00104">main.cpp:104</a></div></div>
+<div class="ttc" id="aclassParserSpi_html_a49359c0815bd95f11bbf84604f94c46c"><div class="ttname"><a href="classParserSpi.html#a49359c0815bd95f11bbf84604f94c46c">ParserSpi::init</a></div><div class="ttdeci">bool init(WTSVariant *params, const char *ttype)</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00025">main.cpp:25</a></div></div>
+<div class="ttc" id="aclassParserSpi_html_a532ea0cd23cad46dff4949c59419cc2a"><div class="ttname"><a href="classParserSpi.html#a532ea0cd23cad46dff4949c59419cc2a">ParserSpi::m_funcRemover</a></div><div class="ttdeci">FuncDeleteParser m_funcRemover</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00123">main.cpp:123</a></div></div>
+<div class="ttc" id="aclassParserSpi_html_ad106ca884bddf758de75219099cec688"><div class="ttname"><a href="classParserSpi.html#ad106ca884bddf758de75219099cec688">ParserSpi::m_pParams</a></div><div class="ttdeci">WTSVariant * m_pParams</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00125">main.cpp:125</a></div></div>
+<div class="ttc" id="aclassParserSpi_html_adac569d86025b8085840b03ad11f943c"><div class="ttname"><a href="classParserSpi.html#adac569d86025b8085840b03ad11f943c">ParserSpi::ParserSpi</a></div><div class="ttdeci">ParserSpi()</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00023">main.cpp:23</a></div></div>
+<div class="ttc" id="aclassParserSpi_html_adbade6a2dab6f597c140025531c0dafa"><div class="ttname"><a href="classParserSpi.html#adbade6a2dab6f597c140025531c0dafa">ParserSpi::getBaseDataMgr</a></div><div class="ttdeci">virtual IBaseDataMgr * getBaseDataMgr()</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00115">main.cpp:115</a></div></div>
+<div class="ttc" id="aclassParserSpi_html_ae98ccfec035f7a8a8386b6a44a7e2ebb"><div class="ttname"><a href="classParserSpi.html#ae98ccfec035f7a8a8386b6a44a7e2ebb">ParserSpi::handleParserLog</a></div><div class="ttdeci">virtual void handleParserLog(WTSLogLevel ll, const char *message) override</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00099">main.cpp:99</a></div></div>
+<div class="ttc" id="aclassParserSpi_html_aeab4178c51ba9b49a7e097658db164f9"><div class="ttname"><a href="classParserSpi.html#aeab4178c51ba9b49a7e097658db164f9">ParserSpi::release</a></div><div class="ttdeci">void release()</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00035">main.cpp:35</a></div></div>
+<div class="ttc" id="aclassParserSpi_html_afa76c83ebca6cad3cc42c4453fa28116"><div class="ttname"><a href="classParserSpi.html#afa76c83ebca6cad3cc42c4453fa28116">ParserSpi::_api</a></div><div class="ttdeci">IParserApi * _api</div><div class="ttdef"><b>Definition</b> <a href="TestParser_2main_8cpp_source.html#l00122">main.cpp:122</a></div></div>
+<div class="ttc" id="aclassStrUtil_html_a6d993d2350e32ceedca3811eee1370db"><div class="ttname"><a href="classStrUtil.html#a6d993d2350e32ceedca3811eee1370db">StrUtil::standardisePath</a></div><div class="ttdeci">static std::string standardisePath(const std::string &amp;init, bool bIsDir=true)</div><div class="ttdoc">标准化路径格式 - 仅使用正斜杠，目录以斜杠结尾</div><div class="ttdef"><b>Definition</b> <a href="StrUtil_8hpp_source.html#l00360">StrUtil.hpp:360</a></div></div>
+<div class="ttc" id="aclassWTSArray_html"><div class="ttname"><a href="classWTSArray.html">WTSArray</a></div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00032">WTSCollection.hpp:33</a></div></div>
+<div class="ttc" id="aclassWTSArray_html_aa16bfca83e36f14e970edae5611f197d"><div class="ttname"><a href="classWTSArray.html#aa16bfca83e36f14e970edae5611f197d">WTSArray::Iterator</a></div><div class="ttdeci">std::vector&lt; WTSObject * &gt;::iterator Iterator</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00038">WTSCollection.hpp:38</a></div></div>
+<div class="ttc" id="aclassWTSArray_html_aa7b9968d4931b28cfb02a367d67cbfe3"><div class="ttname"><a href="classWTSArray.html#aa7b9968d4931b28cfb02a367d67cbfe3">WTSArray::release</a></div><div class="ttdeci">virtual void release()</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00217">WTSCollection.hpp:217</a></div></div>
+<div class="ttc" id="aclassWTSArray_html_abf2b1b8d07394ea3c09b0cf10621ab90"><div class="ttname"><a href="classWTSArray.html#abf2b1b8d07394ea3c09b0cf10621ab90">WTSArray::end</a></div><div class="ttdeci">Iterator end()</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00268">WTSCollection.hpp:268</a></div></div>
+<div class="ttc" id="aclassWTSArray_html_aeb41360de7a6a483de71006af2de8074"><div class="ttname"><a href="classWTSArray.html#aeb41360de7a6a483de71006af2de8074">WTSArray::begin</a></div><div class="ttdeci">Iterator begin()</div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00241">WTSCollection.hpp:241</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html"><div class="ttname"><a href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a></div><div class="ttdoc">基础数据管理器类</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00073">WTSBaseDataMgr.h:74</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a4a497f559d9cef1296216ddab48ecdc4"><div class="ttname"><a href="classWTSBaseDataMgr.html#a4a497f559d9cef1296216ddab48ecdc4">WTSBaseDataMgr::loadCommodities</a></div><div class="ttdeci">bool loadCommodities(const char *filename)</div><div class="ttdoc">加载品种数据</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00543">WTSBaseDataMgr.cpp:543</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a57021af47b2f06c2be9f8b4c4656c497"><div class="ttname"><a href="classWTSBaseDataMgr.html#a57021af47b2f06c2be9f8b4c4656c497">WTSBaseDataMgr::loadSessions</a></div><div class="ttdeci">bool loadSessions(const char *filename)</div><div class="ttdoc">加载交易时段数据</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00425">WTSBaseDataMgr.cpp:425</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a63885c8ed3b5a721b6ac7a5a82f93102"><div class="ttname"><a href="classWTSBaseDataMgr.html#a63885c8ed3b5a721b6ac7a5a82f93102">WTSBaseDataMgr::getContracts</a></div><div class="ttdeci">virtual WTSArray * getContracts(const char *exchg=&quot;&quot;, uint32_t uDate=0) override</div><div class="ttdoc">获取合约列表</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00257">WTSBaseDataMgr.cpp:257</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_af6af96bd4a0b191460c36d572febf80a"><div class="ttname"><a href="classWTSBaseDataMgr.html#af6af96bd4a0b191460c36d572febf80a">WTSBaseDataMgr::loadContracts</a></div><div class="ttdeci">bool loadContracts(const char *filename)</div><div class="ttdoc">加载合约数据</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00616">WTSBaseDataMgr.cpp:616</a></div></div>
+<div class="ttc" id="aclassWTSCfgLoader_html_a222f42e290bc1aa38b4f67c005e10887"><div class="ttname"><a href="classWTSCfgLoader.html#a222f42e290bc1aa38b4f67c005e10887">WTSCfgLoader::load_from_file</a></div><div class="ttdeci">static WTSVariant * load_from_file(const char *filename)</div><div class="ttdoc">从文件加载配置</div><div class="ttdef"><b>Definition</b> <a href="WTSCfgLoader_8cpp_source.html#l00291">WTSCfgLoader.cpp:291</a></div></div>
+<div class="ttc" id="aclassWTSContractInfo_html"><div class="ttname"><a href="classWTSContractInfo.html">WTSContractInfo</a></div><div class="ttdoc">合约信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00171">WTSContractInfo.hpp:172</a></div></div>
+<div class="ttc" id="aclassWTSContractInfo_html_ab9c43c1c16758aa2ee95c3fc23f9b214"><div class="ttname"><a href="classWTSContractInfo.html#ab9c43c1c16758aa2ee95c3fc23f9b214">WTSContractInfo::getFullCode</a></div><div class="ttdeci">const char * getFullCode() const</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00221">WTSContractInfo.hpp:221</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a20d65255542e3ed5d694b529892a0f57"><div class="ttname"><a href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a></div><div class="ttdeci">static void info(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出信息级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00187">WTSLogger.h:187</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a316399910d3af4aef6c4a6e85c50c729"><div class="ttname"><a href="classWTSLogger.html#a316399910d3af4aef6c4a6e85c50c729">WTSLogger::init</a></div><div class="ttdeci">static void init(const char *propFile=&quot;logcfg.json&quot;, bool isFile=true, ILogHandler *handler=NULL)</div><div class="ttdoc">初始化日志系统</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00249">WTSLogger.cpp:249</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a618c41d0ff3c1f5ce0a70d83c28bc9fc"><div class="ttname"><a href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a></div><div class="ttdeci">static void error(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出错误级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00239">WTSLogger.h:239</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_aa3257bbd8e5b1db25f65cd936f50025c"><div class="ttname"><a href="classWTSLogger.html#aa3257bbd8e5b1db25f65cd936f50025c">WTSLogger::log_raw</a></div><div class="ttdeci">static void log_raw(WTSLogLevel ll, const char *message)</div><div class="ttdoc">直接输出日志消息</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00407">WTSLogger.cpp:407</a></div></div>
+<div class="ttc" id="aclassWTSObject_html_a3e41434e26313af90b03c8c8b395b049"><div class="ttname"><a href="classWTSObject.html#a3e41434e26313af90b03c8c8b395b049">WTSObject::retain</a></div><div class="ttdeci">uint32_t retain()</div><div class="ttdef"><b>Definition</b> <a href="WTSObject_8hpp_source.html#l00027">WTSObject.hpp:27</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a12aa24165f23c4dacd1e4f686a2f5879"><div class="ttname"><a href="classWTSTickData.html#a12aa24165f23c4dacd1e4f686a2f5879">WTSTickData::actiontime</a></div><div class="ttdeci">uint32_t actiontime() const</div><div class="ttdoc">获取数据发生时间</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01506">WTSDataDef.hpp:1506</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a9aaeae2b996a6d2e2dc8c813b622e6e0"><div class="ttname"><a href="classWTSTickData.html#a9aaeae2b996a6d2e2dc8c813b622e6e0">WTSTickData::totalvolume</a></div><div class="ttdeci">double totalvolume() const</div><div class="ttdoc">获取累计成交量</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01419">WTSDataDef.hpp:1419</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a9f8dfcc3630181284346338f2049cfb3"><div class="ttname"><a href="classWTSTickData.html#a9f8dfcc3630181284346338f2049cfb3">WTSTickData::actiondate</a></div><div class="ttdeci">uint32_t actiondate() const</div><div class="ttdoc">获取数据发生日期</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01496">WTSDataDef.hpp:1496</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_ae40aac80fd30843224b6e88d007b1d05"><div class="ttname"><a href="classWTSTickData.html#ae40aac80fd30843224b6e88d007b1d05">WTSTickData::code</a></div><div class="ttdeci">const char * code() const</div><div class="ttdoc">获取Tick数据的合约代码</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01320">WTSDataDef.hpp:1320</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_ae502123e14736815e734b7f6456cfd13"><div class="ttname"><a href="classWTSTickData.html#ae502123e14736815e734b7f6456cfd13">WTSTickData::price</a></div><div class="ttdeci">double price() const</div><div class="ttdoc">获取Tick数据的最新成交价</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01338">WTSDataDef.hpp:1338</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a4dacb2b4afd195d05dedb5323d7982f3"><div class="ttname"><a href="classWTSVariant.html#a4dacb2b4afd195d05dedb5323d7982f3">WTSVariant::get</a></div><div class="ttdeci">WTSVariant * get(const char *name) const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00357">WTSVariant.hpp:357</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a830db11fc8daceff409fdbebaa7bea8a"><div class="ttname"><a href="classWTSVariant.html#a830db11fc8daceff409fdbebaa7bea8a">WTSVariant::getCString</a></div><div class="ttdeci">const char * getCString(const char *name) const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00339">WTSVariant.hpp:339</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a888d00f531f1a3ae9d0f12543f302522"><div class="ttname"><a href="classWTSVariant.html#a888d00f531f1a3ae9d0f12543f302522">WTSVariant::release</a></div><div class="ttdeci">virtual void release()</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00691">WTSVariant.hpp:691</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_acbd1ff48af9becbdc0b6bf49061f8fce"><div class="ttname"><a href="classWTSVariant.html#acbd1ff48af9becbdc0b6bf49061f8fce">WTSVariant::has</a></div><div class="ttdeci">bool has(const char *key) const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00146">WTSVariant.hpp:146</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_6077da480def65ea1c1eaa22ab0f4719.html">TestParser</a></li><li class="navelem"><a class="el" href="TestParser_2main_8cpp.html">main.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

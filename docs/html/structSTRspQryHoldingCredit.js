@@ -1,0 +1,25 @@
+var structSTRspQryHoldingCredit =
+[
+    [ "chIsCollat", "structSTRspQryHoldingCredit.html#a20e9e30850284ff763f547ce0a3f51da", null ],
+    [ "llCuacctCode", "structSTRspQryHoldingCredit.html#af236a64eba0118b58a532d0d02b7927a", null ],
+    [ "llMktQty", "structSTRspQryHoldingCredit.html#a644dc56ab4a7fd0a984ec64a1d7ce8ca", null ],
+    [ "llStkAvl", "structSTRspQryHoldingCredit.html#a068f17289d2f7e67e84f1ae06851718d", null ],
+    [ "llStkBln", "structSTRspQryHoldingCredit.html#aae59cd560fe7a981754f7e622eb54a07", null ],
+    [ "llStkFrz", "structSTRspQryHoldingCredit.html#a974bdb5ed8bc8c418a95a21788d38ba6", null ],
+    [ "llStkPrebln", "structSTRspQryHoldingCredit.html#a63d1083882154ff6dc37cfb3280f094b", null ],
+    [ "llStkQty", "structSTRspQryHoldingCredit.html#a8f21e3b9a90079f49a06f37632ad4852", null ],
+    [ "llStkRemain", "structSTRspQryHoldingCredit.html#a4f94938cc49a31351d083df8522a8944", null ],
+    [ "llStkSale", "structSTRspQryHoldingCredit.html#aa45b88ba653ece07f4d3fc6f94e2cd60", null ],
+    [ "llStkTrdBln", "structSTRspQryHoldingCredit.html#aa4d49960d24f882a40374fae855928e8", null ],
+    [ "llStkTrdFrz", "structSTRspQryHoldingCredit.html#a1e6394c1e77b1ffa23806d9b07316501", null ],
+    [ "llStkTrdOtd", "structSTRspQryHoldingCredit.html#a12b30c0a90bc7c3c7d71f16c47754a66", null ],
+    [ "llStkTrdUfz", "structSTRspQryHoldingCredit.html#a4ef8085a2cd0ee4aca327675071cb773", null ],
+    [ "llStkUfz", "structSTRspQryHoldingCredit.html#ad28753a7f16dd10056af723921e9abc6", null ],
+    [ "szAveragePrice", "structSTRspQryHoldingCredit.html#af0140cfc1efda0113375f5de5b0d8861", null ],
+    [ "szCollatRatio", "structSTRspQryHoldingCredit.html#aec9e78c70e1cac7b318a11eac91ba2f9", null ],
+    [ "szQryPos", "structSTRspQryHoldingCredit.html#a640b65527446012f80162cc9b17d9729", null ],
+    [ "szStkbd", "structSTRspQryHoldingCredit.html#a705f476e59b601776dab679b71268651", null ],
+    [ "szStkCode", "structSTRspQryHoldingCredit.html#a2beb4f072d619e8da45c951d328c37a6", null ],
+    [ "szStkName", "structSTRspQryHoldingCredit.html#abe919dd718b893fc92f1e1a3e8cc02c0", null ],
+    [ "szTrdacct", "structSTRspQryHoldingCredit.html#ab79536862919dc9d456c2794552d4a26", null ]
+];

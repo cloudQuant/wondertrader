@@ -1,0 +1,26 @@
+var structCRspOptQryRpcHisRiskNotifyField =
+[
+    [ "chCurrency", "structCRspOptQryRpcHisRiskNotifyField.html#a035ebbb3cb2d40c17839e09200df36b0", null ],
+    [ "chNoticeChnl", "structCRspOptQryRpcHisRiskNotifyField.html#ae7ececabf1c67470f4ab18e72c305fa3", null ],
+    [ "chReadFlag", "structCRspOptQryRpcHisRiskNotifyField.html#a783633d7d2e008a62687c856ee579d0a", null ],
+    [ "chSendType", "structCRspOptQryRpcHisRiskNotifyField.html#a7c5b7a8ff9797a490e4786fcb83cb5cf", null ],
+    [ "iCreateDate", "structCRspOptQryRpcHisRiskNotifyField.html#a5e0eb376b9282758b320a1d138cc75b5", null ],
+    [ "iCreateTime", "structCRspOptQryRpcHisRiskNotifyField.html#a1881be443a25cd233dc3eba5eeaebf86", null ],
+    [ "iRespDate", "structCRspOptQryRpcHisRiskNotifyField.html#a8b1be1362c3b2e12c0c45f682cc07a21", null ],
+    [ "iRespTime", "structCRspOptQryRpcHisRiskNotifyField.html#a2c78685ad176aae33444d5391f462ee9", null ],
+    [ "iSendDate", "structCRspOptQryRpcHisRiskNotifyField.html#a3706ec3680114da2652a8418e21a0708", null ],
+    [ "iSendTime", "structCRspOptQryRpcHisRiskNotifyField.html#aeb464b3e879e37d511850af902c8cdf8", null ],
+    [ "llCuacctCode", "structCRspOptQryRpcHisRiskNotifyField.html#ada917c7c6c39a650c19a7487bed1ba68", null ],
+    [ "llCustCode", "structCRspOptQryRpcHisRiskNotifyField.html#a3a2b652e2a7825a7380077a4af4674f2", null ],
+    [ "llNoticeBsn", "structCRspOptQryRpcHisRiskNotifyField.html#a35849d08deff88c81b3e00497c53f580", null ],
+    [ "llNoticeSn", "structCRspOptQryRpcHisRiskNotifyField.html#aeea8d4a8f87282cf61b25c5c41b317e2", null ],
+    [ "llRecNum", "structCRspOptQryRpcHisRiskNotifyField.html#acac1112545695e6938df61f2cefcb696", null ],
+    [ "szContent", "structCRspOptQryRpcHisRiskNotifyField.html#a9baeb4f89e592c78dfbc76c0c1c41edf", null ],
+    [ "szOptTrdacct", "structCRspOptQryRpcHisRiskNotifyField.html#a256171f93ef478174c0e85f33b2ec97a", null ],
+    [ "szRespCont", "structCRspOptQryRpcHisRiskNotifyField.html#ac1e181274885ad5169b9d113e56ba60d", null ],
+    [ "szRiskId", "structCRspOptQryRpcHisRiskNotifyField.html#acf23a5dd015ea1d9db6750c8958394b7", null ],
+    [ "szSchemaId", "structCRspOptQryRpcHisRiskNotifyField.html#a3798fb84f90647370cc210e5efece704", null ],
+    [ "szStkbd", "structCRspOptQryRpcHisRiskNotifyField.html#aaa90b2b62e36885e70e1e8936c001978", null ],
+    [ "szSubacctCode", "structCRspOptQryRpcHisRiskNotifyField.html#a986c5b5c068f0aea4ee51a5c942466e6", null ],
+    [ "szTrdacct", "structCRspOptQryRpcHisRiskNotifyField.html#ad8b1c09130938db1813e8d5052fa8f8a", null ]
+];

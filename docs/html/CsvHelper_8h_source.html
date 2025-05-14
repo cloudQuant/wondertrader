@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSTools/CsvHelper.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('CsvHelper_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">CsvHelper.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="CsvHelper_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;unordered_map&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;fstream&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;sstream&gt;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="foldopen" id="foldopen00022" data-start="{" data-end="};">
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classCsvReader.html">   22</a></span><span class="keyword">class </span><a class="code hl_class" href="classCsvReader.html">CsvReader</a></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>{</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <a class="code hl_class" href="classCsvReader.html">CsvReader</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* item_splitter = <span class="stringliteral">&quot;,&quot;</span>);</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keywordtype">bool</span>    <a class="code hl_function" href="classCsvReader.html#a58620553a5d28321c617b7896615acaa">load_from_file</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* filename);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classCsvReader.html#ae30835c13c53e72ae5353c36f888bee2">   46</a></span>    <span class="keyword">inline</span> uint32_t <a class="code hl_function" href="classCsvReader.html#ae30835c13c53e72ae5353c36f888bee2">col_count</a>() { <span class="keywordflow">return</span> (uint32_t)<a class="code hl_variable" href="classCsvReader.html#ac4e171df7a32c587fe5e7afb0ad408fc">_fields_map</a>.size(); }</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    int32_t     <a class="code hl_function" href="classCsvReader.html#a244dad7f98c135125a44f836e300f4f0">get_int32</a>(int32_t col);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    uint32_t    <a class="code hl_function" href="classCsvReader.html#a8c0ae3d0ba89a1564eab92ca92995623">get_uint32</a>(int32_t col);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    int64_t     <a class="code hl_function" href="classCsvReader.html#ac0c9b6c1a7958fe4dce928d236980545">get_int64</a>(int32_t col);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    uint64_t    <a class="code hl_function" href="classCsvReader.html#a34f9ee97ce4b292e63b7cfd53057a5f1">get_uint64</a>(int32_t col);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordtype">double</span>      <a class="code hl_function" href="classCsvReader.html#a3d475909d51d3a731ab87f2287531797">get_double</a>(int32_t col);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classCsvReader.html#aa9b837943b8969ce1ad33dc894ffa137">get_string</a>(int32_t col);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    int32_t     <a class="code hl_function" href="classCsvReader.html#a244dad7f98c135125a44f836e300f4f0">get_int32</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* field);</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    uint32_t    <a class="code hl_function" href="classCsvReader.html#a8c0ae3d0ba89a1564eab92ca92995623">get_uint32</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* field);</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    int64_t     <a class="code hl_function" href="classCsvReader.html#ac0c9b6c1a7958fe4dce928d236980545">get_int64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* field);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    uint64_t    <a class="code hl_function" href="classCsvReader.html#a34f9ee97ce4b292e63b7cfd53057a5f1">get_uint64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* field);</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="keywordtype">double</span>      <a class="code hl_function" href="classCsvReader.html#a3d475909d51d3a731ab87f2287531797">get_double</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* field);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classCsvReader.html#aa9b837943b8969ce1ad33dc894ffa137">get_string</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* field);</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="keywordtype">bool</span>        <a class="code hl_function" href="classCsvReader.html#ae4b43d7a3aaa3e9f4c0d8d8a9a9c4af4">next_row</a>();</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span> </div>
+<div class="foldopen" id="foldopen00146" data-start="{" data-end="}">
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno"><a class="line" href="classCsvReader.html#a206a8e7a7b02441b8bde1ebc1cbc4699">  146</a></span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classCsvReader.html#a206a8e7a7b02441b8bde1ebc1cbc4699">fields</a>()<span class="keyword"> const </span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="keyword">    </span>{ </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        <span class="keyword">static</span> std::string s;</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        <span class="keywordflow">if</span>(s.empty())</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        {</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>            std::stringstream ss;</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>            <span class="keywordflow">for</span> (<span class="keyword">auto</span> item : <a class="code hl_variable" href="classCsvReader.html#ac4e171df7a32c587fe5e7afb0ad408fc">_fields_map</a>)</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>                ss &lt;&lt; item.first &lt;&lt; <span class="stringliteral">&quot;,&quot;</span>;</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>            s = ss.str();</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>            s = s.substr(0, s.size() - 1);</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>        }</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        <span class="keywordflow">return</span> s.c_str();</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    }</div>
+</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span> </div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    <span class="keywordtype">bool</span>        <a class="code hl_function" href="classCsvReader.html#a7ad65b4b670aaece2f65779e7d87a0e4">check_cell</a>(int32_t col);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    </div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    int32_t     <a class="code hl_function" href="classCsvReader.html#ab2f0af64bad0875c8fe92c47b4a1c132">get_col_by_filed</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* field);</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno"><a class="line" href="classCsvReader.html#aa2d90e05c1b56ffae8862b10c4b9c21b">  178</a></span>    std::ifstream   <a class="code hl_variable" href="classCsvReader.html#aa2d90e05c1b56ffae8862b10c4b9c21b">_ifs</a>;            </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno"><a class="line" href="classCsvReader.html#a0ec8017ff560c2208d9ff21953de9a8d">  179</a></span>    <span class="keywordtype">char</span>            <a class="code hl_variable" href="classCsvReader.html#a0ec8017ff560c2208d9ff21953de9a8d">_buffer</a>[1024];       </div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno"><a class="line" href="classCsvReader.html#ac58b57a44a9c0ad9154bde12c194427d">  180</a></span>    std::string     <a class="code hl_variable" href="classCsvReader.html#ac58b57a44a9c0ad9154bde12c194427d">_item_splitter</a>;  </div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span> </div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno"><a class="line" href="classCsvReader.html#ac4e171df7a32c587fe5e7afb0ad408fc">  182</a></span>    std::unordered_map&lt;std::string, int32_t&gt; <a class="code hl_variable" href="classCsvReader.html#ac4e171df7a32c587fe5e7afb0ad408fc">_fields_map</a>;  </div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno"><a class="line" href="classCsvReader.html#a7f285c1406064d2f2f5541a6fa61fbea">  183</a></span>    std::vector&lt;std::string&gt; <a class="code hl_variable" href="classCsvReader.html#a7f285c1406064d2f2f5541a6fa61fbea">_current_cells</a>;               </div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>};</div>
+</div>
+<div class="ttc" id="aclassCsvReader_html"><div class="ttname"><a href="classCsvReader.html">CsvReader</a></div><div class="ttdoc">CSV文件读取器类</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8h_source.html#l00022">CsvHelper.h:23</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_a0ec8017ff560c2208d9ff21953de9a8d"><div class="ttname"><a href="classCsvReader.html#a0ec8017ff560c2208d9ff21953de9a8d">CsvReader::_buffer</a></div><div class="ttdeci">char _buffer[1024]</div><div class="ttdoc">行缓冲区</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8h_source.html#l00179">CsvHelper.h:179</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_a206a8e7a7b02441b8bde1ebc1cbc4699"><div class="ttname"><a href="classCsvReader.html#a206a8e7a7b02441b8bde1ebc1cbc4699">CsvReader::fields</a></div><div class="ttdeci">const char * fields() const</div><div class="ttdoc">获取所有字段名</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8h_source.html#l00146">CsvHelper.h:146</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_a244dad7f98c135125a44f836e300f4f0"><div class="ttname"><a href="classCsvReader.html#a244dad7f98c135125a44f836e300f4f0">CsvReader::get_int32</a></div><div class="ttdeci">int32_t get_int32(int32_t col)</div><div class="ttdoc">获取指定列的32位有符号整数值</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8cpp_source.html#l00114">CsvHelper.cpp:114</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_a34f9ee97ce4b292e63b7cfd53057a5f1"><div class="ttname"><a href="classCsvReader.html#a34f9ee97ce4b292e63b7cfd53057a5f1">CsvReader::get_uint64</a></div><div class="ttdeci">uint64_t get_uint64(int32_t col)</div><div class="ttdoc">获取指定列的64位无符号整数值</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8cpp_source.html#l00153">CsvHelper.cpp:153</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_a3d475909d51d3a731ab87f2287531797"><div class="ttname"><a href="classCsvReader.html#a3d475909d51d3a731ab87f2287531797">CsvReader::get_double</a></div><div class="ttdeci">double get_double(int32_t col)</div><div class="ttdoc">获取指定列的双精度浮点数值</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8cpp_source.html#l00166">CsvHelper.cpp:166</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_a58620553a5d28321c617b7896615acaa"><div class="ttname"><a href="classCsvReader.html#a58620553a5d28321c617b7896615acaa">CsvReader::load_from_file</a></div><div class="ttdeci">bool load_from_file(const char *filename)</div><div class="ttdoc">从文件加载CSV数据</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8cpp_source.html#l00039">CsvHelper.cpp:39</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_a7ad65b4b670aaece2f65779e7d87a0e4"><div class="ttname"><a href="classCsvReader.html#a7ad65b4b670aaece2f65779e7d87a0e4">CsvReader::check_cell</a></div><div class="ttdeci">bool check_cell(int32_t col)</div><div class="ttdoc">检查列索引是否有效</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8cpp_source.html#l00261">CsvHelper.cpp:261</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_a7f285c1406064d2f2f5541a6fa61fbea"><div class="ttname"><a href="classCsvReader.html#a7f285c1406064d2f2f5541a6fa61fbea">CsvReader::_current_cells</a></div><div class="ttdeci">std::vector&lt; std::string &gt; _current_cells</div><div class="ttdoc">当前行的单元格数据</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8h_source.html#l00183">CsvHelper.h:183</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_a8c0ae3d0ba89a1564eab92ca92995623"><div class="ttname"><a href="classCsvReader.html#a8c0ae3d0ba89a1564eab92ca92995623">CsvReader::get_uint32</a></div><div class="ttdeci">uint32_t get_uint32(int32_t col)</div><div class="ttdoc">获取指定列的32位无符号整数值</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8cpp_source.html#l00127">CsvHelper.cpp:127</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_aa2d90e05c1b56ffae8862b10c4b9c21b"><div class="ttname"><a href="classCsvReader.html#aa2d90e05c1b56ffae8862b10c4b9c21b">CsvReader::_ifs</a></div><div class="ttdeci">std::ifstream _ifs</div><div class="ttdoc">文件输入流</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8h_source.html#l00178">CsvHelper.h:178</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_aa9b837943b8969ce1ad33dc894ffa137"><div class="ttname"><a href="classCsvReader.html#aa9b837943b8969ce1ad33dc894ffa137">CsvReader::get_string</a></div><div class="ttdeci">const char * get_string(int32_t col)</div><div class="ttdoc">获取指定列的字符串值</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8cpp_source.html#l00179">CsvHelper.cpp:179</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_ab2f0af64bad0875c8fe92c47b4a1c132"><div class="ttname"><a href="classCsvReader.html#ab2f0af64bad0875c8fe92c47b4a1c132">CsvReader::get_col_by_filed</a></div><div class="ttdeci">int32_t get_col_by_filed(const char *field)</div><div class="ttdoc">根据字段名获取列索引</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8cpp_source.html#l00280">CsvHelper.cpp:280</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_ac0c9b6c1a7958fe4dce928d236980545"><div class="ttname"><a href="classCsvReader.html#ac0c9b6c1a7958fe4dce928d236980545">CsvReader::get_int64</a></div><div class="ttdeci">int64_t get_int64(int32_t col)</div><div class="ttdoc">获取指定列的64位有符号整数值</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8cpp_source.html#l00140">CsvHelper.cpp:140</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_ac4e171df7a32c587fe5e7afb0ad408fc"><div class="ttname"><a href="classCsvReader.html#ac4e171df7a32c587fe5e7afb0ad408fc">CsvReader::_fields_map</a></div><div class="ttdeci">std::unordered_map&lt; std::string, int32_t &gt; _fields_map</div><div class="ttdoc">字段名到列索引的映射</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8h_source.html#l00182">CsvHelper.h:182</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_ac58b57a44a9c0ad9154bde12c194427d"><div class="ttname"><a href="classCsvReader.html#ac58b57a44a9c0ad9154bde12c194427d">CsvReader::_item_splitter</a></div><div class="ttdeci">std::string _item_splitter</div><div class="ttdoc">列分隔符</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8h_source.html#l00180">CsvHelper.h:180</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_ae30835c13c53e72ae5353c36f888bee2"><div class="ttname"><a href="classCsvReader.html#ae30835c13c53e72ae5353c36f888bee2">CsvReader::col_count</a></div><div class="ttdeci">uint32_t col_count()</div><div class="ttdoc">获取列数</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8h_source.html#l00046">CsvHelper.h:46</a></div></div>
+<div class="ttc" id="aclassCsvReader_html_ae4b43d7a3aaa3e9f4c0d8d8a9a9c4af4"><div class="ttname"><a href="classCsvReader.html#ae4b43d7a3aaa3e9f4c0d8d8a9a9c4af4">CsvReader::next_row</a></div><div class="ttdeci">bool next_row()</div><div class="ttdoc">读取下一行数据</div><div class="ttdef"><b>Definition</b> <a href="CsvHelper_8cpp_source.html#l00086">CsvHelper.cpp:86</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_a16605e2dd51d97a5bcc8d8e1bf3d6c6.html">WTSTools</a></li><li class="navelem"><a class="el" href="CsvHelper_8h.html">CsvHelper.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

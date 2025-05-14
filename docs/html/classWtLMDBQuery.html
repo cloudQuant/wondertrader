@@ -1,0 +1,966 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: WtLMDBQuery类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classWtLMDBQuery.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classWtLMDBQuery-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">WtLMDBQuery类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>LMDB数据库查询和操作类  
+ <a href="classWtLMDBQuery.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a75988d6583a58b29a1272c3f9a50b657" id="r_a75988d6583a58b29a1272c3f9a50b657"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a75988d6583a58b29a1272c3f9a50b657">WtLMDBQuery</a> (<a class="el" href="classWtLMDB.html">WtLMDB</a> &amp;db)</td></tr>
+<tr class="memdesc:a75988d6583a58b29a1272c3f9a50b657"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a75988d6583a58b29a1272c3f9a50b657"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2dc65ba9e73198c09bcccbfc9a131781" id="r_a2dc65ba9e73198c09bcccbfc9a131781"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a2dc65ba9e73198c09bcccbfc9a131781">~WtLMDBQuery</a> ()</td></tr>
+<tr class="memdesc:a2dc65ba9e73198c09bcccbfc9a131781"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:a2dc65ba9e73198c09bcccbfc9a131781"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61f36b025f0a1ce788bb900703ae6cd0" id="r_a61f36b025f0a1ce788bb900703ae6cd0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a61f36b025f0a1ce788bb900703ae6cd0">rollback</a> ()</td></tr>
+<tr class="memdesc:a61f36b025f0a1ce788bb900703ae6cd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">回滚事务  <br /></td></tr>
+<tr class="separator:a61f36b025f0a1ce788bb900703ae6cd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b554bda9de1b1e4b4d515f2602e44af" id="r_a6b554bda9de1b1e4b4d515f2602e44af"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a6b554bda9de1b1e4b4d515f2602e44af">commit</a> ()</td></tr>
+<tr class="memdesc:a6b554bda9de1b1e4b4d515f2602e44af"><td class="mdescLeft">&#160;</td><td class="mdescRight">提交事务  <br /></td></tr>
+<tr class="separator:a6b554bda9de1b1e4b4d515f2602e44af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adcd422a5b6ba815d37e5eb9a1d8c068d" id="r_adcd422a5b6ba815d37e5eb9a1d8c068d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#adcd422a5b6ba815d37e5eb9a1d8c068d">put</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;key, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;val)</td></tr>
+<tr class="memdesc:adcd422a5b6ba815d37e5eb9a1d8c068d"><td class="mdescLeft">&#160;</td><td class="mdescRight">写入数据（字符串版本）  <br /></td></tr>
+<tr class="separator:adcd422a5b6ba815d37e5eb9a1d8c068d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c4da6f02c34eedbf3cab805a8bb895b" id="r_a7c4da6f02c34eedbf3cab805a8bb895b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a7c4da6f02c34eedbf3cab805a8bb895b">put_and_commit</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;key, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;val)</td></tr>
+<tr class="memdesc:a7c4da6f02c34eedbf3cab805a8bb895b"><td class="mdescLeft">&#160;</td><td class="mdescRight">写入数据并提交（字符串版本）  <br /></td></tr>
+<tr class="separator:a7c4da6f02c34eedbf3cab805a8bb895b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab25ed16bd6a7a74c7e7e9702e0e5d6b3" id="r_ab25ed16bd6a7a74c7e7e9702e0e5d6b3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#ab25ed16bd6a7a74c7e7e9702e0e5d6b3">put</a> (void *key, std::size_t klen, void *val, std::size_t vlen)</td></tr>
+<tr class="memdesc:ab25ed16bd6a7a74c7e7e9702e0e5d6b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">写入数据（原始数据版本）  <br /></td></tr>
+<tr class="separator:ab25ed16bd6a7a74c7e7e9702e0e5d6b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30f76cbca8a7640d490b0e02f31cfd53" id="r_a30f76cbca8a7640d490b0e02f31cfd53"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a30f76cbca8a7640d490b0e02f31cfd53">put_and_commit</a> (void *key, std::size_t klen, void *val, std::size_t vlen)</td></tr>
+<tr class="memdesc:a30f76cbca8a7640d490b0e02f31cfd53"><td class="mdescLeft">&#160;</td><td class="mdescRight">写入数据并提交（原始数据版本）  <br /></td></tr>
+<tr class="separator:a30f76cbca8a7640d490b0e02f31cfd53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb648c36b10ad339bbacefc1f038c03e" id="r_acb648c36b10ad339bbacefc1f038c03e"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#acb648c36b10ad339bbacefc1f038c03e">get</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;key)</td></tr>
+<tr class="memdesc:acb648c36b10ad339bbacefc1f038c03e"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定键的数据（字符串版本）  <br /></td></tr>
+<tr class="separator:acb648c36b10ad339bbacefc1f038c03e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78d3f1b7e7a5a1bfe0ed7c2270da00ab" id="r_a78d3f1b7e7a5a1bfe0ed7c2270da00ab"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a78d3f1b7e7a5a1bfe0ed7c2270da00ab">get</a> (void *key, std::size_t klen)</td></tr>
+<tr class="memdesc:a78d3f1b7e7a5a1bfe0ed7c2270da00ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定键的数据（原始数据版本）  <br /></td></tr>
+<tr class="separator:a78d3f1b7e7a5a1bfe0ed7c2270da00ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a135dd774c0e8f40f82a3a6dba78c41" id="r_a7a135dd774c0e8f40f82a3a6dba78c41"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a7a135dd774c0e8f40f82a3a6dba78c41">get_range</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;lower_key, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;upper_key, <a class="el" href="WtLMDB_8hpp.html#a0cdd304877129230e16c3606e714bcd2">LMDBQueryCallback</a> cb)</td></tr>
+<tr class="memdesc:a7a135dd774c0e8f40f82a3a6dba78c41"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定区间内的数据  <br /></td></tr>
+<tr class="separator:a7a135dd774c0e8f40f82a3a6dba78c41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6fe637a0ce69220fc2aaec23c49ca050" id="r_a6fe637a0ce69220fc2aaec23c49ca050"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a6fe637a0ce69220fc2aaec23c49ca050">get_lowers</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;lower_key, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;upper_key, int count, <a class="el" href="WtLMDB_8hpp.html#a0cdd304877129230e16c3606e714bcd2">LMDBQueryCallback</a> cb)</td></tr>
+<tr class="memdesc:a6fe637a0ce69220fc2aaec23c49ca050"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取限定数量的区间上限之前的数据  <br /></td></tr>
+<tr class="separator:a6fe637a0ce69220fc2aaec23c49ca050"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03d24824e5b6fe9fc96bedfc6d617f9c" id="r_a03d24824e5b6fe9fc96bedfc6d617f9c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a03d24824e5b6fe9fc96bedfc6d617f9c">get_uppers</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;lower_key, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;upper_key, int count, <a class="el" href="WtLMDB_8hpp.html#a0cdd304877129230e16c3606e714bcd2">LMDBQueryCallback</a> cb)</td></tr>
+<tr class="memdesc:a03d24824e5b6fe9fc96bedfc6d617f9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取限定数量的区间下限之后的数据  <br /></td></tr>
+<tr class="separator:a03d24824e5b6fe9fc96bedfc6d617f9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc7a8ed1c54f49460d91c7bf5d3544b0" id="r_abc7a8ed1c54f49460d91c7bf5d3544b0"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#abc7a8ed1c54f49460d91c7bf5d3544b0">get_all</a> (<a class="el" href="WtLMDB_8hpp.html#a0cdd304877129230e16c3606e714bcd2">LMDBQueryCallback</a> cb)</td></tr>
+<tr class="memdesc:abc7a8ed1c54f49460d91c7bf5d3544b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取数据库中的所有数据  <br /></td></tr>
+<tr class="separator:abc7a8ed1c54f49460d91c7bf5d3544b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:a8128145e083f6d0e7c033a7fa1d82446" id="r_a8128145e083f6d0e7c033a7fa1d82446"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtLMDB.html">WtLMDB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a8128145e083f6d0e7c033a7fa1d82446">_db</a></td></tr>
+<tr class="separator:a8128145e083f6d0e7c033a7fa1d82446"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3895380705cef1818ee5f74b20d13ddd" id="r_a3895380705cef1818ee5f74b20d13ddd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structMDB__txn.html">MDB_txn</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a3895380705cef1818ee5f74b20d13ddd">_txn</a></td></tr>
+<tr class="separator:a3895380705cef1818ee5f74b20d13ddd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a090f2c4ca400a3b2f1254995c1117514" id="r_a090f2c4ca400a3b2f1254995c1117514"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__mdb.html#gadbe68a06c448dfb62da16443d251a78b">MDB_dbi</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a090f2c4ca400a3b2f1254995c1117514">_dbi</a></td></tr>
+<tr class="separator:a090f2c4ca400a3b2f1254995c1117514"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6146d0ec4a6be6ed23532522d75715e0" id="r_a6146d0ec4a6be6ed23532522d75715e0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a6146d0ec4a6be6ed23532522d75715e0">_readonly</a></td></tr>
+<tr class="separator:a6146d0ec4a6be6ed23532522d75715e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c6391802d1852b7d84561cffc7a6023" id="r_a4c6391802d1852b7d84561cffc7a6023"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDBQuery.html#a4c6391802d1852b7d84561cffc7a6023">_commited</a></td></tr>
+<tr class="separator:a4c6391802d1852b7d84561cffc7a6023"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>LMDB数据库查询和操作类 </p>
+<p>基于WtLMDB实现的数据库查询和操作类，提供了各种数据库操作功能 支持事务操作、数据写入、单条查询、区间查询、范围查询等功能 自动管理事务生命周期，并提供提交和回滚操作 </p>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00198">198</a> 行定义.</p>
+</div><h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a75988d6583a58b29a1272c3f9a50b657" name="a75988d6583a58b29a1272c3f9a50b657"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75988d6583a58b29a1272c3f9a50b657">&#9670;&#160;</a></span>WtLMDBQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">WtLMDBQuery::WtLMDBQuery </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWtLMDB.html">WtLMDB</a> &amp;&#160;</td>
+          <td class="paramname"><em>db</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>初始化LMDB查询对象，创建事务并连接到已存在的数据库 设置只读模式，并设置数据库句柄</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">db</td><td>WtLMDB数据库对象引用 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00209">209</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2dc65ba9e73198c09bcccbfc9a131781" name="a2dc65ba9e73198c09bcccbfc9a131781"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2dc65ba9e73198c09bcccbfc9a131781">&#9670;&#160;</a></span>~WtLMDBQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">WtLMDBQuery::~WtLMDBQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>析构函数 </p>
+<p>根据不同情况自动处理事务：</p><ul>
+<li>只读模式下中止事务</li>
+<li>非只读模式且未提交时自动提交事务 </li>
+</ul>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00226">226</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a6b554bda9de1b1e4b4d515f2602e44af" name="a6b554bda9de1b1e4b4d515f2602e44af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b554bda9de1b1e4b4d515f2602e44af">&#9670;&#160;</a></span>commit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtLMDBQuery::commit </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>提交事务 </p>
+<p>提交当前事务，将所有修改写入数据库 如果事务已提交或在只读模式下，则不执行任何操作 </p>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00256">256</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acb648c36b10ad339bbacefc1f038c03e" name="acb648c36b10ad339bbacefc1f038c03e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb648c36b10ad339bbacefc1f038c03e">&#9670;&#160;</a></span>get() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string WtLMDBQuery::get </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>key</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取指定键的数据（字符串版本） </p>
+<p>根据字符串键来获取对应的值</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>要查询的键字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>std::string 查询到的值字符串，如果不存在则返回空字符串 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00355">355</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a78d3f1b7e7a5a1bfe0ed7c2270da00ab" name="a78d3f1b7e7a5a1bfe0ed7c2270da00ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78d3f1b7e7a5a1bfe0ed7c2270da00ab">&#9670;&#160;</a></span>get() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string WtLMDBQuery::get </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>klen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取指定键的数据（原始数据版本） </p>
+<p>使用数据库游标查找并返回指定键对应的值</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>要查询的键数据指针 </td></tr>
+    <tr><td class="paramname">klen</td><td>键数据长度 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>std::string 查询到的值字符串，如果不存在或出错则返回空字符串 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00369">369</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abc7a8ed1c54f49460d91c7bf5d3544b0" name="abc7a8ed1c54f49460d91c7bf5d3544b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc7a8ed1c54f49460d91c7bf5d3544b0">&#9670;&#160;</a></span>get_all()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int WtLMDBQuery::get_all </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WtLMDB_8hpp.html#a0cdd304877129230e16c3606e714bcd2">LMDBQueryCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取数据库中的所有数据 </p>
+<p>读取数据库中的所有键值对数据，通过回调函数返回结果集</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cb</td><td>查询结果回调函数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>int 返回数据库中的数据条数 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00573">573</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6fe637a0ce69220fc2aaec23c49ca050" name="a6fe637a0ce69220fc2aaec23c49ca050"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6fe637a0ce69220fc2aaec23c49ca050">&#9670;&#160;</a></span>get_lowers()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int WtLMDBQuery::get_lowers </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>lower_key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>upper_key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtLMDB_8hpp.html#a0cdd304877129230e16c3606e714bcd2">LMDBQueryCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取限定数量的区间上限之前的数据 </p>
+<p>从upperKey往前查找指定数量的数据，然后进行倒序返回。 主要用于获取指定时间点之前的有限数量的历史数据。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">lower_key</td><td>区间下限键，防止读取到其他合约的数据 </td></tr>
+    <tr><td class="paramname">upper_key</td><td>区间上限键，从这个键开始向前查找 </td></tr>
+    <tr><td class="paramname">count</td><td>要返回的数据条数 </td></tr>
+    <tr><td class="paramname">cb</td><td>查询结果回调函数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>int 返回实际获取的数据条数 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00457">457</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7a135dd774c0e8f40f82a3a6dba78c41" name="a7a135dd774c0e8f40f82a3a6dba78c41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a135dd774c0e8f40f82a3a6dba78c41">&#9670;&#160;</a></span>get_range()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int WtLMDBQuery::get_range </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>lower_key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>upper_key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtLMDB_8hpp.html#a0cdd304877129230e16c3606e714bcd2">LMDBQueryCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取指定区间内的数据 </p>
+<p>查询指定键区间[lower_key, upper_key]内的所有键值对数据 通过回调函数返回结果集</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">lower_key</td><td>区间下限键 </td></tr>
+    <tr><td class="paramname">upper_key</td><td>区间上限键 </td></tr>
+    <tr><td class="paramname">cb</td><td>查询结果回调函数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>int 返回符合条件的数据条数 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00402">402</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a03d24824e5b6fe9fc96bedfc6d617f9c" name="a03d24824e5b6fe9fc96bedfc6d617f9c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03d24824e5b6fe9fc96bedfc6d617f9c">&#9670;&#160;</a></span>get_uppers()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int WtLMDBQuery::get_uppers </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>lower_key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>upper_key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtLMDB_8hpp.html#a0cdd304877129230e16c3606e714bcd2">LMDBQueryCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取限定数量的区间下限之后的数据 </p>
+<p>从lowerKey往后查找指定数量的数据，按照键的升序返回。 主要用于获取指定时间点之后的有限数量的数据。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">lower_key</td><td>区间下限键，从这个键开始向后查找 </td></tr>
+    <tr><td class="paramname">upper_key</td><td>区间上限键，防止读取到其他合约的数据 </td></tr>
+    <tr><td class="paramname">count</td><td>要返回的数据条数 </td></tr>
+    <tr><td class="paramname">cb</td><td>查询结果回调函数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>int 返回实际获取的数据条数 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00527">527</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adcd422a5b6ba815d37e5eb9a1d8c068d" name="adcd422a5b6ba815d37e5eb9a1d8c068d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adcd422a5b6ba815d37e5eb9a1d8c068d">&#9670;&#160;</a></span>put() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtLMDBQuery::put </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>写入数据（字符串版本） </p>
+<p>将字符串键值对写入数据库，不自动提交事务</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>键字符串 </td></tr>
+    <tr><td class="paramname">val</td><td>值字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 操作是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00274">274</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab25ed16bd6a7a74c7e7e9702e0e5d6b3" name="ab25ed16bd6a7a74c7e7e9702e0e5d6b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab25ed16bd6a7a74c7e7e9702e0e5d6b3">&#9670;&#160;</a></span>put() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtLMDBQuery::put </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>klen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>val</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>vlen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>写入数据（原始数据版本） </p>
+<p>将原始二进制数据作为键值对写入数据库，不自动提交事务</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>键数据指针 </td></tr>
+    <tr><td class="paramname">klen</td><td>键数据长度 </td></tr>
+    <tr><td class="paramname">val</td><td>值数据指针 </td></tr>
+    <tr><td class="paramname">vlen</td><td>值数据长度 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 操作是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00304">304</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7c4da6f02c34eedbf3cab805a8bb895b" name="a7c4da6f02c34eedbf3cab805a8bb895b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c4da6f02c34eedbf3cab805a8bb895b">&#9670;&#160;</a></span>put_and_commit() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtLMDBQuery::put_and_commit </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>写入数据并提交（字符串版本） </p>
+<p>将字符串键值对写入数据库，并自动提交事务</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>键字符串 </td></tr>
+    <tr><td class="paramname">val</td><td>值字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 操作是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00288">288</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a30f76cbca8a7640d490b0e02f31cfd53" name="a30f76cbca8a7640d490b0e02f31cfd53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30f76cbca8a7640d490b0e02f31cfd53">&#9670;&#160;</a></span>put_and_commit() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtLMDBQuery::put_and_commit </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>klen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>val</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>vlen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>写入数据并提交（原始数据版本） </p>
+<p>将原始二进制数据作为键值对写入数据库，并自动提交事务</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>键数据指针 </td></tr>
+    <tr><td class="paramname">klen</td><td>键数据长度 </td></tr>
+    <tr><td class="paramname">val</td><td>值数据指针 </td></tr>
+    <tr><td class="paramname">vlen</td><td>值数据长度 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 操作是否成功，写入和提交都成功时返回true </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00328">328</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a61f36b025f0a1ce788bb900703ae6cd0" name="a61f36b025f0a1ce788bb900703ae6cd0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61f36b025f0a1ce788bb900703ae6cd0">&#9670;&#160;</a></span>rollback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtLMDBQuery::rollback </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>回滚事务 </p>
+<p>中止当前事务，取消所有未提交的修改 如果事务已提交，则不执行任何操作 </p>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00241">241</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a4c6391802d1852b7d84561cffc7a6023" name="a4c6391802d1852b7d84561cffc7a6023"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c6391802d1852b7d84561cffc7a6023">&#9670;&#160;</a></span>_commited</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtLMDBQuery::_commited</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00599">599</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8128145e083f6d0e7c033a7fa1d82446" name="a8128145e083f6d0e7c033a7fa1d82446"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8128145e083f6d0e7c033a7fa1d82446">&#9670;&#160;</a></span>_db</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtLMDB.html">WtLMDB</a>&amp; WtLMDBQuery::_db</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00595">595</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a090f2c4ca400a3b2f1254995c1117514" name="a090f2c4ca400a3b2f1254995c1117514"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a090f2c4ca400a3b2f1254995c1117514">&#9670;&#160;</a></span>_dbi</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__mdb.html#gadbe68a06c448dfb62da16443d251a78b">MDB_dbi</a> WtLMDBQuery::_dbi</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00597">597</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6146d0ec4a6be6ed23532522d75715e0" name="a6146d0ec4a6be6ed23532522d75715e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6146d0ec4a6be6ed23532522d75715e0">&#9670;&#160;</a></span>_readonly</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtLMDBQuery::_readonly</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00598">598</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3895380705cef1818ee5f74b20d13ddd" name="a3895380705cef1818ee5f74b20d13ddd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3895380705cef1818ee5f74b20d13ddd">&#9670;&#160;</a></span>_txn</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structMDB__txn.html">MDB_txn</a>* WtLMDBQuery::_txn</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00596">596</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WTSUtils/<a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classWtLMDBQuery.html">WtLMDBQuery</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

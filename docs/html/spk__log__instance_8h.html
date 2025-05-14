@@ -1,0 +1,1934 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/sutil/logger/spk_log_instance.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('spk__log__instance_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">spk_log_instance.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;<a class="el" href="types_8h_source.html">sutil/types.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__log__level_8h_source.html">sutil/logger/spk_log_level.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__log__mode_8h_source.html">sutil/logger/spk_log_mode.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__log__config_8h_source.html">sutil/logger/spk_log_config.h</a>&gt;</code><br />
+</div>
+<p><a href="spk__log__instance_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__SLogAppender.html">_SLogAppender</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a46b4f56b7c495e617629a5b6e747e375" id="r_a46b4f56b7c495e617629a5b6e747e375"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a46b4f56b7c495e617629a5b6e747e375">NULLOBJ_LOG_APPENDER</a></td></tr>
+<tr class="separator:a46b4f56b7c495e617629a5b6e747e375"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a52bf252d864c3e9cf24be450a063f891" id="r_a52bf252d864c3e9cf24be450a063f891"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__SLogAppender.html">_SLogAppender</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a></td></tr>
+<tr class="separator:a52bf252d864c3e9cf24be450a063f891"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a3b0dc69909f9aac0d9f9b02df80c5a77" id="r_a3b0dc69909f9aac0d9f9b02df80c5a77"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a3b0dc69909f9aac0d9f9b02df80c5a77">SLog_InitLogger</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pConfigFile, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pRootSection, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pLogSystemName)</td></tr>
+<tr class="separator:a3b0dc69909f9aac0d9f9b02df80c5a77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3174976ec4947ce86e28d423b1490451" id="r_a3174976ec4947ce86e28d423b1490451"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a3174976ec4947ce86e28d423b1490451">SLog_InitLoggerExceptive</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pConfigFile, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pRootSection, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pRootCategoryField, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pLogSystemName)</td></tr>
+<tr class="separator:a3174976ec4947ce86e28d423b1490451"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03de9b956378a9d5b0f232bf8df65f98" id="r_a03de9b956378a9d5b0f232bf8df65f98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a03de9b956378a9d5b0f232bf8df65f98">SLog_BuildLogInstance</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__config_8h.html#ae577be6f3feed8ecee2171fc7cf76063">SLogCfgItemT</a> *pLogConfigs, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> logConfigCount, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__config_8h.html#a94225d96595aed6b822327e7d24939ed">SLogCfgSectionInfoT</a> *pLogSections, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> logSectionCount, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pLogSystemName, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *pAllowableMinLogLevel)</td></tr>
+<tr class="separator:a03de9b956378a9d5b0f232bf8df65f98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a703a8c0ad1d5d0918157b688f65c991d" id="r_a703a8c0ad1d5d0918157b688f65c991d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a703a8c0ad1d5d0918157b688f65c991d">SLog_RebuildLogInstance</a> ()</td></tr>
+<tr class="separator:a703a8c0ad1d5d0918157b688f65c991d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0e52da988332727555f97e0348860e2" id="r_ac0e52da988332727555f97e0348860e2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#ac0e52da988332727555f97e0348860e2">SLog_RebuildLogInstance2</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pLogSystemName)</td></tr>
+<tr class="separator:ac0e52da988332727555f97e0348860e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a228192d83ed728b8ee776da50b9a248c" id="r_a228192d83ed728b8ee776da50b9a248c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a228192d83ed728b8ee776da50b9a248c">SLog_RebuildThreadInstance</a> ()</td></tr>
+<tr class="separator:a228192d83ed728b8ee776da50b9a248c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a668718ceef40bb9df172d22602278bf1" id="r_a668718ceef40bb9df172d22602278bf1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a668718ceef40bb9df172d22602278bf1">SLog_RebuildThreadInstance2</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pLogSystemName)</td></tr>
+<tr class="separator:a668718ceef40bb9df172d22602278bf1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a579e73418e5f5d455fa0b8c1e72be0a2" id="r_a579e73418e5f5d455fa0b8c1e72be0a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a579e73418e5f5d455fa0b8c1e72be0a2">SLog_IsInstanceInitialized</a> ()</td></tr>
+<tr class="separator:a579e73418e5f5d455fa0b8c1e72be0a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad298f60f9d3492cafd8c68167b689979" id="r_ad298f60f9d3492cafd8c68167b689979"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#ad298f60f9d3492cafd8c68167b689979">SLog_GetLogSystemName</a> ()</td></tr>
+<tr class="separator:ad298f60f9d3492cafd8c68167b689979"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a438befe27f4045ed9df420658a1a98af" id="r_a438befe27f4045ed9df420658a1a98af"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a438befe27f4045ed9df420658a1a98af">SLog_SetLogSystemName</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pLogSystemName)</td></tr>
+<tr class="separator:a438befe27f4045ed9df420658a1a98af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1b4ef0abc4f95f9f28e0ab3d815c6b6" id="r_ab1b4ef0abc4f95f9f28e0ab3d815c6b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#ab1b4ef0abc4f95f9f28e0ab3d815c6b6">SLog_SetThreadLogName</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pLogSystemName)</td></tr>
+<tr class="separator:ab1b4ef0abc4f95f9f28e0ab3d815c6b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c27eabb36ba65953f8a654d6a7d0fa7" id="r_a3c27eabb36ba65953f8a654d6a7d0fa7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a3c27eabb36ba65953f8a654d6a7d0fa7">SLog_GetMinLogLevel</a> ()</td></tr>
+<tr class="separator:a3c27eabb36ba65953f8a654d6a7d0fa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adecd8405fecd4cf55e6ac25174a271e5" id="r_adecd8405fecd4cf55e6ac25174a271e5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#adecd8405fecd4cf55e6ac25174a271e5">SLog_SetMinLogLevel</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *pMinLogLevel)</td></tr>
+<tr class="separator:adecd8405fecd4cf55e6ac25174a271e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac55deab82ceb7fa64325b37faf052d3" id="r_aac55deab82ceb7fa64325b37faf052d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#aac55deab82ceb7fa64325b37faf052d3">SLog_GetLogFile</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> *pAppender)</td></tr>
+<tr class="separator:aac55deab82ceb7fa64325b37faf052d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed7558ec2fc66a4dfef1395cb150e8a5" id="r_aed7558ec2fc66a4dfef1395cb150e8a5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#aed7558ec2fc66a4dfef1395cb150e8a5">SLog_SetThreadMinLogLevel</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *pMinLogLevel)</td></tr>
+<tr class="separator:aed7558ec2fc66a4dfef1395cb150e8a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab70f69cbcd3ad6e98789f005cd569d6c" id="r_ab70f69cbcd3ad6e98789f005cd569d6c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#ab70f69cbcd3ad6e98789f005cd569d6c">SLog_GetMinLevelLimit</a> ()</td></tr>
+<tr class="separator:ab70f69cbcd3ad6e98789f005cd569d6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66c11c048957f7dc4e7d9bc954101004" id="r_a66c11c048957f7dc4e7d9bc954101004"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a66c11c048957f7dc4e7d9bc954101004">SLog_SetMinLevelLimit</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *pMinLogLevel)</td></tr>
+<tr class="separator:a66c11c048957f7dc4e7d9bc954101004"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a544b050d35c4b86ed3544ec8818ff0e7" id="r_a544b050d35c4b86ed3544ec8818ff0e7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a544b050d35c4b86ed3544ec8818ff0e7">SLog_IsLogLevelAble</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *pLevel)</td></tr>
+<tr class="separator:a544b050d35c4b86ed3544ec8818ff0e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83bdd15d9921b23f2f57b03ec647721c" id="r_a83bdd15d9921b23f2f57b03ec647721c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a83bdd15d9921b23f2f57b03ec647721c">SLog_GetLogMask</a> ()</td></tr>
+<tr class="separator:a83bdd15d9921b23f2f57b03ec647721c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3488c7a5f830429e626f8e74427d83de" id="r_a3488c7a5f830429e626f8e74427d83de"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a3488c7a5f830429e626f8e74427d83de">SLog_SetLogMask</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> logMask)</td></tr>
+<tr class="separator:a3488c7a5f830429e626f8e74427d83de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cb00f10e14ba402614ec27d829250a3" id="r_a4cb00f10e14ba402614ec27d829250a3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a4cb00f10e14ba402614ec27d829250a3">SLog_ResetLogMask</a> ()</td></tr>
+<tr class="separator:a4cb00f10e14ba402614ec27d829250a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25b9a2628f6df5a06e0eed4587a12d67" id="r_a25b9a2628f6df5a06e0eed4587a12d67"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a25b9a2628f6df5a06e0eed4587a12d67">SLog_DisableAllMask</a> ()</td></tr>
+<tr class="separator:a25b9a2628f6df5a06e0eed4587a12d67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3ec44facdd2a230424f58a7366be030" id="r_aa3ec44facdd2a230424f58a7366be030"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#aa3ec44facdd2a230424f58a7366be030">SLog_DisableSpecifyMask</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> logMask)</td></tr>
+<tr class="separator:aa3ec44facdd2a230424f58a7366be030"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b355b5ceab6f50f5cb7132c654e2e16" id="r_a6b355b5ceab6f50f5cb7132c654e2e16"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a6b355b5ceab6f50f5cb7132c654e2e16">SLog_EnableAllMask</a> ()</td></tr>
+<tr class="separator:a6b355b5ceab6f50f5cb7132c654e2e16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46c104ae0d3731fec622d1126b7cf5f4" id="r_a46c104ae0d3731fec622d1126b7cf5f4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a46c104ae0d3731fec622d1126b7cf5f4">SLog_EnableSpecifyMask</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> logMask)</td></tr>
+<tr class="separator:a46c104ae0d3731fec622d1126b7cf5f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a439cab57e9c8dcb9c245e40b81b2f9" id="r_a7a439cab57e9c8dcb9c245e40b81b2f9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a7a439cab57e9c8dcb9c245e40b81b2f9">SLog_GetLogAppenderList</a> ()</td></tr>
+<tr class="separator:a7a439cab57e9c8dcb9c245e40b81b2f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad29033411ccf1ca37fc60b233a89c970" id="r_ad29033411ccf1ca37fc60b233a89c970"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#ad29033411ccf1ca37fc60b233a89c970">SLog_GetLogAppender</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> index)</td></tr>
+<tr class="separator:ad29033411ccf1ca37fc60b233a89c970"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53a5ef4a584fe39b051c509333dd0ecf" id="r_a53a5ef4a584fe39b051c509333dd0ecf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a53a5ef4a584fe39b051c509333dd0ecf">SLog_GetLogAppenderByName</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pSectionName)</td></tr>
+<tr class="separator:a53a5ef4a584fe39b051c509333dd0ecf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac63006a2829d46331d60adb5a924727c" id="r_ac63006a2829d46331d60adb5a924727c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#ac63006a2829d46331d60adb5a924727c">SLog_GetLogAppenderCount</a> ()</td></tr>
+<tr class="separator:ac63006a2829d46331d60adb5a924727c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae12b9b226400b5fc6d8ee85998a6d93e" id="r_ae12b9b226400b5fc6d8ee85998a6d93e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#ae12b9b226400b5fc6d8ee85998a6d93e">SLog_GetOriginalLogConfigItemsCount</a> ()</td></tr>
+<tr class="separator:ae12b9b226400b5fc6d8ee85998a6d93e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05b484d67dd831d975dd9301c90f0cec" id="r_a05b484d67dd831d975dd9301c90f0cec"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__config_8h.html#ae577be6f3feed8ecee2171fc7cf76063">SLogCfgItemT</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a05b484d67dd831d975dd9301c90f0cec">SLog_GetOriginalLogConfigItem</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> index)</td></tr>
+<tr class="separator:a05b484d67dd831d975dd9301c90f0cec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade88795060a9f86e0e077261b8d215c0" id="r_ade88795060a9f86e0e077261b8d215c0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#ade88795060a9f86e0e077261b8d215c0">SLog_GetDefaultLogAppender</a> ()</td></tr>
+<tr class="separator:ade88795060a9f86e0e077261b8d215c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55cde5d030a229347ae421b6706aabd3" id="r_a55cde5d030a229347ae421b6706aabd3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a55cde5d030a229347ae421b6706aabd3">SLog_PrintLogInstanceInfo</a> (FILE *fp)</td></tr>
+<tr class="separator:a55cde5d030a229347ae421b6706aabd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acaf8324272431bbcae2bf03eb7d6b551" id="r_acaf8324272431bbcae2bf03eb7d6b551"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#acaf8324272431bbcae2bf03eb7d6b551">SLog_CreateAsyncLogQueues</a> ()</td></tr>
+<tr class="separator:acaf8324272431bbcae2bf03eb7d6b551"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0dbd3281e76ed4fcfac213e681f4183f" id="r_a0dbd3281e76ed4fcfac213e681f4183f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a0dbd3281e76ed4fcfac213e681f4183f">SLog_ReleaseAsyncLogQueues</a> ()</td></tr>
+<tr class="separator:a0dbd3281e76ed4fcfac213e681f4183f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3dd511590409c8fe82b4e95cc4a5174a" id="r_a3dd511590409c8fe82b4e95cc4a5174a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a3dd511590409c8fe82b4e95cc4a5174a">SLog_EnableAsyncLogAppenders</a> ()</td></tr>
+<tr class="separator:a3dd511590409c8fe82b4e95cc4a5174a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff06a70929c1a5166919feedd93a6f47" id="r_aff06a70929c1a5166919feedd93a6f47"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#aff06a70929c1a5166919feedd93a6f47">SLog_EnableAsyncLogAppender</a> (<a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> *pLogAppender)</td></tr>
+<tr class="separator:aff06a70929c1a5166919feedd93a6f47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6e2ccd7612934894539c514078000e4" id="r_af6e2ccd7612934894539c514078000e4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#af6e2ccd7612934894539c514078000e4">SLog_DisableAsyncLogAppenders</a> ()</td></tr>
+<tr class="separator:af6e2ccd7612934894539c514078000e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfff8c1fa32e581e1495b5408952f6e0" id="r_adfff8c1fa32e581e1495b5408952f6e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#adfff8c1fa32e581e1495b5408952f6e0">SLog_DisableAsyncLogAppender</a> (<a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> *pLogAppender)</td></tr>
+<tr class="separator:adfff8c1fa32e581e1495b5408952f6e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7a4391d8ca558d74e29e76d2af6c176" id="r_af7a4391d8ca558d74e29e76d2af6c176"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#af7a4391d8ca558d74e29e76d2af6c176">SLog_DisableAsyncLogAppender2</a> (<a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> *pLogAppender, <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> detachQueue)</td></tr>
+<tr class="separator:af7a4391d8ca558d74e29e76d2af6c176"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad944a82989ce013ad00f43e12bc1f749" id="r_ad944a82989ce013ad00f43e12bc1f749"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#ad944a82989ce013ad00f43e12bc1f749">SLog_StartAsyncLogWriterThreads</a> (<a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> *pNormalTerminatedFlag, <a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> *pExceptionAbortedFlag, <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> isWaitThreadsTerminated)</td></tr>
+<tr class="separator:ad944a82989ce013ad00f43e12bc1f749"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22d0a5cc6dfaa54e3739934c912f6e8b" id="r_a22d0a5cc6dfaa54e3739934c912f6e8b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a22d0a5cc6dfaa54e3739934c912f6e8b">_SLog_LogImpl</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pSrcFile, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> fileNameLength, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> srcLine, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pSrcFunction, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> logMask, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *pLevel, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a22d0a5cc6dfaa54e3739934c912f6e8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b0fd62104153703018b2e08be4a1f56" id="r_a8b0fd62104153703018b2e08be4a1f56"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a8b0fd62104153703018b2e08be4a1f56">_SLog_LogSimpleness</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a8b0fd62104153703018b2e08be4a1f56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3827c82515e661b7233e6dbe518f8fbe" id="r_a3827c82515e661b7233e6dbe518f8fbe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a3827c82515e661b7233e6dbe518f8fbe">_SLog_LogFullSimpleness</a> (<a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *level, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a3827c82515e661b7233e6dbe518f8fbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20e41f60a2c5153666d8743cefdd7589" id="r_a20e41f60a2c5153666d8743cefdd7589"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a20e41f60a2c5153666d8743cefdd7589">_SLog_TraceSimpleness</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a20e41f60a2c5153666d8743cefdd7589"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d8dfa9989eb3894d04152f9865b6e4a" id="r_a0d8dfa9989eb3894d04152f9865b6e4a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a0d8dfa9989eb3894d04152f9865b6e4a">_SLog_DebugSimpleness</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a0d8dfa9989eb3894d04152f9865b6e4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c6ddd3c71f62d349c84543458549bed" id="r_a3c6ddd3c71f62d349c84543458549bed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a3c6ddd3c71f62d349c84543458549bed">_SLog_InfoSimpleness</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a3c6ddd3c71f62d349c84543458549bed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfeecd045fde668ea0b3b92bc816078b" id="r_adfeecd045fde668ea0b3b92bc816078b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#adfeecd045fde668ea0b3b92bc816078b">_SLog_WarnSimpleness</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:adfeecd045fde668ea0b3b92bc816078b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade6c12bb8468c5be874c1fae7a7d442e" id="r_ade6c12bb8468c5be874c1fae7a7d442e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#ade6c12bb8468c5be874c1fae7a7d442e">_SLog_ErrorSimpleness</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:ade6c12bb8468c5be874c1fae7a7d442e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecd74d27b9c06974e0af8d31154acaaa" id="r_aecd74d27b9c06974e0af8d31154acaaa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#aecd74d27b9c06974e0af8d31154acaaa">_SLog_BzInfoSimpleness</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:aecd74d27b9c06974e0af8d31154acaaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e37c716483b568eecf1e2aa0a48aff7" id="r_a5e37c716483b568eecf1e2aa0a48aff7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a5e37c716483b568eecf1e2aa0a48aff7">_SLog_BzWarnSimpleness</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a5e37c716483b568eecf1e2aa0a48aff7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afae54803a9f9e80d0563d59661486edd" id="r_afae54803a9f9e80d0563d59661486edd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#afae54803a9f9e80d0563d59661486edd">_SLog_BzErrorSimpleness</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:afae54803a9f9e80d0563d59661486edd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a637ef34764abc39ba1aae2f603ded6c4" id="r_a637ef34764abc39ba1aae2f603ded6c4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a637ef34764abc39ba1aae2f603ded6c4">_SLog_FatalSimpleness</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a637ef34764abc39ba1aae2f603ded6c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1be55e480f32382c1dac17a877ce6ee" id="r_aa1be55e480f32382c1dac17a877ce6ee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#aa1be55e480f32382c1dac17a877ce6ee">_SLog_LogSimplenessMasked</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:aa1be55e480f32382c1dac17a877ce6ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b227d5dc312d94e294227b118ef3bdc" id="r_a1b227d5dc312d94e294227b118ef3bdc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a1b227d5dc312d94e294227b118ef3bdc">_SLog_LogFullSimplenessMasked</a> (<a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *level, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a1b227d5dc312d94e294227b118ef3bdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e99c0bce5297a499b8bbe72d3d1a07d" id="r_a8e99c0bce5297a499b8bbe72d3d1a07d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a8e99c0bce5297a499b8bbe72d3d1a07d">_SLog_TraceSimplenessMasked</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a8e99c0bce5297a499b8bbe72d3d1a07d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addb0ddb2d5757bc2dbe5ea571dfd9741" id="r_addb0ddb2d5757bc2dbe5ea571dfd9741"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#addb0ddb2d5757bc2dbe5ea571dfd9741">_SLog_DebugSimplenessMasked</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:addb0ddb2d5757bc2dbe5ea571dfd9741"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8db2c9dfed886200d6cf4ae8dcaa5b51" id="r_a8db2c9dfed886200d6cf4ae8dcaa5b51"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a8db2c9dfed886200d6cf4ae8dcaa5b51">_SLog_InfoSimplenessMasked</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a8db2c9dfed886200d6cf4ae8dcaa5b51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c722df5003615d1cb36ee8c1f837386" id="r_a2c722df5003615d1cb36ee8c1f837386"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a2c722df5003615d1cb36ee8c1f837386">_SLog_WarnSimplenessMasked</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a2c722df5003615d1cb36ee8c1f837386"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b5d0e167af8f31274203990586f2823" id="r_a4b5d0e167af8f31274203990586f2823"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a4b5d0e167af8f31274203990586f2823">_SLog_ErrorSimplenessMasked</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a4b5d0e167af8f31274203990586f2823"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaccf0a9f04f346a9e95e5e567e562201" id="r_aaccf0a9f04f346a9e95e5e567e562201"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#aaccf0a9f04f346a9e95e5e567e562201">_SLog_BzInfoSimplenessMasked</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:aaccf0a9f04f346a9e95e5e567e562201"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6084b3ae37a6047596042f3fb0f0c93b" id="r_a6084b3ae37a6047596042f3fb0f0c93b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a6084b3ae37a6047596042f3fb0f0c93b">_SLog_BzWarnSimplenessMasked</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a6084b3ae37a6047596042f3fb0f0c93b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bf209955d346b1c09b480cfde38c852" id="r_a8bf209955d346b1c09b480cfde38c852"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a8bf209955d346b1c09b480cfde38c852">_SLog_BzErrorSimplenessMasked</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a8bf209955d346b1c09b480cfde38c852"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55c92fd0d6a5f305726c29ce5bf4ccd5" id="r_a55c92fd0d6a5f305726c29ce5bf4ccd5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a55c92fd0d6a5f305726c29ce5bf4ccd5">_SLog_FatalSimplenessMasked</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a55c92fd0d6a5f305726c29ce5bf4ccd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10951ec7fa0e911a00864b25c900f8e3" id="r_a10951ec7fa0e911a00864b25c900f8e3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#a10951ec7fa0e911a00864b25c900f8e3">_SLog_AssertSimpleness</a> (<a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> EXPR, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:a10951ec7fa0e911a00864b25c900f8e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6ff8a8ed4d53fd2fe831be8cbc46124" id="r_af6ff8a8ed4d53fd2fe831be8cbc46124"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#af6ff8a8ed4d53fd2fe831be8cbc46124">_SLog_AssertSimplenessNA</a> (<a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> EXPR, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:af6ff8a8ed4d53fd2fe831be8cbc46124"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae61dd0a9dd55f00bba2989823455d159" id="r_ae61dd0a9dd55f00bba2989823455d159"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__log__instance_8h.html#ae61dd0a9dd55f00bba2989823455d159">_SLog_AssertSimplenessRV</a> (<a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> EXPR, void *retValue, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fmt,...)</td></tr>
+<tr class="separator:ae61dd0a9dd55f00bba2989823455d159"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>日志记录器实例管理接口的头文件 (非线程安全)</p>
+<dl class="section version"><dt>版本</dt><dd>$Id$ </dd></dl>
+<dl class="section since"><dt>自从</dt><dd>2005.10.31 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__log__instance_8h_source.html">spk_log_instance.h</a> 中定义.</p>
+</div><h2 class="groupheader">宏定义说明</h2>
+<a id="a46b4f56b7c495e617629a5b6e747e375" name="a46b4f56b7c495e617629a5b6e747e375"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46b4f56b7c495e617629a5b6e747e375">&#9670;&#160;</a></span>NULLOBJ_LOG_APPENDER</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_LOG_APPENDER</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">        0, 0, \</div>
+<div class="line">        0, 0, \</div>
+<div class="line">        0, 0, 0, 0, \</div>
+<div class="line">        0, 0, \</div>
+<div class="line">        0, 0, 0, \</div>
+<div class="line">        {0}, {0}</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="spk__log__instance_8h_source.html">spk_log_instance.h</a> 第 <a class="el" href="spk__log__instance_8h_source.html#l00083">83</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类型定义说明</h2>
+<a id="a52bf252d864c3e9cf24be450a063f891" name="a52bf252d864c3e9cf24be450a063f891"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52bf252d864c3e9cf24be450a063f891">&#9670;&#160;</a></span>SLogAppenderT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct__SLogAppender.html">_SLogAppender</a> <a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>日志记录器定义 </p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a10951ec7fa0e911a00864b25c900f8e3" name="a10951ec7fa0e911a00864b25c900f8e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10951ec7fa0e911a00864b25c900f8e3">&#9670;&#160;</a></span>_SLog_AssertSimpleness()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_AssertSimpleness </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td>
+          <td class="paramname"><em>EXPR</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af6ff8a8ed4d53fd2fe831be8cbc46124" name="af6ff8a8ed4d53fd2fe831be8cbc46124"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6ff8a8ed4d53fd2fe831be8cbc46124">&#9670;&#160;</a></span>_SLog_AssertSimplenessNA()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_AssertSimplenessNA </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td>
+          <td class="paramname"><em>EXPR</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae61dd0a9dd55f00bba2989823455d159" name="ae61dd0a9dd55f00bba2989823455d159"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae61dd0a9dd55f00bba2989823455d159">&#9670;&#160;</a></span>_SLog_AssertSimplenessRV()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * _SLog_AssertSimplenessRV </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td>
+          <td class="paramname"><em>EXPR</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>retValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afae54803a9f9e80d0563d59661486edd" name="afae54803a9f9e80d0563d59661486edd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afae54803a9f9e80d0563d59661486edd">&#9670;&#160;</a></span>_SLog_BzErrorSimpleness()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_BzErrorSimpleness </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8bf209955d346b1c09b480cfde38c852" name="a8bf209955d346b1c09b480cfde38c852"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8bf209955d346b1c09b480cfde38c852">&#9670;&#160;</a></span>_SLog_BzErrorSimplenessMasked()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_BzErrorSimplenessMasked </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aecd74d27b9c06974e0af8d31154acaaa" name="aecd74d27b9c06974e0af8d31154acaaa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aecd74d27b9c06974e0af8d31154acaaa">&#9670;&#160;</a></span>_SLog_BzInfoSimpleness()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_BzInfoSimpleness </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aaccf0a9f04f346a9e95e5e567e562201" name="aaccf0a9f04f346a9e95e5e567e562201"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaccf0a9f04f346a9e95e5e567e562201">&#9670;&#160;</a></span>_SLog_BzInfoSimplenessMasked()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_BzInfoSimplenessMasked </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5e37c716483b568eecf1e2aa0a48aff7" name="a5e37c716483b568eecf1e2aa0a48aff7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e37c716483b568eecf1e2aa0a48aff7">&#9670;&#160;</a></span>_SLog_BzWarnSimpleness()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_BzWarnSimpleness </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6084b3ae37a6047596042f3fb0f0c93b" name="a6084b3ae37a6047596042f3fb0f0c93b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6084b3ae37a6047596042f3fb0f0c93b">&#9670;&#160;</a></span>_SLog_BzWarnSimplenessMasked()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_BzWarnSimplenessMasked </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0d8dfa9989eb3894d04152f9865b6e4a" name="a0d8dfa9989eb3894d04152f9865b6e4a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d8dfa9989eb3894d04152f9865b6e4a">&#9670;&#160;</a></span>_SLog_DebugSimpleness()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_DebugSimpleness </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="addb0ddb2d5757bc2dbe5ea571dfd9741" name="addb0ddb2d5757bc2dbe5ea571dfd9741"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#addb0ddb2d5757bc2dbe5ea571dfd9741">&#9670;&#160;</a></span>_SLog_DebugSimplenessMasked()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_DebugSimplenessMasked </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ade6c12bb8468c5be874c1fae7a7d442e" name="ade6c12bb8468c5be874c1fae7a7d442e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade6c12bb8468c5be874c1fae7a7d442e">&#9670;&#160;</a></span>_SLog_ErrorSimpleness()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_ErrorSimpleness </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4b5d0e167af8f31274203990586f2823" name="a4b5d0e167af8f31274203990586f2823"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b5d0e167af8f31274203990586f2823">&#9670;&#160;</a></span>_SLog_ErrorSimplenessMasked()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_ErrorSimplenessMasked </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a637ef34764abc39ba1aae2f603ded6c4" name="a637ef34764abc39ba1aae2f603ded6c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a637ef34764abc39ba1aae2f603ded6c4">&#9670;&#160;</a></span>_SLog_FatalSimpleness()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_FatalSimpleness </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a55c92fd0d6a5f305726c29ce5bf4ccd5" name="a55c92fd0d6a5f305726c29ce5bf4ccd5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55c92fd0d6a5f305726c29ce5bf4ccd5">&#9670;&#160;</a></span>_SLog_FatalSimplenessMasked()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_FatalSimplenessMasked </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3c6ddd3c71f62d349c84543458549bed" name="a3c6ddd3c71f62d349c84543458549bed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c6ddd3c71f62d349c84543458549bed">&#9670;&#160;</a></span>_SLog_InfoSimpleness()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_InfoSimpleness </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8db2c9dfed886200d6cf4ae8dcaa5b51" name="a8db2c9dfed886200d6cf4ae8dcaa5b51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8db2c9dfed886200d6cf4ae8dcaa5b51">&#9670;&#160;</a></span>_SLog_InfoSimplenessMasked()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_InfoSimplenessMasked </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3827c82515e661b7233e6dbe518f8fbe" name="a3827c82515e661b7233e6dbe518f8fbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3827c82515e661b7233e6dbe518f8fbe">&#9670;&#160;</a></span>_SLog_LogFullSimpleness()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_LogFullSimpleness </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *&#160;</td>
+          <td class="paramname"><em>level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1b227d5dc312d94e294227b118ef3bdc" name="a1b227d5dc312d94e294227b118ef3bdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b227d5dc312d94e294227b118ef3bdc">&#9670;&#160;</a></span>_SLog_LogFullSimplenessMasked()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_LogFullSimplenessMasked </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *&#160;</td>
+          <td class="paramname"><em>level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a22d0a5cc6dfaa54e3739934c912f6e8b" name="a22d0a5cc6dfaa54e3739934c912f6e8b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22d0a5cc6dfaa54e3739934c912f6e8b">&#9670;&#160;</a></span>_SLog_LogImpl()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_LogImpl </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pSrcFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>fileNameLength</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>srcLine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pSrcFunction</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>logMask</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *&#160;</td>
+          <td class="paramname"><em>pLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8b0fd62104153703018b2e08be4a1f56" name="a8b0fd62104153703018b2e08be4a1f56"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b0fd62104153703018b2e08be4a1f56">&#9670;&#160;</a></span>_SLog_LogSimpleness()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_LogSimpleness </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa1be55e480f32382c1dac17a877ce6ee" name="aa1be55e480f32382c1dac17a877ce6ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1be55e480f32382c1dac17a877ce6ee">&#9670;&#160;</a></span>_SLog_LogSimplenessMasked()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_LogSimplenessMasked </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a20e41f60a2c5153666d8743cefdd7589" name="a20e41f60a2c5153666d8743cefdd7589"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20e41f60a2c5153666d8743cefdd7589">&#9670;&#160;</a></span>_SLog_TraceSimpleness()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_TraceSimpleness </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8e99c0bce5297a499b8bbe72d3d1a07d" name="a8e99c0bce5297a499b8bbe72d3d1a07d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e99c0bce5297a499b8bbe72d3d1a07d">&#9670;&#160;</a></span>_SLog_TraceSimplenessMasked()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_TraceSimplenessMasked </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adfeecd045fde668ea0b3b92bc816078b" name="adfeecd045fde668ea0b3b92bc816078b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adfeecd045fde668ea0b3b92bc816078b">&#9670;&#160;</a></span>_SLog_WarnSimpleness()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_WarnSimpleness </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2c722df5003615d1cb36ee8c1f837386" name="a2c722df5003615d1cb36ee8c1f837386"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c722df5003615d1cb36ee8c1f837386">&#9670;&#160;</a></span>_SLog_WarnSimplenessMasked()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _SLog_WarnSimplenessMasked </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fmt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a03de9b956378a9d5b0f232bf8df65f98" name="a03de9b956378a9d5b0f232bf8df65f98"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03de9b956378a9d5b0f232bf8df65f98">&#9670;&#160;</a></span>SLog_BuildLogInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_BuildLogInstance </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__config_8h.html#ae577be6f3feed8ecee2171fc7cf76063">SLogCfgItemT</a> *&#160;</td>
+          <td class="paramname"><em>pLogConfigs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>logConfigCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__config_8h.html#a94225d96595aed6b822327e7d24939ed">SLogCfgSectionInfoT</a> *&#160;</td>
+          <td class="paramname"><em>pLogSections</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>logSectionCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pLogSystemName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *&#160;</td>
+          <td class="paramname"><em>pAllowableMinLogLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acaf8324272431bbcae2bf03eb7d6b551" name="acaf8324272431bbcae2bf03eb7d6b551"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acaf8324272431bbcae2bf03eb7d6b551">&#9670;&#160;</a></span>SLog_CreateAsyncLogQueues()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_CreateAsyncLogQueues </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a25b9a2628f6df5a06e0eed4587a12d67" name="a25b9a2628f6df5a06e0eed4587a12d67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a25b9a2628f6df5a06e0eed4587a12d67">&#9670;&#160;</a></span>SLog_DisableAllMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SLog_DisableAllMask </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adfff8c1fa32e581e1495b5408952f6e0" name="adfff8c1fa32e581e1495b5408952f6e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adfff8c1fa32e581e1495b5408952f6e0">&#9670;&#160;</a></span>SLog_DisableAsyncLogAppender()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_DisableAsyncLogAppender </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> *&#160;</td>
+          <td class="paramname"><em>pLogAppender</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af7a4391d8ca558d74e29e76d2af6c176" name="af7a4391d8ca558d74e29e76d2af6c176"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7a4391d8ca558d74e29e76d2af6c176">&#9670;&#160;</a></span>SLog_DisableAsyncLogAppender2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_DisableAsyncLogAppender2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> *&#160;</td>
+          <td class="paramname"><em>pLogAppender</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td>
+          <td class="paramname"><em>detachQueue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af6e2ccd7612934894539c514078000e4" name="af6e2ccd7612934894539c514078000e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6e2ccd7612934894539c514078000e4">&#9670;&#160;</a></span>SLog_DisableAsyncLogAppenders()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_DisableAsyncLogAppenders </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa3ec44facdd2a230424f58a7366be030" name="aa3ec44facdd2a230424f58a7366be030"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3ec44facdd2a230424f58a7366be030">&#9670;&#160;</a></span>SLog_DisableSpecifyMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SLog_DisableSpecifyMask </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>logMask</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6b355b5ceab6f50f5cb7132c654e2e16" name="a6b355b5ceab6f50f5cb7132c654e2e16"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b355b5ceab6f50f5cb7132c654e2e16">&#9670;&#160;</a></span>SLog_EnableAllMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SLog_EnableAllMask </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aff06a70929c1a5166919feedd93a6f47" name="aff06a70929c1a5166919feedd93a6f47"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff06a70929c1a5166919feedd93a6f47">&#9670;&#160;</a></span>SLog_EnableAsyncLogAppender()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_EnableAsyncLogAppender </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> *&#160;</td>
+          <td class="paramname"><em>pLogAppender</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3dd511590409c8fe82b4e95cc4a5174a" name="a3dd511590409c8fe82b4e95cc4a5174a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3dd511590409c8fe82b4e95cc4a5174a">&#9670;&#160;</a></span>SLog_EnableAsyncLogAppenders()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_EnableAsyncLogAppenders </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a46c104ae0d3731fec622d1126b7cf5f4" name="a46c104ae0d3731fec622d1126b7cf5f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46c104ae0d3731fec622d1126b7cf5f4">&#9670;&#160;</a></span>SLog_EnableSpecifyMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SLog_EnableSpecifyMask </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>logMask</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ade88795060a9f86e0e077261b8d215c0" name="ade88795060a9f86e0e077261b8d215c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade88795060a9f86e0e077261b8d215c0">&#9670;&#160;</a></span>SLog_GetDefaultLogAppender()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> * SLog_GetDefaultLogAppender </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad29033411ccf1ca37fc60b233a89c970" name="ad29033411ccf1ca37fc60b233a89c970"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad29033411ccf1ca37fc60b233a89c970">&#9670;&#160;</a></span>SLog_GetLogAppender()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> * SLog_GetLogAppender </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a53a5ef4a584fe39b051c509333dd0ecf" name="a53a5ef4a584fe39b051c509333dd0ecf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53a5ef4a584fe39b051c509333dd0ecf">&#9670;&#160;</a></span>SLog_GetLogAppenderByName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> * SLog_GetLogAppenderByName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pSectionName</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac63006a2829d46331d60adb5a924727c" name="ac63006a2829d46331d60adb5a924727c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac63006a2829d46331d60adb5a924727c">&#9670;&#160;</a></span>SLog_GetLogAppenderCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SLog_GetLogAppenderCount </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7a439cab57e9c8dcb9c245e40b81b2f9" name="a7a439cab57e9c8dcb9c245e40b81b2f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a439cab57e9c8dcb9c245e40b81b2f9">&#9670;&#160;</a></span>SLog_GetLogAppenderList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> * SLog_GetLogAppenderList </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aac55deab82ceb7fa64325b37faf052d3" name="aac55deab82ceb7fa64325b37faf052d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac55deab82ceb7fa64325b37faf052d3">&#9670;&#160;</a></span>SLog_GetLogFile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * SLog_GetLogFile </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__instance_8h.html#a52bf252d864c3e9cf24be450a063f891">SLogAppenderT</a> *&#160;</td>
+          <td class="paramname"><em>pAppender</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a83bdd15d9921b23f2f57b03ec647721c" name="a83bdd15d9921b23f2f57b03ec647721c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83bdd15d9921b23f2f57b03ec647721c">&#9670;&#160;</a></span>SLog_GetLogMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SLog_GetLogMask </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad298f60f9d3492cafd8c68167b689979" name="ad298f60f9d3492cafd8c68167b689979"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad298f60f9d3492cafd8c68167b689979">&#9670;&#160;</a></span>SLog_GetLogSystemName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * SLog_GetLogSystemName </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab70f69cbcd3ad6e98789f005cd569d6c" name="ab70f69cbcd3ad6e98789f005cd569d6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab70f69cbcd3ad6e98789f005cd569d6c">&#9670;&#160;</a></span>SLog_GetMinLevelLimit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> * SLog_GetMinLevelLimit </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3c27eabb36ba65953f8a654d6a7d0fa7" name="a3c27eabb36ba65953f8a654d6a7d0fa7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c27eabb36ba65953f8a654d6a7d0fa7">&#9670;&#160;</a></span>SLog_GetMinLogLevel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> * SLog_GetMinLogLevel </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a05b484d67dd831d975dd9301c90f0cec" name="a05b484d67dd831d975dd9301c90f0cec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a05b484d67dd831d975dd9301c90f0cec">&#9670;&#160;</a></span>SLog_GetOriginalLogConfigItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__config_8h.html#ae577be6f3feed8ecee2171fc7cf76063">SLogCfgItemT</a> * SLog_GetOriginalLogConfigItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae12b9b226400b5fc6d8ee85998a6d93e" name="ae12b9b226400b5fc6d8ee85998a6d93e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae12b9b226400b5fc6d8ee85998a6d93e">&#9670;&#160;</a></span>SLog_GetOriginalLogConfigItemsCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SLog_GetOriginalLogConfigItemsCount </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3b0dc69909f9aac0d9f9b02df80c5a77" name="a3b0dc69909f9aac0d9f9b02df80c5a77"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b0dc69909f9aac0d9f9b02df80c5a77">&#9670;&#160;</a></span>SLog_InitLogger()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_InitLogger </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pConfigFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pRootSection</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pLogSystemName</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3174976ec4947ce86e28d423b1490451" name="a3174976ec4947ce86e28d423b1490451"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3174976ec4947ce86e28d423b1490451">&#9670;&#160;</a></span>SLog_InitLoggerExceptive()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_InitLoggerExceptive </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pConfigFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pRootSection</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pRootCategoryField</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pLogSystemName</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a579e73418e5f5d455fa0b8c1e72be0a2" name="a579e73418e5f5d455fa0b8c1e72be0a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a579e73418e5f5d455fa0b8c1e72be0a2">&#9670;&#160;</a></span>SLog_IsInstanceInitialized()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_IsInstanceInitialized </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a544b050d35c4b86ed3544ec8818ff0e7" name="a544b050d35c4b86ed3544ec8818ff0e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a544b050d35c4b86ed3544ec8818ff0e7">&#9670;&#160;</a></span>SLog_IsLogLevelAble()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_IsLogLevelAble </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *&#160;</td>
+          <td class="paramname"><em>pLevel</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a55cde5d030a229347ae421b6706aabd3" name="a55cde5d030a229347ae421b6706aabd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55cde5d030a229347ae421b6706aabd3">&#9670;&#160;</a></span>SLog_PrintLogInstanceInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SLog_PrintLogInstanceInfo </td>
+          <td>(</td>
+          <td class="paramtype">FILE *&#160;</td>
+          <td class="paramname"><em>fp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a703a8c0ad1d5d0918157b688f65c991d" name="a703a8c0ad1d5d0918157b688f65c991d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a703a8c0ad1d5d0918157b688f65c991d">&#9670;&#160;</a></span>SLog_RebuildLogInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_RebuildLogInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac0e52da988332727555f97e0348860e2" name="ac0e52da988332727555f97e0348860e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0e52da988332727555f97e0348860e2">&#9670;&#160;</a></span>SLog_RebuildLogInstance2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_RebuildLogInstance2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pLogSystemName</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a228192d83ed728b8ee776da50b9a248c" name="a228192d83ed728b8ee776da50b9a248c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a228192d83ed728b8ee776da50b9a248c">&#9670;&#160;</a></span>SLog_RebuildThreadInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_RebuildThreadInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a668718ceef40bb9df172d22602278bf1" name="a668718ceef40bb9df172d22602278bf1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a668718ceef40bb9df172d22602278bf1">&#9670;&#160;</a></span>SLog_RebuildThreadInstance2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_RebuildThreadInstance2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pLogSystemName</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0dbd3281e76ed4fcfac213e681f4183f" name="a0dbd3281e76ed4fcfac213e681f4183f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0dbd3281e76ed4fcfac213e681f4183f">&#9670;&#160;</a></span>SLog_ReleaseAsyncLogQueues()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> SLog_ReleaseAsyncLogQueues </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4cb00f10e14ba402614ec27d829250a3" name="a4cb00f10e14ba402614ec27d829250a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4cb00f10e14ba402614ec27d829250a3">&#9670;&#160;</a></span>SLog_ResetLogMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SLog_ResetLogMask </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3488c7a5f830429e626f8e74427d83de" name="a3488c7a5f830429e626f8e74427d83de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3488c7a5f830429e626f8e74427d83de">&#9670;&#160;</a></span>SLog_SetLogMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SLog_SetLogMask </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>logMask</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a438befe27f4045ed9df420658a1a98af" name="a438befe27f4045ed9df420658a1a98af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a438befe27f4045ed9df420658a1a98af">&#9670;&#160;</a></span>SLog_SetLogSystemName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SLog_SetLogSystemName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pLogSystemName</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a66c11c048957f7dc4e7d9bc954101004" name="a66c11c048957f7dc4e7d9bc954101004"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66c11c048957f7dc4e7d9bc954101004">&#9670;&#160;</a></span>SLog_SetMinLevelLimit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SLog_SetMinLevelLimit </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *&#160;</td>
+          <td class="paramname"><em>pMinLogLevel</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adecd8405fecd4cf55e6ac25174a271e5" name="adecd8405fecd4cf55e6ac25174a271e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adecd8405fecd4cf55e6ac25174a271e5">&#9670;&#160;</a></span>SLog_SetMinLogLevel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SLog_SetMinLogLevel </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *&#160;</td>
+          <td class="paramname"><em>pMinLogLevel</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab1b4ef0abc4f95f9f28e0ab3d815c6b6" name="ab1b4ef0abc4f95f9f28e0ab3d815c6b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1b4ef0abc4f95f9f28e0ab3d815c6b6">&#9670;&#160;</a></span>SLog_SetThreadLogName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SLog_SetThreadLogName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pLogSystemName</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aed7558ec2fc66a4dfef1395cb150e8a5" name="aed7558ec2fc66a4dfef1395cb150e8a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed7558ec2fc66a4dfef1395cb150e8a5">&#9670;&#160;</a></span>SLog_SetThreadMinLogLevel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SLog_SetThreadMinLogLevel </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="spk__log__level_8h.html#aa4f0f0bd8046ec0edded6e945995b160">SLogLevelT</a> *&#160;</td>
+          <td class="paramname"><em>pMinLogLevel</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad944a82989ce013ad00f43e12bc1f749" name="ad944a82989ce013ad00f43e12bc1f749"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad944a82989ce013ad00f43e12bc1f749">&#9670;&#160;</a></span>SLog_StartAsyncLogWriterThreads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> SLog_StartAsyncLogWriterThreads </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> *&#160;</td>
+          <td class="paramname"><em>pNormalTerminatedFlag</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> *&#160;</td>
+          <td class="paramname"><em>pExceptionAbortedFlag</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td>
+          <td class="paramname"><em>isWaitThreadsTerminated</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_248d918e0c46523948aef7b06f6106c0.html">sutil</a></li><li class="navelem"><a class="el" href="dir_37fd8358d4a8b050212c9d10a7fd9b79.html">logger</a></li><li class="navelem"><a class="el" href="spk__log__instance_8h.html">spk_log_instance.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

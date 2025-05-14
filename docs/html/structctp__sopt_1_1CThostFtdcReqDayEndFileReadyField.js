@@ -1,0 +1,25 @@
+var structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField =
+[
+    [ "BankBranchID", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#a5143cc759a293cad99dea6d7df5ecda5", null ],
+    [ "BankID", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#aa5290453fae800db6daffa06b630eaac", null ],
+    [ "BankSerial", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#ac845279b392cb045f6953953b0efe1e7", null ],
+    [ "BrokerBranchID", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#a0b029b044065be7d466721ac6cc616df", null ],
+    [ "BrokerID", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#af51377c58a9f68643c4985813c66efd8", null ],
+    [ "BrokerIDByBank", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#ad77173a7edeac2e7ecb5ab7a349fc1e1", null ],
+    [ "CurrencyID", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#a6a89ec7cac866658f2145d259ceddfed", null ],
+    [ "DeviceID", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#a78eba7e71f06b3a4d9769f0ed68a2d2e", null ],
+    [ "Digest", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#ab8af5cc316f2d7559e736d982948a1cd", null ],
+    [ "FileBusinessCode", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#a279efcab1e3ca62895c2b2d8d9fe7b0e", null ],
+    [ "InstallID", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#ae2afd7fcd4b408489150881b9bd14a0f", null ],
+    [ "LastFragment", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#aa6df28618c32e4e6175ab2aaaa124620", null ],
+    [ "OperNo", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#a10c95d8785baa6be977129e12a912aaa", null ],
+    [ "PlateSerial", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#a9e6890b956e721a6f448eb947427ad12", null ],
+    [ "RequestID", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#ab620466d09490ea1460901a31d764bbe", null ],
+    [ "SessionID", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#a8f227f04d4de0f2a73ba48781aebbc82", null ],
+    [ "TID", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#a5421be134f9b0fe45a9572a51e0fae78", null ],
+    [ "TradeCode", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#ae46b6880d0ffabf8f1cbc30c42a45426", null ],
+    [ "TradeDate", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#aea40b455ef730dfee0085bd89560003c", null ],
+    [ "TradeTime", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#a86573eadb7779c64c32a0c17962cc365", null ],
+    [ "TradingDay", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#a9a7eaa3a5f0e0691d8a6689462587997", null ],
+    [ "UserID", "structctp__sopt_1_1CThostFtdcReqDayEndFileReadyField.html#a7f7706db1f8f86a7fffeaa675487d441", null ]
+];

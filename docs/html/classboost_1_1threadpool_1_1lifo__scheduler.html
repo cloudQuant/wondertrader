@@ -1,0 +1,404 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: boost::threadpool::lifo_scheduler&lt; Task &gt; 模板类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classboost_1_1threadpool_1_1lifo__scheduler.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Public 类型</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pro-attribs">Protected 属性</a> &#124;
+<a href="classboost_1_1threadpool_1_1lifo__scheduler-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">boost::threadpool::lifo_scheduler&lt; Task &gt; 模板类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>实现LIFO（后进先出）排序的调度策略  
+ <a href="classboost_1_1threadpool_1_1lifo__scheduler.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="scheduling__policies_8hpp_source.html">scheduling_policies.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public 类型</h2></td></tr>
+<tr class="memitem:a932d503e02062f4aa3e9fb42d05ac2e8" id="r_a932d503e02062f4aa3e9fb42d05ac2e8"><td class="memItemLeft" align="right" valign="top">typedef Task&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#a932d503e02062f4aa3e9fb42d05ac2e8">task_type</a></td></tr>
+<tr class="memdesc:a932d503e02062f4aa3e9fb42d05ac2e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">调度器的任务类型  <br /></td></tr>
+<tr class="separator:a932d503e02062f4aa3e9fb42d05ac2e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a4f9096da1dee2bc68d2e4bd1ac882178" id="r_a4f9096da1dee2bc68d2e4bd1ac882178"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#a4f9096da1dee2bc68d2e4bd1ac882178">push</a> (<a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#a932d503e02062f4aa3e9fb42d05ac2e8">task_type</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;task)</td></tr>
+<tr class="memdesc:a4f9096da1dee2bc68d2e4bd1ac882178"><td class="mdescLeft">&#160;</td><td class="mdescRight">向调度器添加新任务  <br /></td></tr>
+<tr class="separator:a4f9096da1dee2bc68d2e4bd1ac882178"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af932a6f8354f9795dd5943c680fe2f42" id="r_af932a6f8354f9795dd5943c680fe2f42"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#af932a6f8354f9795dd5943c680fe2f42">pop</a> ()</td></tr>
+<tr class="separator:af932a6f8354f9795dd5943c680fe2f42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0ab054195d55978ff439cd977303aad" id="r_ae0ab054195d55978ff439cd977303aad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#a932d503e02062f4aa3e9fb42d05ac2e8">task_type</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#ae0ab054195d55978ff439cd977303aad">top</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:ae0ab054195d55978ff439cd977303aad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00389abdce7b716273806d841b4ead33" id="r_a00389abdce7b716273806d841b4ead33"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#a00389abdce7b716273806d841b4ead33">size</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:a00389abdce7b716273806d841b4ead33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae206744cabcf0277acd0df921256b7fb" id="r_ae206744cabcf0277acd0df921256b7fb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#ae206744cabcf0277acd0df921256b7fb">empty</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:ae206744cabcf0277acd0df921256b7fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a882e0d57368461ba48fe5cc0018b5794" id="r_a882e0d57368461ba48fe5cc0018b5794"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#a882e0d57368461ba48fe5cc0018b5794">clear</a> ()</td></tr>
+<tr class="separator:a882e0d57368461ba48fe5cc0018b5794"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
+Protected 属性</h2></td></tr>
+<tr class="memitem:a9a056bd401271660b98bc0553fb00883" id="r_a9a056bd401271660b98bc0553fb00883"><td class="memItemLeft" align="right" valign="top">std::deque&lt; <a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#a932d503e02062f4aa3e9fb42d05ac2e8">task_type</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#a9a056bd401271660b98bc0553fb00883">m_container</a></td></tr>
+<tr class="memdesc:a9a056bd401271660b98bc0553fb00883"><td class="mdescLeft">&#160;</td><td class="mdescRight">内部任务容器  <br /></td></tr>
+<tr class="separator:a9a056bd401271660b98bc0553fb00883"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename Task = task_func&gt;<br />
+class boost::threadpool::lifo_scheduler&lt; Task &gt;</div><p>实现LIFO（后进先出）排序的调度策略 </p>
+<p>该容器实现了LIFO（后进先出）调度策略。 最近添加到调度器的任务将第一个被移除。 LIFO表示“后进先出”，与堆栈结构类似。</p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Task</td><td>实现operator()(void)的函数对象 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="scheduling__policies_8hpp_source.html">scheduling_policies.hpp</a> 第 <a class="el" href="scheduling__policies_8hpp_source.html#l00132">132</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="a932d503e02062f4aa3e9fb42d05ac2e8" name="a932d503e02062f4aa3e9fb42d05ac2e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a932d503e02062f4aa3e9fb42d05ac2e8">&#9670;&#160;</a></span>task_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef Task <a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html">boost::threadpool::lifo_scheduler</a>&lt; Task &gt;::task_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>调度器的任务类型 </p>
+<p>指示调度器使用的任务函数对象类型 </p>
+
+<p class="definition">在文件 <a class="el" href="scheduling__policies_8hpp_source.html">scheduling_policies.hpp</a> 第 <a class="el" href="scheduling__policies_8hpp_source.html#l00139">139</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a882e0d57368461ba48fe5cc0018b5794" name="a882e0d57368461ba48fe5cc0018b5794"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a882e0d57368461ba48fe5cc0018b5794">&#9670;&#160;</a></span>clear()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html">boost::threadpool::lifo_scheduler</a>&lt; Task &gt;::clear </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Removes all tasks from the scheduler. </p>
+
+<p class="definition">在文件 <a class="el" href="scheduling__policies_8hpp_source.html">scheduling_policies.hpp</a> 第 <a class="el" href="scheduling__policies_8hpp_source.html#l00196">196</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae206744cabcf0277acd0df921256b7fb" name="ae206744cabcf0277acd0df921256b7fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae206744cabcf0277acd0df921256b7fb">&#9670;&#160;</a></span>empty()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html">boost::threadpool::lifo_scheduler</a>&lt; Task &gt;::empty </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Checks if the scheduler is empty. </p><dl class="section return"><dt>返回</dt><dd>true if the scheduler contains no tasks, false otherwise. </dd></dl>
+<dl class="section remark"><dt>备注</dt><dd>Is more efficient than <a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#a00389abdce7b716273806d841b4ead33">size()</a> == 0. </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="scheduling__policies_8hpp_source.html">scheduling_policies.hpp</a> 第 <a class="el" href="scheduling__policies_8hpp_source.html#l00189">189</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af932a6f8354f9795dd5943c680fe2f42" name="af932a6f8354f9795dd5943c680fe2f42"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af932a6f8354f9795dd5943c680fe2f42">&#9670;&#160;</a></span>pop()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html">boost::threadpool::lifo_scheduler</a>&lt; Task &gt;::pop </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Removes the task which should be executed next. </p>
+
+<p class="definition">在文件 <a class="el" href="scheduling__policies_8hpp_source.html">scheduling_policies.hpp</a> 第 <a class="el" href="scheduling__policies_8hpp_source.html#l00163">163</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4f9096da1dee2bc68d2e4bd1ac882178" name="a4f9096da1dee2bc68d2e4bd1ac882178"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f9096da1dee2bc68d2e4bd1ac882178">&#9670;&#160;</a></span>push()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html">boost::threadpool::lifo_scheduler</a>&lt; Task &gt;::push </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#a932d503e02062f4aa3e9fb42d05ac2e8">task_type</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;&#160;</td>
+          <td class="paramname"><em>task</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>向调度器添加新任务 </p>
+<p>将任务添加到队列头部，符合LIFO（后进先出）策略 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">task</td><td>任务对象 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>如果任务成功调度返回 true，否则返回 false </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="scheduling__policies_8hpp_source.html">scheduling_policies.hpp</a> 第 <a class="el" href="scheduling__policies_8hpp_source.html#l00155">155</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a00389abdce7b716273806d841b4ead33" name="a00389abdce7b716273806d841b4ead33"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00389abdce7b716273806d841b4ead33">&#9670;&#160;</a></span>size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t <a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html">boost::threadpool::lifo_scheduler</a>&lt; Task &gt;::size </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Gets the current number of tasks in the scheduler. </p><dl class="section return"><dt>返回</dt><dd>The number of tasks. </dd></dl>
+<dl class="section remark"><dt>备注</dt><dd>Prefer <a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#ae206744cabcf0277acd0df921256b7fb">empty()</a> to <a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#a00389abdce7b716273806d841b4ead33">size()</a> == 0 to check if the scheduler is empty. </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="scheduling__policies_8hpp_source.html">scheduling_policies.hpp</a> 第 <a class="el" href="scheduling__policies_8hpp_source.html#l00180">180</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae0ab054195d55978ff439cd977303aad" name="ae0ab054195d55978ff439cd977303aad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0ab054195d55978ff439cd977303aad">&#9670;&#160;</a></span>top()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#a932d503e02062f4aa3e9fb42d05ac2e8">task_type</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>  &amp; <a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html">boost::threadpool::lifo_scheduler</a>&lt; Task &gt;::top </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Gets the task which should be executed next. </p><dl class="section return"><dt>返回</dt><dd>The task object to be executed. </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="scheduling__policies_8hpp_source.html">scheduling_policies.hpp</a> 第 <a class="el" href="scheduling__policies_8hpp_source.html#l00171">171</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a9a056bd401271660b98bc0553fb00883" name="a9a056bd401271660b98bc0553fb00883"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a056bd401271660b98bc0553fb00883">&#9670;&#160;</a></span>m_container</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::deque&lt;<a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html#a932d503e02062f4aa3e9fb42d05ac2e8">task_type</a>&gt; <a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html">boost::threadpool::lifo_scheduler</a>&lt; Task &gt;::m_container</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>内部任务容器 </p>
+<p>使用双端队列存储任务，实现LIFO调度策略，新任务添加到队列的头部 </p>
+
+<p class="definition">在文件 <a class="el" href="scheduling__policies_8hpp_source.html">scheduling_policies.hpp</a> 第 <a class="el" href="scheduling__policies_8hpp_source.html#l00146">146</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/Share/threadpool/<a class="el" href="scheduling__policies_8hpp_source.html">scheduling_policies.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespaceboost.html">boost</a></li><li class="navelem"><a class="el" href="namespaceboost_1_1threadpool.html">threadpool</a></li><li class="navelem"><a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html">lifo_scheduler</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

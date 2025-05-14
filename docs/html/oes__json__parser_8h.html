@@ -1,0 +1,373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/oes_api/parser/json_parser/oes_json_parser.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('oes__json__parser_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">oes_json_parser.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;<a class="el" href="oes__packets_8h_source.html">oes_global/oes_packets.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__global__packet_8h_source.html">sutil/net/spk_global_packet.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="types_8h_source.html">sutil/types.h</a>&gt;</code><br />
+</div>
+<p><a href="oes__json__parser_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a02757f91ecda46a0dd8dbfecca97e7cc" id="r_a02757f91ecda46a0dd8dbfecca97e7cc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="oes__packets_8h.html#a337336ee0d3043cae352ca9277039c33">OesReqMsgBodyT</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__json__parser_8h.html#a02757f91ecda46a0dd8dbfecca97e7cc">OesJsonParser_DecodeReq</a> (<a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *pReqHead, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *pMsgBody, <a class="el" href="oes__packets_8h.html#a337336ee0d3043cae352ca9277039c33">OesReqMsgBodyT</a> *pReqMsgBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pRemoteInfo)</td></tr>
+<tr class="separator:a02757f91ecda46a0dd8dbfecca97e7cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5b99caafdedf6a8c6af2dc6b39fbf6f" id="r_ad5b99caafdedf6a8c6af2dc6b39fbf6f"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__json__parser_8h.html#ad5b99caafdedf6a8c6af2dc6b39fbf6f">OesJsonParser_EncodeRsp</a> (<a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *pRspHead, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__packets_8h.html#a5de180388ac4ed4674c424578ac10e6d">OesRspMsgBodyT</a> *pRspBody, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pRemoteInfo)</td></tr>
+<tr class="separator:ad5b99caafdedf6a8c6af2dc6b39fbf6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb24d9c5e9e2e626c7dbe7894dd9c444" id="r_acb24d9c5e9e2e626c7dbe7894dd9c444"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__json__parser_8h.html#acb24d9c5e9e2e626c7dbe7894dd9c444">OesJsonParser_EncodeRptItem</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a> rptMsgType, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__packets_8h.html#a859bc92e6bfa2ef358e42d2d03bccf2a">OesRptMsgHeadT</a> *pRptHead, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *pRptData, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize)</td></tr>
+<tr class="separator:acb24d9c5e9e2e626c7dbe7894dd9c444"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab930a24ebffaf0474c913c468b9255ff" id="r_ab930a24ebffaf0474c913c468b9255ff"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__json__parser_8h.html#ab930a24ebffaf0474c913c468b9255ff">OesJsonParser_EncodeRptSpecial</a> (<a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *pRspHead, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__packets_8h.html#a859bc92e6bfa2ef358e42d2d03bccf2a">OesRptMsgHeadT</a> *pRptMsgHead, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__packets_8h.html#a488abbd3011ed8e25c2a09ba8b6d29f6">OesRptMsgBodyT</a> *pRptMsgBody, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pRemoteInfo)</td></tr>
+<tr class="separator:ab930a24ebffaf0474c913c468b9255ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>流消息接收处理</p>
+<dl class="section version"><dt>版本</dt><dd>1.2 2016/10/24 </dd></dl>
+<dl class="section since"><dt>自从</dt><dd>2014/12/23 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="oes__json__parser_8h_source.html">oes_json_parser.h</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="a02757f91ecda46a0dd8dbfecca97e7cc" name="a02757f91ecda46a0dd8dbfecca97e7cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02757f91ecda46a0dd8dbfecca97e7cc">&#9670;&#160;</a></span>OesJsonParser_DecodeReq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="oes__packets_8h.html#a337336ee0d3043cae352ca9277039c33">OesReqMsgBodyT</a> * OesJsonParser_DecodeReq </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *&#160;</td>
+          <td class="paramname"><em>pReqHead</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>pMsgBody</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="oes__packets_8h.html#a337336ee0d3043cae352ca9277039c33">OesReqMsgBodyT</a> *&#160;</td>
+          <td class="paramname"><em>pReqMsgBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pRemoteInfo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>请求消息解码处理 (解码为二进制结构体，用于接收客户端的请求消息)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">pReqHead</td><td>消息头 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">pMsgBody</td><td>消息体数据 </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">pReqMsgBuf</td><td>解码后的消息体数据缓存 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pRemoteInfo</td><td>对端身份信息, 用于打印跟踪日志 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>解码后的消息体数据; NULL, 解析失败 </dd></dl>
+
+</div>
+</div>
+<a id="acb24d9c5e9e2e626c7dbe7894dd9c444" name="acb24d9c5e9e2e626c7dbe7894dd9c444"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb24d9c5e9e2e626c7dbe7894dd9c444">&#9670;&#160;</a></span>OesJsonParser_EncodeRptItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * OesJsonParser_EncodeRptItem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>&#160;</td>
+          <td class="paramname"><em>rptMsgType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__packets_8h.html#a859bc92e6bfa2ef358e42d2d03bccf2a">OesRptMsgHeadT</a> *&#160;</td>
+          <td class="paramname"><em>pRptHead</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>pRptData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>编码回报数据 (编码为JSON格式)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rptMsgType</td><td>回报消息的消息代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>参见</dt><dd><a class="el" href="oes__packets_8h.html#a88fe8908936b793944f5fd575d7d3706">eOesMsgTypeT</a> </dd></dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">pRptHead</td><td>回报消息的消息头 (若有的话)<ul>
+<li>对于没有回报消息头的回报同步应答、市场状态消息等, 该参数需要传 NULL </li>
+</ul>
+</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pRptData</td><td>回报消息的消息体数据 </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">pBuf</td><td>存储编码后数据的缓存区 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">bufSize</td><td>缓存区长度 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>编码后的消息体数据; NULL, 编码失败 </dd></dl>
+
+</div>
+</div>
+<a id="ab930a24ebffaf0474c913c468b9255ff" name="ab930a24ebffaf0474c913c468b9255ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab930a24ebffaf0474c913c468b9255ff">&#9670;&#160;</a></span>OesJsonParser_EncodeRptSpecial()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * OesJsonParser_EncodeRptSpecial </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *&#160;</td>
+          <td class="paramname"><em>pRspHead</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__packets_8h.html#a859bc92e6bfa2ef358e42d2d03bccf2a">OesRptMsgHeadT</a> *&#160;</td>
+          <td class="paramname"><em>pRptMsgHead</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__packets_8h.html#a488abbd3011ed8e25c2a09ba8b6d29f6">OesRptMsgBodyT</a> *&#160;</td>
+          <td class="paramname"><em>pRptMsgBody</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pRemoteInfo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>为执行报告回报特别定制的应答消息编码处理 (编码为JSON格式，用于向客户端发送应答消息)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">pRspHead</td><td>消息头 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pRspBody</td><td>原始应答数据结构体 </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">pBuf</td><td>存储编码后数据的缓存区 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">bufSize</td><td>缓存区长度 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pRemoteInfo</td><td>对端身份信息, 用于打印跟踪日志 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>编码后的消息体数据; NULL, 编码失败</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000049">弃用:</a></b></dt><dd>已废弃, 建议改为使用 OesJsonParser_EncodeRptItem </dd></dl>
+
+</div>
+</div>
+<a id="ad5b99caafdedf6a8c6af2dc6b39fbf6f" name="ad5b99caafdedf6a8c6af2dc6b39fbf6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5b99caafdedf6a8c6af2dc6b39fbf6f">&#9670;&#160;</a></span>OesJsonParser_EncodeRsp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * OesJsonParser_EncodeRsp </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *&#160;</td>
+          <td class="paramname"><em>pRspHead</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="oes__packets_8h.html#a5de180388ac4ed4674c424578ac10e6d">OesRspMsgBodyT</a> *&#160;</td>
+          <td class="paramname"><em>pRspBody</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pRemoteInfo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>应答消息编码处理 (编码为JSON格式，用于向客户端发送应答消息)</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">pRspHead</td><td>消息头 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pRspBody</td><td>原始应答数据结构体 </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">pBuf</td><td>存储编码后数据的缓存区 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">bufSize</td><td>缓存区长度 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pRemoteInfo</td><td>对端身份信息, 用于打印跟踪日志 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>编码后的消息体数据; NULL, 编码失败 </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_70297f1fa9b6148dc45ed33f791a8354.html">oes_api</a></li><li class="navelem"><a class="el" href="dir_9f8a467a3d2884a59a472bc8722c5a93.html">parser</a></li><li class="navelem"><a class="el" href="dir_ac33a07802f029a8e75f680825794900.html">json_parser</a></li><li class="navelem"><a class="el" href="oes__json__parser_8h.html">oes_json_parser.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtDtCore/StatHelper.hpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('StatHelper_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">StatHelper.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="StatHelper_8hpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;boost/atomic.hpp&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;boost/interprocess/detail/atomic.hpp&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="foldopen" id="foldopen00022" data-start="{" data-end="};">
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classStatHelper.html">   22</a></span><span class="keyword">class </span><a class="code hl_class" href="classStatHelper.html">StatHelper</a></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>{</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00031" data-start="{" data-end="}">
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classStatHelper.html#a10b316bf40b99b284c4f021ae290787a">   31</a></span>    <span class="keyword">static</span> <a class="code hl_class" href="classStatHelper.html">StatHelper</a>&amp; <a class="code hl_function" href="classStatHelper.html#a10b316bf40b99b284c4f021ae290787a">one</a>()</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    {</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="keyword">static</span> <a class="code hl_class" href="classStatHelper.html">StatHelper</a> only; <span class="comment">// 内部静态对象，确保对象的全局唯一性</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <span class="keywordflow">return</span> only;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    }</div>
+</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00042" data-start="{" data-end="};">
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="structStatHelper_1_1__StatInfo.html">   42</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structStatHelper_1_1__StatInfo.html">_StatInfo</a></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    {</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="structStatHelper_1_1__StatInfo.html#a0b2c7d546123dbe0f0eedb02908ae520">   44</a></span>        uint32_t    <a class="code hl_variable" href="structStatHelper_1_1__StatInfo.html#a0b2c7d546123dbe0f0eedb02908ae520">_recv_packs</a>;  </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="structStatHelper_1_1__StatInfo.html#af70f6ba84f0ee6284324f81252900f97">   45</a></span>        uint32_t    <a class="code hl_variable" href="structStatHelper_1_1__StatInfo.html#af70f6ba84f0ee6284324f81252900f97">_send_packs</a>;  </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="structStatHelper_1_1__StatInfo.html#a3d92ac6b851342b0018c6f907a5d788a">   46</a></span>        uint64_t    <a class="code hl_variable" href="structStatHelper_1_1__StatInfo.html#a3d92ac6b851342b0018c6f907a5d788a">_send_bytes</a>;  </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="foldopen" id="foldopen00052" data-start="{" data-end="}">
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="structStatHelper_1_1__StatInfo.html#ab955bf08b342a51d54606bc24dc22730">   52</a></span>        <a class="code hl_function" href="structStatHelper_1_1__StatInfo.html#ab955bf08b342a51d54606bc24dc22730">_StatInfo</a>()</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        {</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>            <a class="code hl_variable" href="structStatHelper_1_1__StatInfo.html#a0b2c7d546123dbe0f0eedb02908ae520">_recv_packs</a> = 0;  <span class="comment">// 初始化接收包数为0</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>            <a class="code hl_variable" href="structStatHelper_1_1__StatInfo.html#a3d92ac6b851342b0018c6f907a5d788a">_send_bytes</a> = 0;  <span class="comment">// 初始化发送字节数为0</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>            <a class="code hl_variable" href="structStatHelper_1_1__StatInfo.html#af70f6ba84f0ee6284324f81252900f97">_send_packs</a> = 0;  <span class="comment">// 初始化发送包数为0</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        }</div>
+</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="classStatHelper.html#a7f53ea5a96bebbcad167f5769554d6c8">   58</a></span>    } <a class="code hl_typedef" href="classStatHelper.html#a7f53ea5a96bebbcad167f5769554d6c8">StatInfo</a>;</div>
+</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="foldopen" id="foldopen00064" data-start="{" data-end="};">
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classStatHelper.html#aeb854ef0aa3c662615c7b94d387da9ce">   64</a></span>    <span class="keyword">typedef</span> <span class="keyword">enum</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    {</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <a class="code hl_enumvalue" href="classStatHelper.html#aeb854ef0aa3c662615c7b94d387da9cea9c671e0331623c909a2756431f188169">ST_BROADCAST</a> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classStatHelper.html#aeb854ef0aa3c662615c7b94d387da9cea9c671e0331623c909a2756431f188169">   67</a></span>    } <a class="code hl_enumeration" href="classStatHelper.html#aeb854ef0aa3c662615c7b94d387da9ce">StatType</a>;</div>
+</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="foldopen" id="foldopen00073" data-start="{" data-end="};">
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="classStatHelper.html#ab9b218ca93997e44c24c18e748edb23a">   73</a></span>    <span class="keyword">typedef</span> <span class="keyword">enum</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    {</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="classStatHelper.html#ab9b218ca93997e44c24c18e748edb23aa90ea8352b239fac378e9a1cceb64bfbf">   75</a></span>        <a class="code hl_enumvalue" href="classStatHelper.html#ab9b218ca93997e44c24c18e748edb23aa90ea8352b239fac378e9a1cceb64bfbf">UF_Recv</a>     = 0x0001, </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        <a class="code hl_enumvalue" href="classStatHelper.html#ab9b218ca93997e44c24c18e748edb23aaa4c1cee77081d97978fdeca63cb7ca2a">UF_Send</a>     = 0x0002  </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="classStatHelper.html#ab9b218ca93997e44c24c18e748edb23aaa4c1cee77081d97978fdeca63cb7ca2a">   77</a></span>    } <a class="code hl_enumeration" href="classStatHelper.html#ab9b218ca93997e44c24c18e748edb23a">UpdateFlag</a>;</div>
+</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00089" data-start="{" data-end="}">
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="classStatHelper.html#a7679c09d835262d98e3d3d5e0f52e48d">   89</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classStatHelper.html#a7679c09d835262d98e3d3d5e0f52e48d">updateStatInfo</a>(<a class="code hl_enumeration" href="classStatHelper.html#aeb854ef0aa3c662615c7b94d387da9ce">StatType</a> sType, uint32_t recvPacks, uint32_t sendPacks, uint64_t sendBytes)</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    {</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        BoostWriteLock lock(<a class="code hl_variable" href="classStatHelper.html#a8bec6ac1d3122a0a7fc83d06eb23ebc5">_mutexes</a>[sType]); <span class="comment">// 获取写锁，确保线程安全</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        <a class="code hl_struct" href="structStatHelper_1_1__StatInfo.html">StatInfo</a>&amp; sInfo = <a class="code hl_variable" href="classStatHelper.html#aac7d495fbd0a857224b3f3525f9cd671">_stats</a>[sType]; <span class="comment">// 获取指定类型的统计信息</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        sInfo.<a class="code hl_variable" href="structStatHelper_1_1__StatInfo.html#a0b2c7d546123dbe0f0eedb02908ae520">_recv_packs</a> += recvPacks; <span class="comment">// 累加接收包数</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        sInfo.<a class="code hl_variable" href="structStatHelper_1_1__StatInfo.html#af70f6ba84f0ee6284324f81252900f97">_send_packs</a> += sendPacks; <span class="comment">// 累加发送包数</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <span class="comment">// 处理字节数累加可能导致的溢出</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        <span class="keywordflow">if</span>(UINT64_MAX - sInfo.<a class="code hl_variable" href="structStatHelper_1_1__StatInfo.html#a3d92ac6b851342b0018c6f907a5d788a">_send_bytes</a> &lt; sendBytes) <span class="comment">// 检查是否会溢出</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>            sInfo.<a class="code hl_variable" href="structStatHelper_1_1__StatInfo.html#a3d92ac6b851342b0018c6f907a5d788a">_send_bytes</a> = sendBytes; <span class="comment">// 如果会溢出，直接设置为新值</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>            sInfo.<a class="code hl_variable" href="structStatHelper_1_1__StatInfo.html#a3d92ac6b851342b0018c6f907a5d788a">_send_bytes</a> += sendBytes; <span class="comment">// 如果不会溢出，正常累加</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <span class="comment">// 设置更新标志</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        uint32_t flag = 0;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        <span class="keywordflow">if</span> (recvPacks &gt; 0)</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>            flag |= <a class="code hl_enumvalue" href="classStatHelper.html#ab9b218ca93997e44c24c18e748edb23aa90ea8352b239fac378e9a1cceb64bfbf">UF_Recv</a>; <span class="comment">// 标记接收数据被更新</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        <span class="keywordflow">if</span> (sendPacks &gt; 0)</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>            flag |= <a class="code hl_enumvalue" href="classStatHelper.html#ab9b218ca93997e44c24c18e748edb23aaa4c1cee77081d97978fdeca63cb7ca2a">UF_Send</a>; <span class="comment">// 标记发送数据被更新</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    }</div>
+</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    </div>
+<div class="foldopen" id="foldopen00116" data-start="{" data-end="}">
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="classStatHelper.html#a77a7788d8f385e1f03b96089f0caf9b6">  116</a></span>    <a class="code hl_struct" href="structStatHelper_1_1__StatInfo.html">StatInfo</a> <a class="code hl_function" href="classStatHelper.html#a77a7788d8f385e1f03b96089f0caf9b6">getStatInfo</a>(<a class="code hl_enumeration" href="classStatHelper.html#aeb854ef0aa3c662615c7b94d387da9ce">StatType</a> sType)</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    {</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>        BoostReadLock lock(<a class="code hl_variable" href="classStatHelper.html#a8bec6ac1d3122a0a7fc83d06eb23ebc5">_mutexes</a>[sType]); <span class="comment">// 获取读锁，确保线程安全</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classStatHelper.html#aac7d495fbd0a857224b3f3525f9cd671">_stats</a>[sType]; <span class="comment">// 返回统计信息的副本</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    }</div>
+</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="classStatHelper.html#aac7d495fbd0a857224b3f3525f9cd671">  123</a></span>    <a class="code hl_struct" href="structStatHelper_1_1__StatInfo.html">StatInfo</a>        <a class="code hl_variable" href="classStatHelper.html#aac7d495fbd0a857224b3f3525f9cd671">_stats</a>[5];     </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="classStatHelper.html#a8bec6ac1d3122a0a7fc83d06eb23ebc5">  124</a></span>    BoostRWMutex    <a class="code hl_variable" href="classStatHelper.html#a8bec6ac1d3122a0a7fc83d06eb23ebc5">_mutexes</a>[5];   </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>};</div>
+</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="ttc" id="aclassStatHelper_html"><div class="ttname"><a href="classStatHelper.html">StatHelper</a></div><div class="ttdoc">数据统计辅助类</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00022">StatHelper.hpp:23</a></div></div>
+<div class="ttc" id="aclassStatHelper_html_a10b316bf40b99b284c4f021ae290787a"><div class="ttname"><a href="classStatHelper.html#a10b316bf40b99b284c4f021ae290787a">StatHelper::one</a></div><div class="ttdeci">static StatHelper &amp; one()</div><div class="ttdoc">获取StatHelper的单例对象</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00031">StatHelper.hpp:31</a></div></div>
+<div class="ttc" id="aclassStatHelper_html_a7679c09d835262d98e3d3d5e0f52e48d"><div class="ttname"><a href="classStatHelper.html#a7679c09d835262d98e3d3d5e0f52e48d">StatHelper::updateStatInfo</a></div><div class="ttdeci">void updateStatInfo(StatType sType, uint32_t recvPacks, uint32_t sendPacks, uint64_t sendBytes)</div><div class="ttdoc">更新统计信息</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00089">StatHelper.hpp:89</a></div></div>
+<div class="ttc" id="aclassStatHelper_html_a77a7788d8f385e1f03b96089f0caf9b6"><div class="ttname"><a href="classStatHelper.html#a77a7788d8f385e1f03b96089f0caf9b6">StatHelper::getStatInfo</a></div><div class="ttdeci">StatInfo getStatInfo(StatType sType)</div><div class="ttdoc">获取统计信息</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00116">StatHelper.hpp:116</a></div></div>
+<div class="ttc" id="aclassStatHelper_html_a7f53ea5a96bebbcad167f5769554d6c8"><div class="ttname"><a href="classStatHelper.html#a7f53ea5a96bebbcad167f5769554d6c8">StatHelper::StatInfo</a></div><div class="ttdeci">struct StatHelper::_StatInfo StatInfo</div><div class="ttdoc">统计信息结构体</div></div>
+<div class="ttc" id="aclassStatHelper_html_a8bec6ac1d3122a0a7fc83d06eb23ebc5"><div class="ttname"><a href="classStatHelper.html#a8bec6ac1d3122a0a7fc83d06eb23ebc5">StatHelper::_mutexes</a></div><div class="ttdeci">BoostRWMutex _mutexes[5]</div><div class="ttdoc">读写锁数组，每种统计类型对应一个读写锁，用于线程同步</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00124">StatHelper.hpp:124</a></div></div>
+<div class="ttc" id="aclassStatHelper_html_aac7d495fbd0a857224b3f3525f9cd671"><div class="ttname"><a href="classStatHelper.html#aac7d495fbd0a857224b3f3525f9cd671">StatHelper::_stats</a></div><div class="ttdeci">StatInfo _stats[5]</div><div class="ttdoc">统计信息数组，每个下标对应一种统计类型，最多支持5种类型</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00123">StatHelper.hpp:123</a></div></div>
+<div class="ttc" id="aclassStatHelper_html_ab9b218ca93997e44c24c18e748edb23a"><div class="ttname"><a href="classStatHelper.html#ab9b218ca93997e44c24c18e748edb23a">StatHelper::UpdateFlag</a></div><div class="ttdeci">UpdateFlag</div><div class="ttdoc">更新标志枚举</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00073">StatHelper.hpp:74</a></div></div>
+<div class="ttc" id="aclassStatHelper_html_ab9b218ca93997e44c24c18e748edb23aa90ea8352b239fac378e9a1cceb64bfbf"><div class="ttname"><a href="classStatHelper.html#ab9b218ca93997e44c24c18e748edb23aa90ea8352b239fac378e9a1cceb64bfbf">StatHelper::UF_Recv</a></div><div class="ttdeci">@ UF_Recv</div><div class="ttdoc">接收数据更新标志，值为1</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00075">StatHelper.hpp:75</a></div></div>
+<div class="ttc" id="aclassStatHelper_html_ab9b218ca93997e44c24c18e748edb23aaa4c1cee77081d97978fdeca63cb7ca2a"><div class="ttname"><a href="classStatHelper.html#ab9b218ca93997e44c24c18e748edb23aaa4c1cee77081d97978fdeca63cb7ca2a">StatHelper::UF_Send</a></div><div class="ttdeci">@ UF_Send</div><div class="ttdoc">发送数据更新标志，值为2</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00077">StatHelper.hpp:76</a></div></div>
+<div class="ttc" id="aclassStatHelper_html_aeb854ef0aa3c662615c7b94d387da9ce"><div class="ttname"><a href="classStatHelper.html#aeb854ef0aa3c662615c7b94d387da9ce">StatHelper::StatType</a></div><div class="ttdeci">StatType</div><div class="ttdoc">统计类型枚举</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00064">StatHelper.hpp:65</a></div></div>
+<div class="ttc" id="aclassStatHelper_html_aeb854ef0aa3c662615c7b94d387da9cea9c671e0331623c909a2756431f188169"><div class="ttname"><a href="classStatHelper.html#aeb854ef0aa3c662615c7b94d387da9cea9c671e0331623c909a2756431f188169">StatHelper::ST_BROADCAST</a></div><div class="ttdeci">@ ST_BROADCAST</div><div class="ttdoc">广播数据的统计类型</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00067">StatHelper.hpp:66</a></div></div>
+<div class="ttc" id="astructStatHelper_1_1__StatInfo_html"><div class="ttname"><a href="structStatHelper_1_1__StatInfo.html">StatHelper::_StatInfo</a></div><div class="ttdoc">统计信息结构体</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00042">StatHelper.hpp:43</a></div></div>
+<div class="ttc" id="astructStatHelper_1_1__StatInfo_html_a0b2c7d546123dbe0f0eedb02908ae520"><div class="ttname"><a href="structStatHelper_1_1__StatInfo.html#a0b2c7d546123dbe0f0eedb02908ae520">StatHelper::_StatInfo::_recv_packs</a></div><div class="ttdeci">uint32_t _recv_packs</div><div class="ttdoc">接收数据包数量</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00044">StatHelper.hpp:44</a></div></div>
+<div class="ttc" id="astructStatHelper_1_1__StatInfo_html_a3d92ac6b851342b0018c6f907a5d788a"><div class="ttname"><a href="structStatHelper_1_1__StatInfo.html#a3d92ac6b851342b0018c6f907a5d788a">StatHelper::_StatInfo::_send_bytes</a></div><div class="ttdeci">uint64_t _send_bytes</div><div class="ttdoc">发送数据字节数</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00046">StatHelper.hpp:46</a></div></div>
+<div class="ttc" id="astructStatHelper_1_1__StatInfo_html_ab955bf08b342a51d54606bc24dc22730"><div class="ttname"><a href="structStatHelper_1_1__StatInfo.html#ab955bf08b342a51d54606bc24dc22730">StatHelper::_StatInfo::_StatInfo</a></div><div class="ttdeci">_StatInfo()</div><div class="ttdoc">结构体构造函数</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00052">StatHelper.hpp:52</a></div></div>
+<div class="ttc" id="astructStatHelper_1_1__StatInfo_html_af70f6ba84f0ee6284324f81252900f97"><div class="ttname"><a href="structStatHelper_1_1__StatInfo.html#af70f6ba84f0ee6284324f81252900f97">StatHelper::_StatInfo::_send_packs</a></div><div class="ttdeci">uint32_t _send_packs</div><div class="ttdoc">发送数据包数量</div><div class="ttdef"><b>Definition</b> <a href="StatHelper_8hpp_source.html#l00045">StatHelper.hpp:45</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_a28b32a32e43d6abee9cd6e629f0fe5a.html">WtDtCore</a></li><li class="navelem"><a class="el" href="StatHelper_8hpp.html">StatHelper.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

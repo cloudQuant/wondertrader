@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/zbuff_compress.c 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('zbuff__compress_8c_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">zbuff_compress.c</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="zbuff__compress_8c.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (c) 2016-present, Yann Collet, Facebook, Inc.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * This source code is licensed under both the BSD-style license (found in the</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * LICENSE file in the root directory of this source tree) and the GPLv2 (found</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * in the COPYING file in the root directory of this source tree).</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * You may select, at your option, one of the above-listed licenses.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">/* *************************************</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">*  Dependencies</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">***************************************/</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="zbuff__compress_8c.html#a52b77a66e5409a56ef656817332b9876">   16</a></span><span class="preprocessor">#define ZBUFF_STATIC_LINKING_ONLY</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;<a class="code" href="zbuff_8h.html">zbuff.h</a>&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">/*-***********************************************************</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">*  Streaming compression</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">*</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">*  A ZBUFF_CCtx object is required to track streaming operation.</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">*  Use ZBUFF_createCCtx() and ZBUFF_freeCCtx() to create/release resources.</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">*  Use ZBUFF_compressInit() to start a new compression operation.</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment">*  ZBUFF_CCtx objects can be reused multiple times.</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment">*</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">*  Use ZBUFF_compressContinue() repetitively to consume your input.</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">*  *srcSizePtr and *dstCapacityPtr can be any size.</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">*  The function will report how many bytes were read or written by modifying *srcSizePtr and *dstCapacityPtr.</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">*  Note that it may not consume the entire input, in which case it&#39;s up to the caller to call again the function with remaining input.</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">*  The content of dst will be overwritten (up to *dstCapacityPtr) at each function call, so save its content if it matters or change dst .</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment">*  @return : a hint to preferred nb of bytes to use as input for next function call (it&#39;s only a hint, to improve latency)</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment">*            or an error code, which can be tested using ZBUFF_isError().</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment">*</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment">*  ZBUFF_compressFlush() can be used to instruct ZBUFF to compress and output whatever remains within its buffer.</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment">*  Note that it will not output more than *dstCapacityPtr.</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment">*  Therefore, some content might still be left into its internal buffer if dst buffer is too small.</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment">*  @return : nb of bytes still present into internal buffer (0 if it&#39;s empty)</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">*            or an error code, which can be tested using ZBUFF_isError().</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">*</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">*  ZBUFF_compressEnd() instructs to finish a frame.</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">*  It will perform a flush and write frame epilogue.</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">*  Similar to ZBUFF_compressFlush(), it may not be able to output the entire internal buffer content if *dstCapacityPtr is too small.</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment">*  @return : nb of bytes still present into internal buffer (0 if it&#39;s empty)</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment">*            or an error code, which can be tested using ZBUFF_isError().</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment">*</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">*  Hint : recommended buffer sizes (not compulsory)</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment">*  input : ZSTD_BLOCKSIZE_MAX (128 KB), internal unit size, it improves latency to use this value.</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">*  output : ZSTD_compressBound(ZSTD_BLOCKSIZE_MAX) + ZSTD_blockHeaderSize + ZBUFF_endFrameSize : ensures it&#39;s always possible to write/flush/end a full block at best speed.</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment">* ***********************************************************/</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="foldopen" id="foldopen00053" data-start="{" data-end="}">
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="zbuff__compress_8c.html#a9d25f19239843db0565ade125eb5fb50">   53</a></span><a class="code hl_struct" href="structZSTD__CCtx__s.html">ZBUFF_CCtx</a>* <a class="code hl_function" href="zbuff__compress_8c.html#a9d25f19239843db0565ade125eb5fb50">ZBUFF_createCCtx</a>(<span class="keywordtype">void</span>)</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>{</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="zstd_8h.html#acb531407c79bbb9ae84411d73fde464d">ZSTD_createCStream</a>();</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}</div>
+</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="foldopen" id="foldopen00058" data-start="{" data-end="}">
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="zbuff__compress_8c.html#ac71d84d022661f13a1e4774611e916df">   58</a></span><a class="code hl_struct" href="structZSTD__CCtx__s.html">ZBUFF_CCtx</a>* <a class="code hl_function" href="zbuff__compress_8c.html#ac71d84d022661f13a1e4774611e916df">ZBUFF_createCCtx_advanced</a>(ZSTD_customMem customMem)</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>{</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="zstd__compress_8c.html#a9358539569236faa272b87de49c439ac">ZSTD_createCStream_advanced</a>(customMem);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>}</div>
+</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="foldopen" id="foldopen00063" data-start="{" data-end="}">
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="zbuff__compress_8c.html#a0cd6179013bc22a4a816357234c14622">   63</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zbuff__compress_8c.html#a0cd6179013bc22a4a816357234c14622">ZBUFF_freeCCtx</a>(<a class="code hl_struct" href="structZSTD__CCtx__s.html">ZBUFF_CCtx</a>* zbc)</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>{</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="zstd_8h.html#a862b950674b345333db274aaaa1d2ebc">ZSTD_freeCStream</a>(zbc);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>}</div>
+</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="comment">/* ======   Initialization   ====== */</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="foldopen" id="foldopen00071" data-start="{" data-end="}">
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="zbuff__compress_8c.html#ab64e50dbe9bf0bdd58e4aa8d7acebaf2">   71</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zbuff__compress_8c.html#ab64e50dbe9bf0bdd58e4aa8d7acebaf2">ZBUFF_compressInit_advanced</a>(<a class="code hl_struct" href="structZSTD__CCtx__s.html">ZBUFF_CCtx</a>* zbc,</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>                                   <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a>, <span class="keywordtype">size_t</span> <a class="code hl_variable" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>,</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>                                   ZSTD_parameters params, <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <span class="keywordtype">long</span> pledgedSrcSize)</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>{</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keywordflow">if</span> (pledgedSrcSize==0) pledgedSrcSize = <a class="code hl_define" href="zstd_8h.html#a74205e53e7140614077873c76874d842">ZSTD_CONTENTSIZE_UNKNOWN</a>;  <span class="comment">/* preserve &quot;0 == unknown&quot; behavior */</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="zstd__compress_8c.html#afceb48c48b29676a0b2bd5e47499d5d9">ZSTD_initCStream_advanced</a>(zbc, <a class="code hl_variable" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a>, <a class="code hl_variable" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>, params, pledgedSrcSize);</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>}</div>
+</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="foldopen" id="foldopen00080" data-start="{" data-end="}">
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="zbuff__compress_8c.html#afd4d10e2f8d30e92a8a5862297d8ab3c">   80</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zbuff__compress_8c.html#afd4d10e2f8d30e92a8a5862297d8ab3c">ZBUFF_compressInitDictionary</a>(<a class="code hl_struct" href="structZSTD__CCtx__s.html">ZBUFF_CCtx</a>* zbc, <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a>, <span class="keywordtype">size_t</span> <a class="code hl_variable" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>, <span class="keywordtype">int</span> <a class="code hl_variable" href="zbuff_8h.html#ade711b19285bdf476a4f753670ca3489">compressionLevel</a>)</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>{</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="zstd__compress_8c.html#a9bbfb3dd2cf3a661417dc6aed8c50bb0">ZSTD_initCStream_usingDict</a>(zbc, <a class="code hl_variable" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a>, <a class="code hl_variable" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>, <a class="code hl_variable" href="zbuff_8h.html#ade711b19285bdf476a4f753670ca3489">compressionLevel</a>);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>}</div>
+</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="foldopen" id="foldopen00085" data-start="{" data-end="}">
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="zbuff__compress_8c.html#a6b756283235d1cd151513a300d1eebaf">   85</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zbuff__compress_8c.html#a6b756283235d1cd151513a300d1eebaf">ZBUFF_compressInit</a>(<a class="code hl_struct" href="structZSTD__CCtx__s.html">ZBUFF_CCtx</a>* zbc, <span class="keywordtype">int</span> <a class="code hl_variable" href="zbuff_8h.html#ade711b19285bdf476a4f753670ca3489">compressionLevel</a>)</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>{</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="zstd_8h.html#a14d2fa5dfea19623406c47514a1f7524">ZSTD_initCStream</a>(zbc, <a class="code hl_variable" href="zbuff_8h.html#ade711b19285bdf476a4f753670ca3489">compressionLevel</a>);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>}</div>
+</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="comment">/* ======   Compression   ====== */</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="foldopen" id="foldopen00093" data-start="{" data-end="}">
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="zbuff__compress_8c.html#ad26c5e51ddc699b36bfbf45925e1ff7e">   93</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zbuff__compress_8c.html#ad26c5e51ddc699b36bfbf45925e1ff7e">ZBUFF_compressContinue</a>(<a class="code hl_struct" href="structZSTD__CCtx__s.html">ZBUFF_CCtx</a>* zbc,</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>                              <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <span class="keywordtype">size_t</span>* <a class="code hl_variable" href="zbuff_8h.html#a78f89efde0c2032ae72b7ca1abd8b207">dstCapacityPtr</a>,</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>                        <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, <span class="keywordtype">size_t</span>* <a class="code hl_variable" href="zbuff_8h.html#ae13af344c53947e930e4397f405dc007">srcSizePtr</a>)</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>{</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="keywordtype">size_t</span> result;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <a class="code hl_struct" href="structZSTD__outBuffer__s.html">ZSTD_outBuffer</a> outBuff;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <a class="code hl_struct" href="structZSTD__inBuffer__s.html">ZSTD_inBuffer</a> inBuff;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    outBuff.<a class="code hl_variable" href="structZSTD__outBuffer__s.html#ae17b7e44abe8ffd1f72f448df86f2a23">dst</a> = <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    outBuff.<a class="code hl_variable" href="structZSTD__outBuffer__s.html#a51b01c063d6e338d333a865b88ea243c">pos</a> = 0;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    outBuff.<a class="code hl_variable" href="structZSTD__outBuffer__s.html#a34fb461ecc114951093b978c3aa6899e">size</a> = *<a class="code hl_variable" href="zbuff_8h.html#a78f89efde0c2032ae72b7ca1abd8b207">dstCapacityPtr</a>;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    inBuff.<a class="code hl_variable" href="structZSTD__inBuffer__s.html#a2a838d5f348ddfa781bb14aa5209e9eb">src</a> = <a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    inBuff.<a class="code hl_variable" href="structZSTD__inBuffer__s.html#af25828e77def7d36cb648494649ecaa4">pos</a> = 0;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    inBuff.<a class="code hl_variable" href="structZSTD__inBuffer__s.html#ad4673a0122dbe52fe6b0aa9824a35c29">size</a> = *<a class="code hl_variable" href="zbuff_8h.html#ae13af344c53947e930e4397f405dc007">srcSizePtr</a>;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    result = <a class="code hl_function" href="zstd_8h.html#a5fb712d64adcef1d7803a0f0eb35ee6e">ZSTD_compressStream</a>(zbc, &amp;outBuff, &amp;inBuff);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    *<a class="code hl_variable" href="zbuff_8h.html#a78f89efde0c2032ae72b7ca1abd8b207">dstCapacityPtr</a> = outBuff.<a class="code hl_variable" href="structZSTD__outBuffer__s.html#a51b01c063d6e338d333a865b88ea243c">pos</a>;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    *<a class="code hl_variable" href="zbuff_8h.html#ae13af344c53947e930e4397f405dc007">srcSizePtr</a> = inBuff.<a class="code hl_variable" href="structZSTD__inBuffer__s.html#af25828e77def7d36cb648494649ecaa4">pos</a>;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>}</div>
+</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="comment">/* ======   Finalize   ====== */</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="foldopen" id="foldopen00116" data-start="{" data-end="}">
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="zbuff__compress_8c.html#aa94d00c8fd54e55b22ee29ce27efa7f2">  116</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zbuff__compress_8c.html#aa94d00c8fd54e55b22ee29ce27efa7f2">ZBUFF_compressFlush</a>(<a class="code hl_struct" href="structZSTD__CCtx__s.html">ZBUFF_CCtx</a>* zbc, <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <span class="keywordtype">size_t</span>* <a class="code hl_variable" href="zbuff_8h.html#a78f89efde0c2032ae72b7ca1abd8b207">dstCapacityPtr</a>)</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>{</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keywordtype">size_t</span> result;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <a class="code hl_struct" href="structZSTD__outBuffer__s.html">ZSTD_outBuffer</a> outBuff;</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    outBuff.<a class="code hl_variable" href="structZSTD__outBuffer__s.html#ae17b7e44abe8ffd1f72f448df86f2a23">dst</a> = <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    outBuff.<a class="code hl_variable" href="structZSTD__outBuffer__s.html#a51b01c063d6e338d333a865b88ea243c">pos</a> = 0;</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    outBuff.<a class="code hl_variable" href="structZSTD__outBuffer__s.html#a34fb461ecc114951093b978c3aa6899e">size</a> = *<a class="code hl_variable" href="zbuff_8h.html#a78f89efde0c2032ae72b7ca1abd8b207">dstCapacityPtr</a>;</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    result = <a class="code hl_function" href="zstd_8h.html#aa221a5abd4a173d26a95cbba344de536">ZSTD_flushStream</a>(zbc, &amp;outBuff);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    *<a class="code hl_variable" href="zbuff_8h.html#a78f89efde0c2032ae72b7ca1abd8b207">dstCapacityPtr</a> = outBuff.<a class="code hl_variable" href="structZSTD__outBuffer__s.html#a51b01c063d6e338d333a865b88ea243c">pos</a>;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>}</div>
+</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="foldopen" id="foldopen00129" data-start="{" data-end="}">
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno"><a class="line" href="zbuff__compress_8c.html#a82327168988a35ceaa2f52bf7327a398">  129</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zbuff__compress_8c.html#a82327168988a35ceaa2f52bf7327a398">ZBUFF_compressEnd</a>(<a class="code hl_struct" href="structZSTD__CCtx__s.html">ZBUFF_CCtx</a>* zbc, <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <span class="keywordtype">size_t</span>* <a class="code hl_variable" href="zbuff_8h.html#a78f89efde0c2032ae72b7ca1abd8b207">dstCapacityPtr</a>)</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>{</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keywordtype">size_t</span> result;</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <a class="code hl_struct" href="structZSTD__outBuffer__s.html">ZSTD_outBuffer</a> outBuff;</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    outBuff.<a class="code hl_variable" href="structZSTD__outBuffer__s.html#ae17b7e44abe8ffd1f72f448df86f2a23">dst</a> = <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>;</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    outBuff.<a class="code hl_variable" href="structZSTD__outBuffer__s.html#a51b01c063d6e338d333a865b88ea243c">pos</a> = 0;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    outBuff.<a class="code hl_variable" href="structZSTD__outBuffer__s.html#a34fb461ecc114951093b978c3aa6899e">size</a> = *<a class="code hl_variable" href="zbuff_8h.html#a78f89efde0c2032ae72b7ca1abd8b207">dstCapacityPtr</a>;</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    result = <a class="code hl_function" href="zstd_8h.html#acc3b72d1c78095b05f4f85346709c3de">ZSTD_endStream</a>(zbc, &amp;outBuff);</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    *<a class="code hl_variable" href="zbuff_8h.html#a78f89efde0c2032ae72b7ca1abd8b207">dstCapacityPtr</a> = outBuff.<a class="code hl_variable" href="structZSTD__outBuffer__s.html#a51b01c063d6e338d333a865b88ea243c">pos</a>;</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>}</div>
+</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span> </div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span><span class="comment">/* *************************************</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="comment">*  Tool functions</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="comment">***************************************/</span></div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno"><a class="line" href="zbuff__compress_8c.html#ae785f6e8d20fe111184ba3977fafb95d">  146</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zbuff__compress_8c.html#ae785f6e8d20fe111184ba3977fafb95d">ZBUFF_recommendedCInSize</a>(<span class="keywordtype">void</span>)  { <span class="keywordflow">return</span> <a class="code hl_function" href="zstd_8h.html#a239b9dc342b7825b22b32fded13c6709">ZSTD_CStreamInSize</a>(); }</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno"><a class="line" href="zbuff__compress_8c.html#ad546b3c91d54df1bf95d0721c8a1d44e">  147</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zbuff__compress_8c.html#ad546b3c91d54df1bf95d0721c8a1d44e">ZBUFF_recommendedCOutSize</a>(<span class="keywordtype">void</span>) { <span class="keywordflow">return</span> <a class="code hl_function" href="zstd_8h.html#af4b399dd4e0ae1027e00381318a7aa48">ZSTD_CStreamOutSize</a>(); }</div>
+<div class="ttc" id="astructZSTD__CCtx__s_html"><div class="ttname"><a href="structZSTD__CCtx__s.html">ZSTD_CCtx_s</a></div><div class="ttdef"><b>Definition</b> <a href="zstd__compress__internal_8h_source.html#l00228">zstd_compress_internal.h:228</a></div></div>
+<div class="ttc" id="astructZSTD__inBuffer__s_html"><div class="ttname"><a href="structZSTD__inBuffer__s.html">ZSTD_inBuffer_s</a></div><div class="ttdef"><b>Definition</b> <a href="zstd_8h_source.html#l00561">zstd.h:561</a></div></div>
+<div class="ttc" id="astructZSTD__inBuffer__s_html_a2a838d5f348ddfa781bb14aa5209e9eb"><div class="ttname"><a href="structZSTD__inBuffer__s.html#a2a838d5f348ddfa781bb14aa5209e9eb">ZSTD_inBuffer_s::src</a></div><div class="ttdeci">const void * src</div><div class="ttdef"><b>Definition</b> <a href="zstd_8h_source.html#l00562">zstd.h:562</a></div></div>
+<div class="ttc" id="astructZSTD__inBuffer__s_html_ad4673a0122dbe52fe6b0aa9824a35c29"><div class="ttname"><a href="structZSTD__inBuffer__s.html#ad4673a0122dbe52fe6b0aa9824a35c29">ZSTD_inBuffer_s::size</a></div><div class="ttdeci">size_t size</div><div class="ttdef"><b>Definition</b> <a href="zstd_8h_source.html#l00563">zstd.h:563</a></div></div>
+<div class="ttc" id="astructZSTD__inBuffer__s_html_af25828e77def7d36cb648494649ecaa4"><div class="ttname"><a href="structZSTD__inBuffer__s.html#af25828e77def7d36cb648494649ecaa4">ZSTD_inBuffer_s::pos</a></div><div class="ttdeci">size_t pos</div><div class="ttdef"><b>Definition</b> <a href="zstd_8h_source.html#l00564">zstd.h:564</a></div></div>
+<div class="ttc" id="astructZSTD__outBuffer__s_html"><div class="ttname"><a href="structZSTD__outBuffer__s.html">ZSTD_outBuffer_s</a></div><div class="ttdef"><b>Definition</b> <a href="zstd_8h_source.html#l00567">zstd.h:567</a></div></div>
+<div class="ttc" id="astructZSTD__outBuffer__s_html_a34fb461ecc114951093b978c3aa6899e"><div class="ttname"><a href="structZSTD__outBuffer__s.html#a34fb461ecc114951093b978c3aa6899e">ZSTD_outBuffer_s::size</a></div><div class="ttdeci">size_t size</div><div class="ttdef"><b>Definition</b> <a href="zstd_8h_source.html#l00569">zstd.h:569</a></div></div>
+<div class="ttc" id="astructZSTD__outBuffer__s_html_a51b01c063d6e338d333a865b88ea243c"><div class="ttname"><a href="structZSTD__outBuffer__s.html#a51b01c063d6e338d333a865b88ea243c">ZSTD_outBuffer_s::pos</a></div><div class="ttdeci">size_t pos</div><div class="ttdef"><b>Definition</b> <a href="zstd_8h_source.html#l00570">zstd.h:570</a></div></div>
+<div class="ttc" id="astructZSTD__outBuffer__s_html_ae17b7e44abe8ffd1f72f448df86f2a23"><div class="ttname"><a href="structZSTD__outBuffer__s.html#ae17b7e44abe8ffd1f72f448df86f2a23">ZSTD_outBuffer_s::dst</a></div><div class="ttdeci">void * dst</div><div class="ttdef"><b>Definition</b> <a href="zstd_8h_source.html#l00568">zstd.h:568</a></div></div>
+<div class="ttc" id="azbuff_8h_html"><div class="ttname"><a href="zbuff_8h.html">zbuff.h</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a08f683b5840d86269fccb0ca7609598c"><div class="ttname"><a href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a></div><div class="ttdeci">void * dst</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00078">zbuff.h:78</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a2f73e10b74b7581a0d17ebd274ae6c7b"><div class="ttname"><a href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a></div><div class="ttdeci">const void * dict</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00076">zbuff.h:76</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a49286b6a0dd3728961b8ff1f1730a982"><div class="ttname"><a href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a></div><div class="ttdeci">void size_t const void * src</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00078">zbuff.h:78</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a78f89efde0c2032ae72b7ca1abd8b207"><div class="ttname"><a href="zbuff_8h.html#a78f89efde0c2032ae72b7ca1abd8b207">dstCapacityPtr</a></div><div class="ttdeci">void size_t * dstCapacityPtr</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00078">zbuff.h:78</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a7b276dd54a215af14d59cd30ff88a5ff"><div class="ttname"><a href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a></div><div class="ttdeci">const void size_t dictSize</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00076">zbuff.h:76</a></div></div>
+<div class="ttc" id="azbuff_8h_html_ade711b19285bdf476a4f753670ca3489"><div class="ttname"><a href="zbuff_8h.html#ade711b19285bdf476a4f753670ca3489">compressionLevel</a></div><div class="ttdeci">int compressionLevel</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00075">zbuff.h:75</a></div></div>
+<div class="ttc" id="azbuff_8h_html_ae13af344c53947e930e4397f405dc007"><div class="ttname"><a href="zbuff_8h.html#ae13af344c53947e930e4397f405dc007">srcSizePtr</a></div><div class="ttdeci">void size_t const void size_t * srcSizePtr</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00078">zbuff.h:78</a></div></div>
+<div class="ttc" id="azbuff__compress_8c_html_a0cd6179013bc22a4a816357234c14622"><div class="ttname"><a href="zbuff__compress_8c.html#a0cd6179013bc22a4a816357234c14622">ZBUFF_freeCCtx</a></div><div class="ttdeci">size_t ZBUFF_freeCCtx(ZBUFF_CCtx *zbc)</div><div class="ttdef"><b>Definition</b> <a href="zbuff__compress_8c_source.html#l00063">zbuff_compress.c:63</a></div></div>
+<div class="ttc" id="azbuff__compress_8c_html_a6b756283235d1cd151513a300d1eebaf"><div class="ttname"><a href="zbuff__compress_8c.html#a6b756283235d1cd151513a300d1eebaf">ZBUFF_compressInit</a></div><div class="ttdeci">size_t ZBUFF_compressInit(ZBUFF_CCtx *zbc, int compressionLevel)</div><div class="ttdef"><b>Definition</b> <a href="zbuff__compress_8c_source.html#l00085">zbuff_compress.c:85</a></div></div>
+<div class="ttc" id="azbuff__compress_8c_html_a82327168988a35ceaa2f52bf7327a398"><div class="ttname"><a href="zbuff__compress_8c.html#a82327168988a35ceaa2f52bf7327a398">ZBUFF_compressEnd</a></div><div class="ttdeci">size_t ZBUFF_compressEnd(ZBUFF_CCtx *zbc, void *dst, size_t *dstCapacityPtr)</div><div class="ttdef"><b>Definition</b> <a href="zbuff__compress_8c_source.html#l00129">zbuff_compress.c:129</a></div></div>
+<div class="ttc" id="azbuff__compress_8c_html_a9d25f19239843db0565ade125eb5fb50"><div class="ttname"><a href="zbuff__compress_8c.html#a9d25f19239843db0565ade125eb5fb50">ZBUFF_createCCtx</a></div><div class="ttdeci">ZBUFF_CCtx * ZBUFF_createCCtx(void)</div><div class="ttdef"><b>Definition</b> <a href="zbuff__compress_8c_source.html#l00053">zbuff_compress.c:53</a></div></div>
+<div class="ttc" id="azbuff__compress_8c_html_aa94d00c8fd54e55b22ee29ce27efa7f2"><div class="ttname"><a href="zbuff__compress_8c.html#aa94d00c8fd54e55b22ee29ce27efa7f2">ZBUFF_compressFlush</a></div><div class="ttdeci">size_t ZBUFF_compressFlush(ZBUFF_CCtx *zbc, void *dst, size_t *dstCapacityPtr)</div><div class="ttdef"><b>Definition</b> <a href="zbuff__compress_8c_source.html#l00116">zbuff_compress.c:116</a></div></div>
+<div class="ttc" id="azbuff__compress_8c_html_ab64e50dbe9bf0bdd58e4aa8d7acebaf2"><div class="ttname"><a href="zbuff__compress_8c.html#ab64e50dbe9bf0bdd58e4aa8d7acebaf2">ZBUFF_compressInit_advanced</a></div><div class="ttdeci">size_t ZBUFF_compressInit_advanced(ZBUFF_CCtx *zbc, const void *dict, size_t dictSize, ZSTD_parameters params, unsigned long long pledgedSrcSize)</div><div class="ttdef"><b>Definition</b> <a href="zbuff__compress_8c_source.html#l00071">zbuff_compress.c:71</a></div></div>
+<div class="ttc" id="azbuff__compress_8c_html_ac71d84d022661f13a1e4774611e916df"><div class="ttname"><a href="zbuff__compress_8c.html#ac71d84d022661f13a1e4774611e916df">ZBUFF_createCCtx_advanced</a></div><div class="ttdeci">ZBUFF_CCtx * ZBUFF_createCCtx_advanced(ZSTD_customMem customMem)</div><div class="ttdef"><b>Definition</b> <a href="zbuff__compress_8c_source.html#l00058">zbuff_compress.c:58</a></div></div>
+<div class="ttc" id="azbuff__compress_8c_html_ad26c5e51ddc699b36bfbf45925e1ff7e"><div class="ttname"><a href="zbuff__compress_8c.html#ad26c5e51ddc699b36bfbf45925e1ff7e">ZBUFF_compressContinue</a></div><div class="ttdeci">size_t ZBUFF_compressContinue(ZBUFF_CCtx *zbc, void *dst, size_t *dstCapacityPtr, const void *src, size_t *srcSizePtr)</div><div class="ttdef"><b>Definition</b> <a href="zbuff__compress_8c_source.html#l00093">zbuff_compress.c:93</a></div></div>
+<div class="ttc" id="azbuff__compress_8c_html_ad546b3c91d54df1bf95d0721c8a1d44e"><div class="ttname"><a href="zbuff__compress_8c.html#ad546b3c91d54df1bf95d0721c8a1d44e">ZBUFF_recommendedCOutSize</a></div><div class="ttdeci">size_t ZBUFF_recommendedCOutSize(void)</div><div class="ttdef"><b>Definition</b> <a href="zbuff__compress_8c_source.html#l00147">zbuff_compress.c:147</a></div></div>
+<div class="ttc" id="azbuff__compress_8c_html_ae785f6e8d20fe111184ba3977fafb95d"><div class="ttname"><a href="zbuff__compress_8c.html#ae785f6e8d20fe111184ba3977fafb95d">ZBUFF_recommendedCInSize</a></div><div class="ttdeci">size_t ZBUFF_recommendedCInSize(void)</div><div class="ttdef"><b>Definition</b> <a href="zbuff__compress_8c_source.html#l00146">zbuff_compress.c:146</a></div></div>
+<div class="ttc" id="azbuff__compress_8c_html_afd4d10e2f8d30e92a8a5862297d8ab3c"><div class="ttname"><a href="zbuff__compress_8c.html#afd4d10e2f8d30e92a8a5862297d8ab3c">ZBUFF_compressInitDictionary</a></div><div class="ttdeci">size_t ZBUFF_compressInitDictionary(ZBUFF_CCtx *zbc, const void *dict, size_t dictSize, int compressionLevel)</div><div class="ttdef"><b>Definition</b> <a href="zbuff__compress_8c_source.html#l00080">zbuff_compress.c:80</a></div></div>
+<div class="ttc" id="azstd_8h_html_a14d2fa5dfea19623406c47514a1f7524"><div class="ttname"><a href="zstd_8h.html#a14d2fa5dfea19623406c47514a1f7524">ZSTD_initCStream</a></div><div class="ttdeci">ZSTDLIB_API size_t ZSTD_initCStream(ZSTD_CStream *zcs, int compressionLevel)</div><div class="ttdef"><b>Definition</b> <a href="zstd__compress_8c_source.html#l03622">zstd_compress.c:3622</a></div></div>
+<div class="ttc" id="azstd_8h_html_a239b9dc342b7825b22b32fded13c6709"><div class="ttname"><a href="zstd_8h.html#a239b9dc342b7825b22b32fded13c6709">ZSTD_CStreamInSize</a></div><div class="ttdeci">ZSTDLIB_API size_t ZSTD_CStreamInSize(void)</div><div class="ttdef"><b>Definition</b> <a href="zstd__compress_8c_source.html#l03477">zstd_compress.c:3477</a></div></div>
+<div class="ttc" id="azstd_8h_html_a5fb712d64adcef1d7803a0f0eb35ee6e"><div class="ttname"><a href="zstd_8h.html#a5fb712d64adcef1d7803a0f0eb35ee6e">ZSTD_compressStream</a></div><div class="ttdeci">ZSTDLIB_API size_t ZSTD_compressStream(ZSTD_CStream *zcs, ZSTD_outBuffer *output, ZSTD_inBuffer *input)</div><div class="ttdef"><b>Definition</b> <a href="zstd__compress_8c_source.html#l03803">zstd_compress.c:3803</a></div></div>
+<div class="ttc" id="azstd_8h_html_a74205e53e7140614077873c76874d842"><div class="ttname"><a href="zstd_8h.html#a74205e53e7140614077873c76874d842">ZSTD_CONTENTSIZE_UNKNOWN</a></div><div class="ttdeci">#define ZSTD_CONTENTSIZE_UNKNOWN</div><div class="ttdef"><b>Definition</b> <a href="zstd_8h_source.html#l00152">zstd.h:152</a></div></div>
+<div class="ttc" id="azstd_8h_html_a862b950674b345333db274aaaa1d2ebc"><div class="ttname"><a href="zstd_8h.html#a862b950674b345333db274aaaa1d2ebc">ZSTD_freeCStream</a></div><div class="ttdeci">ZSTDLIB_API size_t ZSTD_freeCStream(ZSTD_CStream *zcs)</div><div class="ttdef"><b>Definition</b> <a href="zstd__compress_8c_source.html#l03468">zstd_compress.c:3468</a></div></div>
+<div class="ttc" id="azstd_8h_html_aa221a5abd4a173d26a95cbba344de536"><div class="ttname"><a href="zstd_8h.html#aa221a5abd4a173d26a95cbba344de536">ZSTD_flushStream</a></div><div class="ttdeci">ZSTDLIB_API size_t ZSTD_flushStream(ZSTD_CStream *zcs, ZSTD_outBuffer *output)</div><div class="ttdef"><b>Definition</b> <a href="zstd__compress_8c_source.html#l03936">zstd_compress.c:3936</a></div></div>
+<div class="ttc" id="azstd_8h_html_acb531407c79bbb9ae84411d73fde464d"><div class="ttname"><a href="zstd_8h.html#acb531407c79bbb9ae84411d73fde464d">ZSTD_createCStream</a></div><div class="ttdeci">ZSTDLIB_API ZSTD_CStream * ZSTD_createCStream(void)</div><div class="ttdef"><b>Definition</b> <a href="zstd__compress_8c_source.html#l03452">zstd_compress.c:3452</a></div></div>
+<div class="ttc" id="azstd_8h_html_acc3b72d1c78095b05f4f85346709c3de"><div class="ttname"><a href="zstd_8h.html#acc3b72d1c78095b05f4f85346709c3de">ZSTD_endStream</a></div><div class="ttdeci">ZSTDLIB_API size_t ZSTD_endStream(ZSTD_CStream *zcs, ZSTD_outBuffer *output)</div><div class="ttdef"><b>Definition</b> <a href="zstd__compress_8c_source.html#l03943">zstd_compress.c:3943</a></div></div>
+<div class="ttc" id="azstd_8h_html_af4b399dd4e0ae1027e00381318a7aa48"><div class="ttname"><a href="zstd_8h.html#af4b399dd4e0ae1027e00381318a7aa48">ZSTD_CStreamOutSize</a></div><div class="ttdeci">ZSTDLIB_API size_t ZSTD_CStreamOutSize(void)</div><div class="ttdef"><b>Definition</b> <a href="zstd__compress_8c_source.html#l03479">zstd_compress.c:3479</a></div></div>
+<div class="ttc" id="azstd__compress_8c_html_a9358539569236faa272b87de49c439ac"><div class="ttname"><a href="zstd__compress_8c.html#a9358539569236faa272b87de49c439ac">ZSTD_createCStream_advanced</a></div><div class="ttdeci">ZSTD_CStream * ZSTD_createCStream_advanced(ZSTD_customMem customMem)</div><div class="ttdef"><b>Definition</b> <a href="zstd__compress_8c_source.html#l03463">zstd_compress.c:3463</a></div></div>
+<div class="ttc" id="azstd__compress_8c_html_a9bbfb3dd2cf3a661417dc6aed8c50bb0"><div class="ttname"><a href="zstd__compress_8c.html#a9bbfb3dd2cf3a661417dc6aed8c50bb0">ZSTD_initCStream_usingDict</a></div><div class="ttdeci">size_t ZSTD_initCStream_usingDict(ZSTD_CStream *zcs, const void *dict, size_t dictSize, int compressionLevel)</div><div class="ttdef"><b>Definition</b> <a href="zstd__compress_8c_source.html#l03598">zstd_compress.c:3598</a></div></div>
+<div class="ttc" id="azstd__compress_8c_html_afceb48c48b29676a0b2bd5e47499d5d9"><div class="ttname"><a href="zstd__compress_8c.html#afceb48c48b29676a0b2bd5e47499d5d9">ZSTD_initCStream_advanced</a></div><div class="ttdeci">size_t ZSTD_initCStream_advanced(ZSTD_CStream *zcs, const void *dict, size_t dictSize, ZSTD_parameters params, unsigned long long pss)</div><div class="ttdef"><b>Definition</b> <a href="zstd__compress_8c_source.html#l03580">zstd_compress.c:3580</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="zbuff__compress_8c.html">zbuff_compress.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

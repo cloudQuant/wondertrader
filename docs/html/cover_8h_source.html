@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/cover.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('cover_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">cover.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="cover_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#include &lt;stdio.h&gt;</span>  <span class="comment">/* fprintf */</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &lt;stdlib.h&gt;</span> <span class="comment">/* malloc, free, qsort */</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;string.h&gt;</span> <span class="comment">/* memset */</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;time.h&gt;</span>   <span class="comment">/* clock */</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;<a class="code" href="mem_8h.html">mem.h</a>&quot;</span> <span class="comment">/* read */</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;<a class="code" href="pool_8h.html">pool.h</a>&quot;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="threading_8h.html">threading.h</a>&quot;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;<a class="code" href="zstd__internal_8h.html">zstd_internal.h</a>&quot;</span> <span class="comment">/* includes zstd.h */</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#ifndef ZDICT_STATIC_LINKING_ONLY</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno"><a class="line" href="cover_8h.html#a67a585a357b2e71e8ece2ee1ee510b7f">   10</a></span><span class="preprocessor">#define ZDICT_STATIC_LINKING_ONLY</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="zdict_8h.html">zdict.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="foldopen" id="foldopen00022" data-start="{" data-end="};">
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="structCOVER__best__s.html">   22</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structCOVER__best__s.html">COVER_best_s</a> {</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="structCOVER__best__s.html#a2f435939db7b1ec75ece5da8ed077a51">   23</a></span>  <a class="code hl_typedef" href="threading_8h.html#a1c720bfec5b4d96aa294890b643fd631">ZSTD_pthread_mutex_t</a> <a class="code hl_variable" href="structCOVER__best__s.html#a2f435939db7b1ec75ece5da8ed077a51">mutex</a>;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="structCOVER__best__s.html#a32ba325c890fedd92aaef54af9229208">   24</a></span>  <a class="code hl_typedef" href="threading_8h.html#a46e23ced67d2270e859ea3090b7201bb">ZSTD_pthread_cond_t</a> <a class="code hl_variable" href="structCOVER__best__s.html#a32ba325c890fedd92aaef54af9229208">cond</a>;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="structCOVER__best__s.html#aaa4940d9a1da05d09ccead1b9105607c">   25</a></span>  <span class="keywordtype">size_t</span> <a class="code hl_variable" href="structCOVER__best__s.html#aaa4940d9a1da05d09ccead1b9105607c">liveJobs</a>;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="structCOVER__best__s.html#aa70610bad8754f5b3b8bf00b1f23f6b3">   26</a></span>  <span class="keywordtype">void</span> *<a class="code hl_variable" href="structCOVER__best__s.html#aa70610bad8754f5b3b8bf00b1f23f6b3">dict</a>;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="structCOVER__best__s.html#af1a1ac03fe3cd4137f6e6934ca048e43">   27</a></span>  <span class="keywordtype">size_t</span> <a class="code hl_variable" href="structCOVER__best__s.html#af1a1ac03fe3cd4137f6e6934ca048e43">dictSize</a>;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="structCOVER__best__s.html#afa8e108b2ce9a21fbbfc54286ab522ac">   28</a></span>  ZDICT_cover_params_t <a class="code hl_variable" href="structCOVER__best__s.html#afa8e108b2ce9a21fbbfc54286ab522ac">parameters</a>;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="structCOVER__best__s.html#a9420869daf273f8b5c134f7def51d57d">   29</a></span>  <span class="keywordtype">size_t</span> <a class="code hl_variable" href="structCOVER__best__s.html#a9420869daf273f8b5c134f7def51d57d">compressedSize</a>;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="cover_8h.html#aaf2609966f31111ad988e3c226013dc2">   30</a></span>} <a class="code hl_typedef" href="cover_8h.html#aaf2609966f31111ad988e3c226013dc2">COVER_best_t</a>;</div>
+</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="foldopen" id="foldopen00035" data-start="{" data-end="};">
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="structCOVER__segment__t.html">   35</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="structCOVER__segment__t.html#ae62b6348250a43fa2983889c41c37646">   36</a></span>  <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="code hl_variable" href="structCOVER__segment__t.html#ae62b6348250a43fa2983889c41c37646">begin</a>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="structCOVER__segment__t.html#ac00178369782da3fe00e1aac2b85dc72">   37</a></span>  <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="code hl_variable" href="structCOVER__segment__t.html#ac00178369782da3fe00e1aac2b85dc72">end</a>;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="structCOVER__segment__t.html#a439faa15da8000472508d7b5197e43fd">   38</a></span>  <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="code hl_variable" href="structCOVER__segment__t.html#a439faa15da8000472508d7b5197e43fd">score</a>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>} <a class="code hl_struct" href="structCOVER__segment__t.html">COVER_segment_t</a>;</div>
+</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="foldopen" id="foldopen00044" data-start="{" data-end="};">
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="structCOVER__epoch__info__t.html">   44</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="structCOVER__epoch__info__t.html#ac24f899031f020ca62e8bd48351fcf8b">   45</a></span>  <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="code hl_variable" href="structCOVER__epoch__info__t.html#ac24f899031f020ca62e8bd48351fcf8b">num</a>;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="structCOVER__epoch__info__t.html#abe25bf08652b16fe3ff996de8b0c7ba7">   46</a></span>  <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="code hl_variable" href="structCOVER__epoch__info__t.html#abe25bf08652b16fe3ff996de8b0c7ba7">size</a>;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>} <a class="code hl_struct" href="structCOVER__epoch__info__t.html">COVER_epoch_info_t</a>;</div>
+</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="foldopen" id="foldopen00052" data-start="{" data-end="};">
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="structCOVER__dictSelection.html">   52</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structCOVER__dictSelection.html">COVER_dictSelection</a> {</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="structCOVER__dictSelection.html#a688a6fd95e584c2099ed66458c0fbcfa">   53</a></span>  <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>* <a class="code hl_variable" href="structCOVER__dictSelection.html#a688a6fd95e584c2099ed66458c0fbcfa">dictContent</a>;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="structCOVER__dictSelection.html#aa98706c0410a1bed17eead6b6420e6dd">   54</a></span>  <span class="keywordtype">size_t</span> <a class="code hl_variable" href="structCOVER__dictSelection.html#aa98706c0410a1bed17eead6b6420e6dd">dictSize</a>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="structCOVER__dictSelection.html#ac28d67bcf3a12b9dad35d0bac96d8c9a">   55</a></span>  <span class="keywordtype">size_t</span> <a class="code hl_variable" href="structCOVER__dictSelection.html#ac28d67bcf3a12b9dad35d0bac96d8c9a">totalCompressedSize</a>;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="cover_8h.html#a3668acc1d146e3367f7f17ea2fb9b10c">   56</a></span>} <a class="code hl_typedef" href="cover_8h.html#a3668acc1d146e3367f7f17ea2fb9b10c">COVER_dictSelection_t</a>;</div>
+</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><a class="code hl_struct" href="structCOVER__epoch__info__t.html">COVER_epoch_info_t</a> <a class="code hl_function" href="cover_8h.html#a2e20e2a51007d245a12b3cdff905ef6a">COVER_computeEpochs</a>(<a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> maxDictSize, <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> nbDmers,</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>                                       <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> k, <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> passes);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="keywordtype">void</span> <a class="code hl_function" href="cover_8h.html#a418b0fa9785bd766c31ae41e34ce3ebe">COVER_warnOnSmallCorpus</a>(<span class="keywordtype">size_t</span> maxDictSize, <span class="keywordtype">size_t</span> nbDmers, <span class="keywordtype">int</span> displayLevel);</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="cover_8h.html#a7aac36c878428b22365706e321184fa3">COVER_checkTotalCompressedSize</a>(<span class="keyword">const</span> ZDICT_cover_params_t parameters,</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>                                      <span class="keyword">const</span> <span class="keywordtype">size_t</span> *samplesSizes, <span class="keyword">const</span> <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *samples,</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>                                      <span class="keywordtype">size_t</span> *offsets,</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>                                      <span class="keywordtype">size_t</span> nbTrainSamples, <span class="keywordtype">size_t</span> nbSamples,</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>                                      <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *<span class="keyword">const</span> <a class="code hl_variable" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a>, <span class="keywordtype">size_t</span> dictBufferCapacity);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="cover_8h.html#a8d08abe6ce8f3b3af95b93193b46524f">COVER_sum</a>(<span class="keyword">const</span> <span class="keywordtype">size_t</span> *samplesSizes, <span class="keywordtype">unsigned</span> nbSamples) ;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="keywordtype">void</span> <a class="code hl_function" href="cover_8h.html#ad0e0964587f6d04e93bd019b9cfc6d4e">COVER_best_init</a>(<a class="code hl_struct" href="structCOVER__best__s.html">COVER_best_t</a> *best);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="keywordtype">void</span> <a class="code hl_function" href="cover_8h.html#a7fc9631879075e9bc967691e50d591d9">COVER_best_wait</a>(<a class="code hl_struct" href="structCOVER__best__s.html">COVER_best_t</a> *best);</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="keywordtype">void</span> <a class="code hl_function" href="cover_8h.html#afb56a3f59a5490db6fa1b9641d1bbc92">COVER_best_destroy</a>(<a class="code hl_struct" href="structCOVER__best__s.html">COVER_best_t</a> *best);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="keywordtype">void</span> <a class="code hl_function" href="cover_8h.html#a96921521d4c290f9f3b76100f9e4b8aa">COVER_best_start</a>(<a class="code hl_struct" href="structCOVER__best__s.html">COVER_best_t</a> *best);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="keywordtype">void</span> <a class="code hl_function" href="cover_8h.html#a4495a68384f7dcbb049f9880e417bcd9">COVER_best_finish</a>(<a class="code hl_struct" href="structCOVER__best__s.html">COVER_best_t</a> *best, ZDICT_cover_params_t parameters,</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>                       <a class="code hl_struct" href="structCOVER__dictSelection.html">COVER_dictSelection_t</a> selection);</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="keywordtype">unsigned</span> <a class="code hl_function" href="cover_8h.html#a80a65ca984f14545558e223f36996497">COVER_dictSelectionIsError</a>(<a class="code hl_struct" href="structCOVER__dictSelection.html">COVER_dictSelection_t</a> selection);</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><a class="code hl_struct" href="structCOVER__dictSelection.html">COVER_dictSelection_t</a> <a class="code hl_function" href="cover_8h.html#a1bc2ca47eb799aa732a25920b6a89ed5">COVER_dictSelectionError</a>(<span class="keywordtype">size_t</span> error);</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="keywordtype">void</span> <a class="code hl_function" href="cover_8h.html#a7cfba6966b1c889991b9e5f4b1f0b5d6">COVER_dictSelectionFree</a>(<a class="code hl_struct" href="structCOVER__dictSelection.html">COVER_dictSelection_t</a> selection);</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span> <a class="code hl_struct" href="structCOVER__dictSelection.html">COVER_dictSelection_t</a> <a class="code hl_function" href="cover_8h.html#a17c0fe7004c8c5f23653c082e47a6aad">COVER_selectDict</a>(<a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>* customDictContent,</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>                       <span class="keywordtype">size_t</span> dictContentSize, <span class="keyword">const</span> <a class="code hl_typedef" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a>* samplesBuffer, <span class="keyword">const</span> <span class="keywordtype">size_t</span>* samplesSizes, <span class="keywordtype">unsigned</span> nbFinalizeSamples,</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>                       <span class="keywordtype">size_t</span> nbCheckSamples, <span class="keywordtype">size_t</span> nbSamples, ZDICT_cover_params_t params, <span class="keywordtype">size_t</span>* offsets, <span class="keywordtype">size_t</span> totalCompressedSize);</div>
+<div class="ttc" id="aWTSExpressData_8hpp_html_a4ae1dab0fb4b072a66584546209e7d58"><div class="ttname"><a href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a></div><div class="ttdeci">unsigned char BYTE</div><div class="ttdef"><b>Definition</b> <a href="WTSExpressData_8hpp_source.html#l00019">WTSExpressData.hpp:19</a></div></div>
+<div class="ttc" id="acover_8h_html_a17c0fe7004c8c5f23653c082e47a6aad"><div class="ttname"><a href="cover_8h.html#a17c0fe7004c8c5f23653c082e47a6aad">COVER_selectDict</a></div><div class="ttdeci">COVER_dictSelection_t COVER_selectDict(BYTE *customDictContent, size_t dictContentSize, const BYTE *samplesBuffer, const size_t *samplesSizes, unsigned nbFinalizeSamples, size_t nbCheckSamples, size_t nbSamples, ZDICT_cover_params_t params, size_t *offsets, size_t totalCompressedSize)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00949">cover.c:949</a></div></div>
+<div class="ttc" id="acover_8h_html_a1bc2ca47eb799aa732a25920b6a89ed5"><div class="ttname"><a href="cover_8h.html#a1bc2ca47eb799aa732a25920b6a89ed5">COVER_dictSelectionError</a></div><div class="ttdeci">COVER_dictSelection_t COVER_dictSelectionError(size_t error)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00936">cover.c:936</a></div></div>
+<div class="ttc" id="acover_8h_html_a2e20e2a51007d245a12b3cdff905ef6a"><div class="ttname"><a href="cover_8h.html#a2e20e2a51007d245a12b3cdff905ef6a">COVER_computeEpochs</a></div><div class="ttdeci">COVER_epoch_info_t COVER_computeEpochs(U32 maxDictSize, U32 nbDmers, U32 k, U32 passes)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00646">cover.c:646</a></div></div>
+<div class="ttc" id="acover_8h_html_a3668acc1d146e3367f7f17ea2fb9b10c"><div class="ttname"><a href="cover_8h.html#a3668acc1d146e3367f7f17ea2fb9b10c">COVER_dictSelection_t</a></div><div class="ttdeci">struct COVER_dictSelection COVER_dictSelection_t</div></div>
+<div class="ttc" id="acover_8h_html_a418b0fa9785bd766c31ae41e34ce3ebe"><div class="ttname"><a href="cover_8h.html#a418b0fa9785bd766c31ae41e34ce3ebe">COVER_warnOnSmallCorpus</a></div><div class="ttdeci">void COVER_warnOnSmallCorpus(size_t maxDictSize, size_t nbDmers, int displayLevel)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00630">cover.c:630</a></div></div>
+<div class="ttc" id="acover_8h_html_a4495a68384f7dcbb049f9880e417bcd9"><div class="ttname"><a href="cover_8h.html#a4495a68384f7dcbb049f9880e417bcd9">COVER_best_finish</a></div><div class="ttdeci">void COVER_best_finish(COVER_best_t *best, ZDICT_cover_params_t parameters, COVER_dictSelection_t selection)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00892">cover.c:892</a></div></div>
+<div class="ttc" id="acover_8h_html_a7aac36c878428b22365706e321184fa3"><div class="ttname"><a href="cover_8h.html#a7aac36c878428b22365706e321184fa3">COVER_checkTotalCompressedSize</a></div><div class="ttdeci">size_t COVER_checkTotalCompressedSize(const ZDICT_cover_params_t parameters, const size_t *samplesSizes, const BYTE *samples, size_t *offsets, size_t nbTrainSamples, size_t nbSamples, BYTE *const dict, size_t dictBufferCapacity)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00778">cover.c:778</a></div></div>
+<div class="ttc" id="acover_8h_html_a7cfba6966b1c889991b9e5f4b1f0b5d6"><div class="ttname"><a href="cover_8h.html#a7cfba6966b1c889991b9e5f4b1f0b5d6">COVER_dictSelectionFree</a></div><div class="ttdeci">void COVER_dictSelectionFree(COVER_dictSelection_t selection)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00945">cover.c:945</a></div></div>
+<div class="ttc" id="acover_8h_html_a7fc9631879075e9bc967691e50d591d9"><div class="ttname"><a href="cover_8h.html#a7fc9631879075e9bc967691e50d591d9">COVER_best_wait</a></div><div class="ttdeci">void COVER_best_wait(COVER_best_t *best)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00848">cover.c:848</a></div></div>
+<div class="ttc" id="acover_8h_html_a80a65ca984f14545558e223f36996497"><div class="ttname"><a href="cover_8h.html#a80a65ca984f14545558e223f36996497">COVER_dictSelectionIsError</a></div><div class="ttdeci">unsigned COVER_dictSelectionIsError(COVER_dictSelection_t selection)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00941">cover.c:941</a></div></div>
+<div class="ttc" id="acover_8h_html_a8d08abe6ce8f3b3af95b93193b46524f"><div class="ttname"><a href="cover_8h.html#a8d08abe6ce8f3b3af95b93193b46524f">COVER_sum</a></div><div class="ttdeci">size_t COVER_sum(const size_t *samplesSizes, unsigned nbSamples)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00227">cover.c:227</a></div></div>
+<div class="ttc" id="acover_8h_html_a96921521d4c290f9f3b76100f9e4b8aa"><div class="ttname"><a href="cover_8h.html#a96921521d4c290f9f3b76100f9e4b8aa">COVER_best_start</a></div><div class="ttdeci">void COVER_best_start(COVER_best_t *best)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00878">cover.c:878</a></div></div>
+<div class="ttc" id="acover_8h_html_aaf2609966f31111ad988e3c226013dc2"><div class="ttname"><a href="cover_8h.html#aaf2609966f31111ad988e3c226013dc2">COVER_best_t</a></div><div class="ttdeci">struct COVER_best_s COVER_best_t</div></div>
+<div class="ttc" id="acover_8h_html_ad0e0964587f6d04e93bd019b9cfc6d4e"><div class="ttname"><a href="cover_8h.html#ad0e0964587f6d04e93bd019b9cfc6d4e">COVER_best_init</a></div><div class="ttdeci">void COVER_best_init(COVER_best_t *best)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00834">cover.c:834</a></div></div>
+<div class="ttc" id="acover_8h_html_afb56a3f59a5490db6fa1b9641d1bbc92"><div class="ttname"><a href="cover_8h.html#afb56a3f59a5490db6fa1b9641d1bbc92">COVER_best_destroy</a></div><div class="ttdeci">void COVER_best_destroy(COVER_best_t *best)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00862">cover.c:862</a></div></div>
+<div class="ttc" id="amem_8h_html"><div class="ttname"><a href="mem_8h.html">mem.h</a></div></div>
+<div class="ttc" id="amem_8h_html_ac3df7cf3c8cb172a588adec881447d68"><div class="ttname"><a href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a></div><div class="ttdeci">unsigned int U32</div><div class="ttdef"><b>Definition</b> <a href="mem_8h_source.html#l00150">mem.h:150</a></div></div>
+<div class="ttc" id="apool_8h_html"><div class="ttname"><a href="pool_8h.html">pool.h</a></div></div>
+<div class="ttc" id="astructCOVER__best__s_html"><div class="ttname"><a href="structCOVER__best__s.html">COVER_best_s</a></div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00022">cover.h:22</a></div></div>
+<div class="ttc" id="astructCOVER__best__s_html_a2f435939db7b1ec75ece5da8ed077a51"><div class="ttname"><a href="structCOVER__best__s.html#a2f435939db7b1ec75ece5da8ed077a51">COVER_best_s::mutex</a></div><div class="ttdeci">ZSTD_pthread_mutex_t mutex</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00023">cover.h:23</a></div></div>
+<div class="ttc" id="astructCOVER__best__s_html_a32ba325c890fedd92aaef54af9229208"><div class="ttname"><a href="structCOVER__best__s.html#a32ba325c890fedd92aaef54af9229208">COVER_best_s::cond</a></div><div class="ttdeci">ZSTD_pthread_cond_t cond</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00024">cover.h:24</a></div></div>
+<div class="ttc" id="astructCOVER__best__s_html_a9420869daf273f8b5c134f7def51d57d"><div class="ttname"><a href="structCOVER__best__s.html#a9420869daf273f8b5c134f7def51d57d">COVER_best_s::compressedSize</a></div><div class="ttdeci">size_t compressedSize</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00029">cover.h:29</a></div></div>
+<div class="ttc" id="astructCOVER__best__s_html_aa70610bad8754f5b3b8bf00b1f23f6b3"><div class="ttname"><a href="structCOVER__best__s.html#aa70610bad8754f5b3b8bf00b1f23f6b3">COVER_best_s::dict</a></div><div class="ttdeci">void * dict</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00026">cover.h:26</a></div></div>
+<div class="ttc" id="astructCOVER__best__s_html_aaa4940d9a1da05d09ccead1b9105607c"><div class="ttname"><a href="structCOVER__best__s.html#aaa4940d9a1da05d09ccead1b9105607c">COVER_best_s::liveJobs</a></div><div class="ttdeci">size_t liveJobs</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00025">cover.h:25</a></div></div>
+<div class="ttc" id="astructCOVER__best__s_html_af1a1ac03fe3cd4137f6e6934ca048e43"><div class="ttname"><a href="structCOVER__best__s.html#af1a1ac03fe3cd4137f6e6934ca048e43">COVER_best_s::dictSize</a></div><div class="ttdeci">size_t dictSize</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00027">cover.h:27</a></div></div>
+<div class="ttc" id="astructCOVER__best__s_html_afa8e108b2ce9a21fbbfc54286ab522ac"><div class="ttname"><a href="structCOVER__best__s.html#afa8e108b2ce9a21fbbfc54286ab522ac">COVER_best_s::parameters</a></div><div class="ttdeci">ZDICT_cover_params_t parameters</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00028">cover.h:28</a></div></div>
+<div class="ttc" id="astructCOVER__dictSelection_html"><div class="ttname"><a href="structCOVER__dictSelection.html">COVER_dictSelection</a></div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00052">cover.h:52</a></div></div>
+<div class="ttc" id="astructCOVER__dictSelection_html_a688a6fd95e584c2099ed66458c0fbcfa"><div class="ttname"><a href="structCOVER__dictSelection.html#a688a6fd95e584c2099ed66458c0fbcfa">COVER_dictSelection::dictContent</a></div><div class="ttdeci">BYTE * dictContent</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00053">cover.h:53</a></div></div>
+<div class="ttc" id="astructCOVER__dictSelection_html_aa98706c0410a1bed17eead6b6420e6dd"><div class="ttname"><a href="structCOVER__dictSelection.html#aa98706c0410a1bed17eead6b6420e6dd">COVER_dictSelection::dictSize</a></div><div class="ttdeci">size_t dictSize</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00054">cover.h:54</a></div></div>
+<div class="ttc" id="astructCOVER__dictSelection_html_ac28d67bcf3a12b9dad35d0bac96d8c9a"><div class="ttname"><a href="structCOVER__dictSelection.html#ac28d67bcf3a12b9dad35d0bac96d8c9a">COVER_dictSelection::totalCompressedSize</a></div><div class="ttdeci">size_t totalCompressedSize</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00055">cover.h:55</a></div></div>
+<div class="ttc" id="astructCOVER__epoch__info__t_html"><div class="ttname"><a href="structCOVER__epoch__info__t.html">COVER_epoch_info_t</a></div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00044">cover.h:44</a></div></div>
+<div class="ttc" id="astructCOVER__epoch__info__t_html_abe25bf08652b16fe3ff996de8b0c7ba7"><div class="ttname"><a href="structCOVER__epoch__info__t.html#abe25bf08652b16fe3ff996de8b0c7ba7">COVER_epoch_info_t::size</a></div><div class="ttdeci">U32 size</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00046">cover.h:46</a></div></div>
+<div class="ttc" id="astructCOVER__epoch__info__t_html_ac24f899031f020ca62e8bd48351fcf8b"><div class="ttname"><a href="structCOVER__epoch__info__t.html#ac24f899031f020ca62e8bd48351fcf8b">COVER_epoch_info_t::num</a></div><div class="ttdeci">U32 num</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00045">cover.h:45</a></div></div>
+<div class="ttc" id="astructCOVER__segment__t_html"><div class="ttname"><a href="structCOVER__segment__t.html">COVER_segment_t</a></div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00035">cover.h:35</a></div></div>
+<div class="ttc" id="astructCOVER__segment__t_html_a439faa15da8000472508d7b5197e43fd"><div class="ttname"><a href="structCOVER__segment__t.html#a439faa15da8000472508d7b5197e43fd">COVER_segment_t::score</a></div><div class="ttdeci">U32 score</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00038">cover.h:38</a></div></div>
+<div class="ttc" id="astructCOVER__segment__t_html_ac00178369782da3fe00e1aac2b85dc72"><div class="ttname"><a href="structCOVER__segment__t.html#ac00178369782da3fe00e1aac2b85dc72">COVER_segment_t::end</a></div><div class="ttdeci">U32 end</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00037">cover.h:37</a></div></div>
+<div class="ttc" id="astructCOVER__segment__t_html_ae62b6348250a43fa2983889c41c37646"><div class="ttname"><a href="structCOVER__segment__t.html#ae62b6348250a43fa2983889c41c37646">COVER_segment_t::begin</a></div><div class="ttdeci">U32 begin</div><div class="ttdef"><b>Definition</b> <a href="cover_8h_source.html#l00036">cover.h:36</a></div></div>
+<div class="ttc" id="athreading_8h_html"><div class="ttname"><a href="threading_8h.html">threading.h</a></div></div>
+<div class="ttc" id="athreading_8h_html_a1c720bfec5b4d96aa294890b643fd631"><div class="ttname"><a href="threading_8h.html#a1c720bfec5b4d96aa294890b643fd631">ZSTD_pthread_mutex_t</a></div><div class="ttdeci">int ZSTD_pthread_mutex_t</div><div class="ttdef"><b>Definition</b> <a href="threading_8h_source.html#l00133">threading.h:133</a></div></div>
+<div class="ttc" id="athreading_8h_html_a46e23ced67d2270e859ea3090b7201bb"><div class="ttname"><a href="threading_8h.html#a46e23ced67d2270e859ea3090b7201bb">ZSTD_pthread_cond_t</a></div><div class="ttdeci">int ZSTD_pthread_cond_t</div><div class="ttdef"><b>Definition</b> <a href="threading_8h_source.html#l00139">threading.h:139</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a2f73e10b74b7581a0d17ebd274ae6c7b"><div class="ttname"><a href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a></div><div class="ttdeci">const void * dict</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00076">zbuff.h:76</a></div></div>
+<div class="ttc" id="azdict_8h_html"><div class="ttname"><a href="zdict_8h.html">zdict.h</a></div></div>
+<div class="ttc" id="azstd__internal_8h_html"><div class="ttname"><a href="zstd__internal_8h.html">zstd_internal.h</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="cover_8h.html">cover.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

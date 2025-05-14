@@ -1,0 +1,1954 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: EventNotifier类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classEventNotifier.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-methods">Private 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classEventNotifier-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">EventNotifier类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>事件通知器类，用于回测过程中的事件、数据和资金信息广播  
+ <a href="classEventNotifier.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:af4e8558e00d272a55547d72b34a5fedd" id="r_af4e8558e00d272a55547d72b34a5fedd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#af4e8558e00d272a55547d72b34a5fedd">EventNotifier</a> ()</td></tr>
+<tr class="memdesc:af4e8558e00d272a55547d72b34a5fedd"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:af4e8558e00d272a55547d72b34a5fedd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a512da14ec6f0d036a919ab39617b97e9" id="r_a512da14ec6f0d036a919ab39617b97e9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a512da14ec6f0d036a919ab39617b97e9">~EventNotifier</a> ()</td></tr>
+<tr class="memdesc:a512da14ec6f0d036a919ab39617b97e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:a512da14ec6f0d036a919ab39617b97e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4547482410c8759f72673d3902b990ee" id="r_a4547482410c8759f72673d3902b990ee"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a4547482410c8759f72673d3902b990ee">init</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *cfg)</td></tr>
+<tr class="memdesc:a4547482410c8759f72673d3902b990ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化事件通知器  <br /></td></tr>
+<tr class="separator:a4547482410c8759f72673d3902b990ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a739db1dbb51ad2c82360f61dda9677ba" id="r_a739db1dbb51ad2c82360f61dda9677ba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a739db1dbb51ad2c82360f61dda9677ba">notifyEvent</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *evtType)</td></tr>
+<tr class="memdesc:a739db1dbb51ad2c82360f61dda9677ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">通知事件  <br /></td></tr>
+<tr class="separator:a739db1dbb51ad2c82360f61dda9677ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b82d84349d1394b791760f9e341aa61" id="r_a6b82d84349d1394b791760f9e341aa61"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a6b82d84349d1394b791760f9e341aa61">notifyData</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *topic, void *data, uint32_t dataLen)</td></tr>
+<tr class="memdesc:a6b82d84349d1394b791760f9e341aa61"><td class="mdescLeft">&#160;</td><td class="mdescRight">通知数据  <br /></td></tr>
+<tr class="separator:a6b82d84349d1394b791760f9e341aa61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b55a82376faa84c33907cc73cca00c2" id="r_a0b55a82376faa84c33907cc73cca00c2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a0b55a82376faa84c33907cc73cca00c2">notifyFund</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *topic, uint32_t uDate, double total_profit, double dynprofit, double dynbalance, double total_fee)</td></tr>
+<tr class="memdesc:a0b55a82376faa84c33907cc73cca00c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">通知资金信息  <br /></td></tr>
+<tr class="separator:a0b55a82376faa84c33907cc73cca00c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4e8558e00d272a55547d72b34a5fedd" id="r_af4e8558e00d272a55547d72b34a5fedd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#af4e8558e00d272a55547d72b34a5fedd">EventNotifier</a> ()</td></tr>
+<tr class="memdesc:af4e8558e00d272a55547d72b34a5fedd"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:af4e8558e00d272a55547d72b34a5fedd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a512da14ec6f0d036a919ab39617b97e9" id="r_a512da14ec6f0d036a919ab39617b97e9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a512da14ec6f0d036a919ab39617b97e9">~EventNotifier</a> ()</td></tr>
+<tr class="memdesc:a512da14ec6f0d036a919ab39617b97e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:a512da14ec6f0d036a919ab39617b97e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4547482410c8759f72673d3902b990ee" id="r_a4547482410c8759f72673d3902b990ee"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a4547482410c8759f72673d3902b990ee">init</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *cfg)</td></tr>
+<tr class="memdesc:a4547482410c8759f72673d3902b990ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化事件通知器  <br /></td></tr>
+<tr class="separator:a4547482410c8759f72673d3902b990ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e1a5f8071c58d89422dcfafda32c703" id="r_a2e1a5f8071c58d89422dcfafda32c703"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a2e1a5f8071c58d89422dcfafda32c703">notify</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *trader, uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTradeInfo.html">WTSTradeInfo</a> *trdInfo)</td></tr>
+<tr class="memdesc:a2e1a5f8071c58d89422dcfafda32c703"><td class="mdescLeft">&#160;</td><td class="mdescRight">发送成交事件通知  <br /></td></tr>
+<tr class="separator:a2e1a5f8071c58d89422dcfafda32c703"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c8ed97d5ce86392c155fcbd43da3371" id="r_a2c8ed97d5ce86392c155fcbd43da3371"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a2c8ed97d5ce86392c155fcbd43da3371">notify</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *trader, uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrderInfo.html">WTSOrderInfo</a> *ordInfo)</td></tr>
+<tr class="memdesc:a2c8ed97d5ce86392c155fcbd43da3371"><td class="mdescLeft">&#160;</td><td class="mdescRight">发送订单事件通知  <br /></td></tr>
+<tr class="separator:a2c8ed97d5ce86392c155fcbd43da3371"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae90b62ade84181a8387ca5f6025bec6f" id="r_ae90b62ade84181a8387ca5f6025bec6f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#ae90b62ade84181a8387ca5f6025bec6f">notify</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *trader, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:ae90b62ade84181a8387ca5f6025bec6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">发送交易者消息通知  <br /></td></tr>
+<tr class="separator:ae90b62ade84181a8387ca5f6025bec6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe59bb8dfd08ef8960743cb79d16c114" id="r_afe59bb8dfd08ef8960743cb79d16c114"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#afe59bb8dfd08ef8960743cb79d16c114">notify_log</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *tag, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:afe59bb8dfd08ef8960743cb79d16c114"><td class="mdescLeft">&#160;</td><td class="mdescRight">发送日志通知  <br /></td></tr>
+<tr class="separator:afe59bb8dfd08ef8960743cb79d16c114"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ddecad48701ffcf7ee388485b6f29a9" id="r_a6ddecad48701ffcf7ee388485b6f29a9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a6ddecad48701ffcf7ee388485b6f29a9">notify_event</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:a6ddecad48701ffcf7ee388485b6f29a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">发送事件通知  <br /></td></tr>
+<tr class="separator:a6ddecad48701ffcf7ee388485b6f29a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b1837a9206ff88bdb7cc0c772285141" id="r_a5b1837a9206ff88bdb7cc0c772285141"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a5b1837a9206ff88bdb7cc0c772285141">notify_chart_marker</a> (uint64_t time, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *straId, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *icon, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *tag)</td></tr>
+<tr class="memdesc:a5b1837a9206ff88bdb7cc0c772285141"><td class="mdescLeft">&#160;</td><td class="mdescRight">发送图表标记通知  <br /></td></tr>
+<tr class="separator:a5b1837a9206ff88bdb7cc0c772285141"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28d9c78d7af811d1901c7ee6c2762c1d" id="r_a28d9c78d7af811d1901c7ee6c2762c1d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a28d9c78d7af811d1901c7ee6c2762c1d">notify_chart_index</a> (uint64_t time, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *straId, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *idxName, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *lineName, double val)</td></tr>
+<tr class="memdesc:a28d9c78d7af811d1901c7ee6c2762c1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">发送图表指标通知  <br /></td></tr>
+<tr class="separator:a28d9c78d7af811d1901c7ee6c2762c1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4356229a5f1f323f1bb90d69fff74f4" id="r_ae4356229a5f1f323f1bb90d69fff74f4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#ae4356229a5f1f323f1bb90d69fff74f4">notify_trade</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *straId, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isLong, bool isOpen, uint64_t curTime, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag)</td></tr>
+<tr class="memdesc:ae4356229a5f1f323f1bb90d69fff74f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">发送策略交易信号通知  <br /></td></tr>
+<tr class="separator:ae4356229a5f1f323f1bb90d69fff74f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4e8558e00d272a55547d72b34a5fedd" id="r_af4e8558e00d272a55547d72b34a5fedd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#af4e8558e00d272a55547d72b34a5fedd">EventNotifier</a> ()</td></tr>
+<tr class="memdesc:af4e8558e00d272a55547d72b34a5fedd"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:af4e8558e00d272a55547d72b34a5fedd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a512da14ec6f0d036a919ab39617b97e9" id="r_a512da14ec6f0d036a919ab39617b97e9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a512da14ec6f0d036a919ab39617b97e9">~EventNotifier</a> ()</td></tr>
+<tr class="memdesc:a512da14ec6f0d036a919ab39617b97e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:a512da14ec6f0d036a919ab39617b97e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4547482410c8759f72673d3902b990ee" id="r_a4547482410c8759f72673d3902b990ee"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a4547482410c8759f72673d3902b990ee">init</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *cfg)</td></tr>
+<tr class="memdesc:a4547482410c8759f72673d3902b990ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化事件通知器  <br /></td></tr>
+<tr class="separator:a4547482410c8759f72673d3902b990ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e1a5f8071c58d89422dcfafda32c703" id="r_a2e1a5f8071c58d89422dcfafda32c703"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a2e1a5f8071c58d89422dcfafda32c703">notify</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *trader, uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTradeInfo.html">WTSTradeInfo</a> *trdInfo)</td></tr>
+<tr class="memdesc:a2e1a5f8071c58d89422dcfafda32c703"><td class="mdescLeft">&#160;</td><td class="mdescRight">通知成交信息  <br /></td></tr>
+<tr class="separator:a2e1a5f8071c58d89422dcfafda32c703"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c8ed97d5ce86392c155fcbd43da3371" id="r_a2c8ed97d5ce86392c155fcbd43da3371"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a2c8ed97d5ce86392c155fcbd43da3371">notify</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *trader, uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrderInfo.html">WTSOrderInfo</a> *ordInfo)</td></tr>
+<tr class="memdesc:a2c8ed97d5ce86392c155fcbd43da3371"><td class="mdescLeft">&#160;</td><td class="mdescRight">通知订单信息  <br /></td></tr>
+<tr class="separator:a2c8ed97d5ce86392c155fcbd43da3371"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae90b62ade84181a8387ca5f6025bec6f" id="r_ae90b62ade84181a8387ca5f6025bec6f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#ae90b62ade84181a8387ca5f6025bec6f">notify</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *trader, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:ae90b62ade84181a8387ca5f6025bec6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">通知交易消息  <br /></td></tr>
+<tr class="separator:ae90b62ade84181a8387ca5f6025bec6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe59bb8dfd08ef8960743cb79d16c114" id="r_afe59bb8dfd08ef8960743cb79d16c114"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#afe59bb8dfd08ef8960743cb79d16c114">notify_log</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *tag, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:afe59bb8dfd08ef8960743cb79d16c114"><td class="mdescLeft">&#160;</td><td class="mdescRight">通知日志信息  <br /></td></tr>
+<tr class="separator:afe59bb8dfd08ef8960743cb79d16c114"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ddecad48701ffcf7ee388485b6f29a9" id="r_a6ddecad48701ffcf7ee388485b6f29a9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a6ddecad48701ffcf7ee388485b6f29a9">notify_event</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:a6ddecad48701ffcf7ee388485b6f29a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">通知事件信息  <br /></td></tr>
+<tr class="separator:a6ddecad48701ffcf7ee388485b6f29a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 成员函数</h2></td></tr>
+<tr class="memitem:a9ea3431fa5ced6a232d5e8dff5ebf1dd" id="r_a9ea3431fa5ced6a232d5e8dff5ebf1dd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a9ea3431fa5ced6a232d5e8dff5ebf1dd">tradeToJson</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *trader, uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTradeInfo.html">WTSTradeInfo</a> *trdInfo, std::string &amp;output)</td></tr>
+<tr class="memdesc:a9ea3431fa5ced6a232d5e8dff5ebf1dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">将成交信息转换为JSON格式  <br /></td></tr>
+<tr class="separator:a9ea3431fa5ced6a232d5e8dff5ebf1dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99137f05f5acbd16d150075ca9b20307" id="r_a99137f05f5acbd16d150075ca9b20307"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a99137f05f5acbd16d150075ca9b20307">orderToJson</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *trader, uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrderInfo.html">WTSOrderInfo</a> *ordInfo, std::string &amp;output)</td></tr>
+<tr class="memdesc:a99137f05f5acbd16d150075ca9b20307"><td class="mdescLeft">&#160;</td><td class="mdescRight">将订单信息转换为JSON格式  <br /></td></tr>
+<tr class="separator:a99137f05f5acbd16d150075ca9b20307"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ea3431fa5ced6a232d5e8dff5ebf1dd" id="r_a9ea3431fa5ced6a232d5e8dff5ebf1dd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a9ea3431fa5ced6a232d5e8dff5ebf1dd">tradeToJson</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *trader, uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTradeInfo.html">WTSTradeInfo</a> *trdInfo, std::string &amp;output)</td></tr>
+<tr class="memdesc:a9ea3431fa5ced6a232d5e8dff5ebf1dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">将成交信息转换为JSON格式  <br /></td></tr>
+<tr class="separator:a9ea3431fa5ced6a232d5e8dff5ebf1dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99137f05f5acbd16d150075ca9b20307" id="r_a99137f05f5acbd16d150075ca9b20307"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a99137f05f5acbd16d150075ca9b20307">orderToJson</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *trader, uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrderInfo.html">WTSOrderInfo</a> *ordInfo, std::string &amp;output)</td></tr>
+<tr class="memdesc:a99137f05f5acbd16d150075ca9b20307"><td class="mdescLeft">&#160;</td><td class="mdescRight">将订单信息转换为JSON格式  <br /></td></tr>
+<tr class="separator:a99137f05f5acbd16d150075ca9b20307"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:aea698540a048ded5b656bb670d72a350" id="r_aea698540a048ded5b656bb670d72a350"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#aea698540a048ded5b656bb670d72a350">m_strURL</a></td></tr>
+<tr class="memdesc:aea698540a048ded5b656bb670d72a350"><td class="mdescLeft">&#160;</td><td class="mdescRight">消息队列服务器的URL地址  <br /></td></tr>
+<tr class="separator:aea698540a048ded5b656bb670d72a350"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d72e6fb52f53aa3a24fd1b1a1611cfd" id="r_a7d72e6fb52f53aa3a24fd1b1a1611cfd"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a></td></tr>
+<tr class="memdesc:a7d72e6fb52f53aa3a24fd1b1a1611cfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">消息队列服务器ID  <br /></td></tr>
+<tr class="separator:a7d72e6fb52f53aa3a24fd1b1a1611cfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36a31a906436f07677cf62d750794140" id="r_a36a31a906436f07677cf62d750794140"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WtUftCore_2EventNotifier_8h.html#ad2fd82701ffd71cefdf561fae2b49446">FuncCreateMQServer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a36a31a906436f07677cf62d750794140">_creator</a></td></tr>
+<tr class="memdesc:a36a31a906436f07677cf62d750794140"><td class="mdescLeft">&#160;</td><td class="mdescRight">创建消息队列服务器的函数指针  <br /></td></tr>
+<tr class="separator:a36a31a906436f07677cf62d750794140"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57d276e9cf1a7247de069554d229aa45" id="r_a57d276e9cf1a7247de069554d229aa45"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WtUftCore_2EventNotifier_8h.html#a3522cc64d06d81ed85a8b524cf8b82c2">FuncDestroyMQServer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a57d276e9cf1a7247de069554d229aa45">_remover</a></td></tr>
+<tr class="memdesc:a57d276e9cf1a7247de069554d229aa45"><td class="mdescLeft">&#160;</td><td class="mdescRight">销毁消息队列服务器的函数指针  <br /></td></tr>
+<tr class="separator:a57d276e9cf1a7247de069554d229aa45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a101f642fc6b56698302eb941d769331c" id="r_a101f642fc6b56698302eb941d769331c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WtUftCore_2EventNotifier_8h.html#a87a3a860679f7f5e622261d4d0e6f287">FundPublishMessage</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">_publisher</a></td></tr>
+<tr class="memdesc:a101f642fc6b56698302eb941d769331c"><td class="mdescLeft">&#160;</td><td class="mdescRight">发布消息的函数指针  <br /></td></tr>
+<tr class="separator:a101f642fc6b56698302eb941d769331c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a408f207bc3cb4821c72e1080b663711e" id="r_a408f207bc3cb4821c72e1080b663711e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WtUftCore_2EventNotifier_8h.html#a8d23775ba30cc3102a9ee6fafb76a871">FuncRegCallbacks</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a408f207bc3cb4821c72e1080b663711e">_register</a></td></tr>
+<tr class="memdesc:a408f207bc3cb4821c72e1080b663711e"><td class="mdescLeft">&#160;</td><td class="mdescRight">注册回调函数的函数指针  <br /></td></tr>
+<tr class="separator:a408f207bc3cb4821c72e1080b663711e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f9ec2c20ca9091b290bffb1866bd7f4" id="r_a1f9ec2c20ca9091b290bffb1866bd7f4"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a1f9ec2c20ca9091b290bffb1866bd7f4">_url</a></td></tr>
+<tr class="memdesc:a1f9ec2c20ca9091b290bffb1866bd7f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">消息队列服务器URL  <br /></td></tr>
+<tr class="separator:a1f9ec2c20ca9091b290bffb1866bd7f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12ec122bae2c557400acc7ee196e2d1e" id="r_a12ec122bae2c557400acc7ee196e2d1e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a12ec122bae2c557400acc7ee196e2d1e">_stopped</a></td></tr>
+<tr class="memdesc:a12ec122bae2c557400acc7ee196e2d1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">是否停止工作线程  <br /></td></tr>
+<tr class="separator:a12ec122bae2c557400acc7ee196e2d1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0919eddb5d2f795e841f17949ab22b96" id="r_a0919eddb5d2f795e841f17949ab22b96"><td class="memItemLeft" align="right" valign="top">boost::asio::io_service&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a0919eddb5d2f795e841f17949ab22b96">_asyncio</a></td></tr>
+<tr class="memdesc:a0919eddb5d2f795e841f17949ab22b96"><td class="mdescLeft">&#160;</td><td class="mdescRight">asio异步IO服务  <br /></td></tr>
+<tr class="separator:a0919eddb5d2f795e841f17949ab22b96"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af88b03ed7914f730cab479513b38748b" id="r_af88b03ed7914f730cab479513b38748b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#af88b03ed7914f730cab479513b38748b">_worker</a></td></tr>
+<tr class="memdesc:af88b03ed7914f730cab479513b38748b"><td class="mdescLeft">&#160;</td><td class="mdescRight">工作线程指针  <br /></td></tr>
+<tr class="separator:af88b03ed7914f730cab479513b38748b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>事件通知器类，用于回测过程中的事件、数据和资金信息广播 </p>
+<p>事件通知器类</p>
+<p>该类封装了消息队列服务器的创建、销毁和消息发布功能，便于其他模块获取回测过程中的信息</p>
+<p>负责处理并发送各类交易相关的事件和日志 如订单事件、成交事件、图表标记、日志等 通过消息队列将这些事件异步通知给客户端</p>
+<p>负责收集并向外部系统广播交易相关事件，包括交易日志、订单信息、成交信息和系统事件等。 使用消息队列服务实现与外部系统的异步通信，通过动态加载库支持多种消息队列实现。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html#l00063">63</a> 行定义.</p>
+</div><h2 class="groupheader">构造及析构函数说明</h2>
+<a id="af4e8558e00d272a55547d72b34a5fedd" name="af4e8558e00d272a55547d72b34a5fedd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4e8558e00d272a55547d72b34a5fedd">&#9670;&#160;</a></span>EventNotifier() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">EventNotifier::EventNotifier </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>事件通知器构造函数</p>
+<p>初始化成员变量，将消息队列服务器ID初始化为0</p>
+<p>初始化事件通知器对象，设置默认属性值</p>
+<p>初始化事件通知器对象，设置初始属性值 </p>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8cpp_source.html#l00041">41</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a512da14ec6f0d036a919ab39617b97e9" name="a512da14ec6f0d036a919ab39617b97e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a512da14ec6f0d036a919ab39617b97e9">&#9670;&#160;</a></span>~EventNotifier() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">EventNotifier::~EventNotifier </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>析构函数 </p>
+<p>事件通知器析构函数</p>
+<p>如果有消息队列服务器ID并且有移除器函数，则调用移除器函数销毁服务器</p>
+<p>清理事件通知器资源，停止工作线程并销毁消息队列服务器</p>
+<p>清理事件通知器资源，关闭工作线程并销毁消息队列连接 </p>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8cpp_source.html#l00052">52</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af4e8558e00d272a55547d72b34a5fedd" name="af4e8558e00d272a55547d72b34a5fedd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4e8558e00d272a55547d72b34a5fedd">&#9670;&#160;</a></span>EventNotifier() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">EventNotifier::EventNotifier </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+
+</div>
+</div>
+<a id="a512da14ec6f0d036a919ab39617b97e9" name="a512da14ec6f0d036a919ab39617b97e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a512da14ec6f0d036a919ab39617b97e9">&#9670;&#160;</a></span>~EventNotifier() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">EventNotifier::~EventNotifier </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>析构函数 </p>
+
+</div>
+</div>
+<a id="af4e8558e00d272a55547d72b34a5fedd" name="af4e8558e00d272a55547d72b34a5fedd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4e8558e00d272a55547d72b34a5fedd">&#9670;&#160;</a></span>EventNotifier() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">EventNotifier::EventNotifier </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>初始化事件通知器对象，设置初始状态 </p>
+
+</div>
+</div>
+<a id="a512da14ec6f0d036a919ab39617b97e9" name="a512da14ec6f0d036a919ab39617b97e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a512da14ec6f0d036a919ab39617b97e9">&#9670;&#160;</a></span>~EventNotifier() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">EventNotifier::~EventNotifier </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>析构函数 </p>
+<p>清理事件通知器资源，包括关闭消息队列连接并终止工作线程 </p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a4547482410c8759f72673d3902b990ee" name="a4547482410c8759f72673d3902b990ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4547482410c8759f72673d3902b990ee">&#9670;&#160;</a></span>init() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool EventNotifier::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>cfg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化事件通知器 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfg</td><td>配置项，包含消息队列服务器的URL等信息 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否初始化成功</dd></dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfg</td><td>配置项，包含消息队列服务器相关设置 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否初始化成功</dd></dl>
+<p>该方法完成事件通知器的初始化，包括加载消息队列模块动态库， 获取必要的函数指针，注册回调函数，并创建消息队列服务器</p>
+<p>加载消息队列模块，初始化消息队列服务并启动工作线程 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfg</td><td>配置对象 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否初始化成功</dd></dl>
+<p>根据配置加载消息队列模块，初始化消息队列服务器连接，并创建异步处理线程</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfg</td><td>配置对象，包含消息队列服务器连接参数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 初始化成功返回true，失败返回false </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8cpp_source.html#l00066">66</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4547482410c8759f72673d3902b990ee" name="a4547482410c8759f72673d3902b990ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4547482410c8759f72673d3902b990ee">&#9670;&#160;</a></span>init() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool EventNotifier::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>cfg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化事件通知器 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfg</td><td>配置对象 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>是否初始化成功 </dd></dl>
+
+</div>
+</div>
+<a id="a4547482410c8759f72673d3902b990ee" name="a4547482410c8759f72673d3902b990ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4547482410c8759f72673d3902b990ee">&#9670;&#160;</a></span>init() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool EventNotifier::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>cfg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化事件通知器 </p>
+<p>根据配置加载并初始化消息队列服务器，创建异步处理线程</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfg</td><td>配置对象，包含消息队列服务器URL等信息 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 初始化是否成功 </dd></dl>
+
+</div>
+</div>
+<a id="ae90b62ade84181a8387ca5f6025bec6f" name="ae90b62ade84181a8387ca5f6025bec6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae90b62ade84181a8387ca5f6025bec6f">&#9670;&#160;</a></span>notify() <span class="overload">[1/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notify </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>trader</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>发送交易者消息通知 </p>
+<p>发送交易器消息通知</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易者标识 </td></tr>
+    <tr><td class="paramname">message</td><td>消息内容</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将交易者的消息异步发送到消息队列，使用JSON格式封装 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易者标识 </td></tr>
+    <tr><td class="paramname">message</td><td>消息内容</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将交易器名称和消息内容作为JSON对象发送到消息队列，主题为"TRD_NOTIFY"</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易器名称 </td></tr>
+    <tr><td class="paramname">message</td><td>消息内容 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html#l00230">230</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae90b62ade84181a8387ca5f6025bec6f" name="ae90b62ade84181a8387ca5f6025bec6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae90b62ade84181a8387ca5f6025bec6f">&#9670;&#160;</a></span>notify() <span class="overload">[2/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notify </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>trader</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>通知交易消息 </p>
+<p>将交易相关消息转换为JSON并通过消息队列发送</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易器名称 </td></tr>
+    <tr><td class="paramname">message</td><td>消息内容 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a2c8ed97d5ce86392c155fcbd43da3371" name="a2c8ed97d5ce86392c155fcbd43da3371"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c8ed97d5ce86392c155fcbd43da3371">&#9670;&#160;</a></span>notify() <span class="overload">[3/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notify </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>trader</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSOrderInfo.html">WTSOrderInfo</a> *&#160;</td>
+          <td class="paramname"><em>ordInfo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>发送订单事件通知 </p>
+<p>发送订单信息通知</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易者标识 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">ordInfo</td><td>订单信息对象</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将订单信息转换为JSON并异步发送到消息队列 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易者标识 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">ordInfo</td><td>订单信息对象</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将订单信息转换为JSON对象发送到消息队列，主题为"TRD_ORDER"</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易器名称 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">ordInfo</td><td>订单信息对象 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html#l00304">304</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2c8ed97d5ce86392c155fcbd43da3371" name="a2c8ed97d5ce86392c155fcbd43da3371"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c8ed97d5ce86392c155fcbd43da3371">&#9670;&#160;</a></span>notify() <span class="overload">[4/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notify </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>trader</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSOrderInfo.html">WTSOrderInfo</a> *&#160;</td>
+          <td class="paramname"><em>ordInfo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>通知订单信息 </p>
+<p>将订单信息转换为JSON并通过消息队列发送</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易器名称 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">ordInfo</td><td>订单信息对象 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a2e1a5f8071c58d89422dcfafda32c703" name="a2e1a5f8071c58d89422dcfafda32c703"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e1a5f8071c58d89422dcfafda32c703">&#9670;&#160;</a></span>notify() <span class="overload">[5/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notify </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>trader</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTradeInfo.html">WTSTradeInfo</a> *&#160;</td>
+          <td class="paramname"><em>trdInfo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>发送成交事件通知 </p>
+<p>发送成交信息通知</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易者标识 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">trdInfo</td><td>成交信息对象</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将成交信息转换为JSON并异步发送到消息队列 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易者标识 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">trdInfo</td><td>成交信息对象</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将成交信息转换为JSON对象发送到消息队列，主题为"TRD_TRADE"</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易器名称 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">trdInfo</td><td>成交信息对象 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html#l00273">273</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2e1a5f8071c58d89422dcfafda32c703" name="a2e1a5f8071c58d89422dcfafda32c703"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e1a5f8071c58d89422dcfafda32c703">&#9670;&#160;</a></span>notify() <span class="overload">[6/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notify </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>trader</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTradeInfo.html">WTSTradeInfo</a> *&#160;</td>
+          <td class="paramname"><em>trdInfo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>通知成交信息 </p>
+<p>将成交信息转换为JSON并通过消息队列发送</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易器名称 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">trdInfo</td><td>成交信息对象 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a28d9c78d7af811d1901c7ee6c2762c1d" name="a28d9c78d7af811d1901c7ee6c2762c1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28d9c78d7af811d1901c7ee6c2762c1d">&#9670;&#160;</a></span>notify_chart_index()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notify_chart_index </td>
+          <td>(</td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>time</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>straId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>idxName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>lineName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>发送图表指标通知 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">time</td><td>时间戳 </td></tr>
+    <tr><td class="paramname">straId</td><td>策略ID </td></tr>
+    <tr><td class="paramname">idxName</td><td>指标名称 </td></tr>
+    <tr><td class="paramname">lineName</td><td>线条名称 </td></tr>
+    <tr><td class="paramname">val</td><td>指标值</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将图表指标数据异步发送到消息队列，使用JSON格式封装 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">time</td><td>时间戳 </td></tr>
+    <tr><td class="paramname">straId</td><td>策略ID </td></tr>
+    <tr><td class="paramname">idxName</td><td>指标名称 </td></tr>
+    <tr><td class="paramname">lineName</td><td>线条名称 </td></tr>
+    <tr><td class="paramname">val</td><td>指标值 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html#l00432">432</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5b1837a9206ff88bdb7cc0c772285141" name="a5b1837a9206ff88bdb7cc0c772285141"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b1837a9206ff88bdb7cc0c772285141">&#9670;&#160;</a></span>notify_chart_marker()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notify_chart_marker </td>
+          <td>(</td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>time</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>straId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>icon</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>tag</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>发送图表标记通知 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">time</td><td>时间戳 </td></tr>
+    <tr><td class="paramname">straId</td><td>策略ID </td></tr>
+    <tr><td class="paramname">price</td><td>价格 </td></tr>
+    <tr><td class="paramname">icon</td><td>图标 </td></tr>
+    <tr><td class="paramname">tag</td><td>标签</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将图表上的标记点数据异步发送到消息队列，使用JSON格式封装 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">time</td><td>时间戳 </td></tr>
+    <tr><td class="paramname">straId</td><td>策略ID </td></tr>
+    <tr><td class="paramname">price</td><td>价格 </td></tr>
+    <tr><td class="paramname">icon</td><td>图标 </td></tr>
+    <tr><td class="paramname">tag</td><td>标签 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html#l00479">479</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6ddecad48701ffcf7ee388485b6f29a9" name="a6ddecad48701ffcf7ee388485b6f29a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ddecad48701ffcf7ee388485b6f29a9">&#9670;&#160;</a></span>notify_event() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notify_event </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>发送事件通知 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">message</td><td>事件消息</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将一般事件消息异步发送到消息队列，使用JSON格式封装 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">message</td><td>事件消息内容</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将事件消息作为JSON对象发送到消息队列，主题为"GRP_EVENT"</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">message</td><td>事件消息内容 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html#l00191">191</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6ddecad48701ffcf7ee388485b6f29a9" name="a6ddecad48701ffcf7ee388485b6f29a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ddecad48701ffcf7ee388485b6f29a9">&#9670;&#160;</a></span>notify_event() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notify_event </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>通知事件信息 </p>
+<p>将系统事件信息转换为JSON并通过消息队列发送</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">message</td><td>事件内容 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="afe59bb8dfd08ef8960743cb79d16c114" name="afe59bb8dfd08ef8960743cb79d16c114"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe59bb8dfd08ef8960743cb79d16c114">&#9670;&#160;</a></span>notify_log() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notify_log </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>tag</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>发送日志通知 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tag</td><td>日志标签 </td></tr>
+    <tr><td class="paramname">message</td><td>日志消息</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将日志消息异步发送到消息队列，使用JSON格式封装 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tag</td><td>日志标签 </td></tr>
+    <tr><td class="paramname">message</td><td>日志消息内容</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将标签和日志消息作为JSON对象发送到消息队列，主题为"LOG"</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tag</td><td>日志标签，标识日志来源或类型 </td></tr>
+    <tr><td class="paramname">message</td><td>日志内容 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html#l00150">150</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afe59bb8dfd08ef8960743cb79d16c114" name="afe59bb8dfd08ef8960743cb79d16c114"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe59bb8dfd08ef8960743cb79d16c114">&#9670;&#160;</a></span>notify_log() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notify_log </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>tag</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>通知日志信息 </p>
+<p>将日志信息转换为JSON并通过消息队列发送</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tag</td><td>日志标签 </td></tr>
+    <tr><td class="paramname">message</td><td>日志内容 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae4356229a5f1f323f1bb90d69fff74f4" name="ae4356229a5f1f323f1bb90d69fff74f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4356229a5f1f323f1bb90d69fff74f4">&#9670;&#160;</a></span>notify_trade()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notify_trade </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>straId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isLong</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isOpen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>curTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>userTag</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>发送策略交易信号通知 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">straId</td><td>策略ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isLong</td><td>是否做多 </td></tr>
+    <tr><td class="paramname">isOpen</td><td>是否开仓 </td></tr>
+    <tr><td class="paramname">curTime</td><td>当前时间戳 </td></tr>
+    <tr><td class="paramname">price</td><td>交易价格 </td></tr>
+    <tr><td class="paramname">userTag</td><td>用户标记</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将策略交易信号数据异步发送到消息队列，使用JSON格式封装 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">straId</td><td>策略ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isLong</td><td>是否做多 </td></tr>
+    <tr><td class="paramname">isOpen</td><td>是否开仓 </td></tr>
+    <tr><td class="paramname">curTime</td><td>当前时间戳 </td></tr>
+    <tr><td class="paramname">price</td><td>交易价格 </td></tr>
+    <tr><td class="paramname">userTag</td><td>用户标记 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html#l00528">528</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6b82d84349d1394b791760f9e341aa61" name="a6b82d84349d1394b791760f9e341aa61"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b82d84349d1394b791760f9e341aa61">&#9670;&#160;</a></span>notifyData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notifyData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>topic</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>dataLen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>通知数据 </p>
+<p>通知自定义数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">topic</td><td>主题 </td></tr>
+    <tr><td class="paramname">data</td><td>数据内容 </td></tr>
+    <tr><td class="paramname">dataLen</td><td>数据长度</td></tr>
+    <tr><td class="paramname">topic</td><td>消息主题 </td></tr>
+    <tr><td class="paramname">data</td><td>数据内容指针 </td></tr>
+    <tr><td class="paramname">dataLen</td><td>数据长度</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将指定的数据内容通过消息队列以指定的主题广播出去 如果消息发布函数不存在，则不进行操作 </p>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8cpp_source.html#l00139">139</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a739db1dbb51ad2c82360f61dda9677ba" name="a739db1dbb51ad2c82360f61dda9677ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a739db1dbb51ad2c82360f61dda9677ba">&#9670;&#160;</a></span>notifyEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notifyEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>evtType</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>通知事件 </p>
+<p>通知回测系统事件</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">evtType</td><td>事件类型</td></tr>
+    <tr><td class="paramname">evtType</td><td>事件类型</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将指定类型的事件通过消息队列广播出去，主题固定为"BT_EVENT" 如果消息发布函数不存在，则不进行操作 </p>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8cpp_source.html#l00124">124</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0b55a82376faa84c33907cc73cca00c2" name="a0b55a82376faa84c33907cc73cca00c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b55a82376faa84c33907cc73cca00c2">&#9670;&#160;</a></span>notifyFund()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::notifyFund </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>topic</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uDate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>total_profit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>dynprofit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>dynbalance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>total_fee</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>通知资金信息 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">topic</td><td>主题 </td></tr>
+    <tr><td class="paramname">uDate</td><td>日期，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">total_profit</td><td>总盈亏 </td></tr>
+    <tr><td class="paramname">dynprofit</td><td>动态盈亏 </td></tr>
+    <tr><td class="paramname">dynbalance</td><td>动态余额 </td></tr>
+    <tr><td class="paramname">total_fee</td><td>总手续费</td></tr>
+    <tr><td class="paramname">topic</td><td>消息主题 </td></tr>
+    <tr><td class="paramname">uDate</td><td>日期，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">total_profit</td><td>总盈亏 </td></tr>
+    <tr><td class="paramname">dynprofit</td><td>动态盈亏 </td></tr>
+    <tr><td class="paramname">dynbalance</td><td>动态余额 </td></tr>
+    <tr><td class="paramname">total_fee</td><td>总手续费</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将指定的资金信息通过消息队列广播出去 资金信息会被格式化为JSON字符串，然后作为消息内容发送 </p>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8cpp_source.html#l00157">157</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a99137f05f5acbd16d150075ca9b20307" name="a99137f05f5acbd16d150075ca9b20307"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a99137f05f5acbd16d150075ca9b20307">&#9670;&#160;</a></span>orderToJson() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::orderToJson </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>trader</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSOrderInfo.html">WTSOrderInfo</a> *&#160;</td>
+          <td class="paramname"><em>ordInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>将订单信息转换为JSON格式 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易者标识 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">ordInfo</td><td>订单信息对象 </td></tr>
+    <tr><td class="paramname">output</td><td>输出的JSON字符串</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>根据订单信息对象的各个字段构造JSON对象 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易者标识 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">ordInfo</td><td>订单信息对象 </td></tr>
+    <tr><td class="paramname">output</td><td>输出的JSON字符串</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将订单信息对象的各个字段转换为JSON格式字符串</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易器名称 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">ordInfo</td><td>订单信息对象 </td></tr>
+    <tr><td class="paramname">output</td><td>输出参数，用于返回JSON字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html#l00377">377</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a99137f05f5acbd16d150075ca9b20307" name="a99137f05f5acbd16d150075ca9b20307"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a99137f05f5acbd16d150075ca9b20307">&#9670;&#160;</a></span>orderToJson() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::orderToJson </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>trader</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSOrderInfo.html">WTSOrderInfo</a> *&#160;</td>
+          <td class="paramname"><em>ordInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>将订单信息转换为JSON格式 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易器名称 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">ordInfo</td><td>订单信息对象 </td></tr>
+    <tr><td class="paramname">output</td><td>输出的JSON字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a9ea3431fa5ced6a232d5e8dff5ebf1dd" name="a9ea3431fa5ced6a232d5e8dff5ebf1dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ea3431fa5ced6a232d5e8dff5ebf1dd">&#9670;&#160;</a></span>tradeToJson() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::tradeToJson </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>trader</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTradeInfo.html">WTSTradeInfo</a> *&#160;</td>
+          <td class="paramname"><em>trdInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>将成交信息转换为JSON格式 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易者标识 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">trdInfo</td><td>成交信息对象 </td></tr>
+    <tr><td class="paramname">output</td><td>输出的JSON字符串</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将成交信息对象的各个字段转换为JSON格式字符串</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易器名称 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">trdInfo</td><td>成交信息对象 </td></tr>
+    <tr><td class="paramname">output</td><td>输出参数，用于返回JSON字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a> 第 <a class="el" href="WtCore_2EventNotifier_8cpp_source.html#l00327">327</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9ea3431fa5ced6a232d5e8dff5ebf1dd" name="a9ea3431fa5ced6a232d5e8dff5ebf1dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ea3431fa5ced6a232d5e8dff5ebf1dd">&#9670;&#160;</a></span>tradeToJson() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::tradeToJson </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>trader</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTradeInfo.html">WTSTradeInfo</a> *&#160;</td>
+          <td class="paramname"><em>trdInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>将成交信息转换为JSON格式 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trader</td><td>交易器名称 </td></tr>
+    <tr><td class="paramname">localid</td><td>本地订单ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">trdInfo</td><td>成交信息对象 </td></tr>
+    <tr><td class="paramname">output</td><td>输出的JSON字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a0919eddb5d2f795e841f17949ab22b96" name="a0919eddb5d2f795e841f17949ab22b96"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0919eddb5d2f795e841f17949ab22b96">&#9670;&#160;</a></span>_asyncio</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">boost::asio::io_service EventNotifier::_asyncio</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>asio异步IO服务 </p>
+<p>异步IO服务对象 </p>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtCore_2EventNotifier_8h_source.html#l00187">187</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a36a31a906436f07677cf62d750794140" name="a36a31a906436f07677cf62d750794140"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36a31a906436f07677cf62d750794140">&#9670;&#160;</a></span>_creator</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WtUftCore_2EventNotifier_8h.html#ad2fd82701ffd71cefdf561fae2b49446">FuncCreateMQServer</a> EventNotifier::_creator</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>创建消息队列服务器的函数指针 </p>
+<p>创建服务器函数指针</p>
+<p>创建消息队列服务器函数指针 </p>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html#l00113">113</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7d72e6fb52f53aa3a24fd1b1a1611cfd" name="a7d72e6fb52f53aa3a24fd1b1a1611cfd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d72e6fb52f53aa3a24fd1b1a1611cfd">&#9670;&#160;</a></span>_mq_sid</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t EventNotifier::_mq_sid</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>消息队列服务器ID </p>
+<p>消息队列服务器标识ID </p>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html#l00112">112</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a101f642fc6b56698302eb941d769331c" name="a101f642fc6b56698302eb941d769331c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a101f642fc6b56698302eb941d769331c">&#9670;&#160;</a></span>_publisher</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WtUftCore_2EventNotifier_8h.html#a87a3a860679f7f5e622261d4d0e6f287">FundPublishMessage</a> EventNotifier::_publisher</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>发布消息的函数指针 </p>
+<p>发布消息函数指针 </p>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html#l00115">115</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a408f207bc3cb4821c72e1080b663711e" name="a408f207bc3cb4821c72e1080b663711e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a408f207bc3cb4821c72e1080b663711e">&#9670;&#160;</a></span>_register</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WtUftCore_2EventNotifier_8h.html#a8d23775ba30cc3102a9ee6fafb76a871">FuncRegCallbacks</a> EventNotifier::_register</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>注册回调函数的函数指针 </p>
+<p>注册回调函数指针</p>
+<p>注册回调函数函数指针 </p>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html#l00116">116</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a57d276e9cf1a7247de069554d229aa45" name="a57d276e9cf1a7247de069554d229aa45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57d276e9cf1a7247de069554d229aa45">&#9670;&#160;</a></span>_remover</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WtUftCore_2EventNotifier_8h.html#a3522cc64d06d81ed85a8b524cf8b82c2">FuncDestroyMQServer</a> EventNotifier::_remover</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>销毁消息队列服务器的函数指针 </p>
+<p>销毁服务器函数指针</p>
+<p>销毁消息队列服务器函数指针 </p>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html#l00114">114</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a12ec122bae2c557400acc7ee196e2d1e" name="a12ec122bae2c557400acc7ee196e2d1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12ec122bae2c557400acc7ee196e2d1e">&#9670;&#160;</a></span>_stopped</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool EventNotifier::_stopped</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>是否停止工作线程 </p>
+<p>线程停止标志 </p>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtCore_2EventNotifier_8h_source.html#l00186">186</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1f9ec2c20ca9091b290bffb1866bd7f4" name="a1f9ec2c20ca9091b290bffb1866bd7f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f9ec2c20ca9091b290bffb1866bd7f4">&#9670;&#160;</a></span>_url</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string EventNotifier::_url</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>消息队列服务器URL </p>
+<p>消息队列服务器URL </p>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtCore_2EventNotifier_8h_source.html#l00179">179</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af88b03ed7914f730cab479513b38748b" name="af88b03ed7914f730cab479513b38748b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af88b03ed7914f730cab479513b38748b">&#9670;&#160;</a></span>_worker</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a> EventNotifier::_worker</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>工作线程指针 </p>
+<p>工作线程指针 </p>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtCore_2EventNotifier_8h_source.html#l00188">188</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aea698540a048ded5b656bb670d72a350" name="aea698540a048ded5b656bb670d72a350"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea698540a048ded5b656bb670d72a350">&#9670;&#160;</a></span>m_strURL</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string EventNotifier::m_strURL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>消息队列服务器的URL地址 </p>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html#l00111">111</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WtBtCore/<a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a></li>
+<li>src/WtCore/<a class="el" href="WtCore_2EventNotifier_8h_source.html">EventNotifier.h</a></li>
+<li>src/WtUftCore/<a class="el" href="WtUftCore_2EventNotifier_8h_source.html">EventNotifier.h</a></li>
+<li>src/WtBtCore/<a class="el" href="WtBtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a></li>
+<li>src/WtCore/<a class="el" href="WtCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a></li>
+<li>src/WtUftCore/<a class="el" href="WtUftCore_2EventNotifier_8cpp_source.html">EventNotifier.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classEventNotifier.html">EventNotifier</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/emitterutils.cpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('emitterutils_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#namespaces">命名空间</a> &#124;
+<a href="#enum-members">枚举</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">emitterutils.cpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;iomanip&gt;</code><br />
+<code>#include &lt;sstream&gt;</code><br />
+<code>#include &quot;<a class="el" href="emitterutils_8h_source.html">emitterutils.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="exp_8h_source.html">exp.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="indentation_8h_source.html">indentation.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="regex__yaml_8h_source.html">regex_yaml.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="regeximpl_8h_source.html">regeximpl.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="stringsource_8h_source.html">stringsource.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="binary_8h_source.html">yaml-cpp/binary.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="null_8h_source.html">yaml-cpp/null.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="ostream__wrapper_8h_source.html">yaml-cpp/ostream_wrapper.h</a>&quot;</code><br />
+</div>
+<p><a href="emitterutils_8cpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+命名空间</h2></td></tr>
+<tr class="memitem:namespaceYAML" id="r_namespaceYAML"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html">YAML</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespaceYAML_1_1Utils" id="r_namespaceYAML_1_1Utils"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils.html">YAML::Utils</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03" id="r_namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03.html">YAML::Utils::anonymous_namespace{emitterutils.cpp}</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+枚举</h2></td></tr>
+<tr class="memitem:af8d0b3fe681ec3be1a18f98499de913a" id="r_af8d0b3fe681ec3be1a18f98499de913a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <a class="el" href="namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03.html#af8d0b3fe681ec3be1a18f98499de913aac5b7125836431a2af3df1c3ded6826ea">YAML::Utils::anonymous_namespace{emitterutils.cpp}::REPLACEMENT_CHARACTER</a> = 0xFFFD
+ }</td></tr>
+<tr class="separator:af8d0b3fe681ec3be1a18f98499de913a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:abe44d611c3a96b87a615c1d2e7a60ce5" id="r_abe44d611c3a96b87a615c1d2e7a60ce5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03.html#abe44d611c3a96b87a615c1d2e7a60ce5">YAML::Utils::anonymous_namespace{emitterutils.cpp}::IsAnchorChar</a> (int ch)</td></tr>
+<tr class="separator:abe44d611c3a96b87a615c1d2e7a60ce5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae60a4e3e889e5902308b1ce5123cc329" id="r_ae60a4e3e889e5902308b1ce5123cc329"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03.html#ae60a4e3e889e5902308b1ce5123cc329">YAML::Utils::anonymous_namespace{emitterutils.cpp}::Utf8BytesIndicated</a> (char ch)</td></tr>
+<tr class="separator:ae60a4e3e889e5902308b1ce5123cc329"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86adfc81d07ed3c18099cc940770d8ca" id="r_a86adfc81d07ed3c18099cc940770d8ca"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03.html#a86adfc81d07ed3c18099cc940770d8ca">YAML::Utils::anonymous_namespace{emitterutils.cpp}::IsTrailingByte</a> (char ch)</td></tr>
+<tr class="separator:a86adfc81d07ed3c18099cc940770d8ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78e3f85e0837201724295a0833595685" id="r_a78e3f85e0837201724295a0833595685"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03.html#a78e3f85e0837201724295a0833595685">YAML::Utils::anonymous_namespace{emitterutils.cpp}::GetNextCodePointAndAdvance</a> (int &amp;codePoint, std::string::const_iterator &amp;first, std::string::const_iterator last)</td></tr>
+<tr class="separator:a78e3f85e0837201724295a0833595685"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2eeeac63029991068a0bf929a66768dc" id="r_a2eeeac63029991068a0bf929a66768dc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03.html#a2eeeac63029991068a0bf929a66768dc">YAML::Utils::anonymous_namespace{emitterutils.cpp}::WriteCodePoint</a> (<a class="el" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a> &amp;out, int codePoint)</td></tr>
+<tr class="separator:a2eeeac63029991068a0bf929a66768dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62accde89ef1537cb5b7e935c4a9733f" id="r_a62accde89ef1537cb5b7e935c4a9733f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03.html#a62accde89ef1537cb5b7e935c4a9733f">YAML::Utils::anonymous_namespace{emitterutils.cpp}::IsValidPlainScalar</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;str, <a class="el" href="structYAML_1_1FlowType.html#afc7b0fab097e599c9b49918739e1b5cc">FlowType::value</a> flowType, bool allowOnlyAscii)</td></tr>
+<tr class="separator:a62accde89ef1537cb5b7e935c4a9733f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94a7b37038e516177948fb5ca24aa147" id="r_a94a7b37038e516177948fb5ca24aa147"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03.html#a94a7b37038e516177948fb5ca24aa147">YAML::Utils::anonymous_namespace{emitterutils.cpp}::IsValidSingleQuotedScalar</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;str, bool escapeNonAscii)</td></tr>
+<tr class="separator:a94a7b37038e516177948fb5ca24aa147"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4e8fdf45c28eb52afc9a9be30d1683b" id="r_aa4e8fdf45c28eb52afc9a9be30d1683b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03.html#aa4e8fdf45c28eb52afc9a9be30d1683b">YAML::Utils::anonymous_namespace{emitterutils.cpp}::IsValidLiteralScalar</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;str, <a class="el" href="structYAML_1_1FlowType.html#afc7b0fab097e599c9b49918739e1b5cc">FlowType::value</a> flowType, bool escapeNonAscii)</td></tr>
+<tr class="separator:aa4e8fdf45c28eb52afc9a9be30d1683b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c5ba412636376d57e9421e3e44a6ea4" id="r_a0c5ba412636376d57e9421e3e44a6ea4"><td class="memItemLeft" align="right" valign="top">std::pair&lt; uint16_t, uint16_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03.html#a0c5ba412636376d57e9421e3e44a6ea4">YAML::Utils::anonymous_namespace{emitterutils.cpp}::EncodeUTF16SurrogatePair</a> (int codePoint)</td></tr>
+<tr class="separator:a0c5ba412636376d57e9421e3e44a6ea4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c9e3e0a24a079fec7e6d240b5e490fa" id="r_a0c9e3e0a24a079fec7e6d240b5e490fa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03.html#a0c9e3e0a24a079fec7e6d240b5e490fa">YAML::Utils::anonymous_namespace{emitterutils.cpp}::WriteDoubleQuoteEscapeSequence</a> (<a class="el" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a> &amp;out, int codePoint, <a class="el" href="structYAML_1_1StringEscaping.html#a1b5602e52d1944cc847337160dc65de6">StringEscaping::value</a> stringEscapingStyle)</td></tr>
+<tr class="separator:a0c9e3e0a24a079fec7e6d240b5e490fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52330d4e5c3a67651801ee2106c47896" id="r_a52330d4e5c3a67651801ee2106c47896"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils_1_1anonymous__namespace_02emitterutils_8cpp_03.html#a52330d4e5c3a67651801ee2106c47896">YAML::Utils::anonymous_namespace{emitterutils.cpp}::WriteAliasName</a> (<a class="el" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a> &amp;out, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;str)</td></tr>
+<tr class="separator:a52330d4e5c3a67651801ee2106c47896"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e90407fae0bc69c37ab45c2c5ef1b75" id="r_a5e90407fae0bc69c37ab45c2c5ef1b75"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structYAML_1_1StringFormat.html#aa87d77d0f60417355a95432f16b226e0">StringFormat::value</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils.html#a5e90407fae0bc69c37ab45c2c5ef1b75">YAML::Utils::ComputeStringFormat</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;str, <a class="el" href="namespaceYAML.html#a67c320aa50d3de7ecba1d0b8775dd684">EMITTER_MANIP</a> strFormat, <a class="el" href="structYAML_1_1FlowType.html#afc7b0fab097e599c9b49918739e1b5cc">FlowType::value</a> flowType, bool escapeNonAscii)</td></tr>
+<tr class="separator:a5e90407fae0bc69c37ab45c2c5ef1b75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a891448c41049715579789fd852895422" id="r_a891448c41049715579789fd852895422"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils.html#a891448c41049715579789fd852895422">YAML::Utils::WriteSingleQuotedString</a> (<a class="el" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a> &amp;out, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;str)</td></tr>
+<tr class="separator:a891448c41049715579789fd852895422"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af815a77ec87a25c3be859481c641523b" id="r_af815a77ec87a25c3be859481c641523b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils.html#af815a77ec87a25c3be859481c641523b">YAML::Utils::WriteDoubleQuotedString</a> (<a class="el" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a> &amp;out, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;str, <a class="el" href="structYAML_1_1StringEscaping.html#a1b5602e52d1944cc847337160dc65de6">StringEscaping::value</a> stringEscaping)</td></tr>
+<tr class="separator:af815a77ec87a25c3be859481c641523b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb118a00a60fa8cbbe613f787d8d2043" id="r_aeb118a00a60fa8cbbe613f787d8d2043"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils.html#aeb118a00a60fa8cbbe613f787d8d2043">YAML::Utils::WriteLiteralString</a> (<a class="el" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a> &amp;out, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;str, std::size_t indent)</td></tr>
+<tr class="separator:aeb118a00a60fa8cbbe613f787d8d2043"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2e3e90cf55a120b89ea088668ccf497" id="r_ae2e3e90cf55a120b89ea088668ccf497"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils.html#ae2e3e90cf55a120b89ea088668ccf497">YAML::Utils::WriteChar</a> (<a class="el" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a> &amp;out, char ch, <a class="el" href="structYAML_1_1StringEscaping.html#a1b5602e52d1944cc847337160dc65de6">StringEscaping::value</a> stringEscapingStyle)</td></tr>
+<tr class="separator:ae2e3e90cf55a120b89ea088668ccf497"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83f522e522e5ca04f5618a03d1e49795" id="r_a83f522e522e5ca04f5618a03d1e49795"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils.html#a83f522e522e5ca04f5618a03d1e49795">YAML::Utils::WriteComment</a> (<a class="el" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a> &amp;out, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;str, std::size_t postCommentIndent)</td></tr>
+<tr class="separator:a83f522e522e5ca04f5618a03d1e49795"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7073e23b2ae04bf248abd3c6fd26a90a" id="r_a7073e23b2ae04bf248abd3c6fd26a90a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils.html#a7073e23b2ae04bf248abd3c6fd26a90a">YAML::Utils::WriteAlias</a> (<a class="el" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a> &amp;out, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;str)</td></tr>
+<tr class="separator:a7073e23b2ae04bf248abd3c6fd26a90a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa8f13a74dea4476312947c484d56220" id="r_afa8f13a74dea4476312947c484d56220"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils.html#afa8f13a74dea4476312947c484d56220">YAML::Utils::WriteAnchor</a> (<a class="el" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a> &amp;out, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;str)</td></tr>
+<tr class="separator:afa8f13a74dea4476312947c484d56220"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7fde5352b7c504e255770937b71e9318" id="r_a7fde5352b7c504e255770937b71e9318"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils.html#a7fde5352b7c504e255770937b71e9318">YAML::Utils::WriteTag</a> (<a class="el" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a> &amp;out, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;str, bool verbatim)</td></tr>
+<tr class="separator:a7fde5352b7c504e255770937b71e9318"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18ff3f00faf332edd6ecb7d3aa968b52" id="r_a18ff3f00faf332edd6ecb7d3aa968b52"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils.html#a18ff3f00faf332edd6ecb7d3aa968b52">YAML::Utils::WriteTagWithPrefix</a> (<a class="el" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a> &amp;out, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;prefix, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;tag)</td></tr>
+<tr class="separator:a18ff3f00faf332edd6ecb7d3aa968b52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a545fdb750b68169d5cb818cd4eedde21" id="r_a545fdb750b68169d5cb818cd4eedde21"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1Utils.html#a545fdb750b68169d5cb818cd4eedde21">YAML::Utils::WriteBinary</a> (<a class="el" href="classYAML_1_1ostream__wrapper.html">ostream_wrapper</a> &amp;out, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYAML_1_1Binary.html">Binary</a> &amp;binary)</td></tr>
+<tr class="separator:a545fdb750b68169d5cb818cd4eedde21"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="emitterutils_8cpp.html">emitterutils.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+var classTraderAdapterMgr =
+[
+    [ "addAdapter", "classTraderAdapterMgr.html#aba592f7b9755d6a0855729528e22e44e", null ],
+    [ "addAdapter", "classTraderAdapterMgr.html#aba592f7b9755d6a0855729528e22e44e", null ],
+    [ "addAdapter", "classTraderAdapterMgr.html#aba592f7b9755d6a0855729528e22e44e", null ],
+    [ "decAlive", "classTraderAdapterMgr.html#ac76c227be1a6a574380209a48c3e42fa", null ],
+    [ "getAdapter", "classTraderAdapterMgr.html#af72c5f78898d2990528fce49c91cb9a3", null ],
+    [ "getAdapter", "classTraderAdapterMgr.html#af72c5f78898d2990528fce49c91cb9a3", null ],
+    [ "getAdapter", "classTraderAdapterMgr.html#af72c5f78898d2990528fce49c91cb9a3", null ],
+    [ "getAdapters", "classTraderAdapterMgr.html#aca16245f071de6facaea6dd53b56f43d", null ],
+    [ "getAdapters", "classTraderAdapterMgr.html#aca16245f071de6facaea6dd53b56f43d", null ],
+    [ "getAdapters", "classTraderAdapterMgr.html#aca16245f071de6facaea6dd53b56f43d", null ],
+    [ "isAnyAlive", "classTraderAdapterMgr.html#ab0c4bd970c04c92bc221c30ed99a9e62", null ],
+    [ "refresh", "classTraderAdapterMgr.html#a890fd1dee5279482487922e41e736b08", null ],
+    [ "refresh_funds", "classTraderAdapterMgr.html#a1010a2c06210d7dc995ddf7da593cb74", null ],
+    [ "release", "classTraderAdapterMgr.html#a50fb856c38636f102c775ee9ea8114ce", null ],
+    [ "release", "classTraderAdapterMgr.html#a50fb856c38636f102c775ee9ea8114ce", null ],
+    [ "release", "classTraderAdapterMgr.html#a50fb856c38636f102c775ee9ea8114ce", null ],
+    [ "run", "classTraderAdapterMgr.html#a6d321839dfa13802f208eb0a31f81cd8", null ],
+    [ "run", "classTraderAdapterMgr.html#a6d321839dfa13802f208eb0a31f81cd8", null ],
+    [ "run", "classTraderAdapterMgr.html#a6d321839dfa13802f208eb0a31f81cd8", null ],
+    [ "size", "classTraderAdapterMgr.html#a48c4267cee24ce2a0b22bc4d2af4f58c", null ],
+    [ "_adapters", "classTraderAdapterMgr.html#af78036180b2e5e383f2194825e1ca213", null ],
+    [ "_live_cnt", "classTraderAdapterMgr.html#a8afa9fa2ae9e6d9f5aab45d72c0851f5", null ],
+    [ "_mutex", "classTraderAdapterMgr.html#a3d6ee607bce8028183d0173a39017c5f", null ]
+];

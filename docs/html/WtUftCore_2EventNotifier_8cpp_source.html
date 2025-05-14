@@ -1,0 +1,482 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtUftCore/EventNotifier.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtUftCore_2EventNotifier_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">EventNotifier.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtUftCore_2EventNotifier_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="WtUftCore_2EventNotifier_8h.html">EventNotifier.h</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="WtUftCore_2WtHelper_8h.html">WtHelper.h</a>&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../Share/TimeUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../Share/DLLHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;../Includes/WTSTradeDef.hpp&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;../Includes/WTSCollection.hpp&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;../Includes/WTSVariant.hpp&quot;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;../WTSTools/WTSLogger.h&quot;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;rapidjson/document.h&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;rapidjson/prettywriter.h&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;rapidjson/writer.h&gt;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">namespace </span>rj = rapidjson;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="WtUftCore_2EventNotifier_8cpp.html#a17226795848decb565e90624584e5c0f">   30</a></span><a class="code hl_variable" href="WtBtCore_2EventNotifier_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="}">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="WtUftCore_2EventNotifier_8cpp.html#a58ee84c8e486650d09dbfc587b52005e">   39</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="WtBtCore_2EventNotifier_8cpp.html#a58ee84c8e486650d09dbfc587b52005e">on_mq_log</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">char</span>* message, <span class="keywordtype">bool</span> bServer)</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>{</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="comment">// 可以在这里添加日志处理逻辑</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}</div>
+</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><a class="code hl_function" href="classEventNotifier.html#af4e8558e00d272a55547d72b34a5fedd">EventNotifier::EventNotifier</a>()</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    : _mq_sid(0)      <span class="comment">// 初始化消息队列服务器ID为0</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    , _publisher(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>) <span class="comment">// 初始化消息发布者为空</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    , _stopped(false)  <span class="comment">// 初始化停止标志为否</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>{</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="comment">// 构造函数体内不需要额外操作</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>}</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><a class="code hl_function" href="classEventNotifier.html#a512da14ec6f0d036a919ab39617b97e9">EventNotifier::~EventNotifier</a>()</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>{</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <a class="code hl_variable" href="classEventNotifier.html#a12ec122bae2c557400acc7ee196e2d1e">_stopped</a> = <span class="keyword">true</span>;  <span class="comment">// 设置停止标志，通知工作线程结束</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classEventNotifier.html#af88b03ed7914f730cab479513b38748b">_worker</a>)</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <a class="code hl_variable" href="classEventNotifier.html#af88b03ed7914f730cab479513b38748b">_worker</a>-&gt;join(); <span class="comment">// 等待工作线程结束</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <a class="code hl_variable" href="classEventNotifier.html#a0919eddb5d2f795e841f17949ab22b96">_asyncio</a>.stop();  <span class="comment">// 停止异步IO服务</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classEventNotifier.html#a57d276e9cf1a7247de069554d229aa45">_remover</a> &amp;&amp; <a class="code hl_variable" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a> != 0)</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <a class="code hl_variable" href="classEventNotifier.html#a57d276e9cf1a7247de069554d229aa45">_remover</a>(<a class="code hl_variable" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a>); <span class="comment">// 销毁消息队列服务器连接</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>}</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="keywordtype">bool</span> <a class="code hl_function" href="classEventNotifier.html#a4547482410c8759f72673d3902b990ee">EventNotifier::init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg)</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>{</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="comment">// 如果不激活消息队列，直接返回失败</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keywordflow">if</span> (!cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#a597bf32bfe71fb040721dc65dc786df6">getBoolean</a>(<span class="stringliteral">&quot;active&quot;</span>))</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="comment">// 获取消息队列服务器URL</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <a class="code hl_variable" href="classEventNotifier.html#a1f9ec2c20ca9091b290bffb1866bd7f4">_url</a> = cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#a830db11fc8daceff409fdbebaa7bea8a">getCString</a>(<span class="stringliteral">&quot;url&quot;</span>);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    std::string <span class="keyword">module</span> = DLLHelper::wrap_module(&quot;WtMsgQue&quot;, &quot;lib&quot;);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="comment">//先看工作目录下是否有对应模块</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    std::string dllpath = <a class="code hl_function" href="classWtHelper.html#ac5e1e8cf33bf4c502aedaf6c6db62ab5">WtHelper::getCWD</a>() + <span class="keyword">module</span>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="comment">//如果没有,则再看模块目录,即dll同目录下</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="classStdFile.html#a65778f7268857f981a2e19acb8379761">StdFile::exists</a>(dllpath.c_str()))</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        dllpath = <a class="code hl_function" href="classWtHelper.html#af1a7e612c19e279fc8b57066cad0c2f9">WtHelper::getInstDir</a>() + <span class="keyword">module</span>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <a class="code hl_typedef" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a> dllInst = <a class="code hl_function" href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a>(dllpath.c_str());</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <span class="keywordflow">if</span> (dllInst == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    {</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;MQ module {} loading failed&quot;</span>, dllpath.c_str());</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    }</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <a class="code hl_variable" href="classEventNotifier.html#a36a31a906436f07677cf62d750794140">_creator</a> = (<a class="code hl_typedef" href="WtUftCore_2EventNotifier_8h.html#ad2fd82701ffd71cefdf561fae2b49446">FuncCreateMQServer</a>)<a class="code hl_function" href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a>(dllInst, <span class="stringliteral">&quot;create_server&quot;</span>);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classEventNotifier.html#a36a31a906436f07677cf62d750794140">_creator</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    {</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        <a class="code hl_function" href="classDLLHelper.html#adbde89a530ae734c57506bf9639ccc65">DLLHelper::free_library</a>(dllInst);</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>        <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;MQ module {} is not compatible&quot;</span>, dllpath.c_str());</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    }</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <a class="code hl_variable" href="classEventNotifier.html#a57d276e9cf1a7247de069554d229aa45">_remover</a> = (<a class="code hl_typedef" href="WtUftCore_2EventNotifier_8h.html#a3522cc64d06d81ed85a8b524cf8b82c2">FuncDestroyMQServer</a>)<a class="code hl_function" href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a>(dllInst, <span class="stringliteral">&quot;destroy_server&quot;</span>);</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <a class="code hl_variable" href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">_publisher</a> = (<a class="code hl_typedef" href="WtUftCore_2EventNotifier_8h.html#a87a3a860679f7f5e622261d4d0e6f287">FundPublishMessage</a>)<a class="code hl_function" href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a>(dllInst, <span class="stringliteral">&quot;publish_message&quot;</span>);</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <a class="code hl_variable" href="classEventNotifier.html#a408f207bc3cb4821c72e1080b663711e">_register</a> = (<a class="code hl_typedef" href="WtUftCore_2EventNotifier_8h.html#a8d23775ba30cc3102a9ee6fafb76a871">FuncRegCallbacks</a>)<a class="code hl_function" href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a>(dllInst, <span class="stringliteral">&quot;regiter_callbacks&quot;</span>);</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="comment">//注册回调函数</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <a class="code hl_variable" href="classEventNotifier.html#a408f207bc3cb4821c72e1080b663711e">_register</a>(<a class="code hl_function" href="WtBtCore_2EventNotifier_8cpp.html#a58ee84c8e486650d09dbfc587b52005e">on_mq_log</a>);</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="comment">//创建一个MQServer</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <a class="code hl_variable" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a> = <a class="code hl_variable" href="classEventNotifier.html#a36a31a906436f07677cf62d750794140">_creator</a>(<a class="code hl_variable" href="classEventNotifier.html#a1f9ec2c20ca9091b290bffb1866bd7f4">_url</a>.c_str());</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <a class="code hl_function" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a>(<span class="stringliteral">&quot;EventNotifier initialized with channel {}&quot;</span>, <a class="code hl_variable" href="classEventNotifier.html#a1f9ec2c20ca9091b290bffb1866bd7f4">_url</a>.c_str());</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classEventNotifier.html#af88b03ed7914f730cab479513b38748b">_worker</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    {</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        boost::asio::io_service::work work(<a class="code hl_variable" href="classEventNotifier.html#a0919eddb5d2f795e841f17949ab22b96">_asyncio</a>);</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>        <a class="code hl_variable" href="classEventNotifier.html#af88b03ed7914f730cab479513b38748b">_worker</a>.reset(<span class="keyword">new</span> <a class="code hl_typedef" href="group__ThreadUtils.html#gad58209190954450c6ef8c8d66f422e61">StdThread</a>([<span class="keyword">this</span>]() {</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>            <span class="keywordflow">while</span> (!<a class="code hl_variable" href="classEventNotifier.html#a12ec122bae2c557400acc7ee196e2d1e">_stopped</a>)</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>            {</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>                std::this_thread::sleep_for(std::chrono::milliseconds(2));</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>                <a class="code hl_variable" href="classEventNotifier.html#a0919eddb5d2f795e841f17949ab22b96">_asyncio</a>.run_one();</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>                <span class="comment">//m_asyncIO.run();</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>            }</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        }));</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    }</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>}</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="keywordtype">void</span> <a class="code hl_function" href="classEventNotifier.html#afe59bb8dfd08ef8960743cb79d16c114">EventNotifier::notify_log</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* tag, <span class="keyword">const</span> <span class="keywordtype">char</span>* message)</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>{</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    <span class="comment">// 如果消息队列服务器不可用，直接返回</span></div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a> == 0)</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    <span class="comment">// 复制参数，防止异步调用时参数已被释放</span></div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    std::string strTag = tag;</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    std::string strMsg = message;</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    <span class="comment">// 添加异步任务</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <a class="code hl_variable" href="classEventNotifier.html#a0919eddb5d2f795e841f17949ab22b96">_asyncio</a>.post([<span class="keyword">this</span>, strTag, strMsg]() {</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        std::string data;</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>        {</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>            rj::Document root(rj::kObjectType);</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>            rj::Document::AllocatorType &amp;allocator = root.GetAllocator();</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>            root.AddMember(<span class="stringliteral">&quot;tag&quot;</span>, rj::Value(strTag.c_str(), allocator), allocator);</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>            root.AddMember(<span class="stringliteral">&quot;time&quot;</span>, <a class="code hl_function" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">TimeUtils::getLocalTimeNow</a>(), allocator);</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>            root.AddMember(<span class="stringliteral">&quot;message&quot;</span>, rj::Value(strMsg.c_str(), allocator), allocator);</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>            rj::StringBuffer sb;</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>            rj::PrettyWriter&lt;rj::StringBuffer&gt; writer(sb);</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>            root.Accept(writer);</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>            data = sb.GetString();</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        }</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">_publisher</a>)</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>            <a class="code hl_variable" href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">_publisher</a>(<a class="code hl_variable" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a>, <span class="stringliteral">&quot;LOG&quot;</span>, data.c_str(), (<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>)data.size());</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    });</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>}</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span><span class="keywordtype">void</span> <a class="code hl_function" href="classEventNotifier.html#a6ddecad48701ffcf7ee388485b6f29a9">EventNotifier::notify_event</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* message)</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>{</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>    <span class="comment">// 如果消息队列服务器不可用，直接返回</span></div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a> == 0)</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <span class="comment">// 复制参数，防止异步调用时参数已被释放</span></div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    std::string strMsg = message;</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    <span class="comment">// 添加异步任务</span></div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    <a class="code hl_variable" href="classEventNotifier.html#a0919eddb5d2f795e841f17949ab22b96">_asyncio</a>.post([<span class="keyword">this</span>, strMsg]() {</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        std::string data;</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        {</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>            rj::Document root(rj::kObjectType);</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>            rj::Document::AllocatorType &amp;allocator = root.GetAllocator();</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span> </div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>            root.AddMember(<span class="stringliteral">&quot;time&quot;</span>, <a class="code hl_function" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">TimeUtils::getLocalTimeNow</a>(), allocator);</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>            root.AddMember(<span class="stringliteral">&quot;message&quot;</span>, rj::Value(strMsg.c_str(), allocator), allocator);</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>            rj::StringBuffer sb;</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>            rj::PrettyWriter&lt;rj::StringBuffer&gt; writer(sb);</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>            root.Accept(writer);</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span> </div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>            data = sb.GetString();</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>        }</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">_publisher</a>)</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>            <a class="code hl_variable" href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">_publisher</a>(<a class="code hl_variable" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a>, <span class="stringliteral">&quot;GRP_EVENT&quot;</span>, data.c_str(), (<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>)data.size());</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    });</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>}</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span> </div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span><span class="keywordtype">void</span> <a class="code hl_function" href="classEventNotifier.html#a2e1a5f8071c58d89422dcfafda32c703">EventNotifier::notify</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* trader, <span class="keyword">const</span> <span class="keywordtype">char</span>* message)</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>{</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    <span class="comment">// 如果消息队列服务器不可用，直接返回</span></div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a> == 0)</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span> </div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    <span class="comment">// 复制参数，防止异步调用时参数已被释放</span></div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    std::string strTrader = trader;</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>    std::string strMsg = message;</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    <span class="comment">// 添加异步任务</span></div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    <a class="code hl_variable" href="classEventNotifier.html#a0919eddb5d2f795e841f17949ab22b96">_asyncio</a>.post([<span class="keyword">this</span>, strTrader, strMsg]() {</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        std::string data;</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        {</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>            rj::Document root(rj::kObjectType);</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>            rj::Document::AllocatorType &amp;allocator = root.GetAllocator();</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span> </div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>            root.AddMember(<span class="stringliteral">&quot;trader&quot;</span>, rj::Value(strTrader.c_str(), allocator), allocator);</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>            root.AddMember(<span class="stringliteral">&quot;time&quot;</span>, <a class="code hl_function" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">TimeUtils::getLocalTimeNow</a>(), allocator);</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>            root.AddMember(<span class="stringliteral">&quot;message&quot;</span>, rj::Value(strMsg.c_str(), allocator), allocator);</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span> </div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>            rj::StringBuffer sb;</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>            rj::PrettyWriter&lt;rj::StringBuffer&gt; writer(sb);</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>            root.Accept(writer);</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>            data = sb.GetString();</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        }</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">_publisher</a>)</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>            <a class="code hl_variable" href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">_publisher</a>(<a class="code hl_variable" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a>, <span class="stringliteral">&quot;TRD_NOTIFY&quot;</span>, data.c_str(), (<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>)data.size());</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    });</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>}</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span> </div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span><span class="keywordtype">void</span> <a class="code hl_function" href="classEventNotifier.html#a2e1a5f8071c58d89422dcfafda32c703">EventNotifier::notify</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* trader, uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTradeInfo.html">WTSTradeInfo</a>* trdInfo)</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>{</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>    <span class="comment">// 如果成交信息为空或消息队列服务器不可用，直接返回</span></div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    <span class="keywordflow">if</span> (trdInfo == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a> || <a class="code hl_variable" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a> == 0)</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span> </div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>    <span class="comment">// 复制参数，防止异步调用时参数已被释放</span></div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>    std::string strTrader = trader;</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>    std::string strCode = stdCode;</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    trdInfo-&gt;<a class="code hl_function" href="classWTSObject.html#a3e41434e26313af90b03c8c8b395b049">retain</a>(); <span class="comment">// 增加引用计数，防止异步调用期间被释放</span></div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    <span class="comment">// 添加异步任务</span></div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>    <a class="code hl_variable" href="classEventNotifier.html#a0919eddb5d2f795e841f17949ab22b96">_asyncio</a>.post([<span class="keyword">this</span>, strTrader, strCode, localid, trdInfo]() {</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        std::string data;</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>        <a class="code hl_function" href="classEventNotifier.html#a9ea3431fa5ced6a232d5e8dff5ebf1dd">tradeToJson</a>(strTrader.c_str(), localid, strCode.c_str(), trdInfo, data);</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">_publisher</a>)</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>            <a class="code hl_variable" href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">_publisher</a>(<a class="code hl_variable" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a>, <span class="stringliteral">&quot;TRD_TRADE&quot;</span>, data.c_str(), (<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>)data.size());</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>        trdInfo-&gt;<a class="code hl_function" href="classWTSPoolObject.html#a868f127b3ccc31cba6b077803cb00951">release</a>();</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>    });</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>}</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span> </div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span><span class="keywordtype">void</span> <a class="code hl_function" href="classEventNotifier.html#a2e1a5f8071c58d89422dcfafda32c703">EventNotifier::notify</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* trader, uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSOrderInfo.html">WTSOrderInfo</a>* ordInfo)</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>{</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>    <span class="comment">// 如果订单信息为空或消息队列服务器不可用，直接返回</span></div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>    <span class="keywordflow">if</span> (ordInfo == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a> || <a class="code hl_variable" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a> == 0)</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>    <span class="comment">// 复制参数，防止异步调用时参数已被释放</span></div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>    std::string strTrader = trader;</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    std::string strCode = stdCode;</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>    ordInfo-&gt;<a class="code hl_function" href="classWTSObject.html#a3e41434e26313af90b03c8c8b395b049">retain</a>(); <span class="comment">// 增加引用计数，防止异步调用期间被释放</span></div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>    <span class="comment">// 添加异步任务</span></div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    <a class="code hl_variable" href="classEventNotifier.html#a0919eddb5d2f795e841f17949ab22b96">_asyncio</a>.post([<span class="keyword">this</span>, strTrader, strCode, localid, ordInfo]() {</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>        std::string data;</div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>        <a class="code hl_function" href="classEventNotifier.html#a99137f05f5acbd16d150075ca9b20307">orderToJson</a>(strTrader.c_str(), localid, strCode.c_str(), ordInfo, data);</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">_publisher</a>)</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>            <a class="code hl_variable" href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">_publisher</a>(<a class="code hl_variable" href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">_mq_sid</a>, <span class="stringliteral">&quot;TRD_ORDER&quot;</span>, data.c_str(), (<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>)data.size());</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>    });</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>}</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span> </div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span><span class="keywordtype">void</span> <a class="code hl_function" href="classEventNotifier.html#a9ea3431fa5ced6a232d5e8dff5ebf1dd">EventNotifier::tradeToJson</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* trader, uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTradeInfo.html">WTSTradeInfo</a>* trdInfo, std::string&amp; output)</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>{</div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>    <span class="keywordflow">if</span>(trdInfo == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>    {</div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>        output = <span class="stringliteral">&quot;{}&quot;</span>;</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>    }</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span> </div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>    <span class="keywordtype">bool</span> isLong = (trdInfo-&gt;<a class="code hl_function" href="classWTSTradeInfo.html#a9435375dcb5a230d1df5f2dc4cdbce6a">getDirection</a>() == <a class="code hl_enumvalue" href="WTSTypes_8h.html#ae2cf85c5f6cfd2f633b2045283699332afb61491ba13c3cf7a718fef01c3968e7">WDT_LONG</a>);</div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>    <span class="keywordtype">bool</span> isOpen = (trdInfo-&gt;<a class="code hl_function" href="classWTSTradeInfo.html#ad55bfa9a6d29886c66d6baff317ea6d8">getOffsetType</a>() == <a class="code hl_enumvalue" href="WTSTypes_8h.html#acaae84fe2c46ad411136d3691fa7d2cea8b94e4f682500e584c233a87cfaea8c2">WOT_OPEN</a>);</div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>    <span class="keywordtype">bool</span> isToday = (trdInfo-&gt;<a class="code hl_function" href="classWTSTradeInfo.html#ad55bfa9a6d29886c66d6baff317ea6d8">getOffsetType</a>() == <a class="code hl_enumvalue" href="WTSTypes_8h.html#acaae84fe2c46ad411136d3691fa7d2cea910439879d362dfd9cff4d0f96c68a03">WOT_CLOSETODAY</a>);</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span> </div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>    {</div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>        rj::Document root(rj::kObjectType);</div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>        rj::Document::AllocatorType &amp;allocator = root.GetAllocator();</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span> </div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>        root.AddMember(<span class="stringliteral">&quot;trader&quot;</span>, rj::Value(trader, allocator), allocator);</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>        root.AddMember(<span class="stringliteral">&quot;time&quot;</span>, <a class="code hl_function" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">TimeUtils::getLocalTimeNow</a>(), allocator);</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>        root.AddMember(<span class="stringliteral">&quot;localid&quot;</span>, localid, allocator);</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>        root.AddMember(<span class="stringliteral">&quot;code&quot;</span>, rj::Value(stdCode, allocator), allocator);</div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>        root.AddMember(<span class="stringliteral">&quot;islong&quot;</span>, isLong, allocator);</div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>        root.AddMember(<span class="stringliteral">&quot;isopen&quot;</span>, isOpen, allocator);</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>        root.AddMember(<span class="stringliteral">&quot;istoday&quot;</span>, isToday, allocator);</div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span> </div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>        root.AddMember(<span class="stringliteral">&quot;volume&quot;</span>, trdInfo-&gt;<a class="code hl_function" href="classWTSTradeInfo.html#a16d1b0acd8f971f1db39aee322b42d70">getVolume</a>(), allocator);</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>        root.AddMember(<span class="stringliteral">&quot;price&quot;</span>, trdInfo-&gt;<a class="code hl_function" href="classWTSTradeInfo.html#a94937918dfb5fc31ed95b2548ce357fd">getPrice</a>(), allocator);</div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span> </div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>        rj::StringBuffer sb;</div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>        rj::PrettyWriter&lt;rj::StringBuffer&gt; writer(sb);</div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>        root.Accept(writer);</div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span> </div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>        output = sb.GetString();</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>    }</div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>}</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span> </div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span><span class="keywordtype">void</span> <a class="code hl_function" href="classEventNotifier.html#a99137f05f5acbd16d150075ca9b20307">EventNotifier::orderToJson</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* trader, uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSOrderInfo.html">WTSOrderInfo</a>* ordInfo, std::string&amp; output)</div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>{</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>    <span class="keywordflow">if</span> (ordInfo == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>    {</div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>        output = <span class="stringliteral">&quot;{}&quot;</span>;</div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>    }</div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span> </div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>    <span class="keywordtype">bool</span> isLong = (ordInfo-&gt;<a class="code hl_function" href="classWTSOrderInfo.html#a997c8d62422210666e1bff13d99eb83e">getDirection</a>() == <a class="code hl_enumvalue" href="WTSTypes_8h.html#ae2cf85c5f6cfd2f633b2045283699332afb61491ba13c3cf7a718fef01c3968e7">WDT_LONG</a>);</div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>    <span class="keywordtype">bool</span> isOpen = (ordInfo-&gt;<a class="code hl_function" href="classWTSOrderInfo.html#a3cb548b38ea88d4c7a6a0b2b75ad5032">getOffsetType</a>() == <a class="code hl_enumvalue" href="WTSTypes_8h.html#acaae84fe2c46ad411136d3691fa7d2cea8b94e4f682500e584c233a87cfaea8c2">WOT_OPEN</a>);</div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>    <span class="keywordtype">bool</span> isToday = (ordInfo-&gt;<a class="code hl_function" href="classWTSOrderInfo.html#a3cb548b38ea88d4c7a6a0b2b75ad5032">getOffsetType</a>() == <a class="code hl_enumvalue" href="WTSTypes_8h.html#acaae84fe2c46ad411136d3691fa7d2cea910439879d362dfd9cff4d0f96c68a03">WOT_CLOSETODAY</a>);</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>    <span class="keywordtype">bool</span> isCanceled = (ordInfo-&gt;<a class="code hl_function" href="classWTSOrderInfo.html#a8a07556a997e4908e64ad7b990a70581">getOrderState</a>() == <a class="code hl_enumvalue" href="WTSTypes_8h.html#aa94346ff57cc9428156f8f04d056aa70a379f47b6103a10756a56bb945c6304ed">WOS_Canceled</a>);</div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span> </div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>    {</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>        rj::Document root(rj::kObjectType);</div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>        rj::Document::AllocatorType &amp;allocator = root.GetAllocator();</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span> </div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>        root.AddMember(<span class="stringliteral">&quot;trader&quot;</span>, rj::Value(trader, allocator), allocator);</div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>        root.AddMember(<span class="stringliteral">&quot;time&quot;</span>, <a class="code hl_function" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">TimeUtils::getLocalTimeNow</a>(), allocator);</div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>        root.AddMember(<span class="stringliteral">&quot;localid&quot;</span>, localid, allocator);</div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>        root.AddMember(<span class="stringliteral">&quot;code&quot;</span>, rj::Value(stdCode, allocator), allocator);</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>        root.AddMember(<span class="stringliteral">&quot;islong&quot;</span>, isLong, allocator);</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>        root.AddMember(<span class="stringliteral">&quot;isopen&quot;</span>, isOpen, allocator);</div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>        root.AddMember(<span class="stringliteral">&quot;istoday&quot;</span>, isToday, allocator);</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>        root.AddMember(<span class="stringliteral">&quot;canceled&quot;</span>, isCanceled, allocator);</div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span> </div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>        root.AddMember(<span class="stringliteral">&quot;total&quot;</span>, ordInfo-&gt;<a class="code hl_function" href="classWTSOrderInfo.html#ac092e06579eb8dda9e619f7b9f60a476">getVolume</a>(), allocator);</div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>        root.AddMember(<span class="stringliteral">&quot;left&quot;</span>, ordInfo-&gt;<a class="code hl_function" href="classWTSOrderInfo.html#a8d0dd4988368f524b2d7392594eaaddd">getVolLeft</a>(), allocator);</div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>        root.AddMember(<span class="stringliteral">&quot;traded&quot;</span>, ordInfo-&gt;<a class="code hl_function" href="classWTSOrderInfo.html#a67abdbe89283e7b592ddf2b6ce7c8b6b">getVolTraded</a>(), allocator);</div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>        root.AddMember(<span class="stringliteral">&quot;price&quot;</span>, ordInfo-&gt;<a class="code hl_function" href="classWTSOrderInfo.html#a7bed44277e0945f04d2765b2db0d4ad8">getPrice</a>(), allocator);</div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>        root.AddMember(<span class="stringliteral">&quot;state&quot;</span>, rj::Value(ordInfo-&gt;<a class="code hl_function" href="classWTSOrderInfo.html#af43b6c1bb0ef695e934d1bac4f264d8d">getStateMsg</a>(), allocator), allocator);</div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span> </div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>        rj::StringBuffer sb;</div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>        rj::PrettyWriter&lt;rj::StringBuffer&gt; writer(sb);</div>
+<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>        root.Accept(writer);</div>
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span> </div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>        output = sb.GetString();</div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>    }</div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>}</div>
+<div class="ttc" id="aDLLHelper_8hpp_html_a40972742af38c16d3ab2f521abf0ca8a"><div class="ttname"><a href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a></div><div class="ttdeci">void * DllHandle</div><div class="ttdoc">动态库句柄类型（非Windows平台）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00032">DLLHelper.hpp:32</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aa94346ff57cc9428156f8f04d056aa70a379f47b6103a10756a56bb945c6304ed"><div class="ttname"><a href="WTSTypes_8h.html#aa94346ff57cc9428156f8f04d056aa70a379f47b6103a10756a56bb945c6304ed">WOS_Canceled</a></div><div class="ttdeci">@ WOS_Canceled</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00245">WTSTypes.h:245</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_acaae84fe2c46ad411136d3691fa7d2cea8b94e4f682500e584c233a87cfaea8c2"><div class="ttname"><a href="WTSTypes_8h.html#acaae84fe2c46ad411136d3691fa7d2cea8b94e4f682500e584c233a87cfaea8c2">WOT_OPEN</a></div><div class="ttdeci">@ WOT_OPEN</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00194">WTSTypes.h:194</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_acaae84fe2c46ad411136d3691fa7d2cea910439879d362dfd9cff4d0f96c68a03"><div class="ttname"><a href="WTSTypes_8h.html#acaae84fe2c46ad411136d3691fa7d2cea910439879d362dfd9cff4d0f96c68a03">WOT_CLOSETODAY</a></div><div class="ttdeci">@ WOT_CLOSETODAY</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00197">WTSTypes.h:197</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_ae2cf85c5f6cfd2f633b2045283699332afb61491ba13c3cf7a718fef01c3968e7"><div class="ttname"><a href="WTSTypes_8h.html#ae2cf85c5f6cfd2f633b2045283699332afb61491ba13c3cf7a718fef01c3968e7">WDT_LONG</a></div><div class="ttdeci">@ WDT_LONG</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00206">WTSTypes.h:206</a></div></div>
+<div class="ttc" id="aWtBtCore_2EventNotifier_8cpp_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="WtBtCore_2EventNotifier_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8cpp_source.html#l00023">EventNotifier.cpp:23</a></div></div>
+<div class="ttc" id="aWtBtCore_2EventNotifier_8cpp_html_a58ee84c8e486650d09dbfc587b52005e"><div class="ttname"><a href="WtBtCore_2EventNotifier_8cpp.html#a58ee84c8e486650d09dbfc587b52005e">on_mq_log</a></div><div class="ttdeci">void on_mq_log(unsigned long id, const char *message, bool bServer)</div><div class="ttdoc">消息队列日志回调函数</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8cpp_source.html#l00032">EventNotifier.cpp:32</a></div></div>
+<div class="ttc" id="aWtUftCore_2EventNotifier_8h_html"><div class="ttname"><a href="WtUftCore_2EventNotifier_8h.html">EventNotifier.h</a></div><div class="ttdoc">事件通知器对象定义</div></div>
+<div class="ttc" id="aWtUftCore_2EventNotifier_8h_html_a3522cc64d06d81ed85a8b524cf8b82c2"><div class="ttname"><a href="WtUftCore_2EventNotifier_8h.html#a3522cc64d06d81ed85a8b524cf8b82c2">FuncDestroyMQServer</a></div><div class="ttdeci">void(* FuncDestroyMQServer)(unsigned long)</div><div class="ttdoc">销毁消息队列服务器函数指针类型</div><div class="ttdef"><b>Definition</b> <a href="WtUftCore_2EventNotifier_8h_source.html#l00032">EventNotifier.h:32</a></div></div>
+<div class="ttc" id="aWtUftCore_2EventNotifier_8h_html_a87a3a860679f7f5e622261d4d0e6f287"><div class="ttname"><a href="WtUftCore_2EventNotifier_8h.html#a87a3a860679f7f5e622261d4d0e6f287">FundPublishMessage</a></div><div class="ttdeci">void(* FundPublishMessage)(unsigned long, const char *, const char *, unsigned long)</div><div class="ttdoc">发布消息函数指针类型</div><div class="ttdef"><b>Definition</b> <a href="WtUftCore_2EventNotifier_8h_source.html#l00041">EventNotifier.h:41</a></div></div>
+<div class="ttc" id="aWtUftCore_2EventNotifier_8h_html_a8d23775ba30cc3102a9ee6fafb76a871"><div class="ttname"><a href="WtUftCore_2EventNotifier_8h.html#a8d23775ba30cc3102a9ee6fafb76a871">FuncRegCallbacks</a></div><div class="ttdeci">void(* FuncRegCallbacks)(FuncLogCallback)</div><div class="ttdoc">注册回调函数指针类型</div><div class="ttdef"><b>Definition</b> <a href="WtUftCore_2EventNotifier_8h_source.html#l00055">EventNotifier.h:55</a></div></div>
+<div class="ttc" id="aWtUftCore_2EventNotifier_8h_html_ad2fd82701ffd71cefdf561fae2b49446"><div class="ttname"><a href="WtUftCore_2EventNotifier_8h.html#ad2fd82701ffd71cefdf561fae2b49446">FuncCreateMQServer</a></div><div class="ttdeci">unsigned long(* FuncCreateMQServer)(const char *)</div><div class="ttdoc">创建消息队列服务器函数指针类型</div><div class="ttdef"><b>Definition</b> <a href="WtUftCore_2EventNotifier_8h_source.html#l00026">EventNotifier.h:26</a></div></div>
+<div class="ttc" id="aWtUftCore_2WtHelper_8h_html"><div class="ttname"><a href="WtUftCore_2WtHelper_8h.html">WtHelper.h</a></div><div class="ttdoc">WonderTrader辅助工具类头文件</div></div>
+<div class="ttc" id="aclassDLLHelper_html_ac5d55450ea114206242d9ccbfd65ac82"><div class="ttname"><a href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a></div><div class="ttdeci">static DllHandle load_library(const char *filename)</div><div class="ttdoc">加载动态库</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00058">DLLHelper.hpp:58</a></div></div>
+<div class="ttc" id="aclassDLLHelper_html_adbde89a530ae734c57506bf9639ccc65"><div class="ttname"><a href="classDLLHelper.html#adbde89a530ae734c57506bf9639ccc65">DLLHelper::free_library</a></div><div class="ttdeci">static void free_library(DllHandle handle)</div><div class="ttdoc">释放动态库</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00085">DLLHelper.hpp:85</a></div></div>
+<div class="ttc" id="aclassDLLHelper_html_ae01c3a299dd418d0298d29fa5f5f9b2c"><div class="ttname"><a href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a></div><div class="ttdeci">static ProcHandle get_symbol(DllHandle handle, const char *name)</div><div class="ttdoc">获取动态库中的符号（函数或变量）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00107">DLLHelper.hpp:107</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a0919eddb5d2f795e841f17949ab22b96"><div class="ttname"><a href="classEventNotifier.html#a0919eddb5d2f795e841f17949ab22b96">EventNotifier::_asyncio</a></div><div class="ttdeci">boost::asio::io_service _asyncio</div><div class="ttdoc">asio异步IO服务</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2EventNotifier_8h_source.html#l00187">EventNotifier.h:187</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a101f642fc6b56698302eb941d769331c"><div class="ttname"><a href="classEventNotifier.html#a101f642fc6b56698302eb941d769331c">EventNotifier::_publisher</a></div><div class="ttdeci">FundPublishMessage _publisher</div><div class="ttdoc">发布消息的函数指针</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00115">EventNotifier.h:115</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a12ec122bae2c557400acc7ee196e2d1e"><div class="ttname"><a href="classEventNotifier.html#a12ec122bae2c557400acc7ee196e2d1e">EventNotifier::_stopped</a></div><div class="ttdeci">bool _stopped</div><div class="ttdoc">是否停止工作线程</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2EventNotifier_8h_source.html#l00186">EventNotifier.h:186</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a1f9ec2c20ca9091b290bffb1866bd7f4"><div class="ttname"><a href="classEventNotifier.html#a1f9ec2c20ca9091b290bffb1866bd7f4">EventNotifier::_url</a></div><div class="ttdeci">std::string _url</div><div class="ttdoc">消息队列服务器URL</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2EventNotifier_8h_source.html#l00179">EventNotifier.h:179</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a2e1a5f8071c58d89422dcfafda32c703"><div class="ttname"><a href="classEventNotifier.html#a2e1a5f8071c58d89422dcfafda32c703">EventNotifier::notify</a></div><div class="ttdeci">void notify(const char *trader, uint32_t localid, const char *stdCode, WTSTradeInfo *trdInfo)</div><div class="ttdoc">发送成交事件通知</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2EventNotifier_8cpp_source.html#l00273">EventNotifier.cpp:273</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a36a31a906436f07677cf62d750794140"><div class="ttname"><a href="classEventNotifier.html#a36a31a906436f07677cf62d750794140">EventNotifier::_creator</a></div><div class="ttdeci">FuncCreateMQServer _creator</div><div class="ttdoc">创建消息队列服务器的函数指针</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00113">EventNotifier.h:113</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a408f207bc3cb4821c72e1080b663711e"><div class="ttname"><a href="classEventNotifier.html#a408f207bc3cb4821c72e1080b663711e">EventNotifier::_register</a></div><div class="ttdeci">FuncRegCallbacks _register</div><div class="ttdoc">注册回调函数的函数指针</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00116">EventNotifier.h:116</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a4547482410c8759f72673d3902b990ee"><div class="ttname"><a href="classEventNotifier.html#a4547482410c8759f72673d3902b990ee">EventNotifier::init</a></div><div class="ttdeci">bool init(WTSVariant *cfg)</div><div class="ttdoc">初始化事件通知器</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8cpp_source.html#l00066">EventNotifier.cpp:66</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a512da14ec6f0d036a919ab39617b97e9"><div class="ttname"><a href="classEventNotifier.html#a512da14ec6f0d036a919ab39617b97e9">EventNotifier::~EventNotifier</a></div><div class="ttdeci">~EventNotifier()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8cpp_source.html#l00052">EventNotifier.cpp:52</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a57d276e9cf1a7247de069554d229aa45"><div class="ttname"><a href="classEventNotifier.html#a57d276e9cf1a7247de069554d229aa45">EventNotifier::_remover</a></div><div class="ttdeci">FuncDestroyMQServer _remover</div><div class="ttdoc">销毁消息队列服务器的函数指针</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00114">EventNotifier.h:114</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a6ddecad48701ffcf7ee388485b6f29a9"><div class="ttname"><a href="classEventNotifier.html#a6ddecad48701ffcf7ee388485b6f29a9">EventNotifier::notify_event</a></div><div class="ttdeci">void notify_event(const char *message)</div><div class="ttdoc">发送事件通知</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2EventNotifier_8cpp_source.html#l00191">EventNotifier.cpp:191</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a7d72e6fb52f53aa3a24fd1b1a1611cfd"><div class="ttname"><a href="classEventNotifier.html#a7d72e6fb52f53aa3a24fd1b1a1611cfd">EventNotifier::_mq_sid</a></div><div class="ttdeci">uint32_t _mq_sid</div><div class="ttdoc">消息队列服务器ID</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8h_source.html#l00112">EventNotifier.h:112</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a99137f05f5acbd16d150075ca9b20307"><div class="ttname"><a href="classEventNotifier.html#a99137f05f5acbd16d150075ca9b20307">EventNotifier::orderToJson</a></div><div class="ttdeci">void orderToJson(const char *trader, uint32_t localid, const char *stdCode, WTSOrderInfo *ordInfo, std::string &amp;output)</div><div class="ttdoc">将订单信息转换为JSON格式</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2EventNotifier_8cpp_source.html#l00377">EventNotifier.cpp:377</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_a9ea3431fa5ced6a232d5e8dff5ebf1dd"><div class="ttname"><a href="classEventNotifier.html#a9ea3431fa5ced6a232d5e8dff5ebf1dd">EventNotifier::tradeToJson</a></div><div class="ttdeci">void tradeToJson(const char *trader, uint32_t localid, const char *stdCode, WTSTradeInfo *trdInfo, std::string &amp;output)</div><div class="ttdoc">将成交信息转换为JSON格式</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2EventNotifier_8cpp_source.html#l00327">EventNotifier.cpp:327</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_af4e8558e00d272a55547d72b34a5fedd"><div class="ttname"><a href="classEventNotifier.html#af4e8558e00d272a55547d72b34a5fedd">EventNotifier::EventNotifier</a></div><div class="ttdeci">EventNotifier()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2EventNotifier_8cpp_source.html#l00041">EventNotifier.cpp:41</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_af88b03ed7914f730cab479513b38748b"><div class="ttname"><a href="classEventNotifier.html#af88b03ed7914f730cab479513b38748b">EventNotifier::_worker</a></div><div class="ttdeci">StdThreadPtr _worker</div><div class="ttdoc">工作线程指针</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2EventNotifier_8h_source.html#l00188">EventNotifier.h:188</a></div></div>
+<div class="ttc" id="aclassEventNotifier_html_afe59bb8dfd08ef8960743cb79d16c114"><div class="ttname"><a href="classEventNotifier.html#afe59bb8dfd08ef8960743cb79d16c114">EventNotifier::notify_log</a></div><div class="ttdeci">void notify_log(const char *tag, const char *message)</div><div class="ttdoc">发送日志通知</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2EventNotifier_8cpp_source.html#l00150">EventNotifier.cpp:150</a></div></div>
+<div class="ttc" id="aclassStdFile_html_a65778f7268857f981a2e19acb8379761"><div class="ttname"><a href="classStdFile.html#a65778f7268857f981a2e19acb8379761">StdFile::exists</a></div><div class="ttdeci">static bool exists(const char *filename)</div><div class="ttdoc">检查文件是否存在</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00221">StdUtils.hpp:221</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_a48644704dd42fbb708a3e8b88b9611a8"><div class="ttname"><a href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">TimeUtils::getLocalTimeNow</a></div><div class="ttdeci">static int64_t getLocalTimeNow(void)</div><div class="ttdoc">获取当前本地时间，精确到毫秒</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00123">TimeUtils.hpp:123</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a20d65255542e3ed5d694b529892a0f57"><div class="ttname"><a href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a></div><div class="ttdeci">static void info(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出信息级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00187">WTSLogger.h:187</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a618c41d0ff3c1f5ce0a70d83c28bc9fc"><div class="ttname"><a href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a></div><div class="ttdeci">static void error(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出错误级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00239">WTSLogger.h:239</a></div></div>
+<div class="ttc" id="aclassWTSObject_html_a3e41434e26313af90b03c8c8b395b049"><div class="ttname"><a href="classWTSObject.html#a3e41434e26313af90b03c8c8b395b049">WTSObject::retain</a></div><div class="ttdeci">uint32_t retain()</div><div class="ttdef"><b>Definition</b> <a href="WTSObject_8hpp_source.html#l00027">WTSObject.hpp:27</a></div></div>
+<div class="ttc" id="aclassWTSOrderInfo_html"><div class="ttname"><a href="classWTSOrderInfo.html">WTSOrderInfo</a></div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00235">WTSTradeDef.hpp:236</a></div></div>
+<div class="ttc" id="aclassWTSOrderInfo_html_a3cb548b38ea88d4c7a6a0b2b75ad5032"><div class="ttname"><a href="classWTSOrderInfo.html#a3cb548b38ea88d4c7a6a0b2b75ad5032">WTSOrderInfo::getOffsetType</a></div><div class="ttdeci">WTSOffsetType getOffsetType() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00301">WTSTradeDef.hpp:301</a></div></div>
+<div class="ttc" id="aclassWTSOrderInfo_html_a67abdbe89283e7b592ddf2b6ce7c8b6b"><div class="ttname"><a href="classWTSOrderInfo.html#a67abdbe89283e7b592ddf2b6ce7c8b6b">WTSOrderInfo::getVolTraded</a></div><div class="ttdeci">double getVolTraded() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00342">WTSTradeDef.hpp:342</a></div></div>
+<div class="ttc" id="aclassWTSOrderInfo_html_a7bed44277e0945f04d2765b2db0d4ad8"><div class="ttname"><a href="classWTSOrderInfo.html#a7bed44277e0945f04d2765b2db0d4ad8">WTSOrderInfo::getPrice</a></div><div class="ttdeci">double getPrice() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00310">WTSTradeDef.hpp:310</a></div></div>
+<div class="ttc" id="aclassWTSOrderInfo_html_a8a07556a997e4908e64ad7b990a70581"><div class="ttname"><a href="classWTSOrderInfo.html#a8a07556a997e4908e64ad7b990a70581">WTSOrderInfo::getOrderState</a></div><div class="ttdeci">WTSOrderState getOrderState() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00345">WTSTradeDef.hpp:345</a></div></div>
+<div class="ttc" id="aclassWTSOrderInfo_html_a8d0dd4988368f524b2d7392594eaaddd"><div class="ttname"><a href="classWTSOrderInfo.html#a8d0dd4988368f524b2d7392594eaaddd">WTSOrderInfo::getVolLeft</a></div><div class="ttdeci">double getVolLeft() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00343">WTSTradeDef.hpp:343</a></div></div>
+<div class="ttc" id="aclassWTSOrderInfo_html_a997c8d62422210666e1bff13d99eb83e"><div class="ttname"><a href="classWTSOrderInfo.html#a997c8d62422210666e1bff13d99eb83e">WTSOrderInfo::getDirection</a></div><div class="ttdeci">WTSDirectionType getDirection() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00298">WTSTradeDef.hpp:298</a></div></div>
+<div class="ttc" id="aclassWTSOrderInfo_html_ac092e06579eb8dda9e619f7b9f60a476"><div class="ttname"><a href="classWTSOrderInfo.html#ac092e06579eb8dda9e619f7b9f60a476">WTSOrderInfo::getVolume</a></div><div class="ttdeci">double getVolume() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00309">WTSTradeDef.hpp:309</a></div></div>
+<div class="ttc" id="aclassWTSOrderInfo_html_af43b6c1bb0ef695e934d1bac4f264d8d"><div class="ttname"><a href="classWTSOrderInfo.html#af43b6c1bb0ef695e934d1bac4f264d8d">WTSOrderInfo::getStateMsg</a></div><div class="ttdeci">const char * getStateMsg() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00351">WTSTradeDef.hpp:351</a></div></div>
+<div class="ttc" id="aclassWTSPoolObject_html_a868f127b3ccc31cba6b077803cb00951"><div class="ttname"><a href="classWTSPoolObject.html#a868f127b3ccc31cba6b077803cb00951">WTSPoolObject::release</a></div><div class="ttdeci">virtual void release() override</div><div class="ttdef"><b>Definition</b> <a href="WTSObject_8hpp_source.html#l00092">WTSObject.hpp:92</a></div></div>
+<div class="ttc" id="aclassWTSTradeInfo_html"><div class="ttname"><a href="classWTSTradeInfo.html">WTSTradeInfo</a></div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00406">WTSTradeDef.hpp:407</a></div></div>
+<div class="ttc" id="aclassWTSTradeInfo_html_a16d1b0acd8f971f1db39aee322b42d70"><div class="ttname"><a href="classWTSTradeInfo.html#a16d1b0acd8f971f1db39aee322b42d70">WTSTradeInfo::getVolume</a></div><div class="ttdeci">double getVolume() const</div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00451">WTSTradeDef.hpp:451</a></div></div>
+<div class="ttc" id="aclassWTSTradeInfo_html_a9435375dcb5a230d1df5f2dc4cdbce6a"><div class="ttname"><a href="classWTSTradeInfo.html#a9435375dcb5a230d1df5f2dc4cdbce6a">WTSTradeInfo::getDirection</a></div><div class="ttdeci">WTSDirectionType getDirection() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00446">WTSTradeDef.hpp:446</a></div></div>
+<div class="ttc" id="aclassWTSTradeInfo_html_a94937918dfb5fc31ed95b2548ce357fd"><div class="ttname"><a href="classWTSTradeInfo.html#a94937918dfb5fc31ed95b2548ce357fd">WTSTradeInfo::getPrice</a></div><div class="ttdeci">double getPrice() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00452">WTSTradeDef.hpp:452</a></div></div>
+<div class="ttc" id="aclassWTSTradeInfo_html_ad55bfa9a6d29886c66d6baff317ea6d8"><div class="ttname"><a href="classWTSTradeInfo.html#ad55bfa9a6d29886c66d6baff317ea6d8">WTSTradeInfo::getOffsetType</a></div><div class="ttdeci">WTSOffsetType getOffsetType() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00447">WTSTradeDef.hpp:447</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a597bf32bfe71fb040721dc65dc786df6"><div class="ttname"><a href="classWTSVariant.html#a597bf32bfe71fb040721dc65dc786df6">WTSVariant::getBoolean</a></div><div class="ttdeci">bool getBoolean(const char *name) const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00348">WTSVariant.hpp:348</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a830db11fc8daceff409fdbebaa7bea8a"><div class="ttname"><a href="classWTSVariant.html#a830db11fc8daceff409fdbebaa7bea8a">WTSVariant::getCString</a></div><div class="ttdeci">const char * getCString(const char *name) const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00339">WTSVariant.hpp:339</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_ac5e1e8cf33bf4c502aedaf6c6db62ab5"><div class="ttname"><a href="classWtHelper.html#ac5e1e8cf33bf4c502aedaf6c6db62ab5">WtHelper::getCWD</a></div><div class="ttdeci">static std::string getCWD()</div><div class="ttdoc">获取当前工作目录</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2WtHelper_8cpp_source.html#l00031">WtHelper.cpp:31</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_af1a7e612c19e279fc8b57066cad0c2f9"><div class="ttname"><a href="classWtHelper.html#af1a7e612c19e279fc8b57066cad0c2f9">WtHelper::getInstDir</a></div><div class="ttdeci">static const std::string &amp; getInstDir()</div><div class="ttdoc">获取实例目录</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2WtHelper_8h_source.html#l00041">WtHelper.h:41</a></div></div>
+<div class="ttc" id="agroup__ThreadUtils_html_gad58209190954450c6ef8c8d66f422e61"><div class="ttname"><a href="group__ThreadUtils.html#gad58209190954450c6ef8c8d66f422e61">StdThread</a></div><div class="ttdeci">std::thread StdThread</div><div class="ttdoc">std::thread的别名</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00036">StdUtils.hpp:36</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_d8cf3075eb9e2bed05522e3b08b8e887.html">WtUftCore</a></li><li class="navelem"><a class="el" href="WtUftCore_2EventNotifier_8cpp.html">EventNotifier.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

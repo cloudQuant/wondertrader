@@ -1,0 +1,601 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: ShmCaster类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classShmCaster.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#pub-types">Public 类型</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-types">Private 类型</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classShmCaster-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">ShmCaster类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>基于共享内存的行情广播器  
+ <a href="classShmCaster.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="ShmCaster_8h_source.html">ShmCaster.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structShmCaster_1_1__DataItem.html">_DataItem</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">数据项结构体，用于存储各种类型的行情数据  <a href="structShmCaster_1_1__DataItem.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structShmCaster_1_1__DataQueue.html">_DataQueue</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">共享内存数据队列模板  <a href="structShmCaster_1_1__DataQueue.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public 类型</h2></td></tr>
+<tr class="memitem:aa5c0c036a1c0af51810713cccdde723c" id="r_aa5c0c036a1c0af51810713cccdde723c"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structShmCaster_1_1__DataItem.html">ShmCaster::_DataItem</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classShmCaster.html#aa5c0c036a1c0af51810713cccdde723c">DataItem</a></td></tr>
+<tr class="memdesc:aa5c0c036a1c0af51810713cccdde723c"><td class="mdescLeft">&#160;</td><td class="mdescRight">数据项结构体，用于存储各种类型的行情数据  <br /></td></tr>
+<tr class="separator:aa5c0c036a1c0af51810713cccdde723c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c76cf2875ceac4536848f9eb5d22ac9" id="r_a1c76cf2875ceac4536848f9eb5d22ac9"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="structShmCaster_1_1__DataQueue.html">_DataQueue</a>&lt; 8 *1024 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classShmCaster.html#a1c76cf2875ceac4536848f9eb5d22ac9">CastQueue</a></td></tr>
+<tr class="memdesc:a1c76cf2875ceac4536848f9eb5d22ac9"><td class="mdescLeft">&#160;</td><td class="mdescRight">广播队列类型别名，容量固定为8*1024个数据项  <br /></td></tr>
+<tr class="separator:a1c76cf2875ceac4536848f9eb5d22ac9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a7673ab920ce59358100fb6b219433d8d" id="r_a7673ab920ce59358100fb6b219433d8d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classShmCaster.html#a7673ab920ce59358100fb6b219433d8d">ShmCaster</a> ()</td></tr>
+<tr class="memdesc:a7673ab920ce59358100fb6b219433d8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a7673ab920ce59358100fb6b219433d8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3cc55487bff5f6b971ed43234382bb1a" id="r_a3cc55487bff5f6b971ed43234382bb1a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classShmCaster.html#a3cc55487bff5f6b971ed43234382bb1a">init</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *cfg)</td></tr>
+<tr class="memdesc:a3cc55487bff5f6b971ed43234382bb1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化广播器  <br /></td></tr>
+<tr class="separator:a3cc55487bff5f6b971ed43234382bb1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6d88a7f9aa3ad292516380888c21c70" id="r_ab6d88a7f9aa3ad292516380888c21c70"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classShmCaster.html#ab6d88a7f9aa3ad292516380888c21c70">broadcast</a> (<a class="el" href="classWTSTickData.html">WTSTickData</a> *curTick) override</td></tr>
+<tr class="memdesc:ab6d88a7f9aa3ad292516380888c21c70"><td class="mdescLeft">&#160;</td><td class="mdescRight">广播股票行情数据  <br /></td></tr>
+<tr class="separator:ab6d88a7f9aa3ad292516380888c21c70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62128f859a2d4069a7ebcf64fb842428" id="r_a62128f859a2d4069a7ebcf64fb842428"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classShmCaster.html#a62128f859a2d4069a7ebcf64fb842428">broadcast</a> (<a class="el" href="classWTSOrdQueData.html">WTSOrdQueData</a> *curOrdQue) override</td></tr>
+<tr class="memdesc:a62128f859a2d4069a7ebcf64fb842428"><td class="mdescLeft">&#160;</td><td class="mdescRight">广播委托队列数据  <br /></td></tr>
+<tr class="separator:a62128f859a2d4069a7ebcf64fb842428"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab78e881d5c53db1eaa8faec1ae4bbbc5" id="r_ab78e881d5c53db1eaa8faec1ae4bbbc5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classShmCaster.html#ab78e881d5c53db1eaa8faec1ae4bbbc5">broadcast</a> (<a class="el" href="classWTSOrdDtlData.html">WTSOrdDtlData</a> *curOrdDtl) override</td></tr>
+<tr class="memdesc:ab78e881d5c53db1eaa8faec1ae4bbbc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">广播逆序委托明细数据  <br /></td></tr>
+<tr class="separator:ab78e881d5c53db1eaa8faec1ae4bbbc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3ef5f57a34ad0a1c89a659d4a5be36f" id="r_ae3ef5f57a34ad0a1c89a659d4a5be36f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classShmCaster.html#ae3ef5f57a34ad0a1c89a659d4a5be36f">broadcast</a> (<a class="el" href="classWTSTransData.html">WTSTransData</a> *curTrans) override</td></tr>
+<tr class="memdesc:ae3ef5f57a34ad0a1c89a659d4a5be36f"><td class="mdescLeft">&#160;</td><td class="mdescRight">广播逆序逆序成交数据  <br /></td></tr>
+<tr class="separator:ae3ef5f57a34ad0a1c89a659d4a5be36f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 类型</h2></td></tr>
+<tr class="memitem:a8f1e1fde976db5d3039ee770adbe1dfb" id="r_a8f1e1fde976db5d3039ee770adbe1dfb"><td class="memItemLeft" align="right" valign="top">typedef std::shared_ptr&lt; <a class="el" href="classBoostMappingFile.html">BoostMappingFile</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classShmCaster.html#a8f1e1fde976db5d3039ee770adbe1dfb">MappedFilePtr</a></td></tr>
+<tr class="memdesc:a8f1e1fde976db5d3039ee770adbe1dfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">内存映射文件智能指针类型别名  <br /></td></tr>
+<tr class="separator:a8f1e1fde976db5d3039ee770adbe1dfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:a11fa289986da49108ea3487e6114fba8" id="r_a11fa289986da49108ea3487e6114fba8"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classShmCaster.html#a11fa289986da49108ea3487e6114fba8">_path</a></td></tr>
+<tr class="memdesc:a11fa289986da49108ea3487e6114fba8"><td class="mdescLeft">&#160;</td><td class="mdescRight">共享内存映射文件路径  <br /></td></tr>
+<tr class="separator:a11fa289986da49108ea3487e6114fba8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26123faca29120ed9955d292182d51c7" id="r_a26123faca29120ed9955d292182d51c7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classShmCaster.html#a8f1e1fde976db5d3039ee770adbe1dfb">MappedFilePtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classShmCaster.html#a26123faca29120ed9955d292182d51c7">_mapfile</a></td></tr>
+<tr class="memdesc:a26123faca29120ed9955d292182d51c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">内存映射文件智能指针  <br /></td></tr>
+<tr class="separator:a26123faca29120ed9955d292182d51c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad686ce74033ae0019b2eff4d6d5e227f" id="r_ad686ce74033ae0019b2eff4d6d5e227f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classShmCaster.html#a1c76cf2875ceac4536848f9eb5d22ac9">CastQueue</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classShmCaster.html#ad686ce74033ae0019b2eff4d6d5e227f">_queue</a></td></tr>
+<tr class="memdesc:ad686ce74033ae0019b2eff4d6d5e227f"><td class="mdescLeft">&#160;</td><td class="mdescRight">广播队列指针，指向内存映射区域  <br /></td></tr>
+<tr class="separator:ad686ce74033ae0019b2eff4d6d5e227f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3cca5945caf2af633791efc3c5208fd" id="r_af3cca5945caf2af633791efc3c5208fd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classShmCaster.html#af3cca5945caf2af633791efc3c5208fd">_inited</a></td></tr>
+<tr class="memdesc:af3cca5945caf2af633791efc3c5208fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">是否已成功初始化标记  <br /></td></tr>
+<tr class="separator:af3cca5945caf2af633791efc3c5208fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>基于共享内存的行情广播器 </p>
+<p>实现IDataCaster接口，将行情数据广播到共享内存中，供其他进程读取。 使用内存映射文件实现进程间通信，通过对同一文件进行读写操作来传递数据。 </p>
+
+<p class="definition">在文件 <a class="el" href="ShmCaster_8h_source.html">ShmCaster.h</a> 第 <a class="el" href="ShmCaster_8h_source.html#l00028">28</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="a1c76cf2875ceac4536848f9eb5d22ac9" name="a1c76cf2875ceac4536848f9eb5d22ac9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c76cf2875ceac4536848f9eb5d22ac9">&#9670;&#160;</a></span>CastQueue</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="structShmCaster_1_1__DataQueue.html">_DataQueue</a>&lt;8*1024&gt; <a class="el" href="classShmCaster.html#a1c76cf2875ceac4536848f9eb5d22ac9">ShmCaster::CastQueue</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>广播队列类型别名，容量固定为8*1024个数据项 </p>
+
+<p class="definition">在文件 <a class="el" href="ShmCaster_8h_source.html">ShmCaster.h</a> 第 <a class="el" href="ShmCaster_8h_source.html#l00089">89</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa5c0c036a1c0af51810713cccdde723c" name="aa5c0c036a1c0af51810713cccdde723c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5c0c036a1c0af51810713cccdde723c">&#9670;&#160;</a></span>DataItem</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structShmCaster_1_1__DataItem.html">ShmCaster::_DataItem</a> <a class="el" href="classShmCaster.html#aa5c0c036a1c0af51810713cccdde723c">ShmCaster::DataItem</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>数据项结构体，用于存储各种类型的行情数据 </p>
+<p>包含数据类型标识和一个联合体，该联合体根据数据类型存储不同类型的行情数据 </p>
+
+</div>
+</div>
+<a id="a8f1e1fde976db5d3039ee770adbe1dfb" name="a8f1e1fde976db5d3039ee770adbe1dfb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f1e1fde976db5d3039ee770adbe1dfb">&#9670;&#160;</a></span>MappedFilePtr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::shared_ptr&lt;<a class="el" href="classBoostMappingFile.html">BoostMappingFile</a>&gt; <a class="el" href="classShmCaster.html#a8f1e1fde976db5d3039ee770adbe1dfb">ShmCaster::MappedFilePtr</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>内存映射文件智能指针类型别名 </p>
+
+<p class="definition">在文件 <a class="el" href="ShmCaster_8h_source.html">ShmCaster.h</a> 第 <a class="el" href="ShmCaster_8h_source.html#l00137">137</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a7673ab920ce59358100fb6b219433d8d" name="a7673ab920ce59358100fb6b219433d8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7673ab920ce59358100fb6b219433d8d">&#9670;&#160;</a></span>ShmCaster()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ShmCaster::ShmCaster </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>初始化成员变量，将队列指针设置为空，初始化状态设置为未初始化 </p>
+
+<p class="definition">在文件 <a class="el" href="ShmCaster_8h_source.html">ShmCaster.h</a> 第 <a class="el" href="ShmCaster_8h_source.html#l00098">98</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="ab78e881d5c53db1eaa8faec1ae4bbbc5" name="ab78e881d5c53db1eaa8faec1ae4bbbc5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab78e881d5c53db1eaa8faec1ae4bbbc5">&#9670;&#160;</a></span>broadcast() <span class="overload">[1/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ShmCaster::broadcast </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSOrdDtlData.html">WTSOrdDtlData</a> *&#160;</td>
+          <td class="paramname"><em>curOrdDtl</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>广播逆序委托明细数据 </p>
+<p>将逆序委托明细数据写入共享内存队列中，供其他进程读取 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curOrdDtl</td><td>逆序委托明细数据指针</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将逆序委托明细数据写入共享内存队列中，并更新可读指针 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curOrdDtl</td><td>逆序委托明细数据指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classIDataCaster.html#add4abe8078962782c24568467a0ca418">IDataCaster</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ShmCaster_8cpp_source.html">ShmCaster.cpp</a> 第 <a class="el" href="ShmCaster_8cpp_source.html#l00126">126</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a62128f859a2d4069a7ebcf64fb842428" name="a62128f859a2d4069a7ebcf64fb842428"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62128f859a2d4069a7ebcf64fb842428">&#9670;&#160;</a></span>broadcast() <span class="overload">[2/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ShmCaster::broadcast </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSOrdQueData.html">WTSOrdQueData</a> *&#160;</td>
+          <td class="paramname"><em>curOrdQue</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>广播委托队列数据 </p>
+<p>将委托队列数据写入共享内存队列中，供其他进程读取 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curOrdQue</td><td>委托队列数据指针</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将委托队列数据写入共享内存队列中，并更新可读指针 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curOrdQue</td><td>委托队列数据指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classIDataCaster.html#a79200c0dfff13716e7d86c68eb0811da">IDataCaster</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ShmCaster_8cpp_source.html">ShmCaster.cpp</a> 第 <a class="el" href="ShmCaster_8cpp_source.html#l00099">99</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab6d88a7f9aa3ad292516380888c21c70" name="ab6d88a7f9aa3ad292516380888c21c70"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6d88a7f9aa3ad292516380888c21c70">&#9670;&#160;</a></span>broadcast() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ShmCaster::broadcast </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>curTick</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>广播股票行情数据 </p>
+<p>将Tick数据写入共享内存队列中，供其他进程读取 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curTick</td><td>Tick数据指针</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将Tick数据写入共享内存队列中，并更新可读指针 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curTick</td><td>Tick数据指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>实现了 <a class="el" href="classIDataCaster.html#ae8cd659e3263b2d40968de348206a0b9">IDataCaster</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="ShmCaster_8cpp_source.html">ShmCaster.cpp</a> 第 <a class="el" href="ShmCaster_8cpp_source.html#l00072">72</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae3ef5f57a34ad0a1c89a659d4a5be36f" name="ae3ef5f57a34ad0a1c89a659d4a5be36f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3ef5f57a34ad0a1c89a659d4a5be36f">&#9670;&#160;</a></span>broadcast() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ShmCaster::broadcast </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSTransData.html">WTSTransData</a> *&#160;</td>
+          <td class="paramname"><em>curTrans</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>广播逆序逆序成交数据 </p>
+<p>广播逆序成交数据</p>
+<p>将逆序成交数据写入共享内存队列中，供其他进程读取 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curTrans</td><td>逆序成交数据指针</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将逆序成交数据写入共享内存队列中，并更新可读指针 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curTrans</td><td>逆序成交数据指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classIDataCaster.html#ab84cfb0e069f3b4adacf7a3e28ca326f">IDataCaster</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ShmCaster_8cpp_source.html">ShmCaster.cpp</a> 第 <a class="el" href="ShmCaster_8cpp_source.html#l00153">153</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3cc55487bff5f6b971ed43234382bb1a" name="a3cc55487bff5f6b971ed43234382bb1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3cc55487bff5f6b971ed43234382bb1a">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ShmCaster::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>cfg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化广播器 </p>
+<p>初始化共享内存广播器</p>
+<p>根据配置初始化共享内存广播器，创建或打开内存映射文件 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfg</td><td>配置项指针，需要包含"path"和"active"字段 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 初始化是否成功</dd></dl>
+<p>根据配置项创建或重置共享内存队列，并进行内存映射 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfg</td><td>配置项指针，包含"active"和"path"字段 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 初始化是否成功 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="ShmCaster_8cpp_source.html">ShmCaster.cpp</a> 第 <a class="el" href="ShmCaster_8cpp_source.html#l00024">24</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="af3cca5945caf2af633791efc3c5208fd" name="af3cca5945caf2af633791efc3c5208fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af3cca5945caf2af633791efc3c5208fd">&#9670;&#160;</a></span>_inited</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ShmCaster::_inited</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>是否已成功初始化标记 </p>
+
+<p class="definition">在文件 <a class="el" href="ShmCaster_8h_source.html">ShmCaster.h</a> 第 <a class="el" href="ShmCaster_8h_source.html#l00143">143</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a26123faca29120ed9955d292182d51c7" name="a26123faca29120ed9955d292182d51c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26123faca29120ed9955d292182d51c7">&#9670;&#160;</a></span>_mapfile</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classShmCaster.html#a8f1e1fde976db5d3039ee770adbe1dfb">MappedFilePtr</a> ShmCaster::_mapfile</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>内存映射文件智能指针 </p>
+
+<p class="definition">在文件 <a class="el" href="ShmCaster_8h_source.html">ShmCaster.h</a> 第 <a class="el" href="ShmCaster_8h_source.html#l00139">139</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a11fa289986da49108ea3487e6114fba8" name="a11fa289986da49108ea3487e6114fba8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a11fa289986da49108ea3487e6114fba8">&#9670;&#160;</a></span>_path</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string ShmCaster::_path</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>共享内存映射文件路径 </p>
+
+<p class="definition">在文件 <a class="el" href="ShmCaster_8h_source.html">ShmCaster.h</a> 第 <a class="el" href="ShmCaster_8h_source.html#l00135">135</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad686ce74033ae0019b2eff4d6d5e227f" name="ad686ce74033ae0019b2eff4d6d5e227f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad686ce74033ae0019b2eff4d6d5e227f">&#9670;&#160;</a></span>_queue</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classShmCaster.html#a1c76cf2875ceac4536848f9eb5d22ac9">CastQueue</a>* ShmCaster::_queue</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>广播队列指针，指向内存映射区域 </p>
+
+<p class="definition">在文件 <a class="el" href="ShmCaster_8h_source.html">ShmCaster.h</a> 第 <a class="el" href="ShmCaster_8h_source.html#l00141">141</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WtDtCore/<a class="el" href="ShmCaster_8h_source.html">ShmCaster.h</a></li>
+<li>src/WtDtCore/<a class="el" href="ShmCaster_8cpp_source.html">ShmCaster.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classShmCaster.html">ShmCaster</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+var structCThostFtdcMarketDataField =
+[
+    [ "ActionDay", "structCThostFtdcMarketDataField.html#ae3e525a168b71e9027cdf40020e19301", null ],
+    [ "ClosePrice", "structCThostFtdcMarketDataField.html#a76aa2eeb402045e1bcdf5bdba18f67ae", null ],
+    [ "CurrDelta", "structCThostFtdcMarketDataField.html#a968d58e0d23621b1ede52c0dbffcdf03", null ],
+    [ "ExchangeID", "structCThostFtdcMarketDataField.html#aabd43b20474d40cb49efcd495d474aa2", null ],
+    [ "ExchangeInstID", "structCThostFtdcMarketDataField.html#a3a9e4a9e356c2c13a19c3efd8d4c9461", null ],
+    [ "HighestPrice", "structCThostFtdcMarketDataField.html#a8503f1557b84be44cfd209f8f1ed41da", null ],
+    [ "InstrumentID", "structCThostFtdcMarketDataField.html#a2adca4de6aec7b409d06de6e011da1d0", null ],
+    [ "LastPrice", "structCThostFtdcMarketDataField.html#afd986fac227d92220f94814c19d58ee7", null ],
+    [ "LowerLimitPrice", "structCThostFtdcMarketDataField.html#ac9602655e5649482eac83910a3c7c1a6", null ],
+    [ "LowestPrice", "structCThostFtdcMarketDataField.html#afe9032373dac46667babb4426bc074fb", null ],
+    [ "OpenInterest", "structCThostFtdcMarketDataField.html#a2666c54a0ce85f36ca9a920ba0d19479", null ],
+    [ "OpenPrice", "structCThostFtdcMarketDataField.html#aa622f4c165df21ff119c25f6d4e61761", null ],
+    [ "PreClosePrice", "structCThostFtdcMarketDataField.html#a038c9874be48cff39912be565a4a5b3e", null ],
+    [ "PreDelta", "structCThostFtdcMarketDataField.html#a9c72883adf9d38e95d349eb56b3b94b1", null ],
+    [ "PreOpenInterest", "structCThostFtdcMarketDataField.html#a7e8f2bb0139fe94934755b16c158dcd3", null ],
+    [ "PreSettlementPrice", "structCThostFtdcMarketDataField.html#a01635523c85d3682d5b3c006a73c5c43", null ],
+    [ "SettlementPrice", "structCThostFtdcMarketDataField.html#a340cf233bd28c410c2d009b91e86acb1", null ],
+    [ "TradingDay", "structCThostFtdcMarketDataField.html#a9123e60674b18d342bd6f6b0a389a006", null ],
+    [ "Turnover", "structCThostFtdcMarketDataField.html#abc449ac6f7a15671ed07f142b962a166", null ],
+    [ "UpdateMillisec", "structCThostFtdcMarketDataField.html#abb35d8fb8f37cfdcc5785e4dad5eaa53", null ],
+    [ "UpdateTime", "structCThostFtdcMarketDataField.html#a0a5ce8281152fcaf02d5335eb29af635", null ],
+    [ "UpperLimitPrice", "structCThostFtdcMarketDataField.html#a30d8f92ba05ab9737e83ecf211a748ff", null ],
+    [ "Volume", "structCThostFtdcMarketDataField.html#aef0ed86eb01d02e00cb147d151ffa13a", null ]
+];

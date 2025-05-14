@@ -1,0 +1,1024 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: ITrdNotifySink类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classITrdNotifySink.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="classITrdNotifySink-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">ITrdNotifySink类 参考<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>交易通知接收器接口  
+ <a href="classITrdNotifySink.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="WtCore_2ITrdNotifySink_8h_source.html">ITrdNotifySink.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a5194a86c27cc25869664dc395ffc7a34" id="r_a5194a86c27cc25869664dc395ffc7a34"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#a5194a86c27cc25869664dc395ffc7a34">on_trade</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isBuy, double vol, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>)=0</td></tr>
+<tr class="memdesc:a5194a86c27cc25869664dc395ffc7a34"><td class="mdescLeft">&#160;</td><td class="mdescRight">成交回报通知  <br /></td></tr>
+<tr class="separator:a5194a86c27cc25869664dc395ffc7a34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d94f7d9a478a10b74aa5c22fd64442b" id="r_a6d94f7d9a478a10b74aa5c22fd64442b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#a6d94f7d9a478a10b74aa5c22fd64442b">on_order</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isBuy, double totalQty, double leftQty, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, bool isCanceled=false)=0</td></tr>
+<tr class="memdesc:a6d94f7d9a478a10b74aa5c22fd64442b"><td class="mdescLeft">&#160;</td><td class="mdescRight">订单状态回报通知  <br /></td></tr>
+<tr class="separator:a6d94f7d9a478a10b74aa5c22fd64442b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac14573f6ffa6d514cd0623224bdef49c" id="r_ac14573f6ffa6d514cd0623224bdef49c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#ac14573f6ffa6d514cd0623224bdef49c">on_position</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)</td></tr>
+<tr class="memdesc:ac14573f6ffa6d514cd0623224bdef49c"><td class="mdescLeft">&#160;</td><td class="mdescRight">持仓更新回调  <br /></td></tr>
+<tr class="separator:ac14573f6ffa6d514cd0623224bdef49c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11c67f1886dfc6065f8dfd7114174f89" id="r_a11c67f1886dfc6065f8dfd7114174f89"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#a11c67f1886dfc6065f8dfd7114174f89">on_channel_ready</a> ()=0</td></tr>
+<tr class="memdesc:a11c67f1886dfc6065f8dfd7114174f89"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易通道就绪通知  <br /></td></tr>
+<tr class="separator:a11c67f1886dfc6065f8dfd7114174f89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeae96c9f4a81d07d8d818f764c5a2174" id="r_aeae96c9f4a81d07d8d818f764c5a2174"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#aeae96c9f4a81d07d8d818f764c5a2174">on_channel_lost</a> ()=0</td></tr>
+<tr class="memdesc:aeae96c9f4a81d07d8d818f764c5a2174"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易通道丢失通知  <br /></td></tr>
+<tr class="separator:aeae96c9f4a81d07d8d818f764c5a2174"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07fdff40e8b5fc42c7d6f13e1fe23ab4" id="r_a07fdff40e8b5fc42c7d6f13e1fe23ab4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#a07fdff40e8b5fc42c7d6f13e1fe23ab4">on_entrust</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool bSuccess, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:a07fdff40e8b5fc42c7d6f13e1fe23ab4"><td class="mdescLeft">&#160;</td><td class="mdescRight">下单回报通知  <br /></td></tr>
+<tr class="separator:a07fdff40e8b5fc42c7d6f13e1fe23ab4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48aff2eda862be2f42b06bfeb7fe8966" id="r_a48aff2eda862be2f42b06bfeb7fe8966"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#a48aff2eda862be2f42b06bfeb7fe8966">on_account</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="demo__send__order_8cpp.html#af75f83b1c7d27fcbd5fb60b382330d60">currency</a>, double prebalance, double balance, double dynbalance, double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw)</td></tr>
+<tr class="memdesc:a48aff2eda862be2f42b06bfeb7fe8966"><td class="mdescLeft">&#160;</td><td class="mdescRight">资金账户更新回调  <br /></td></tr>
+<tr class="separator:a48aff2eda862be2f42b06bfeb7fe8966"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7996c695e786e2b9b1422941061f0955" id="r_a7996c695e786e2b9b1422941061f0955"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#a7996c695e786e2b9b1422941061f0955">on_trade</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isLong, uint32_t offset, double vol, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>)=0</td></tr>
+<tr class="memdesc:a7996c695e786e2b9b1422941061f0955"><td class="mdescLeft">&#160;</td><td class="mdescRight">成交回报回调函数  <br /></td></tr>
+<tr class="separator:a7996c695e786e2b9b1422941061f0955"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7857e8863c1c0e8833782e62a1784b5" id="r_ad7857e8863c1c0e8833782e62a1784b5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#ad7857e8863c1c0e8833782e62a1784b5">on_order</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, bool isCanceled=false)=0</td></tr>
+<tr class="memdesc:ad7857e8863c1c0e8833782e62a1784b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">订单回报回调函数  <br /></td></tr>
+<tr class="separator:ad7857e8863c1c0e8833782e62a1784b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac14573f6ffa6d514cd0623224bdef49c" id="r_ac14573f6ffa6d514cd0623224bdef49c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#ac14573f6ffa6d514cd0623224bdef49c">on_position</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)</td></tr>
+<tr class="memdesc:ac14573f6ffa6d514cd0623224bdef49c"><td class="mdescLeft">&#160;</td><td class="mdescRight">持仓更新回调函数  <br /></td></tr>
+<tr class="separator:ac14573f6ffa6d514cd0623224bdef49c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa504f5dec57747a86c1d17a392cabb2" id="r_afa504f5dec57747a86c1d17a392cabb2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#afa504f5dec57747a86c1d17a392cabb2">on_channel_ready</a> (uint32_t tradingday)=0</td></tr>
+<tr class="memdesc:afa504f5dec57747a86c1d17a392cabb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易通道就绪回调函数  <br /></td></tr>
+<tr class="separator:afa504f5dec57747a86c1d17a392cabb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeae96c9f4a81d07d8d818f764c5a2174" id="r_aeae96c9f4a81d07d8d818f764c5a2174"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#aeae96c9f4a81d07d8d818f764c5a2174">on_channel_lost</a> ()=0</td></tr>
+<tr class="memdesc:aeae96c9f4a81d07d8d818f764c5a2174"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易通道丢失回调函数  <br /></td></tr>
+<tr class="separator:aeae96c9f4a81d07d8d818f764c5a2174"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07fdff40e8b5fc42c7d6f13e1fe23ab4" id="r_a07fdff40e8b5fc42c7d6f13e1fe23ab4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#a07fdff40e8b5fc42c7d6f13e1fe23ab4">on_entrust</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool bSuccess, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="memdesc:a07fdff40e8b5fc42c7d6f13e1fe23ab4"><td class="mdescLeft">&#160;</td><td class="mdescRight">下单回报回调函数  <br /></td></tr>
+<tr class="separator:a07fdff40e8b5fc42c7d6f13e1fe23ab4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>交易通知接收器接口 </p>
+<p>用于接收各类交易相关通知和回报，实现交易引擎与策略组件的解耦</p>
+<p>定义了交易系统的各类回调接口，包括成交回报、订单回报、交易通道状态等 策略模块需要实现该接口以接收交易相关信息 </p>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2ITrdNotifySink_8h_source.html">ITrdNotifySink.h</a> 第 <a class="el" href="WtCore_2ITrdNotifySink_8h_source.html#l00021">21</a> 行定义.</p>
+</div><h2 class="groupheader">成员函数说明</h2>
+<a id="a48aff2eda862be2f42b06bfeb7fe8966" name="a48aff2eda862be2f42b06bfeb7fe8966"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48aff2eda862be2f42b06bfeb7fe8966">&#9670;&#160;</a></span>on_account()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITrdNotifySink::on_account </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>currency</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>prebalance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>balance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>dynbalance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>avaliable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>closeprofit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>dynprofit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>margin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>fee</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>deposit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>withdraw</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>资金账户更新回调 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">currency</td><td>货币类型，如CNY、USD等 </td></tr>
+    <tr><td class="paramname">prebalance</td><td>前一交易日结存 </td></tr>
+    <tr><td class="paramname">balance</td><td>静态权益 </td></tr>
+    <tr><td class="paramname">dynbalance</td><td>动态权益 </td></tr>
+    <tr><td class="paramname">avaliable</td><td>可用资金 </td></tr>
+    <tr><td class="paramname">closeprofit</td><td>平仓盈亏 </td></tr>
+    <tr><td class="paramname">dynprofit</td><td>浮动盈亏 </td></tr>
+    <tr><td class="paramname">margin</td><td>占用保证金 </td></tr>
+    <tr><td class="paramname">fee</td><td>手续费 </td></tr>
+    <tr><td class="paramname">deposit</td><td>入金 </td></tr>
+    <tr><td class="paramname">withdraw</td><td>出金</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当账户资金状态发生变化时，交易引擎调用此接口将最新资金信息通知给相关组件 </p>
+
+<p>被 <a class="el" href="classWtArbiExecuter.html#a82471cd2a847fea4ab6c91525684236c">WtArbiExecuter</a>, <a class="el" href="classWtDiffExecuter.html#abdda2816421ff61ed11f92f2b775b69a">WtDiffExecuter</a> , 以及 <a class="el" href="classWtLocalExecuter.html#abf899daac3a8762a684a1e66dc88f697">WtLocalExecuter</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2ITrdNotifySink_8h_source.html">ITrdNotifySink.h</a> 第 <a class="el" href="WtCore_2ITrdNotifySink_8h_source.html#l00098">98</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aeae96c9f4a81d07d8d818f764c5a2174" name="aeae96c9f4a81d07d8d818f764c5a2174"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeae96c9f4a81d07d8d818f764c5a2174">&#9670;&#160;</a></span>on_channel_lost() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITrdNotifySink::on_channel_lost </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易通道丢失通知 </p>
+<p>当交易通道断开连接或发生异常时，交易引擎调用此接口通知相关组件 </p>
+
+<p>在 <a class="el" href="classHftStraBaseCtx.html#a4b30e29c5ad9bc93af4d06b855d28136">HftStraBaseCtx</a>, <a class="el" href="classHftStraContext.html#a59eb6c5074b05129425868582a94c61f">HftStraContext</a>, <a class="el" href="classWtArbiExecuter.html#a40c0a3af438c82f90e512cba0bb6d399">WtArbiExecuter</a>, <a class="el" href="classWtDiffExecuter.html#ae1f33c5e17b2153960acedd85bdada7b">WtDiffExecuter</a>, <a class="el" href="classWtLocalExecuter.html#a3dba380e25b2012468333836bc7a085d">WtLocalExecuter</a>, <a class="el" href="classExpHftContext.html#a1fe4f863a322c0645c5ec18bbb0fed0c">ExpHftContext</a> , 以及 <a class="el" href="classUftStraContext.html#a3919d062c94bc07746bd12cef922569a">UftStraContext</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="aeae96c9f4a81d07d8d818f764c5a2174" name="aeae96c9f4a81d07d8d818f764c5a2174"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeae96c9f4a81d07d8d818f764c5a2174">&#9670;&#160;</a></span>on_channel_lost() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITrdNotifySink::on_channel_lost </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易通道丢失回调函数 </p>
+<p>当交易通道连接断开或发生异常时，交易系统会调用此函数通知策略 </p>
+
+<p>在 <a class="el" href="classHftStraBaseCtx.html#a4b30e29c5ad9bc93af4d06b855d28136">HftStraBaseCtx</a>, <a class="el" href="classHftStraContext.html#a59eb6c5074b05129425868582a94c61f">HftStraContext</a>, <a class="el" href="classWtArbiExecuter.html#a40c0a3af438c82f90e512cba0bb6d399">WtArbiExecuter</a>, <a class="el" href="classWtDiffExecuter.html#ae1f33c5e17b2153960acedd85bdada7b">WtDiffExecuter</a>, <a class="el" href="classWtLocalExecuter.html#a3dba380e25b2012468333836bc7a085d">WtLocalExecuter</a>, <a class="el" href="classExpHftContext.html#a1fe4f863a322c0645c5ec18bbb0fed0c">ExpHftContext</a> , 以及 <a class="el" href="classUftStraContext.html#a3919d062c94bc07746bd12cef922569a">UftStraContext</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a11c67f1886dfc6065f8dfd7114174f89" name="a11c67f1886dfc6065f8dfd7114174f89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a11c67f1886dfc6065f8dfd7114174f89">&#9670;&#160;</a></span>on_channel_ready() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITrdNotifySink::on_channel_ready </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易通道就绪通知 </p>
+<p>当交易通道连接成功并准备就绪可用时，交易引擎调用此接口通知相关组件 </p>
+
+<p>在 <a class="el" href="classHftStraBaseCtx.html#a0ca1b6038f7e2df933044a0cd3c16e81">HftStraBaseCtx</a>, <a class="el" href="classHftStraContext.html#a0a438298726264da7be3aa1175ceb4d7">HftStraContext</a>, <a class="el" href="classWtArbiExecuter.html#a24405250b199827160a88a0e5759175f">WtArbiExecuter</a>, <a class="el" href="classWtDiffExecuter.html#ace1e4766434fe17a8b5465472482b0bf">WtDiffExecuter</a>, <a class="el" href="classWtLocalExecuter.html#a5b3d2a1543897ea62060560b9abf3444">WtLocalExecuter</a> , 以及 <a class="el" href="classExpHftContext.html#a57ed35ab4d052c40bd8cae92095ef6cd">ExpHftContext</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="afa504f5dec57747a86c1d17a392cabb2" name="afa504f5dec57747a86c1d17a392cabb2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa504f5dec57747a86c1d17a392cabb2">&#9670;&#160;</a></span>on_channel_ready() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITrdNotifySink::on_channel_ready </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>tradingday</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易通道就绪回调函数 </p>
+<p>当交易通道连接成功并准备就绪时，交易系统会调用此函数通知策略</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tradingday</td><td>当前交易日 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>在 <a class="el" href="classUftStraContext.html#af27dbebcab94fb95aded76f8f5eb4d4b">UftStraContext</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a07fdff40e8b5fc42c7d6f13e1fe23ab4" name="a07fdff40e8b5fc42c7d6f13e1fe23ab4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07fdff40e8b5fc42c7d6f13e1fe23ab4">&#9670;&#160;</a></span>on_entrust() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITrdNotifySink::on_entrust </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bSuccess</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>下单回报通知 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">bSuccess</td><td>是否下单成功，true表示成功，false表示失败 </td></tr>
+    <tr><td class="paramname">message</td><td>回报消息，通常在下单失败时包含错误信息</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当委托下单后收到确认或拒绝时，交易引擎调用此接口通知相关组件 </p>
+
+<p>被 <a class="el" href="classHftStraBaseCtx.html#a15b0b37f4ca72bfc74e8cf99d46cffa0">HftStraBaseCtx</a>, <a class="el" href="classHftStraContext.html#a6c8f11190394f8c0ca831b31cc531700">HftStraContext</a>, <a class="el" href="classWtArbiExecuter.html#a2bc72d19849e53bca49005d0102b587d">WtArbiExecuter</a>, <a class="el" href="classWtDiffExecuter.html#aefbdd62b9d0c2d7e715aa36498989a9f">WtDiffExecuter</a>, <a class="el" href="classWtLocalExecuter.html#a8be25dee9c6be324765bd0c08e435240">WtLocalExecuter</a>, <a class="el" href="classExpHftContext.html#a57c2916e89f0fc5a4028f2bfc43b2831">ExpHftContext</a> , 以及 <a class="el" href="classUftStraContext.html#af15bdc0fc285a6f30077371a913ea4ed">UftStraContext</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2ITrdNotifySink_8h_source.html">ITrdNotifySink.h</a> 第 <a class="el" href="WtCore_2ITrdNotifySink_8h_source.html#l00081">81</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a07fdff40e8b5fc42c7d6f13e1fe23ab4" name="a07fdff40e8b5fc42c7d6f13e1fe23ab4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07fdff40e8b5fc42c7d6f13e1fe23ab4">&#9670;&#160;</a></span>on_entrust() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITrdNotifySink::on_entrust </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bSuccess</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>下单回报回调函数 </p>
+<p>当下单指令发送后收到回报时，交易系统会调用此函数通知策略</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地订单ID，用于识别订单 </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">bSuccess</td><td>下单是否成功，true表示成功，false表示失败 </td></tr>
+    <tr><td class="paramname">message</td><td>回报消息，并常包含错误信息（当失败时） </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>被 <a class="el" href="classHftStraBaseCtx.html#a15b0b37f4ca72bfc74e8cf99d46cffa0">HftStraBaseCtx</a>, <a class="el" href="classHftStraContext.html#a6c8f11190394f8c0ca831b31cc531700">HftStraContext</a>, <a class="el" href="classWtArbiExecuter.html#a2bc72d19849e53bca49005d0102b587d">WtArbiExecuter</a>, <a class="el" href="classWtDiffExecuter.html#aefbdd62b9d0c2d7e715aa36498989a9f">WtDiffExecuter</a>, <a class="el" href="classWtLocalExecuter.html#a8be25dee9c6be324765bd0c08e435240">WtLocalExecuter</a>, <a class="el" href="classExpHftContext.html#a57c2916e89f0fc5a4028f2bfc43b2831">ExpHftContext</a> , 以及 <a class="el" href="classUftStraContext.html#af15bdc0fc285a6f30077371a913ea4ed">UftStraContext</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="WtUftCore_2ITrdNotifySink_8h_source.html">ITrdNotifySink.h</a> 第 <a class="el" href="WtUftCore_2ITrdNotifySink_8h_source.html#l00099">99</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6d94f7d9a478a10b74aa5c22fd64442b" name="a6d94f7d9a478a10b74aa5c22fd64442b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d94f7d9a478a10b74aa5c22fd64442b">&#9670;&#160;</a></span>on_order() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITrdNotifySink::on_order </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isBuy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>totalQty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>leftQty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isCanceled</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>订单状态回报通知 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否买入，true为买入，false为卖出 </td></tr>
+    <tr><td class="paramname">totalQty</td><td>委托总数量 </td></tr>
+    <tr><td class="paramname">leftQty</td><td>剩余未成交数量 </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">isCanceled</td><td>是否已撤销，true表示已撤销，false表示未撤销</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当委托状态发生变化时，交易引擎调用此接口将最新状态通知给相关组件 </p>
+
+<p>在 <a class="el" href="classHftStraBaseCtx.html#a8218c4def0f463bd75b94dcb6547a46b">HftStraBaseCtx</a>, <a class="el" href="classExpHftContext.html#aa2b4e840be86ef145d18a31d0ca5ccc2">ExpHftContext</a>, <a class="el" href="classHftStraContext.html#ad9becb94e918625f10516b6fc30f17db">HftStraContext</a>, <a class="el" href="classWtArbiExecuter.html#ab806e8521429ae06253d1fc146295aab">WtArbiExecuter</a>, <a class="el" href="classWtDiffExecuter.html#a49e0b84b51c83e249c60165911b0a74e">WtDiffExecuter</a> , 以及 <a class="el" href="classWtLocalExecuter.html#a2ee7e9663f55e2ef6a099260315febbc">WtLocalExecuter</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="ad7857e8863c1c0e8833782e62a1784b5" name="ad7857e8863c1c0e8833782e62a1784b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7857e8863c1c0e8833782e62a1784b5">&#9670;&#160;</a></span>on_order() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITrdNotifySink::on_order </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isLong</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>totalQty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>leftQty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isCanceled</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>订单回报回调函数 </p>
+<p>当订单状态发生变化时，交易系统会调用此函数通知策略</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地订单ID，用于识别订单 </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">isLong</td><td>是否为多头方向，true为多头，false为空头 </td></tr>
+    <tr><td class="paramname">offset</td><td>开平仓标志，参考WTSDefine.h中的WTSOffsetType </td></tr>
+    <tr><td class="paramname">totalQty</td><td>总数量 </td></tr>
+    <tr><td class="paramname">leftQty</td><td>剩余未成交数量 </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">isCanceled</td><td>是否已撤单，true表示已撤销，false表示未撤销 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>在 <a class="el" href="classUftStraContext.html#aea022e449d52406cd1d7160dfad4b6aa">UftStraContext</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="ac14573f6ffa6d514cd0623224bdef49c" name="ac14573f6ffa6d514cd0623224bdef49c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac14573f6ffa6d514cd0623224bdef49c">&#9670;&#160;</a></span>on_position() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITrdNotifySink::on_position </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isLong</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>prevol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>preavail</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>newvol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>newavail</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>tradingday</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>持仓更新回调 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isLong</td><td>是否为多头持仓，true为多头，false为空头 </td></tr>
+    <tr><td class="paramname">prevol</td><td>前一交易日持仓量 </td></tr>
+    <tr><td class="paramname">preavail</td><td>前一交易日可用持仓量 </td></tr>
+    <tr><td class="paramname">newvol</td><td>最新持仓量 </td></tr>
+    <tr><td class="paramname">newavail</td><td>最新可用持仓量 </td></tr>
+    <tr><td class="paramname">tradingday</td><td>交易日，格式为YYYYMMDD</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当持仓状态发生变化时，交易引擎调用此接口将最新持仓信息通知给相关组件 </p>
+
+<p>被 <a class="el" href="classHftStraBaseCtx.html#a0e93542d0f950dd6a9245628a3349b5d">HftStraBaseCtx</a>, <a class="el" href="classHftStraContext.html#a0bd98becaf62dec278e678a689bf8eea">HftStraContext</a>, <a class="el" href="classWtArbiExecuter.html#ae1778def27d511707e8ea327b39fbc2f">WtArbiExecuter</a>, <a class="el" href="classWtDiffExecuter.html#a3731ce2870c714f9c4f44c7b392a24a5">WtDiffExecuter</a>, <a class="el" href="classWtLocalExecuter.html#ad5a042095493fc86b8184fbb8a7ca2b3">WtLocalExecuter</a>, <a class="el" href="classExpHftContext.html#ae2c3cd760e38b66d7fd319e62c994542">ExpHftContext</a> , 以及 <a class="el" href="classUftStraContext.html#aa33e6196771757613b9d65285cc7fa91">UftStraContext</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="WtCore_2ITrdNotifySink_8h_source.html">ITrdNotifySink.h</a> 第 <a class="el" href="WtCore_2ITrdNotifySink_8h_source.html#l00059">59</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac14573f6ffa6d514cd0623224bdef49c" name="ac14573f6ffa6d514cd0623224bdef49c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac14573f6ffa6d514cd0623224bdef49c">&#9670;&#160;</a></span>on_position() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITrdNotifySink::on_position </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isLong</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>prevol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>preavail</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>newvol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>newavail</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>tradingday</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>持仓更新回调函数 </p>
+<p>当持仓状态发生变化时，交易系统会调用此函数通知策略</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">isLong</td><td>是否为多头持仓，true为多头，false为空头 </td></tr>
+    <tr><td class="paramname">prevol</td><td>先前的持仓总量 </td></tr>
+    <tr><td class="paramname">preavail</td><td>先前的可用持仓量 </td></tr>
+    <tr><td class="paramname">newvol</td><td>新的持仓总量 </td></tr>
+    <tr><td class="paramname">newavail</td><td>新的可用持仓量 </td></tr>
+    <tr><td class="paramname">tradingday</td><td>交易日 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>被 <a class="el" href="classHftStraBaseCtx.html#a0e93542d0f950dd6a9245628a3349b5d">HftStraBaseCtx</a>, <a class="el" href="classHftStraContext.html#a0bd98becaf62dec278e678a689bf8eea">HftStraContext</a>, <a class="el" href="classWtArbiExecuter.html#ae1778def27d511707e8ea327b39fbc2f">WtArbiExecuter</a>, <a class="el" href="classWtDiffExecuter.html#a3731ce2870c714f9c4f44c7b392a24a5">WtDiffExecuter</a>, <a class="el" href="classWtLocalExecuter.html#ad5a042095493fc86b8184fbb8a7ca2b3">WtLocalExecuter</a>, <a class="el" href="classExpHftContext.html#ae2c3cd760e38b66d7fd319e62c994542">ExpHftContext</a> , 以及 <a class="el" href="classUftStraContext.html#aa33e6196771757613b9d65285cc7fa91">UftStraContext</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="WtUftCore_2ITrdNotifySink_8h_source.html">ITrdNotifySink.h</a> 第 <a class="el" href="WtUftCore_2ITrdNotifySink_8h_source.html#l00071">71</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5194a86c27cc25869664dc395ffc7a34" name="a5194a86c27cc25869664dc395ffc7a34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5194a86c27cc25869664dc395ffc7a34">&#9670;&#160;</a></span>on_trade() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITrdNotifySink::on_trade </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isBuy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>vol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>成交回报通知 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否买入，true为买入，false为卖出 </td></tr>
+    <tr><td class="paramname">vol</td><td>成交数量 </td></tr>
+    <tr><td class="paramname">price</td><td>成交价格</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当委托成交后，交易引擎调用此接口将成交信息通知给相关组件 </p>
+
+<p>在 <a class="el" href="classHftStraBaseCtx.html#af0112009eddd57cfb0ad4387d073bc78">HftStraBaseCtx</a>, <a class="el" href="classHftStraContext.html#a4a41b983dd77ab54b99221648bbc9303">HftStraContext</a>, <a class="el" href="classWtArbiExecuter.html#aca7e6c915a5d0b2f449aba2964d9e891">WtArbiExecuter</a>, <a class="el" href="classWtDiffExecuter.html#ab9074df35d29e0d56808f16c22ed87f9">WtDiffExecuter</a>, <a class="el" href="classWtLocalExecuter.html#a02fd3de717e9b71b7ee9e3c12634138e">WtLocalExecuter</a> , 以及 <a class="el" href="classExpHftContext.html#a1cd24c736154a9d288cf71cedd684d36">ExpHftContext</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a7996c695e786e2b9b1422941061f0955" name="a7996c695e786e2b9b1422941061f0955"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7996c695e786e2b9b1422941061f0955">&#9670;&#160;</a></span>on_trade() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITrdNotifySink::on_trade </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isLong</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>vol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>成交回报回调函数 </p>
+<p>当有新的成交信息时，交易系统会调用此函数通知策略</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地订单ID，用于识别订单 </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">isLong</td><td>是否为多头方向，true为多头，false为空头 </td></tr>
+    <tr><td class="paramname">offset</td><td>开平仓标志，参考WTSDefine.h中的WTSOffsetType </td></tr>
+    <tr><td class="paramname">vol</td><td>成交数量 </td></tr>
+    <tr><td class="paramname">price</td><td>成交价格 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>在 <a class="el" href="classUftStraContext.html#a797a0dc1d4e3a0d20c788f7ff3a88374">UftStraContext</a> 内被实现.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WtCore/<a class="el" href="WtCore_2ITrdNotifySink_8h_source.html">ITrdNotifySink.h</a></li>
+<li>src/WtUftCore/<a class="el" href="WtUftCore_2ITrdNotifySink_8h_source.html">ITrdNotifySink.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classITrdNotifySink.html">ITrdNotifySink</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtDtPorter/WtDtPorter.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtDtPorter_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtDtPorter.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtDtPorter_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="WtDtPorter_8h.html">WtDtPorter.h</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="WtDtServo_2WtDtRunner_8h.html">WtDtRunner.h</a>&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../WtDtCore/WtHelper.h&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../WTSTools/WTSLogger.h&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;../Share/ModuleHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;../Includes/WTSVersion.h&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#ifdef _WIN64</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keywordtype">char</span> <a class="code hl_variable" href="WtDtPorter_8cpp.html#a1c00b66b793e799ab324e7092d25e54f">PLATFORM_NAME</a>[] = <span class="stringliteral">&quot;X64&quot;</span>;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keywordtype">char</span> <a class="code hl_variable" href="WtDtPorter_8cpp.html#a1c00b66b793e799ab324e7092d25e54f">PLATFORM_NAME</a>[] = <span class="stringliteral">&quot;X86&quot;</span>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="WtDtPorter_8cpp.html#a1c00b66b793e799ab324e7092d25e54f">   41</a></span><span class="keywordtype">char</span> <a class="code hl_variable" href="WtDtPorter_8cpp.html#a1c00b66b793e799ab324e7092d25e54f">PLATFORM_NAME</a>[] = <span class="stringliteral">&quot;UNIX&quot;</span>;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#ifdef _MSC_VER</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#include &quot;../Common/mdump.h&quot;</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#include &lt;boost/filesystem.hpp&gt;</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="keyword">const</span> <span class="keywordtype">char</span>* getModuleName()</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>{</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keyword">static</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="CTPLoader_8cpp.html#a607f55b827e0f9ac8476fe14ee55e3c1">MODULE_NAME</a>[250] = { 0 };</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">if</span> (strlen(<a class="code hl_variable" href="CTPLoader_8cpp.html#a607f55b827e0f9ac8476fe14ee55e3c1">MODULE_NAME</a>) == 0)</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    {</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        <span class="comment">// 获取当前模块文件路径</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        GetModuleFileName(g_dllModule, <a class="code hl_variable" href="CTPLoader_8cpp.html#a607f55b827e0f9ac8476fe14ee55e3c1">MODULE_NAME</a>, 250);</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <span class="comment">// 提取文件名部分</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        boost::filesystem::path p(<a class="code hl_variable" href="CTPLoader_8cpp.html#a607f55b827e0f9ac8476fe14ee55e3c1">MODULE_NAME</a>);</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        strcpy(<a class="code hl_variable" href="CTPLoader_8cpp.html#a607f55b827e0f9ac8476fe14ee55e3c1">MODULE_NAME</a>, p.filename().string().c_str());</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    }</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="CTPLoader_8cpp.html#a607f55b827e0f9ac8476fe14ee55e3c1">MODULE_NAME</a>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>}</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="foldopen" id="foldopen00074" data-start="{" data-end="}">
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="WtDtPorter_8cpp.html#a046d496fdc3bf2de86bcdbcb276f592d">   74</a></span><a class="code hl_class" href="classWtDtRunner.html">WtDtRunner</a>&amp; <a class="code hl_function" href="WtDtPorter_8cpp.html#a046d496fdc3bf2de86bcdbcb276f592d">getRunner</a>()</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>{</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="comment">// 使用静态局部变量确保单例模式</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keyword">static</span> <a class="code hl_class" href="classWtDtRunner.html">WtDtRunner</a> runner;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordflow">return</span> runner;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>}</div>
+</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="foldopen" id="foldopen00089" data-start="{" data-end="}">
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="WtDtPorter_8cpp.html#a9b21c448e66ba44f72439cb411d03fee">   89</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="WtDtPorter_8cpp.html#a9b21c448e66ba44f72439cb411d03fee">initialize</a>(<a class="code hl_typedef" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> cfgFile, <a class="code hl_typedef" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> logCfg, <span class="keywordtype">bool</span> bCfgFile, <span class="keywordtype">bool</span> bLogCfgFile)</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>{</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="preprocessor">#ifdef _MSC_VER</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="comment">// 在Windows平台上启用崩溃转储功能</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <a class="code hl_function" href="classCMiniDumper.html#a4bc1259819db0c9ef7afc3264745a146">CMiniDumper::Enable</a>(getModuleName(), <span class="keyword">true</span>, <a class="code hl_function" href="classWtHelper.html#aa6b2cf1518435992478b4c0a0a14cd9a">WtHelper::get_cwd</a>());</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="comment">// 调用运行器的初始化方法</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <a class="code hl_function" href="WtDtPorter_8cpp.html#a046d496fdc3bf2de86bcdbcb276f592d">getRunner</a>().<a class="code hl_function" href="classWtDtRunner.html#ac0d061d0d1468a332d9e96d62d0a817b">initialize</a>(cfgFile, logCfg, <a class="code hl_function" href="QuoteFactory_2main_8cpp.html#a60d1186895e0d2d2edd7a2710e082cd0">getBinDir</a>(), bCfgFile, bLogCfgFile);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>}</div>
+</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="foldopen" id="foldopen00104" data-start="{" data-end="}">
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="WtDtPorter_8cpp.html#a011cfecbf1cc7aea656da1554c8f0e7f">  104</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="WtDtPorter_8cpp.html#a011cfecbf1cc7aea656da1554c8f0e7f">start</a>(<span class="keywordtype">bool</span> bAsync<span class="comment">/* = false*/</span>)</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>{</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <span class="comment">// 调用运行器的启动方法</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <a class="code hl_function" href="WtDtPorter_8cpp.html#a046d496fdc3bf2de86bcdbcb276f592d">getRunner</a>().<a class="code hl_function" href="classWtDtRunner.html#a16c4c92a100f5b818ef635eaf7c2d95c">start</a>(bAsync);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>}</div>
+</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
+<div class="foldopen" id="foldopen00115" data-start="{" data-end="}">
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="WtDtPorter_8cpp.html#ada199ed63f32eb9f9d6ce141d5d820ec">  115</a></span><span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="WtDtPorter_8cpp.html#ada199ed63f32eb9f9d6ce141d5d820ec">get_version</a>()</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>{</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="comment">// 使用静态字符串缓存版本信息，避免重复构建</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keyword">static</span> std::string _ver;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <span class="keywordflow">if</span> (_ver.empty())</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    {</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>        <span class="comment">// 构建版本信息字符串，包含平台名称、版本号和编译日期时间</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        _ver = <a class="code hl_variable" href="WtDtPorter_8cpp.html#a1c00b66b793e799ab324e7092d25e54f">PLATFORM_NAME</a>;</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        _ver += <span class="stringliteral">&quot; &quot;</span>;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        _ver += <a class="code hl_variable" href="WTSVersion_8h.html#ac293de260d95c93b8527216f8becc54b">WT_VERSION</a>;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>        _ver += <span class="stringliteral">&quot; Build@&quot;</span>;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        _ver += __DATE__;</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        _ver += <span class="stringliteral">&quot; &quot;</span>;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>        _ver += __TIME__;</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    }</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keywordflow">return</span> _ver.c_str();</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>}</div>
+</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
+<div class="foldopen" id="foldopen00140" data-start="{" data-end="}">
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno"><a class="line" href="WtDtPorter_8cpp.html#a2a5fedc7463c63fcd029ee1f93f063a3">  140</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="WtDtPorter_8cpp.html#a2a5fedc7463c63fcd029ee1f93f063a3">write_log</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> level, <span class="keyword">const</span> <span class="keywordtype">char</span>* message, <span class="keyword">const</span> <span class="keywordtype">char</span>* catName)</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>{</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>    <span class="comment">// 如果指定了日志类别名称</span></div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>    <span class="keywordflow">if</span> (strlen(catName) &gt; 0)</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    {</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>        <span class="comment">// 使用指定类别写入日志</span></div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>        <a class="code hl_function" href="classWTSLogger.html#a01fb1b92bf14e993751ce211b00e7dd2">WTSLogger::log_raw_by_cat</a>(catName, (<a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>)level, message);</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    }</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>    {</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        <span class="comment">// 使用默认类别写入日志</span></div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>        <a class="code hl_function" href="classWTSLogger.html#aa3257bbd8e5b1db25f65cd936f50025c">WTSLogger::log_raw</a>((<a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>)level, message);</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    }</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>}</div>
+</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span><span class="preprocessor">#pragma region &quot;扩展Parser接口&quot;</span></div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="foldopen" id="foldopen00163" data-start="{" data-end="}">
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno"><a class="line" href="WtDtPorter_8cpp.html#af7c500d7e168519d199e72d020aeadb3">  163</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="WtDtPorter_8cpp.html#af7c500d7e168519d199e72d020aeadb3">create_ext_parser</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>)</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>{</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    <span class="comment">// 调用运行器的方法创建扩展解析器</span></div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="WtDtPorter_8cpp.html#a046d496fdc3bf2de86bcdbcb276f592d">getRunner</a>().<a class="code hl_function" href="classWtDtRunner.html#a15ecc1bca166a1150898388b696aba86">createExtParser</a>(<span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>}</div>
+</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
+<div class="foldopen" id="foldopen00176" data-start="{" data-end="}">
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno"><a class="line" href="WtDtPorter_8cpp.html#a94304b0cdce650d652930eca1da3a10e">  176</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="WtDtPorter_8cpp.html#a94304b0cdce650d652930eca1da3a10e">parser_push_quote</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>, <a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>* curTick, <a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> uProcFlag)</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>{</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    <span class="comment">// 调用运行器的方法处理外部解析器推送的行情数据</span></div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    <a class="code hl_function" href="WtDtPorter_8cpp.html#a046d496fdc3bf2de86bcdbcb276f592d">getRunner</a>().<a class="code hl_function" href="classWtDtRunner.html#a2047afc1135c8af33f25fe53182e37af">on_ext_parser_quote</a>(<span class="keywordtype">id</span>, curTick, uProcFlag);</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>}</div>
+</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span> </div>
+<div class="foldopen" id="foldopen00188" data-start="{" data-end="}">
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno"><a class="line" href="WtDtPorter_8cpp.html#a0f58fff87f72a5fdde7eba309d5be924">  188</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="WtDtPorter_8cpp.html#a0f58fff87f72a5fdde7eba309d5be924">register_parser_callbacks</a>(<a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a19abdbb76592f69c751dc63b6978c3bc">FuncParserEvtCallback</a> cbEvt, <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a6036ab6dc363c10ac1af93552add37cc">FuncParserSubCallback</a> cbSub)</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>{</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>    <span class="comment">// 调用运行器的方法注册解析器回调函数</span></div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    <a class="code hl_function" href="WtDtPorter_8cpp.html#a046d496fdc3bf2de86bcdbcb276f592d">getRunner</a>().<a class="code hl_function" href="classWtDtRunner.html#a18f8edb190e89637f5e3f5b92c3f9406">registerParserPorter</a>(cbEvt, cbSub);</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>}</div>
+</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span><span class="preprocessor">#pragma endregion &quot;扩展Parser接口&quot;</span></div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span><span class="preprocessor">#pragma region &quot;扩展Dumper接口&quot;</span></div>
+<div class="foldopen" id="foldopen00204" data-start="{" data-end="}">
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno"><a class="line" href="WtDtPorter_8cpp.html#a84d6d41c60e616fab3014fb30dac2773">  204</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="WtDtPorter_8cpp.html#a84d6d41c60e616fab3014fb30dac2773">create_ext_dumper</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>)</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>{</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>    <span class="comment">// 调用运行器的方法创建扩展导出器</span></div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="WtDtPorter_8cpp.html#a046d496fdc3bf2de86bcdbcb276f592d">getRunner</a>().<a class="code hl_function" href="classWtDtRunner.html#a3a1968976ffd07e72a3cb04270281c28">createExtDumper</a>(<span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>}</div>
+</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span> </div>
+<div class="foldopen" id="foldopen00216" data-start="{" data-end="}">
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno"><a class="line" href="WtDtPorter_8cpp.html#a3f82ffd854ba398a2cb162907d89efe9">  216</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="WtDtPorter_8cpp.html#a3f82ffd854ba398a2cb162907d89efe9">register_extended_dumper</a>(<a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#adc4513b79f4c5b470eb9dbcfae034f3d">FuncDumpBars</a> barDumper, <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a9c9111f37d33566db91bab58d98463fe">FuncDumpTicks</a> tickDumper)</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>{</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>    <span class="comment">// 调用运行器的方法注册扩展导出器的基础数据回调</span></div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>    <a class="code hl_function" href="WtDtPorter_8cpp.html#a046d496fdc3bf2de86bcdbcb276f592d">getRunner</a>().<a class="code hl_function" href="classWtDtRunner.html#a208fc4be183e826bdb083c803c0adb75">registerExtDumper</a>(barDumper, tickDumper);</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>}</div>
+</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span> </div>
+<div class="foldopen" id="foldopen00229" data-start="{" data-end="}">
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno"><a class="line" href="WtDtPorter_8cpp.html#ac94804f3c224e92a86345732f4b94046">  229</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="WtDtPorter_8cpp.html#ac94804f3c224e92a86345732f4b94046">register_extended_hftdata_dumper</a>(<a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a5f4a554e983f0d8709b79940cde62dba">FuncDumpOrdQue</a> ordQueDumper, <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a01d26dff0ca98d73297c7fca7dd2789f">FuncDumpOrdDtl</a> ordDtlDumper, <a class="code hl_typedef" href="WtDtPorter_2PorterDefs_8h.html#a8a8857d86ecda6e85f2d98f067735680">FuncDumpTrans</a> transDumper)</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>{</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    <span class="comment">// 调用运行器的方法注册扩展导出器的高频数据回调</span></div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <a class="code hl_function" href="WtDtPorter_8cpp.html#a046d496fdc3bf2de86bcdbcb276f592d">getRunner</a>().<a class="code hl_function" href="classWtDtRunner.html#a2438290030de893209f2356a487b919b">registerExtHftDataDumper</a>(ordQueDumper, ordDtlDumper, transDumper);</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>}</div>
+</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span><span class="preprocessor">#pragma endregion &quot;扩展Dumper接口&quot;</span></div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span> </div>
+<div class="ttc" id="aCTPLoader_8cpp_html_a607f55b827e0f9ac8476fe14ee55e3c1"><div class="ttname"><a href="CTPLoader_8cpp.html#a607f55b827e0f9ac8476fe14ee55e3c1">MODULE_NAME</a></div><div class="ttdeci">std::string MODULE_NAME</div><div class="ttdoc">CTP API模块名称</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_8cpp_source.html#l00067">CTPLoader.cpp:67</a></div></div>
+<div class="ttc" id="aQuoteFactory_2main_8cpp_html_a60d1186895e0d2d2edd7a2710e082cd0"><div class="ttname"><a href="QuoteFactory_2main_8cpp.html#a60d1186895e0d2d2edd7a2710e082cd0">getBinDir</a></div><div class="ttdeci">const char * getBinDir()</div><div class="ttdoc">获取当前可执行文件所在目录</div><div class="ttdef"><b>Definition</b> <a href="QuoteFactory_2main_8cpp_source.html#l00080">main.cpp:80</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a137b118e8aaff7fc7ff0a17f2bd7141e"><div class="ttname"><a href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a></div><div class="ttdeci">unsigned int WtUInt32</div><div class="ttdoc">WonderTrader类型别名定义</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00121">WTSMarcos.h:121</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_ac25509d4a6621101451db7aeca0b7d1e"><div class="ttname"><a href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a></div><div class="ttdeci">const char * WtString</div><div class="ttdoc">字符串类型（常量字符指针）</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00125">WTSMarcos.h:125</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aa7b93f4aa2259e69e48f27448c247dc8"><div class="ttname"><a href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a></div><div class="ttdeci">enum tagLogLevel WTSLogLevel</div></div>
+<div class="ttc" id="aWTSVersion_8h_html_ac293de260d95c93b8527216f8becc54b"><div class="ttname"><a href="WTSVersion_8h.html#ac293de260d95c93b8527216f8becc54b">WT_VERSION</a></div><div class="ttdeci">static const char WT_VERSION[]</div><div class="ttdef"><b>Definition</b> <a href="WTSVersion_8h_source.html#l00010">WTSVersion.h:10</a></div></div>
+<div class="ttc" id="aWtDtPorter_2PorterDefs_8h_html_a01d26dff0ca98d73297c7fca7dd2789f"><div class="ttname"><a href="WtDtPorter_2PorterDefs_8h.html#a01d26dff0ca98d73297c7fca7dd2789f">FuncDumpOrdDtl</a></div><div class="ttdeci">bool(PORTER_FLAG * FuncDumpOrdDtl)(const char *id, const char *stdCode, WtUInt32 uDate, WTSOrdDtlStruct *items, WtUInt32 count)</div><div class="ttdoc">委托明细数据导出回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2PorterDefs_8h_source.html#l00157">PorterDefs.h:157</a></div></div>
+<div class="ttc" id="aWtDtPorter_2PorterDefs_8h_html_a19abdbb76592f69c751dc63b6978c3bc"><div class="ttname"><a href="WtDtPorter_2PorterDefs_8h.html#a19abdbb76592f69c751dc63b6978c3bc">FuncParserEvtCallback</a></div><div class="ttdeci">void(PORTER_FLAG * FuncParserEvtCallback)(WtUInt32 evtId, const char *id)</div><div class="ttdoc">解析器事件回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2PorterDefs_8h_source.html#l00093">PorterDefs.h:93</a></div></div>
+<div class="ttc" id="aWtDtPorter_2PorterDefs_8h_html_a5f4a554e983f0d8709b79940cde62dba"><div class="ttname"><a href="WtDtPorter_2PorterDefs_8h.html#a5f4a554e983f0d8709b79940cde62dba">FuncDumpOrdQue</a></div><div class="ttdeci">bool(PORTER_FLAG * FuncDumpOrdQue)(const char *id, const char *stdCode, WtUInt32 uDate, WTSOrdQueStruct *items, WtUInt32 count)</div><div class="ttdoc">委托队列数据导出回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2PorterDefs_8h_source.html#l00145">PorterDefs.h:145</a></div></div>
+<div class="ttc" id="aWtDtPorter_2PorterDefs_8h_html_a6036ab6dc363c10ac1af93552add37cc"><div class="ttname"><a href="WtDtPorter_2PorterDefs_8h.html#a6036ab6dc363c10ac1af93552add37cc">FuncParserSubCallback</a></div><div class="ttdeci">void(PORTER_FLAG * FuncParserSubCallback)(const char *id, const char *fullCode, bool isForSub)</div><div class="ttdoc">解析器订阅回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2PorterDefs_8h_source.html#l00102">PorterDefs.h:102</a></div></div>
+<div class="ttc" id="aWtDtPorter_2PorterDefs_8h_html_a8a8857d86ecda6e85f2d98f067735680"><div class="ttname"><a href="WtDtPorter_2PorterDefs_8h.html#a8a8857d86ecda6e85f2d98f067735680">FuncDumpTrans</a></div><div class="ttdeci">bool(PORTER_FLAG * FuncDumpTrans)(const char *id, const char *stdCode, WtUInt32 uDate, WTSTransStruct *items, WtUInt32 count)</div><div class="ttdoc">成交数据导出回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2PorterDefs_8h_source.html#l00169">PorterDefs.h:169</a></div></div>
+<div class="ttc" id="aWtDtPorter_2PorterDefs_8h_html_a9c9111f37d33566db91bab58d98463fe"><div class="ttname"><a href="WtDtPorter_2PorterDefs_8h.html#a9c9111f37d33566db91bab58d98463fe">FuncDumpTicks</a></div><div class="ttdeci">bool(PORTER_FLAG * FuncDumpTicks)(const char *id, const char *stdCode, WtUInt32 uDate, WTSTickStruct *ticks, WtUInt32 count)</div><div class="ttdoc">适价数据导出回调函数类型</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2PorterDefs_8h_source.html#l00133">PorterDefs.h:133</a></div></div>
+<div class="ttc" id="aWtDtPorter_2PorterDefs_8h_html_adc4513b79f4c5b470eb9dbcfae034f3d"><div class="ttname"><a href="WtDtPorter_2PorterDefs_8h.html#adc4513b79f4c5b470eb9dbcfae034f3d">FuncDumpBars</a></div><div class="ttdeci">bool(PORTER_FLAG * FuncDumpBars)(const char *id, const char *stdCode, const char *period, WTSBarStruct *bars, WtUInt32 count)</div><div class="ttdoc">数据导出器相关回调函数定义</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2PorterDefs_8h_source.html#l00121">PorterDefs.h:121</a></div></div>
+<div class="ttc" id="aWtDtPorter_8cpp_html_a011cfecbf1cc7aea656da1554c8f0e7f"><div class="ttname"><a href="WtDtPorter_8cpp.html#a011cfecbf1cc7aea656da1554c8f0e7f">start</a></div><div class="ttdeci">void start(bool bAsync)</div><div class="ttdoc">启动数据处理模块</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_8cpp_source.html#l00104">WtDtPorter.cpp:104</a></div></div>
+<div class="ttc" id="aWtDtPorter_8cpp_html_a046d496fdc3bf2de86bcdbcb276f592d"><div class="ttname"><a href="WtDtPorter_8cpp.html#a046d496fdc3bf2de86bcdbcb276f592d">getRunner</a></div><div class="ttdeci">WtDtRunner &amp; getRunner()</div><div class="ttdoc">获取全局数据处理运行器实例</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_8cpp_source.html#l00074">WtDtPorter.cpp:74</a></div></div>
+<div class="ttc" id="aWtDtPorter_8cpp_html_a0f58fff87f72a5fdde7eba309d5be924"><div class="ttname"><a href="WtDtPorter_8cpp.html#a0f58fff87f72a5fdde7eba309d5be924">register_parser_callbacks</a></div><div class="ttdeci">void register_parser_callbacks(FuncParserEvtCallback cbEvt, FuncParserSubCallback cbSub)</div><div class="ttdoc">注册解析器回调函数</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_8cpp_source.html#l00188">WtDtPorter.cpp:188</a></div></div>
+<div class="ttc" id="aWtDtPorter_8cpp_html_a1c00b66b793e799ab324e7092d25e54f"><div class="ttname"><a href="WtDtPorter_8cpp.html#a1c00b66b793e799ab324e7092d25e54f">PLATFORM_NAME</a></div><div class="ttdeci">char PLATFORM_NAME[]</div><div class="ttdoc">平台名称常量，UNIX版本</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_8cpp_source.html#l00041">WtDtPorter.cpp:41</a></div></div>
+<div class="ttc" id="aWtDtPorter_8cpp_html_a2a5fedc7463c63fcd029ee1f93f063a3"><div class="ttname"><a href="WtDtPorter_8cpp.html#a2a5fedc7463c63fcd029ee1f93f063a3">write_log</a></div><div class="ttdeci">void write_log(unsigned int level, const char *message, const char *catName)</div><div class="ttdoc">写入日志</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_8cpp_source.html#l00140">WtDtPorter.cpp:140</a></div></div>
+<div class="ttc" id="aWtDtPorter_8cpp_html_a3f82ffd854ba398a2cb162907d89efe9"><div class="ttname"><a href="WtDtPorter_8cpp.html#a3f82ffd854ba398a2cb162907d89efe9">register_extended_dumper</a></div><div class="ttdeci">void register_extended_dumper(FuncDumpBars barDumper, FuncDumpTicks tickDumper)</div><div class="ttdoc">注册扩展数据导出器的基础数据回调</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_8cpp_source.html#l00216">WtDtPorter.cpp:216</a></div></div>
+<div class="ttc" id="aWtDtPorter_8cpp_html_a84d6d41c60e616fab3014fb30dac2773"><div class="ttname"><a href="WtDtPorter_8cpp.html#a84d6d41c60e616fab3014fb30dac2773">create_ext_dumper</a></div><div class="ttdeci">bool create_ext_dumper(const char *id)</div><div class="ttdoc">创建扩展数据导出器</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_8cpp_source.html#l00204">WtDtPorter.cpp:204</a></div></div>
+<div class="ttc" id="aWtDtPorter_8cpp_html_a94304b0cdce650d652930eca1da3a10e"><div class="ttname"><a href="WtDtPorter_8cpp.html#a94304b0cdce650d652930eca1da3a10e">parser_push_quote</a></div><div class="ttdeci">void parser_push_quote(const char *id, WTSTickStruct *curTick, WtUInt32 uProcFlag)</div><div class="ttdoc">推送行情数据</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_8cpp_source.html#l00176">WtDtPorter.cpp:176</a></div></div>
+<div class="ttc" id="aWtDtPorter_8cpp_html_a9b21c448e66ba44f72439cb411d03fee"><div class="ttname"><a href="WtDtPorter_8cpp.html#a9b21c448e66ba44f72439cb411d03fee">initialize</a></div><div class="ttdeci">void initialize(WtString cfgFile, WtString logCfg, bool bCfgFile, bool bLogCfgFile)</div><div class="ttdoc">初始化数据处理模块</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_8cpp_source.html#l00089">WtDtPorter.cpp:89</a></div></div>
+<div class="ttc" id="aWtDtPorter_8cpp_html_ac94804f3c224e92a86345732f4b94046"><div class="ttname"><a href="WtDtPorter_8cpp.html#ac94804f3c224e92a86345732f4b94046">register_extended_hftdata_dumper</a></div><div class="ttdeci">void register_extended_hftdata_dumper(FuncDumpOrdQue ordQueDumper, FuncDumpOrdDtl ordDtlDumper, FuncDumpTrans transDumper)</div><div class="ttdoc">注册扩展数据导出器的高频数据回调</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_8cpp_source.html#l00229">WtDtPorter.cpp:229</a></div></div>
+<div class="ttc" id="aWtDtPorter_8cpp_html_ada199ed63f32eb9f9d6ce141d5d820ec"><div class="ttname"><a href="WtDtPorter_8cpp.html#ada199ed63f32eb9f9d6ce141d5d820ec">get_version</a></div><div class="ttdeci">const char * get_version()</div><div class="ttdoc">获取模块版本信息</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_8cpp_source.html#l00115">WtDtPorter.cpp:115</a></div></div>
+<div class="ttc" id="aWtDtPorter_8cpp_html_af7c500d7e168519d199e72d020aeadb3"><div class="ttname"><a href="WtDtPorter_8cpp.html#af7c500d7e168519d199e72d020aeadb3">create_ext_parser</a></div><div class="ttdeci">bool create_ext_parser(const char *id)</div><div class="ttdoc">创建扩展解析器</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_8cpp_source.html#l00163">WtDtPorter.cpp:163</a></div></div>
+<div class="ttc" id="aWtDtPorter_8h_html"><div class="ttname"><a href="WtDtPorter_8h.html">WtDtPorter.h</a></div><div class="ttdoc">WonderTrader数据处理模块的C接口定义</div></div>
+<div class="ttc" id="aWtDtServo_2WtDtRunner_8h_html"><div class="ttname"><a href="WtDtServo_2WtDtRunner_8h.html">WtDtRunner.h</a></div><div class="ttdoc">数据服务运行器定义</div></div>
+<div class="ttc" id="aclassCMiniDumper_html_a4bc1259819db0c9ef7afc3264745a146"><div class="ttname"><a href="classCMiniDumper.html#a4bc1259819db0c9ef7afc3264745a146">CMiniDumper::Enable</a></div><div class="ttdeci">static void Enable(LPCTSTR pszAppName, bool bShowErrors, LPCTSTR pszDumpPath=&quot;&quot;)</div><div class="ttdef"><b>Definition</b> <a href="mdump_8cpp_source.html#l00052">mdump.cpp:52</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a01fb1b92bf14e993751ce211b00e7dd2"><div class="ttname"><a href="classWTSLogger.html#a01fb1b92bf14e993751ce211b00e7dd2">WTSLogger::log_raw_by_cat</a></div><div class="ttdeci">static void log_raw_by_cat(const char *catName, WTSLogLevel ll, const char *message)</div><div class="ttdoc">按分类输出日志消息</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00446">WTSLogger.cpp:446</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_aa3257bbd8e5b1db25f65cd936f50025c"><div class="ttname"><a href="classWTSLogger.html#aa3257bbd8e5b1db25f65cd936f50025c">WTSLogger::log_raw</a></div><div class="ttdeci">static void log_raw(WTSLogLevel ll, const char *message)</div><div class="ttdoc">直接输出日志消息</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00407">WTSLogger.cpp:407</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html"><div class="ttname"><a href="classWtDtRunner.html">WtDtRunner</a></div><div class="ttdoc">WonderTrader数据处理模块的运行器类</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8h_source.html#l00037">WtDtRunner.h:38</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a15ecc1bca166a1150898388b696aba86"><div class="ttname"><a href="classWtDtRunner.html#a15ecc1bca166a1150898388b696aba86">WtDtRunner::createExtParser</a></div><div class="ttdeci">bool createExtParser(const char *id)</div><div class="ttdoc">创建扩展解析器</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00431">WtDtRunner.cpp:431</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a16c4c92a100f5b818ef635eaf7c2d95c"><div class="ttname"><a href="classWtDtRunner.html#a16c4c92a100f5b818ef635eaf7c2d95c">WtDtRunner::start</a></div><div class="ttdeci">void start(bool bAsync=false, bool bAlldayMode=false)</div><div class="ttdoc">启动数据处理模块</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00058">WtDtRunner.cpp:58</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a18f8edb190e89637f5e3f5b92c3f9406"><div class="ttname"><a href="classWtDtRunner.html#a18f8edb190e89637f5e3f5b92c3f9406">WtDtRunner::registerParserPorter</a></div><div class="ttdeci">void registerParserPorter(FuncParserEvtCallback cbEvt, FuncParserSubCallback cbSub)</div><div class="ttdoc">扩展解析器相关方法</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00327">WtDtRunner.cpp:327</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a2047afc1135c8af33f25fe53182e37af"><div class="ttname"><a href="classWtDtRunner.html#a2047afc1135c8af33f25fe53182e37af">WtDtRunner::on_ext_parser_quote</a></div><div class="ttdeci">void on_ext_parser_quote(const char *id, WTSTickStruct *curTick, uint32_t uProcFlag)</div><div class="ttdoc">处理外部解析器的行情数据</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00410">WtDtRunner.cpp:410</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a208fc4be183e826bdb083c803c0adb75"><div class="ttname"><a href="classWtDtRunner.html#a208fc4be183e826bdb083c803c0adb75">WtDtRunner::registerExtDumper</a></div><div class="ttdeci">void registerExtDumper(FuncDumpBars barDumper, FuncDumpTicks tickDumper)</div><div class="ttdoc">注册扩展数据导出器的基础数据回调</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00466">WtDtRunner.cpp:466</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a2438290030de893209f2356a487b919b"><div class="ttname"><a href="classWtDtRunner.html#a2438290030de893209f2356a487b919b">WtDtRunner::registerExtHftDataDumper</a></div><div class="ttdeci">void registerExtHftDataDumper(FuncDumpOrdQue ordQueDumper, FuncDumpOrdDtl ordDtlDumper, FuncDumpTrans transDumper)</div><div class="ttdoc">注册扩展数据导出器的高频数据回调</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00479">WtDtRunner.cpp:479</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_a3a1968976ffd07e72a3cb04270281c28"><div class="ttname"><a href="classWtDtRunner.html#a3a1968976ffd07e72a3cb04270281c28">WtDtRunner::createExtDumper</a></div><div class="ttdeci">bool createExtDumper(const char *id)</div><div class="ttdoc">扩展导出器相关方法</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00449">WtDtRunner.cpp:449</a></div></div>
+<div class="ttc" id="aclassWtDtRunner_html_ac0d061d0d1468a332d9e96d62d0a817b"><div class="ttname"><a href="classWtDtRunner.html#ac0d061d0d1468a332d9e96d62d0a817b">WtDtRunner::initialize</a></div><div class="ttdeci">void initialize(const char *cfgFile, const char *logCfg, const char *modDir=&quot;&quot;, bool bCfgFile=true, bool bLogCfgFile=true)</div><div class="ttdoc">初始化数据处理模块</div><div class="ttdef"><b>Definition</b> <a href="WtDtPorter_2WtDtRunner_8cpp_source.html#l00111">WtDtRunner.cpp:111</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_aa6b2cf1518435992478b4c0a0a14cd9a"><div class="ttname"><a href="classWtHelper.html#aa6b2cf1518435992478b4c0a0a14cd9a">WtHelper::get_cwd</a></div><div class="ttdeci">static const char * get_cwd()</div><div class="ttdoc">获取当前工作目录的实现</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2WtHelper_8cpp_source.html#l00022">WtHelper.cpp:22</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html"><div class="ttname"><a href="structWTSTickStruct.html">WTSTickStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00158">WTSStruct.h:159</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_a1e191ac351261b7a05020a3948e707e.html">WtDtPorter</a></li><li class="navelem"><a class="el" href="WtDtPorter_8cpp.html">WtDtPorter.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

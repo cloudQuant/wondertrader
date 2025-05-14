@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSTools/WTSBaseDataMgr.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WTSBaseDataMgr_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WTSBaseDataMgr.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WTSBaseDataMgr_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Includes/IBaseDataMgr.h&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/WTSCollection.hpp&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../Includes/FasterDefs.h&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="WTSBaseDataMgr_8h.html#a17226795848decb565e90624584e5c0f">   18</a></span><a class="code hl_variable" href="WTSBaseDataMgr_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="WTSBaseDataMgr_8h.html#a857680077fdeefcf770dc548122e8349">   24</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, TradingDayTpl&gt;</a>  <a class="code hl_typedef" href="WTSBaseDataMgr_8h.html#a857680077fdeefcf770dc548122e8349">TradingDayTplMap</a>;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="WTSBaseDataMgr_8h.html#a8e87338ffc7bcbda9bd9c8a3ee7c99bd">   30</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classWTSHashMap.html">WTSHashMap&lt;std::string&gt;</a>     <a class="code hl_typedef" href="WTSBaseDataMgr_8h.html#a8e87338ffc7bcbda9bd9c8a3ee7c99bd">WTSContractList</a>;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="WTSBaseDataMgr_8h.html#a9b724a992049f393d33ba196ce130b3a">   36</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classWTSHashMap.html">WTSHashMap&lt;std::string&gt;</a>     <a class="code hl_typedef" href="WTSBaseDataMgr_8h.html#a9b724a992049f393d33ba196ce130b3a">WTSExchgContract</a>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="WTSBaseDataMgr_8h.html#acaf6128b50426e3b6afb40f79ae4e83a">   42</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classWTSHashMap.html">WTSHashMap&lt;std::string&gt;</a>     <a class="code hl_typedef" href="WTSBaseDataMgr_8h.html#acaf6128b50426e3b6afb40f79ae4e83a">WTSContractMap</a>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="WTSBaseDataMgr_8h.html#aef623af62a11b61287880b93762e6aad">   48</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classWTSHashMap.html">WTSHashMap&lt;std::string&gt;</a>     <a class="code hl_typedef" href="WTSBaseDataMgr_8h.html#aef623af62a11b61287880b93762e6aad">WTSSessionMap</a>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="WTSBaseDataMgr_8h.html#a5c2f20afb8c65f7033edf57b3e7e3171">   54</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classWTSHashMap.html">WTSHashMap&lt;std::string&gt;</a>     <a class="code hl_typedef" href="WTSBaseDataMgr_8h.html#a5c2f20afb8c65f7033edf57b3e7e3171">WTSCommodityMap</a>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="WTSBaseDataMgr_8h.html#a5efd108040bb55c05d08a4ef59b41cb1">   60</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, CodeSet&gt;</a> <a class="code hl_typedef" href="WTSBaseDataMgr_8h.html#a5efd108040bb55c05d08a4ef59b41cb1">SessionCodeMap</a>;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="foldopen" id="foldopen00073" data-start="{" data-end="};">
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="classWTSBaseDataMgr.html">   73</a></span><span class="keyword">class </span><a class="code hl_class" href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a> : <span class="keyword">public</span> <a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>{</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <a class="code hl_function" href="classWTSBaseDataMgr.html#a09c55e2f861eac56ba87378fd2704f95">WTSBaseDataMgr</a>();</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <a class="code hl_function" href="classWTSBaseDataMgr.html#a86443a05fcea3e9f30638a67fa831500">~WTSBaseDataMgr</a>();</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSCommodityInfo.html">WTSCommodityInfo</a>*   <a class="code hl_function" href="classWTSBaseDataMgr.html#a3c8d0059a4b4772feade21e0360f5b3e">getCommodity</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdPID) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSCommodityInfo.html">WTSCommodityInfo</a>*   <a class="code hl_function" href="classWTSBaseDataMgr.html#a3c8d0059a4b4772feade21e0360f5b3e">getCommodity</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg, <span class="keyword">const</span> <span class="keywordtype">char</span>* pid) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSContractInfo.html">WTSContractInfo</a>*    <a class="code hl_function" href="classWTSBaseDataMgr.html#a3e9d267521c1ed9850b244528b98fbf0">getContract</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* code, <span class="keyword">const</span> <span class="keywordtype">char</span>* exchg = <span class="stringliteral">&quot;&quot;</span>, uint32_t uDate = 0) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSArray.html">WTSArray</a>*           <a class="code hl_function" href="classWTSBaseDataMgr.html#a63885c8ed3b5a721b6ac7a5a82f93102">getContracts</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg = <span class="stringliteral">&quot;&quot;</span>, uint32_t uDate = 0) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSSessionInfo.html">WTSSessionInfo</a>*     <a class="code hl_function" href="classWTSBaseDataMgr.html#af6490dcd4fed173a5f372c765ce2010f">getSession</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* sid) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSSessionInfo.html">WTSSessionInfo</a>*     <a class="code hl_function" href="classWTSBaseDataMgr.html#ae4cb2075167dad363e7f19e2b1116864">getSessionByCode</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* code, <span class="keyword">const</span> <span class="keywordtype">char</span>* exchg = <span class="stringliteral">&quot;&quot;</span>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSArray.html">WTSArray</a>*           <a class="code hl_function" href="classWTSBaseDataMgr.html#ad1e342aa308ac3856dd9d52d124c034f">getAllSessions</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span> </div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span>                <a class="code hl_function" href="classWTSBaseDataMgr.html#ab6cb1b21d0600f3ef1f0c5ff76488744">isHoliday</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdPID, uint32_t uDate, <span class="keywordtype">bool</span> isTpl = <span class="keyword">false</span>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    <span class="keyword">virtual</span> uint32_t            <a class="code hl_function" href="classWTSBaseDataMgr.html#ab2ff9bd9564154135849b5e598fa4ee0">calcTradingDate</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdPID, uint32_t uDate, uint32_t uTime, <span class="keywordtype">bool</span> isSession = <span class="keyword">false</span>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    <span class="keyword">virtual</span> uint64_t            <a class="code hl_function" href="classWTSBaseDataMgr.html#a495150eddd10ef92338ad84bbde5b7ac">getBoundaryTime</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdPID, uint32_t tDate, <span class="keywordtype">bool</span> isSession = <span class="keyword">false</span>, <span class="keywordtype">bool</span> isStart = <span class="keyword">true</span>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    <span class="keyword">virtual</span> uint32_t            <a class="code hl_function" href="classWTSBaseDataMgr.html#a1766f9c8cb3b3650ad55a109e7c767ad">getContractSize</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* exchg = <span class="stringliteral">&quot;&quot;</span>, uint32_t uDate = 0) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    <span class="keywordtype">void</span>        <a class="code hl_function" href="classWTSBaseDataMgr.html#a4cde828ea7e284a25c961be0d03993e2">release</a>();</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    <span class="keywordtype">bool</span>        <a class="code hl_function" href="classWTSBaseDataMgr.html#a57021af47b2f06c2be9f8b4c4656c497">loadSessions</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* filename);</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>    <span class="keywordtype">bool</span>        <a class="code hl_function" href="classWTSBaseDataMgr.html#a4a497f559d9cef1296216ddab48ecdc4">loadCommodities</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* filename);</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    <span class="keywordtype">bool</span>        <a class="code hl_function" href="classWTSBaseDataMgr.html#af6af96bd4a0b191460c36d572febf80a">loadContracts</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* filename);</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span> </div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    <span class="keywordtype">bool</span>        <a class="code hl_function" href="classWTSBaseDataMgr.html#abed3522cce01edfd775a217ff0635bf3">loadHolidays</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* filename);</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span> </div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    uint32_t    <a class="code hl_function" href="classWTSBaseDataMgr.html#a490678d017a3095f8f80956eb24e158b">getTradingDate</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdPID, uint32_t uOffDate = 0, uint32_t uOffMinute = 0, <span class="keywordtype">bool</span> isTpl = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span> </div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    uint32_t    <a class="code hl_function" href="classWTSBaseDataMgr.html#a23c6997855e11797c9877c6f7f4c82d8">getNextTDate</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdPID, uint32_t uDate, <span class="keywordtype">int</span> days = 1, <span class="keywordtype">bool</span> isTpl = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span> </div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    uint32_t    <a class="code hl_function" href="classWTSBaseDataMgr.html#a37fa36ae47417e99a146b8b5e8ad4a01">getPrevTDate</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdPID, uint32_t uDate, <span class="keywordtype">int</span> days = 1, <span class="keywordtype">bool</span> isTpl = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span> </div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>    <span class="keywordtype">bool</span>        <a class="code hl_function" href="classWTSBaseDataMgr.html#ad080ad6233c856be61d2951ef3db2d64">isTradingDate</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdPID, uint32_t uDate, <span class="keywordtype">bool</span> isTpl = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span> </div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>    <span class="keywordtype">void</span>        <a class="code hl_function" href="classWTSBaseDataMgr.html#a66e31f7e0261283ed3d145362b763044">setTradingDate</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdPID, uint32_t uDate, <span class="keywordtype">bool</span> isTpl = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span> </div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a>*    <a class="code hl_function" href="classWTSBaseDataMgr.html#ac266e833193103d566d3f15dba590245">getSessionComms</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* sid);</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span> </div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWTSBaseDataMgr.html#a3abdb34ac483fe971f51c499f2208ceb">getTplIDByPID</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdPID);</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno"><a class="line" href="classWTSBaseDataMgr.html#a509ad5f7cea58e9e0a72c6ba4ad3a343">  281</a></span>    <a class="code hl_class" href="classwt__hashmap.html">TradingDayTplMap</a>    <a class="code hl_variable" href="classWTSBaseDataMgr.html#a509ad5f7cea58e9e0a72c6ba4ad3a343">m_mapTradingDay</a>;</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span> </div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno"><a class="line" href="classWTSBaseDataMgr.html#a086abb77af856a990fad85205e54c81d">  284</a></span>    <a class="code hl_class" href="classwt__hashmap.html">SessionCodeMap</a>      <a class="code hl_variable" href="classWTSBaseDataMgr.html#a086abb77af856a990fad85205e54c81d">m_mapSessionCode</a>;</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span> </div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno"><a class="line" href="classWTSBaseDataMgr.html#a46ce681774d440e9105966d16718434a">  287</a></span>    <a class="code hl_class" href="classWTSHashMap.html">WTSExchgContract</a>*   <a class="code hl_variable" href="classWTSBaseDataMgr.html#a46ce681774d440e9105966d16718434a">m_mapExchgContract</a>;</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno"><a class="line" href="classWTSBaseDataMgr.html#a32ed646149ed4614115462762607b74e">  289</a></span>    <a class="code hl_class" href="classWTSHashMap.html">WTSSessionMap</a>*      <a class="code hl_variable" href="classWTSBaseDataMgr.html#a32ed646149ed4614115462762607b74e">m_mapSessions</a>;</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno"><a class="line" href="classWTSBaseDataMgr.html#aeef72b65a73dd64b30e81312b430cafb">  291</a></span>    <a class="code hl_class" href="classWTSHashMap.html">WTSCommodityMap</a>*    <a class="code hl_variable" href="classWTSBaseDataMgr.html#aeef72b65a73dd64b30e81312b430cafb">m_mapCommodities</a>;</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno"><a class="line" href="classWTSBaseDataMgr.html#a2296ef859ff1736f3944072c00b8427b">  293</a></span>    <a class="code hl_class" href="classWTSHashMap.html">WTSContractMap</a>*     <a class="code hl_variable" href="classWTSBaseDataMgr.html#a2296ef859ff1736f3944072c00b8427b">m_mapContracts</a>;</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>};</div>
+</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span> </div>
+<div class="ttc" id="aWTSBaseDataMgr_8h_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="WTSBaseDataMgr_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00018">WTSBaseDataMgr.h:18</a></div></div>
+<div class="ttc" id="aWTSBaseDataMgr_8h_html_a5c2f20afb8c65f7033edf57b3e7e3171"><div class="ttname"><a href="WTSBaseDataMgr_8h.html#a5c2f20afb8c65f7033edf57b3e7e3171">WTSCommodityMap</a></div><div class="ttdeci">WTSHashMap&lt; std::string &gt; WTSCommodityMap</div><div class="ttdoc">品种映射类型 用于存储品种ID到品种信息的映射</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00054">WTSBaseDataMgr.h:54</a></div></div>
+<div class="ttc" id="aWTSBaseDataMgr_8h_html_a5efd108040bb55c05d08a4ef59b41cb1"><div class="ttname"><a href="WTSBaseDataMgr_8h.html#a5efd108040bb55c05d08a4ef59b41cb1">SessionCodeMap</a></div><div class="ttdeci">wt_hashmap&lt; std::string, CodeSet &gt; SessionCodeMap</div><div class="ttdoc">交易时段代码集合映射类型 用于存储交易时段ID到该时段包含的代码集合的映射</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00060">WTSBaseDataMgr.h:60</a></div></div>
+<div class="ttc" id="aWTSBaseDataMgr_8h_html_a857680077fdeefcf770dc548122e8349"><div class="ttname"><a href="WTSBaseDataMgr_8h.html#a857680077fdeefcf770dc548122e8349">TradingDayTplMap</a></div><div class="ttdeci">wt_hashmap&lt; std::string, TradingDayTpl &gt; TradingDayTplMap</div><div class="ttdoc">交易日历模板映射表类型 用于存储不同交易日历模板的映射关系</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00024">WTSBaseDataMgr.h:24</a></div></div>
+<div class="ttc" id="aWTSBaseDataMgr_8h_html_a8e87338ffc7bcbda9bd9c8a3ee7c99bd"><div class="ttname"><a href="WTSBaseDataMgr_8h.html#a8e87338ffc7bcbda9bd9c8a3ee7c99bd">WTSContractList</a></div><div class="ttdeci">WTSHashMap&lt; std::string &gt; WTSContractList</div><div class="ttdoc">合约列表类型 用于存储合约信息的哈希映射</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00030">WTSBaseDataMgr.h:30</a></div></div>
+<div class="ttc" id="aWTSBaseDataMgr_8h_html_a9b724a992049f393d33ba196ce130b3a"><div class="ttname"><a href="WTSBaseDataMgr_8h.html#a9b724a992049f393d33ba196ce130b3a">WTSExchgContract</a></div><div class="ttdeci">WTSHashMap&lt; std::string &gt; WTSExchgContract</div><div class="ttdoc">交易所合约映射类型 用于存储交易所与其合约列表的映射关系</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00036">WTSBaseDataMgr.h:36</a></div></div>
+<div class="ttc" id="aWTSBaseDataMgr_8h_html_acaf6128b50426e3b6afb40f79ae4e83a"><div class="ttname"><a href="WTSBaseDataMgr_8h.html#acaf6128b50426e3b6afb40f79ae4e83a">WTSContractMap</a></div><div class="ttdeci">WTSHashMap&lt; std::string &gt; WTSContractMap</div><div class="ttdoc">合约映射类型 用于存储合约代码到合约信息的映射</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00042">WTSBaseDataMgr.h:42</a></div></div>
+<div class="ttc" id="aWTSBaseDataMgr_8h_html_aef623af62a11b61287880b93762e6aad"><div class="ttname"><a href="WTSBaseDataMgr_8h.html#aef623af62a11b61287880b93762e6aad">WTSSessionMap</a></div><div class="ttdeci">WTSHashMap&lt; std::string &gt; WTSSessionMap</div><div class="ttdoc">交易时段映射类型 用于存储交易时段ID到交易时段信息的映射</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00048">WTSBaseDataMgr.h:48</a></div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html"><div class="ttname"><a href="classIBaseDataMgr.html">IBaseDataMgr</a></div><div class="ttdoc">基础数据管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IBaseDataMgr_8h_source.html#l00075">IBaseDataMgr.h:76</a></div></div>
+<div class="ttc" id="aclassWTSArray_html"><div class="ttname"><a href="classWTSArray.html">WTSArray</a></div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00032">WTSCollection.hpp:33</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html"><div class="ttname"><a href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a></div><div class="ttdoc">基础数据管理器类</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00073">WTSBaseDataMgr.h:74</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a086abb77af856a990fad85205e54c81d"><div class="ttname"><a href="classWTSBaseDataMgr.html#a086abb77af856a990fad85205e54c81d">WTSBaseDataMgr::m_mapSessionCode</a></div><div class="ttdeci">SessionCodeMap m_mapSessionCode</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00284">WTSBaseDataMgr.h:284</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a09c55e2f861eac56ba87378fd2704f95"><div class="ttname"><a href="classWTSBaseDataMgr.html#a09c55e2f861eac56ba87378fd2704f95">WTSBaseDataMgr::WTSBaseDataMgr</a></div><div class="ttdeci">WTSBaseDataMgr()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00037">WTSBaseDataMgr.cpp:37</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a1766f9c8cb3b3650ad55a109e7c767ad"><div class="ttname"><a href="classWTSBaseDataMgr.html#a1766f9c8cb3b3650ad55a109e7c767ad">WTSBaseDataMgr::getContractSize</a></div><div class="ttdeci">virtual uint32_t getContractSize(const char *exchg=&quot;&quot;, uint32_t uDate=0) override</div><div class="ttdoc">获取合约数量</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00211">WTSBaseDataMgr.cpp:211</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a2296ef859ff1736f3944072c00b8427b"><div class="ttname"><a href="classWTSBaseDataMgr.html#a2296ef859ff1736f3944072c00b8427b">WTSBaseDataMgr::m_mapContracts</a></div><div class="ttdeci">WTSContractMap * m_mapContracts</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00293">WTSBaseDataMgr.h:293</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a23c6997855e11797c9877c6f7f4c82d8"><div class="ttname"><a href="classWTSBaseDataMgr.html#a23c6997855e11797c9877c6f7f4c82d8">WTSBaseDataMgr::getNextTDate</a></div><div class="ttdeci">uint32_t getNextTDate(const char *stdPID, uint32_t uDate, int days=1, bool isTpl=false)</div><div class="ttdoc">获取下一个交易日</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l01082">WTSBaseDataMgr.cpp:1082</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a32ed646149ed4614115462762607b74e"><div class="ttname"><a href="classWTSBaseDataMgr.html#a32ed646149ed4614115462762607b74e">WTSBaseDataMgr::m_mapSessions</a></div><div class="ttdeci">WTSSessionMap * m_mapSessions</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00289">WTSBaseDataMgr.h:289</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a37fa36ae47417e99a146b8b5e8ad4a01"><div class="ttname"><a href="classWTSBaseDataMgr.html#a37fa36ae47417e99a146b8b5e8ad4a01">WTSBaseDataMgr::getPrevTDate</a></div><div class="ttdeci">uint32_t getPrevTDate(const char *stdPID, uint32_t uDate, int days=1, bool isTpl=false)</div><div class="ttdoc">获取上一个交易日</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l01128">WTSBaseDataMgr.cpp:1128</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a3abdb34ac483fe971f51c499f2208ceb"><div class="ttname"><a href="classWTSBaseDataMgr.html#a3abdb34ac483fe971f51c499f2208ceb">WTSBaseDataMgr::getTplIDByPID</a></div><div class="ttdeci">const char * getTplIDByPID(const char *stdPID)</div><div class="ttdoc">根据标准品种ID获取交易日历模板ID</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l01241">WTSBaseDataMgr.cpp:1241</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a3c8d0059a4b4772feade21e0360f5b3e"><div class="ttname"><a href="classWTSBaseDataMgr.html#a3c8d0059a4b4772feade21e0360f5b3e">WTSBaseDataMgr::getCommodity</a></div><div class="ttdeci">virtual WTSCommodityInfo * getCommodity(const char *stdPID) override</div><div class="ttdoc">根据标准品种ID获取品种信息</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00098">WTSBaseDataMgr.cpp:98</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a3e9d267521c1ed9850b244528b98fbf0"><div class="ttname"><a href="classWTSBaseDataMgr.html#a3e9d267521c1ed9850b244528b98fbf0">WTSBaseDataMgr::getContract</a></div><div class="ttdeci">virtual WTSContractInfo * getContract(const char *code, const char *exchg=&quot;&quot;, uint32_t uDate=0) override</div><div class="ttdoc">获取合约信息</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00138">WTSBaseDataMgr.cpp:138</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a46ce681774d440e9105966d16718434a"><div class="ttname"><a href="classWTSBaseDataMgr.html#a46ce681774d440e9105966d16718434a">WTSBaseDataMgr::m_mapExchgContract</a></div><div class="ttdeci">WTSExchgContract * m_mapExchgContract</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00287">WTSBaseDataMgr.h:287</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a490678d017a3095f8f80956eb24e158b"><div class="ttname"><a href="classWTSBaseDataMgr.html#a490678d017a3095f8f80956eb24e158b">WTSBaseDataMgr::getTradingDate</a></div><div class="ttdeci">uint32_t getTradingDate(const char *stdPID, uint32_t uOffDate=0, uint32_t uOffMinute=0, bool isTpl=false)</div><div class="ttdoc">获取交易日期</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l01030">WTSBaseDataMgr.cpp:1030</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a495150eddd10ef92338ad84bbde5b7ac"><div class="ttname"><a href="classWTSBaseDataMgr.html#a495150eddd10ef92338ad84bbde5b7ac">WTSBaseDataMgr::getBoundaryTime</a></div><div class="ttdeci">virtual uint64_t getBoundaryTime(const char *stdPID, uint32_t tDate, bool isSession=false, bool isStart=true) override</div><div class="ttdoc">获取交易时段边界时间</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00815">WTSBaseDataMgr.cpp:815</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a4a497f559d9cef1296216ddab48ecdc4"><div class="ttname"><a href="classWTSBaseDataMgr.html#a4a497f559d9cef1296216ddab48ecdc4">WTSBaseDataMgr::loadCommodities</a></div><div class="ttdeci">bool loadCommodities(const char *filename)</div><div class="ttdoc">加载品种数据</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00543">WTSBaseDataMgr.cpp:543</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a4cde828ea7e284a25c961be0d03993e2"><div class="ttname"><a href="classWTSBaseDataMgr.html#a4cde828ea7e284a25c961be0d03993e2">WTSBaseDataMgr::release</a></div><div class="ttdeci">void release()</div><div class="ttdoc">释放资源</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00393">WTSBaseDataMgr.cpp:393</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a509ad5f7cea58e9e0a72c6ba4ad3a343"><div class="ttname"><a href="classWTSBaseDataMgr.html#a509ad5f7cea58e9e0a72c6ba4ad3a343">WTSBaseDataMgr::m_mapTradingDay</a></div><div class="ttdeci">TradingDayTplMap m_mapTradingDay</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00281">WTSBaseDataMgr.h:281</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a57021af47b2f06c2be9f8b4c4656c497"><div class="ttname"><a href="classWTSBaseDataMgr.html#a57021af47b2f06c2be9f8b4c4656c497">WTSBaseDataMgr::loadSessions</a></div><div class="ttdeci">bool loadSessions(const char *filename)</div><div class="ttdoc">加载交易时段数据</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00425">WTSBaseDataMgr.cpp:425</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a63885c8ed3b5a721b6ac7a5a82f93102"><div class="ttname"><a href="classWTSBaseDataMgr.html#a63885c8ed3b5a721b6ac7a5a82f93102">WTSBaseDataMgr::getContracts</a></div><div class="ttdeci">virtual WTSArray * getContracts(const char *exchg=&quot;&quot;, uint32_t uDate=0) override</div><div class="ttdoc">获取合约列表</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00257">WTSBaseDataMgr.cpp:257</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a66e31f7e0261283ed3d145362b763044"><div class="ttname"><a href="classWTSBaseDataMgr.html#a66e31f7e0261283ed3d145362b763044">WTSBaseDataMgr::setTradingDate</a></div><div class="ttdeci">void setTradingDate(const char *stdPID, uint32_t uDate, bool isTpl=false)</div><div class="ttdoc">设置当前交易日</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l01196">WTSBaseDataMgr.cpp:1196</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a86443a05fcea3e9f30638a67fa831500"><div class="ttname"><a href="classWTSBaseDataMgr.html#a86443a05fcea3e9f30638a67fa831500">WTSBaseDataMgr::~WTSBaseDataMgr</a></div><div class="ttdeci">~WTSBaseDataMgr()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00059">WTSBaseDataMgr.cpp:59</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_ab2ff9bd9564154135849b5e598fa4ee0"><div class="ttname"><a href="classWTSBaseDataMgr.html#ab2ff9bd9564154135849b5e598fa4ee0">WTSBaseDataMgr::calcTradingDate</a></div><div class="ttdeci">virtual uint32_t calcTradingDate(const char *stdPID, uint32_t uDate, uint32_t uTime, bool isSession=false) override</div><div class="ttdoc">计算交易日期</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00908">WTSBaseDataMgr.cpp:908</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_ab6cb1b21d0600f3ef1f0c5ff76488744"><div class="ttname"><a href="classWTSBaseDataMgr.html#ab6cb1b21d0600f3ef1f0c5ff76488744">WTSBaseDataMgr::isHoliday</a></div><div class="ttdeci">virtual bool isHoliday(const char *stdPID, uint32_t uDate, bool isTpl=false) override</div><div class="ttdoc">检查指定日期是否为节假日</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00362">WTSBaseDataMgr.cpp:362</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_abed3522cce01edfd775a217ff0635bf3"><div class="ttname"><a href="classWTSBaseDataMgr.html#abed3522cce01edfd775a217ff0635bf3">WTSBaseDataMgr::loadHolidays</a></div><div class="ttdeci">bool loadHolidays(const char *filename)</div><div class="ttdoc">加载节假日数据</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00762">WTSBaseDataMgr.cpp:762</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_ac266e833193103d566d3f15dba590245"><div class="ttname"><a href="classWTSBaseDataMgr.html#ac266e833193103d566d3f15dba590245">WTSBaseDataMgr::getSessionComms</a></div><div class="ttdeci">CodeSet * getSessionComms(const char *sid)</div><div class="ttdoc">获取交易时段对应的代码集合</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l01222">WTSBaseDataMgr.cpp:1222</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_ad080ad6233c856be61d2951ef3db2d64"><div class="ttname"><a href="classWTSBaseDataMgr.html#ad080ad6233c856be61d2951ef3db2d64">WTSBaseDataMgr::isTradingDate</a></div><div class="ttdeci">bool isTradingDate(const char *stdPID, uint32_t uDate, bool isTpl=false)</div><div class="ttdoc">检查指定日期是否为交易日</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l01173">WTSBaseDataMgr.cpp:1173</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_ad1e342aa308ac3856dd9d52d124c034f"><div class="ttname"><a href="classWTSBaseDataMgr.html#ad1e342aa308ac3856dd9d52d124c034f">WTSBaseDataMgr::getAllSessions</a></div><div class="ttdeci">virtual WTSArray * getAllSessions() override</div><div class="ttdoc">获取所有交易时段信息</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00309">WTSBaseDataMgr.cpp:309</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_ae4cb2075167dad363e7f19e2b1116864"><div class="ttname"><a href="classWTSBaseDataMgr.html#ae4cb2075167dad363e7f19e2b1116864">WTSBaseDataMgr::getSessionByCode</a></div><div class="ttdeci">virtual WTSSessionInfo * getSessionByCode(const char *code, const char *exchg=&quot;&quot;) override</div><div class="ttdoc">根据合约代码获取其对应的交易时段信息</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00341">WTSBaseDataMgr.cpp:341</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_aeef72b65a73dd64b30e81312b430cafb"><div class="ttname"><a href="classWTSBaseDataMgr.html#aeef72b65a73dd64b30e81312b430cafb">WTSBaseDataMgr::m_mapCommodities</a></div><div class="ttdeci">WTSCommodityMap * m_mapCommodities</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00291">WTSBaseDataMgr.h:291</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_af6490dcd4fed173a5f372c765ce2010f"><div class="ttname"><a href="classWTSBaseDataMgr.html#af6490dcd4fed173a5f372c765ce2010f">WTSBaseDataMgr::getSession</a></div><div class="ttdeci">virtual WTSSessionInfo * getSession(const char *sid) override</div><div class="ttdoc">根据交易时段ID获取交易时段信息</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00327">WTSBaseDataMgr.cpp:327</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_af6af96bd4a0b191460c36d572febf80a"><div class="ttname"><a href="classWTSBaseDataMgr.html#af6af96bd4a0b191460c36d572febf80a">WTSBaseDataMgr::loadContracts</a></div><div class="ttdeci">bool loadContracts(const char *filename)</div><div class="ttdoc">加载合约数据</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00616">WTSBaseDataMgr.cpp:616</a></div></div>
+<div class="ttc" id="aclassWTSCommodityInfo_html"><div class="ttname"><a href="classWTSCommodityInfo.html">WTSCommodityInfo</a></div><div class="ttdoc">品种信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00020">WTSContractInfo.hpp:21</a></div></div>
+<div class="ttc" id="aclassWTSContractInfo_html"><div class="ttname"><a href="classWTSContractInfo.html">WTSContractInfo</a></div><div class="ttdoc">合约信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00171">WTSContractInfo.hpp:172</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html"><div class="ttname"><a href="classWTSHashMap.html">WTSHashMap</a></div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00594">WTSCollection.hpp:595</a></div></div>
+<div class="ttc" id="aclassWTSSessionInfo_html"><div class="ttname"><a href="classWTSSessionInfo.html">WTSSessionInfo</a></div><div class="ttdoc">会话信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSSessionInfo_8hpp_source.html#l00020">WTSSessionInfo.hpp:21</a></div></div>
+<div class="ttc" id="aclassfastest__hashset_3_01std_1_1string_01_4_html"><div class="ttname"><a href="classfastest__hashset_3_01std_1_1string_01_4.html">fastest_hashset&lt; std::string &gt;</a></div><div class="ttdoc">字符串元素的高性能哈希集合类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00134">FasterDefs.h:135</a></div></div>
+<div class="ttc" id="aclasswt__hashmap_html"><div class="ttname"><a href="classwt__hashmap.html">wt_hashmap</a></div><div class="ttdoc">WonderTrader通用高性能哈希表模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00162">FasterDefs.h:163</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_a16605e2dd51d97a5bcc8d8e1bf3d6c6.html">WTSTools</a></li><li class="navelem"><a class="el" href="WTSBaseDataMgr_8h.html">WTSBaseDataMgr.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

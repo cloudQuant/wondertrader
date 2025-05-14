@@ -1,0 +1,26 @@
+var structctp__sopt_1_1CThostFtdcErrExecOrderField =
+[
+    [ "AccountID", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#ae1d486dd36bb52d86126c7a1c1d54259", null ],
+    [ "ActionType", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#aea294ff4a912dc310c455faa49798833", null ],
+    [ "BrokerID", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#ab94d582dfef294c5cb0a117efae51a0a", null ],
+    [ "BusinessUnit", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#a6bfd6869aceee2e6e75c83b82bab37f1", null ],
+    [ "ClientID", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#a12a2c0a8c4a2bad3014be2b274f6d3b2", null ],
+    [ "CloseFlag", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#aee681898aeb5e4ace9272437fcedb119", null ],
+    [ "CurrencyID", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#af5d1d573dddc24f0309e6f22aa41b371", null ],
+    [ "ErrorID", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#ae736763967e2d53e5c5b027e954c37f9", null ],
+    [ "ErrorMsg", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#a23db8c5f69e4bf435ffa28a80c71784e", null ],
+    [ "ExchangeID", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#a286aa4bbea8e713adbc04861046a4096", null ],
+    [ "ExecOrderRef", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#ae4f442625210ac89b1d9a7a63bc5bfea", null ],
+    [ "HedgeFlag", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#a5b5798ffbace77da1bf8d926b9fff902", null ],
+    [ "InstrumentID", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#af659cb64e271308e9aec54ee8ccd0502", null ],
+    [ "InvestorID", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#a681819160e9569c6f2d4c8afbcddfa3c", null ],
+    [ "InvestUnitID", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#ae18085bd4240f0546ca094d5a9c012eb", null ],
+    [ "IPAddress", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#a3a678ca39056e766ec73c83a795fd0e8", null ],
+    [ "MacAddress", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#ae6d303d039aff17dd84e418c234fc8b0", null ],
+    [ "OffsetFlag", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#a8e1d15037f8f4704ee643fcf70236269", null ],
+    [ "PosiDirection", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#afa9d69fcd2fd1748f27bac96f1bb7f9e", null ],
+    [ "RequestID", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#aa31e509fd0a4c2b56d513bace8354822", null ],
+    [ "ReservePositionFlag", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#a1d0dc01d03dbf763058860a219d8b917", null ],
+    [ "UserID", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#a158942fbaf88a47a7015f6677054021f", null ],
+    [ "Volume", "structctp__sopt_1_1CThostFtdcErrExecOrderField.html#ac68b56fa159480a02796b0b1e1a9bd50", null ]
+];

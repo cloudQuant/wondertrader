@@ -1,0 +1,25 @@
+var group__errors =
+[
+    [ "MDB_BAD_DBI", "group__errors.html#gab4c82e050391b60a18a5df08d22a7083", null ],
+    [ "MDB_BAD_RSLOT", "group__errors.html#ga1b6cbb28da30e28c48c9df66dd398bf0", null ],
+    [ "MDB_BAD_TXN", "group__errors.html#gadcc86b34304f2ae761e3ba7c2eb88ba9", null ],
+    [ "MDB_BAD_VALSIZE", "group__errors.html#ga4630697cffb88ca6dc92504271941d0b", null ],
+    [ "MDB_CORRUPTED", "group__errors.html#gaf8148bf1b85f58e264e57194bafb03ef", null ],
+    [ "MDB_CURSOR_FULL", "group__errors.html#gae1e5002c56df52ded874bb3495e2a733", null ],
+    [ "MDB_DBS_FULL", "group__errors.html#ga6288de36b58badda2e5a64ecddd1da70", null ],
+    [ "MDB_INCOMPATIBLE", "group__errors.html#gaa39c88fa25b3163b643198f0572a3bee", null ],
+    [ "MDB_INVALID", "group__errors.html#ga9c2257e8cd8ea027cb682588b235a6f0", null ],
+    [ "MDB_KEYEXIST", "group__errors.html#ga05dc5bbcc7da81a7345bd8676e8e0e3b", null ],
+    [ "MDB_LAST_ERRCODE", "group__errors.html#ga4577d36100db836719f5c304a1fb5cc6", null ],
+    [ "MDB_MAP_FULL", "group__errors.html#ga0a83370402a060c9175100d4bbfb9f25", null ],
+    [ "MDB_MAP_RESIZED", "group__errors.html#ga75c014faa4f02ffd234a5ee0e14baa92", null ],
+    [ "MDB_NOTFOUND", "group__errors.html#gabeb52e4c4be21b329e31c4add1b71926", null ],
+    [ "MDB_PAGE_FULL", "group__errors.html#ga0501aacf4483f755c7bdcdba643b028e", null ],
+    [ "MDB_PAGE_NOTFOUND", "group__errors.html#ga7b77315de5265d94cae12609b0fe1f44", null ],
+    [ "MDB_PANIC", "group__errors.html#gae37b9aedcb3767faba3de8c1cf6d3473", null ],
+    [ "MDB_READERS_FULL", "group__errors.html#gadd6aaa88823710b97cc44f4f8c160799", null ],
+    [ "MDB_SUCCESS", "group__errors.html#gad01fd0bf65d986197e7bf63024278ab6", null ],
+    [ "MDB_TLS_FULL", "group__errors.html#gabe74ed736c4594b8e1c6f1b86b77f8f4", null ],
+    [ "MDB_TXN_FULL", "group__errors.html#gacba5cdc8618093f59d0339e88e69570e", null ],
+    [ "MDB_VERSION_MISMATCH", "group__errors.html#ga909b2db047fa90fb0d37a78f86a6f99b", null ]
+];

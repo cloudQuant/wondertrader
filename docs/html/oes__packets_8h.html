@@ -1,0 +1,1533 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/oes_global/oes_packets.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('oes__packets_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#enum-members">枚举</a>  </div>
+  <div class="headertitle"><div class="title">oes_packets.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;<a class="el" href="oes__base__model_8h_source.html">oes_global/oes_base_model.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="oes__base__model__credit_8h_source.html">oes_global/oes_base_model_credit.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="oes__base__model__option_8h_source.html">oes_global/oes_base_model_option.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="oes__qry__packets_8h_source.html">oes_global/oes_qry_packets.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="oes__qry__packets__credit_8h_source.html">oes_global/oes_qry_packets_credit.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="oes__qry__packets__option_8h_source.html">oes_global/oes_qry_packets_option.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__global__packet_8h_source.html">sutil/net/spk_global_packet.h</a>&gt;</code><br />
+</div>
+<p><a href="oes__packets_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__OesReportSynchronizationReq.html">_OesReportSynchronizationReq</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__OesReportSynchronizationRsp.html">_OesReportSynchronizationRsp</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__OesTestRequestReq.html">_OesTestRequestReq</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__OesTestRequestRsp.html">_OesTestRequestRsp</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__OesBatchOrdersHead.html">_OesBatchOrdersHead</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__OesBatchOrdersReq.html">_OesBatchOrdersReq</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__OesChangePasswordReq.html">_OesChangePasswordReq</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__OesChangePasswordRsp.html">_OesChangePasswordRsp</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__OesOptSettlementConfirmReq.html">_OesOptSettlementConfirmReq</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__OesRptMsgHead.html">_OesRptMsgHead</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="union__OesRptMsgBody.html">_OesRptMsgBody</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__OesRptMsg.html">_OesRptMsg</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="union__OesReqMsgBody.html">_OesReqMsgBody</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="union__OesRspMsgBody.html">_OesRspMsgBody</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="union__OesQryReqMsg.html">_OesQryReqMsg</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="union__OesQryRspMsg.html">_OesQryRspMsg</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a3d34063ca701172334f33cf8eda9bb45" id="r_a3d34063ca701172334f33cf8eda9bb45"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a3d34063ca701172334f33cf8eda9bb45">OES_APPL_VER_ID</a>&#160;&#160;&#160;&quot;0.17.5.8&quot;</td></tr>
+<tr class="separator:a3d34063ca701172334f33cf8eda9bb45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29fc9b25c58d61ff0b85786a158fe434" id="r_a29fc9b25c58d61ff0b85786a158fe434"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a29fc9b25c58d61ff0b85786a158fe434">OES_APPL_VER_VALUE</a>&#160;&#160;&#160;1001705081</td></tr>
+<tr class="separator:a29fc9b25c58d61ff0b85786a158fe434"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53d83468ac8d3b856c40383339a52357" id="r_a53d83468ac8d3b856c40383339a52357"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a53d83468ac8d3b856c40383339a52357">OES_MIN_APPL_VER_ID</a>&#160;&#160;&#160;&quot;0.15.5&quot;</td></tr>
+<tr class="separator:a53d83468ac8d3b856c40383339a52357"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa04edb791b12577001b1f4e1c51db52c" id="r_aa04edb791b12577001b1f4e1c51db52c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#aa04edb791b12577001b1f4e1c51db52c">OES_APPL_NAME</a>&#160;&#160;&#160;&quot;OES&quot;</td></tr>
+<tr class="separator:aa04edb791b12577001b1f4e1c51db52c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a787ec3b0ce5f83b41ea66efa27b2f251" id="r_a787ec3b0ce5f83b41ea66efa27b2f251"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a787ec3b0ce5f83b41ea66efa27b2f251">NULLOBJ_OES_REPORT_SYNCHRONIZATION_REQ</a>&#160;&#160;&#160;        0, 0, {0}, 0</td></tr>
+<tr class="separator:a787ec3b0ce5f83b41ea66efa27b2f251"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12a25f6cb57da97047bb50cea784a83e" id="r_a12a25f6cb57da97047bb50cea784a83e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a12a25f6cb57da97047bb50cea784a83e">NULLOBJ_OES_REPORT_SYNCHRONIZATION_RSP</a>&#160;&#160;&#160;        0, 0, {0}, 0</td></tr>
+<tr class="separator:a12a25f6cb57da97047bb50cea784a83e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f6c2a5526ac67753b2d0bf5b6fc77ff" id="r_a8f6c2a5526ac67753b2d0bf5b6fc77ff"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a8f6c2a5526ac67753b2d0bf5b6fc77ff">NULLOBJ_OES_TEST_REQUEST_REQ</a>&#160;&#160;&#160;        {0}, {0}, {0}</td></tr>
+<tr class="separator:a8f6c2a5526ac67753b2d0bf5b6fc77ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ad54f73561d9c257f8c382bacdfe53b" id="r_a3ad54f73561d9c257f8c382bacdfe53b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a3ad54f73561d9c257f8c382bacdfe53b">__NULLOBJ_OES_TEST_REQUEST_RSP_TAILER</a></td></tr>
+<tr class="separator:a3ad54f73561d9c257f8c382bacdfe53b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaea5c9b1bdcb62e03e9d16442b5aa6cb" id="r_aaea5c9b1bdcb62e03e9d16442b5aa6cb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#aaea5c9b1bdcb62e03e9d16442b5aa6cb">NULLOBJ_OES_TEST_REQUEST_RSP</a></td></tr>
+<tr class="separator:aaea5c9b1bdcb62e03e9d16442b5aa6cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d4f771fcaa726f871a669bf53af6f3e" id="r_a2d4f771fcaa726f871a669bf53af6f3e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a2d4f771fcaa726f871a669bf53af6f3e">NULLOBJ_OES_BATCH_ORDERS_HEAD</a>&#160;&#160;&#160;        0, 0</td></tr>
+<tr class="separator:a2d4f771fcaa726f871a669bf53af6f3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa569c1cddaca9cb70867ab55d6bddd62" id="r_aa569c1cddaca9cb70867ab55d6bddd62"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#aa569c1cddaca9cb70867ab55d6bddd62">NULLOBJ_OES_BATCH_ORDERS_REQ</a></td></tr>
+<tr class="separator:aa569c1cddaca9cb70867ab55d6bddd62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad93e0421f30ca772ee33d245a2534e53" id="r_ad93e0421f30ca772ee33d245a2534e53"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#ad93e0421f30ca772ee33d245a2534e53">NULLOBJ_OES_CHANGE_PASSWORD_REQ</a></td></tr>
+<tr class="separator:ad93e0421f30ca772ee33d245a2534e53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad02b1219c40b51fc4d1ddb247554dc62" id="r_ad02b1219c40b51fc4d1ddb247554dc62"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#ad02b1219c40b51fc4d1ddb247554dc62">NULLOBJ_OES_CHANGE_PASSWORD_RSP</a></td></tr>
+<tr class="separator:ad02b1219c40b51fc4d1ddb247554dc62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a2524394c3bcec3a9c64d544711fb83" id="r_a4a2524394c3bcec3a9c64d544711fb83"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a4a2524394c3bcec3a9c64d544711fb83">NULLOBJ_OES_OPT_SETTLEMENT_CONFIRM_REQ</a>&#160;&#160;&#160;        {0}, {0}</td></tr>
+<tr class="separator:a4a2524394c3bcec3a9c64d544711fb83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade221408ead3ef012882584b956a0b43" id="r_ade221408ead3ef012882584b956a0b43"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#ade221408ead3ef012882584b956a0b43">NULLOBJ_OES_OPT_SETTLEMENT_CONFIRM_RSP</a>&#160;&#160;&#160;        <a class="el" href="oes__base__model__option_8h.html#a01fe8ee859308b917c89fba36de80d31">NULLOBJ_OPT_SETTLEMENT_CONFIRM_BASE_INFO</a></td></tr>
+<tr class="separator:ade221408ead3ef012882584b956a0b43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2551b2043c9366706f198c4c766489d8" id="r_a2551b2043c9366706f198c4c766489d8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a2551b2043c9366706f198c4c766489d8">NULLOBJ_OES_RPT_MSG_HEAD</a>&#160;&#160;&#160;        0, 0, 0, 0, 0</td></tr>
+<tr class="separator:a2551b2043c9366706f198c4c766489d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af184a504fb790068b228079d0b3d0310" id="r_af184a504fb790068b228079d0b3d0310"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#af184a504fb790068b228079d0b3d0310">NULLOBJ_OES_RPT_MSG_BODY</a>&#160;&#160;&#160;        {<a class="el" href="oes__base__model_8h.html#ad525877dbd9d158abebaefb81b2ce7df">NULLOBJ_OES_ORD_CNFM</a>}</td></tr>
+<tr class="separator:af184a504fb790068b228079d0b3d0310"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b9f0665b0931cd3c3522f62b0c62ceb" id="r_a1b9f0665b0931cd3c3522f62b0c62ceb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a1b9f0665b0931cd3c3522f62b0c62ceb">NULLOBJ_OES_RPT_MSG</a></td></tr>
+<tr class="separator:a1b9f0665b0931cd3c3522f62b0c62ceb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe77c887031c2e1308e17c751e2219e1" id="r_afe77c887031c2e1308e17c751e2219e1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#afe77c887031c2e1308e17c751e2219e1">NULLOBJ_OES_REQ_MSG_BODY</a>&#160;&#160;&#160;        {<a class="el" href="oes__base__model_8h.html#a4f59e72177a53a3e7e1672e105befbdf">NULLOBJ_OES_ORD_REQ</a>}</td></tr>
+<tr class="separator:afe77c887031c2e1308e17c751e2219e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7ae7909721d61551a0dad9dc262c311" id="r_af7ae7909721d61551a0dad9dc262c311"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#af7ae7909721d61551a0dad9dc262c311">NULLOBJ_OES_RSP_MSG_BODY</a>&#160;&#160;&#160;        {<a class="el" href="oes__packets_8h.html#a1b9f0665b0931cd3c3522f62b0c62ceb">NULLOBJ_OES_RPT_MSG</a>}</td></tr>
+<tr class="separator:af7ae7909721d61551a0dad9dc262c311"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa02a0ba80f7887c7fbee7d8181729482" id="r_aa02a0ba80f7887c7fbee7d8181729482"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#aa02a0ba80f7887c7fbee7d8181729482">NULLOBJ_OES_QRY_REQ_MSG</a>&#160;&#160;&#160;        {<a class="el" href="oes__qry__packets_8h.html#af9a01740854293f0e249fe55499fb1ce">NULLOBJ_OES_QRY_ORD_REQ</a>}</td></tr>
+<tr class="separator:aa02a0ba80f7887c7fbee7d8181729482"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5d558da28a681d35f3d8aad16428c16" id="r_aa5d558da28a681d35f3d8aad16428c16"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#aa5d558da28a681d35f3d8aad16428c16">NULLOBJ_OES_QRY_RSP_MSG</a>&#160;&#160;&#160;        {<a class="el" href="oes__qry__packets_8h.html#aeded444c96cb0a7dc38b8c6de140b1ec">NULLOBJ_OES_QRY_ORD_RSP</a>}</td></tr>
+<tr class="separator:aa5d558da28a681d35f3d8aad16428c16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a88fe8908936b793944f5fd575d7d3706" id="r_a88fe8908936b793944f5fd575d7d3706"><td class="memItemLeft" align="right" valign="top">typedef enum <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3">_eOesMsgType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a88fe8908936b793944f5fd575d7d3706">eOesMsgTypeT</a></td></tr>
+<tr class="separator:a88fe8908936b793944f5fd575d7d3706"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02cf47349701041eb0ef7635cfb189b2" id="r_a02cf47349701041eb0ef7635cfb189b2"><td class="memItemLeft" align="right" valign="top">typedef enum <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64">_eOesSubscribeReportType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a02cf47349701041eb0ef7635cfb189b2">eOesSubscribeReportTypeT</a></td></tr>
+<tr class="separator:a02cf47349701041eb0ef7635cfb189b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6dd8fad6eb47d6d819ddb0232da0f18c" id="r_a6dd8fad6eb47d6d819ddb0232da0f18c"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__OesReportSynchronizationReq.html">_OesReportSynchronizationReq</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a6dd8fad6eb47d6d819ddb0232da0f18c">OesReportSynchronizationReqT</a></td></tr>
+<tr class="separator:a6dd8fad6eb47d6d819ddb0232da0f18c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c5b66b184a1c2f7a8cc09674cfd5aed" id="r_a6c5b66b184a1c2f7a8cc09674cfd5aed"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__OesReportSynchronizationRsp.html">_OesReportSynchronizationRsp</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a6c5b66b184a1c2f7a8cc09674cfd5aed">OesReportSynchronizationRspT</a></td></tr>
+<tr class="separator:a6c5b66b184a1c2f7a8cc09674cfd5aed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ff0a7439efece4100e0c942e1090e30" id="r_a4ff0a7439efece4100e0c942e1090e30"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__OesTestRequestReq.html">_OesTestRequestReq</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a4ff0a7439efece4100e0c942e1090e30">OesTestRequestReqT</a></td></tr>
+<tr class="separator:a4ff0a7439efece4100e0c942e1090e30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96679511bed63628eb80d3db93ce77d5" id="r_a96679511bed63628eb80d3db93ce77d5"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__OesTestRequestRsp.html">_OesTestRequestRsp</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a96679511bed63628eb80d3db93ce77d5">OesTestRequestRspT</a></td></tr>
+<tr class="separator:a96679511bed63628eb80d3db93ce77d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a721e8c9023578e7d04ad3c3bfd981fe5" id="r_a721e8c9023578e7d04ad3c3bfd981fe5"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__OesBatchOrdersHead.html">_OesBatchOrdersHead</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a721e8c9023578e7d04ad3c3bfd981fe5">OesBatchOrdersHeadT</a></td></tr>
+<tr class="separator:a721e8c9023578e7d04ad3c3bfd981fe5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2fab7049bf0bfe56ea41033c77e88146" id="r_a2fab7049bf0bfe56ea41033c77e88146"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__OesBatchOrdersReq.html">_OesBatchOrdersReq</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a2fab7049bf0bfe56ea41033c77e88146">OesBatchOrdersReqT</a></td></tr>
+<tr class="separator:a2fab7049bf0bfe56ea41033c77e88146"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee5b106bfabfe4adc1d4d728d0eaa9fe" id="r_aee5b106bfabfe4adc1d4d728d0eaa9fe"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__OesChangePasswordReq.html">_OesChangePasswordReq</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#aee5b106bfabfe4adc1d4d728d0eaa9fe">OesChangePasswordReqT</a></td></tr>
+<tr class="separator:aee5b106bfabfe4adc1d4d728d0eaa9fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ecf9d7fd2b5492c6b44f98a00d02ccb" id="r_a5ecf9d7fd2b5492c6b44f98a00d02ccb"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__OesChangePasswordRsp.html">_OesChangePasswordRsp</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a5ecf9d7fd2b5492c6b44f98a00d02ccb">OesChangePasswordRspT</a></td></tr>
+<tr class="separator:a5ecf9d7fd2b5492c6b44f98a00d02ccb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b6926719c83b041a439da1456b8a0e5" id="r_a7b6926719c83b041a439da1456b8a0e5"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__OesOptSettlementConfirmReq.html">_OesOptSettlementConfirmReq</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a7b6926719c83b041a439da1456b8a0e5">OesOptSettlementConfirmReqT</a></td></tr>
+<tr class="separator:a7b6926719c83b041a439da1456b8a0e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30bf5644383b8a308ae7b39d713d7d4b" id="r_a30bf5644383b8a308ae7b39d713d7d4b"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="oes__base__model__option_8h.html#a45e83453508c507ff7c09bc09b323fde">OesOptSettlementConfirmBaseInfoT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a30bf5644383b8a308ae7b39d713d7d4b">OesOptSettlementConfirmRspT</a></td></tr>
+<tr class="separator:a30bf5644383b8a308ae7b39d713d7d4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a859bc92e6bfa2ef358e42d2d03bccf2a" id="r_a859bc92e6bfa2ef358e42d2d03bccf2a"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__OesRptMsgHead.html">_OesRptMsgHead</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a859bc92e6bfa2ef358e42d2d03bccf2a">OesRptMsgHeadT</a></td></tr>
+<tr class="separator:a859bc92e6bfa2ef358e42d2d03bccf2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a488abbd3011ed8e25c2a09ba8b6d29f6" id="r_a488abbd3011ed8e25c2a09ba8b6d29f6"><td class="memItemLeft" align="right" valign="top">typedef union <a class="el" href="union__OesRptMsgBody.html">_OesRptMsgBody</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a488abbd3011ed8e25c2a09ba8b6d29f6">OesRptMsgBodyT</a></td></tr>
+<tr class="separator:a488abbd3011ed8e25c2a09ba8b6d29f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aede694f6ecfb43a48ff7dd55fbb0fedd" id="r_aede694f6ecfb43a48ff7dd55fbb0fedd"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__OesRptMsg.html">_OesRptMsg</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#aede694f6ecfb43a48ff7dd55fbb0fedd">OesRptMsgT</a></td></tr>
+<tr class="separator:aede694f6ecfb43a48ff7dd55fbb0fedd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a337336ee0d3043cae352ca9277039c33" id="r_a337336ee0d3043cae352ca9277039c33"><td class="memItemLeft" align="right" valign="top">typedef union <a class="el" href="union__OesReqMsgBody.html">_OesReqMsgBody</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a337336ee0d3043cae352ca9277039c33">OesReqMsgBodyT</a></td></tr>
+<tr class="separator:a337336ee0d3043cae352ca9277039c33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5de180388ac4ed4674c424578ac10e6d" id="r_a5de180388ac4ed4674c424578ac10e6d"><td class="memItemLeft" align="right" valign="top">typedef union <a class="el" href="union__OesRspMsgBody.html">_OesRspMsgBody</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a5de180388ac4ed4674c424578ac10e6d">OesRspMsgBodyT</a></td></tr>
+<tr class="separator:a5de180388ac4ed4674c424578ac10e6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf264d9c9079ee7ba1f57bf2fbdcd3ef" id="r_adf264d9c9079ee7ba1f57bf2fbdcd3ef"><td class="memItemLeft" align="right" valign="top">typedef union <a class="el" href="union__OesQryReqMsg.html">_OesQryReqMsg</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#adf264d9c9079ee7ba1f57bf2fbdcd3ef">OesQryReqMsgT</a></td></tr>
+<tr class="separator:adf264d9c9079ee7ba1f57bf2fbdcd3ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33088ccb974e47d4289db95b3f3807d7" id="r_a33088ccb974e47d4289db95b3f3807d7"><td class="memItemLeft" align="right" valign="top">typedef union <a class="el" href="union__OesQryRspMsg.html">_OesQryRspMsg</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a33088ccb974e47d4289db95b3f3807d7">OesQryRspMsgT</a></td></tr>
+<tr class="separator:a33088ccb974e47d4289db95b3f3807d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+枚举</h2></td></tr>
+<tr class="memitem:a4812a4f870508a664c2df6d1e6a860b3" id="r_a4812a4f870508a664c2df6d1e6a860b3"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3">_eOesMsgType</a> { <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a92ae8d6d1dc5db39ce67d38da260fa08">OESMSG_ORD_NEW_ORDER</a> = 0x01
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3ae283cc88423a5a73266e2c432acacb52">OESMSG_ORD_CANCEL_REQUEST</a> = 0x02
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a217e7f4fd1df1c04c8ae2a5349b81bfa">OESMSG_ORD_BATCH_ORDERS</a> = 0x03
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a386e8239e4178324f08061b9aa9a57d3">OESMSG_ORD_CREDIT_REPAY</a> = 0x04
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a8f0eddd5eb86d67384b7aed97d99c863">OESMSG_ORD_CREDIT_CASH_REPAY</a> = 0x05
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a7c6b8bfcb98b52ea204c2b31475950e9">__OESMSG_ORD_MAX</a>
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a0ff1d1f097fde9fd5c51cf7463b83a0e">__OESMSG_NONTRD_MIN</a> = 0xC0
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3abf2ebbf8f143c29a4a23327658abbb29">OESMSG_NONTRD_FUND_TRSF_REQ</a> = 0xC1
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a5d330a185e580b3fa14bfbc583e06600">OESMSG_NONTRD_CHANGE_PASSWORD</a> = 0xC2
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a545e2523f5df335b9c98a1a93006606d">OESMSG_NONTRD_OPT_CONFIRM_SETTLEMENT</a> = 0xC3
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a77cd05b15d64be506ec95fc390330327">__OESMSG_NONTRD_MAX</a>
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a8499efde93472567514e3c8f3c355564">__OESMSG_RPT_MIN</a> = 0x0A
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3af1e3cd97d8788293449d069d4239cc93">OESMSG_RPT_SERVICE_STATE</a> = 0x0E
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3ac582ffb6aa004457b2e7a0596d4e701b">OESMSG_RPT_MARKET_STATE</a> = 0x10
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3aa750cfc44aa220c779981d6dcf534c15">OESMSG_RPT_REPORT_SYNCHRONIZATION</a> = 0x11
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a319dc7537fb8121273c0586f31df05e9">OESMSG_RPT_BUSINESS_REJECT</a> = 0x12
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a941aff616e3d824a511a419d217a142a">OESMSG_RPT_ORDER_INSERT</a> = 0x13
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3af726fccd8b57e87659e8117483e2539a">OESMSG_RPT_ORDER_REPORT</a> = 0x14
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3af11efe935bb31fec388b1980260a0565">OESMSG_RPT_TRADE_REPORT</a> = 0x15
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3ad55382f318e86c9a4010ccdac8e92b1d">OESMSG_RPT_FUND_TRSF_REJECT</a> = 0x16
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3aa14205c7de3c370346c8e28528b9725b">OESMSG_RPT_FUND_TRSF_REPORT</a> = 0x17
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a4ce19dcdb2c5dce6736035a2c5eeb96b">OESMSG_RPT_CASH_ASSET_VARIATION</a> = 0x18
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a69bec9db2c2c7348327df3588560bcc9">OESMSG_RPT_STOCK_HOLDING_VARIATION</a> = 0x19
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3abd8a21b901ef83d73641d352851cf27b">OESMSG_RPT_OPTION_HOLDING_VARIATION</a> = 0x1A
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a28a1e1f500058615f729c0c02f2bcc83">OESMSG_RPT_OPTION_UNDERLYING_HOLDING_VARIATION</a> = 0x1B
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3ac7a7c753f8329d130c1e38df0c817be7">OESMSG_RPT_OPTION_SETTLEMENT_CONFIRMED</a> = 0x1C
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3aefe614d7a6dbe28373b0d409636429bd">OESMSG_RPT_NOTIFY_INFO</a> = 0x1E
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a58545ce75bdf52fc2de5c023025bc771">OESMSG_RPT_CREDIT_CASH_REPAY_REPORT</a> = 0x20
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3af2da2fead38b206dbc5e12137c307040">OESMSG_RPT_CREDIT_DEBT_CONTRACT_VARIATION</a> = 0x21
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a4f1d871abf44c758fa1151337e64815f">OESMSG_RPT_CREDIT_DEBT_JOURNAL</a> = 0x22
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a923c5b2edfb73ef0befe788cfd9ea8be">__OESMSG_RPT_MAX</a>
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3ab0cdf727880aedca4f5d3460d17e4274">__OESMSG_QRYMSG_MIN</a> = 0x2F
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3af45e7a80d325bf516b19015937b83480">OESMSG_QRYMSG_OPT_HLD</a> = 0x35
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a9d97b9f7bc3bdc67dfcae03aa2884250">OESMSG_QRYMSG_CUST</a> = 0x36
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a3cc38eb18c0dc5a0a5949fd4ce0a281f">OESMSG_QRYMSG_COMMISSION_RATE</a> = 0x38
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a7b41d513c27be5e06ac7923b4650779d">OESMSG_QRYMSG_FUND_TRSF</a> = 0x39
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a7426c4411ffbcb6fa1ba368dd4d428a7">OESMSG_QRYMSG_ETF</a> = 0x3B
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a37abb9f92389810be8e8d7598d97d722">OESMSG_QRYMSG_OPTION</a> = 0x3D
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a95aeccf7a4df56b664c735101dc03473">OESMSG_QRYMSG_LOT_WINNING</a> = 0x3F
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a706f73c0f8b902f3631dc035ed415a43">OESMSG_QRYMSG_TRADING_DAY</a> = 0x40
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3accd350e1647423835047f6088820516f">OESMSG_QRYMSG_MARKET_STATE</a> = 0x41
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3aeb8f095fbd25df1578d9c50115e62ad1">OESMSG_QRYMSG_COUNTER_CASH</a> = 0x42
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a7514ccd0ca7f03b48f3b5d92dcf3473e">OESMSG_QRYMSG_OPT_UNDERLYING_HLD</a> = 0x43
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3aaeb6957b3c57660a615f5fee4109e462">OESMSG_QRYMSG_NOTIFY_INFO</a> = 0x44
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a92522b76fa5a346211e2ef26b475d8bc">OESMSG_QRYMSG_OPT_POSITION_LIMIT</a> = 0x45
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a69a4a8fa1911e55251348bcb9cf377c9">OESMSG_QRYMSG_OPT_PURCHASE_LIMIT</a> = 0x46
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a8b20afa954e37a28e3fda4541e8e52b4">OESMSG_QRYMSG_BROKER_PARAMS</a> = 0x48
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a340e931305c21213165976bad100fa9b">OESMSG_QRYMSG_COLOCATION_PEER_CASH</a> = 0x49
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3afab0560ef9a6f155516fb74f58cdc7d4">OESMSG_QRYMSG_INV_ACCT</a> = 0x51
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3af31dd9745196c63b1cf47e29fcfcbcfe">OESMSG_QRYMSG_ORD</a> = 0x54
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a9735691e07f052ba6676017617e2d167">OESMSG_QRYMSG_TRD</a> = 0x55
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3abd4f42552036c452e99d405da5d86664">OESMSG_QRYMSG_OPT_EXERCISE_ASSIGN</a> = 0x56
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3aeee736dea1c18fdc3c16972ad739694c">OESMSG_QRYMSG_ISSUE</a> = 0x57
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a6356c8678a224dc571c4256b12f9886d">OESMSG_QRYMSG_STOCK</a> = 0x58
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3aff1a33e3c6382138fa4a9f6a45a0d74a">OESMSG_QRYMSG_ETF_COMPONENT</a> = 0x59
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3aefd10ddddbd8822a854c8d6386717b88">OESMSG_QRYMSG_CLIENT_OVERVIEW</a> = 0x5A
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a60f7198e9c0d426f57987792e3fe64da">OESMSG_QRYMSG_CASH_ASSET</a> = 0x5B
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3abe4cba19aa3b8a72bf02acb95153c550">OESMSG_QRYMSG_STK_HLD</a> = 0x5C
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3aaedb0a869f41a33b55bb7f61316dd3dc">OESMSG_QRYMSG_CRD_DEBT_CONTRACT</a> = 0x80
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a5f5a4402ca88a8e4ffdb3d4676b7af61">OESMSG_QRYMSG_CRD_CUST_SECU_DEBT_STATS</a> = 0x81
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a6ac1d3a492b252362cd9d6a6250b9b83">OESMSG_QRYMSG_CRD_CREDIT_ASSET</a> = 0x82
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a258c7d5d72e0d1a329143fdb616c956e">OESMSG_QRYMSG_CRD_CASH_REPAY_INFO</a> = 0x83
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3aa9350284dfdef0d4337b6613a0ec9509">OESMSG_QRYMSG_CRD_CASH_POSITION</a> = 0x84
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a2e3000c1d810099ee91b9bbe5c14068d">OESMSG_QRYMSG_CRD_SECURITY_POSITION</a> = 0x85
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a2cca4acc743eda4ce744abfa06c2b4fc">OESMSG_QRYMSG_CRD_EXCESS_STOCK</a> = 0x86
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a1118854e9cafd9528df35cba33f29001">OESMSG_QRYMSG_CRD_DEBT_JOURNAL</a> = 0x87
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3abd77a2363ed5a752174505961f43d77d">OESMSG_QRYMSG_CRD_INTEREST_RATE</a> = 0x88
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a5f52616d0fd8228428dc1116a61850be">OESMSG_QRYMSG_CRD_UNDERLYING_INFO</a> = 0x89
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a9b65571dcb633db7d6b3050234f9a22f">OESMSG_QRYMSG_CRD_DRAWABLE_BALANCE</a> = 0x90
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3af8a456ca9d8e790b9ec22599f85f3d38">OESMSG_QRYMSG_CRD_COLLATERAL_TRANSFER_OUT_MAX_QTY</a> = 0x91
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3acd1b41cb3f2fbc4725de397d23cd9cbb">__OESMSG_QRYMSG_MAX</a>
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3ae1182f9579d09e6fcd026e7eaffa99df">OESMSG_SESS_HEARTBEAT</a> = 0xFA
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a7d37d99da9424a9ef9cdf466f52374a7">OESMSG_SESS_TEST_REQUEST</a> = 0xFB
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3afab10ff7c76554e4a252742b9e17d174">OESMSG_SESS_LOGIN_EXTEND</a> = 0xFC
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a235f9d5c68f051f048a35f0415a7c7ef">OESMSG_SESS_LOGOUT</a> = 0xFE
+, <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3a3c5ad1f8dc4bf5f4540e32b0b05c2d4e">OESMSG_RPT_ORDER_REJECT</a> = OESMSG_RPT_BUSINESS_REJECT
+<br />
+ }</td></tr>
+<tr class="separator:a4812a4f870508a664c2df6d1e6a860b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e9b4f23c96bd7467c0ee2bfa10c8b64" id="r_a0e9b4f23c96bd7467c0ee2bfa10c8b64"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64">_eOesSubscribeReportType</a> { <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64a477a130251171de2556634d059a3feaa">OES_SUB_RPT_TYPE_DEFAULT</a> = 0
+, <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64af369ac559e3a53b861e5c875071055f2">OES_SUB_RPT_TYPE_BUSINESS_REJECT</a> = 0x01
+, <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64a478ae1bef4faf9f60f5bb221398dd2eb">OES_SUB_RPT_TYPE_ORDER_INSERT</a> = 0x02
+, <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64a968000bbb24228b3302cb10bbebe456c">OES_SUB_RPT_TYPE_ORDER_REPORT</a> = 0x04
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64a89db6b673fb5cf8a303b4443109c3a91">OES_SUB_RPT_TYPE_TRADE_REPORT</a> = 0x08
+, <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64ac3ac2429069fb4ef64a76aa7d29bb128">OES_SUB_RPT_TYPE_FUND_TRSF_REPORT</a> = 0x10
+, <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64aecdc5efa8ea64844e7330c6bbdcf97f1">OES_SUB_RPT_TYPE_CASH_ASSET_VARIATION</a> = 0x20
+, <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64a85a164b1c612c4143f16ce1b820aba3a">OES_SUB_RPT_TYPE_HOLDING_VARIATION</a> = 0x40
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64a1a6e3ac4830521343a00a829149c493c">OES_SUB_RPT_TYPE_MARKET_STATE</a> = 0x80
+, <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64aab906022734d2f0f748b18f460b76fee">OES_SUB_RPT_TYPE_NOTIFY_INFO</a> = 0x100
+, <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64afceb1e6006b3da034b125dcaf0a691ff">OES_SUB_RPT_TYPE_SETTLEMETN_CONFIRMED</a> = 0x200
+, <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64aa259b22f4326c150e395ab2cb9f23137">OES_SUB_RPT_TYPE_CREDIT_CASH_REPAY_REPORT</a> = 0x400
+, <br />
+&#160;&#160;<a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64afb6ffcba6fa07f14f89392de434cf393">OES_SUB_RPT_TYPE_CREDIT_DEBT_CONTRACT_VARIATION</a> = 0x800
+, <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64a3bc943ace6f0699ad61ec462841bf104">OES_SUB_RPT_TYPE_CREDIT_DEBT_JOURNAL</a> = 0x1000
+, <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64a67769086ba60e692a7d6752087671064">OES_SUB_RPT_TYPE_ALL</a> = 0xFFFF
+, <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64a4be3513dc66456d3d53ba61e0294c705">__MAX_OES_SUB_RPT_TYPE</a> = 0x7FFFFFFF
+<br />
+ }</td></tr>
+<tr class="separator:a0e9b4f23c96bd7467c0ee2bfa10c8b64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>订单执行系统订单接收模块通讯报文定义</p>
+<dl class="section version"><dt>版本</dt><dd>0.11.1 2016/11/17 </dd>
+<dd>
+0.12 2016/11/30<ul>
+<li>在登录报文中增加协议版本号信息, 并在登录时校验协议版本号的兼容性 </li>
+</ul>
+</dd>
+<dd>
+0.12.3 2017/01/10<ul>
+<li>新增期权持仓查询的消息类型</li>
+<li>调整查询类消息类型的取值定义 </li>
+</ul>
+</dd>
+<dd>
+0.12.6.2 2017/03/16<ul>
+<li>重命名 ‘出入金委托’ 消息 OESMSG_NONTRD_CASH_TRSF_REQ =&gt; OESMSG_NONTRD_FUND_TRSF_REQ</li>
+<li>新增 ‘出入金委托响应-业务拒绝’、‘出入金委托执行报告’ 两类回报消息</li>
+<li>删除 ‘出入金管理登录消息’ 宏定义</li>
+<li>重命名 ‘出入金委托’消息的结构体定义 OesCashTrsfReqT =&gt; OesFundTrsfReqT </li>
+</ul>
+</dd>
+<dd>
+0.15.2 2017/07/18<ul>
+<li>新增 查询新股配号、中签信息消息类型定义(OESMSG_QRYMSG_LOT_WINNING) </li>
+</ul>
+</dd>
+<dd>
+0.15.2.1 2017/07/31<ul>
+<li>出入金业务拒绝消息类型变更 OesFundTrsfReqT =&gt; OesFundTrsfRejectT</li>
+<li>出入金委托回报的结构体(OesFundTrsfReportT) 中新增字段 '错误码信息 (rejReasonInfo)' </li>
+</ul>
+</dd>
+<dd>
+0.15.4 2017/09/04<ul>
+<li>新增交易类请求消息 '撤单请求消息 (OESMSG_ORD_CANCEL_REQUEST)'</li>
+<li>新增结构体 '撤单请求 (OesOrdCancelReqT)'</li>
+<li>新增回报消息类型 '撤单拒绝 (OESMSG_RPT_CANCEL_REJECT)'<ul>
+<li>对应回报消息 OesRptMsgBodyT.cancelRejectRsp</li>
+</ul>
+</li>
+<li>委托拒绝消息中将不再包含撤单委托, 所有被OES拒绝的撤单请求和撤单委托都将通过新增的撤单拒绝消息进行回报</li>
+<li>新增回报消息类型 '资金变动信息 (OESMSG_RPT_CASH_ASSET_VARIATION)'<ul>
+<li>对应回报消息 <a class="el" href="union__OesRptMsgBody.html#ad1016b2db7d2d4a9d6bd151d0a9804a6">OesRptMsgBodyT.cashAssetRpt</a></li>
+</ul>
+</li>
+<li>新增回报消息类型 '持仓变动信息 (股票) (OESMSG_RPT_STOCK_HOLDING_VARIATION)'<ul>
+<li>对应回报消息 <a class="el" href="union__OesRptMsgBody.html#a25c25e6ea357cdb7215983066134b56a">OesRptMsgBodyT.stkHoldingRpt</a></li>
+</ul>
+</li>
+<li>新增回报消息类型 '持仓变动信息 (期权) (OESMSG_RPT_OPTION_HOLDING_VARIATION)'<ul>
+<li>对应回报消息 <a class="el" href="union__OesRptMsgBody.html#ac17298e1132c7201e9a255b727a70e47">OesRptMsgBodyT.optHoldingRpt</a> </li>
+</ul>
+</li>
+</ul>
+</dd>
+<dd>
+0.15.4.1 2017/09/07<ul>
+<li>调整回报消息类型的定义顺序和取值<ul>
+<li>OESMSG_RPT_ORDER_INSERT, OESMSG_RPT_ORDER_REJECT, OESMSG_RPT_CANCEL_REJECT</li>
+</ul>
+</li>
+<li>登录应答报文(OesLogonRspT) 中增加字段 客户端环境号(clEnvId) </li>
+</ul>
+</dd>
+<dd>
+0.15.4.2 2017/10/16<ul>
+<li>新增交易类请求消息 '测试请求 (OesTestRequestReqT)'</li>
+<li>新增回报消息类型 '测试请求的应答 (OesTestRequestRspT)' </li>
+</ul>
+</dd>
+<dd>
+0.15.5 2017/11/03<ul>
+<li>删除回报消息类型 '撤单拒绝 (OESMSG_RPT_CANCEL_REJECT)', 并整合到 '委托拒绝 (OESMSG_RPT_ORDER_REJECT)' 消息中</li>
+<li>重命名回报消息类型 OESMSG_RPT_ORDER_REJECT =&gt; OESMSG_RPT_BUSINESS_REJECT (OES业务拒绝, 委托/撤单未通过风控检查等)</li>
+<li>增加可订阅的回报消息类型 OES_SUB_RPT_TYPE_BUSINESS_REJECT</li>
+<li>当前采用的协议版本号(OES_APPL_VER_ID) 升级到 0.15.5</li>
+<li>兼容最低的协议版本号(OES_MIN_APPL_VER_ID) 升级到 0.15.5 </li>
+</ul>
+</dd>
+<dd>
+0.15.5.1 2017/11/15<ul>
+<li>增加数值类型的协议版本号 OES_APPL_VER_VALUE, 以方便比对版本 </li>
+</ul>
+</dd>
+<dd>
+0.15.6 2018/03/28<ul>
+<li>增加修改密码请求/应答报文和消息代码定义</li>
+<li>增加批量委托请求报文和消息代码定义</li>
+<li>登录请求报文(OesLogonReqT) 中增加字段 客户端设备序列号(clientDriverId)</li>
+<li>增加默认回报消息类型 OES_SUB_RPT_TYPE_DEFAULT</li>
+<li>新增回报消息类型 '市场状态信息 (OESMSG_RPT_MARKET_STATE)'<ul>
+<li>对应回报消息 <a class="el" href="union__OesRspMsgBody.html#ad6517e56aab057a8ee9d4d592592715c">OesRspMsgBodyT.mktStateRpt</a></li>
+</ul>
+</li>
+<li>回报消息头(OesRptMsgHeadT) 中增加字段 执行类型(execType), 用以区分回报的执行类型(参考eOesExecTypeT定义） </li>
+</ul>
+</dd>
+<dd>
+0.15.5.13 2018/07/20<ul>
+<li>登录应答报文(OesLogonRspT) 中增加字段:<ul>
+<li>客户端类型 (clientType)</li>
+<li>客户端状态 (clientStatus) </li>
+</ul>
+</li>
+</ul>
+</dd>
+<dd>
+0.15.5.16 2018/08/31<ul>
+<li>登录应答报文(OesLogonRspT) 中增加字段:<ul>
+<li>客户端类型(clientType)</li>
+<li>客户端状态(clientStatus)</li>
+</ul>
+</li>
+<li>新增 查询客户端总览信息(OESMSG_QRYMSG_CLIENT_OVERVIEW) 消息类型定义</li>
+<li>新增 查询客户主柜资金信息(OESMSG_QRYMSG_COUNTER_CASH) 消息类型定义 </li>
+</ul>
+</dd>
+<dd>
+0.15.5.17 2018/11/23<ul>
+<li>登录应答报文(OesLogonRspT) 中增加字段:<ul>
+<li>服务端集群号(setNum) </li>
+</ul>
+</li>
+</ul>
+</dd>
+<dd>
+0.15.7.6 2018/11/03<ul>
+<li>新增 OES服务状态回报消息类型(OESMSG_RPT_SERVICE_STATE)，暂不支持订阅推送 </li>
+</ul>
+</dd>
+<dd>
+0.15.9 2018/03/12<ul>
+<li>为了支持科创板, 新增以下查询消息类型 (兼容之前版本的API)<ul>
+<li>查询证券账户信息 (OESMSG_QRYMSG_INV_ACCT)</li>
+<li>查询现货产品信息 (OESMSG_QRYMSG_STOCK) </li>
+</ul>
+</li>
+</ul>
+</dd>
+<dd>
+0.15.10.6 2020/04/19<ul>
+<li>将延迟统计相关的时间戳字段升级为纳秒级时间戳 (内部使用的字段, 协议保持兼容, STimeval32T =&gt; STimespec32T) </li>
+</ul>
+</dd>
+<dd>
+0.15.11 2020/05/29<ul>
+<li>为了支持创业板, 新增以下查询消息类型 (兼容之前版本的API)<ul>
+<li>查询证券发行信息 (OESMSG_QRYMSG_ISSUE)</li>
+<li>查询现货产品信息 (OESMSG_QRYMSG_STOCK)</li>
+<li>查询ETF成份证券信息 (OESMSG_QRYMSG_ETF_COMPONENT) </li>
+</ul>
+</li>
+</ul>
+</dd>
+<dd>
+0.16 2019/11/20<ul>
+<li>新增回报消息类型 '通知消息回报 (OESMSG_RPT_NOTIFY_INFO)'<ul>
+<li>对应回报消息 <a class="el" href="union__OesRptMsgBody.html#a902700397909ff0b55c46bf54718afcf">OesRptMsgBodyT.notifyInfoRpt</a></li>
+</ul>
+</li>
+<li>新增 查询通知消息(OESMSG_QRYMSG_NOTIFY_INFO) 消息类型定义</li>
+<li>新增回报消息类型 '期权标的持仓变动信息 (OESMSG_RPT_OPTION_UNDERLYING_HOLDING_VARIATION)'<ul>
+<li>对应回报消息 <a class="el" href="union__OesRptMsgBody.html#a832bf36f50f79b3a6437410e4c60bcca">OesRptMsgBodyT.optUnderlyingHoldingRpt</a></li>
+</ul>
+</li>
+<li>新增回报消息类型 '期权账户结算单确认 (OESMSG_RPT_OPTION_SETTLEMENT_CONFIRMED)'<ul>
+<li>对应回报消息 <a class="el" href="union__OesRptMsgBody.html#a934ef618e20c30af3b6c03f76c0626ad">OesRptMsgBodyT.optSettlementConfirmRpt</a></li>
+</ul>
+</li>
+<li>新增 查询期权标的持仓信息(OESMSG_QRYMSG_OPT_UNDERLYING_HLD) 消息类型定义</li>
+<li>新增 查询期权限仓额度信息(OESMSG_QRYMSG_OPT_POSITION_LIMIT) 消息类型定义</li>
+<li>新增 查询期权行权指派信息(OESMSG_QRYMSG_OPT_EXERCISE_ASSIGN) 消息类型定义</li>
+<li>新增以下查询消息类型 (兼容之前版本的API)<ul>
+<li>查询委托信息 (OESMSG_QRYMSG_ORD)</li>
+<li>查询成交信息 (OESMSG_QRYMSG_TRD)</li>
+<li>查询客户资金信息 (OESMSG_QRYMSG_CASH_ASSET)</li>
+</ul>
+</li>
+<li>重命名 ‘资金变动回报信息’消息的结构体定义 OesCashAssetItemT =&gt; OesCashAssetReportT<ul>
+<li>对应回报消息 <a class="el" href="union__OesRptMsgBody.html#ad1016b2db7d2d4a9d6bd151d0a9804a6">OesRptMsgBodyT.cashAssetRpt</a></li>
+</ul>
+</li>
+<li>重命名 ‘持仓变动回报信息 (股票)’消息的结构体定义 OesStkHoldingItemT =&gt; OesStkHoldingReportT<ul>
+<li>对应回报消息 <a class="el" href="union__OesRptMsgBody.html#a25c25e6ea357cdb7215983066134b56a">OesRptMsgBodyT.stkHoldingRpt</a></li>
+</ul>
+</li>
+<li>重命名 ‘持仓变动回报信息 (期权)’消息的结构体定义 OesOptHoldingItemT =&gt; OesOptHoldingReportT<ul>
+<li>对应回报消息 <a class="el" href="union__OesRptMsgBody.html#ac17298e1132c7201e9a255b727a70e47">OesRptMsgBodyT.optHoldingRpt</a> </li>
+</ul>
+</li>
+</ul>
+</dd>
+<dd>
+0.16.0.2 2020/01/03<ul>
+<li>'券商参数信息 (OesBrokerParamsInfoT)' 中<ul>
+<li>新增 服务端业务范围 (businessScope) 字段</li>
+<li>新增 期权扩展参数 (optionExt) 结构, 其中新增 投资人出金提取线 (withdrawLineRatio) 字段 </li>
+</ul>
+</li>
+</ul>
+</dd>
+<dd>
+0.16.0.3 2020/01/14<ul>
+<li>为了兼容之前版本的API, 新增以下查询消息类型<ul>
+<li>查询期权行权指派信息 (OESMSG_QRYMSG_OPT_EXERCISE_ASSIGN) </li>
+</ul>
+</li>
+</ul>
+</dd>
+<dd>
+0.17.0.8 2020/04/20<ul>
+<li>调整非交易类消息的消息代码取值</li>
+<li>新增回报消息类型 融资融券直接还款委托执行报告(OESMSG_RPT_CREDIT_CASH_REPAY_REPORT)<ul>
+<li>对应回报订阅类型 OES_SUB_RPT_TYPE_CREDIT_CASH_REPAY_REPORT</li>
+<li>对应回报消息 <a class="el" href="union__OesRptMsgBody.html#ad55ebfa89c9b635217a96aa550c8a151">OesRptMsgBodyT.crdDebtCashRepayRpt</a></li>
+</ul>
+</li>
+<li>新增回报消息类型 融资融券合约变动信息(OESMSG_RPT_CREDIT_DEBT_CONTRACT_VARIATION)<ul>
+<li>对应回报订阅类型 OES_SUB_RPT_TYPE_CREDIT_DEBT_CONTRACT_VARIATION</li>
+<li>对应回报消息 <a class="el" href="union__OesRptMsgBody.html#a22e4c2a5a3ac2fec8cd64c48e56c664c">OesRptMsgBodyT.crdDebtContractRpt</a></li>
+</ul>
+</li>
+<li>新增回报消息类型 融资融券合约流水信息(OESMSG_RPT_CREDIT_DEBT_JOURNAL)<ul>
+<li>对应回报订阅类型 OES_SUB_RPT_TYPE_CREDIT_DEBT_JOURNAL</li>
+<li>对应回报消息 <a class="el" href="union__OesRptMsgBody.html#a7874b1c8e7b448a3129a982e8a6eeb74">OesRptMsgBodyT.crdDebtJournalRpt</a> </li>
+</ul>
+</li>
+</ul>
+</dd>
+<dd>
+0.17.1 2020/06/16<ul>
+<li>新增 查询融资融券业务可取资金(OESMSG_QRYMSG_CRD_DRAWABLE_BALANCE) 消息类型定义</li>
+<li>新增 查询融资融券担保品可转出的最大数量信息(OESMSG_QRYMSG_CRD_COLLATERAL_TRANSFER_OUT_MAX_QTY) 消息类型定义</li>
+</ul>
+</dd></dl>
+<dl class="section since"><dt>自从</dt><dd>2015/07/30 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 中定义.</p>
+</div><h2 class="groupheader">宏定义说明</h2>
+<a id="a3ad54f73561d9c257f8c382bacdfe53b" name="a3ad54f73561d9c257f8c382bacdfe53b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ad54f73561d9c257f8c382bacdfe53b">&#9670;&#160;</a></span>__NULLOBJ_OES_TEST_REQUEST_RSP_TAILER</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __NULLOBJ_OES_TEST_REQUEST_RSP_TAILER</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00517">517</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2d4f771fcaa726f871a669bf53af6f3e" name="a2d4f771fcaa726f871a669bf53af6f3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d4f771fcaa726f871a669bf53af6f3e">&#9670;&#160;</a></span>NULLOBJ_OES_BATCH_ORDERS_HEAD</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_BATCH_ORDERS_HEAD&#160;&#160;&#160;        0, 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00557">557</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa569c1cddaca9cb70867ab55d6bddd62" name="aa569c1cddaca9cb70867ab55d6bddd62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa569c1cddaca9cb70867ab55d6bddd62">&#9670;&#160;</a></span>NULLOBJ_OES_BATCH_ORDERS_REQ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_BATCH_ORDERS_REQ</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">        {<a class="code hl_define" href="oes__packets_8h.html#a2d4f771fcaa726f871a669bf53af6f3e">NULLOBJ_OES_BATCH_ORDERS_HEAD</a>}, \</div>
+<div class="line">        {{<a class="code hl_define" href="oes__base__model_8h.html#a4f59e72177a53a3e7e1672e105befbdf">NULLOBJ_OES_ORD_REQ</a>}}</div>
+<div class="ttc" id="aoes__base__model_8h_html_a4f59e72177a53a3e7e1672e105befbdf"><div class="ttname"><a href="oes__base__model_8h.html#a4f59e72177a53a3e7e1672e105befbdf">NULLOBJ_OES_ORD_REQ</a></div><div class="ttdeci">#define NULLOBJ_OES_ORD_REQ</div><div class="ttdef"><b>Definition</b> <a href="oes__base__model_8h_source.html#l00763">oes_base_model.h:763</a></div></div>
+<div class="ttc" id="aoes__packets_8h_html_a2d4f771fcaa726f871a669bf53af6f3e"><div class="ttname"><a href="oes__packets_8h.html#a2d4f771fcaa726f871a669bf53af6f3e">NULLOBJ_OES_BATCH_ORDERS_HEAD</a></div><div class="ttdeci">#define NULLOBJ_OES_BATCH_ORDERS_HEAD</div><div class="ttdef"><b>Definition</b> <a href="oes__packets_8h_source.html#l00557">oes_packets.h:557</a></div></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00561">561</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad93e0421f30ca772ee33d245a2534e53" name="ad93e0421f30ca772ee33d245a2534e53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad93e0421f30ca772ee33d245a2534e53">&#9670;&#160;</a></span>NULLOBJ_OES_CHANGE_PASSWORD_REQ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_CHANGE_PASSWORD_REQ</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">        0, 0, \</div>
+<div class="line">        {0}, {0}, \</div>
+<div class="line">        {0}, {0}</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00595">595</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad02b1219c40b51fc4d1ddb247554dc62" name="ad02b1219c40b51fc4d1ddb247554dc62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad02b1219c40b51fc4d1ddb247554dc62">&#9670;&#160;</a></span>NULLOBJ_OES_CHANGE_PASSWORD_RSP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_CHANGE_PASSWORD_RSP</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">        0, 0, \</div>
+<div class="line">        {0}, {0}, \</div>
+<div class="line">        0, 0, 0, \</div>
+<div class="line">        0, 0, 0</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00639">639</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4a2524394c3bcec3a9c64d544711fb83" name="a4a2524394c3bcec3a9c64d544711fb83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a2524394c3bcec3a9c64d544711fb83">&#9670;&#160;</a></span>NULLOBJ_OES_OPT_SETTLEMENT_CONFIRM_REQ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_OPT_SETTLEMENT_CONFIRM_REQ&#160;&#160;&#160;        {0}, {0}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00666">666</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ade221408ead3ef012882584b956a0b43" name="ade221408ead3ef012882584b956a0b43"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade221408ead3ef012882584b956a0b43">&#9670;&#160;</a></span>NULLOBJ_OES_OPT_SETTLEMENT_CONFIRM_RSP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_OPT_SETTLEMENT_CONFIRM_RSP&#160;&#160;&#160;        <a class="el" href="oes__base__model__option_8h.html#a01fe8ee859308b917c89fba36de80d31">NULLOBJ_OPT_SETTLEMENT_CONFIRM_BASE_INFO</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00679">679</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa02a0ba80f7887c7fbee7d8181729482" name="aa02a0ba80f7887c7fbee7d8181729482"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa02a0ba80f7887c7fbee7d8181729482">&#9670;&#160;</a></span>NULLOBJ_OES_QRY_REQ_MSG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_QRY_REQ_MSG&#160;&#160;&#160;        {<a class="el" href="oes__qry__packets_8h.html#af9a01740854293f0e249fe55499fb1ce">NULLOBJ_OES_QRY_ORD_REQ</a>}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00899">899</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa5d558da28a681d35f3d8aad16428c16" name="aa5d558da28a681d35f3d8aad16428c16"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5d558da28a681d35f3d8aad16428c16">&#9670;&#160;</a></span>NULLOBJ_OES_QRY_RSP_MSG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_QRY_RSP_MSG&#160;&#160;&#160;        {<a class="el" href="oes__qry__packets_8h.html#aeded444c96cb0a7dc38b8c6de140b1ec">NULLOBJ_OES_QRY_ORD_RSP</a>}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00956">956</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a787ec3b0ce5f83b41ea66efa27b2f251" name="a787ec3b0ce5f83b41ea66efa27b2f251"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a787ec3b0ce5f83b41ea66efa27b2f251">&#9670;&#160;</a></span>NULLOBJ_OES_REPORT_SYNCHRONIZATION_REQ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_REPORT_SYNCHRONIZATION_REQ&#160;&#160;&#160;        0, 0, {0}, 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00427">427</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a12a25f6cb57da97047bb50cea784a83e" name="a12a25f6cb57da97047bb50cea784a83e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12a25f6cb57da97047bb50cea784a83e">&#9670;&#160;</a></span>NULLOBJ_OES_REPORT_SYNCHRONIZATION_RSP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_REPORT_SYNCHRONIZATION_RSP&#160;&#160;&#160;        0, 0, {0}, 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00455">455</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afe77c887031c2e1308e17c751e2219e1" name="afe77c887031c2e1308e17c751e2219e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe77c887031c2e1308e17c751e2219e1">&#9670;&#160;</a></span>NULLOBJ_OES_REQ_MSG_BODY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_REQ_MSG_BODY&#160;&#160;&#160;        {<a class="el" href="oes__base__model_8h.html#a4f59e72177a53a3e7e1672e105befbdf">NULLOBJ_OES_ORD_REQ</a>}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00809">809</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1b9f0665b0931cd3c3522f62b0c62ceb" name="a1b9f0665b0931cd3c3522f62b0c62ceb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b9f0665b0931cd3c3522f62b0c62ceb">&#9670;&#160;</a></span>NULLOBJ_OES_RPT_MSG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_RPT_MSG</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">        {<a class="code hl_define" href="oes__packets_8h.html#a2551b2043c9366706f198c4c766489d8">NULLOBJ_OES_RPT_MSG_HEAD</a>}, \</div>
+<div class="line">        {<a class="code hl_define" href="oes__packets_8h.html#af184a504fb790068b228079d0b3d0310">NULLOBJ_OES_RPT_MSG_BODY</a>}</div>
+<div class="ttc" id="aoes__packets_8h_html_a2551b2043c9366706f198c4c766489d8"><div class="ttname"><a href="oes__packets_8h.html#a2551b2043c9366706f198c4c766489d8">NULLOBJ_OES_RPT_MSG_HEAD</a></div><div class="ttdeci">#define NULLOBJ_OES_RPT_MSG_HEAD</div><div class="ttdef"><b>Definition</b> <a href="oes__packets_8h_source.html#l00703">oes_packets.h:703</a></div></div>
+<div class="ttc" id="aoes__packets_8h_html_af184a504fb790068b228079d0b3d0310"><div class="ttname"><a href="oes__packets_8h.html#af184a504fb790068b228079d0b3d0310">NULLOBJ_OES_RPT_MSG_BODY</a></div><div class="ttdeci">#define NULLOBJ_OES_RPT_MSG_BODY</div><div class="ttdef"><b>Definition</b> <a href="oes__packets_8h_source.html#l00744">oes_packets.h:744</a></div></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00759">759</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af184a504fb790068b228079d0b3d0310" name="af184a504fb790068b228079d0b3d0310"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af184a504fb790068b228079d0b3d0310">&#9670;&#160;</a></span>NULLOBJ_OES_RPT_MSG_BODY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_RPT_MSG_BODY&#160;&#160;&#160;        {<a class="el" href="oes__base__model_8h.html#ad525877dbd9d158abebaefb81b2ce7df">NULLOBJ_OES_ORD_CNFM</a>}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00744">744</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2551b2043c9366706f198c4c766489d8" name="a2551b2043c9366706f198c4c766489d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2551b2043c9366706f198c4c766489d8">&#9670;&#160;</a></span>NULLOBJ_OES_RPT_MSG_HEAD</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_RPT_MSG_HEAD&#160;&#160;&#160;        0, 0, 0, 0, 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00703">703</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af7ae7909721d61551a0dad9dc262c311" name="af7ae7909721d61551a0dad9dc262c311"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7ae7909721d61551a0dad9dc262c311">&#9670;&#160;</a></span>NULLOBJ_OES_RSP_MSG_BODY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_RSP_MSG_BODY&#160;&#160;&#160;        {<a class="el" href="oes__packets_8h.html#a1b9f0665b0931cd3c3522f62b0c62ceb">NULLOBJ_OES_RPT_MSG</a>}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00842">842</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8f6c2a5526ac67753b2d0bf5b6fc77ff" name="a8f6c2a5526ac67753b2d0bf5b6fc77ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f6c2a5526ac67753b2d0bf5b6fc77ff">&#9670;&#160;</a></span>NULLOBJ_OES_TEST_REQUEST_REQ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_TEST_REQUEST_REQ&#160;&#160;&#160;        {0}, {0}, {0}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00476">476</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaea5c9b1bdcb62e03e9d16442b5aa6cb" name="aaea5c9b1bdcb62e03e9d16442b5aa6cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaea5c9b1bdcb62e03e9d16442b5aa6cb">&#9670;&#160;</a></span>NULLOBJ_OES_TEST_REQUEST_RSP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NULLOBJ_OES_TEST_REQUEST_RSP</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">        {0}, {0}, {0}, {0}, {0} \</div>
+<div class="line">        <a class="code hl_define" href="oes__packets_8h.html#a3ad54f73561d9c257f8c382bacdfe53b">__NULLOBJ_OES_TEST_REQUEST_RSP_TAILER</a></div>
+<div class="ttc" id="aoes__packets_8h_html_a3ad54f73561d9c257f8c382bacdfe53b"><div class="ttname"><a href="oes__packets_8h.html#a3ad54f73561d9c257f8c382bacdfe53b">__NULLOBJ_OES_TEST_REQUEST_RSP_TAILER</a></div><div class="ttdeci">#define __NULLOBJ_OES_TEST_REQUEST_RSP_TAILER</div><div class="ttdef"><b>Definition</b> <a href="oes__packets_8h_source.html#l00517">oes_packets.h:517</a></div></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00522">522</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa04edb791b12577001b1f4e1c51db52c" name="aa04edb791b12577001b1f4e1c51db52c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa04edb791b12577001b1f4e1c51db52c">&#9670;&#160;</a></span>OES_APPL_NAME</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define OES_APPL_NAME&#160;&#160;&#160;&quot;OES&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>应用名称 </p>
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00186">186</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3d34063ca701172334f33cf8eda9bb45" name="a3d34063ca701172334f33cf8eda9bb45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d34063ca701172334f33cf8eda9bb45">&#9670;&#160;</a></span>OES_APPL_VER_ID</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define OES_APPL_VER_ID&#160;&#160;&#160;&quot;0.17.5.8&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>当前采用的协议版本号 </p>
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00169">169</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a29fc9b25c58d61ff0b85786a158fe434" name="a29fc9b25c58d61ff0b85786a158fe434"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29fc9b25c58d61ff0b85786a158fe434">&#9670;&#160;</a></span>OES_APPL_VER_VALUE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define OES_APPL_VER_VALUE&#160;&#160;&#160;1001705081</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>当前采用的协议版本号数值</p><ul>
+<li>版本号数值的格式为 10 位整型数值, 形如: 1AABBCCDDX, 其中:<ul>
+<li>AA 为主版本号</li>
+<li>BB 为副版本号</li>
+<li>CC 为发布号</li>
+<li>DD 为构建号</li>
+<li>X 0, 表示不带时间戳的正常版本; 1, 表示带时间戳的延迟测量版本 </li>
+</ul>
+</li>
+</ul>
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00180">180</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a53d83468ac8d3b856c40383339a52357" name="a53d83468ac8d3b856c40383339a52357"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53d83468ac8d3b856c40383339a52357">&#9670;&#160;</a></span>OES_MIN_APPL_VER_ID</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define OES_MIN_APPL_VER_ID&#160;&#160;&#160;&quot;0.15.5&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>兼容的最低协议版本号 </p>
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00183">183</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类型定义说明</h2>
+<a id="a88fe8908936b793944f5fd575d7d3706" name="a88fe8908936b793944f5fd575d7d3706"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88fe8908936b793944f5fd575d7d3706">&#9670;&#160;</a></span>eOesMsgTypeT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef enum <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3">_eOesMsgType</a> <a class="el" href="oes__packets_8h.html#a88fe8908936b793944f5fd575d7d3706">eOesMsgTypeT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>通信消息的消息类型定义 </p>
+
+</div>
+</div>
+<a id="a02cf47349701041eb0ef7635cfb189b2" name="a02cf47349701041eb0ef7635cfb189b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02cf47349701041eb0ef7635cfb189b2">&#9670;&#160;</a></span>eOesSubscribeReportTypeT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef enum <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64">_eOesSubscribeReportType</a> <a class="el" href="oes__packets_8h.html#a02cf47349701041eb0ef7635cfb189b2">eOesSubscribeReportTypeT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>可订阅的回报消息类型定义</p><ul>
+<li>0: 默认回报 (等价于: 0x01,0x02,0x04,0x08,0x10,0x20,0x40)</li>
+<li>0x0001: OES业务拒绝 (未通过风控检查等)</li>
+<li>0x0002: OES委托已生成 (已通过风控检查)</li>
+<li>0x0004: 交易所委托回报 (包括交易所委托拒绝、委托确认和撤单完成通知)</li>
+<li>0x0008: 交易所成交回报</li>
+<li>0x0010: 出入金委托执行报告 (包括出入金委托拒绝、出入金委托回报)</li>
+<li>0x0020: 资金变动信息</li>
+<li>0x0040: 持仓变动信息</li>
+<li>0x0080: 市场状态信息</li>
+<li>0x0100: 通知消息回报</li>
+<li>0x0200: 结算单确认消息</li>
+<li>0x0400: 融资融券直接还款委托执行报告</li>
+<li>0x0800: 融资融券合约变动信息</li>
+<li>0x1000: 融资融券合约流水信息</li>
+<li>0xFFFF: 所有回报 </li>
+</ul>
+
+</div>
+</div>
+<a id="a721e8c9023578e7d04ad3c3bfd981fe5" name="a721e8c9023578e7d04ad3c3bfd981fe5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a721e8c9023578e7d04ad3c3bfd981fe5">&#9670;&#160;</a></span>OesBatchOrdersHeadT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct__OesBatchOrdersHead.html">_OesBatchOrdersHead</a> <a class="el" href="oes__packets_8h.html#a721e8c9023578e7d04ad3c3bfd981fe5">OesBatchOrdersHeadT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>批量委托请求的消息头 </p>
+
+</div>
+</div>
+<a id="a2fab7049bf0bfe56ea41033c77e88146" name="a2fab7049bf0bfe56ea41033c77e88146"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2fab7049bf0bfe56ea41033c77e88146">&#9670;&#160;</a></span>OesBatchOrdersReqT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct__OesBatchOrdersReq.html">_OesBatchOrdersReq</a> <a class="el" href="oes__packets_8h.html#a2fab7049bf0bfe56ea41033c77e88146">OesBatchOrdersReqT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>批量委托请求的完整请求报文 (只有请求报文, 没有独立的应答报文) </p>
+
+</div>
+</div>
+<a id="aee5b106bfabfe4adc1d4d728d0eaa9fe" name="aee5b106bfabfe4adc1d4d728d0eaa9fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee5b106bfabfe4adc1d4d728d0eaa9fe">&#9670;&#160;</a></span>OesChangePasswordReqT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct__OesChangePasswordReq.html">_OesChangePasswordReq</a> <a class="el" href="oes__packets_8h.html#aee5b106bfabfe4adc1d4d728d0eaa9fe">OesChangePasswordReqT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>修改密码请求报文 </p>
+
+</div>
+</div>
+<a id="a5ecf9d7fd2b5492c6b44f98a00d02ccb" name="a5ecf9d7fd2b5492c6b44f98a00d02ccb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ecf9d7fd2b5492c6b44f98a00d02ccb">&#9670;&#160;</a></span>OesChangePasswordRspT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct__OesChangePasswordRsp.html">_OesChangePasswordRsp</a> <a class="el" href="oes__packets_8h.html#a5ecf9d7fd2b5492c6b44f98a00d02ccb">OesChangePasswordRspT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>修改密码应答报文 </p>
+
+</div>
+</div>
+<a id="a7b6926719c83b041a439da1456b8a0e5" name="a7b6926719c83b041a439da1456b8a0e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b6926719c83b041a439da1456b8a0e5">&#9670;&#160;</a></span>OesOptSettlementConfirmReqT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct__OesOptSettlementConfirmReq.html">_OesOptSettlementConfirmReq</a> <a class="el" href="oes__packets_8h.html#a7b6926719c83b041a439da1456b8a0e5">OesOptSettlementConfirmReqT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>期权账户结算单确认请求报文 </p>
+
+</div>
+</div>
+<a id="a30bf5644383b8a308ae7b39d713d7d4b" name="a30bf5644383b8a308ae7b39d713d7d4b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30bf5644383b8a308ae7b39d713d7d4b">&#9670;&#160;</a></span>OesOptSettlementConfirmRspT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="oes__base__model__option_8h.html#a45e83453508c507ff7c09bc09b323fde">OesOptSettlementConfirmBaseInfoT</a> <a class="el" href="oes__packets_8h.html#a30bf5644383b8a308ae7b39d713d7d4b">OesOptSettlementConfirmRspT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>期权账户结算单确认应答报文 </p>
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00675">675</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adf264d9c9079ee7ba1f57bf2fbdcd3ef" name="adf264d9c9079ee7ba1f57bf2fbdcd3ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf264d9c9079ee7ba1f57bf2fbdcd3ef">&#9670;&#160;</a></span>OesQryReqMsgT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef union <a class="el" href="union__OesQryReqMsg.html">_OesQryReqMsg</a> <a class="el" href="oes__packets_8h.html#adf264d9c9079ee7ba1f57bf2fbdcd3ef">OesQryReqMsgT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>统一的查询请求消息定义 </p>
+
+</div>
+</div>
+<a id="a33088ccb974e47d4289db95b3f3807d7" name="a33088ccb974e47d4289db95b3f3807d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33088ccb974e47d4289db95b3f3807d7">&#9670;&#160;</a></span>OesQryRspMsgT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef union <a class="el" href="union__OesQryRspMsg.html">_OesQryRspMsg</a> <a class="el" href="oes__packets_8h.html#a33088ccb974e47d4289db95b3f3807d7">OesQryRspMsgT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>统一的查询应答消息定义 </p>
+
+</div>
+</div>
+<a id="a6dd8fad6eb47d6d819ddb0232da0f18c" name="a6dd8fad6eb47d6d819ddb0232da0f18c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6dd8fad6eb47d6d819ddb0232da0f18c">&#9670;&#160;</a></span>OesReportSynchronizationReqT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct__OesReportSynchronizationReq.html">_OesReportSynchronizationReq</a> <a class="el" href="oes__packets_8h.html#a6dd8fad6eb47d6d819ddb0232da0f18c">OesReportSynchronizationReqT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>回报同步请求消息 </p>
+
+</div>
+</div>
+<a id="a6c5b66b184a1c2f7a8cc09674cfd5aed" name="a6c5b66b184a1c2f7a8cc09674cfd5aed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c5b66b184a1c2f7a8cc09674cfd5aed">&#9670;&#160;</a></span>OesReportSynchronizationRspT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct__OesReportSynchronizationRsp.html">_OesReportSynchronizationRsp</a> <a class="el" href="oes__packets_8h.html#a6c5b66b184a1c2f7a8cc09674cfd5aed">OesReportSynchronizationRspT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>回报同步应答消息 </p>
+
+</div>
+</div>
+<a id="a337336ee0d3043cae352ca9277039c33" name="a337336ee0d3043cae352ca9277039c33"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a337336ee0d3043cae352ca9277039c33">&#9670;&#160;</a></span>OesReqMsgBodyT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef union <a class="el" href="union__OesReqMsgBody.html">_OesReqMsgBody</a> <a class="el" href="oes__packets_8h.html#a337336ee0d3043cae352ca9277039c33">OesReqMsgBodyT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>汇总的请求消息的消息体定义 </p>
+
+</div>
+</div>
+<a id="a488abbd3011ed8e25c2a09ba8b6d29f6" name="a488abbd3011ed8e25c2a09ba8b6d29f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a488abbd3011ed8e25c2a09ba8b6d29f6">&#9670;&#160;</a></span>OesRptMsgBodyT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef union <a class="el" href="union__OesRptMsgBody.html">_OesRptMsgBody</a> <a class="el" href="oes__packets_8h.html#a488abbd3011ed8e25c2a09ba8b6d29f6">OesRptMsgBodyT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>回报消息的消息体定义 </p>
+
+</div>
+</div>
+<a id="a859bc92e6bfa2ef358e42d2d03bccf2a" name="a859bc92e6bfa2ef358e42d2d03bccf2a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a859bc92e6bfa2ef358e42d2d03bccf2a">&#9670;&#160;</a></span>OesRptMsgHeadT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct__OesRptMsgHead.html">_OesRptMsgHead</a> <a class="el" href="oes__packets_8h.html#a859bc92e6bfa2ef358e42d2d03bccf2a">OesRptMsgHeadT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>回报消息的消息头定义 </p>
+
+</div>
+</div>
+<a id="aede694f6ecfb43a48ff7dd55fbb0fedd" name="aede694f6ecfb43a48ff7dd55fbb0fedd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aede694f6ecfb43a48ff7dd55fbb0fedd">&#9670;&#160;</a></span>OesRptMsgT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct__OesRptMsg.html">_OesRptMsg</a> <a class="el" href="oes__packets_8h.html#aede694f6ecfb43a48ff7dd55fbb0fedd">OesRptMsgT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>完整的回报消息定义 </p>
+
+</div>
+</div>
+<a id="a5de180388ac4ed4674c424578ac10e6d" name="a5de180388ac4ed4674c424578ac10e6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5de180388ac4ed4674c424578ac10e6d">&#9670;&#160;</a></span>OesRspMsgBodyT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef union <a class="el" href="union__OesRspMsgBody.html">_OesRspMsgBody</a> <a class="el" href="oes__packets_8h.html#a5de180388ac4ed4674c424578ac10e6d">OesRspMsgBodyT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>汇总的应答消息的消息体定义 </p>
+
+</div>
+</div>
+<a id="a4ff0a7439efece4100e0c942e1090e30" name="a4ff0a7439efece4100e0c942e1090e30"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ff0a7439efece4100e0c942e1090e30">&#9670;&#160;</a></span>OesTestRequestReqT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct__OesTestRequestReq.html">_OesTestRequestReq</a> <a class="el" href="oes__packets_8h.html#a4ff0a7439efece4100e0c942e1090e30">OesTestRequestReqT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>测试请求报文 </p>
+
+</div>
+</div>
+<a id="a96679511bed63628eb80d3db93ce77d5" name="a96679511bed63628eb80d3db93ce77d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96679511bed63628eb80d3db93ce77d5">&#9670;&#160;</a></span>OesTestRequestRspT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct__OesTestRequestRsp.html">_OesTestRequestRsp</a> <a class="el" href="oes__packets_8h.html#a96679511bed63628eb80d3db93ce77d5">OesTestRequestRspT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>测试请求的应答报文 </p>
+
+</div>
+</div>
+<h2 class="groupheader">枚举类型说明</h2>
+<a id="a4812a4f870508a664c2df6d1e6a860b3" name="a4812a4f870508a664c2df6d1e6a860b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4812a4f870508a664c2df6d1e6a860b3">&#9670;&#160;</a></span>_eOesMsgType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="oes__packets_8h.html#a4812a4f870508a664c2df6d1e6a860b3">_eOesMsgType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>通信消息的消息类型定义 </p>
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a92ae8d6d1dc5db39ce67d38da260fa08" name="a4812a4f870508a664c2df6d1e6a860b3a92ae8d6d1dc5db39ce67d38da260fa08"></a>OESMSG_ORD_NEW_ORDER&#160;</td><td class="fielddoc"><p>0x01/01 委托申报消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3ae283cc88423a5a73266e2c432acacb52" name="a4812a4f870508a664c2df6d1e6a860b3ae283cc88423a5a73266e2c432acacb52"></a>OESMSG_ORD_CANCEL_REQUEST&#160;</td><td class="fielddoc"><p>0x02/02 撤单请求消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a217e7f4fd1df1c04c8ae2a5349b81bfa" name="a4812a4f870508a664c2df6d1e6a860b3a217e7f4fd1df1c04c8ae2a5349b81bfa"></a>OESMSG_ORD_BATCH_ORDERS&#160;</td><td class="fielddoc"><p>0x03/03 批量委托消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a386e8239e4178324f08061b9aa9a57d3" name="a4812a4f870508a664c2df6d1e6a860b3a386e8239e4178324f08061b9aa9a57d3"></a>OESMSG_ORD_CREDIT_REPAY&#160;</td><td class="fielddoc"><p>0x04/04 融资融券负债归还请求消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a8f0eddd5eb86d67384b7aed97d99c863" name="a4812a4f870508a664c2df6d1e6a860b3a8f0eddd5eb86d67384b7aed97d99c863"></a>OESMSG_ORD_CREDIT_CASH_REPAY&#160;</td><td class="fielddoc"><p>0x05/05 融资融券直接还款请求消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a7c6b8bfcb98b52ea204c2b31475950e9" name="a4812a4f870508a664c2df6d1e6a860b3a7c6b8bfcb98b52ea204c2b31475950e9"></a>__OESMSG_ORD_MAX&#160;</td><td class="fielddoc"><p>最大的委托消息类型 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a0ff1d1f097fde9fd5c51cf7463b83a0e" name="a4812a4f870508a664c2df6d1e6a860b3a0ff1d1f097fde9fd5c51cf7463b83a0e"></a>__OESMSG_NONTRD_MIN&#160;</td><td class="fielddoc"><p>0xC0/192 最小的非交易消息类型 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3abf2ebbf8f143c29a4a23327658abbb29" name="a4812a4f870508a664c2df6d1e6a860b3abf2ebbf8f143c29a4a23327658abbb29"></a>OESMSG_NONTRD_FUND_TRSF_REQ&#160;</td><td class="fielddoc"><p>0xC1/193 出入金委托 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a5d330a185e580b3fa14bfbc583e06600" name="a4812a4f870508a664c2df6d1e6a860b3a5d330a185e580b3fa14bfbc583e06600"></a>OESMSG_NONTRD_CHANGE_PASSWORD&#160;</td><td class="fielddoc"><p>0xC2/194 修改客户端登录密码 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a545e2523f5df335b9c98a1a93006606d" name="a4812a4f870508a664c2df6d1e6a860b3a545e2523f5df335b9c98a1a93006606d"></a>OESMSG_NONTRD_OPT_CONFIRM_SETTLEMENT&#160;</td><td class="fielddoc"><p>0xC3/195 期权账户结算单确认 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a77cd05b15d64be506ec95fc390330327" name="a4812a4f870508a664c2df6d1e6a860b3a77cd05b15d64be506ec95fc390330327"></a>__OESMSG_NONTRD_MAX&#160;</td><td class="fielddoc"><p>最大的非交易消息类型 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a8499efde93472567514e3c8f3c355564" name="a4812a4f870508a664c2df6d1e6a860b3a8499efde93472567514e3c8f3c355564"></a>__OESMSG_RPT_MIN&#160;</td><td class="fielddoc"><p>0x0A/10 最小的执行报告消息类型 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3af1e3cd97d8788293449d069d4239cc93" name="a4812a4f870508a664c2df6d1e6a860b3af1e3cd97d8788293449d069d4239cc93"></a>OESMSG_RPT_SERVICE_STATE&#160;</td><td class="fielddoc"><p>0x0E/15 OES服务状态信息 (暂不支持订阅推送) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3ac582ffb6aa004457b2e7a0596d4e701b" name="a4812a4f870508a664c2df6d1e6a860b3ac582ffb6aa004457b2e7a0596d4e701b"></a>OESMSG_RPT_MARKET_STATE&#160;</td><td class="fielddoc"><p>0x10/16 市场状态信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3aa750cfc44aa220c779981d6dcf534c15" name="a4812a4f870508a664c2df6d1e6a860b3aa750cfc44aa220c779981d6dcf534c15"></a>OESMSG_RPT_REPORT_SYNCHRONIZATION&#160;</td><td class="fielddoc"><p>0x11/17 回报同步的应答消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a319dc7537fb8121273c0586f31df05e9" name="a4812a4f870508a664c2df6d1e6a860b3a319dc7537fb8121273c0586f31df05e9"></a>OESMSG_RPT_BUSINESS_REJECT&#160;</td><td class="fielddoc"><p>0x12/18 OES业务拒绝 (因未通过风控检查等原因而被OES拒绝) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a941aff616e3d824a511a419d217a142a" name="a4812a4f870508a664c2df6d1e6a860b3a941aff616e3d824a511a419d217a142a"></a>OESMSG_RPT_ORDER_INSERT&#160;</td><td class="fielddoc"><p>0x13/19 OES委托已生成 (已通过风控检查) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3af726fccd8b57e87659e8117483e2539a" name="a4812a4f870508a664c2df6d1e6a860b3af726fccd8b57e87659e8117483e2539a"></a>OESMSG_RPT_ORDER_REPORT&#160;</td><td class="fielddoc"><p>0x14/20 交易所委托回报 (包括交易所委托拒绝、委托确认和撤单完成通知) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3af11efe935bb31fec388b1980260a0565" name="a4812a4f870508a664c2df6d1e6a860b3af11efe935bb31fec388b1980260a0565"></a>OESMSG_RPT_TRADE_REPORT&#160;</td><td class="fielddoc"><p>0x15/21 交易所成交回报 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3ad55382f318e86c9a4010ccdac8e92b1d" name="a4812a4f870508a664c2df6d1e6a860b3ad55382f318e86c9a4010ccdac8e92b1d"></a>OESMSG_RPT_FUND_TRSF_REJECT&#160;</td><td class="fielddoc"><p>0x16/22 出入金委托拒绝 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3aa14205c7de3c370346c8e28528b9725b" name="a4812a4f870508a664c2df6d1e6a860b3aa14205c7de3c370346c8e28528b9725b"></a>OESMSG_RPT_FUND_TRSF_REPORT&#160;</td><td class="fielddoc"><p>0x17/23 出入金委托执行报告 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a4ce19dcdb2c5dce6736035a2c5eeb96b" name="a4812a4f870508a664c2df6d1e6a860b3a4ce19dcdb2c5dce6736035a2c5eeb96b"></a>OESMSG_RPT_CASH_ASSET_VARIATION&#160;</td><td class="fielddoc"><p>0x18/24 资金变动信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a69bec9db2c2c7348327df3588560bcc9" name="a4812a4f870508a664c2df6d1e6a860b3a69bec9db2c2c7348327df3588560bcc9"></a>OESMSG_RPT_STOCK_HOLDING_VARIATION&#160;</td><td class="fielddoc"><p>0x19/25 持仓变动信息 (股票) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3abd8a21b901ef83d73641d352851cf27b" name="a4812a4f870508a664c2df6d1e6a860b3abd8a21b901ef83d73641d352851cf27b"></a>OESMSG_RPT_OPTION_HOLDING_VARIATION&#160;</td><td class="fielddoc"><p>0x1A/26 持仓变动信息 (期权) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a28a1e1f500058615f729c0c02f2bcc83" name="a4812a4f870508a664c2df6d1e6a860b3a28a1e1f500058615f729c0c02f2bcc83"></a>OESMSG_RPT_OPTION_UNDERLYING_HOLDING_VARIATION&#160;</td><td class="fielddoc"><p>0x1B/27 期权标的持仓变动信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3ac7a7c753f8329d130c1e38df0c817be7" name="a4812a4f870508a664c2df6d1e6a860b3ac7a7c753f8329d130c1e38df0c817be7"></a>OESMSG_RPT_OPTION_SETTLEMENT_CONFIRMED&#160;</td><td class="fielddoc"><p>0x1C/28 期权账户结算单确认消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3aefe614d7a6dbe28373b0d409636429bd" name="a4812a4f870508a664c2df6d1e6a860b3aefe614d7a6dbe28373b0d409636429bd"></a>OESMSG_RPT_NOTIFY_INFO&#160;</td><td class="fielddoc"><p>0x1E/30 OES通知消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a58545ce75bdf52fc2de5c023025bc771" name="a4812a4f870508a664c2df6d1e6a860b3a58545ce75bdf52fc2de5c023025bc771"></a>OESMSG_RPT_CREDIT_CASH_REPAY_REPORT&#160;</td><td class="fielddoc"><p>0x20/32 融资融券直接还款委托执行报告 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3af2da2fead38b206dbc5e12137c307040" name="a4812a4f870508a664c2df6d1e6a860b3af2da2fead38b206dbc5e12137c307040"></a>OESMSG_RPT_CREDIT_DEBT_CONTRACT_VARIATION&#160;</td><td class="fielddoc"><p>0x21/33 融资融券合约变动信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a4f1d871abf44c758fa1151337e64815f" name="a4812a4f870508a664c2df6d1e6a860b3a4f1d871abf44c758fa1151337e64815f"></a>OESMSG_RPT_CREDIT_DEBT_JOURNAL&#160;</td><td class="fielddoc"><p>0x22/34 融资融券合约流水信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a923c5b2edfb73ef0befe788cfd9ea8be" name="a4812a4f870508a664c2df6d1e6a860b3a923c5b2edfb73ef0befe788cfd9ea8be"></a>__OESMSG_RPT_MAX&#160;</td><td class="fielddoc"><p>最大的回报消息类型 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3ab0cdf727880aedca4f5d3460d17e4274" name="a4812a4f870508a664c2df6d1e6a860b3ab0cdf727880aedca4f5d3460d17e4274"></a>__OESMSG_QRYMSG_MIN&#160;</td><td class="fielddoc"><p>0x2F/47 最小的查询消息类型 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3af45e7a80d325bf516b19015937b83480" name="a4812a4f870508a664c2df6d1e6a860b3af45e7a80d325bf516b19015937b83480"></a>OESMSG_QRYMSG_OPT_HLD&#160;</td><td class="fielddoc"><p>0x35/53 查询期权持仓信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a9d97b9f7bc3bdc67dfcae03aa2884250" name="a4812a4f870508a664c2df6d1e6a860b3a9d97b9f7bc3bdc67dfcae03aa2884250"></a>OESMSG_QRYMSG_CUST&#160;</td><td class="fielddoc"><p>0x36/54 查询客户信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a3cc38eb18c0dc5a0a5949fd4ce0a281f" name="a4812a4f870508a664c2df6d1e6a860b3a3cc38eb18c0dc5a0a5949fd4ce0a281f"></a>OESMSG_QRYMSG_COMMISSION_RATE&#160;</td><td class="fielddoc"><p>0x38/56 查询客户佣金信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a7b41d513c27be5e06ac7923b4650779d" name="a4812a4f870508a664c2df6d1e6a860b3a7b41d513c27be5e06ac7923b4650779d"></a>OESMSG_QRYMSG_FUND_TRSF&#160;</td><td class="fielddoc"><p>0x39/57 查询出入金信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a7426c4411ffbcb6fa1ba368dd4d428a7" name="a4812a4f870508a664c2df6d1e6a860b3a7426c4411ffbcb6fa1ba368dd4d428a7"></a>OESMSG_QRYMSG_ETF&#160;</td><td class="fielddoc"><p>0x3B/59 查询ETF申赎产品信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a37abb9f92389810be8e8d7598d97d722" name="a4812a4f870508a664c2df6d1e6a860b3a37abb9f92389810be8e8d7598d97d722"></a>OESMSG_QRYMSG_OPTION&#160;</td><td class="fielddoc"><p>0x3D/61 查询期权产品信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a95aeccf7a4df56b664c735101dc03473" name="a4812a4f870508a664c2df6d1e6a860b3a95aeccf7a4df56b664c735101dc03473"></a>OESMSG_QRYMSG_LOT_WINNING&#160;</td><td class="fielddoc"><p>0x3F/63 查询新股配号、中签信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a706f73c0f8b902f3631dc035ed415a43" name="a4812a4f870508a664c2df6d1e6a860b3a706f73c0f8b902f3631dc035ed415a43"></a>OESMSG_QRYMSG_TRADING_DAY&#160;</td><td class="fielddoc"><p>0x40/64 查询当前交易日 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3accd350e1647423835047f6088820516f" name="a4812a4f870508a664c2df6d1e6a860b3accd350e1647423835047f6088820516f"></a>OESMSG_QRYMSG_MARKET_STATE&#160;</td><td class="fielddoc"><p>0x41/65 查询市场状态 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3aeb8f095fbd25df1578d9c50115e62ad1" name="a4812a4f870508a664c2df6d1e6a860b3aeb8f095fbd25df1578d9c50115e62ad1"></a>OESMSG_QRYMSG_COUNTER_CASH&#160;</td><td class="fielddoc"><p>0x42/66 查询客户主柜资金信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a7514ccd0ca7f03b48f3b5d92dcf3473e" name="a4812a4f870508a664c2df6d1e6a860b3a7514ccd0ca7f03b48f3b5d92dcf3473e"></a>OESMSG_QRYMSG_OPT_UNDERLYING_HLD&#160;</td><td class="fielddoc"><p>0x43/67 查询期权标的持仓信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3aaeb6957b3c57660a615f5fee4109e462" name="a4812a4f870508a664c2df6d1e6a860b3aaeb6957b3c57660a615f5fee4109e462"></a>OESMSG_QRYMSG_NOTIFY_INFO&#160;</td><td class="fielddoc"><p>0x44/68 查询通知消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a92522b76fa5a346211e2ef26b475d8bc" name="a4812a4f870508a664c2df6d1e6a860b3a92522b76fa5a346211e2ef26b475d8bc"></a>OESMSG_QRYMSG_OPT_POSITION_LIMIT&#160;</td><td class="fielddoc"><p>0x45/69 查询期权限仓额度信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a69a4a8fa1911e55251348bcb9cf377c9" name="a4812a4f870508a664c2df6d1e6a860b3a69a4a8fa1911e55251348bcb9cf377c9"></a>OESMSG_QRYMSG_OPT_PURCHASE_LIMIT&#160;</td><td class="fielddoc"><p>0x46/70 查询期权限购额度信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a8b20afa954e37a28e3fda4541e8e52b4" name="a4812a4f870508a664c2df6d1e6a860b3a8b20afa954e37a28e3fda4541e8e52b4"></a>OESMSG_QRYMSG_BROKER_PARAMS&#160;</td><td class="fielddoc"><p>0x48/72 查询券商参数信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a340e931305c21213165976bad100fa9b" name="a4812a4f870508a664c2df6d1e6a860b3a340e931305c21213165976bad100fa9b"></a>OESMSG_QRYMSG_COLOCATION_PEER_CASH&#160;</td><td class="fielddoc"><p>0x49/73 查询两地交易时对端结点的资金资产信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3afab0560ef9a6f155516fb74f58cdc7d4" name="a4812a4f870508a664c2df6d1e6a860b3afab0560ef9a6f155516fb74f58cdc7d4"></a>OESMSG_QRYMSG_INV_ACCT&#160;</td><td class="fielddoc"><p>0x51/81 查询证券账户信息 (0x37的更新版本, </p><dl class="section since"><dt>自从</dt><dd>0.15.9) </dd></dl>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3af31dd9745196c63b1cf47e29fcfcbcfe" name="a4812a4f870508a664c2df6d1e6a860b3af31dd9745196c63b1cf47e29fcfcbcfe"></a>OESMSG_QRYMSG_ORD&#160;</td><td class="fielddoc"><p>0x54/84 查询委托信息 (0x31的更新版本, </p><dl class="section since"><dt>自从</dt><dd>0.16) </dd></dl>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a9735691e07f052ba6676017617e2d167" name="a4812a4f870508a664c2df6d1e6a860b3a9735691e07f052ba6676017617e2d167"></a>OESMSG_QRYMSG_TRD&#160;</td><td class="fielddoc"><p>0x55/85 查询成交信息 (0x32的更新版本, </p><dl class="section since"><dt>自从</dt><dd>0.16) </dd></dl>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3abd4f42552036c452e99d405da5d86664" name="a4812a4f870508a664c2df6d1e6a860b3abd4f42552036c452e99d405da5d86664"></a>OESMSG_QRYMSG_OPT_EXERCISE_ASSIGN&#160;</td><td class="fielddoc"><p>0x56/86 查询期权行权指派信息 (0x47的更新版本, </p><dl class="section since"><dt>自从</dt><dd>0.16.0.3) </dd></dl>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3aeee736dea1c18fdc3c16972ad739694c" name="a4812a4f870508a664c2df6d1e6a860b3aeee736dea1c18fdc3c16972ad739694c"></a>OESMSG_QRYMSG_ISSUE&#160;</td><td class="fielddoc"><p>0x57/87 查询证券发行信息 (0x3E的更新版本, </p><dl class="section since"><dt>自从</dt><dd>0.15.11) </dd></dl>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a6356c8678a224dc571c4256b12f9886d" name="a4812a4f870508a664c2df6d1e6a860b3a6356c8678a224dc571c4256b12f9886d"></a>OESMSG_QRYMSG_STOCK&#160;</td><td class="fielddoc"><p>0x58/88 查询现货产品信息 (0x52的更新版本, </p><dl class="section since"><dt>自从</dt><dd>0.15.11) </dd></dl>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3aff1a33e3c6382138fa4a9f6a45a0d74a" name="a4812a4f870508a664c2df6d1e6a860b3aff1a33e3c6382138fa4a9f6a45a0d74a"></a>OESMSG_QRYMSG_ETF_COMPONENT&#160;</td><td class="fielddoc"><p>0x59/89 查询ETF成份证券信息 (0x3C的更新版本, </p><dl class="section since"><dt>自从</dt><dd>0.15.11) </dd></dl>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3aefd10ddddbd8822a854c8d6386717b88" name="a4812a4f870508a664c2df6d1e6a860b3aefd10ddddbd8822a854c8d6386717b88"></a>OESMSG_QRYMSG_CLIENT_OVERVIEW&#160;</td><td class="fielddoc"><p>0x5A/90 查询客户端总览信息 (0x30的更新版本, </p><dl class="section since"><dt>自从</dt><dd>0.15.11.11) <br  />
+ </dd></dl>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a60f7198e9c0d426f57987792e3fe64da" name="a4812a4f870508a664c2df6d1e6a860b3a60f7198e9c0d426f57987792e3fe64da"></a>OESMSG_QRYMSG_CASH_ASSET&#160;</td><td class="fielddoc"><p>0x5B/91 查询客户资金信息 (0x53的更新版本, </p><dl class="section since"><dt>自从</dt><dd>0.17) </dd></dl>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3abe4cba19aa3b8a72bf02acb95153c550" name="a4812a4f870508a664c2df6d1e6a860b3abe4cba19aa3b8a72bf02acb95153c550"></a>OESMSG_QRYMSG_STK_HLD&#160;</td><td class="fielddoc"><p>0x5C/92 查询股票持仓信息 (0x34的更新版本, </p><dl class="section since"><dt>自从</dt><dd>0.17) </dd></dl>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3aaedb0a869f41a33b55bb7f61316dd3dc" name="a4812a4f870508a664c2df6d1e6a860b3aaedb0a869f41a33b55bb7f61316dd3dc"></a>OESMSG_QRYMSG_CRD_DEBT_CONTRACT&#160;</td><td class="fielddoc"><p>0x80/128 查询融资融券合约信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a5f5a4402ca88a8e4ffdb3d4676b7af61" name="a4812a4f870508a664c2df6d1e6a860b3a5f5a4402ca88a8e4ffdb3d4676b7af61"></a>OESMSG_QRYMSG_CRD_CUST_SECU_DEBT_STATS&#160;</td><td class="fielddoc"><p>0x81/129 查询客户单证券融资融券负债统计信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a6ac1d3a492b252362cd9d6a6250b9b83" name="a4812a4f870508a664c2df6d1e6a860b3a6ac1d3a492b252362cd9d6a6250b9b83"></a>OESMSG_QRYMSG_CRD_CREDIT_ASSET&#160;</td><td class="fielddoc"><p>0x82/130 查询信用资产信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a258c7d5d72e0d1a329143fdb616c956e" name="a4812a4f870508a664c2df6d1e6a860b3a258c7d5d72e0d1a329143fdb616c956e"></a>OESMSG_QRYMSG_CRD_CASH_REPAY_INFO&#160;</td><td class="fielddoc"><p>0x83/131 查询融资融券业务直接还款信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3aa9350284dfdef0d4337b6613a0ec9509" name="a4812a4f870508a664c2df6d1e6a860b3aa9350284dfdef0d4337b6613a0ec9509"></a>OESMSG_QRYMSG_CRD_CASH_POSITION&#160;</td><td class="fielddoc"><p>0x84/132 查询融资融券业务资金头寸信息 (可融资头寸信息) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a2e3000c1d810099ee91b9bbe5c14068d" name="a4812a4f870508a664c2df6d1e6a860b3a2e3000c1d810099ee91b9bbe5c14068d"></a>OESMSG_QRYMSG_CRD_SECURITY_POSITION&#160;</td><td class="fielddoc"><p>0x85/133 查询融资融券业务证券头寸信息 (可融券头寸信息) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a2cca4acc743eda4ce744abfa06c2b4fc" name="a4812a4f870508a664c2df6d1e6a860b3a2cca4acc743eda4ce744abfa06c2b4fc"></a>OESMSG_QRYMSG_CRD_EXCESS_STOCK&#160;</td><td class="fielddoc"><p>0x86/134 查询融资融券业务余券信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a1118854e9cafd9528df35cba33f29001" name="a4812a4f870508a664c2df6d1e6a860b3a1118854e9cafd9528df35cba33f29001"></a>OESMSG_QRYMSG_CRD_DEBT_JOURNAL&#160;</td><td class="fielddoc"><p>0x87/135 查询融资融券合约流水信息 (仅当日流水) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3abd77a2363ed5a752174505961f43d77d" name="a4812a4f870508a664c2df6d1e6a860b3abd77a2363ed5a752174505961f43d77d"></a>OESMSG_QRYMSG_CRD_INTEREST_RATE&#160;</td><td class="fielddoc"><p>0x88/136 查询融资融券息费利率 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a5f52616d0fd8228428dc1116a61850be" name="a4812a4f870508a664c2df6d1e6a860b3a5f52616d0fd8228428dc1116a61850be"></a>OESMSG_QRYMSG_CRD_UNDERLYING_INFO&#160;</td><td class="fielddoc"><p>0x89/137 查询融资融券可充抵保证金证券及融资融券标的信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a9b65571dcb633db7d6b3050234f9a22f" name="a4812a4f870508a664c2df6d1e6a860b3a9b65571dcb633db7d6b3050234f9a22f"></a>OESMSG_QRYMSG_CRD_DRAWABLE_BALANCE&#160;</td><td class="fielddoc"><p>0x90/138 查询融资融券业务可取资金 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3af8a456ca9d8e790b9ec22599f85f3d38" name="a4812a4f870508a664c2df6d1e6a860b3af8a456ca9d8e790b9ec22599f85f3d38"></a>OESMSG_QRYMSG_CRD_COLLATERAL_TRANSFER_OUT_MAX_QTY&#160;</td><td class="fielddoc"><p>0x91/139 查询融资融券担保品可转出的最大数量 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3acd1b41cb3f2fbc4725de397d23cd9cbb" name="a4812a4f870508a664c2df6d1e6a860b3acd1b41cb3f2fbc4725de397d23cd9cbb"></a>__OESMSG_QRYMSG_MAX&#160;</td><td class="fielddoc"><p>最大的查询消息类型 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3ae1182f9579d09e6fcd026e7eaffa99df" name="a4812a4f870508a664c2df6d1e6a860b3ae1182f9579d09e6fcd026e7eaffa99df"></a>OESMSG_SESS_HEARTBEAT&#160;</td><td class="fielddoc"><p>0xFA/250 心跳消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a7d37d99da9424a9ef9cdf466f52374a7" name="a4812a4f870508a664c2df6d1e6a860b3a7d37d99da9424a9ef9cdf466f52374a7"></a>OESMSG_SESS_TEST_REQUEST&#160;</td><td class="fielddoc"><p>0xFB/251 测试请求消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3afab10ff7c76554e4a252742b9e17d174" name="a4812a4f870508a664c2df6d1e6a860b3afab10ff7c76554e4a252742b9e17d174"></a>OESMSG_SESS_LOGIN_EXTEND&#160;</td><td class="fielddoc"><p>0xFC/252 登录扩展消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a235f9d5c68f051f048a35f0415a7c7ef" name="a4812a4f870508a664c2df6d1e6a860b3a235f9d5c68f051f048a35f0415a7c7ef"></a>OESMSG_SESS_LOGOUT&#160;</td><td class="fielddoc"><p>0xFE/254 登出消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4812a4f870508a664c2df6d1e6a860b3a3c5ad1f8dc4bf5f4540e32b0b05c2d4e" name="a4812a4f870508a664c2df6d1e6a860b3a3c5ad1f8dc4bf5f4540e32b0b05c2d4e"></a>OESMSG_RPT_ORDER_REJECT&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00197">197</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e9b4f23c96bd7467c0ee2bfa10c8b64">&#9670;&#160;</a></span>_eOesSubscribeReportType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="oes__packets_8h.html#a0e9b4f23c96bd7467c0ee2bfa10c8b64">_eOesSubscribeReportType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>可订阅的回报消息类型定义</p><ul>
+<li>0: 默认回报 (等价于: 0x01,0x02,0x04,0x08,0x10,0x20,0x40)</li>
+<li>0x0001: OES业务拒绝 (未通过风控检查等)</li>
+<li>0x0002: OES委托已生成 (已通过风控检查)</li>
+<li>0x0004: 交易所委托回报 (包括交易所委托拒绝、委托确认和撤单完成通知)</li>
+<li>0x0008: 交易所成交回报</li>
+<li>0x0010: 出入金委托执行报告 (包括出入金委托拒绝、出入金委托回报)</li>
+<li>0x0020: 资金变动信息</li>
+<li>0x0040: 持仓变动信息</li>
+<li>0x0080: 市场状态信息</li>
+<li>0x0100: 通知消息回报</li>
+<li>0x0200: 结算单确认消息</li>
+<li>0x0400: 融资融券直接还款委托执行报告</li>
+<li>0x0800: 融资融券合约变动信息</li>
+<li>0x1000: 融资融券合约流水信息</li>
+<li>0xFFFF: 所有回报 </li>
+</ul>
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64a477a130251171de2556634d059a3feaa" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64a477a130251171de2556634d059a3feaa"></a>OES_SUB_RPT_TYPE_DEFAULT&#160;</td><td class="fielddoc"><p>默认回报 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64af369ac559e3a53b861e5c875071055f2" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64af369ac559e3a53b861e5c875071055f2"></a>OES_SUB_RPT_TYPE_BUSINESS_REJECT&#160;</td><td class="fielddoc"><p>OES业务拒绝 (未通过风控检查等) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64a478ae1bef4faf9f60f5bb221398dd2eb" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64a478ae1bef4faf9f60f5bb221398dd2eb"></a>OES_SUB_RPT_TYPE_ORDER_INSERT&#160;</td><td class="fielddoc"><p>OES委托已生成 (已通过风控检查) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64a968000bbb24228b3302cb10bbebe456c" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64a968000bbb24228b3302cb10bbebe456c"></a>OES_SUB_RPT_TYPE_ORDER_REPORT&#160;</td><td class="fielddoc"><p>交易所委托回报 (包括交易所委托拒绝、委托确认和撤单完成通知) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64a89db6b673fb5cf8a303b4443109c3a91" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64a89db6b673fb5cf8a303b4443109c3a91"></a>OES_SUB_RPT_TYPE_TRADE_REPORT&#160;</td><td class="fielddoc"><p>交易所成交回报 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64ac3ac2429069fb4ef64a76aa7d29bb128" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64ac3ac2429069fb4ef64a76aa7d29bb128"></a>OES_SUB_RPT_TYPE_FUND_TRSF_REPORT&#160;</td><td class="fielddoc"><p>出入金委托执行报告 (包括出入金委托拒绝、出入金委托回报) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64aecdc5efa8ea64844e7330c6bbdcf97f1" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64aecdc5efa8ea64844e7330c6bbdcf97f1"></a>OES_SUB_RPT_TYPE_CASH_ASSET_VARIATION&#160;</td><td class="fielddoc"><p>资金变动信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64a85a164b1c612c4143f16ce1b820aba3a" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64a85a164b1c612c4143f16ce1b820aba3a"></a>OES_SUB_RPT_TYPE_HOLDING_VARIATION&#160;</td><td class="fielddoc"><p>持仓变动信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64a1a6e3ac4830521343a00a829149c493c" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64a1a6e3ac4830521343a00a829149c493c"></a>OES_SUB_RPT_TYPE_MARKET_STATE&#160;</td><td class="fielddoc"><p>市场状态信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64aab906022734d2f0f748b18f460b76fee" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64aab906022734d2f0f748b18f460b76fee"></a>OES_SUB_RPT_TYPE_NOTIFY_INFO&#160;</td><td class="fielddoc"><p>通知消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64afceb1e6006b3da034b125dcaf0a691ff" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64afceb1e6006b3da034b125dcaf0a691ff"></a>OES_SUB_RPT_TYPE_SETTLEMETN_CONFIRMED&#160;</td><td class="fielddoc"><p>结算单确认消息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64aa259b22f4326c150e395ab2cb9f23137" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64aa259b22f4326c150e395ab2cb9f23137"></a>OES_SUB_RPT_TYPE_CREDIT_CASH_REPAY_REPORT&#160;</td><td class="fielddoc"><p>融资融券直接还款委托执行报告 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64afb6ffcba6fa07f14f89392de434cf393" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64afb6ffcba6fa07f14f89392de434cf393"></a>OES_SUB_RPT_TYPE_CREDIT_DEBT_CONTRACT_VARIATION&#160;</td><td class="fielddoc"><p>融资融券合约变动信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64a3bc943ace6f0699ad61ec462841bf104" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64a3bc943ace6f0699ad61ec462841bf104"></a>OES_SUB_RPT_TYPE_CREDIT_DEBT_JOURNAL&#160;</td><td class="fielddoc"><p>融资融券合约流水信息 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64a67769086ba60e692a7d6752087671064" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64a67769086ba60e692a7d6752087671064"></a>OES_SUB_RPT_TYPE_ALL&#160;</td><td class="fielddoc"><p>所有回报 </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0e9b4f23c96bd7467c0ee2bfa10c8b64a4be3513dc66456d3d53ba61e0294c705" name="a0e9b4f23c96bd7467c0ee2bfa10c8b64a4be3513dc66456d3d53ba61e0294c705"></a>__MAX_OES_SUB_RPT_TYPE&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="oes__packets_8h_source.html">oes_packets.h</a> 第 <a class="el" href="oes__packets_8h_source.html#l00328">328</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_ea8eb33b87c1731a5ddc0fcd0e5125a9.html">oes_global</a></li><li class="navelem"><a class="el" href="oes__packets_8h.html">oes_packets.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

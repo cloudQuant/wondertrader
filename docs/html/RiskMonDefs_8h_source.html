@@ -1,0 +1,299 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/Includes/RiskMonDefs.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('RiskMonDefs_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">RiskMonDefs.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="RiskMonDefs_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;../Includes/WTSMarcos.h&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;stdio.h&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> *  这是风控模块基本定义文件</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *  目前风控模块暂时不考虑根据行情风控</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> *  只实现基本的资金风控的要求</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> *  行情风控通过更高层的择时策略来实现</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> *  不在风控模块里处理</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *  风控模块只处理高效的风控策略</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">class </span><a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">class </span><a class="code hl_class" href="classWTSPortFundInfo.html">WTSPortFundInfo</a>;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment"> *  组合上下文</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment"> */</span></div>
+<div class="foldopen" id="foldopen00033" data-start="{" data-end="};">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classWtPortContext.html">   33</a></span><span class="keyword">class </span><a class="code hl_class" href="classWtPortContext.html">WtPortContext</a></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>{</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment">     *  获取组合资金数据</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="classWtPortContext.html#a9a37d398f2e2389dd79a91f8d20e5fa9">   39</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWTSPortFundInfo.html">WTSPortFundInfo</a>*    <a class="code hl_function" href="classWtPortContext.html#a9a37d398f2e2389dd79a91f8d20e5fa9">getFundInfo</a>() = 0;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">     *  设置数量倍数</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">     *  @scale  数量倍率, 一般小于等于1, 用于控制整体仓位比例</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="classWtPortContext.html#a3fc8a0513f4519fb38b331d3b9f51896">   45</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span>    <a class="code hl_function" href="classWtPortContext.html#a3fc8a0513f4519fb38b331d3b9f51896">setVolScale</a>(<span class="keywordtype">double</span> scale) = 0;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">     *  检查是否处于交易状态</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment">     *</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">     *  return  处于交易状态为true</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="classWtPortContext.html#a222b620921bd1912a367ac827d1da11e">   52</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span>    <a class="code hl_function" href="classWtPortContext.html#a222b620921bd1912a367ac827d1da11e">isInTrading</a>() = 0;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="comment">     *  写日志</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="classWtPortContext.html#ae33cb5fead2917b42959eaf3f8f6d47b">   57</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span>    <a class="code hl_function" href="classWtPortContext.html#ae33cb5fead2917b42959eaf3f8f6d47b">writeRiskLog</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* message) = 0;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment">     *  获取当前日期</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="classWtPortContext.html#ab9d64e6eff157f3eb7e7bac5f4fc8192">   62</a></span>    <span class="keyword">virtual</span> uint32_t    <a class="code hl_function" href="classWtPortContext.html#ab9d64e6eff157f3eb7e7bac5f4fc8192">getCurDate</a>() = 0;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="comment">     *  获取当前时间</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classWtPortContext.html#a024c2a34b09d81906e81c3c85dcdde9c">   67</a></span>    <span class="keyword">virtual</span> uint32_t    <a class="code hl_function" href="classWtPortContext.html#a024c2a34b09d81906e81c3c85dcdde9c">getCurTime</a>() = 0;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="comment">     *  获取当前交易日</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="classWtPortContext.html#afcb341cde97c9f03316fb161b670d907">   72</a></span>    <span class="keyword">virtual</span> uint32_t    <a class="code hl_function" href="classWtPortContext.html#afcb341cde97c9f03316fb161b670d907">getTradingDate</a>() = 0;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="comment">     *  将时间转换为分钟数(日内有效)</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="classWtPortContext.html#a7b63839f66c5f40a37c52eb6f830d6e3">   77</a></span>    <span class="keyword">virtual</span> uint32_t    <a class="code hl_function" href="classWtPortContext.html#a7b63839f66c5f40a37c52eb6f830d6e3">transTimeToMin</a>(uint32_t uTime) = 0;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>};</div>
+</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="comment"> *  组合风控模块</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="comment"> */</span></div>
+<div class="foldopen" id="foldopen00083" data-start="{" data-end="};">
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="classWtRiskMonitor.html">   83</a></span><span class="keyword">class </span><a class="code hl_class" href="classWtRiskMonitor.html">WtRiskMonitor</a></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>{</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classWtRiskMonitor.html#afc8c90e6cbba159a68e828ba7faec7d2">   86</a></span>    <a class="code hl_function" href="classWtRiskMonitor.html#afc8c90e6cbba159a68e828ba7faec7d2">WtRiskMonitor</a>():<a class="code hl_variable" href="classWtRiskMonitor.html#aa269672c79404a0b3e2fe5747461e358">_ctx</a>(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>){}</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="classWtRiskMonitor.html#ab015fb0cbe7a13d0aab8aadfcb7c7169">   87</a></span>    <span class="keyword">virtual</span> <a class="code hl_function" href="classWtRiskMonitor.html#ab015fb0cbe7a13d0aab8aadfcb7c7169">~WtRiskMonitor</a>(){}</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="comment">    *   执行单元名称</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="comment">    */</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="classWtRiskMonitor.html#a2d49d9c67edfc2437baca27956a7458d">   93</a></span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtRiskMonitor.html#a2d49d9c67edfc2437baca27956a7458d">getName</a>() = 0;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="comment">    *   所属执行器工厂名称</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="comment">    */</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="classWtRiskMonitor.html#ab3a5f96a754c73125a6108fba85d9ee1">   98</a></span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtRiskMonitor.html#ab3a5f96a754c73125a6108fba85d9ee1">getFactName</a>() = 0;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="comment">    *   初始化执行单元</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="comment">    *   ctx     执行单元运行环境</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="comment">    *   code    管理的合约代码</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="comment">    */</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="classWtRiskMonitor.html#a6de7d43b98e85294c67446092c98fdf0">  105</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtRiskMonitor.html#a6de7d43b98e85294c67446092c98fdf0">init</a>(<a class="code hl_class" href="classWtPortContext.html">WtPortContext</a>* ctx, <a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg){ <a class="code hl_variable" href="classWtRiskMonitor.html#aa269672c79404a0b3e2fe5747461e358">_ctx</a> = ctx; }</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="comment">     *  启动风控模块</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno"><a class="line" href="classWtRiskMonitor.html#a3fad316c6eba93facd72b16e45560446">  110</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtRiskMonitor.html#a3fad316c6eba93facd72b16e45560446">run</a>(){}</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="comment">     *  停止风控模块</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="classWtRiskMonitor.html#a0f7b384907ebb028a0288f5a9282e251">  115</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtRiskMonitor.html#a0f7b384907ebb028a0288f5a9282e251">stop</a>(){}</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="classWtRiskMonitor.html#aa269672c79404a0b3e2fe5747461e358">  118</a></span>    <a class="code hl_class" href="classWtPortContext.html">WtPortContext</a>*  <a class="code hl_variable" href="classWtRiskMonitor.html#aa269672c79404a0b3e2fe5747461e358">_ctx</a>;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>};</div>
+</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="comment">//风控模块工厂接口</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="RiskMonDefs_8h.html#af1e8886b66c150e110c30cb42f854ba1">  124</a></span><span class="keyword">typedef</span> void(*<a class="code hl_typedef" href="RiskMonDefs_8h.html#af1e8886b66c150e110c30cb42f854ba1">FuncEnumRiskMonCallback</a>)(<span class="keyword">const</span> <span class="keywordtype">char</span>* factName, <span class="keyword">const</span> <span class="keywordtype">char</span>* unitName, <span class="keywordtype">bool</span> isLast);</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
+<div class="foldopen" id="foldopen00126" data-start="{" data-end="};">
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno"><a class="line" href="classIRiskMonitorFact.html">  126</a></span><span class="keyword">class </span><a class="code hl_class" href="classIRiskMonitorFact.html">IRiskMonitorFact</a></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>{</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno"><a class="line" href="classIRiskMonitorFact.html#ab48f7dbac610863ceb68038ed5b0ecf5">  129</a></span>    <a class="code hl_function" href="classIRiskMonitorFact.html#ab48f7dbac610863ceb68038ed5b0ecf5">IRiskMonitorFact</a>(){}</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="classIRiskMonitorFact.html#a9137f14c45bcb6c820065fc797434b69">  130</a></span>    <span class="keyword">virtual</span> <a class="code hl_function" href="classIRiskMonitorFact.html#a9137f14c45bcb6c820065fc797434b69">~IRiskMonitorFact</a>(){}</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span><span class="comment">    *   获取工厂名</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="comment">    */</span></div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno"><a class="line" href="classIRiskMonitorFact.html#a51eed7a98fb96d691b970e6719ed729b">  136</a></span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classIRiskMonitorFact.html#a51eed7a98fb96d691b970e6719ed729b">getName</a>() = 0;</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span><span class="comment">    *   枚举交易通道风控模块</span></div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span><span class="comment">    */</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="classIRiskMonitorFact.html#a9b5109a0495678dd62dfa476da5f4812">  141</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classIRiskMonitorFact.html#a9b5109a0495678dd62dfa476da5f4812">enumRiskMonitors</a>(<a class="code hl_typedef" href="RiskMonDefs_8h.html#af1e8886b66c150e110c30cb42f854ba1">FuncEnumRiskMonCallback</a> cb) = 0;</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="comment">    *   根据名称创建交易通道风控模块</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="comment">    */</span></div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno"><a class="line" href="classIRiskMonitorFact.html#a01d7cc2875a1934b5f972c4ce70bb65a">  146</a></span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classWtRiskMonitor.html">WtRiskMonitor</a>* <a class="code hl_function" href="classIRiskMonitorFact.html#a01d7cc2875a1934b5f972c4ce70bb65a">createRiskMonotor</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* name) = 0;</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="comment">    *   删除交易通道风控模块</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span><span class="comment">    */</span></div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="classIRiskMonitorFact.html#ad5ee60986423971e3a9f36fb8df33603">  151</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classIRiskMonitorFact.html#ad5ee60986423971e3a9f36fb8df33603">deleteRiskMonotor</a>(<a class="code hl_class" href="classWtRiskMonitor.html">WtRiskMonitor</a>* unit) = 0;</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>};</div>
+</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span><span class="comment">//创建执行工厂</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno"><a class="line" href="RiskMonDefs_8h.html#a6a11dd5cf65f3da85a609d38b2176476">  155</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classIRiskMonitorFact.html">IRiskMonitorFact</a>* (*FuncCreateRiskMonFact)();</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span><span class="comment">//删除执行工厂</span></div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno"><a class="line" href="RiskMonDefs_8h.html#a7e46e4d0d7c281cd57c9b46ebef9994f">  157</a></span><span class="keyword">typedef</span> void(*<a class="code hl_typedef" href="RiskMonDefs_8h.html#a7e46e4d0d7c281cd57c9b46ebef9994f">FuncDeleteRiskMonFact</a>)(<a class="code hl_class" href="classIRiskMonitorFact.html">IRiskMonitorFact</a>* &amp;fact);</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="ttc" id="aRiskMonDefs_8h_html_a7e46e4d0d7c281cd57c9b46ebef9994f"><div class="ttname"><a href="RiskMonDefs_8h.html#a7e46e4d0d7c281cd57c9b46ebef9994f">FuncDeleteRiskMonFact</a></div><div class="ttdeci">void(* FuncDeleteRiskMonFact)(IRiskMonitorFact *&amp;fact)</div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00157">RiskMonDefs.h:157</a></div></div>
+<div class="ttc" id="aRiskMonDefs_8h_html_af1e8886b66c150e110c30cb42f854ba1"><div class="ttname"><a href="RiskMonDefs_8h.html#af1e8886b66c150e110c30cb42f854ba1">FuncEnumRiskMonCallback</a></div><div class="ttdeci">void(* FuncEnumRiskMonCallback)(const char *factName, const char *unitName, bool isLast)</div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00124">RiskMonDefs.h:124</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aclassIRiskMonitorFact_html"><div class="ttname"><a href="classIRiskMonitorFact.html">IRiskMonitorFact</a></div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00126">RiskMonDefs.h:127</a></div></div>
+<div class="ttc" id="aclassIRiskMonitorFact_html_a01d7cc2875a1934b5f972c4ce70bb65a"><div class="ttname"><a href="classIRiskMonitorFact.html#a01d7cc2875a1934b5f972c4ce70bb65a">IRiskMonitorFact::createRiskMonotor</a></div><div class="ttdeci">virtual WtRiskMonitor * createRiskMonotor(const char *name)=0</div></div>
+<div class="ttc" id="aclassIRiskMonitorFact_html_a51eed7a98fb96d691b970e6719ed729b"><div class="ttname"><a href="classIRiskMonitorFact.html#a51eed7a98fb96d691b970e6719ed729b">IRiskMonitorFact::getName</a></div><div class="ttdeci">virtual const char * getName()=0</div></div>
+<div class="ttc" id="aclassIRiskMonitorFact_html_a9137f14c45bcb6c820065fc797434b69"><div class="ttname"><a href="classIRiskMonitorFact.html#a9137f14c45bcb6c820065fc797434b69">IRiskMonitorFact::~IRiskMonitorFact</a></div><div class="ttdeci">virtual ~IRiskMonitorFact()</div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00130">RiskMonDefs.h:130</a></div></div>
+<div class="ttc" id="aclassIRiskMonitorFact_html_a9b5109a0495678dd62dfa476da5f4812"><div class="ttname"><a href="classIRiskMonitorFact.html#a9b5109a0495678dd62dfa476da5f4812">IRiskMonitorFact::enumRiskMonitors</a></div><div class="ttdeci">virtual void enumRiskMonitors(FuncEnumRiskMonCallback cb)=0</div></div>
+<div class="ttc" id="aclassIRiskMonitorFact_html_ab48f7dbac610863ceb68038ed5b0ecf5"><div class="ttname"><a href="classIRiskMonitorFact.html#ab48f7dbac610863ceb68038ed5b0ecf5">IRiskMonitorFact::IRiskMonitorFact</a></div><div class="ttdeci">IRiskMonitorFact()</div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00129">RiskMonDefs.h:129</a></div></div>
+<div class="ttc" id="aclassIRiskMonitorFact_html_ad5ee60986423971e3a9f36fb8df33603"><div class="ttname"><a href="classIRiskMonitorFact.html#ad5ee60986423971e3a9f36fb8df33603">IRiskMonitorFact::deleteRiskMonotor</a></div><div class="ttdeci">virtual bool deleteRiskMonotor(WtRiskMonitor *unit)=0</div></div>
+<div class="ttc" id="aclassWTSPortFundInfo_html"><div class="ttname"><a href="classWTSPortFundInfo.html">WTSPortFundInfo</a></div><div class="ttdoc">组合资金信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSRiskDef_8hpp_source.html#l00143">WTSRiskDef.hpp:144</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWtPortContext_html"><div class="ttname"><a href="classWtPortContext.html">WtPortContext</a></div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00033">RiskMonDefs.h:34</a></div></div>
+<div class="ttc" id="aclassWtPortContext_html_a024c2a34b09d81906e81c3c85dcdde9c"><div class="ttname"><a href="classWtPortContext.html#a024c2a34b09d81906e81c3c85dcdde9c">WtPortContext::getCurTime</a></div><div class="ttdeci">virtual uint32_t getCurTime()=0</div></div>
+<div class="ttc" id="aclassWtPortContext_html_a222b620921bd1912a367ac827d1da11e"><div class="ttname"><a href="classWtPortContext.html#a222b620921bd1912a367ac827d1da11e">WtPortContext::isInTrading</a></div><div class="ttdeci">virtual bool isInTrading()=0</div></div>
+<div class="ttc" id="aclassWtPortContext_html_a3fc8a0513f4519fb38b331d3b9f51896"><div class="ttname"><a href="classWtPortContext.html#a3fc8a0513f4519fb38b331d3b9f51896">WtPortContext::setVolScale</a></div><div class="ttdeci">virtual void setVolScale(double scale)=0</div></div>
+<div class="ttc" id="aclassWtPortContext_html_a7b63839f66c5f40a37c52eb6f830d6e3"><div class="ttname"><a href="classWtPortContext.html#a7b63839f66c5f40a37c52eb6f830d6e3">WtPortContext::transTimeToMin</a></div><div class="ttdeci">virtual uint32_t transTimeToMin(uint32_t uTime)=0</div></div>
+<div class="ttc" id="aclassWtPortContext_html_a9a37d398f2e2389dd79a91f8d20e5fa9"><div class="ttname"><a href="classWtPortContext.html#a9a37d398f2e2389dd79a91f8d20e5fa9">WtPortContext::getFundInfo</a></div><div class="ttdeci">virtual WTSPortFundInfo * getFundInfo()=0</div></div>
+<div class="ttc" id="aclassWtPortContext_html_ab9d64e6eff157f3eb7e7bac5f4fc8192"><div class="ttname"><a href="classWtPortContext.html#ab9d64e6eff157f3eb7e7bac5f4fc8192">WtPortContext::getCurDate</a></div><div class="ttdeci">virtual uint32_t getCurDate()=0</div></div>
+<div class="ttc" id="aclassWtPortContext_html_ae33cb5fead2917b42959eaf3f8f6d47b"><div class="ttname"><a href="classWtPortContext.html#ae33cb5fead2917b42959eaf3f8f6d47b">WtPortContext::writeRiskLog</a></div><div class="ttdeci">virtual void writeRiskLog(const char *message)=0</div></div>
+<div class="ttc" id="aclassWtPortContext_html_afcb341cde97c9f03316fb161b670d907"><div class="ttname"><a href="classWtPortContext.html#afcb341cde97c9f03316fb161b670d907">WtPortContext::getTradingDate</a></div><div class="ttdeci">virtual uint32_t getTradingDate()=0</div></div>
+<div class="ttc" id="aclassWtRiskMonitor_html"><div class="ttname"><a href="classWtRiskMonitor.html">WtRiskMonitor</a></div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00083">RiskMonDefs.h:84</a></div></div>
+<div class="ttc" id="aclassWtRiskMonitor_html_a0f7b384907ebb028a0288f5a9282e251"><div class="ttname"><a href="classWtRiskMonitor.html#a0f7b384907ebb028a0288f5a9282e251">WtRiskMonitor::stop</a></div><div class="ttdeci">virtual void stop()</div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00115">RiskMonDefs.h:115</a></div></div>
+<div class="ttc" id="aclassWtRiskMonitor_html_a2d49d9c67edfc2437baca27956a7458d"><div class="ttname"><a href="classWtRiskMonitor.html#a2d49d9c67edfc2437baca27956a7458d">WtRiskMonitor::getName</a></div><div class="ttdeci">virtual const char * getName()=0</div></div>
+<div class="ttc" id="aclassWtRiskMonitor_html_a3fad316c6eba93facd72b16e45560446"><div class="ttname"><a href="classWtRiskMonitor.html#a3fad316c6eba93facd72b16e45560446">WtRiskMonitor::run</a></div><div class="ttdeci">virtual void run()</div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00110">RiskMonDefs.h:110</a></div></div>
+<div class="ttc" id="aclassWtRiskMonitor_html_a6de7d43b98e85294c67446092c98fdf0"><div class="ttname"><a href="classWtRiskMonitor.html#a6de7d43b98e85294c67446092c98fdf0">WtRiskMonitor::init</a></div><div class="ttdeci">virtual void init(WtPortContext *ctx, WTSVariant *cfg)</div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00105">RiskMonDefs.h:105</a></div></div>
+<div class="ttc" id="aclassWtRiskMonitor_html_aa269672c79404a0b3e2fe5747461e358"><div class="ttname"><a href="classWtRiskMonitor.html#aa269672c79404a0b3e2fe5747461e358">WtRiskMonitor::_ctx</a></div><div class="ttdeci">WtPortContext * _ctx</div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00118">RiskMonDefs.h:118</a></div></div>
+<div class="ttc" id="aclassWtRiskMonitor_html_ab015fb0cbe7a13d0aab8aadfcb7c7169"><div class="ttname"><a href="classWtRiskMonitor.html#ab015fb0cbe7a13d0aab8aadfcb7c7169">WtRiskMonitor::~WtRiskMonitor</a></div><div class="ttdeci">virtual ~WtRiskMonitor()</div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00087">RiskMonDefs.h:87</a></div></div>
+<div class="ttc" id="aclassWtRiskMonitor_html_ab3a5f96a754c73125a6108fba85d9ee1"><div class="ttname"><a href="classWtRiskMonitor.html#ab3a5f96a754c73125a6108fba85d9ee1">WtRiskMonitor::getFactName</a></div><div class="ttdeci">virtual const char * getFactName()=0</div></div>
+<div class="ttc" id="aclassWtRiskMonitor_html_afc8c90e6cbba159a68e828ba7faec7d2"><div class="ttname"><a href="classWtRiskMonitor.html#afc8c90e6cbba159a68e828ba7faec7d2">WtRiskMonitor::WtRiskMonitor</a></div><div class="ttdeci">WtRiskMonitor()</div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00086">RiskMonDefs.h:86</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_2a2e13dd651d9f4dfc9d1ceadd85b622.html">Includes</a></li><li class="navelem"><a class="el" href="RiskMonDefs_8h.html">RiskMonDefs.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

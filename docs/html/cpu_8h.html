@@ -1,0 +1,1579 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/cpu.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('cpu_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">cpu.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;string.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="mem_8h_source.html">mem.h</a>&quot;</code><br />
+</div>
+<p><a href="cpu_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__cpuid__t.html">ZSTD_cpuid_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a7964be6e3a4fa10246caa18b5df4da34" id="r_a7964be6e3a4fa10246caa18b5df4da34"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a7964be6e3a4fa10246caa18b5df4da34">X</a>(name,  r,  bit)</td></tr>
+<tr class="separator:a7964be6e3a4fa10246caa18b5df4da34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4ea6500801cc6f149d5ea05a269e08d" id="r_ab4ea6500801cc6f149d5ea05a269e08d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(name,  bit)&#160;&#160;&#160;<a class="el" href="cpu_8h.html#a7964be6e3a4fa10246caa18b5df4da34">X</a>(name, f1c, bit)</td></tr>
+<tr class="separator:ab4ea6500801cc6f149d5ea05a269e08d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88f7db79d90030b170014ca4939fd729" id="r_a88f7db79d90030b170014ca4939fd729"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(name,  bit)&#160;&#160;&#160;<a class="el" href="cpu_8h.html#a7964be6e3a4fa10246caa18b5df4da34">X</a>(name, f1d, bit)</td></tr>
+<tr class="separator:a88f7db79d90030b170014ca4939fd729"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6cf6fb3d5954b7c743b07616f47166cd" id="r_a6cf6fb3d5954b7c743b07616f47166cd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(name,  bit)&#160;&#160;&#160;<a class="el" href="cpu_8h.html#a7964be6e3a4fa10246caa18b5df4da34">X</a>(name, f7b, bit)</td></tr>
+<tr class="separator:a6cf6fb3d5954b7c743b07616f47166cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4ea6500801cc6f149d5ea05a269e08d" id="r_ab4ea6500801cc6f149d5ea05a269e08d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(name,  bit)&#160;&#160;&#160;<a class="el" href="cpu_8h.html#a7964be6e3a4fa10246caa18b5df4da34">X</a>(name, f7c, bit)</td></tr>
+<tr class="separator:ab4ea6500801cc6f149d5ea05a269e08d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a78a6773999ec058a68d305925239c0ae" id="r_a78a6773999ec058a68d305925239c0ae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="structZSTD__cpuid__t.html">ZSTD_cpuid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a78a6773999ec058a68d305925239c0ae">ZSTD_cpuid</a> (void)</td></tr>
+<tr class="separator:a78a6773999ec058a68d305925239c0ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aacb0af2153609d8d5adb05ab94a1fddc" id="r_aacb0af2153609d8d5adb05ab94a1fddc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#aacb0af2153609d8d5adb05ab94a1fddc">C</a> (sse3, 0) C(pclmuldq</td></tr>
+<tr class="separator:aacb0af2153609d8d5adb05ab94a1fddc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a867c4f3f2665363966f7ee21ba3b1c97" id="r_a867c4f3f2665363966f7ee21ba3b1c97"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a867c4f3f2665363966f7ee21ba3b1c97">C</a> (dtes64, 2) C(monitor</td></tr>
+<tr class="separator:a867c4f3f2665363966f7ee21ba3b1c97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ba24823c19cf96f2d76a5dba0437cc3" id="r_a1ba24823c19cf96f2d76a5dba0437cc3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a1ba24823c19cf96f2d76a5dba0437cc3">C</a> (dscpl, 4) C(vmx</td></tr>
+<tr class="separator:a1ba24823c19cf96f2d76a5dba0437cc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a915644a23b9264c811b3b6e4cc75fb5e" id="r_a915644a23b9264c811b3b6e4cc75fb5e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a915644a23b9264c811b3b6e4cc75fb5e">C</a> (smx, 6) C(eist</td></tr>
+<tr class="separator:a915644a23b9264c811b3b6e4cc75fb5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a725a791e6eff0ce7faaa9541da969a36" id="r_a725a791e6eff0ce7faaa9541da969a36"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a725a791e6eff0ce7faaa9541da969a36">C</a> (tm2, 8) C(ssse3</td></tr>
+<tr class="separator:a725a791e6eff0ce7faaa9541da969a36"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac42b0ab45acfbed6510e62085068be3" id="r_aac42b0ab45acfbed6510e62085068be3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#aac42b0ab45acfbed6510e62085068be3">C</a> (cnxtid, 10) C(fma</td></tr>
+<tr class="separator:aac42b0ab45acfbed6510e62085068be3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42e522a4bb68c7444112c30d846b1e19" id="r_a42e522a4bb68c7444112c30d846b1e19"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a42e522a4bb68c7444112c30d846b1e19">C</a> (cx16, 13) C(xtpr</td></tr>
+<tr class="separator:a42e522a4bb68c7444112c30d846b1e19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6b6c5dec89197aedfc4e55c2de823f5" id="r_aa6b6c5dec89197aedfc4e55c2de823f5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#aa6b6c5dec89197aedfc4e55c2de823f5">C</a> (pdcm, 15) C(pcid</td></tr>
+<tr class="separator:aa6b6c5dec89197aedfc4e55c2de823f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca202d9d1d1f504d7c0857d7441fbce7" id="r_aca202d9d1d1f504d7c0857d7441fbce7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#aca202d9d1d1f504d7c0857d7441fbce7">C</a> (dca, 18) C(sse41</td></tr>
+<tr class="separator:aca202d9d1d1f504d7c0857d7441fbce7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb21e79b715466a1c8a227ae0f37f27a" id="r_acb21e79b715466a1c8a227ae0f37f27a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#acb21e79b715466a1c8a227ae0f37f27a">C</a> (sse42, 20) C(x2apic</td></tr>
+<tr class="separator:acb21e79b715466a1c8a227ae0f37f27a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c3107b52e448ccecebc2de5d298d581" id="r_a3c3107b52e448ccecebc2de5d298d581"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a3c3107b52e448ccecebc2de5d298d581">C</a> (movbe, 22) C(popcnt</td></tr>
+<tr class="separator:a3c3107b52e448ccecebc2de5d298d581"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f8c47772774217429c9094e152d7a6c" id="r_a8f8c47772774217429c9094e152d7a6c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a8f8c47772774217429c9094e152d7a6c">C</a> (tscdeadline, 24) C(aes</td></tr>
+<tr class="separator:a8f8c47772774217429c9094e152d7a6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0bcce7e6f60295c7638f6e4c9950c0be" id="r_a0bcce7e6f60295c7638f6e4c9950c0be"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a0bcce7e6f60295c7638f6e4c9950c0be">C</a> (xsave, 26) C(osxsave</td></tr>
+<tr class="separator:a0bcce7e6f60295c7638f6e4c9950c0be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5766adce6fd79a9600420a14a9e90edd" id="r_a5766adce6fd79a9600420a14a9e90edd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a5766adce6fd79a9600420a14a9e90edd">C</a> (avx, 28) C(f16c</td></tr>
+<tr class="separator:a5766adce6fd79a9600420a14a9e90edd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae91b88d184dd84533bd5d4c78a8df450" id="r_ae91b88d184dd84533bd5d4c78a8df450"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#ae91b88d184dd84533bd5d4c78a8df450">C</a> (rdrand, 30) <a class="el" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(fpu</td></tr>
+<tr class="separator:ae91b88d184dd84533bd5d4c78a8df450"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a391330389b792182ba7193c7748a7fa3" id="r_a391330389b792182ba7193c7748a7fa3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a391330389b792182ba7193c7748a7fa3">D</a> (vme, 1) D(de</td></tr>
+<tr class="separator:a391330389b792182ba7193c7748a7fa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8eb40cf192af788777447cdf75754bd" id="r_ab8eb40cf192af788777447cdf75754bd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#ab8eb40cf192af788777447cdf75754bd">D</a> (pse, 3) D(tsc</td></tr>
+<tr class="separator:ab8eb40cf192af788777447cdf75754bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43192823573e03a7b980a4445028fb8f" id="r_a43192823573e03a7b980a4445028fb8f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a43192823573e03a7b980a4445028fb8f">D</a> (msr, 5) D(pae</td></tr>
+<tr class="separator:a43192823573e03a7b980a4445028fb8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3a52576b5b9e6e2ca07f9ca3596d372" id="r_ae3a52576b5b9e6e2ca07f9ca3596d372"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#ae3a52576b5b9e6e2ca07f9ca3596d372">D</a> (mce, 7) D(cx8</td></tr>
+<tr class="separator:ae3a52576b5b9e6e2ca07f9ca3596d372"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d5a486276795f2d5033e5561339c323" id="r_a3d5a486276795f2d5033e5561339c323"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a3d5a486276795f2d5033e5561339c323">D</a> (apic, 9) D(sep</td></tr>
+<tr class="separator:a3d5a486276795f2d5033e5561339c323"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8717604dda543ab3df9774e4c8f022c" id="r_ac8717604dda543ab3df9774e4c8f022c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#ac8717604dda543ab3df9774e4c8f022c">D</a> (mtrr, 12) D(pge</td></tr>
+<tr class="separator:ac8717604dda543ab3df9774e4c8f022c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a11af459cb6d20758023b78f72cf2fe" id="r_a0a11af459cb6d20758023b78f72cf2fe"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a0a11af459cb6d20758023b78f72cf2fe">D</a> (mca, 14) D(cmov</td></tr>
+<tr class="separator:a0a11af459cb6d20758023b78f72cf2fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af839db1e1c0776c7dffaa82cdae3298a" id="r_af839db1e1c0776c7dffaa82cdae3298a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#af839db1e1c0776c7dffaa82cdae3298a">D</a> (pat, 16) D(pse36</td></tr>
+<tr class="separator:af839db1e1c0776c7dffaa82cdae3298a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9920f7f37c1356eb8b7ceaa9fe03e2c" id="r_ac9920f7f37c1356eb8b7ceaa9fe03e2c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#ac9920f7f37c1356eb8b7ceaa9fe03e2c">D</a> (psn, 18) D(clfsh</td></tr>
+<tr class="separator:ac9920f7f37c1356eb8b7ceaa9fe03e2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26f33957ef67eefdb6ba134f8c61a9e9" id="r_a26f33957ef67eefdb6ba134f8c61a9e9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a26f33957ef67eefdb6ba134f8c61a9e9">D</a> (ds, 21) D(acpi</td></tr>
+<tr class="separator:a26f33957ef67eefdb6ba134f8c61a9e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18336cf554c68991a60f3d778f717e30" id="r_a18336cf554c68991a60f3d778f717e30"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a18336cf554c68991a60f3d778f717e30">D</a> (mmx, 23) D(fxsr</td></tr>
+<tr class="separator:a18336cf554c68991a60f3d778f717e30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec4bab4fb69f584fd3a6e1864d2dfd7a" id="r_aec4bab4fb69f584fd3a6e1864d2dfd7a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#aec4bab4fb69f584fd3a6e1864d2dfd7a">D</a> (sse, 25) D(sse2</td></tr>
+<tr class="separator:aec4bab4fb69f584fd3a6e1864d2dfd7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a417e5734de62a144c591312639e491a2" id="r_a417e5734de62a144c591312639e491a2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a417e5734de62a144c591312639e491a2">D</a> (ss, 27) D(htt</td></tr>
+<tr class="separator:a417e5734de62a144c591312639e491a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35fbe24d42e9964e6abec22de86a714d" id="r_a35fbe24d42e9964e6abec22de86a714d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a35fbe24d42e9964e6abec22de86a714d">D</a> (tm, 29) D(pbe</td></tr>
+<tr class="separator:a35fbe24d42e9964e6abec22de86a714d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93f27bff78a0e718dd106bea6c2d3b76" id="r_a93f27bff78a0e718dd106bea6c2d3b76"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a93f27bff78a0e718dd106bea6c2d3b76">B</a> (bmi1, 3) B(hle</td></tr>
+<tr class="separator:a93f27bff78a0e718dd106bea6c2d3b76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a236f76efd52076bd2d2817df0e6a0718" id="r_a236f76efd52076bd2d2817df0e6a0718"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a236f76efd52076bd2d2817df0e6a0718">B</a> (avx2, 5) B(smep</td></tr>
+<tr class="separator:a236f76efd52076bd2d2817df0e6a0718"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7848e8e833056784a7a609d9dd0cea2a" id="r_a7848e8e833056784a7a609d9dd0cea2a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a7848e8e833056784a7a609d9dd0cea2a">B</a> (bmi2, 8) B(erms</td></tr>
+<tr class="separator:a7848e8e833056784a7a609d9dd0cea2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac52bf563925c9993ecfb1a6747656ea4" id="r_ac52bf563925c9993ecfb1a6747656ea4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#ac52bf563925c9993ecfb1a6747656ea4">B</a> (invpcid, 10) B(rtm</td></tr>
+<tr class="separator:ac52bf563925c9993ecfb1a6747656ea4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad96b7da92a26e603f52b6bc603b3ec0e" id="r_ad96b7da92a26e603f52b6bc603b3ec0e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#ad96b7da92a26e603f52b6bc603b3ec0e">B</a> (mpx, 14) B(avx512f</td></tr>
+<tr class="separator:ad96b7da92a26e603f52b6bc603b3ec0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd88d04eeea304718b2fe43b410e19d1" id="r_acd88d04eeea304718b2fe43b410e19d1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#acd88d04eeea304718b2fe43b410e19d1">B</a> (avx512dq, 17) B(rdseed</td></tr>
+<tr class="separator:acd88d04eeea304718b2fe43b410e19d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38d1d9f89a6bb9857a193c49be7fe861" id="r_a38d1d9f89a6bb9857a193c49be7fe861"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a38d1d9f89a6bb9857a193c49be7fe861">B</a> (adx, 19) B(smap</td></tr>
+<tr class="separator:a38d1d9f89a6bb9857a193c49be7fe861"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8613134bb2e3b9d704c320d555e34c60" id="r_a8613134bb2e3b9d704c320d555e34c60"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a8613134bb2e3b9d704c320d555e34c60">B</a> (avx512ifma, 21) B(pcommit</td></tr>
+<tr class="separator:a8613134bb2e3b9d704c320d555e34c60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a133068db3ec377aa3e103502d5a30e0c" id="r_a133068db3ec377aa3e103502d5a30e0c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a133068db3ec377aa3e103502d5a30e0c">B</a> (clflushopt, 23) B(clwb</td></tr>
+<tr class="separator:a133068db3ec377aa3e103502d5a30e0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad77af2ee19d72c9df74b9d04935423b4" id="r_ad77af2ee19d72c9df74b9d04935423b4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#ad77af2ee19d72c9df74b9d04935423b4">B</a> (avx512pf, 26) B(avx512er</td></tr>
+<tr class="separator:ad77af2ee19d72c9df74b9d04935423b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8623c767ccb59872c04771ccb3ee4e6" id="r_aa8623c767ccb59872c04771ccb3ee4e6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#aa8623c767ccb59872c04771ccb3ee4e6">B</a> (avx512cd, 28) B(sha</td></tr>
+<tr class="separator:aa8623c767ccb59872c04771ccb3ee4e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fd2a58ef2901726b571abd80a58a880" id="r_a8fd2a58ef2901726b571abd80a58a880"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a8fd2a58ef2901726b571abd80a58a880">B</a> (avx512bw, 30) B(avx512vl</td></tr>
+<tr class="separator:a8fd2a58ef2901726b571abd80a58a880"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d89428e18507b512f024566f06adfa2" id="r_a1d89428e18507b512f024566f06adfa2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cpu_8h.html#a1d89428e18507b512f024566f06adfa2">C</a> (prefetchwt1, 0) C(avx512vbmi</td></tr>
+<tr class="separator:a1d89428e18507b512f024566f06adfa2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a6cf6fb3d5954b7c743b07616f47166cd" name="a6cf6fb3d5954b7c743b07616f47166cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6cf6fb3d5954b7c743b07616f47166cd">&#9670;&#160;</a></span>B</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define B</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">name, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">bit&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="cpu_8h.html#a7964be6e3a4fa10246caa18b5df4da34">X</a>(name, f7b, bit)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cpu_8h_source.html">cpu.h</a> 第 <a class="el" href="cpu_8h_source.html#l00182">182</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab4ea6500801cc6f149d5ea05a269e08d" name="ab4ea6500801cc6f149d5ea05a269e08d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4ea6500801cc6f149d5ea05a269e08d">&#9670;&#160;</a></span>C <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define C</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">name, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">bit&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="cpu_8h.html#a7964be6e3a4fa10246caa18b5df4da34">X</a>(name, f1c, bit)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cpu_8h_source.html">cpu.h</a> 第 <a class="el" href="cpu_8h_source.html#l00118">118</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab4ea6500801cc6f149d5ea05a269e08d" name="ab4ea6500801cc6f149d5ea05a269e08d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4ea6500801cc6f149d5ea05a269e08d">&#9670;&#160;</a></span>C <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define C</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">name, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">bit&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="cpu_8h.html#a7964be6e3a4fa10246caa18b5df4da34">X</a>(name, f7c, bit)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cpu_8h_source.html">cpu.h</a> 第 <a class="el" href="cpu_8h_source.html#l00118">118</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a88f7db79d90030b170014ca4939fd729" name="a88f7db79d90030b170014ca4939fd729"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88f7db79d90030b170014ca4939fd729">&#9670;&#160;</a></span>D</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define D</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">name, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">bit&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="cpu_8h.html#a7964be6e3a4fa10246caa18b5df4da34">X</a>(name, f1d, bit)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7964be6e3a4fa10246caa18b5df4da34" name="a7964be6e3a4fa10246caa18b5df4da34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7964be6e3a4fa10246caa18b5df4da34">&#9670;&#160;</a></span>X</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define X</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">name, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">r, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">bit&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">  <a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <span class="keywordtype">int</span> ZSTD_cpuid_##name(<a class="code hl_struct" href="structZSTD__cpuid__t.html">ZSTD_cpuid_t</a> <span class="keyword">const</span> cpuid) {                 \</div>
+<div class="line">    return ((cpuid.r) &amp; (1U &lt;&lt; bit)) != 0;                                     \</div>
+<div class="line">  }</div>
+<div class="ttc" id="amem_8h_html_acf4d568511d5e964c3579616a28ab62b"><div class="ttname"><a href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a></div><div class="ttdeci">#define MEM_STATIC</div><div class="ttdef"><b>Definition</b> <a href="mem_8h_source.html#l00039">mem.h:39</a></div></div>
+<div class="ttc" id="astructZSTD__cpuid__t_html"><div class="ttname"><a href="structZSTD__cpuid__t.html">ZSTD_cpuid_t</a></div><div class="ttdef"><b>Definition</b> <a href="cpu_8h_source.html#l00027">cpu.h:27</a></div></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="cpu_8h_source.html">cpu.h</a> 第 <a class="el" href="cpu_8h_source.html#l00112">112</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a38d1d9f89a6bb9857a193c49be7fe861" name="a38d1d9f89a6bb9857a193c49be7fe861"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a38d1d9f89a6bb9857a193c49be7fe861">&#9670;&#160;</a></span>B() <span class="overload">[1/12]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">B </td>
+          <td>(</td>
+          <td class="paramtype">adx&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">19&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a236f76efd52076bd2d2817df0e6a0718" name="a236f76efd52076bd2d2817df0e6a0718"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a236f76efd52076bd2d2817df0e6a0718">&#9670;&#160;</a></span>B() <span class="overload">[2/12]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">B </td>
+          <td>(</td>
+          <td class="paramtype">avx2&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">5&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8fd2a58ef2901726b571abd80a58a880" name="a8fd2a58ef2901726b571abd80a58a880"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8fd2a58ef2901726b571abd80a58a880">&#9670;&#160;</a></span>B() <span class="overload">[3/12]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">B </td>
+          <td>(</td>
+          <td class="paramtype">avx512bw&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">30&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa8623c767ccb59872c04771ccb3ee4e6" name="aa8623c767ccb59872c04771ccb3ee4e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8623c767ccb59872c04771ccb3ee4e6">&#9670;&#160;</a></span>B() <span class="overload">[4/12]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">B </td>
+          <td>(</td>
+          <td class="paramtype">avx512cd&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">28&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acd88d04eeea304718b2fe43b410e19d1" name="acd88d04eeea304718b2fe43b410e19d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd88d04eeea304718b2fe43b410e19d1">&#9670;&#160;</a></span>B() <span class="overload">[5/12]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">B </td>
+          <td>(</td>
+          <td class="paramtype">avx512dq&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">17&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8613134bb2e3b9d704c320d555e34c60" name="a8613134bb2e3b9d704c320d555e34c60"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8613134bb2e3b9d704c320d555e34c60">&#9670;&#160;</a></span>B() <span class="overload">[6/12]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">B </td>
+          <td>(</td>
+          <td class="paramtype">avx512ifma&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">21&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad77af2ee19d72c9df74b9d04935423b4" name="ad77af2ee19d72c9df74b9d04935423b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad77af2ee19d72c9df74b9d04935423b4">&#9670;&#160;</a></span>B() <span class="overload">[7/12]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">B </td>
+          <td>(</td>
+          <td class="paramtype">avx512pf&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">26&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a93f27bff78a0e718dd106bea6c2d3b76" name="a93f27bff78a0e718dd106bea6c2d3b76"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a93f27bff78a0e718dd106bea6c2d3b76">&#9670;&#160;</a></span>B() <span class="overload">[8/12]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">B </td>
+          <td>(</td>
+          <td class="paramtype">bmi1&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">3&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7848e8e833056784a7a609d9dd0cea2a" name="a7848e8e833056784a7a609d9dd0cea2a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7848e8e833056784a7a609d9dd0cea2a">&#9670;&#160;</a></span>B() <span class="overload">[9/12]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">B </td>
+          <td>(</td>
+          <td class="paramtype">bmi2&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">8&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a133068db3ec377aa3e103502d5a30e0c" name="a133068db3ec377aa3e103502d5a30e0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a133068db3ec377aa3e103502d5a30e0c">&#9670;&#160;</a></span>B() <span class="overload">[10/12]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">B </td>
+          <td>(</td>
+          <td class="paramtype">clflushopt&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">23&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac52bf563925c9993ecfb1a6747656ea4" name="ac52bf563925c9993ecfb1a6747656ea4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac52bf563925c9993ecfb1a6747656ea4">&#9670;&#160;</a></span>B() <span class="overload">[11/12]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">B </td>
+          <td>(</td>
+          <td class="paramtype">invpcid&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">10&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad96b7da92a26e603f52b6bc603b3ec0e" name="ad96b7da92a26e603f52b6bc603b3ec0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad96b7da92a26e603f52b6bc603b3ec0e">&#9670;&#160;</a></span>B() <span class="overload">[12/12]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">B </td>
+          <td>(</td>
+          <td class="paramtype">mpx&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">14&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5766adce6fd79a9600420a14a9e90edd" name="a5766adce6fd79a9600420a14a9e90edd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5766adce6fd79a9600420a14a9e90edd">&#9670;&#160;</a></span>C() <span class="overload">[1/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">avx&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">28&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aac42b0ab45acfbed6510e62085068be3" name="aac42b0ab45acfbed6510e62085068be3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac42b0ab45acfbed6510e62085068be3">&#9670;&#160;</a></span>C() <span class="overload">[2/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">cnxtid&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">10&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a42e522a4bb68c7444112c30d846b1e19" name="a42e522a4bb68c7444112c30d846b1e19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42e522a4bb68c7444112c30d846b1e19">&#9670;&#160;</a></span>C() <span class="overload">[3/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">cx16&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">13&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aca202d9d1d1f504d7c0857d7441fbce7" name="aca202d9d1d1f504d7c0857d7441fbce7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca202d9d1d1f504d7c0857d7441fbce7">&#9670;&#160;</a></span>C() <span class="overload">[4/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">dca&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">18&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1ba24823c19cf96f2d76a5dba0437cc3" name="a1ba24823c19cf96f2d76a5dba0437cc3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ba24823c19cf96f2d76a5dba0437cc3">&#9670;&#160;</a></span>C() <span class="overload">[5/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">dscpl&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">4&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a867c4f3f2665363966f7ee21ba3b1c97" name="a867c4f3f2665363966f7ee21ba3b1c97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a867c4f3f2665363966f7ee21ba3b1c97">&#9670;&#160;</a></span>C() <span class="overload">[6/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">dtes64&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">2&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3c3107b52e448ccecebc2de5d298d581" name="a3c3107b52e448ccecebc2de5d298d581"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c3107b52e448ccecebc2de5d298d581">&#9670;&#160;</a></span>C() <span class="overload">[7/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">movbe&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">22&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa6b6c5dec89197aedfc4e55c2de823f5" name="aa6b6c5dec89197aedfc4e55c2de823f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6b6c5dec89197aedfc4e55c2de823f5">&#9670;&#160;</a></span>C() <span class="overload">[8/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">pdcm&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">15&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1d89428e18507b512f024566f06adfa2" name="a1d89428e18507b512f024566f06adfa2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d89428e18507b512f024566f06adfa2">&#9670;&#160;</a></span>C() <span class="overload">[9/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">prefetchwt1&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">0&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae91b88d184dd84533bd5d4c78a8df450" name="ae91b88d184dd84533bd5d4c78a8df450"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae91b88d184dd84533bd5d4c78a8df450">&#9670;&#160;</a></span>C() <span class="overload">[10/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">rdrand&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">30&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a915644a23b9264c811b3b6e4cc75fb5e" name="a915644a23b9264c811b3b6e4cc75fb5e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a915644a23b9264c811b3b6e4cc75fb5e">&#9670;&#160;</a></span>C() <span class="overload">[11/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">smx&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">6&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aacb0af2153609d8d5adb05ab94a1fddc" name="aacb0af2153609d8d5adb05ab94a1fddc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aacb0af2153609d8d5adb05ab94a1fddc">&#9670;&#160;</a></span>C() <span class="overload">[12/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">sse3&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">0&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acb21e79b715466a1c8a227ae0f37f27a" name="acb21e79b715466a1c8a227ae0f37f27a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb21e79b715466a1c8a227ae0f37f27a">&#9670;&#160;</a></span>C() <span class="overload">[13/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">sse42&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">20&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a725a791e6eff0ce7faaa9541da969a36" name="a725a791e6eff0ce7faaa9541da969a36"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a725a791e6eff0ce7faaa9541da969a36">&#9670;&#160;</a></span>C() <span class="overload">[14/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">tm2&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">8&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8f8c47772774217429c9094e152d7a6c" name="a8f8c47772774217429c9094e152d7a6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f8c47772774217429c9094e152d7a6c">&#9670;&#160;</a></span>C() <span class="overload">[15/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">tscdeadline&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">24&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0bcce7e6f60295c7638f6e4c9950c0be" name="a0bcce7e6f60295c7638f6e4c9950c0be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0bcce7e6f60295c7638f6e4c9950c0be">&#9670;&#160;</a></span>C() <span class="overload">[16/16]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">C </td>
+          <td>(</td>
+          <td class="paramtype">xsave&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">26&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3d5a486276795f2d5033e5561339c323" name="a3d5a486276795f2d5033e5561339c323"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d5a486276795f2d5033e5561339c323">&#9670;&#160;</a></span>D() <span class="overload">[1/14]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">D </td>
+          <td>(</td>
+          <td class="paramtype">apic&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">9&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a26f33957ef67eefdb6ba134f8c61a9e9" name="a26f33957ef67eefdb6ba134f8c61a9e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26f33957ef67eefdb6ba134f8c61a9e9">&#9670;&#160;</a></span>D() <span class="overload">[2/14]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">D </td>
+          <td>(</td>
+          <td class="paramtype">ds&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">21&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0a11af459cb6d20758023b78f72cf2fe" name="a0a11af459cb6d20758023b78f72cf2fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a11af459cb6d20758023b78f72cf2fe">&#9670;&#160;</a></span>D() <span class="overload">[3/14]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">D </td>
+          <td>(</td>
+          <td class="paramtype">mca&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">14&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae3a52576b5b9e6e2ca07f9ca3596d372" name="ae3a52576b5b9e6e2ca07f9ca3596d372"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3a52576b5b9e6e2ca07f9ca3596d372">&#9670;&#160;</a></span>D() <span class="overload">[4/14]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">D </td>
+          <td>(</td>
+          <td class="paramtype">mce&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">7&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a18336cf554c68991a60f3d778f717e30" name="a18336cf554c68991a60f3d778f717e30"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18336cf554c68991a60f3d778f717e30">&#9670;&#160;</a></span>D() <span class="overload">[5/14]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">D </td>
+          <td>(</td>
+          <td class="paramtype">mmx&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">23&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a43192823573e03a7b980a4445028fb8f" name="a43192823573e03a7b980a4445028fb8f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43192823573e03a7b980a4445028fb8f">&#9670;&#160;</a></span>D() <span class="overload">[6/14]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">D </td>
+          <td>(</td>
+          <td class="paramtype">msr&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">5&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac8717604dda543ab3df9774e4c8f022c" name="ac8717604dda543ab3df9774e4c8f022c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8717604dda543ab3df9774e4c8f022c">&#9670;&#160;</a></span>D() <span class="overload">[7/14]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">D </td>
+          <td>(</td>
+          <td class="paramtype">mtrr&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">12&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af839db1e1c0776c7dffaa82cdae3298a" name="af839db1e1c0776c7dffaa82cdae3298a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af839db1e1c0776c7dffaa82cdae3298a">&#9670;&#160;</a></span>D() <span class="overload">[8/14]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">D </td>
+          <td>(</td>
+          <td class="paramtype">pat&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">16&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab8eb40cf192af788777447cdf75754bd" name="ab8eb40cf192af788777447cdf75754bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab8eb40cf192af788777447cdf75754bd">&#9670;&#160;</a></span>D() <span class="overload">[9/14]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">D </td>
+          <td>(</td>
+          <td class="paramtype">pse&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">3&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac9920f7f37c1356eb8b7ceaa9fe03e2c" name="ac9920f7f37c1356eb8b7ceaa9fe03e2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9920f7f37c1356eb8b7ceaa9fe03e2c">&#9670;&#160;</a></span>D() <span class="overload">[10/14]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">D </td>
+          <td>(</td>
+          <td class="paramtype">psn&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">18&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a417e5734de62a144c591312639e491a2" name="a417e5734de62a144c591312639e491a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a417e5734de62a144c591312639e491a2">&#9670;&#160;</a></span>D() <span class="overload">[11/14]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">D </td>
+          <td>(</td>
+          <td class="paramtype">ss&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">27&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aec4bab4fb69f584fd3a6e1864d2dfd7a" name="aec4bab4fb69f584fd3a6e1864d2dfd7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec4bab4fb69f584fd3a6e1864d2dfd7a">&#9670;&#160;</a></span>D() <span class="overload">[12/14]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">D </td>
+          <td>(</td>
+          <td class="paramtype">sse&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">25&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a35fbe24d42e9964e6abec22de86a714d" name="a35fbe24d42e9964e6abec22de86a714d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35fbe24d42e9964e6abec22de86a714d">&#9670;&#160;</a></span>D() <span class="overload">[13/14]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">D </td>
+          <td>(</td>
+          <td class="paramtype">tm&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">29&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a391330389b792182ba7193c7748a7fa3" name="a391330389b792182ba7193c7748a7fa3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a391330389b792182ba7193c7748a7fa3">&#9670;&#160;</a></span>D() <span class="overload">[14/14]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">D </td>
+          <td>(</td>
+          <td class="paramtype">vme&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">1&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a78a6773999ec058a68d305925239c0ae" name="a78a6773999ec058a68d305925239c0ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78a6773999ec058a68d305925239c0ae">&#9670;&#160;</a></span>ZSTD_cpuid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="structZSTD__cpuid__t.html">ZSTD_cpuid_t</a> ZSTD_cpuid </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="cpu_8h_source.html">cpu.h</a> 第 <a class="el" href="cpu_8h_source.html#l00034">34</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="cpu_8h.html">cpu.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

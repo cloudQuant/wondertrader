@@ -1,0 +1,28 @@
+var classCTraderSpi =
+[
+    [ "DumpToJson", "classCTraderSpi.html#a2a3a12b7945fc7ae8673739b416411eb", null ],
+    [ "DumpToJson", "classCTraderSpi.html#a2a3a12b7945fc7ae8673739b416411eb", null ],
+    [ "IsErrorRspInfo", "classCTraderSpi.html#ac708112e0b675bf706e5364216749324", null ],
+    [ "IsErrorRspInfo", "classCTraderSpi.html#ac708112e0b675bf706e5364216749324", null ],
+    [ "LoadFromJson", "classCTraderSpi.html#a6b5566c5a3cacc5bd4b8ccf4e2958c76", null ],
+    [ "OnFrontConnected", "classCTraderSpi.html#af7fc89c85124ebc1b3fa162ed31b7d4a", null ],
+    [ "OnFrontConnected", "classCTraderSpi.html#aa1d0e47a5f7f448c709d1af89ba33bdc", null ],
+    [ "OnFrontDisconnected", "classCTraderSpi.html#a6397c61c8e1a45893ede144594ff07de", null ],
+    [ "OnFrontDisconnected", "classCTraderSpi.html#a0407599d95e840cdf78e45ed26119fea", null ],
+    [ "OnRspAuthenticate", "classCTraderSpi.html#adbdcbc063843fab2acc13996a1044013", null ],
+    [ "OnRspAuthenticate", "classCTraderSpi.html#aff1a698cfe419e5ef49ba5946f9f6324", null ],
+    [ "OnRspError", "classCTraderSpi.html#a1ec5341d15db827eeb753efa429c6d9c", null ],
+    [ "OnRspError", "classCTraderSpi.html#ab705193ab7ab30849f773e05d83da518", null ],
+    [ "OnRspQryInstrument", "classCTraderSpi.html#ade2a40c23dc654e084a67378326f8295", null ],
+    [ "OnRspQryInstrument", "classCTraderSpi.html#a27bf84bcdd6d9c86c7199b8d93a51d7b", null ],
+    [ "OnRspUserLogin", "classCTraderSpi.html#a0db444c0e6033fa3654997375ed590c4", null ],
+    [ "OnRspUserLogin", "classCTraderSpi.html#a68994fe8a347e94c8237fd35566b61f2", null ],
+    [ "ReqAuth", "classCTraderSpi.html#af5d3a009886e2cbe422f21cd301211a6", null ],
+    [ "ReqAuth", "classCTraderSpi.html#af5d3a009886e2cbe422f21cd301211a6", null ],
+    [ "ReqQryInstrument", "classCTraderSpi.html#aed78a6742508052138a8f56fd8a2a098", null ],
+    [ "ReqQryInstrument", "classCTraderSpi.html#aed78a6742508052138a8f56fd8a2a098", null ],
+    [ "ReqUserLogin", "classCTraderSpi.html#a3da95d30605d4f4750852c3b2cee1ed4", null ],
+    [ "ReqUserLogin", "classCTraderSpi.html#a3da95d30605d4f4750852c3b2cee1ed4", null ],
+    [ "m_lTradingDate", "classCTraderSpi.html#a65404c2d059b4684ae4fe4eb0c6de5da", null ],
+    [ "m_ReqCount", "classCTraderSpi.html#a063d6f2443e67ae68a43d6993424c69d", null ]
+];

@@ -1,0 +1,26 @@
+var structATPReqOptionQuoteOrderMsg =
+[
+    [ "ATPReqOptionQuoteOrderMsg", "structATPReqOptionQuoteOrderMsg.html#a2b376ad16917665965542ae435288df5", null ],
+    [ "ATPReqOptionQuoteOrderMsg", "structATPReqOptionQuoteOrderMsg.html#a2b376ad16917665965542ae435288df5", null ],
+    [ "account_id", "structATPReqOptionQuoteOrderMsg.html#a380c0a43c00482a924211a7fecbdefcb", null ],
+    [ "account_sub_code", "structATPReqOptionQuoteOrderMsg.html#a7b570dd703efe5fce666c897a8a4d58a", null ],
+    [ "bid_order_qty", "structATPReqOptionQuoteOrderMsg.html#ac211abf0650114f3abfc95f3a74ef9cb", null ],
+    [ "bid_position_effect", "structATPReqOptionQuoteOrderMsg.html#acb3f8f14a2214aed1469a077b0efc2a2", null ],
+    [ "bid_price", "structATPReqOptionQuoteOrderMsg.html#a1027091d0f5b2ac679dbc7481a181ee8", null ],
+    [ "branch_id", "structATPReqOptionQuoteOrderMsg.html#a3db02c3b8aa681ba7c92b8409c75e64c", null ],
+    [ "client_feature_code", "structATPReqOptionQuoteOrderMsg.html#add96fed36fd0a57ca7330338780dc6e4", null ],
+    [ "client_seq_id", "structATPReqOptionQuoteOrderMsg.html#ae1be04af60a9a3499a2ea9c5e9983702", null ],
+    [ "cust_id", "structATPReqOptionQuoteOrderMsg.html#af1e71d2c2327c175e288b7b82e117108", null ],
+    [ "enforce_flag", "structATPReqOptionQuoteOrderMsg.html#ad89be6605412fed29fab92293db9fec2", null ],
+    [ "extra_data", "structATPReqOptionQuoteOrderMsg.html#afd06e11d48e6080720831a0091c951fa", null ],
+    [ "fund_account_id", "structATPReqOptionQuoteOrderMsg.html#aa8acb2b6e0268f028e6eaade763d42d7", null ],
+    [ "market_id", "structATPReqOptionQuoteOrderMsg.html#ad917f600e79ffe7a1afe7dc9f487880b", null ],
+    [ "offer_order_qty", "structATPReqOptionQuoteOrderMsg.html#a64d213e56e3229957b0723f5ca6afac2", null ],
+    [ "offer_position_effect", "structATPReqOptionQuoteOrderMsg.html#aadccdd60a57e9e0660965936dbc8d7d3", null ],
+    [ "offer_price", "structATPReqOptionQuoteOrderMsg.html#ab4ed9eb684274a9af9c3ac8c20efe2a5", null ],
+    [ "order_way", "structATPReqOptionQuoteOrderMsg.html#aba4f4fba06402b28008bbf582d9a6482", null ],
+    [ "password", "structATPReqOptionQuoteOrderMsg.html#a4ef1af6f1350abf3bf46821e59b13939", null ],
+    [ "quote_req_id", "structATPReqOptionQuoteOrderMsg.html#ab0b7a1cba58990d756ee7ee23b3aa941", null ],
+    [ "security_id", "structATPReqOptionQuoteOrderMsg.html#a6dd7a778435915fd4047a6a20b128859", null ],
+    [ "user_info", "structATPReqOptionQuoteOrderMsg.html#afbb3fde7017acb2c97384b40530d5220", null ]
+];

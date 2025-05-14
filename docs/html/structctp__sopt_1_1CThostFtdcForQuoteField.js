@@ -1,0 +1,27 @@
+var structctp__sopt_1_1CThostFtdcForQuoteField =
+[
+    [ "ActiveUserID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#afc991220778e3aba89448200e7a81377", null ],
+    [ "BranchID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#a5be86333325cc9a70866fb3b57615a30", null ],
+    [ "BrokerForQutoSeq", "structctp__sopt_1_1CThostFtdcForQuoteField.html#af799348bfd097574deadde048cb582b6", null ],
+    [ "BrokerID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#a8e3bc13941aebbb8f8663f52f97de80f", null ],
+    [ "ClientID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#ab72cb76ac431541a9c2ca43ce9f02f12", null ],
+    [ "ExchangeID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#acff91c9a02f43c647e5b9a607ad76e29", null ],
+    [ "ExchangeInstID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#a43047d3aa16450698304069187185056", null ],
+    [ "ForQuoteLocalID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#a52fc502f345a7335a284c1ab9c47c8c7", null ],
+    [ "ForQuoteRef", "structctp__sopt_1_1CThostFtdcForQuoteField.html#aeb80d0aa83f76d4552e67b6efc517ca1", null ],
+    [ "ForQuoteStatus", "structctp__sopt_1_1CThostFtdcForQuoteField.html#a9301b5c0a8d74496fe837ffa2a50de19", null ],
+    [ "FrontID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#a577b5be2ee3bc6fe153c06e41321b3eb", null ],
+    [ "InsertDate", "structctp__sopt_1_1CThostFtdcForQuoteField.html#a7fc417a66c02034ac2bf0d85cb2b6bde", null ],
+    [ "InsertTime", "structctp__sopt_1_1CThostFtdcForQuoteField.html#ad6bbfb1c54342a77644599a93b017016", null ],
+    [ "InstallID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#af8eb497f3d695958b3b44a52c911d8bd", null ],
+    [ "InstrumentID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#a20697956418259a5b30b7a99edd539dc", null ],
+    [ "InvestorID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#aa9e87410c607fe503b6518bfd6652bf2", null ],
+    [ "InvestUnitID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#a8becf51753427aa4b10040d85bdd9c52", null ],
+    [ "IPAddress", "structctp__sopt_1_1CThostFtdcForQuoteField.html#a28c4811667a3ad5ac4eee11dea28184d", null ],
+    [ "MacAddress", "structctp__sopt_1_1CThostFtdcForQuoteField.html#af20c3a28774cce4000cc60bb4e9db71a", null ],
+    [ "ParticipantID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#afc9abf62edf4f4b56b3117ac7ec0ba4e", null ],
+    [ "SessionID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#a0daef89ad8e258ef00ffdf9f7265457c", null ],
+    [ "StatusMsg", "structctp__sopt_1_1CThostFtdcForQuoteField.html#aca08e5330b52c558cd58b32632f643f1", null ],
+    [ "TraderID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#aa33f934f5a0ecc8e1b71b562c6131353", null ],
+    [ "UserID", "structctp__sopt_1_1CThostFtdcForQuoteField.html#ac508d07e6c9669c0e6b61212c228857a", null ]
+];

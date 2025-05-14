@@ -1,0 +1,25 @@
+var structCReqOptCombStraOrderField =
+[
+    [ "chEncryptType", "structCReqOptCombStraOrderField.html#aec5254f318d7637e20f44f5c51319e2b", null ],
+    [ "chSecurityLevel", "structCReqOptCombStraOrderField.html#aa6a6203b45c324e5bf937538b113a938", null ],
+    [ "iIntOrg", "structCReqOptCombStraOrderField.html#a0cf049517d3fee81c3ff00f88c7ccdca", null ],
+    [ "iOrderBsn", "structCReqOptCombStraOrderField.html#a562ec7f22ad57a475cac998d4992171c", null ],
+    [ "iStkBiz", "structCReqOptCombStraOrderField.html#a0ccf870f3b8d4f74fc4bd98af60eade6", null ],
+    [ "iStkBizAction", "structCReqOptCombStraOrderField.html#afa7bbb65c89e1c73f8f4a10b4bbc97c4", null ],
+    [ "llCuacctCode", "structCReqOptCombStraOrderField.html#a62e68673022f37af69309e18399c10c7", null ],
+    [ "llCustCode", "structCReqOptCombStraOrderField.html#a4b9e38504e48b6c538172832f2952893", null ],
+    [ "llOrderQty", "structCReqOptCombStraOrderField.html#ae252ba3d9016e6dbb92997f376b23d97", null ],
+    [ "szClientInfo", "structCReqOptCombStraOrderField.html#a87d1d02368d3492db748d9662902c919", null ],
+    [ "szCombNum", "structCReqOptCombStraOrderField.html#a9604e338de0b196955830a7cda66b361", null ],
+    [ "szCombStraCode", "structCReqOptCombStraOrderField.html#a02a586ac4572f0e2761048d1e3b34330", null ],
+    [ "szEncryptKey", "structCReqOptCombStraOrderField.html#a0b3ad9009bb1d1caa2058adc50cb7d4b", null ],
+    [ "szLeg1Num", "structCReqOptCombStraOrderField.html#a5bdca06f91dea4695495224bf3f60567", null ],
+    [ "szLeg2Num", "structCReqOptCombStraOrderField.html#ac68018342ad9a9d458855516a4d5c8e7", null ],
+    [ "szLeg3Num", "structCReqOptCombStraOrderField.html#a0e7dab2c03635c0bd470dfa6aca18798", null ],
+    [ "szLeg4Num", "structCReqOptCombStraOrderField.html#a112674b24dcc713cc052d6c4bf2a2c11", null ],
+    [ "szOrderIdEx", "structCReqOptCombStraOrderField.html#ae3e51f3c3a032c21eae1258c5d37dc79", null ],
+    [ "szSecurityInfo", "structCReqOptCombStraOrderField.html#a8cc4998a7dd0395eb632af87d663c1cf", null ],
+    [ "szStkbd", "structCReqOptCombStraOrderField.html#a41075cc018a0118bf7033bfd6b6bb190", null ],
+    [ "szStkpbu", "structCReqOptCombStraOrderField.html#a717d01075b335e3a66d733d90ec645f2", null ],
+    [ "szTrdacct", "structCReqOptCombStraOrderField.html#aa573aa18e6b34f09ded0a7673ecd89ed", null ]
+];

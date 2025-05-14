@@ -1,0 +1,495 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/QuoteFactory/main.cpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('QuoteFactory_2main_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">main.cpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>行情工厂主模块  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="WtDtCore_2ParserAdapter_8h_source.html">../WtDtCore/ParserAdapter.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="DataManager_8h_source.html">../WtDtCore/DataManager.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="StateMonitor_8h_source.html">../WtDtCore/StateMonitor.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="UDPCaster_8h_source.html">../WtDtCore/UDPCaster.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="ShmCaster_8h_source.html">../WtDtCore/ShmCaster.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WtDtCore_2WtHelper_8h_source.html">../WtDtCore/WtHelper.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="IndexFactory_8h_source.html">../WtDtCore/IndexFactory.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSSessionInfo_8hpp_source.html">../Includes/WTSSessionInfo.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSVariant_8hpp_source.html">../Includes/WTSVariant.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSHotMgr_8h_source.html">../WTSTools/WTSHotMgr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSBaseDataMgr_8h_source.html">../WTSTools/WTSBaseDataMgr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSLogger_8h_source.html">../WTSTools/WTSLogger.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSCfgLoader_8h_source.html">../WTSUtils/WTSCfgLoader.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="StrUtil_8hpp_source.html">../Share/StrUtil.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="cppcli_8hpp_source.html">../Share/cppcli.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="SignalHook_8hpp_source.html">../WTSUtils/SignalHook.hpp</a>&quot;</code><br />
+</div>
+<p><a href="QuoteFactory_2main_8cpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a60d1186895e0d2d2edd7a2710e082cd0" id="r_a60d1186895e0d2d2edd7a2710e082cd0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="QuoteFactory_2main_8cpp.html#a60d1186895e0d2d2edd7a2710e082cd0">getBinDir</a> ()</td></tr>
+<tr class="memdesc:a60d1186895e0d2d2edd7a2710e082cd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取当前可执行文件所在目录  <br /></td></tr>
+<tr class="separator:a60d1186895e0d2d2edd7a2710e082cd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a144d9ac5d7f1b6767f8ff9642e0dcb6d" id="r_a144d9ac5d7f1b6767f8ff9642e0dcb6d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="QuoteFactory_2main_8cpp.html#a144d9ac5d7f1b6767f8ff9642e0dcb6d">initDataMgr</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *<a class="el" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>, bool bAlldayMode=false)</td></tr>
+<tr class="memdesc:a144d9ac5d7f1b6767f8ff9642e0dcb6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化数据管理器  <br /></td></tr>
+<tr class="separator:a144d9ac5d7f1b6767f8ff9642e0dcb6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbb89153aef628913827f49123bbd936" id="r_adbb89153aef628913827f49123bbd936"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="QuoteFactory_2main_8cpp.html#adbb89153aef628913827f49123bbd936">initParsers</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *cfg)</td></tr>
+<tr class="memdesc:adbb89153aef628913827f49123bbd936"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化行情解析器  <br /></td></tr>
+<tr class="separator:adbb89153aef628913827f49123bbd936"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32dad1468e2849ac5fa6d4e5f52a8911" id="r_a32dad1468e2849ac5fa6d4e5f52a8911"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="QuoteFactory_2main_8cpp.html#a32dad1468e2849ac5fa6d4e5f52a8911">initialize</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;filename)</td></tr>
+<tr class="memdesc:a32dad1468e2849ac5fa6d4e5f52a8911"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化行情工厂  <br /></td></tr>
+<tr class="separator:a32dad1468e2849ac5fa6d4e5f52a8911"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ddf1224851353fc92bfbff6f499fa97" id="r_a0ddf1224851353fc92bfbff6f499fa97"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="QuoteFactory_2main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a> (int argc, char *argv[])</td></tr>
+<tr class="memdesc:a0ddf1224851353fc92bfbff6f499fa97"><td class="mdescLeft">&#160;</td><td class="mdescRight">程序入口函数  <br /></td></tr>
+<tr class="separator:a0ddf1224851353fc92bfbff6f499fa97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:afcbca1ce421cc432e3954432ed6df3b4" id="r_afcbca1ce421cc432e3954432ed6df3b4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="QuoteFactory_2main_8cpp.html#afcbca1ce421cc432e3954432ed6df3b4">g_baseDataMgr</a></td></tr>
+<tr class="memdesc:afcbca1ce421cc432e3954432ed6df3b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">基础数据管理器，管理交易时段、合约、品种等基础数据  <br /></td></tr>
+<tr class="separator:afcbca1ce421cc432e3954432ed6df3b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96a658fb4eecd14e6ca5b48cdd3678dd" id="r_a96a658fb4eecd14e6ca5b48cdd3678dd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWTSHotMgr.html">WTSHotMgr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="QuoteFactory_2main_8cpp.html#a96a658fb4eecd14e6ca5b48cdd3678dd">g_hotMgr</a></td></tr>
+<tr class="memdesc:a96a658fb4eecd14e6ca5b48cdd3678dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">主力合约管理器，管理主力合约和次主力合约规则  <br /></td></tr>
+<tr class="separator:a96a658fb4eecd14e6ca5b48cdd3678dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4524cbfaf40199214157520335e459b" id="r_af4524cbfaf40199214157520335e459b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classStateMonitor.html">StateMonitor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="QuoteFactory_2main_8cpp.html#af4524cbfaf40199214157520335e459b">g_stateMon</a></td></tr>
+<tr class="memdesc:af4524cbfaf40199214157520335e459b"><td class="mdescLeft">&#160;</td><td class="mdescRight">状态监控器，管理交易时段状态和监控交易时段切换  <br /></td></tr>
+<tr class="separator:af4524cbfaf40199214157520335e459b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0be51367211f47ea3b52153eb9e352e6" id="r_a0be51367211f47ea3b52153eb9e352e6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classUDPCaster.html">UDPCaster</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="QuoteFactory_2main_8cpp.html#a0be51367211f47ea3b52153eb9e352e6">g_udpCaster</a></td></tr>
+<tr class="memdesc:a0be51367211f47ea3b52153eb9e352e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">UDP广播器，通过UDP分发行情数据  <br /></td></tr>
+<tr class="separator:a0be51367211f47ea3b52153eb9e352e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ac5bd585b894f01ca7aa482b2d190c4" id="r_a9ac5bd585b894f01ca7aa482b2d190c4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classShmCaster.html">ShmCaster</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="QuoteFactory_2main_8cpp.html#a9ac5bd585b894f01ca7aa482b2d190c4">g_shmCaster</a></td></tr>
+<tr class="memdesc:a9ac5bd585b894f01ca7aa482b2d190c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">共享内存广播器，通过共享内存分发行情数据  <br /></td></tr>
+<tr class="separator:a9ac5bd585b894f01ca7aa482b2d190c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd7a6aab744defff9119ae14ff391e18" id="r_abd7a6aab744defff9119ae14ff391e18"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classDataManager.html">DataManager</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="QuoteFactory_2main_8cpp.html#abd7a6aab744defff9119ae14ff391e18">g_dataMgr</a></td></tr>
+<tr class="memdesc:abd7a6aab744defff9119ae14ff391e18"><td class="mdescLeft">&#160;</td><td class="mdescRight">数据管理器，管理行情数据的存储和分发  <br /></td></tr>
+<tr class="separator:abd7a6aab744defff9119ae14ff391e18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa363989dac0d7aa0f0c732cd87909ee0" id="r_aa363989dac0d7aa0f0c732cd87909ee0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParserAdapterMgr.html">ParserAdapterMgr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="QuoteFactory_2main_8cpp.html#aa363989dac0d7aa0f0c732cd87909ee0">g_parsers</a></td></tr>
+<tr class="memdesc:aa363989dac0d7aa0f0c732cd87909ee0"><td class="mdescLeft">&#160;</td><td class="mdescRight">解析器适配器管理器，管理所有的行情解析器  <br /></td></tr>
+<tr class="separator:aa363989dac0d7aa0f0c732cd87909ee0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51b088acd67dd1347fabc18d62a0c359" id="r_a51b088acd67dd1347fabc18d62a0c359"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIndexFactory.html">IndexFactory</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="QuoteFactory_2main_8cpp.html#a51b088acd67dd1347fabc18d62a0c359">g_idxFactory</a></td></tr>
+<tr class="memdesc:a51b088acd67dd1347fabc18d62a0c359"><td class="mdescLeft">&#160;</td><td class="mdescRight">指数工厂，用于计算和管理各种指数  <br /></td></tr>
+<tr class="separator:a51b088acd67dd1347fabc18d62a0c359"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>行情工厂主模块 </p>
+<p>行情工厂(QuoteFactory)是一个用于接收、处理和分发行情数据的组件 主要功能包括：</p><ol type="1">
+<li>加载并初始化各种行情解析器</li>
+<li>收集和处理各种市场数据</li>
+<li>通过UDP和共享内存分发行情数据</li>
+<li>支持全天候模式和交易时段模式</li>
+</ol>
+<dl class="section author"><dt>作者</dt><dd>Wesley </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="QuoteFactory_2main_8cpp_source.html">main.cpp</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="a60d1186895e0d2d2edd7a2710e082cd0" name="a60d1186895e0d2d2edd7a2710e082cd0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60d1186895e0d2d2edd7a2710e082cd0">&#9670;&#160;</a></span>getBinDir()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * getBinDir </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取当前可执行文件所在目录 </p>
+<p>该函数使用静态存储技术，只在第一次调用时计算路径 后续调用直接返回缓存的路径</p>
+<dl class="section return"><dt>返回</dt><dd>返回当前可执行文件所在目录的标准路径，以字符串形式 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="QuoteFactory_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="QuoteFactory_2main_8cpp_source.html#l00080">80</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a144d9ac5d7f1b6767f8ff9642e0dcb6d" name="a144d9ac5d7f1b6767f8ff9642e0dcb6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a144d9ac5d7f1b6767f8ff9642e0dcb6d">&#9670;&#160;</a></span>initDataMgr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void initDataMgr </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>config</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAlldayMode</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化数据管理器 </p>
+<p>根据配置和运行模式初始化数据管理器 如果是全天候模式，则不使用状态监控器</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">config</td><td>数据管理器配置对象 </td></tr>
+    <tr><td class="paramname">bAlldayMode</td><td>是否为全天候模式，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="QuoteFactory_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="QuoteFactory_2main_8cpp_source.html#l00106">106</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a32dad1468e2849ac5fa6d4e5f52a8911" name="a32dad1468e2849ac5fa6d4e5f52a8911"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32dad1468e2849ac5fa6d4e5f52a8911">&#9670;&#160;</a></span>initialize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void initialize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>filename</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化行情工厂 </p>
+<p>根据配置文件初始化行情工厂的各个组件 包括加载基础数据、初始化广播器、状态监控器和解析器等</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>配置文件路径 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="QuoteFactory_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="QuoteFactory_2main_8cpp_source.html#l00159">159</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adbb89153aef628913827f49123bbd936" name="adbb89153aef628913827f49123bbd936"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adbb89153aef628913827f49123bbd936">&#9670;&#160;</a></span>initParsers()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void initParsers </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>cfg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化行情解析器 </p>
+<p>根据配置初始化所有活跃的行情解析器 如果解析器没有指定ID，会自动生成一个唯一ID</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfg</td><td>解析器配置数组 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="QuoteFactory_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="QuoteFactory_2main_8cpp_source.html#l00120">120</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0ddf1224851353fc92bfbff6f499fa97" name="a0ddf1224851353fc92bfbff6f499fa97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ddf1224851353fc92bfbff6f499fa97">&#9670;&#160;</a></span>main()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int main </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>argc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>argv</em>[]&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>程序入口函数 </p>
+<p>行情工厂的主函数，负责解析命令行参数、初始化日志系统、 安装信号处理器、初始化行情工厂并进入主循环</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">argc</td><td>命令行参数数量 </td></tr>
+    <tr><td class="paramname">argv</td><td>命令行参数数组 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>程序退出码，0表示正常退出 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="QuoteFactory_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="QuoteFactory_2main_8cpp_source.html#l00336">336</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="afcbca1ce421cc432e3954432ed6df3b4" name="afcbca1ce421cc432e3954432ed6df3b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afcbca1ce421cc432e3954432ed6df3b4">&#9670;&#160;</a></span>g_baseDataMgr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a> g_baseDataMgr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>基础数据管理器，管理交易时段、合约、品种等基础数据 </p>
+
+<p class="definition">在文件 <a class="el" href="QuoteFactory_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="QuoteFactory_2main_8cpp_source.html#l00036">36</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abd7a6aab744defff9119ae14ff391e18" name="abd7a6aab744defff9119ae14ff391e18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd7a6aab744defff9119ae14ff391e18">&#9670;&#160;</a></span>g_dataMgr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classDataManager.html">DataManager</a> g_dataMgr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>数据管理器，管理行情数据的存储和分发 </p>
+
+<p class="definition">在文件 <a class="el" href="QuoteFactory_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="QuoteFactory_2main_8cpp_source.html#l00046">46</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a96a658fb4eecd14e6ca5b48cdd3678dd" name="a96a658fb4eecd14e6ca5b48cdd3678dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96a658fb4eecd14e6ca5b48cdd3678dd">&#9670;&#160;</a></span>g_hotMgr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSHotMgr.html">WTSHotMgr</a> g_hotMgr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>主力合约管理器，管理主力合约和次主力合约规则 </p>
+
+<p class="definition">在文件 <a class="el" href="QuoteFactory_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="QuoteFactory_2main_8cpp_source.html#l00038">38</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a51b088acd67dd1347fabc18d62a0c359" name="a51b088acd67dd1347fabc18d62a0c359"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51b088acd67dd1347fabc18d62a0c359">&#9670;&#160;</a></span>g_idxFactory</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIndexFactory.html">IndexFactory</a> g_idxFactory</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>指数工厂，用于计算和管理各种指数 </p>
+
+<p class="definition">在文件 <a class="el" href="QuoteFactory_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="QuoteFactory_2main_8cpp_source.html#l00050">50</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa363989dac0d7aa0f0c732cd87909ee0" name="aa363989dac0d7aa0f0c732cd87909ee0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa363989dac0d7aa0f0c732cd87909ee0">&#9670;&#160;</a></span>g_parsers</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classParserAdapterMgr.html">ParserAdapterMgr</a> g_parsers</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>解析器适配器管理器，管理所有的行情解析器 </p>
+
+<p class="definition">在文件 <a class="el" href="QuoteFactory_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="QuoteFactory_2main_8cpp_source.html#l00048">48</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9ac5bd585b894f01ca7aa482b2d190c4" name="a9ac5bd585b894f01ca7aa482b2d190c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ac5bd585b894f01ca7aa482b2d190c4">&#9670;&#160;</a></span>g_shmCaster</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classShmCaster.html">ShmCaster</a> g_shmCaster</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>共享内存广播器，通过共享内存分发行情数据 </p>
+
+<p class="definition">在文件 <a class="el" href="QuoteFactory_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="QuoteFactory_2main_8cpp_source.html#l00044">44</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af4524cbfaf40199214157520335e459b" name="af4524cbfaf40199214157520335e459b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4524cbfaf40199214157520335e459b">&#9670;&#160;</a></span>g_stateMon</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classStateMonitor.html">StateMonitor</a> g_stateMon</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>状态监控器，管理交易时段状态和监控交易时段切换 </p>
+
+<p class="definition">在文件 <a class="el" href="QuoteFactory_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="QuoteFactory_2main_8cpp_source.html#l00040">40</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0be51367211f47ea3b52153eb9e352e6" name="a0be51367211f47ea3b52153eb9e352e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0be51367211f47ea3b52153eb9e352e6">&#9670;&#160;</a></span>g_udpCaster</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classUDPCaster.html">UDPCaster</a> g_udpCaster</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>UDP广播器，通过UDP分发行情数据 </p>
+
+<p class="definition">在文件 <a class="el" href="QuoteFactory_2main_8cpp_source.html">main.cpp</a> 第 <a class="el" href="QuoteFactory_2main_8cpp_source.html#l00042">42</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_229cd89e6986403be5e9a373fb85bc1b.html">QuoteFactory</a></li><li class="navelem"><a class="el" href="QuoteFactory_2main_8cpp.html">main.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

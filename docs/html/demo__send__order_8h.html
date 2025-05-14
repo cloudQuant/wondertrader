@@ -1,0 +1,1877 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/AtpTradeApi/demo/all_message_demo/demo_send_order.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('demo__send__order_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">demo_send_order.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;iostream&gt;</code><br />
+<code>#include &lt;map&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;stdint.h&gt;</code><br />
+</div>
+<p><a href="demo__send__order_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:ac1ad125a21084d5104dc3fa950daa175" id="r_ac1ad125a21084d5104dc3fa950daa175"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ac1ad125a21084d5104dc3fa950daa175">GenerateClientSeqID</a> ()</td></tr>
+<tr class="memdesc:ac1ad125a21084d5104dc3fa950daa175"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取系列号  <br /></td></tr>
+<tr class="separator:ac1ad125a21084d5104dc3fa950daa175"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acbd3db1dc2e10717cd8137fdb2b9d359" id="r_acbd3db1dc2e10717cd8137fdb2b9d359"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#acbd3db1dc2e10717cd8137fdb2b9d359">SendCashOrder</a> ()</td></tr>
+<tr class="memdesc:acbd3db1dc2e10717cd8137fdb2b9d359"><td class="mdescLeft">&#160;</td><td class="mdescRight">调用V217版本的上行消息函数 @param[in] ord_type 目标业务类型  <br /></td></tr>
+<tr class="separator:acbd3db1dc2e10717cd8137fdb2b9d359"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c77d5af45998d4fa39673b7abc8fc83" id="r_a8c77d5af45998d4fa39673b7abc8fc83"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a8c77d5af45998d4fa39673b7abc8fc83">SendCreditOrder</a> ()</td></tr>
+<tr class="separator:a8c77d5af45998d4fa39673b7abc8fc83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1dacfac058a590e2b98e6a1f44c951ef" id="r_a1dacfac058a590e2b98e6a1f44c951ef"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a1dacfac058a590e2b98e6a1f44c951ef">SendMarginNoTradeOrder</a> ()</td></tr>
+<tr class="separator:a1dacfac058a590e2b98e6a1f44c951ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa89bf0b283867e144eb5f4c6291480de" id="r_aa89bf0b283867e144eb5f4c6291480de"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#aa89bf0b283867e144eb5f4c6291480de">SendMarginRepayOrder</a> ()</td></tr>
+<tr class="separator:aa89bf0b283867e144eb5f4c6291480de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2cd28d9ee8c308aa9b7d9ac4036797ce" id="r_a2cd28d9ee8c308aa9b7d9ac4036797ce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a2cd28d9ee8c308aa9b7d9ac4036797ce">SendRepoAuction</a> ()</td></tr>
+<tr class="separator:a2cd28d9ee8c308aa9b7d9ac4036797ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f40346081b49ac26d0c809130edcecb" id="r_a7f40346081b49ac26d0c809130edcecb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a7f40346081b49ac26d0c809130edcecb">SendBondDistribution</a> ()</td></tr>
+<tr class="separator:a7f40346081b49ac26d0c809130edcecb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a650d2aa56170c8fb898f72237dfc6c3e" id="r_a650d2aa56170c8fb898f72237dfc6c3e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a650d2aa56170c8fb898f72237dfc6c3e">SendOptionAuction</a> ()</td></tr>
+<tr class="separator:a650d2aa56170c8fb898f72237dfc6c3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3cac4e60a5d147c6c5ab6f707d9ceff" id="r_ab3cac4e60a5d147c6c5ab6f707d9ceff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ab3cac4e60a5d147c6c5ab6f707d9ceff">SendOptionQuoteOrder</a> ()</td></tr>
+<tr class="separator:ab3cac4e60a5d147c6c5ab6f707d9ceff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6840afc4bacfbed2693372a5f7e7c060" id="r_a6840afc4bacfbed2693372a5f7e7c060"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a6840afc4bacfbed2693372a5f7e7c060">SendOptionCombinationOrder</a> ()</td></tr>
+<tr class="separator:a6840afc4bacfbed2693372a5f7e7c060"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76958ff894f66174266dd6fc4ea60657" id="r_a76958ff894f66174266dd6fc4ea60657"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a76958ff894f66174266dd6fc4ea60657">SendOptionCombinationExerciseOrder</a> ()</td></tr>
+<tr class="separator:a76958ff894f66174266dd6fc4ea60657"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a84245dfff63ac82a46197964f7ea93" id="r_a3a84245dfff63ac82a46197964f7ea93"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a3a84245dfff63ac82a46197964f7ea93">SendETFRedemption</a> ()</td></tr>
+<tr class="separator:a3a84245dfff63ac82a46197964f7ea93"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe6733de8ed21a41ccb07455048ddbc8" id="r_afe6733de8ed21a41ccb07455048ddbc8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#afe6733de8ed21a41ccb07455048ddbc8">SendIssue</a> ()</td></tr>
+<tr class="separator:afe6733de8ed21a41ccb07455048ddbc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae099ff94b18c943db480f440c5571559" id="r_ae099ff94b18c943db480f440c5571559"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ae099ff94b18c943db480f440c5571559">SendRightsIssue</a> ()</td></tr>
+<tr class="separator:ae099ff94b18c943db480f440c5571559"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac875613dca171d6dd73e8eae70039a79" id="r_ac875613dca171d6dd73e8eae70039a79"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ac875613dca171d6dd73e8eae70039a79">SendSwapPutback</a> ()</td></tr>
+<tr class="separator:ac875613dca171d6dd73e8eae70039a79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8131ffad3504d9efb891239d1c3a8bd5" id="r_a8131ffad3504d9efb891239d1c3a8bd5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a8131ffad3504d9efb891239d1c3a8bd5">SendOptionExercise</a> ()</td></tr>
+<tr class="separator:a8131ffad3504d9efb891239d1c3a8bd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab523b84b88b7025632f168b60a7ed589" id="r_ab523b84b88b7025632f168b60a7ed589"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ab523b84b88b7025632f168b60a7ed589">SendCoveredLock</a> ()</td></tr>
+<tr class="separator:ab523b84b88b7025632f168b60a7ed589"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f5c1e65b84549c7215acdde685c9481" id="r_a4f5c1e65b84549c7215acdde685c9481"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a4f5c1e65b84549c7215acdde685c9481">SendTurnToDisposal</a> ()</td></tr>
+<tr class="separator:a4f5c1e65b84549c7215acdde685c9481"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a228d9f9b43e271da152749b38d0f67d1" id="r_a228d9f9b43e271da152749b38d0f67d1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a228d9f9b43e271da152749b38d0f67d1">SendDesignation</a> ()</td></tr>
+<tr class="separator:a228d9f9b43e271da152749b38d0f67d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad69ac524064e5a3fa2d686f210311d23" id="r_ad69ac524064e5a3fa2d686f210311d23"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ad69ac524064e5a3fa2d686f210311d23">SendDesignatedTransaction</a> ()</td></tr>
+<tr class="separator:ad69ac524064e5a3fa2d686f210311d23"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a703ddcc3c146c6619f5f56bae9d8f345" id="r_a703ddcc3c146c6619f5f56bae9d8f345"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a703ddcc3c146c6619f5f56bae9d8f345">SendLOF</a> ()</td></tr>
+<tr class="separator:a703ddcc3c146c6619f5f56bae9d8f345"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a172e04284882373b7ddf789a3eddb320" id="r_a172e04284882373b7ddf789a3eddb320"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a172e04284882373b7ddf789a3eddb320">SendTenderOffer</a> ()</td></tr>
+<tr class="separator:a172e04284882373b7ddf789a3eddb320"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86e0fba7a967d4e82a23fd38a76cd485" id="r_a86e0fba7a967d4e82a23fd38a76cd485"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a86e0fba7a967d4e82a23fd38a76cd485">SendNetVoting</a> ()</td></tr>
+<tr class="separator:a86e0fba7a967d4e82a23fd38a76cd485"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27b431792929ab0e2ab0fdec3b8d7563" id="r_a27b431792929ab0e2ab0fdec3b8d7563"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a27b431792929ab0e2ab0fdec3b8d7563">SendPasswordService</a> ()</td></tr>
+<tr class="separator:a27b431792929ab0e2ab0fdec3b8d7563"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d0be441fdd4b5cd77580deee34b9770" id="r_a0d0be441fdd4b5cd77580deee34b9770"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a0d0be441fdd4b5cd77580deee34b9770">SendWarrantExercise</a> ()</td></tr>
+<tr class="separator:a0d0be441fdd4b5cd77580deee34b9770"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a821b555073b33fd716da1c15477d76" id="r_a6a821b555073b33fd716da1c15477d76"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a6a821b555073b33fd716da1c15477d76">SendStructuredFund</a> ()</td></tr>
+<tr class="separator:a6a821b555073b33fd716da1c15477d76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa16bb5f9adc348d24c087ac4b4076ab3" id="r_aa16bb5f9adc348d24c087ac4b4076ab3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#aa16bb5f9adc348d24c087ac4b4076ab3">SendTibAfterHourAuction</a> ()</td></tr>
+<tr class="separator:aa16bb5f9adc348d24c087ac4b4076ab3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a394fdc0b918c4fef7b2fcaace1b601f0" id="r_a394fdc0b918c4fef7b2fcaace1b601f0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a394fdc0b918c4fef7b2fcaace1b601f0">SendPledgeInOrOut</a> ()</td></tr>
+<tr class="separator:a394fdc0b918c4fef7b2fcaace1b601f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c192995cd1c43313063cbd40d59fb5e" id="r_a9c192995cd1c43313063cbd40d59fb5e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a9c192995cd1c43313063cbd40d59fb5e">SendExtOptionFundTransfer</a> ()</td></tr>
+<tr class="separator:a9c192995cd1c43313063cbd40d59fb5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34ec6016c7063d265b7c28929a084ed0" id="r_a34ec6016c7063d265b7c28929a084ed0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a34ec6016c7063d265b7c28929a084ed0">SendCancel</a> ()</td></tr>
+<tr class="separator:a34ec6016c7063d265b7c28929a084ed0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1056be7f2ec5550004ba2d44295f044" id="r_ad1056be7f2ec5550004ba2d44295f044"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ad1056be7f2ec5550004ba2d44295f044">SendReduceHoldingTransfer</a> ()</td></tr>
+<tr class="separator:ad1056be7f2ec5550004ba2d44295f044"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6943b76e50448807a83adf4e3338c850" id="r_a6943b76e50448807a83adf4e3338c850"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a6943b76e50448807a83adf4e3338c850">SendReduceHoldingTransferCancel</a> ()</td></tr>
+<tr class="separator:a6943b76e50448807a83adf4e3338c850"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e34797ca138edc3f016ef5d0290618b" id="r_a1e34797ca138edc3f016ef5d0290618b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a1e34797ca138edc3f016ef5d0290618b">SendBatchCancel</a> ()</td></tr>
+<tr class="separator:a1e34797ca138edc3f016ef5d0290618b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a401af0e356c1610af6e004f2f8a916d5" id="r_a401af0e356c1610af6e004f2f8a916d5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a401af0e356c1610af6e004f2f8a916d5">SendFDEPCancel</a> ()</td></tr>
+<tr class="separator:a401af0e356c1610af6e004f2f8a916d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae63f702a0ec17399e31820e5510f0d2c" id="r_ae63f702a0ec17399e31820e5510f0d2c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ae63f702a0ec17399e31820e5510f0d2c">SendOptionCancel</a> ()</td></tr>
+<tr class="separator:ae63f702a0ec17399e31820e5510f0d2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a590a1914c7b705ae9df532096ac6b238" id="r_a590a1914c7b705ae9df532096ac6b238"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a590a1914c7b705ae9df532096ac6b238">SendCoverMaxOrderQtyQuery</a> ()</td></tr>
+<tr class="separator:a590a1914c7b705ae9df532096ac6b238"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c277e7359ed7010e6bf1a04fb9e391c" id="r_a0c277e7359ed7010e6bf1a04fb9e391c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a0c277e7359ed7010e6bf1a04fb9e391c">SendOrderQuery</a> ()</td></tr>
+<tr class="separator:a0c277e7359ed7010e6bf1a04fb9e391c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a631db984ef94d0825aeaf8926c5e8a49" id="r_a631db984ef94d0825aeaf8926c5e8a49"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a631db984ef94d0825aeaf8926c5e8a49">SendTradeOrderQuery</a> ()</td></tr>
+<tr class="separator:a631db984ef94d0825aeaf8926c5e8a49"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c3ba2e474e5cbdf97aa5781a4642ef3" id="r_a6c3ba2e474e5cbdf97aa5781a4642ef3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a6c3ba2e474e5cbdf97aa5781a4642ef3">SendExtQueryContractSpecifications</a> ()</td></tr>
+<tr class="separator:a6c3ba2e474e5cbdf97aa5781a4642ef3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5806cb985c9445c7ee69c305ad4faf8" id="r_af5806cb985c9445c7ee69c305ad4faf8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#af5806cb985c9445c7ee69c305ad4faf8">SendExtQueryCreditAmount</a> ()</td></tr>
+<tr class="separator:af5806cb985c9445c7ee69c305ad4faf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a901a3774ba7c52ca463dd2b47bc78c26" id="r_a901a3774ba7c52ca463dd2b47bc78c26"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a901a3774ba7c52ca463dd2b47bc78c26">SendExtQueryMarginUseable</a> ()</td></tr>
+<tr class="separator:a901a3774ba7c52ca463dd2b47bc78c26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad57e60c9803e5e9eafcfb53541d16d28" id="r_ad57e60c9803e5e9eafcfb53541d16d28"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ad57e60c9803e5e9eafcfb53541d16d28">SendExtQueryFundLiability</a> ()</td></tr>
+<tr class="separator:ad57e60c9803e5e9eafcfb53541d16d28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2cc596b848fa39eacf8c7ac76adc745e" id="r_a2cc596b848fa39eacf8c7ac76adc745e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a2cc596b848fa39eacf8c7ac76adc745e">SendExtQueryShareLiability</a> ()</td></tr>
+<tr class="separator:a2cc596b848fa39eacf8c7ac76adc745e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39efa12d494aed20972fd1d50aad0e2c" id="r_a39efa12d494aed20972fd1d50aad0e2c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a39efa12d494aed20972fd1d50aad0e2c">SendExtQueryContractSpecificationsManager</a> ()</td></tr>
+<tr class="separator:a39efa12d494aed20972fd1d50aad0e2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75121bd6d5ec4332b84a7c0cf13d1231" id="r_a75121bd6d5ec4332b84a7c0cf13d1231"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a75121bd6d5ec4332b84a7c0cf13d1231">SendExtQueryMarginUnderlying</a> ()</td></tr>
+<tr class="separator:a75121bd6d5ec4332b84a7c0cf13d1231"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3ef96e5cecaa72faa99a7999d3f6197" id="r_ad3ef96e5cecaa72faa99a7999d3f6197"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ad3ef96e5cecaa72faa99a7999d3f6197">SendExtQueryCreditInfo</a> ()</td></tr>
+<tr class="separator:ad3ef96e5cecaa72faa99a7999d3f6197"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae276e75ecb495badd70a1b5b2f557e27" id="r_ae276e75ecb495badd70a1b5b2f557e27"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ae276e75ecb495badd70a1b5b2f557e27">SendExtQueryFundAssetsInfo</a> ()</td></tr>
+<tr class="separator:ae276e75ecb495badd70a1b5b2f557e27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae93f0c4844492fee8aaf651570a2a51" id="r_aae93f0c4844492fee8aaf651570a2a51"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#aae93f0c4844492fee8aaf651570a2a51">SendFundQuery</a> ()</td></tr>
+<tr class="separator:aae93f0c4844492fee8aaf651570a2a51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac326f33a87bc6b07fbbde1bae79231b6" id="r_ac326f33a87bc6b07fbbde1bae79231b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ac326f33a87bc6b07fbbde1bae79231b6">SendTradeOrderExQuery</a> ()</td></tr>
+<tr class="separator:ac326f33a87bc6b07fbbde1bae79231b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02e7abcd92d13e186a920f4fa1b59891" id="r_a02e7abcd92d13e186a920f4fa1b59891"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a02e7abcd92d13e186a920f4fa1b59891">SendShareQuery</a> ()</td></tr>
+<tr class="separator:a02e7abcd92d13e186a920f4fa1b59891"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addc96f1dd648bca8a259048a998fbbb5" id="r_addc96f1dd648bca8a259048a998fbbb5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#addc96f1dd648bca8a259048a998fbbb5">SendIPOQtyQuery</a> ()</td></tr>
+<tr class="separator:addc96f1dd648bca8a259048a998fbbb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed1181959852547741710c957a67a6d3" id="r_aed1181959852547741710c957a67a6d3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#aed1181959852547741710c957a67a6d3">SendAccountContractShareQuery</a> ()</td></tr>
+<tr class="separator:aed1181959852547741710c957a67a6d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad523cd415b8aed84266eb4fb340cbb7c" id="r_ad523cd415b8aed84266eb4fb340cbb7c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ad523cd415b8aed84266eb4fb340cbb7c">SendExtQueryExerciseProfitLoss</a> ()</td></tr>
+<tr class="separator:ad523cd415b8aed84266eb4fb340cbb7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9dd5bc6f90773d716c5a551522b14212" id="r_a9dd5bc6f90773d716c5a551522b14212"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a9dd5bc6f90773d716c5a551522b14212">SendAccountContractFundQuery</a> ()</td></tr>
+<tr class="separator:a9dd5bc6f90773d716c5a551522b14212"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ca78cf0f28c989d6642fba8244fe6e5" id="r_a0ca78cf0f28c989d6642fba8244fe6e5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a0ca78cf0f28c989d6642fba8244fe6e5">SendTradeCollectQuery</a> ()</td></tr>
+<tr class="separator:a0ca78cf0f28c989d6642fba8244fe6e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a355f8c4434b6d01a4ce4e3e47217de49" id="r_a355f8c4434b6d01a4ce4e3e47217de49"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a355f8c4434b6d01a4ce4e3e47217de49">SendTIBIPOQtyQuery</a> ()</td></tr>
+<tr class="separator:a355f8c4434b6d01a4ce4e3e47217de49"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95ba5b93080e907aeb6df54d2ff6ff04" id="r_a95ba5b93080e907aeb6df54d2ff6ff04"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a95ba5b93080e907aeb6df54d2ff6ff04">SendOptionCombinationQuery</a> ()</td></tr>
+<tr class="separator:a95ba5b93080e907aeb6df54d2ff6ff04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a087e39bb85f43af9c9ee6f07ab1d4842" id="r_a087e39bb85f43af9c9ee6f07ab1d4842"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a087e39bb85f43af9c9ee6f07ab1d4842">SendOptionQuoteQuery</a> ()</td></tr>
+<tr class="separator:a087e39bb85f43af9c9ee6f07ab1d4842"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa52bdbeb914e4f63f342728e7a6b918" id="r_aaa52bdbeb914e4f63f342728e7a6b918"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#aaa52bdbeb914e4f63f342728e7a6b918">SendNewMaxOrderQtyQuery</a> ()</td></tr>
+<tr class="separator:aaa52bdbeb914e4f63f342728e7a6b918"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab04842f7fa809dfa0454764c78268d67" id="r_ab04842f7fa809dfa0454764c78268d67"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ab04842f7fa809dfa0454764c78268d67">SendCustLogin</a> ()</td></tr>
+<tr class="separator:ab04842f7fa809dfa0454764c78268d67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3be0c76c0292a311bb3ea5c0093b391" id="r_ab3be0c76c0292a311bb3ea5c0093b391"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ab3be0c76c0292a311bb3ea5c0093b391">SendCustLogout</a> ()</td></tr>
+<tr class="separator:ab3be0c76c0292a311bb3ea5c0093b391"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a952665cce8587ff670a32aa757b3c3a8" id="r_a952665cce8587ff670a32aa757b3c3a8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a952665cce8587ff670a32aa757b3c3a8">SendExtFundTransfer</a> ()</td></tr>
+<tr class="separator:a952665cce8587ff670a32aa757b3c3a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acea45fc63bf9eceffa4f58f7d384b0a8" id="r_acea45fc63bf9eceffa4f58f7d384b0a8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#acea45fc63bf9eceffa4f58f7d384b0a8">SendExtRepay</a> ()</td></tr>
+<tr class="separator:acea45fc63bf9eceffa4f58f7d384b0a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11a0f527949ee9efed82000832d68ab0" id="r_a11a0f527949ee9efed82000832d68ab0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a11a0f527949ee9efed82000832d68ab0">SendSyncBiz</a> ()</td></tr>
+<tr class="separator:a11a0f527949ee9efed82000832d68ab0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdaf9d503193ffb17bdda5d0bc66d1c0" id="r_acdaf9d503193ffb17bdda5d0bc66d1c0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#acdaf9d503193ffb17bdda5d0bc66d1c0">SendHKStocksThroughAuction</a> ()</td></tr>
+<tr class="separator:acdaf9d503193ffb17bdda5d0bc66d1c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3adf694d6dddca1d9546256eb5834fe5" id="r_a3adf694d6dddca1d9546256eb5834fe5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a3adf694d6dddca1d9546256eb5834fe5">SendHKVoting</a> ()</td></tr>
+<tr class="separator:a3adf694d6dddca1d9546256eb5834fe5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbc6f91598890882023f5875e5a2ff72" id="r_adbc6f91598890882023f5875e5a2ff72"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#adbc6f91598890882023f5875e5a2ff72">SendHKCorporateAction</a> ()</td></tr>
+<tr class="separator:adbc6f91598890882023f5875e5a2ff72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47a822b5351faab52e1b3f4ddb4a22a3" id="r_a47a822b5351faab52e1b3f4ddb4a22a3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a47a822b5351faab52e1b3f4ddb4a22a3">SendHKDesignationTransfer</a> ()</td></tr>
+<tr class="separator:a47a822b5351faab52e1b3f4ddb4a22a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1730cfb44fc0a51f35b3b3bd5d2d9e9" id="r_aa1730cfb44fc0a51f35b3b3bd5d2d9e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#aa1730cfb44fc0a51f35b3b3bd5d2d9e9">SendHKCorporateActionCancel</a> ()</td></tr>
+<tr class="separator:aa1730cfb44fc0a51f35b3b3bd5d2d9e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac38411b04a86d2652c370ff8f5844c52" id="r_ac38411b04a86d2652c370ff8f5844c52"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ac38411b04a86d2652c370ff8f5844c52">SendAgwMsgOptionCoveredTransUncoveredOrder</a> ()</td></tr>
+<tr class="separator:ac38411b04a86d2652c370ff8f5844c52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a669f977a53071a4f9a3e669bd0ea0b44" id="r_a669f977a53071a4f9a3e669bd0ea0b44"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a669f977a53071a4f9a3e669bd0ea0b44">SendAgwMsgExtQueryCombinExerciseMaxOrderQty</a> ()</td></tr>
+<tr class="separator:a669f977a53071a4f9a3e669bd0ea0b44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2617aa7f9b0ccfedea1b04c3baa724ca" id="r_a2617aa7f9b0ccfedea1b04c3baa724ca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a2617aa7f9b0ccfedea1b04c3baa724ca">SendAgwMsgExtQueryCombinExerciseProfitLoss</a> ()</td></tr>
+<tr class="separator:a2617aa7f9b0ccfedea1b04c3baa724ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7990a5be8fb4a882273ef9bc81c2a1a" id="r_ab7990a5be8fb4a882273ef9bc81c2a1a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ab7990a5be8fb4a882273ef9bc81c2a1a">SendAgwMsgExternalQueryOptionCombinationMaxOrderQty</a> ()</td></tr>
+<tr class="separator:ab7990a5be8fb4a882273ef9bc81c2a1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64d909665891c441c134b334de6451a7" id="r_a64d909665891c441c134b334de6451a7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a64d909665891c441c134b334de6451a7">SendAfterHoursPricing</a> ()</td></tr>
+<tr class="separator:a64d909665891c441c134b334de6451a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a765256362d8406978b17568e767e3334" id="r_a765256362d8406978b17568e767e3334"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a765256362d8406978b17568e767e3334">SendBlockTradeIntention</a> ()</td></tr>
+<tr class="separator:a765256362d8406978b17568e767e3334"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaaf02f7800520a367bfda07a5fafcab6" id="r_aaaf02f7800520a367bfda07a5fafcab6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#aaaf02f7800520a367bfda07a5fafcab6">SendBlockTradeTransaction</a> ()</td></tr>
+<tr class="separator:aaaf02f7800520a367bfda07a5fafcab6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e042e95b47ad2eeab536877bcc65785" id="r_a5e042e95b47ad2eeab536877bcc65785"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a5e042e95b47ad2eeab536877bcc65785">SendBlockTradePricing</a> ()</td></tr>
+<tr class="separator:a5e042e95b47ad2eeab536877bcc65785"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecd8a24340f4bd5affdd92f425e2dc0e" id="r_aecd8a24340f4bd5affdd92f425e2dc0e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#aecd8a24340f4bd5affdd92f425e2dc0e">SendBlockTradeCancel</a> ()</td></tr>
+<tr class="separator:aecd8a24340f4bd5affdd92f425e2dc0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e130f6c16db468c77f9ea5c01eb019d" id="r_a0e130f6c16db468c77f9ea5c01eb019d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a0e130f6c16db468c77f9ea5c01eb019d">SendAgwMsgCustPasswdModify</a> ()</td></tr>
+<tr class="separator:a0e130f6c16db468c77f9ea5c01eb019d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c441e7a27a28b38f7f98d5564363b52" id="r_a3c441e7a27a28b38f7f98d5564363b52"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a3c441e7a27a28b38f7f98d5564363b52">SendAgwExternalInsTETransFundReq</a> ()</td></tr>
+<tr class="separator:a3c441e7a27a28b38f7f98d5564363b52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a457873c5ea846e9594fc5c30d306f69e" id="r_a457873c5ea846e9594fc5c30d306f69e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a457873c5ea846e9594fc5c30d306f69e">SendAgwMsgExtQueryFundExReq</a> ()</td></tr>
+<tr class="memdesc:a457873c5ea846e9594fc5c30d306f69e"><td class="mdescLeft">&#160;</td><td class="mdescRight">透传第三方OES通用接口  <br /></td></tr>
+<tr class="separator:a457873c5ea846e9594fc5c30d306f69e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c9c3782be500efbfd963444861fb93e" id="r_a2c9c3782be500efbfd963444861fb93e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#a2c9c3782be500efbfd963444861fb93e">SendAgwMsgThirdPartPassThrough</a> ()</td></tr>
+<tr class="separator:a2c9c3782be500efbfd963444861fb93e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab263c6455ed669060ab5174bfcb22513" id="r_ab263c6455ed669060ab5174bfcb22513"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="demo__send__order_8h.html#ab263c6455ed669060ab5174bfcb22513">SendBankSecuritiesFundTransfer</a> ()</td></tr>
+<tr class="separator:ab263c6455ed669060ab5174bfcb22513"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">函数说明</h2>
+<a id="ac1ad125a21084d5104dc3fa950daa175" name="ac1ad125a21084d5104dc3fa950daa175"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1ad125a21084d5104dc3fa950daa175">&#9670;&#160;</a></span>GenerateClientSeqID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t GenerateClientSeqID </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取系列号 </p>
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00233">233</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9dd5bc6f90773d716c5a551522b14212" name="a9dd5bc6f90773d716c5a551522b14212"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9dd5bc6f90773d716c5a551522b14212">&#9670;&#160;</a></span>SendAccountContractFundQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendAccountContractFundQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01816">1816</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aed1181959852547741710c957a67a6d3" name="aed1181959852547741710c957a67a6d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed1181959852547741710c957a67a6d3">&#9670;&#160;</a></span>SendAccountContractShareQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendAccountContractShareQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01789">1789</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a64d909665891c441c134b334de6451a7" name="a64d909665891c441c134b334de6451a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64d909665891c441c134b334de6451a7">&#9670;&#160;</a></span>SendAfterHoursPricing()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendAfterHoursPricing </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02062">2062</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3c441e7a27a28b38f7f98d5564363b52" name="a3c441e7a27a28b38f7f98d5564363b52"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c441e7a27a28b38f7f98d5564363b52">&#9670;&#160;</a></span>SendAgwExternalInsTETransFundReq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendAgwExternalInsTETransFundReq </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02494">2494</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0e130f6c16db468c77f9ea5c01eb019d" name="a0e130f6c16db468c77f9ea5c01eb019d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e130f6c16db468c77f9ea5c01eb019d">&#9670;&#160;</a></span>SendAgwMsgCustPasswdModify()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendAgwMsgCustPasswdModify </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02470">2470</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab7990a5be8fb4a882273ef9bc81c2a1a" name="ab7990a5be8fb4a882273ef9bc81c2a1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab7990a5be8fb4a882273ef9bc81c2a1a">&#9670;&#160;</a></span>SendAgwMsgExternalQueryOptionCombinationMaxOrderQty()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendAgwMsgExternalQueryOptionCombinationMaxOrderQty </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>&lt; 单腿信息组</p>
+<p>&lt; 成分合约代码</p>
+<p>&lt; 市场</p>
+<p>&lt; 持仓类型</p>
+<p>&lt;腿备兑标签</p>
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02431">2431</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a669f977a53071a4f9a3e669bd0ea0b44" name="a669f977a53071a4f9a3e669bd0ea0b44"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a669f977a53071a4f9a3e669bd0ea0b44">&#9670;&#160;</a></span>SendAgwMsgExtQueryCombinExerciseMaxOrderQty()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendAgwMsgExtQueryCombinExerciseMaxOrderQty </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02372">2372</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2617aa7f9b0ccfedea1b04c3baa724ca" name="a2617aa7f9b0ccfedea1b04c3baa724ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2617aa7f9b0ccfedea1b04c3baa724ca">&#9670;&#160;</a></span>SendAgwMsgExtQueryCombinExerciseProfitLoss()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendAgwMsgExtQueryCombinExerciseProfitLoss </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02401">2401</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a457873c5ea846e9594fc5c30d306f69e" name="a457873c5ea846e9594fc5c30d306f69e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a457873c5ea846e9594fc5c30d306f69e">&#9670;&#160;</a></span>SendAgwMsgExtQueryFundExReq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendAgwMsgExtQueryFundExReq </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>透传第三方OES通用接口 </p>
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02523">2523</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac38411b04a86d2652c370ff8f5844c52" name="ac38411b04a86d2652c370ff8f5844c52"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac38411b04a86d2652c370ff8f5844c52">&#9670;&#160;</a></span>SendAgwMsgOptionCoveredTransUncoveredOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendAgwMsgOptionCoveredTransUncoveredOrder </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02343">2343</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2c9c3782be500efbfd963444861fb93e" name="a2c9c3782be500efbfd963444861fb93e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c9c3782be500efbfd963444861fb93e">&#9670;&#160;</a></span>SendAgwMsgThirdPartPassThrough()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendAgwMsgThirdPartPassThrough </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02547">2547</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab263c6455ed669060ab5174bfcb22513" name="ab263c6455ed669060ab5174bfcb22513"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab263c6455ed669060ab5174bfcb22513">&#9670;&#160;</a></span>SendBankSecuritiesFundTransfer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendBankSecuritiesFundTransfer </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02570">2570</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1e34797ca138edc3f016ef5d0290618b" name="a1e34797ca138edc3f016ef5d0290618b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1e34797ca138edc3f016ef5d0290618b">&#9670;&#160;</a></span>SendBatchCancel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendBatchCancel </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01181">1181</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aecd8a24340f4bd5affdd92f425e2dc0e" name="aecd8a24340f4bd5affdd92f425e2dc0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aecd8a24340f4bd5affdd92f425e2dc0e">&#9670;&#160;</a></span>SendBlockTradeCancel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendBlockTradeCancel </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02179">2179</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a765256362d8406978b17568e767e3334" name="a765256362d8406978b17568e767e3334"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a765256362d8406978b17568e767e3334">&#9670;&#160;</a></span>SendBlockTradeIntention()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendBlockTradeIntention </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02090">2090</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5e042e95b47ad2eeab536877bcc65785" name="a5e042e95b47ad2eeab536877bcc65785"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e042e95b47ad2eeab536877bcc65785">&#9670;&#160;</a></span>SendBlockTradePricing()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendBlockTradePricing </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02150">2150</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaaf02f7800520a367bfda07a5fafcab6" name="aaaf02f7800520a367bfda07a5fafcab6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaaf02f7800520a367bfda07a5fafcab6">&#9670;&#160;</a></span>SendBlockTradeTransaction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendBlockTradeTransaction </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02120">2120</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7f40346081b49ac26d0c809130edcecb" name="a7f40346081b49ac26d0c809130edcecb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f40346081b49ac26d0c809130edcecb">&#9670;&#160;</a></span>SendBondDistribution()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendBondDistribution </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00403">403</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a34ec6016c7063d265b7c28929a084ed0" name="a34ec6016c7063d265b7c28929a084ed0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34ec6016c7063d265b7c28929a084ed0">&#9670;&#160;</a></span>SendCancel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendCancel </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01107">1107</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acbd3db1dc2e10717cd8137fdb2b9d359" name="acbd3db1dc2e10717cd8137fdb2b9d359"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acbd3db1dc2e10717cd8137fdb2b9d359">&#9670;&#160;</a></span>SendCashOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendCashOrder </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>调用V217版本的上行消息函数 @param[in] ord_type 目标业务类型 </p>
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00251">251</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab523b84b88b7025632f168b60a7ed589" name="ab523b84b88b7025632f168b60a7ed589"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab523b84b88b7025632f168b60a7ed589">&#9670;&#160;</a></span>SendCoveredLock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendCoveredLock </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00646">646</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a590a1914c7b705ae9df532096ac6b238" name="a590a1914c7b705ae9df532096ac6b238"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a590a1914c7b705ae9df532096ac6b238">&#9670;&#160;</a></span>SendCoverMaxOrderQtyQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendCoverMaxOrderQtyQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01259">1259</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8c77d5af45998d4fa39673b7abc8fc83" name="a8c77d5af45998d4fa39673b7abc8fc83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c77d5af45998d4fa39673b7abc8fc83">&#9670;&#160;</a></span>SendCreditOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendCreditOrder </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00283">283</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab04842f7fa809dfa0454764c78268d67" name="ab04842f7fa809dfa0454764c78268d67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab04842f7fa809dfa0454764c78268d67">&#9670;&#160;</a></span>SendCustLogin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendCustLogin </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01940">1940</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab3be0c76c0292a311bb3ea5c0093b391" name="ab3be0c76c0292a311bb3ea5c0093b391"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3be0c76c0292a311bb3ea5c0093b391">&#9670;&#160;</a></span>SendCustLogout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendCustLogout </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01963">1963</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad69ac524064e5a3fa2d686f210311d23" name="ad69ac524064e5a3fa2d686f210311d23"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad69ac524064e5a3fa2d686f210311d23">&#9670;&#160;</a></span>SendDesignatedTransaction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendDesignatedTransaction </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00730">730</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a228d9f9b43e271da152749b38d0f67d1" name="a228d9f9b43e271da152749b38d0f67d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a228d9f9b43e271da152749b38d0f67d1">&#9670;&#160;</a></span>SendDesignation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendDesignation </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00701">701</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3a84245dfff63ac82a46197964f7ea93" name="a3a84245dfff63ac82a46197964f7ea93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a84245dfff63ac82a46197964f7ea93">&#9670;&#160;</a></span>SendETFRedemption()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendETFRedemption </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00504">504</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a952665cce8587ff670a32aa757b3c3a8" name="a952665cce8587ff670a32aa757b3c3a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a952665cce8587ff670a32aa757b3c3a8">&#9670;&#160;</a></span>SendExtFundTransfer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendExtFundTransfer </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01985">1985</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9c192995cd1c43313063cbd40d59fb5e" name="a9c192995cd1c43313063cbd40d59fb5e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c192995cd1c43313063cbd40d59fb5e">&#9670;&#160;</a></span>SendExtOptionFundTransfer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendExtOptionFundTransfer </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01288">1288</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6c3ba2e474e5cbdf97aa5781a4642ef3" name="a6c3ba2e474e5cbdf97aa5781a4642ef3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c3ba2e474e5cbdf97aa5781a4642ef3">&#9670;&#160;</a></span>SendExtQueryContractSpecifications()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendExtQueryContractSpecifications </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01373">1373</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a39efa12d494aed20972fd1d50aad0e2c" name="a39efa12d494aed20972fd1d50aad0e2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39efa12d494aed20972fd1d50aad0e2c">&#9670;&#160;</a></span>SendExtQueryContractSpecificationsManager()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendExtQueryContractSpecificationsManager </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01507">1507</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af5806cb985c9445c7ee69c305ad4faf8" name="af5806cb985c9445c7ee69c305ad4faf8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5806cb985c9445c7ee69c305ad4faf8">&#9670;&#160;</a></span>SendExtQueryCreditAmount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendExtQueryCreditAmount </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01402">1402</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad3ef96e5cecaa72faa99a7999d3f6197" name="ad3ef96e5cecaa72faa99a7999d3f6197"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3ef96e5cecaa72faa99a7999d3f6197">&#9670;&#160;</a></span>SendExtQueryCreditInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendExtQueryCreditInfo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01563">1563</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad523cd415b8aed84266eb4fb340cbb7c" name="ad523cd415b8aed84266eb4fb340cbb7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad523cd415b8aed84266eb4fb340cbb7c">&#9670;&#160;</a></span>SendExtQueryExerciseProfitLoss()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendExtQueryExerciseProfitLoss </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01838">1838</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae276e75ecb495badd70a1b5b2f557e27" name="ae276e75ecb495badd70a1b5b2f557e27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae276e75ecb495badd70a1b5b2f557e27">&#9670;&#160;</a></span>SendExtQueryFundAssetsInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendExtQueryFundAssetsInfo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01586">1586</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad57e60c9803e5e9eafcfb53541d16d28" name="ad57e60c9803e5e9eafcfb53541d16d28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad57e60c9803e5e9eafcfb53541d16d28">&#9670;&#160;</a></span>SendExtQueryFundLiability()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendExtQueryFundLiability </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01447">1447</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a75121bd6d5ec4332b84a7c0cf13d1231" name="a75121bd6d5ec4332b84a7c0cf13d1231"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75121bd6d5ec4332b84a7c0cf13d1231">&#9670;&#160;</a></span>SendExtQueryMarginUnderlying()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendExtQueryMarginUnderlying </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01536">1536</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a901a3774ba7c52ca463dd2b47bc78c26" name="a901a3774ba7c52ca463dd2b47bc78c26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a901a3774ba7c52ca463dd2b47bc78c26">&#9670;&#160;</a></span>SendExtQueryMarginUseable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendExtQueryMarginUseable </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01424">1424</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2cc596b848fa39eacf8c7ac76adc745e" name="a2cc596b848fa39eacf8c7ac76adc745e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2cc596b848fa39eacf8c7ac76adc745e">&#9670;&#160;</a></span>SendExtQueryShareLiability()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendExtQueryShareLiability </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01470">1470</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acea45fc63bf9eceffa4f58f7d384b0a8" name="acea45fc63bf9eceffa4f58f7d384b0a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acea45fc63bf9eceffa4f58f7d384b0a8">&#9670;&#160;</a></span>SendExtRepay()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendExtRepay </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02012">2012</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a401af0e356c1610af6e004f2f8a916d5" name="a401af0e356c1610af6e004f2f8a916d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a401af0e356c1610af6e004f2f8a916d5">&#9670;&#160;</a></span>SendFDEPCancel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendFDEPCancel </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01207">1207</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aae93f0c4844492fee8aaf651570a2a51" name="aae93f0c4844492fee8aaf651570a2a51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae93f0c4844492fee8aaf651570a2a51">&#9670;&#160;</a></span>SendFundQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendFundQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01636">1636</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adbc6f91598890882023f5875e5a2ff72" name="adbc6f91598890882023f5875e5a2ff72"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adbc6f91598890882023f5875e5a2ff72">&#9670;&#160;</a></span>SendHKCorporateAction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendHKCorporateAction </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02265">2265</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa1730cfb44fc0a51f35b3b3bd5d2d9e9" name="aa1730cfb44fc0a51f35b3b3bd5d2d9e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1730cfb44fc0a51f35b3b3bd5d2d9e9">&#9670;&#160;</a></span>SendHKCorporateActionCancel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendHKCorporateActionCancel </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02319">2319</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a47a822b5351faab52e1b3f4ddb4a22a3" name="a47a822b5351faab52e1b3f4ddb4a22a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47a822b5351faab52e1b3f4ddb4a22a3">&#9670;&#160;</a></span>SendHKDesignationTransfer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendHKDesignationTransfer </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02290">2290</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acdaf9d503193ffb17bdda5d0bc66d1c0" name="acdaf9d503193ffb17bdda5d0bc66d1c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdaf9d503193ffb17bdda5d0bc66d1c0">&#9670;&#160;</a></span>SendHKStocksThroughAuction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendHKStocksThroughAuction </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02204">2204</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3adf694d6dddca1d9546256eb5834fe5" name="a3adf694d6dddca1d9546256eb5834fe5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3adf694d6dddca1d9546256eb5834fe5">&#9670;&#160;</a></span>SendHKVoting()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendHKVoting </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02236">2236</a> 行定义.</p>
+
+</div>
+</div>
+<a id="addc96f1dd648bca8a259048a998fbbb5" name="addc96f1dd648bca8a259048a998fbbb5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#addc96f1dd648bca8a259048a998fbbb5">&#9670;&#160;</a></span>SendIPOQtyQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendIPOQtyQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01766">1766</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afe6733de8ed21a41ccb07455048ddbc8" name="afe6733de8ed21a41ccb07455048ddbc8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe6733de8ed21a41ccb07455048ddbc8">&#9670;&#160;</a></span>SendIssue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendIssue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00532">532</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a703ddcc3c146c6619f5f56bae9d8f345" name="a703ddcc3c146c6619f5f56bae9d8f345"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a703ddcc3c146c6619f5f56bae9d8f345">&#9670;&#160;</a></span>SendLOF()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendLOF </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00756">756</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1dacfac058a590e2b98e6a1f44c951ef" name="a1dacfac058a590e2b98e6a1f44c951ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1dacfac058a590e2b98e6a1f44c951ef">&#9670;&#160;</a></span>SendMarginNoTradeOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendMarginNoTradeOrder </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00316">316</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa89bf0b283867e144eb5f4c6291480de" name="aa89bf0b283867e144eb5f4c6291480de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa89bf0b283867e144eb5f4c6291480de">&#9670;&#160;</a></span>SendMarginRepayOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendMarginRepayOrder </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00344">344</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a86e0fba7a967d4e82a23fd38a76cd485" name="a86e0fba7a967d4e82a23fd38a76cd485"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86e0fba7a967d4e82a23fd38a76cd485">&#9670;&#160;</a></span>SendNetVoting()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendNetVoting </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00813">813</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaa52bdbeb914e4f63f342728e7a6b918" name="aaa52bdbeb914e4f63f342728e7a6b918"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa52bdbeb914e4f63f342728e7a6b918">&#9670;&#160;</a></span>SendNewMaxOrderQtyQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendNewMaxOrderQtyQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01909">1909</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a650d2aa56170c8fb898f72237dfc6c3e" name="a650d2aa56170c8fb898f72237dfc6c3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a650d2aa56170c8fb898f72237dfc6c3e">&#9670;&#160;</a></span>SendOptionAuction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendOptionAuction </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00433">433</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae63f702a0ec17399e31820e5510f0d2c" name="ae63f702a0ec17399e31820e5510f0d2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae63f702a0ec17399e31820e5510f0d2c">&#9670;&#160;</a></span>SendOptionCancel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendOptionCancel </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01232">1232</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a76958ff894f66174266dd6fc4ea60657" name="a76958ff894f66174266dd6fc4ea60657"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76958ff894f66174266dd6fc4ea60657">&#9670;&#160;</a></span>SendOptionCombinationExerciseOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendOptionCombinationExerciseOrder </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00972">972</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6840afc4bacfbed2693372a5f7e7c060" name="a6840afc4bacfbed2693372a5f7e7c060"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6840afc4bacfbed2693372a5f7e7c060">&#9670;&#160;</a></span>SendOptionCombinationOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendOptionCombinationOrder </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00929">929</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a95ba5b93080e907aeb6df54d2ff6ff04" name="a95ba5b93080e907aeb6df54d2ff6ff04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95ba5b93080e907aeb6df54d2ff6ff04">&#9670;&#160;</a></span>SendOptionCombinationQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendOptionCombinationQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01002">1002</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8131ffad3504d9efb891239d1c3a8bd5" name="a8131ffad3504d9efb891239d1c3a8bd5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8131ffad3504d9efb891239d1c3a8bd5">&#9670;&#160;</a></span>SendOptionExercise()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendOptionExercise </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00618">618</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab3cac4e60a5d147c6c5ab6f707d9ceff" name="ab3cac4e60a5d147c6c5ab6f707d9ceff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3cac4e60a5d147c6c5ab6f707d9ceff">&#9670;&#160;</a></span>SendOptionQuoteOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendOptionQuoteOrder </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00471">471</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a087e39bb85f43af9c9ee6f07ab1d4842" name="a087e39bb85f43af9c9ee6f07ab1d4842"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a087e39bb85f43af9c9ee6f07ab1d4842">&#9670;&#160;</a></span>SendOptionQuoteQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendOptionQuoteQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01025">1025</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0c277e7359ed7010e6bf1a04fb9e391c" name="a0c277e7359ed7010e6bf1a04fb9e391c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c277e7359ed7010e6bf1a04fb9e391c">&#9670;&#160;</a></span>SendOrderQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendOrderQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01313">1313</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a27b431792929ab0e2ab0fdec3b8d7563" name="a27b431792929ab0e2ab0fdec3b8d7563"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27b431792929ab0e2ab0fdec3b8d7563">&#9670;&#160;</a></span>SendPasswordService()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendPasswordService </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00844">844</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a394fdc0b918c4fef7b2fcaace1b601f0" name="a394fdc0b918c4fef7b2fcaace1b601f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a394fdc0b918c4fef7b2fcaace1b601f0">&#9670;&#160;</a></span>SendPledgeInOrOut()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendPledgeInOrOut </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01081">1081</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad1056be7f2ec5550004ba2d44295f044" name="ad1056be7f2ec5550004ba2d44295f044"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1056be7f2ec5550004ba2d44295f044">&#9670;&#160;</a></span>SendReduceHoldingTransfer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendReduceHoldingTransfer </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01131">1131</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6943b76e50448807a83adf4e3338c850" name="a6943b76e50448807a83adf4e3338c850"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6943b76e50448807a83adf4e3338c850">&#9670;&#160;</a></span>SendReduceHoldingTransferCancel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendReduceHoldingTransferCancel </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01156">1156</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2cd28d9ee8c308aa9b7d9ac4036797ce" name="a2cd28d9ee8c308aa9b7d9ac4036797ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2cd28d9ee8c308aa9b7d9ac4036797ce">&#9670;&#160;</a></span>SendRepoAuction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendRepoAuction </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00376">376</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae099ff94b18c943db480f440c5571559" name="ae099ff94b18c943db480f440c5571559"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae099ff94b18c943db480f440c5571559">&#9670;&#160;</a></span>SendRightsIssue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendRightsIssue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00560">560</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a02e7abcd92d13e186a920f4fa1b59891" name="a02e7abcd92d13e186a920f4fa1b59891"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02e7abcd92d13e186a920f4fa1b59891">&#9670;&#160;</a></span>SendShareQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendShareQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01706">1706</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6a821b555073b33fd716da1c15477d76" name="a6a821b555073b33fd716da1c15477d76"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a821b555073b33fd716da1c15477d76">&#9670;&#160;</a></span>SendStructuredFund()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendStructuredFund </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00901">901</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac875613dca171d6dd73e8eae70039a79" name="ac875613dca171d6dd73e8eae70039a79"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac875613dca171d6dd73e8eae70039a79">&#9670;&#160;</a></span>SendSwapPutback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendSwapPutback </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00589">589</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a11a0f527949ee9efed82000832d68ab0" name="a11a0f527949ee9efed82000832d68ab0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a11a0f527949ee9efed82000832d68ab0">&#9670;&#160;</a></span>SendSyncBiz()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendSyncBiz </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l02040">2040</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a172e04284882373b7ddf789a3eddb320" name="a172e04284882373b7ddf789a3eddb320"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a172e04284882373b7ddf789a3eddb320">&#9670;&#160;</a></span>SendTenderOffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendTenderOffer </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00784">784</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa16bb5f9adc348d24c087ac4b4076ab3" name="aa16bb5f9adc348d24c087ac4b4076ab3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa16bb5f9adc348d24c087ac4b4076ab3">&#9670;&#160;</a></span>SendTibAfterHourAuction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendTibAfterHourAuction </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01054">1054</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a355f8c4434b6d01a4ce4e3e47217de49" name="a355f8c4434b6d01a4ce4e3e47217de49"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a355f8c4434b6d01a4ce4e3e47217de49">&#9670;&#160;</a></span>SendTIBIPOQtyQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendTIBIPOQtyQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01884">1884</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0ca78cf0f28c989d6642fba8244fe6e5" name="a0ca78cf0f28c989d6642fba8244fe6e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ca78cf0f28c989d6642fba8244fe6e5">&#9670;&#160;</a></span>SendTradeCollectQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendTradeCollectQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01861">1861</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac326f33a87bc6b07fbbde1bae79231b6" name="ac326f33a87bc6b07fbbde1bae79231b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac326f33a87bc6b07fbbde1bae79231b6">&#9670;&#160;</a></span>SendTradeOrderExQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendTradeOrderExQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01608">1608</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a631db984ef94d0825aeaf8926c5e8a49" name="a631db984ef94d0825aeaf8926c5e8a49"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a631db984ef94d0825aeaf8926c5e8a49">&#9670;&#160;</a></span>SendTradeOrderQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendTradeOrderQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l01345">1345</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4f5c1e65b84549c7215acdde685c9481" name="a4f5c1e65b84549c7215acdde685c9481"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f5c1e65b84549c7215acdde685c9481">&#9670;&#160;</a></span>SendTurnToDisposal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendTurnToDisposal </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00672">672</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0d0be441fdd4b5cd77580deee34b9770" name="a0d0be441fdd4b5cd77580deee34b9770"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d0be441fdd4b5cd77580deee34b9770">&#9670;&#160;</a></span>SendWarrantExercise()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SendWarrantExercise </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="demo__send__order_8cpp_source.html">demo_send_order.cpp</a> 第 <a class="el" href="demo__send__order_8cpp_source.html#l00874">874</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_e774e66222d9d2c413b91a00adf428b4.html">AtpTradeApi</a></li><li class="navelem"><a class="el" href="dir_6b2f1be48462935d0525d656d464340e.html">demo</a></li><li class="navelem"><a class="el" href="dir_c927b3a110846cd401c5655c45de3170.html">all_message_demo</a></li><li class="navelem"><a class="el" href="demo__send__order_8h.html">demo_send_order.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

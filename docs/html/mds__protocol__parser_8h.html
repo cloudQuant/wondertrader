@@ -1,0 +1,421 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/mds_api/parser/mds_protocol_parser.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('mds__protocol__parser_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">mds_protocol_parser.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;<a class="el" href="mds__mkt__packets_8h_source.html">mds_global/mds_mkt_packets.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="spk__global__packet_8h_source.html">sutil/net/spk_global_packet.h</a>&gt;</code><br />
+</div>
+<p><a href="mds__protocol__parser_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:ad4d13f9a90db32f3eee064aadfa6bddc" id="r_ad4d13f9a90db32f3eee064aadfa6bddc"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mds__protocol__parser_8h.html#ad4d13f9a90db32f3eee064aadfa6bddc">MdsParser_EncodeReq</a> (<a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *pReqHead, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mds__mkt__packets_8h.html#a501af347046509396b54a8b641a811e5">MdsMktReqMsgBodyT</a> *pReqBody, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pRemoteInfo)</td></tr>
+<tr class="separator:ad4d13f9a90db32f3eee064aadfa6bddc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f146697ea993a33b32f0e8fc9f1f836" id="r_a0f146697ea993a33b32f0e8fc9f1f836"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mds__mkt__packets_8h.html#a501af347046509396b54a8b641a811e5">MdsMktReqMsgBodyT</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mds__protocol__parser_8h.html#a0f146697ea993a33b32f0e8fc9f1f836">MdsParser_DecodeReq</a> (<a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *pReqHead, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *pMsgBody, <a class="el" href="mds__mkt__packets_8h.html#a501af347046509396b54a8b641a811e5">MdsMktReqMsgBodyT</a> *pReqMsgBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pRemoteInfo)</td></tr>
+<tr class="separator:a0f146697ea993a33b32f0e8fc9f1f836"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb8e6ce7eef3bf4f1f6c867d30ab7721" id="r_aeb8e6ce7eef3bf4f1f6c867d30ab7721"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mds__protocol__parser_8h.html#aeb8e6ce7eef3bf4f1f6c867d30ab7721">MdsParser_EncodeRsp</a> (<a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *pRspHead, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mds__mkt__packets_8h.html#af4bcf13452ee0ff4743e20f31bb2f6df">MdsMktRspMsgBodyT</a> *pRspBody, char *pBuf, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pRemoteInfo, <a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> isCopyBinary)</td></tr>
+<tr class="separator:aeb8e6ce7eef3bf4f1f6c867d30ab7721"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e63d31f097a9cd559589905d90b0e40" id="r_a5e63d31f097a9cd559589905d90b0e40"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mds__mkt__packets_8h.html#af4bcf13452ee0ff4743e20f31bb2f6df">MdsMktRspMsgBodyT</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mds__protocol__parser_8h.html#a5e63d31f097a9cd559589905d90b0e40">MdsParser_DecodeRsp</a> (<a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *pRspHead, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *pMsgBody, <a class="el" href="mds__mkt__packets_8h.html#af4bcf13452ee0ff4743e20f31bb2f6df">MdsMktRspMsgBodyT</a> *pRspMsgBuf, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pRemoteInfo)</td></tr>
+<tr class="separator:a5e63d31f097a9cd559589905d90b0e40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab43b4d5c31bae939f254f91fd40623c8" id="r_ab43b4d5c31bae939f254f91fd40623c8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mds__protocol__parser_8h.html#ab43b4d5c31bae939f254f91fd40623c8">MdsParser_GetMdStreamIdString</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a> exchId, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a> bodyType, <a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a> subStreamType)</td></tr>
+<tr class="separator:ab43b4d5c31bae939f254f91fd40623c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>协议转换处理</p>
+<dl class="section version"><dt>版本</dt><dd>1.0 2016/2/20 </dd></dl>
+<dl class="section since"><dt>自从</dt><dd>2016/1/3 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="mds__protocol__parser_8h_source.html">mds_protocol_parser.h</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="a0f146697ea993a33b32f0e8fc9f1f836" name="a0f146697ea993a33b32f0e8fc9f1f836"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f146697ea993a33b32f0e8fc9f1f836">&#9670;&#160;</a></span>MdsParser_DecodeReq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mds__mkt__packets_8h.html#a501af347046509396b54a8b641a811e5">MdsMktReqMsgBodyT</a> * MdsParser_DecodeReq </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *&#160;</td>
+          <td class="paramname"><em>pReqHead</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>pMsgBody</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mds__mkt__packets_8h.html#a501af347046509396b54a8b641a811e5">MdsMktReqMsgBodyT</a> *&#160;</td>
+          <td class="paramname"><em>pReqMsgBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pRemoteInfo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>请求消息解码处理（解码为二进制结构体，用于接收客户端的请求消息）</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">pReqHead</td><td>消息头 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pMsgBody</td><td>消息体数据 </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">pReqMsgBuf</td><td>解码后的消息体数据缓存 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pRemoteInfo</td><td>对端身份信息, 用于打印跟踪日志 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>解码后的消息体数据; NULL：解析失败 </dd></dl>
+
+</div>
+</div>
+<a id="a5e63d31f097a9cd559589905d90b0e40" name="a5e63d31f097a9cd559589905d90b0e40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e63d31f097a9cd559589905d90b0e40">&#9670;&#160;</a></span>MdsParser_DecodeRsp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mds__mkt__packets_8h.html#af4bcf13452ee0ff4743e20f31bb2f6df">MdsMktRspMsgBodyT</a> * MdsParser_DecodeRsp </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *&#160;</td>
+          <td class="paramname"><em>pRspHead</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>pMsgBody</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mds__mkt__packets_8h.html#af4bcf13452ee0ff4743e20f31bb2f6df">MdsMktRspMsgBodyT</a> *&#160;</td>
+          <td class="paramname"><em>pRspMsgBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pRemoteInfo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>应答消息解码处理（解码为二进制结构体，用于接收服务器端返回的应答消息）</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">pRspHead</td><td>消息头 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pMsgBody</td><td>消息体数据 </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">pRspMsgBuf</td><td>解码后的消息体数据缓存 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pRemoteInfo</td><td>对端身份信息, 用于打印跟踪日志 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>解码后的消息体数据; NULL：解析失败 </dd></dl>
+
+</div>
+</div>
+<a id="ad4d13f9a90db32f3eee064aadfa6bddc" name="ad4d13f9a90db32f3eee064aadfa6bddc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4d13f9a90db32f3eee064aadfa6bddc">&#9670;&#160;</a></span>MdsParser_EncodeReq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * MdsParser_EncodeReq </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *&#160;</td>
+          <td class="paramname"><em>pReqHead</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mds__mkt__packets_8h.html#a501af347046509396b54a8b641a811e5">MdsMktReqMsgBodyT</a> *&#160;</td>
+          <td class="paramname"><em>pReqBody</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pRemoteInfo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>请求消息编码处理（编码为JSON等格式，用于向服务器发送请求消息）</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">pReqHead</td><td>消息头 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pReqBody</td><td>待编码的应答数据 </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">pBuf</td><td>存储编码后数据的缓存区 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">bufSize</td><td>缓存区长度 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pRemoteInfo</td><td>对端身份信息, 用于打印跟踪日志 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>编码后的消息体数据; NULL：编码失败 </dd></dl>
+
+</div>
+</div>
+<a id="aeb8e6ce7eef3bf4f1f6c867d30ab7721" name="aeb8e6ce7eef3bf4f1f6c867d30ab7721"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb8e6ce7eef3bf4f1f6c867d30ab7721">&#9670;&#160;</a></span>MdsParser_EncodeRsp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * MdsParser_EncodeRsp </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="spk__global__packet_8h.html#a0840af14b1bbe4cb7838c246fb6773aa">SMsgHeadT</a> *&#160;</td>
+          <td class="paramname"><em>pRspHead</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mds__mkt__packets_8h.html#af4bcf13452ee0ff4743e20f31bb2f6df">MdsMktRspMsgBodyT</a> *&#160;</td>
+          <td class="paramname"><em>pRspBody</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pBuf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>bufSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pRemoteInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td>
+          <td class="paramname"><em>isCopyBinary</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>应答消息编码处理（编码为JSON等格式，用于向客户端发送应答消息）</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">pRspHead</td><td>消息头 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pRspBody</td><td>待编码的应答数据 </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">pBuf</td><td>存储编码后数据的缓存区 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">bufSize</td><td>缓存区长度 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">pRemoteInfo</td><td>对端身份信息, 用于打印跟踪日志 </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">isCopyBinary</td><td>对于二进制协议，是否也同样将原始数据复制到缓存区 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>编码后的消息体数据; NULL：编码失败 </dd></dl>
+
+</div>
+</div>
+<a id="ab43b4d5c31bae939f254f91fd40623c8" name="ab43b4d5c31bae939f254f91fd40623c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab43b4d5c31bae939f254f91fd40623c8">&#9670;&#160;</a></span>MdsParser_GetMdStreamIdString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * MdsParser_GetMdStreamIdString </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>&#160;</td>
+          <td class="paramname"><em>exchId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>&#160;</td>
+          <td class="paramname"><em>bodyType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>&#160;</td>
+          <td class="paramname"><em>subStreamType</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>返回字符串形式的行情数据类型</p>
+<p>上交所 (C5):</p><ul>
+<li>MD001 指数行情数据</li>
+<li>MD002 股票(A、B股)行情数据</li>
+<li>MD003 债券分销类产品</li>
+<li>MD004 基金行情数据</li>
+<li>MD201 债券行情数据</li>
+<li>M0301 期权交易行情</li>
+</ul>
+<p>深交所 (C3):</p><ul>
+<li>010 现货(股票,基金,债券等)集中竞价交易快照行情</li>
+<li>020 质押式回购交易快照行情</li>
+<li>030 债券分销快照行情 (* 属于综合业务，本系统不处理)</li>
+<li>040 期权集中竞价交易快照行情 (==&gt; M0301)</li>
+<li>060 以收盘价交易的盘后定价交易快照行情 (* 属于综合业务，本系统不处理)</li>
+<li>061 以成交量加权平均价交易的盘后定价交易快照行情 (* 属于综合业务，本系统不处理)</li>
+<li>900 指数快照行情 (==&gt; MD001)</li>
+<li>910 成交量统计指标快照行情</li>
+</ul>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchId</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">bodyType</td><td>快照数据对应的消息类型 </td></tr>
+    <tr><td class="paramname">subStreamType</td><td>行情数据类别 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>参见</dt><dd><a class="el" href="mds__base__model_8h.html#a0241b4a880c89e1d927e1853d2ee993b">eMdsSubStreamTypeT</a> </dd></dl>
+<dl class="section return"><dt>返回</dt><dd>行情数据类型字符串 </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_e76444fc31ce260c247acf70d3cb201c.html">mds_api</a></li><li class="navelem"><a class="el" href="dir_d45b6daf708766e291b891a634f9577a.html">parser</a></li><li class="navelem"><a class="el" href="mds__protocol__parser_8h.html">mds_protocol_parser.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,549 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtUftStraFact/WtUftStraDemo.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtUftStraDemo_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtUftStraDemo.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtUftStraDemo_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="WtUftStraDemo_8h.html">WtUftStraDemo.h</a>&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;../Includes/IUftStraCtx.h&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;../Includes/WTSVariant.hpp&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Includes/WTSDataDef.hpp&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/WTSContractInfo.hpp&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../Share/TimeUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../Share/decimal.h&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;../Share/fmtlib.h&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">extern</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_variable" href="WtUftStraDemo_8cpp.html#aee880c24316260593ee859c8443ff4b6">FACT_NAME</a>;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="}">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a1a0bddddae04e1991253ba08ed950dae">   29</a></span><a class="code hl_function" href="classWtUftStraDemo.html#a1a0bddddae04e1991253ba08ed950dae">WtUftStraDemo::WtUftStraDemo</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>)</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    : <a class="code hl_class" href="classUftStrategy.html">UftStrategy</a>(id)              <span class="comment">// 调用父类构造函数</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    , _last_tick(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)             <span class="comment">// 初始化最后一个Tick为空</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    , _last_entry_time(UINT64_MAX) <span class="comment">// 最后入场时间初始化为最大值，确保首次可以正常入场</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    , _channel_ready(false)        <span class="comment">// 初始化交易通道为未就绪状态</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    , _last_calc_time(0)           <span class="comment">// 最后计算时间初始化为0</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    , _lots(1)                     <span class="comment">// 交易手数默认为1手</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    , _cancel_cnt(0)               <span class="comment">// 撤单计数器初始化为0</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>{</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>}</div>
+</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="foldopen" id="foldopen00045" data-start="{" data-end="}">
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#ad0c112e569a877afad19d641d2370f7e">   45</a></span><a class="code hl_function" href="classWtUftStraDemo.html#ad0c112e569a877afad19d641d2370f7e">WtUftStraDemo::~WtUftStraDemo</a>()</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>{</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="comment">// 释放最后一个Tick数据的内存，避免内存泄漏</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtUftStraDemo.html#a073dfebdb8073387ded52caf77e01ae8">_last_tick</a>)</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <a class="code hl_variable" href="classWtUftStraDemo.html#a073dfebdb8073387ded52caf77e01ae8">_last_tick</a>-&gt;<a class="code hl_function" href="classWTSPoolObject.html#a868f127b3ccc31cba6b077803cb00951">release</a>();</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>}</div>
+</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="foldopen" id="foldopen00057" data-start="{" data-end="}">
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a311e2c1aa3100dd79a93fc1727cfc59a">   57</a></span><span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtUftStraDemo.html#a311e2c1aa3100dd79a93fc1727cfc59a">WtUftStraDemo::getName</a>()</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>{</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;UftDemoStrategy&quot;</span>;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>}</div>
+</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="foldopen" id="foldopen00067" data-start="{" data-end="}">
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a599af78fec17ad150919688dd13f8f27">   67</a></span><span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtUftStraDemo.html#a599af78fec17ad150919688dd13f8f27">WtUftStraDemo::getFactName</a>()</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>{</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="WtCtaStraFact_8cpp.html#aee880c24316260593ee859c8443ff4b6">FACT_NAME</a>;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>}</div>
+</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="foldopen" id="foldopen00078" data-start="{" data-end="}">
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#abca72abef22c2cc39c21f47c1dd79d3a">   78</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classWtUftStraDemo.html#abca72abef22c2cc39c21f47c1dd79d3a">WtUftStraDemo::init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg)</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>{</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="comment">//这里演示一下外部传入参数的获取</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#a9bdf226a36e0f034c31c57e44ac8af8c">_code</a> = cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#a830db11fc8daceff409fdbebaa7bea8a">getCString</a>(<span class="stringliteral">&quot;code&quot;</span>);      <span class="comment">// 获取交易品种代码</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#a5254ae4adb8418066ee6b0fd9c452568">_secs</a> = cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#a9c09f146129a4f35dc04b490fef8887c">getUInt32</a>(<span class="stringliteral">&quot;second&quot;</span>);     <span class="comment">// 获取订单超时时间（秒）</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#a333d9231796c0d0de8b747a368ee247e">_freq</a> = cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#a9c09f146129a4f35dc04b490fef8887c">getUInt32</a>(<span class="stringliteral">&quot;freq&quot;</span>);       <span class="comment">// 获取交易频率控制参数</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#abde399df409bb7014a419520d9695337">_offset</a> = cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#a9c09f146129a4f35dc04b490fef8887c">getUInt32</a>(<span class="stringliteral">&quot;offset&quot;</span>);   <span class="comment">// 获取下单价格偏移跳数</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#ac6d67fe9ab777ead707cf441d7679b32">_lots</a> = cfg-&gt;<a class="code hl_function" href="classWTSVariant.html#a394beb745c43614ae782ea502735143f">getDouble</a>(<span class="stringliteral">&quot;lots&quot;</span>);       <span class="comment">// 获取交易手数</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>}</div>
+</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="foldopen" id="foldopen00098" data-start="{" data-end="}">
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a83bc3c7a65424769f2c2aa3de2ff5281">   98</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a83bc3c7a65424769f2c2aa3de2ff5281">WtUftStraDemo::on_entrust</a>(uint32_t localid, <span class="keywordtype">bool</span> bSuccess, <span class="keyword">const</span> <span class="keywordtype">char</span>* message)</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>{</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="comment">// 委托失败的处理</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <span class="keywordflow">if</span>(!bSuccess)</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    {</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        <span class="comment">// 在订单集合中查找该ID</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        <span class="keyword">auto</span> it = <a class="code hl_variable" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">_orders</a>.find(localid);</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        <span class="comment">// 如果找到则删除该订单</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        <span class="keywordflow">if</span>(it != <a class="code hl_variable" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">_orders</a>.end())</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>            <a class="code hl_variable" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">_orders</a>.erase(it);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    }</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>}</div>
+</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="foldopen" id="foldopen00116" data-start="{" data-end="}">
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a9b3b99a159e85492fbb5617868fe474f">  116</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a9b3b99a159e85492fbb5617868fe474f">WtUftStraDemo::on_init</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx)</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>{</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="comment">// 设置需要监视的参数，这些参数可以在运行时动态更新</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#af0ca8c44c1f17ed0f9a6e4eda51804d2">watch_param</a>(<span class="stringliteral">&quot;second&quot;</span>, <a class="code hl_variable" href="classWtUftStraDemo.html#a5254ae4adb8418066ee6b0fd9c452568">_secs</a>);   <span class="comment">// 监视超时时间参数</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#af0ca8c44c1f17ed0f9a6e4eda51804d2">watch_param</a>(<span class="stringliteral">&quot;freq&quot;</span>, <a class="code hl_variable" href="classWtUftStraDemo.html#a333d9231796c0d0de8b747a368ee247e">_freq</a>);     <span class="comment">// 监视交易频率参数</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#af0ca8c44c1f17ed0f9a6e4eda51804d2">watch_param</a>(<span class="stringliteral">&quot;offset&quot;</span>, <a class="code hl_variable" href="classWtUftStraDemo.html#abde399df409bb7014a419520d9695337">_offset</a>); <span class="comment">// 监视价格偏移参数</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#af0ca8c44c1f17ed0f9a6e4eda51804d2">watch_param</a>(<span class="stringliteral">&quot;lots&quot;</span>, <a class="code hl_variable" href="classWtUftStraDemo.html#ac6d67fe9ab777ead707cf441d7679b32">_lots</a>);     <span class="comment">// 监视交易手数参数</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a2843cbe19d9db2da529c25cd666790d2">commit_param_watcher</a>();          <span class="comment">// 提交参数监视器</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    <span class="comment">// 获取历史K线数据，这里为测试目的获取1分钟线数30条</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <a class="code hl_class" href="classWTSKlineSlice.html">WTSKlineSlice</a>* kline = ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a400b2915afabcc34c2dee7dfec85fb1f">stra_get_bars</a>(<a class="code hl_variable" href="classWtUftStraDemo.html#a9bdf226a36e0f034c31c57e44ac8af8c">_code</a>.c_str(), <span class="stringliteral">&quot;m1&quot;</span>, 30);</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="keywordflow">if</span> (kline)</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>        kline-&gt;<a class="code hl_function" href="classWTSObject.html#a57b87f47529974f735f4989eaf2dd55f">release</a>();  <span class="comment">// 释放获取的K线数据内存</span></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="comment">// 订阅交易品种的Tick数据</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a5eafaadd9aaddb9fd11a2d00826592f8">stra_sub_ticks</a>(<a class="code hl_variable" href="classWtUftStraDemo.html#a9bdf226a36e0f034c31c57e44ac8af8c">_code</a>.c_str());</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="comment">// 保存策略上下文指针供后续使用</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a> = ctx;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>}</div>
+</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+<div class="foldopen" id="foldopen00144" data-start="{" data-end="}">
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a30a9fc1378e1f186fb26213e896f4641">  144</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a30a9fc1378e1f186fb26213e896f4641">WtUftStraDemo::on_tick</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick)</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>{   </div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>    <span class="comment">// 如果不是监控的品种，则直接返回</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtUftStraDemo.html#a9bdf226a36e0f034c31c57e44ac8af8c">_code</a>.compare(code) != 0)</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    <span class="comment">// 如果有待成交的订单，先检查是否超时</span></div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">_orders</a>.empty())</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    {</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>        <a class="code hl_function" href="classWtUftStraDemo.html#ac90451d5eb720af565dcfe4288461107">check_orders</a>();</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    }</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    <span class="comment">// 如果交易通道未就绪，则等待</span></div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classWtUftStraDemo.html#a283154f51a05bda19108ee15f5fa28ea">_channel_ready</a>)</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    <span class="comment">// 获取当前品种的最新Tick，这里只是为了测试接口</span></div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* curTick = ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#aa90cf95cf271845a8c393313da8a96e9">stra_get_last_tick</a>(code);</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    <span class="keywordflow">if</span> (curTick)</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>        curTick-&gt;<a class="code hl_function" href="classWTSPoolObject.html#a868f127b3ccc31cba6b077803cb00951">release</a>();  <span class="comment">// 释放内存</span></div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    <span class="comment">// 提取Tick数据的分钟时间</span></div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    uint32_t curMin = newTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a12aa24165f23c4dacd1e4f686a2f5879">actiontime</a>() / 100000;   <span class="comment">//actiontime是带毫秒的,要取得分钟,则需要除以10w</span></div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    <span class="keywordflow">if</span> (curMin &gt; <a class="code hl_variable" href="classWtUftStraDemo.html#a2bc91850e2fec69fd7abe34e43617c98">_last_calc_time</a>)</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    {<span class="comment">//如果spread上次计算的时候小于当前分钟,则重算spread</span></div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>        <span class="comment">//WTSKlineSlice* kline = ctx-&gt;stra_get_bars(code, &quot;m5&quot;, 30);</span></div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>        <span class="comment">//if (kline)</span></div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>        <span class="comment">//  kline-&gt;release();</span></div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span> </div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        <span class="comment">//重算晚了以后,更新计算时间</span></div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        <a class="code hl_variable" href="classWtUftStraDemo.html#a2bc91850e2fec69fd7abe34e43617c98">_last_calc_time</a> = curMin;</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    }</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    <span class="comment">// 频率控制，要求相邻入场时间间隔至少为_freq毫秒</span></div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    uint64_t now = <a class="code hl_function" href="classTimeUtils.html#ade8f9d6db3e20f1057aad655a655d6fd">TimeUtils::makeTime</a>(ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#ab6de4a2a8ca261074f575b0dbbcf9e1a">stra_get_date</a>(), ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#ae5acb469bf4e7da19f12df52b0a3be88">stra_get_time</a>() * 100000 + ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#aaf074f861f97eb8b615d5c0e9e882541">stra_get_secs</a>());</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>    <span class="keywordflow">if</span>(now - <a class="code hl_variable" href="classWtUftStraDemo.html#aaa311b8ee47a030ddc7bb9576c21724d">_last_entry_time</a> &lt;= <a class="code hl_variable" href="classWtUftStraDemo.html#a333d9231796c0d0de8b747a368ee247e">_freq</a> * 1000)</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>    {</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    }</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>    <span class="comment">// 交易信号，1为看多，-1为看空，0为没有信号</span></div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    int32_t signal = 0;</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>    <span class="comment">// 获取当前最新价</span></div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a> = newTick-&gt;<a class="code hl_function" href="classWTSTickData.html#ae502123e14736815e734b7f6456cfd13">price</a>();</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    <span class="comment">// 计算理论价格，这里采用加权平均价格计算方法</span></div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>    <span class="keywordtype">double</span> pxInThry = (newTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a803d1804cb06e32d69064ecd253f1c9d">bidprice</a>(0)*newTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a2c374d0964b76835c0eaf1450a488302">askqty</a>(0) + newTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a235e2995d16b634c5edd5d4a45308302">askprice</a>(0)*newTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a1428afc0bb0e6d1bb01be62bc5743631">bidqty</a>(0)) / (newTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a1428afc0bb0e6d1bb01be62bc5743631">bidqty</a>(0) + newTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a2c374d0964b76835c0eaf1450a488302">askqty</a>(0));</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    <span class="comment">// 当理论价格大于实际价格时，生成做多信号</span></div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    <span class="keywordflow">if</span> (pxInThry &gt; <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>)</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    {</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        <span class="comment">// 正向信号（做多）</span></div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        signal = 1;</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    }</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    <span class="comment">// 当理论价格小于实际价格时，生成做空信号</span></div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (pxInThry &lt; <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>)</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>    {</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        <span class="comment">// 反向信号（做空）</span></div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        signal = -1;</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    }</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>    <span class="comment">// 如果有交易信号生成则处理</span></div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>    <span class="keywordflow">if</span> (signal != 0)</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    {</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        <span class="comment">// 获取当前品种的持仓</span></div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>        <span class="keywordtype">double</span> curPos = ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a48420eb467018e92e94d735772f41c4c">stra_get_position</a>(code);</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span> </div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>        <span class="comment">// 获取品种信息，用于查询价格步长等数据</span></div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>        <a class="code hl_class" href="classWTSCommodityInfo.html">WTSCommodityInfo</a>* cInfo = ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#aaae81348795c0f7f95b38ea7b6ff4a99">stra_get_comminfo</a>(code);</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span> </div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        <span class="comment">// 处理做多信号</span></div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        <span class="keywordflow">if</span>(signal &gt; 0  &amp;&amp; <a class="code hl_function" href="namespacedecimal.html#a6de5f873ba0191bdd61bf1870cd18b81">decimal::le</a>(curPos, 0))</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        {<span class="comment">//正向信号,且当前仓位小于等于0</span></div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>            <span class="comment">// 计算目标下单价格，在最新价基础上加上偏移跳数</span></div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>            <span class="keywordtype">double</span> targetPx = <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a> + cInfo-&gt;<a class="code hl_function" href="classWTSCommodityInfo.html#aeb4de8e6a40d00215ebfae5363137694">getPriceTick</a>() * <a class="code hl_variable" href="classWtUftStraDemo.html#abde399df409bb7014a419520d9695337">_offset</a>;</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span> </div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>            <span class="comment">// 发送买入指令</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>            <span class="keyword">auto</span> ids = ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a4fd161ff52d4b39fdfe9f38bd04bf2ad">stra_buy</a>(code, targetPx, <a class="code hl_variable" href="classWtUftStraDemo.html#ac6d67fe9ab777ead707cf441d7679b32">_lots</a>, <a class="code hl_variable" href="IUftStraCtx_8h.html#a0f1b45f0814910a7fa809fe7d8e99331">UFT_OrderFlag_Nor</a>);</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span> </div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>            {</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>                <span class="comment">// 将新生成的订单ID加入监控列表</span></div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>                <a class="code hl_variable" href="classWtUftStraDemo.html#a9a14b0eb4ec60566a395bcd6955530e6">_mtx_ords</a>.<a class="code hl_function" href="classSpinMutex.html#a736a7883332176a3eb2960406deeaf94">lock</a>();</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>                <span class="keywordflow">for</span> (uint32_t localid : ids)</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>                    <a class="code hl_variable" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">_orders</a>.insert(localid);</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>                <a class="code hl_variable" href="classWtUftStraDemo.html#a9a14b0eb4ec60566a395bcd6955530e6">_mtx_ords</a>.<a class="code hl_function" href="classSpinMutex.html#a0bcc18e687d2f72821a22c76c8b09644">unlock</a>();</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>                <span class="comment">// 更新最后入场时间</span></div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>                <a class="code hl_variable" href="classWtUftStraDemo.html#aaa311b8ee47a030ddc7bb9576c21724d">_last_entry_time</a> = now;</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>            }</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>            </div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        }</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        <span class="comment">// 处理做空信号</span></div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (signal &lt; 0 &amp;&amp; <a class="code hl_function" href="namespacedecimal.html#ae861a5f8f03dca10ee5cd60f1bf50ecd">decimal::ge</a>(curPos, 0))</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        {<span class="comment">//反向信号,且当前仓位大于0,或者仓位为0但不是股票,或者仓位为0但是基础仓位有修正</span></div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>            <span class="comment">// 计算目标下单价格，在最新价基础上减去偏移跳数</span></div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>            <span class="keywordtype">double</span> targetPx = <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a> - cInfo-&gt;<a class="code hl_function" href="classWTSCommodityInfo.html#aeb4de8e6a40d00215ebfae5363137694">getPriceTick</a>()*<a class="code hl_variable" href="classWtUftStraDemo.html#abde399df409bb7014a419520d9695337">_offset</a>;</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span> </div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>            <span class="comment">// 发送卖出指令</span></div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>            <span class="keyword">auto</span> ids = ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#aebf350b1b476c2032b809df41781c456">stra_sell</a>(code, targetPx, <a class="code hl_variable" href="classWtUftStraDemo.html#ac6d67fe9ab777ead707cf441d7679b32">_lots</a>, <a class="code hl_variable" href="IUftStraCtx_8h.html#a0f1b45f0814910a7fa809fe7d8e99331">UFT_OrderFlag_Nor</a>);</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>            {</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>                <span class="comment">// 将新生成的订单ID加入监控列表</span></div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>                <a class="code hl_variable" href="classWtUftStraDemo.html#a9a14b0eb4ec60566a395bcd6955530e6">_mtx_ords</a>.<a class="code hl_function" href="classSpinMutex.html#a736a7883332176a3eb2960406deeaf94">lock</a>();</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>                <span class="keywordflow">for</span> (uint32_t localid : ids)</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>                    <a class="code hl_variable" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">_orders</a>.insert(localid);</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>                <a class="code hl_variable" href="classWtUftStraDemo.html#a9a14b0eb4ec60566a395bcd6955530e6">_mtx_ords</a>.<a class="code hl_function" href="classSpinMutex.html#a0bcc18e687d2f72821a22c76c8b09644">unlock</a>();</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>                <span class="comment">// 更新最后入场时间</span></div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>                <a class="code hl_variable" href="classWtUftStraDemo.html#aaa311b8ee47a030ddc7bb9576c21724d">_last_entry_time</a> = now;</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>            }</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        }</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    }</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>}</div>
+</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span> </div>
+<div class="foldopen" id="foldopen00260" data-start="{" data-end="}">
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#ac90451d5eb720af565dcfe4288461107">  260</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#ac90451d5eb720af565dcfe4288461107">WtUftStraDemo::check_orders</a>()</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>{</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>    <span class="comment">// 如果有待成交的订单且最后入场时间有效</span></div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">_orders</a>.empty() &amp;&amp; <a class="code hl_variable" href="classWtUftStraDemo.html#aaa311b8ee47a030ddc7bb9576c21724d">_last_entry_time</a> != UINT64_MAX)</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>    {</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>        <span class="comment">// 获取当前时间</span></div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>        uint64_t now = <a class="code hl_function" href="classTimeUtils.html#ade8f9d6db3e20f1057aad655a655d6fd">TimeUtils::makeTime</a>(<a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#ab6de4a2a8ca261074f575b0dbbcf9e1a">stra_get_date</a>(), <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#ae5acb469bf4e7da19f12df52b0a3be88">stra_get_time</a>() * 100000 + <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#aaf074f861f97eb8b615d5c0e9e882541">stra_get_secs</a>());</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>        <span class="comment">// 如果超过设定的超时时间（_secs秒），则撤销所有订单</span></div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>        <span class="keywordflow">if</span> (now - <a class="code hl_variable" href="classWtUftStraDemo.html#aaa311b8ee47a030ddc7bb9576c21724d">_last_entry_time</a> &gt;= <a class="code hl_variable" href="classWtUftStraDemo.html#a5254ae4adb8418066ee6b0fd9c452568">_secs</a> * 1000) <span class="comment">//如果超过一定时间没有成交完,则撤销</span></div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>        {</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>            <span class="comment">// 加锁以保护并发安全</span></div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>            <a class="code hl_variable" href="classWtUftStraDemo.html#a9a14b0eb4ec60566a395bcd6955530e6">_mtx_ords</a>.<a class="code hl_function" href="classSpinMutex.html#a736a7883332176a3eb2960406deeaf94">lock</a>();</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>            <span class="comment">// 遍历并撤销所有订单</span></div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>            <span class="keywordflow">for</span> (<span class="keyword">auto</span> localid : <a class="code hl_variable" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">_orders</a>)</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>            {</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>                <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#ab29eaeb26129c9ac7224dc2a9e15cb44">stra_cancel</a>(localid);  <span class="comment">// 撤销订单</span></div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>                <a class="code hl_variable" href="classWtUftStraDemo.html#ad4d4e3b871e7a164ec2d2e7a88c1aa23">_cancel_cnt</a>++;               <span class="comment">// 撤单计数器增加</span></div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>                <span class="comment">// 输出日志，记录撤单信息</span></div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>                <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a445add638bb9b8c84e9c03c425c57c56">stra_log_info</a>(fmt::format(<span class="stringliteral">&quot;Order expired, cancelcnt updated to {}&quot;</span>, <a class="code hl_variable" href="classWtUftStraDemo.html#ad4d4e3b871e7a164ec2d2e7a88c1aa23">_cancel_cnt</a>).c_str());</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>            }</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>            <span class="comment">// 释放锁</span></div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>            <a class="code hl_variable" href="classWtUftStraDemo.html#a9a14b0eb4ec60566a395bcd6955530e6">_mtx_ords</a>.<a class="code hl_function" href="classSpinMutex.html#a0bcc18e687d2f72821a22c76c8b09644">unlock</a>();</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>        }</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>    }</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>}</div>
+</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span> </div>
+<div class="foldopen" id="foldopen00295" data-start="{" data-end="}">
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a66583d927b2c79aa075aaf3d15dbf3d4">  295</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a66583d927b2c79aa075aaf3d15dbf3d4">WtUftStraDemo::on_bar</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, uint32_t times, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* newBar)</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>{</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>    <span class="comment">// 当前示例策略中不使用K线数据进行交易决策</span></div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>}</div>
+</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span> </div>
+<div class="foldopen" id="foldopen00311" data-start="{" data-end="}">
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a634baaf5aa64017c1fed9771a3ee59e0">  311</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a634baaf5aa64017c1fed9771a3ee59e0">WtUftStraDemo::on_trade</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx, uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isLong, uint32_t offset, <span class="keywordtype">double</span> qty, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>)</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>{</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>    <span class="comment">// 当前示例策略中不处理成交回调</span></div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>}</div>
+</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span> </div>
+<div class="foldopen" id="foldopen00327" data-start="{" data-end="}">
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a9a6f5e5f5987f7467bea2f4f2901d5b0">  327</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a9a6f5e5f5987f7467bea2f4f2901d5b0">WtUftStraDemo::on_position</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isLong, <span class="keywordtype">double</span> prevol, <span class="keywordtype">double</span> preavail, <span class="keywordtype">double</span> newvol, <span class="keywordtype">double</span> newavail)</div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>{</div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>    <span class="comment">// 如果不是监控的品种，则直接返回</span></div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtUftStraDemo.html#a9bdf226a36e0f034c31c57e44ac8af8c">_code</a> != stdCode)</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span> </div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>    <span class="comment">// 保存前一交易日持仓值</span></div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#afc9273b9acd37e94bc8e6f149b99cb1c">_prev</a> = prevol;</div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>    <span class="comment">// 输出日志，记录前一交易日持仓情况</span></div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a445add638bb9b8c84e9c03c425c57c56">stra_log_info</a>(fmt::format(<span class="stringliteral">&quot;There are {} of {} before today&quot;</span>, <a class="code hl_variable" href="classWtUftStraDemo.html#afc9273b9acd37e94bc8e6f149b99cb1c">_prev</a>, stdCode).c_str());</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>}</div>
+</div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span> </div>
+<div class="foldopen" id="foldopen00352" data-start="{" data-end="}">
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a33550cdaa29931a1d89023a9243d9fa5">  352</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a33550cdaa29931a1d89023a9243d9fa5">WtUftStraDemo::on_order</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx, uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isLong, uint32_t offset, <span class="keywordtype">double</span> totalQty, <span class="keywordtype">double</span> leftQty, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <span class="keywordtype">bool</span> isCanceled)</div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>{</div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>    <span class="comment">//如果不是我发出去的订单,我就不管了</span></div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">_orders</a>.find(localid);</div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">_orders</a>.end())</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span> </div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>    <span class="comment">//如果已撤销或者剩余数量为0,则清除掉原有的id记录</span></div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>    <span class="keywordflow">if</span>(isCanceled || leftQty == 0)</div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>    {</div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>        <span class="comment">// 加锁以保护并发安全</span></div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>        <a class="code hl_variable" href="classWtUftStraDemo.html#a9a14b0eb4ec60566a395bcd6955530e6">_mtx_ords</a>.<a class="code hl_function" href="classSpinMutex.html#a736a7883332176a3eb2960406deeaf94">lock</a>();</div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>        <span class="comment">// 从订单集合中移除该订单</span></div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>        <a class="code hl_variable" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">_orders</a>.erase(it);</div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>        <span class="comment">// 如果有撤单计数，则减少计数并输出日志</span></div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtUftStraDemo.html#ad4d4e3b871e7a164ec2d2e7a88c1aa23">_cancel_cnt</a> &gt; 0)</div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>        {</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>            <a class="code hl_variable" href="classWtUftStraDemo.html#ad4d4e3b871e7a164ec2d2e7a88c1aa23">_cancel_cnt</a>--;</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>            <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a445add638bb9b8c84e9c03c425c57c56">stra_log_info</a>(fmt::format(<span class="stringliteral">&quot;cancelcnt -&gt; {}&quot;</span>, <a class="code hl_variable" href="classWtUftStraDemo.html#ad4d4e3b871e7a164ec2d2e7a88c1aa23">_cancel_cnt</a>).c_str());</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>        }</div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>        <span class="comment">// 释放锁</span></div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>        <a class="code hl_variable" href="classWtUftStraDemo.html#a9a14b0eb4ec60566a395bcd6955530e6">_mtx_ords</a>.<a class="code hl_function" href="classSpinMutex.html#a0bcc18e687d2f72821a22c76c8b09644">unlock</a>();</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>    }</div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>}</div>
+</div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span> </div>
+<div class="foldopen" id="foldopen00382" data-start="{" data-end="}">
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a0102d1c22b4902a480694ecd0926b96d">  382</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a0102d1c22b4902a480694ecd0926b96d">WtUftStraDemo::on_channel_ready</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx)</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>{</div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>    <span class="comment">// 获取当前品种的未完成订单数量</span></div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>    <span class="keywordtype">double</span> undone = <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a1b7ee39019baa5cde3a41660b52bb9cb">stra_get_undone</a>(<a class="code hl_variable" href="classWtUftStraDemo.html#a9bdf226a36e0f034c31c57e44ac8af8c">_code</a>.c_str());</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>    <span class="comment">// 如果有未完成订单但不在当前监控列表中，则需要处理</span></div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="namespacedecimal.html#a9acf2c0f2cb49024df804e7464472774">decimal::eq</a>(undone, 0) &amp;&amp; <a class="code hl_variable" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">_orders</a>.empty())</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>    {</div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>        <span class="comment">//这说明有未完成单不在监控之中,先撤掉</span></div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>        <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a445add638bb9b8c84e9c03c425c57c56">stra_log_info</a>(fmt::format(<span class="stringliteral">&quot;{}有不在管理中的未完成单 {} 手,全部撤销&quot;</span>, <a class="code hl_variable" href="classWtUftStraDemo.html#a9bdf226a36e0f034c31c57e44ac8af8c">_code</a>, undone).c_str());</div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span> </div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>        <span class="comment">// 撤销所有未完成订单并获取撤单ID列表</span></div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>        <a class="code hl_typedef" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a> ids = <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a527a2d59f3dc89de15b1c08abb62dc2f">stra_cancel_all</a>(<a class="code hl_variable" href="classWtUftStraDemo.html#a9bdf226a36e0f034c31c57e44ac8af8c">_code</a>.c_str());</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>        <span class="comment">// 将撤单ID添加到监控列表中</span></div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span> localid : ids)</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>        {</div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>            <a class="code hl_variable" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">_orders</a>.insert(localid);</div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>        }</div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>        <span class="comment">// 更新撤单计数器</span></div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>        <a class="code hl_variable" href="classWtUftStraDemo.html#ad4d4e3b871e7a164ec2d2e7a88c1aa23">_cancel_cnt</a> += ids.size();</div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span> </div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>        <span class="comment">// 输出日志记录撤单信息</span></div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>        <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a445add638bb9b8c84e9c03c425c57c56">stra_log_info</a>(fmt::format(<span class="stringliteral">&quot;cancelcnt -&gt; {}&quot;</span>, <a class="code hl_variable" href="classWtUftStraDemo.html#ad4d4e3b871e7a164ec2d2e7a88c1aa23">_cancel_cnt</a>).c_str());</div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>    }</div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span> </div>
+<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>    <span class="comment">// 标记交易通道为就绪状态</span></div>
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#a283154f51a05bda19108ee15f5fa28ea">_channel_ready</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>}</div>
+</div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span> </div>
+<div class="foldopen" id="foldopen00415" data-start="{" data-end="}">
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#ae13982f8659316fb2aad3b35bbc1c975">  415</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#ae13982f8659316fb2aad3b35bbc1c975">WtUftStraDemo::on_channel_lost</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx)</div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>{</div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>    <span class="comment">// 标记交易通道为非就绪状态，暂停交易活动</span></div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#a283154f51a05bda19108ee15f5fa28ea">_channel_ready</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>}</div>
+</div>
+<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span> </div>
+<div class="foldopen" id="foldopen00425" data-start="{" data-end="}">
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#adae01dee054d86f6280f43d468e9dbb2">  425</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#adae01dee054d86f6280f43d468e9dbb2">WtUftStraDemo::on_params_updated</a>()</div>
+<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>{</div>
+<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>    <span class="comment">// 以下是对应于init中设置的监视参数</span></div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>    <span class="comment">//ctx-&gt;watch_param(&quot;second&quot;, _secs);</span></div>
+<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span>    <span class="comment">//ctx-&gt;watch_param(&quot;freq&quot;, _freq);</span></div>
+<div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span>    <span class="comment">//ctx-&gt;watch_param(&quot;offset&quot;, _offset);</span></div>
+<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>    <span class="comment">//ctx-&gt;watch_param(&quot;lots&quot;, _lots);</span></div>
+<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span> </div>
+<div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span>    <span class="comment">// 从上下文中读取更新后的参数值</span></div>
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#a5254ae4adb8418066ee6b0fd9c452568">_secs</a> = <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a50b0c46274956eaf072eb8ab6e5d1e7a">read_param</a>(<span class="stringliteral">&quot;second&quot;</span>, <a class="code hl_variable" href="classWtUftStraDemo.html#a5254ae4adb8418066ee6b0fd9c452568">_secs</a>);    <span class="comment">// 读取超时时间参数</span></div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#a333d9231796c0d0de8b747a368ee247e">_freq</a> = <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a50b0c46274956eaf072eb8ab6e5d1e7a">read_param</a>(<span class="stringliteral">&quot;freq&quot;</span>, <a class="code hl_variable" href="classWtUftStraDemo.html#a333d9231796c0d0de8b747a368ee247e">_freq</a>);      <span class="comment">// 读取交易频率参数</span></div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#abde399df409bb7014a419520d9695337">_offset</a> = <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a50b0c46274956eaf072eb8ab6e5d1e7a">read_param</a>(<span class="stringliteral">&quot;offset&quot;</span>, <a class="code hl_variable" href="classWtUftStraDemo.html#abde399df409bb7014a419520d9695337">_offset</a>); <span class="comment">// 读取价格偏移参数</span></div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#ac6d67fe9ab777ead707cf441d7679b32">_lots</a> = <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a50b0c46274956eaf072eb8ab6e5d1e7a">read_param</a>(<span class="stringliteral">&quot;lots&quot;</span>, <a class="code hl_variable" href="classWtUftStraDemo.html#ac6d67fe9ab777ead707cf441d7679b32">_lots</a>);       <span class="comment">// 读取交易手数参数</span></div>
+<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span> </div>
+<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span>    <span class="comment">// 输出日志记录参数更新情况</span></div>
+<div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span>    <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a445add638bb9b8c84e9c03c425c57c56">stra_log_info</a>(<a class="code hl_function" href="namespacefmtutil.html#a1f93a656d7489a2dd7ca4ac7a0f8ba71">fmtutil::format</a>(<span class="stringliteral">&quot;[{}] Params updated, second: {}, freq: {}, offset: {}, lots: {}&quot;</span>, <a class="code hl_variable" href="classUftStrategy.html#a6b5267a9502bfd5a6cb3bff1e7ff5d60">_id</a>.c_str(), <a class="code hl_variable" href="classWtUftStraDemo.html#a5254ae4adb8418066ee6b0fd9c452568">_secs</a>, <a class="code hl_variable" href="classWtUftStraDemo.html#a333d9231796c0d0de8b747a368ee247e">_freq</a>, <a class="code hl_variable" href="classWtUftStraDemo.html#abde399df409bb7014a419520d9695337">_offset</a>, <a class="code hl_variable" href="classWtUftStraDemo.html#ac6d67fe9ab777ead707cf441d7679b32">_lots</a>));</div>
+<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span>}</div>
+</div>
+<div class="ttc" id="aExecuteDefs_8h_html_a5956353808ff4eea2def6475db30bc0d"><div class="ttname"><a href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a></div><div class="ttdeci">std::vector&lt; uint32_t &gt; OrderIDs</div><div class="ttdef"><b>Definition</b> <a href="ExecuteDefs_8h_source.html#l00021">ExecuteDefs.h:21</a></div></div>
+<div class="ttc" id="aIUftStraCtx_8h_html_a0f1b45f0814910a7fa809fe7d8e99331"><div class="ttname"><a href="IUftStraCtx_8h.html#a0f1b45f0814910a7fa809fe7d8e99331">UFT_OrderFlag_Nor</a></div><div class="ttdeci">static const int UFT_OrderFlag_Nor</div><div class="ttdef"><b>Definition</b> <a href="IUftStraCtx_8h_source.html#l00027">IUftStraCtx.h:27</a></div></div>
+<div class="ttc" id="aWtCtaStraFact_8cpp_html_aee880c24316260593ee859c8443ff4b6"><div class="ttname"><a href="WtCtaStraFact_8cpp.html#aee880c24316260593ee859c8443ff4b6">FACT_NAME</a></div><div class="ttdeci">const char * FACT_NAME</div><div class="ttdoc">外部声明的工厂名称常量</div><div class="ttdef"><b>Definition</b> <a href="WtCtaStraFact_8cpp_source.html#l00017">WtCtaStraFact.cpp:17</a></div></div>
+<div class="ttc" id="aWtUftStraDemo_8cpp_html_aee880c24316260593ee859c8443ff4b6"><div class="ttname"><a href="WtUftStraDemo_8cpp.html#aee880c24316260593ee859c8443ff4b6">FACT_NAME</a></div><div class="ttdeci">const char * FACT_NAME</div><div class="ttdoc">外部声明的工厂名称</div><div class="ttdef"><b>Definition</b> <a href="WtCtaStraFact_8cpp_source.html#l00017">WtCtaStraFact.cpp:17</a></div></div>
+<div class="ttc" id="aWtUftStraDemo_8h_html"><div class="ttname"><a href="WtUftStraDemo_8h.html">WtUftStraDemo.h</a></div><div class="ttdoc">UFT策略演示类头文件</div></div>
+<div class="ttc" id="aclassIUftStraCtx_html"><div class="ttname"><a href="classIUftStraCtx.html">IUftStraCtx</a></div><div class="ttdef"><b>Definition</b> <a href="IUftStraCtx_8h_source.html#l00031">IUftStraCtx.h:32</a></div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_a1b7ee39019baa5cde3a41660b52bb9cb"><div class="ttname"><a href="classIUftStraCtx.html#a1b7ee39019baa5cde3a41660b52bb9cb">IUftStraCtx::stra_get_undone</a></div><div class="ttdeci">virtual double stra_get_undone(const char *stdCode)=0</div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_a2843cbe19d9db2da529c25cd666790d2"><div class="ttname"><a href="classIUftStraCtx.html#a2843cbe19d9db2da529c25cd666790d2">IUftStraCtx::commit_param_watcher</a></div><div class="ttdeci">virtual void commit_param_watcher()</div><div class="ttdef"><b>Definition</b> <a href="IUftStraCtx_8h_source.html#l00071">IUftStraCtx.h:71</a></div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_a400b2915afabcc34c2dee7dfec85fb1f"><div class="ttname"><a href="classIUftStraCtx.html#a400b2915afabcc34c2dee7dfec85fb1f">IUftStraCtx::stra_get_bars</a></div><div class="ttdeci">virtual WTSKlineSlice * stra_get_bars(const char *stdCode, const char *period, uint32_t count)=0</div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_a445add638bb9b8c84e9c03c425c57c56"><div class="ttname"><a href="classIUftStraCtx.html#a445add638bb9b8c84e9c03c425c57c56">IUftStraCtx::stra_log_info</a></div><div class="ttdeci">virtual void stra_log_info(const char *message)=0</div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_a48420eb467018e92e94d735772f41c4c"><div class="ttname"><a href="classIUftStraCtx.html#a48420eb467018e92e94d735772f41c4c">IUftStraCtx::stra_get_position</a></div><div class="ttdeci">virtual double stra_get_position(const char *stdCode, bool bOnlyValid=false, int32_t iFlag=3)=0</div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_a4fd161ff52d4b39fdfe9f38bd04bf2ad"><div class="ttname"><a href="classIUftStraCtx.html#a4fd161ff52d4b39fdfe9f38bd04bf2ad">IUftStraCtx::stra_buy</a></div><div class="ttdeci">virtual OrderIDs stra_buy(const char *stdCode, double price, double qty, int flag=0)</div><div class="ttdef"><b>Definition</b> <a href="IUftStraCtx_8h_source.html#l00113">IUftStraCtx.h:113</a></div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_a50b0c46274956eaf072eb8ab6e5d1e7a"><div class="ttname"><a href="classIUftStraCtx.html#a50b0c46274956eaf072eb8ab6e5d1e7a">IUftStraCtx::read_param</a></div><div class="ttdeci">virtual const char * read_param(const char *name, const char *defVal=&quot;&quot;)</div><div class="ttdef"><b>Definition</b> <a href="IUftStraCtx_8h_source.html#l00073">IUftStraCtx.h:73</a></div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_a527a2d59f3dc89de15b1c08abb62dc2f"><div class="ttname"><a href="classIUftStraCtx.html#a527a2d59f3dc89de15b1c08abb62dc2f">IUftStraCtx::stra_cancel_all</a></div><div class="ttdeci">virtual OrderIDs stra_cancel_all(const char *stdCode)=0</div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_a5eafaadd9aaddb9fd11a2d00826592f8"><div class="ttname"><a href="classIUftStraCtx.html#a5eafaadd9aaddb9fd11a2d00826592f8">IUftStraCtx::stra_sub_ticks</a></div><div class="ttdeci">virtual void stra_sub_ticks(const char *stdCode)=0</div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_aa90cf95cf271845a8c393313da8a96e9"><div class="ttname"><a href="classIUftStraCtx.html#aa90cf95cf271845a8c393313da8a96e9">IUftStraCtx::stra_get_last_tick</a></div><div class="ttdeci">virtual WTSTickData * stra_get_last_tick(const char *stdCode)=0</div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_aaae81348795c0f7f95b38ea7b6ff4a99"><div class="ttname"><a href="classIUftStraCtx.html#aaae81348795c0f7f95b38ea7b6ff4a99">IUftStraCtx::stra_get_comminfo</a></div><div class="ttdeci">virtual WTSCommodityInfo * stra_get_comminfo(const char *stdCode)=0</div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_aaf074f861f97eb8b615d5c0e9e882541"><div class="ttname"><a href="classIUftStraCtx.html#aaf074f861f97eb8b615d5c0e9e882541">IUftStraCtx::stra_get_secs</a></div><div class="ttdeci">virtual uint32_t stra_get_secs()=0</div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_ab29eaeb26129c9ac7224dc2a9e15cb44"><div class="ttname"><a href="classIUftStraCtx.html#ab29eaeb26129c9ac7224dc2a9e15cb44">IUftStraCtx::stra_cancel</a></div><div class="ttdeci">virtual bool stra_cancel(uint32_t localid)=0</div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_ab6de4a2a8ca261074f575b0dbbcf9e1a"><div class="ttname"><a href="classIUftStraCtx.html#ab6de4a2a8ca261074f575b0dbbcf9e1a">IUftStraCtx::stra_get_date</a></div><div class="ttdeci">virtual uint32_t stra_get_date()=0</div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_ae5acb469bf4e7da19f12df52b0a3be88"><div class="ttname"><a href="classIUftStraCtx.html#ae5acb469bf4e7da19f12df52b0a3be88">IUftStraCtx::stra_get_time</a></div><div class="ttdeci">virtual uint32_t stra_get_time()=0</div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_aebf350b1b476c2032b809df41781c456"><div class="ttname"><a href="classIUftStraCtx.html#aebf350b1b476c2032b809df41781c456">IUftStraCtx::stra_sell</a></div><div class="ttdeci">virtual OrderIDs stra_sell(const char *stdCode, double price, double qty, int flag=0)</div><div class="ttdef"><b>Definition</b> <a href="IUftStraCtx_8h_source.html#l00123">IUftStraCtx.h:123</a></div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_af0ca8c44c1f17ed0f9a6e4eda51804d2"><div class="ttname"><a href="classIUftStraCtx.html#af0ca8c44c1f17ed0f9a6e4eda51804d2">IUftStraCtx::watch_param</a></div><div class="ttdeci">virtual const char * watch_param(const char *name, const char *initVal=&quot;&quot;)</div><div class="ttdef"><b>Definition</b> <a href="IUftStraCtx_8h_source.html#l00064">IUftStraCtx.h:64</a></div></div>
+<div class="ttc" id="aclassSpinMutex_html_a0bcc18e687d2f72821a22c76c8b09644"><div class="ttname"><a href="classSpinMutex.html#a0bcc18e687d2f72821a22c76c8b09644">SpinMutex::unlock</a></div><div class="ttdeci">void unlock()</div><div class="ttdoc">释放锁</div><div class="ttdef"><b>Definition</b> <a href="SpinMutex_8hpp_source.html#l00077">SpinMutex.hpp:77</a></div></div>
+<div class="ttc" id="aclassSpinMutex_html_a736a7883332176a3eb2960406deeaf94"><div class="ttname"><a href="classSpinMutex.html#a736a7883332176a3eb2960406deeaf94">SpinMutex::lock</a></div><div class="ttdeci">void lock()</div><div class="ttdoc">获取锁</div><div class="ttdef"><b>Definition</b> <a href="SpinMutex_8hpp_source.html#l00043">SpinMutex.hpp:43</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_ade8f9d6db3e20f1057aad655a655d6fd"><div class="ttname"><a href="classTimeUtils.html#ade8f9d6db3e20f1057aad655a655d6fd">TimeUtils::makeTime</a></div><div class="ttdeci">static int64_t makeTime(long lDate, long lTimeWithMs, bool isToUTC=false)</div><div class="ttdoc">生成带毫秒的时间戳</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00340">TimeUtils.hpp:340</a></div></div>
+<div class="ttc" id="aclassUftStrategy_html"><div class="ttname"><a href="classUftStrategy.html">UftStrategy</a></div><div class="ttdef"><b>Definition</b> <a href="UftStrategyDefs_8h_source.html#l00028">UftStrategyDefs.h:29</a></div></div>
+<div class="ttc" id="aclassUftStrategy_html_a6b5267a9502bfd5a6cb3bff1e7ff5d60"><div class="ttname"><a href="classUftStrategy.html#a6b5267a9502bfd5a6cb3bff1e7ff5d60">UftStrategy::_id</a></div><div class="ttdeci">std::string _id</div><div class="ttdef"><b>Definition</b> <a href="UftStrategyDefs_8h_source.html#l00169">UftStrategyDefs.h:169</a></div></div>
+<div class="ttc" id="aclassWTSCommodityInfo_html"><div class="ttname"><a href="classWTSCommodityInfo.html">WTSCommodityInfo</a></div><div class="ttdoc">品种信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00020">WTSContractInfo.hpp:21</a></div></div>
+<div class="ttc" id="aclassWTSCommodityInfo_html_aeb4de8e6a40d00215ebfae5363137694"><div class="ttname"><a href="classWTSCommodityInfo.html#aeb4de8e6a40d00215ebfae5363137694">WTSCommodityInfo::getPriceTick</a></div><div class="ttdeci">double getPriceTick() const</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00059">WTSContractInfo.hpp:59</a></div></div>
+<div class="ttc" id="aclassWTSKlineSlice_html"><div class="ttname"><a href="classWTSKlineSlice.html">WTSKlineSlice</a></div><div class="ttdoc">K线数据切片类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l00295">WTSDataDef.hpp:296</a></div></div>
+<div class="ttc" id="aclassWTSObject_html_a57b87f47529974f735f4989eaf2dd55f"><div class="ttname"><a href="classWTSObject.html#a57b87f47529974f735f4989eaf2dd55f">WTSObject::release</a></div><div class="ttdeci">virtual void release()</div><div class="ttdef"><b>Definition</b> <a href="WTSObject_8hpp_source.html#l00029">WTSObject.hpp:29</a></div></div>
+<div class="ttc" id="aclassWTSPoolObject_html_a868f127b3ccc31cba6b077803cb00951"><div class="ttname"><a href="classWTSPoolObject.html#a868f127b3ccc31cba6b077803cb00951">WTSPoolObject::release</a></div><div class="ttdeci">virtual void release() override</div><div class="ttdef"><b>Definition</b> <a href="WTSObject_8hpp_source.html#l00092">WTSObject.hpp:92</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a12aa24165f23c4dacd1e4f686a2f5879"><div class="ttname"><a href="classWTSTickData.html#a12aa24165f23c4dacd1e4f686a2f5879">WTSTickData::actiontime</a></div><div class="ttdeci">uint32_t actiontime() const</div><div class="ttdoc">获取数据发生时间</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01506">WTSDataDef.hpp:1506</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a1428afc0bb0e6d1bb01be62bc5743631"><div class="ttname"><a href="classWTSTickData.html#a1428afc0bb0e6d1bb01be62bc5743631">WTSTickData::bidqty</a></div><div class="ttdeci">double bidqty(int idx) const</div><div class="ttdoc">获取指定档位的委买量（买盘量）</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01552">WTSDataDef.hpp:1552</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a235e2995d16b634c5edd5d4a45308302"><div class="ttname"><a href="classWTSTickData.html#a235e2995d16b634c5edd5d4a45308302">WTSTickData::askprice</a></div><div class="ttdeci">double askprice(int idx) const</div><div class="ttdoc">获取指定档位的委卖价（卖盘价）</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01535">WTSDataDef.hpp:1535</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a2c374d0964b76835c0eaf1450a488302"><div class="ttname"><a href="classWTSTickData.html#a2c374d0964b76835c0eaf1450a488302">WTSTickData::askqty</a></div><div class="ttdeci">double askqty(int idx) const</div><div class="ttdoc">获取指定档位的委卖量（卖盘量）</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01569">WTSDataDef.hpp:1569</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a803d1804cb06e32d69064ecd253f1c9d"><div class="ttname"><a href="classWTSTickData.html#a803d1804cb06e32d69064ecd253f1c9d">WTSTickData::bidprice</a></div><div class="ttdeci">double bidprice(int idx) const</div><div class="ttdoc">获取指定档位的委买价（买盘价）</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01518">WTSDataDef.hpp:1518</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_ae502123e14736815e734b7f6456cfd13"><div class="ttname"><a href="classWTSTickData.html#ae502123e14736815e734b7f6456cfd13">WTSTickData::price</a></div><div class="ttdeci">double price() const</div><div class="ttdoc">获取Tick数据的最新成交价</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01338">WTSDataDef.hpp:1338</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a394beb745c43614ae782ea502735143f"><div class="ttname"><a href="classWTSVariant.html#a394beb745c43614ae782ea502735143f">WTSVariant::getDouble</a></div><div class="ttdeci">double getDouble(const char *name) const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00321">WTSVariant.hpp:321</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a830db11fc8daceff409fdbebaa7bea8a"><div class="ttname"><a href="classWTSVariant.html#a830db11fc8daceff409fdbebaa7bea8a">WTSVariant::getCString</a></div><div class="ttdeci">const char * getCString(const char *name) const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00339">WTSVariant.hpp:339</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a9c09f146129a4f35dc04b490fef8887c"><div class="ttname"><a href="classWTSVariant.html#a9c09f146129a4f35dc04b490fef8887c">WTSVariant::getUInt32</a></div><div class="ttdeci">uint32_t getUInt32(const char *name) const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00294">WTSVariant.hpp:294</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a0102d1c22b4902a480694ecd0926b96d"><div class="ttname"><a href="classWtUftStraDemo.html#a0102d1c22b4902a480694ecd0926b96d">WtUftStraDemo::on_channel_ready</a></div><div class="ttdeci">virtual void on_channel_ready(IUftStraCtx *ctx) override</div><div class="ttdoc">交易通道就绪回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00382">WtUftStraDemo.cpp:382</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a02cf7e06345d25024ff00b5a576bb921"><div class="ttname"><a href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">WtUftStraDemo::_orders</a></div><div class="ttdeci">IDSet _orders</div><div class="ttdoc">当前活跃订单ID集合</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00189">WtUftStraDemo.h:189</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a073dfebdb8073387ded52caf77e01ae8"><div class="ttname"><a href="classWtUftStraDemo.html#a073dfebdb8073387ded52caf77e01ae8">WtUftStraDemo::_last_tick</a></div><div class="ttdeci">WTSTickData * _last_tick</div><div class="ttdoc">最后一个Tick数据</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00170">WtUftStraDemo.h:170</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a1a0bddddae04e1991253ba08ed950dae"><div class="ttname"><a href="classWtUftStraDemo.html#a1a0bddddae04e1991253ba08ed950dae">WtUftStraDemo::WtUftStraDemo</a></div><div class="ttdeci">WtUftStraDemo(const char *id)</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00029">WtUftStraDemo.cpp:29</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a283154f51a05bda19108ee15f5fa28ea"><div class="ttname"><a href="classWtUftStraDemo.html#a283154f51a05bda19108ee15f5fa28ea">WtUftStraDemo::_channel_ready</a></div><div class="ttdeci">bool _channel_ready</div><div class="ttdoc">交易通道是否就绪</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00197">WtUftStraDemo.h:197</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a2bc91850e2fec69fd7abe34e43617c98"><div class="ttname"><a href="classWtUftStraDemo.html#a2bc91850e2fec69fd7abe34e43617c98">WtUftStraDemo::_last_calc_time</a></div><div class="ttdeci">uint32_t _last_calc_time</div><div class="ttdoc">最后一次计算时间（分钟）</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00199">WtUftStraDemo.h:199</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a30a9fc1378e1f186fb26213e896f4641"><div class="ttname"><a href="classWtUftStraDemo.html#a30a9fc1378e1f186fb26213e896f4641">WtUftStraDemo::on_tick</a></div><div class="ttdeci">virtual void on_tick(IUftStraCtx *ctx, const char *code, WTSTickData *newTick) override</div><div class="ttdoc">Tick数据回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00144">WtUftStraDemo.cpp:144</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a311e2c1aa3100dd79a93fc1727cfc59a"><div class="ttname"><a href="classWtUftStraDemo.html#a311e2c1aa3100dd79a93fc1727cfc59a">WtUftStraDemo::getName</a></div><div class="ttdeci">virtual const char * getName() override</div><div class="ttdoc">获取策略名称</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00057">WtUftStraDemo.cpp:57</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a333d9231796c0d0de8b747a368ee247e"><div class="ttname"><a href="classWtUftStraDemo.html#a333d9231796c0d0de8b747a368ee247e">WtUftStraDemo::_freq</a></div><div class="ttdeci">uint32_t _freq</div><div class="ttdoc">交易频率控制，以毫秒为单位</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00178">WtUftStraDemo.h:178</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a33550cdaa29931a1d89023a9243d9fa5"><div class="ttname"><a href="classWtUftStraDemo.html#a33550cdaa29931a1d89023a9243d9fa5">WtUftStraDemo::on_order</a></div><div class="ttdeci">virtual void on_order(IUftStraCtx *ctx, uint32_t localid, const char *stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled) override</div><div class="ttdoc">订单状态回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00352">WtUftStraDemo.cpp:352</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a5254ae4adb8418066ee6b0fd9c452568"><div class="ttname"><a href="classWtUftStraDemo.html#a5254ae4adb8418066ee6b0fd9c452568">WtUftStraDemo::_secs</a></div><div class="ttdeci">uint32_t _secs</div><div class="ttdoc">检查订单超时的秒数</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00176">WtUftStraDemo.h:176</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a599af78fec17ad150919688dd13f8f27"><div class="ttname"><a href="classWtUftStraDemo.html#a599af78fec17ad150919688dd13f8f27">WtUftStraDemo::getFactName</a></div><div class="ttdeci">virtual const char * getFactName() override</div><div class="ttdoc">获取策略所属工厂名称</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00067">WtUftStraDemo.cpp:67</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a634baaf5aa64017c1fed9771a3ee59e0"><div class="ttname"><a href="classWtUftStraDemo.html#a634baaf5aa64017c1fed9771a3ee59e0">WtUftStraDemo::on_trade</a></div><div class="ttdeci">virtual void on_trade(IUftStraCtx *ctx, uint32_t localid, const char *stdCode, bool isLong, uint32_t offset, double qty, double price) override</div><div class="ttdoc">成交回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00311">WtUftStraDemo.cpp:311</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a66583d927b2c79aa075aaf3d15dbf3d4"><div class="ttname"><a href="classWtUftStraDemo.html#a66583d927b2c79aa075aaf3d15dbf3d4">WtUftStraDemo::on_bar</a></div><div class="ttdeci">virtual void on_bar(IUftStraCtx *ctx, const char *code, const char *period, uint32_t times, WTSBarStruct *newBar) override</div><div class="ttdoc">K线数据回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00295">WtUftStraDemo.cpp:295</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a6b9587bcf3f355a0f52373fc69a96244"><div class="ttname"><a href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">WtUftStraDemo::_ctx</a></div><div class="ttdeci">IUftStraCtx * _ctx</div><div class="ttdoc">策略上下文指针</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00172">WtUftStraDemo.h:172</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a83bc3c7a65424769f2c2aa3de2ff5281"><div class="ttname"><a href="classWtUftStraDemo.html#a83bc3c7a65424769f2c2aa3de2ff5281">WtUftStraDemo::on_entrust</a></div><div class="ttdeci">virtual void on_entrust(uint32_t localid, bool bSuccess, const char *message) override</div><div class="ttdoc">委托回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00098">WtUftStraDemo.cpp:98</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a9a14b0eb4ec60566a395bcd6955530e6"><div class="ttname"><a href="classWtUftStraDemo.html#a9a14b0eb4ec60566a395bcd6955530e6">WtUftStraDemo::_mtx_ords</a></div><div class="ttdeci">SpinMutex _mtx_ords</div><div class="ttdoc">订单集合访问互斥锁</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00191">WtUftStraDemo.h:191</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a9a6f5e5f5987f7467bea2f4f2901d5b0"><div class="ttname"><a href="classWtUftStraDemo.html#a9a6f5e5f5987f7467bea2f4f2901d5b0">WtUftStraDemo::on_position</a></div><div class="ttdeci">virtual void on_position(IUftStraCtx *ctx, const char *stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail) override</div><div class="ttdoc">持仓变更回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00327">WtUftStraDemo.cpp:327</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a9b3b99a159e85492fbb5617868fe474f"><div class="ttname"><a href="classWtUftStraDemo.html#a9b3b99a159e85492fbb5617868fe474f">WtUftStraDemo::on_init</a></div><div class="ttdeci">virtual void on_init(IUftStraCtx *ctx) override</div><div class="ttdoc">策略初始化回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00116">WtUftStraDemo.cpp:116</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a9bdf226a36e0f034c31c57e44ac8af8c"><div class="ttname"><a href="classWtUftStraDemo.html#a9bdf226a36e0f034c31c57e44ac8af8c">WtUftStraDemo::_code</a></div><div class="ttdeci">std::string _code</div><div class="ttdoc">交易品种代码</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00174">WtUftStraDemo.h:174</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_aaa311b8ee47a030ddc7bb9576c21724d"><div class="ttname"><a href="classWtUftStraDemo.html#aaa311b8ee47a030ddc7bb9576c21724d">WtUftStraDemo::_last_entry_time</a></div><div class="ttdeci">uint64_t _last_entry_time</div><div class="ttdoc">最后一次入场时间</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00194">WtUftStraDemo.h:194</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_abca72abef22c2cc39c21f47c1dd79d3a"><div class="ttname"><a href="classWtUftStraDemo.html#abca72abef22c2cc39c21f47c1dd79d3a">WtUftStraDemo::init</a></div><div class="ttdeci">virtual bool init(WTSVariant *cfg) override</div><div class="ttdoc">初始化策略</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00078">WtUftStraDemo.cpp:78</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_abde399df409bb7014a419520d9695337"><div class="ttname"><a href="classWtUftStraDemo.html#abde399df409bb7014a419520d9695337">WtUftStraDemo::_offset</a></div><div class="ttdeci">int32_t _offset</div><div class="ttdoc">下单价格偏移跳数</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00180">WtUftStraDemo.h:180</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_ac6d67fe9ab777ead707cf441d7679b32"><div class="ttname"><a href="classWtUftStraDemo.html#ac6d67fe9ab777ead707cf441d7679b32">WtUftStraDemo::_lots</a></div><div class="ttdeci">double _lots</div><div class="ttdoc">交易手数</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00182">WtUftStraDemo.h:182</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_ac90451d5eb720af565dcfe4288461107"><div class="ttname"><a href="classWtUftStraDemo.html#ac90451d5eb720af565dcfe4288461107">WtUftStraDemo::check_orders</a></div><div class="ttdeci">void check_orders()</div><div class="ttdoc">检查订单状态</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00260">WtUftStraDemo.cpp:260</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_ad0c112e569a877afad19d641d2370f7e"><div class="ttname"><a href="classWtUftStraDemo.html#ad0c112e569a877afad19d641d2370f7e">WtUftStraDemo::~WtUftStraDemo</a></div><div class="ttdeci">~WtUftStraDemo()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00045">WtUftStraDemo.cpp:45</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_ad4d4e3b871e7a164ec2d2e7a88c1aa23"><div class="ttname"><a href="classWtUftStraDemo.html#ad4d4e3b871e7a164ec2d2e7a88c1aa23">WtUftStraDemo::_cancel_cnt</a></div><div class="ttdeci">uint32_t _cancel_cnt</div><div class="ttdoc">撤单计数器</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00201">WtUftStraDemo.h:201</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_adae01dee054d86f6280f43d468e9dbb2"><div class="ttname"><a href="classWtUftStraDemo.html#adae01dee054d86f6280f43d468e9dbb2">WtUftStraDemo::on_params_updated</a></div><div class="ttdeci">virtual void on_params_updated() override</div><div class="ttdoc">策略参数更新回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00425">WtUftStraDemo.cpp:425</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_ae13982f8659316fb2aad3b35bbc1c975"><div class="ttname"><a href="classWtUftStraDemo.html#ae13982f8659316fb2aad3b35bbc1c975">WtUftStraDemo::on_channel_lost</a></div><div class="ttdeci">virtual void on_channel_lost(IUftStraCtx *ctx) override</div><div class="ttdoc">交易通道中断回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00415">WtUftStraDemo.cpp:415</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_afc9273b9acd37e94bc8e6f149b99cb1c"><div class="ttname"><a href="classWtUftStraDemo.html#afc9273b9acd37e94bc8e6f149b99cb1c">WtUftStraDemo::_prev</a></div><div class="ttdeci">double _prev</div><div class="ttdoc">前一交易日持仓</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00184">WtUftStraDemo.h:184</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_a04f887fc8800d4727971dbb8eb550132"><div class="ttname"><a href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a></div><div class="ttdeci">ATPPriceType price</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00040">main.cpp:40</a></div></div>
+<div class="ttc" id="anamespacedecimal_html_a6de5f873ba0191bdd61bf1870cd18b81"><div class="ttname"><a href="namespacedecimal.html#a6de5f873ba0191bdd61bf1870cd18b81">decimal::le</a></div><div class="ttdeci">bool le(double a, double b=0.0) noexcept</div><div class="ttdoc">判断第一个浮点数是否小于等于第二个浮点数</div><div class="ttdef"><b>Definition</b> <a href="decimal_8h_source.html#l00093">decimal.h:93</a></div></div>
+<div class="ttc" id="anamespacedecimal_html_a9acf2c0f2cb49024df804e7464472774"><div class="ttname"><a href="namespacedecimal.html#a9acf2c0f2cb49024df804e7464472774">decimal::eq</a></div><div class="ttdeci">bool eq(double a, double b=0.0) noexcept</div><div class="ttdoc">判断两个浮点数是否相等</div><div class="ttdef"><b>Definition</b> <a href="decimal_8h_source.html#l00045">decimal.h:45</a></div></div>
+<div class="ttc" id="anamespacedecimal_html_ae861a5f8f03dca10ee5cd60f1bf50ecd"><div class="ttname"><a href="namespacedecimal.html#ae861a5f8f03dca10ee5cd60f1bf50ecd">decimal::ge</a></div><div class="ttdeci">bool ge(double a, double b=0.0) noexcept</div><div class="ttdoc">判断第一个浮点数是否大于等于第二个浮点数</div><div class="ttdef"><b>Definition</b> <a href="decimal_8h_source.html#l00081">decimal.h:81</a></div></div>
+<div class="ttc" id="anamespacefmtutil_html_a1f93a656d7489a2dd7ca4ac7a0f8ba71"><div class="ttname"><a href="namespacefmtutil.html#a1f93a656d7489a2dd7ca4ac7a0f8ba71">fmtutil::format</a></div><div class="ttdeci">const char * format(const char *format, const Args &amp;...args)</div><div class="ttdoc">格式化字符串并返回结果</div><div class="ttdef"><b>Definition</b> <a href="fmtlib_8h_source.html#l00052">fmtlib.h:52</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_b83e7b1a28fa0ddd43e819a050ea4044.html">WtUftStraFact</a></li><li class="navelem"><a class="el" href="WtUftStraDemo_8cpp.html">WtUftStraDemo.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

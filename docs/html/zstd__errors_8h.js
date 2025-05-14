@@ -1,0 +1,35 @@
+var zstd__errors_8h =
+[
+    [ "ZSTDERRORLIB_API", "zstd__errors_8h.html#aba638ca88c24aaf1c6c1e1250cfee5d3", null ],
+    [ "ZSTDERRORLIB_VISIBILITY", "zstd__errors_8h.html#abd2280cbf96a1b3b523184f4a921070e", null ],
+    [ "ZSTD_ErrorCode", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37", [
+      [ "ZSTD_error_no_error", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a772de3d1ee688447540f78c6b1371c89", null ],
+      [ "ZSTD_error_GENERIC", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37abc227d32dc7cde66266cead14ca650d7", null ],
+      [ "ZSTD_error_prefix_unknown", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a53c2c67ef3d068aabc01f6e3d40098a2", null ],
+      [ "ZSTD_error_version_unsupported", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a0a9f0f8895bb47bbeb68974b59a19422", null ],
+      [ "ZSTD_error_frameParameter_unsupported", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a1393112fcbe2ab628ca3d2afe3858a3c", null ],
+      [ "ZSTD_error_frameParameter_windowTooLarge", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a6bc23da35003a39d978026ce4b034bb3", null ],
+      [ "ZSTD_error_corruption_detected", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a781c5c268ea8d3debcb01faa146997ac", null ],
+      [ "ZSTD_error_checksum_wrong", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ab4243df58a97838531ca9c06a44eeaa3", null ],
+      [ "ZSTD_error_dictionary_corrupted", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ae247e41d5fad361406f57c8f72653d49", null ],
+      [ "ZSTD_error_dictionary_wrong", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37abbc036a50b83b470ace6b3867a7e4da5", null ],
+      [ "ZSTD_error_dictionaryCreation_failed", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37aa929a4cbdfcbf7e5dc073482ebd09365", null ],
+      [ "ZSTD_error_parameter_unsupported", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37aeefa0dfe6ab35472d779afa6af6bb239", null ],
+      [ "ZSTD_error_parameter_outOfBound", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ae839eba708a06ffd3fe3228b20b670ba", null ],
+      [ "ZSTD_error_tableLog_tooLarge", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a24cf1f4f900063cda5d6529d36bde33f", null ],
+      [ "ZSTD_error_maxSymbolValue_tooLarge", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ab16f46e97b43bc4e0c6559e1f752635c", null ],
+      [ "ZSTD_error_maxSymbolValue_tooSmall", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a876d94368190fded3bc485daf0a16f67", null ],
+      [ "ZSTD_error_stage_wrong", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a2428b6f538a5d34eb68e8c08bc78ee6b", null ],
+      [ "ZSTD_error_init_missing", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a5ccf8242f23660203a2386047bfbfd28", null ],
+      [ "ZSTD_error_memory_allocation", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a0ea7f43e31ad2e7e7bcdf92059d5fbfb", null ],
+      [ "ZSTD_error_workSpace_tooSmall", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ae6ea12e04d2b13d79a31b8ba72affc52", null ],
+      [ "ZSTD_error_dstSize_tooSmall", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ad8e0e6b5943d77a13cf6d89aed8b3c1f", null ],
+      [ "ZSTD_error_srcSize_wrong", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a09bdf64f794359c5ff5dd443533fd83b", null ],
+      [ "ZSTD_error_dstBuffer_null", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a8f2b76cac9583c5d5f3c5094c6e888e5", null ],
+      [ "ZSTD_error_frameIndex_tooLarge", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a3e2ad8e6fee52d451d1d62309be3d4db", null ],
+      [ "ZSTD_error_seekableIO", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37ad414d9aeeab3b187caabad74c1c97edd", null ],
+      [ "ZSTD_error_maxCode", "zstd__errors_8h.html#a5d61076079b98dcc1fcbe06775e81b37a366cf0cb3e27ca1e04c5250d34a7db51", null ]
+    ] ],
+    [ "ZSTD_getErrorCode", "zstd__errors_8h.html#a08b7fe037a62299f5f81e394c280a711", null ],
+    [ "ZSTD_getErrorString", "zstd__errors_8h.html#ab160f0da4b0f5e5dc01ab99b288172f2", null ]
+];

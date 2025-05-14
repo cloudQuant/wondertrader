@@ -1,0 +1,607 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: WtLMDB类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classWtLMDB.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classWtLMDB-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">WtLMDB类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>LMDB数据库封装基础类  
+ <a href="classWtLMDB.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a86889d7c648dc518b541aaa81b9f8e81" id="r_a86889d7c648dc518b541aaa81b9f8e81"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html#a86889d7c648dc518b541aaa81b9f8e81">WtLMDB</a> (bool bReadOnly=false)</td></tr>
+<tr class="memdesc:a86889d7c648dc518b541aaa81b9f8e81"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a86889d7c648dc518b541aaa81b9f8e81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c3e06b0cf3c55cf3d630566b5b1cc43" id="r_a1c3e06b0cf3c55cf3d630566b5b1cc43"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html#a1c3e06b0cf3c55cf3d630566b5b1cc43">~WtLMDB</a> ()</td></tr>
+<tr class="memdesc:a1c3e06b0cf3c55cf3d630566b5b1cc43"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:a1c3e06b0cf3c55cf3d630566b5b1cc43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1605c7af86fe8dbd21eec40213d4d2e6" id="r_a1605c7af86fe8dbd21eec40213d4d2e6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structMDB__env.html">MDB_env</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html#a1605c7af86fe8dbd21eec40213d4d2e6">env</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a1605c7af86fe8dbd21eec40213d4d2e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取LMDB环境句柄  <br /></td></tr>
+<tr class="separator:a1605c7af86fe8dbd21eec40213d4d2e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ed4369c7291e44ea14827fdea9616e9" id="r_a7ed4369c7291e44ea14827fdea9616e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__mdb.html#gadbe68a06c448dfb62da16443d251a78b">MDB_dbi</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html#a7ed4369c7291e44ea14827fdea9616e9">dbi</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a7ed4369c7291e44ea14827fdea9616e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取LMDB数据库句柄  <br /></td></tr>
+<tr class="separator:a7ed4369c7291e44ea14827fdea9616e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af88698659442a941579dd92c25b9a330" id="r_af88698659442a941579dd92c25b9a330"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__mdb.html#gadbe68a06c448dfb62da16443d251a78b">MDB_dbi</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html#af88698659442a941579dd92c25b9a330">update_dbi</a> (<a class="el" href="structMDB__txn.html">MDB_txn</a> *txn)</td></tr>
+<tr class="memdesc:af88698659442a941579dd92c25b9a330"><td class="mdescLeft">&#160;</td><td class="mdescRight">更新数据库句柄  <br /></td></tr>
+<tr class="separator:af88698659442a941579dd92c25b9a330"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a378dd4d41798b2e958ff4370625843c9" id="r_a378dd4d41798b2e958ff4370625843c9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html#a378dd4d41798b2e958ff4370625843c9">open</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *path, std::size_t mapsize=16 *1024 *1024)</td></tr>
+<tr class="memdesc:a378dd4d41798b2e958ff4370625843c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">打开数据库  <br /></td></tr>
+<tr class="separator:a378dd4d41798b2e958ff4370625843c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a979881d98abcc6cf9709b7a2426d07af" id="r_a979881d98abcc6cf9709b7a2426d07af"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html#a979881d98abcc6cf9709b7a2426d07af">update_errno</a> (int error)</td></tr>
+<tr class="memdesc:a979881d98abcc6cf9709b7a2426d07af"><td class="mdescLeft">&#160;</td><td class="mdescRight">更新错误码  <br /></td></tr>
+<tr class="separator:a979881d98abcc6cf9709b7a2426d07af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac18e4b75a1d837e8492b275ffb49de94" id="r_ac18e4b75a1d837e8492b275ffb49de94"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html#ac18e4b75a1d837e8492b275ffb49de94">has_error</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:ac18e4b75a1d837e8492b275ffb49de94"><td class="mdescLeft">&#160;</td><td class="mdescRight">检查是否有错误  <br /></td></tr>
+<tr class="separator:ac18e4b75a1d837e8492b275ffb49de94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a221b99c5af0c9bb8e2fe5949a5c4fe2e" id="r_a221b99c5af0c9bb8e2fe5949a5c4fe2e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html#a221b99c5af0c9bb8e2fe5949a5c4fe2e">is_readonly</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a221b99c5af0c9bb8e2fe5949a5c4fe2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">检查是否为只读模式  <br /></td></tr>
+<tr class="separator:a221b99c5af0c9bb8e2fe5949a5c4fe2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32aedbc28d12c9d5d2d72eb7f991ca79" id="r_a32aedbc28d12c9d5d2d72eb7f991ca79"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html#a32aedbc28d12c9d5d2d72eb7f991ca79">errmsg</a> ()</td></tr>
+<tr class="memdesc:a32aedbc28d12c9d5d2d72eb7f991ca79"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取错误信息  <br /></td></tr>
+<tr class="separator:a32aedbc28d12c9d5d2d72eb7f991ca79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:ac4e96f5a9ffbf2fe721d8a021bdee119" id="r_ac4e96f5a9ffbf2fe721d8a021bdee119"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structMDB__env.html">MDB_env</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html#ac4e96f5a9ffbf2fe721d8a021bdee119">_env</a></td></tr>
+<tr class="separator:ac4e96f5a9ffbf2fe721d8a021bdee119"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a043a429037837b0972a081c3e402ec4b" id="r_a043a429037837b0972a081c3e402ec4b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__mdb.html#gadbe68a06c448dfb62da16443d251a78b">MDB_dbi</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html#a043a429037837b0972a081c3e402ec4b">_dbi</a></td></tr>
+<tr class="separator:a043a429037837b0972a081c3e402ec4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e8b8846dcc68c6823790308f72aa57e" id="r_a8e8b8846dcc68c6823790308f72aa57e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html#a8e8b8846dcc68c6823790308f72aa57e">_errno</a></td></tr>
+<tr class="separator:a8e8b8846dcc68c6823790308f72aa57e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aedcdc2770608c3c99d9aca260a009f0a" id="r_aedcdc2770608c3c99d9aca260a009f0a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtLMDB.html#aedcdc2770608c3c99d9aca260a009f0a">_readonly</a></td></tr>
+<tr class="separator:aedcdc2770608c3c99d9aca260a009f0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>LMDB数据库封装基础类 </p>
+<p>封装了LMDB数据库的基本操作，包括创建环境、打开数据库、管理数据库句柄等功能 支持只读模式和读写模式，并提供错误处理机制 作为WtLMDBQuery类的底层基础，不直接进行数据操作 </p>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00057">57</a> 行定义.</p>
+</div><h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a86889d7c648dc518b541aaa81b9f8e81" name="a86889d7c648dc518b541aaa81b9f8e81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86889d7c648dc518b541aaa81b9f8e81">&#9670;&#160;</a></span>WtLMDB()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">WtLMDB::WtLMDB </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bReadOnly</em> = <code>false</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>初始化LMDB对象，设置是否为只读模式</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bReadOnly</td><td>是否为只读模式，默认为false（读写模式） </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00067">67</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1c3e06b0cf3c55cf3d630566b5b1cc43" name="a1c3e06b0cf3c55cf3d630566b5b1cc43"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c3e06b0cf3c55cf3d630566b5b1cc43">&#9670;&#160;</a></span>~WtLMDB()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">WtLMDB::~WtLMDB </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>析构函数 </p>
+<p>关闭数据库句柄和环境，释放LMDB相关资源 </p>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00079">79</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a7ed4369c7291e44ea14827fdea9616e9" name="a7ed4369c7291e44ea14827fdea9616e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ed4369c7291e44ea14827fdea9616e9">&#9670;&#160;</a></span>dbi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__mdb.html#gadbe68a06c448dfb62da16443d251a78b">MDB_dbi</a> WtLMDB::dbi </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取LMDB数据库句柄 </p>
+<dl class="section return"><dt>返回</dt><dd>MDB_dbi LMDB数据库句柄 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00099">99</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1605c7af86fe8dbd21eec40213d4d2e6" name="a1605c7af86fe8dbd21eec40213d4d2e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1605c7af86fe8dbd21eec40213d4d2e6">&#9670;&#160;</a></span>env()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structMDB__env.html">MDB_env</a> * WtLMDB::env </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取LMDB环境句柄 </p>
+<dl class="section return"><dt>返回</dt><dd>MDB_env* LMDB环境句柄 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00093">93</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a32aedbc28d12c9d5d2d72eb7f991ca79" name="a32aedbc28d12c9d5d2d72eb7f991ca79"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32aedbc28d12c9d5d2d72eb7f991ca79">&#9670;&#160;</a></span>errmsg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * WtLMDB::errmsg </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取错误信息 </p>
+<dl class="section return"><dt>返回</dt><dd>const char* 错误信息字符串 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00179">179</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac18e4b75a1d837e8492b275ffb49de94" name="ac18e4b75a1d837e8492b275ffb49de94"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac18e4b75a1d837e8492b275ffb49de94">&#9670;&#160;</a></span>has_error()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtLMDB::has_error </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>检查是否有错误 </p>
+<dl class="section return"><dt>返回</dt><dd>bool 是否发生错误 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00167">167</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a221b99c5af0c9bb8e2fe5949a5c4fe2e" name="a221b99c5af0c9bb8e2fe5949a5c4fe2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a221b99c5af0c9bb8e2fe5949a5c4fe2e">&#9670;&#160;</a></span>is_readonly()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtLMDB::is_readonly </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>检查是否为只读模式 </p>
+<dl class="section return"><dt>返回</dt><dd>bool 是否为只读模式 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00173">173</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a378dd4d41798b2e958ff4370625843c9" name="a378dd4d41798b2e958ff4370625843c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a378dd4d41798b2e958ff4370625843c9">&#9670;&#160;</a></span>open()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtLMDB::open </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>mapsize</em> = <code>16*1024*1024</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>打开数据库 </p>
+<p>创建并打开LMDB数据库，如果指定路径不存在则自动创建 设置数据库的映射大小和权限</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">path</td><td>数据库文件路径 </td></tr>
+    <tr><td class="paramname">mapsize</td><td>内存映射大小，默认为16MB </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 是否成功打开数据库 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00128">128</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af88698659442a941579dd92c25b9a330" name="af88698659442a941579dd92c25b9a330"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af88698659442a941579dd92c25b9a330">&#9670;&#160;</a></span>update_dbi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__mdb.html#gadbe68a06c448dfb62da16443d251a78b">MDB_dbi</a> WtLMDB::update_dbi </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structMDB__txn.html">MDB_txn</a> *&#160;</td>
+          <td class="paramname"><em>txn</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>更新数据库句柄 </p>
+<p>如果数据库句柄还未初始化，则打开数据库并创建句柄</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">txn</td><td>事务对象指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>MDB_dbi 数据库句柄 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00109">109</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a979881d98abcc6cf9709b7a2426d07af" name="a979881d98abcc6cf9709b7a2426d07af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a979881d98abcc6cf9709b7a2426d07af">&#9670;&#160;</a></span>update_errno()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtLMDB::update_errno </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>error</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>更新错误码 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">error</td><td>LMDB操作返回的错误码 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00161">161</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a043a429037837b0972a081c3e402ec4b" name="a043a429037837b0972a081c3e402ec4b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a043a429037837b0972a081c3e402ec4b">&#9670;&#160;</a></span>_dbi</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__mdb.html#gadbe68a06c448dfb62da16443d251a78b">MDB_dbi</a> WtLMDB::_dbi</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00186">186</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac4e96f5a9ffbf2fe721d8a021bdee119" name="ac4e96f5a9ffbf2fe721d8a021bdee119"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4e96f5a9ffbf2fe721d8a021bdee119">&#9670;&#160;</a></span>_env</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structMDB__env.html">MDB_env</a>* WtLMDB::_env</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00185">185</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8e8b8846dcc68c6823790308f72aa57e" name="a8e8b8846dcc68c6823790308f72aa57e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e8b8846dcc68c6823790308f72aa57e">&#9670;&#160;</a></span>_errno</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int WtLMDB::_errno</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00187">187</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aedcdc2770608c3c99d9aca260a009f0a" name="aedcdc2770608c3c99d9aca260a009f0a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aedcdc2770608c3c99d9aca260a009f0a">&#9670;&#160;</a></span>_readonly</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtLMDB::_readonly</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a> 第 <a class="el" href="WtLMDB_8hpp_source.html#l00188">188</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WTSUtils/<a class="el" href="WtLMDB_8hpp_source.html">WtLMDB.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classWtLMDB.html">WtLMDB</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

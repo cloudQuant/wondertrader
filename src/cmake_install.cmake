@@ -239,6 +239,16 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
+  include("/home/yun/Documents/wondertrader/src/WtCtaStraFact/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("/home/yun/Documents/wondertrader/src/WtCtaTwoMaFact/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
   include("/home/yun/Documents/wondertrader/src/WtUftCore/cmake_install.cmake")
 endif()
 

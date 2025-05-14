@@ -1,0 +1,25 @@
+var structAPIShareUnit =
+[
+    [ "APIShareUnit", "structAPIShareUnit.html#a7e75ae31fdb0acec9963c051e939bbcf", null ],
+    [ "APIShareUnit", "structAPIShareUnit.html#a7e75ae31fdb0acec9963c051e939bbcf", null ],
+    [ "account_id", "structAPIShareUnit.html#ac831b86bc82a875ec1b4a483606edb56", null ],
+    [ "available_qty", "structAPIShareUnit.html#af4d2c019b04a3b1c98245273d8ccab13", null ],
+    [ "branch_id", "structAPIShareUnit.html#a56b4e1ac08c96712a492d4bf99285deb", null ],
+    [ "cost_price", "structAPIShareUnit.html#a216a4597e21b4fcf9ad3d8f2d9bdaabf", null ],
+    [ "cur_crd_sell_occupied_amt", "structAPIShareUnit.html#a957e6c0eed1832b92c2ccd35f22948c3", null ],
+    [ "cur_crd_sell_occupied_qty", "structAPIShareUnit.html#a805bfd3238b5305b862c1fb9c1fc86ec", null ],
+    [ "currency", "structAPIShareUnit.html#a7966fc9a08f2f01df2154dc7709925d5", null ],
+    [ "etf_redemption_qty", "structAPIShareUnit.html#ae4d01131af11e8939e93caa8d902a5ef", null ],
+    [ "fund_account_id", "structAPIShareUnit.html#a3ba504368c0ce38c7d2efe3359fff48e", null ],
+    [ "init_crd_sell_buy_share_qty", "structAPIShareUnit.html#a7c4a1019f458845b68625b462f43caf3", null ],
+    [ "init_crd_sell_occupied_amt", "structAPIShareUnit.html#a58a7dce6972184f35ac3c152b89841c8", null ],
+    [ "init_qty", "structAPIShareUnit.html#a230b514a0f0dfa34625e488339e68aa9", null ],
+    [ "leaves_qty", "structAPIShareUnit.html#af6fbd7d705f17b5ddacab381c967c32b", null ],
+    [ "market_id", "structAPIShareUnit.html#a0b758789ac785b40752e9243059ea918", null ],
+    [ "market_value", "structAPIShareUnit.html#a8a953702cc3efc06b86633fa9dcfabb7", null ],
+    [ "profit_loss", "structAPIShareUnit.html#a32911c368fc13b058068d2db654d9189", null ],
+    [ "realize_profit_loss", "structAPIShareUnit.html#a7927f0558b5acd9829c1fe3ed1961f3d", null ],
+    [ "security_id", "structAPIShareUnit.html#a2afd96922f573d8eb278c71caede6f95", null ],
+    [ "security_symbol", "structAPIShareUnit.html#a02409c9db127d6922dd80948eedf1ecb", null ],
+    [ "security_type", "structAPIShareUnit.html#a27a5e71dc5548dcd0abb97707f2d3ed5", null ]
+];

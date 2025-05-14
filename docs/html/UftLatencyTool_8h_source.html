@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtLatencyUFT/UftLatencyTool.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('UftLatencyTool_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">UftLatencyTool.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="UftLatencyTool_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;../WtUftCore/WtUftEngine.h&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;../WtUftCore/UftStrategyMgr.h&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../WtUftCore/TraderAdapter.h&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../WtUftCore/ParserAdapter.h&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../WTSTools/WTSBaseDataMgr.h&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">class </span><a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceuft.html">uft</a></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>{</div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="};">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html">   29</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classuft_1_1UftLatencyTool.html">UftLatencyTool</a></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    {</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#a2b65d28724cea9da11615c00d5acc181">UftLatencyTool</a>();</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#ad02e4ca3f21f9292d4be756e6858adc2">~UftLatencyTool</a>();</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#af92a0a7b0095a48c935b2a49f17d3fb2">init</a>();</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <span class="keywordtype">void</span> <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#a89dd651d5dd92da67874d2a52616312f">run</a>();</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#a85233d6dafa56c113e265ef4a642e3bc">initModules</a>();</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#a22d3f0cd77d456a57c96a3a4224e4835">initStrategies</a>();</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#ab37cba7c75df4fbfcdfbe613c2c0c5b9">initEngine</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg);</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html#a8c49e432a30ab3fe7a35bdba942aad1d">   80</a></span>        <a class="code hl_class" href="classTraderAdapterMgr.html">TraderAdapterMgr</a>    <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a8c49e432a30ab3fe7a35bdba942aad1d">_traders</a>;    </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html#a568a74cc2396ad262f33825236a06dd4">   81</a></span>        <a class="code hl_class" href="classParserAdapterMgr.html">ParserAdapterMgr</a>    <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a568a74cc2396ad262f33825236a06dd4">_parsers</a>;    </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html#adf94fdb5c773142a1a9c149c479574f2">   82</a></span>        <a class="code hl_class" href="classUftStrategyMgr.html">UftStrategyMgr</a>      <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#adf94fdb5c773142a1a9c149c479574f2">_stra_mgr</a>;   </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html#a53ac7b1918134992f57db3b406b420f6">   84</a></span>        <a class="code hl_class" href="classWtUftEngine.html">WtUftEngine</a>         <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a53ac7b1918134992f57db3b406b420f6">_engine</a>;     </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html#ad079ba5c85fdbd9f7d8e8433ec48a8cb">   86</a></span>        <a class="code hl_class" href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a>      <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#ad079ba5c85fdbd9f7d8e8433ec48a8cb">_bd_mgr</a>;     </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html#a9efb0ead0c0a5bf763ac9a27c38b6bbf">   88</a></span>        uint32_t            <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a9efb0ead0c0a5bf763ac9a27c38b6bbf">_times</a>;      </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html#aea0c6619e1a3f98b760af88dc6e36a5e">   89</a></span>        uint32_t            <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#aea0c6619e1a3f98b760af88dc6e36a5e">_core</a>;       </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    };</div>
+</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>}</div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aclassParserAdapterMgr_html"><div class="ttname"><a href="classParserAdapterMgr.html">ParserAdapterMgr</a></div><div class="ttdoc">解析器适配器管理器类</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ParserAdapter_8h_source.html#l00268">ParserAdapter.h:269</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html"><div class="ttname"><a href="classTraderAdapterMgr.html">TraderAdapterMgr</a></div><div class="ttdoc">交易适配器管理器</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00097">TraderAdapter.h:98</a></div></div>
+<div class="ttc" id="aclassUftStrategyMgr_html"><div class="ttname"><a href="classUftStrategyMgr.html">UftStrategyMgr</a></div><div class="ttdoc">UFT策略管理器</div><div class="ttdef"><b>Definition</b> <a href="UftStrategyMgr_8h_source.html#l00068">UftStrategyMgr.h:69</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html"><div class="ttname"><a href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a></div><div class="ttdoc">基础数据管理器类</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00073">WTSBaseDataMgr.h:74</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWtUftEngine_html"><div class="ttname"><a href="classWtUftEngine.html">WtUftEngine</a></div><div class="ttdoc">UFT策略引擎类</div><div class="ttdef"><b>Definition</b> <a href="WtUftEngine_8h_source.html#l00064">WtUftEngine.h:65</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html">uft::UftLatencyTool</a></div><div class="ttdoc">超高频交易延迟测试工具类</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00029">UftLatencyTool.h:30</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a22d3f0cd77d456a57c96a3a4224e4835"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a22d3f0cd77d456a57c96a3a4224e4835">uft::UftLatencyTool::initStrategies</a></div><div class="ttdeci">bool initStrategies()</div><div class="ttdoc">初始化策略</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00434">UftLatencyTool.cpp:434</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a2b65d28724cea9da11615c00d5acc181"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a2b65d28724cea9da11615c00d5acc181">uft::UftLatencyTool::UftLatencyTool</a></div><div class="ttdeci">UftLatencyTool()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00329">UftLatencyTool.cpp:329</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a53ac7b1918134992f57db3b406b420f6"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a53ac7b1918134992f57db3b406b420f6">uft::UftLatencyTool::_engine</a></div><div class="ttdeci">WtUftEngine _engine</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00084">UftLatencyTool.h:84</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a568a74cc2396ad262f33825236a06dd4"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a568a74cc2396ad262f33825236a06dd4">uft::UftLatencyTool::_parsers</a></div><div class="ttdeci">ParserAdapterMgr _parsers</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00081">UftLatencyTool.h:81</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a85233d6dafa56c113e265ef4a642e3bc"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a85233d6dafa56c113e265ef4a642e3bc">uft::UftLatencyTool::initModules</a></div><div class="ttdeci">bool initModules()</div><div class="ttdoc">初始化模块</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00478">UftLatencyTool.cpp:478</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a89dd651d5dd92da67874d2a52616312f"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a89dd651d5dd92da67874d2a52616312f">uft::UftLatencyTool::run</a></div><div class="ttdeci">void run()</div><div class="ttdoc">执行延迟测试</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00511">UftLatencyTool.cpp:511</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a8c49e432a30ab3fe7a35bdba942aad1d"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a8c49e432a30ab3fe7a35bdba942aad1d">uft::UftLatencyTool::_traders</a></div><div class="ttdeci">TraderAdapterMgr _traders</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00080">UftLatencyTool.h:80</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a9efb0ead0c0a5bf763ac9a27c38b6bbf"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a9efb0ead0c0a5bf763ac9a27c38b6bbf">uft::UftLatencyTool::_times</a></div><div class="ttdeci">uint32_t _times</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00088">UftLatencyTool.h:88</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_ab37cba7c75df4fbfcdfbe613c2c0c5b9"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#ab37cba7c75df4fbfcdfbe613c2c0c5b9">uft::UftLatencyTool::initEngine</a></div><div class="ttdeci">bool initEngine(WTSVariant *cfg)</div><div class="ttdoc">初始化引擎</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00460">UftLatencyTool.cpp:460</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_ad02e4ca3f21f9292d4be756e6858adc2"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#ad02e4ca3f21f9292d4be756e6858adc2">uft::UftLatencyTool::~UftLatencyTool</a></div><div class="ttdeci">~UftLatencyTool()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00339">UftLatencyTool.cpp:339</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_ad079ba5c85fdbd9f7d8e8433ec48a8cb"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#ad079ba5c85fdbd9f7d8e8433ec48a8cb">uft::UftLatencyTool::_bd_mgr</a></div><div class="ttdeci">WTSBaseDataMgr _bd_mgr</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00086">UftLatencyTool.h:86</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_adf94fdb5c773142a1a9c149c479574f2"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#adf94fdb5c773142a1a9c149c479574f2">uft::UftLatencyTool::_stra_mgr</a></div><div class="ttdeci">UftStrategyMgr _stra_mgr</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00082">UftLatencyTool.h:82</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_aea0c6619e1a3f98b760af88dc6e36a5e"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#aea0c6619e1a3f98b760af88dc6e36a5e">uft::UftLatencyTool::_core</a></div><div class="ttdeci">uint32_t _core</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00089">UftLatencyTool.h:89</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_af92a0a7b0095a48c935b2a49f17d3fb2"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#af92a0a7b0095a48c935b2a49f17d3fb2">uft::UftLatencyTool::init</a></div><div class="ttdeci">bool init()</div><div class="ttdoc">初始化延迟测试工具</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00349">UftLatencyTool.cpp:349</a></div></div>
+<div class="ttc" id="anamespaceuft_html"><div class="ttname"><a href="namespaceuft.html">uft</a></div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00044">UftLatencyTool.cpp:45</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_57e6a1706ae8294aba78822425d4a1da.html">WtLatencyUFT</a></li><li class="navelem"><a class="el" href="UftLatencyTool_8h.html">UftLatencyTool.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

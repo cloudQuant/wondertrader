@@ -624,6 +624,32 @@ WtShareHelper/fast:
 .PHONY : WtShareHelper/fast
 
 #=============================================================================
+# Target rules for targets named WtCtaStraFact
+
+# Build rule for target.
+WtCtaStraFact: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtCtaStraFact
+.PHONY : WtCtaStraFact
+
+# fast build rule for target.
+WtCtaStraFact/fast:
+	$(MAKE) $(MAKESILENT) -f WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/build.make WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/build
+.PHONY : WtCtaStraFact/fast
+
+#=============================================================================
+# Target rules for targets named WtCtaTwoMaFact
+
+# Build rule for target.
+WtCtaTwoMaFact: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtCtaTwoMaFact
+.PHONY : WtCtaTwoMaFact
+
+# fast build rule for target.
+WtCtaTwoMaFact/fast:
+	$(MAKE) $(MAKESILENT) -f WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/build.make WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/build
+.PHONY : WtCtaTwoMaFact/fast
+
+#=============================================================================
 # Target rules for targets named WtUftCore
 
 # Build rule for target.
@@ -722,6 +748,8 @@ help:
 	@echo "... WtBtPorter"
 	@echo "... WtBtRunner"
 	@echo "... WtCore"
+	@echo "... WtCtaStraFact"
+	@echo "... WtCtaTwoMaFact"
 	@echo "... WtDataStorage"
 	@echo "... WtDataStorageAD"
 	@echo "... WtDtCore"

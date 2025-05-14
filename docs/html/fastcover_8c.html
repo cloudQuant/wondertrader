@@ -1,0 +1,1396 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/fastcover.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('fastcover_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">fastcover.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;stdio.h&gt;</code><br />
+<code>#include &lt;stdlib.h&gt;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;time.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="mem_8h_source.html">mem.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="pool_8h_source.html">pool.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="threading_8h_source.html">threading.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="cover_8h_source.html">cover.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="zdict_8h_source.html">zdict.h</a>&quot;</code><br />
+</div>
+<p><a href="fastcover_8c_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structFASTCOVER__accel__t.html">FASTCOVER_accel_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structFASTCOVER__ctx__t.html">FASTCOVER_ctx_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structFASTCOVER__tryParameters__data__s.html">FASTCOVER_tryParameters_data_s</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a9636f8b85954a677e9e429f9ba90f21a" id="r_a9636f8b85954a677e9e429f9ba90f21a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a9636f8b85954a677e9e429f9ba90f21a">FASTCOVER_MAX_SAMPLES_SIZE</a>&#160;&#160;&#160;(sizeof(size_t) == 8 ? ((unsigned)-1) : ((unsigned)1 <a class="el" href="zdict_8c.html#a44172ac633c517cb4c9e278cef36b000">GB</a>))</td></tr>
+<tr class="separator:a9636f8b85954a677e9e429f9ba90f21a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace2b44127de1a3a52d1c2a420545171a" id="r_ace2b44127de1a3a52d1c2a420545171a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#ace2b44127de1a3a52d1c2a420545171a">FASTCOVER_MAX_F</a>&#160;&#160;&#160;31</td></tr>
+<tr class="separator:ace2b44127de1a3a52d1c2a420545171a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a5496cd8d3d52c13994a31cca42448b" id="r_a4a5496cd8d3d52c13994a31cca42448b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a4a5496cd8d3d52c13994a31cca42448b">FASTCOVER_MAX_ACCEL</a>&#160;&#160;&#160;10</td></tr>
+<tr class="separator:a4a5496cd8d3d52c13994a31cca42448b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1caf4c33d101eb66c87d336aed6cb52" id="r_af1caf4c33d101eb66c87d336aed6cb52"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#af1caf4c33d101eb66c87d336aed6cb52">DEFAULT_SPLITPOINT</a>&#160;&#160;&#160;0.75</td></tr>
+<tr class="separator:af1caf4c33d101eb66c87d336aed6cb52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c43093c9826a0e35dafc1ce2e17da29" id="r_a5c43093c9826a0e35dafc1ce2e17da29"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a5c43093c9826a0e35dafc1ce2e17da29">DEFAULT_F</a>&#160;&#160;&#160;20</td></tr>
+<tr class="separator:a5c43093c9826a0e35dafc1ce2e17da29"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34bbba669e2c198ae9348cdd388335b9" id="r_a34bbba669e2c198ae9348cdd388335b9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a34bbba669e2c198ae9348cdd388335b9">DEFAULT_ACCEL</a>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:a34bbba669e2c198ae9348cdd388335b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a5fbd7a78051c2134b21324e5c74bdc" id="r_a5a5fbd7a78051c2134b21324e5c74bdc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a5a5fbd7a78051c2134b21324e5c74bdc">DISPLAY</a>(...)</td></tr>
+<tr class="separator:a5a5fbd7a78051c2134b21324e5c74bdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed3edb401d7feb70e609cff1a2956f1e" id="r_aed3edb401d7feb70e609cff1a2956f1e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#aed3edb401d7feb70e609cff1a2956f1e">LOCALDISPLAYLEVEL</a>(displayLevel,  l, ...)</td></tr>
+<tr class="separator:aed3edb401d7feb70e609cff1a2956f1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9200da68a37a9ae33332f82599d00e67" id="r_a9200da68a37a9ae33332f82599d00e67"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a9200da68a37a9ae33332f82599d00e67">DISPLAYLEVEL</a>(l, ...)&#160;&#160;&#160;<a class="el" href="cover_8c.html#aed3edb401d7feb70e609cff1a2956f1e">LOCALDISPLAYLEVEL</a>(<a class="el" href="cover_8c.html#acc504051bdf74b2bba3326a56ed566c6">g_displayLevel</a>, l, __VA_ARGS__)</td></tr>
+<tr class="separator:a9200da68a37a9ae33332f82599d00e67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0683103c0036daae676e99dff5def66f" id="r_a0683103c0036daae676e99dff5def66f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a0683103c0036daae676e99dff5def66f">LOCALDISPLAYUPDATE</a>(displayLevel,  l, ...)</td></tr>
+<tr class="separator:a0683103c0036daae676e99dff5def66f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40fa793cc466bb4f03748de2352e8e8c" id="r_a40fa793cc466bb4f03748de2352e8e8c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a40fa793cc466bb4f03748de2352e8e8c">DISPLAYUPDATE</a>(l, ...)&#160;&#160;&#160;<a class="el" href="cover_8c.html#a0683103c0036daae676e99dff5def66f">LOCALDISPLAYUPDATE</a>(<a class="el" href="cover_8c.html#acc504051bdf74b2bba3326a56ed566c6">g_displayLevel</a>, l, __VA_ARGS__)</td></tr>
+<tr class="separator:a40fa793cc466bb4f03748de2352e8e8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a7509ace266912c8ba8e10d3f7fc479bb" id="r_a7509ace266912c8ba8e10d3f7fc479bb"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structFASTCOVER__tryParameters__data__s.html">FASTCOVER_tryParameters_data_s</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a7509ace266912c8ba8e10d3f7fc479bb">FASTCOVER_tryParameters_data_t</a></td></tr>
+<tr class="separator:a7509ace266912c8ba8e10d3f7fc479bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a1ab54be54d550573a2e9af97153b05da" id="r_a1ab54be54d550573a2e9af97153b05da"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a1ab54be54d550573a2e9af97153b05da">ZSTD_hash6</a> (<a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> u, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> h)</td></tr>
+<tr class="separator:a1ab54be54d550573a2e9af97153b05da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e57434382dc24a608464b1743c2f3e8" id="r_a0e57434382dc24a608464b1743c2f3e8"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a0e57434382dc24a608464b1743c2f3e8">ZSTD_hash6Ptr</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *p, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> h)</td></tr>
+<tr class="separator:a0e57434382dc24a608464b1743c2f3e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46cc106ddc61e2ae332c2bdfe92ccf10" id="r_a46cc106ddc61e2ae332c2bdfe92ccf10"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a46cc106ddc61e2ae332c2bdfe92ccf10">ZSTD_hash8</a> (<a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> u, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> h)</td></tr>
+<tr class="separator:a46cc106ddc61e2ae332c2bdfe92ccf10"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e63d547f3c86dcdb4fc6673cc9e2313" id="r_a5e63d547f3c86dcdb4fc6673cc9e2313"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a5e63d547f3c86dcdb4fc6673cc9e2313">ZSTD_hash8Ptr</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *p, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> h)</td></tr>
+<tr class="separator:a5e63d547f3c86dcdb4fc6673cc9e2313"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e08c3a22c1937dd2ec5febcc67ff0e7" id="r_a0e08c3a22c1937dd2ec5febcc67ff0e7"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a0e08c3a22c1937dd2ec5febcc67ff0e7">FASTCOVER_hashPtrToIndex</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *p, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> h, unsigned d)</td></tr>
+<tr class="separator:a0e08c3a22c1937dd2ec5febcc67ff0e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec5c299a79e62b9d05761f4cd1a9c32f" id="r_aec5c299a79e62b9d05761f4cd1a9c32f"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structCOVER__segment__t.html">COVER_segment_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#aec5c299a79e62b9d05761f4cd1a9c32f">FASTCOVER_selectSegment</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structFASTCOVER__ctx__t.html">FASTCOVER_ctx_t</a> *ctx, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *freqs, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> begin, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> end, ZDICT_cover_params_t parameters, <a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a> *segmentFreqs)</td></tr>
+<tr class="separator:aec5c299a79e62b9d05761f4cd1a9c32f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95459763cbc491a58cd441b98877dd8b" id="r_a95459763cbc491a58cd441b98877dd8b"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a95459763cbc491a58cd441b98877dd8b">FASTCOVER_checkParameters</a> (ZDICT_cover_params_t parameters, size_t maxDictSize, unsigned f, unsigned accel)</td></tr>
+<tr class="separator:a95459763cbc491a58cd441b98877dd8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a797e27f943fb9a009c2ddcafb789d652" id="r_a797e27f943fb9a009c2ddcafb789d652"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a797e27f943fb9a009c2ddcafb789d652">FASTCOVER_ctx_destroy</a> (<a class="el" href="structFASTCOVER__ctx__t.html">FASTCOVER_ctx_t</a> *ctx)</td></tr>
+<tr class="separator:a797e27f943fb9a009c2ddcafb789d652"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac81d46237c265ff2a7eb46e872560943" id="r_ac81d46237c265ff2a7eb46e872560943"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#ac81d46237c265ff2a7eb46e872560943">FASTCOVER_computeFrequency</a> (<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *freqs, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structFASTCOVER__ctx__t.html">FASTCOVER_ctx_t</a> *ctx)</td></tr>
+<tr class="separator:ac81d46237c265ff2a7eb46e872560943"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa958197c3493892a8f61ccf83413d644" id="r_aa958197c3493892a8f61ccf83413d644"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#aa958197c3493892a8f61ccf83413d644">FASTCOVER_ctx_init</a> (<a class="el" href="structFASTCOVER__ctx__t.html">FASTCOVER_ctx_t</a> *ctx, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *samplesBuffer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, unsigned nbSamples, unsigned d, double splitPoint, unsigned f, <a class="el" href="structFASTCOVER__accel__t.html">FASTCOVER_accel_t</a> accelParams)</td></tr>
+<tr class="separator:aa958197c3493892a8f61ccf83413d644"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a02a5f33c0643231393a99f875ec2e2" id="r_a2a02a5f33c0643231393a99f875ec2e2"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a2a02a5f33c0643231393a99f875ec2e2">FASTCOVER_buildDictionary</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structFASTCOVER__ctx__t.html">FASTCOVER_ctx_t</a> *ctx, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *freqs, void *dictBuffer, size_t dictBufferCapacity, ZDICT_cover_params_t parameters, <a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a> *segmentFreqs)</td></tr>
+<tr class="separator:a2a02a5f33c0643231393a99f875ec2e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad80f77d1a3062dac3816435eccf83e4c" id="r_ad80f77d1a3062dac3816435eccf83e4c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#ad80f77d1a3062dac3816435eccf83e4c">FASTCOVER_tryParameters</a> (void *opaque)</td></tr>
+<tr class="separator:ad80f77d1a3062dac3816435eccf83e4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b74bce1b2e8a6382c70e0379c54f97e" id="r_a9b74bce1b2e8a6382c70e0379c54f97e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a9b74bce1b2e8a6382c70e0379c54f97e">FASTCOVER_convertToCoverParams</a> (ZDICT_fastCover_params_t fastCoverParams, ZDICT_cover_params_t *coverParams)</td></tr>
+<tr class="separator:a9b74bce1b2e8a6382c70e0379c54f97e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fb1925c7e6fc33fd11e8b53a8a48a4f" id="r_a0fb1925c7e6fc33fd11e8b53a8a48a4f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a0fb1925c7e6fc33fd11e8b53a8a48a4f">FASTCOVER_convertToFastCoverParams</a> (ZDICT_cover_params_t coverParams, ZDICT_fastCover_params_t *fastCoverParams, unsigned f, unsigned accel)</td></tr>
+<tr class="separator:a0fb1925c7e6fc33fd11e8b53a8a48a4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d44130fccc4101fcc8f13488c9ce3e2" id="r_a2d44130fccc4101fcc8f13488c9ce3e2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a2d44130fccc4101fcc8f13488c9ce3e2">ZDICT_trainFromBuffer_fastCover</a> (void *dictBuffer, size_t dictBufferCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *samplesBuffer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, unsigned nbSamples, ZDICT_fastCover_params_t parameters)</td></tr>
+<tr class="separator:a2d44130fccc4101fcc8f13488c9ce3e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56745742202f55abaece58a70f587a58" id="r_a56745742202f55abaece58a70f587a58"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a56745742202f55abaece58a70f587a58">ZDICT_optimizeTrainFromBuffer_fastCover</a> (void *dictBuffer, size_t dictBufferCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *samplesBuffer, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *samplesSizes, unsigned nbSamples, ZDICT_fastCover_params_t *parameters)</td></tr>
+<tr class="separator:a56745742202f55abaece58a70f587a58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:acc504051bdf74b2bba3326a56ed566c6" id="r_acc504051bdf74b2bba3326a56ed566c6"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#acc504051bdf74b2bba3326a56ed566c6">g_displayLevel</a> = 2</td></tr>
+<tr class="separator:acc504051bdf74b2bba3326a56ed566c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefc094acd97c214655e20602823c224a" id="r_aefc094acd97c214655e20602823c224a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> clock_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#aefc094acd97c214655e20602823c224a">refreshRate</a> = CLOCKS_PER_SEC * 15 / 100</td></tr>
+<tr class="separator:aefc094acd97c214655e20602823c224a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aacaf904c2035258561ef34f18706a638" id="r_aacaf904c2035258561ef34f18706a638"><td class="memItemLeft" align="right" valign="top">static clock_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#aacaf904c2035258561ef34f18706a638">g_time</a> = 0</td></tr>
+<tr class="separator:aacaf904c2035258561ef34f18706a638"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34385622176f79487a887a9412d5037e" id="r_a34385622176f79487a887a9412d5037e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#a34385622176f79487a887a9412d5037e">prime6bytes</a> = 227718039650203ULL</td></tr>
+<tr class="separator:a34385622176f79487a887a9412d5037e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac61dc420c7785010cee37d5ee3e39d44" id="r_ac61dc420c7785010cee37d5ee3e39d44"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#ac61dc420c7785010cee37d5ee3e39d44">prime8bytes</a> = 0xCF1BBCDCB7A56463ULL</td></tr>
+<tr class="separator:ac61dc420c7785010cee37d5ee3e39d44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:accd17f07664ff091bba31d2a5e3b3609" id="r_accd17f07664ff091bba31d2a5e3b3609"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structFASTCOVER__accel__t.html">FASTCOVER_accel_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastcover_8c.html#accd17f07664ff091bba31d2a5e3b3609">FASTCOVER_defaultAccelParameters</a> [<a class="el" href="fastcover_8c.html#a4a5496cd8d3d52c13994a31cca42448b">FASTCOVER_MAX_ACCEL</a>+1]</td></tr>
+<tr class="separator:accd17f07664ff091bba31d2a5e3b3609"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a34bbba669e2c198ae9348cdd388335b9" name="a34bbba669e2c198ae9348cdd388335b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34bbba669e2c198ae9348cdd388335b9">&#9670;&#160;</a></span>DEFAULT_ACCEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DEFAULT_ACCEL&#160;&#160;&#160;1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00028">28</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5c43093c9826a0e35dafc1ce2e17da29" name="a5c43093c9826a0e35dafc1ce2e17da29"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c43093c9826a0e35dafc1ce2e17da29">&#9670;&#160;</a></span>DEFAULT_F</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DEFAULT_F&#160;&#160;&#160;20</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00027">27</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af1caf4c33d101eb66c87d336aed6cb52" name="af1caf4c33d101eb66c87d336aed6cb52"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1caf4c33d101eb66c87d336aed6cb52">&#9670;&#160;</a></span>DEFAULT_SPLITPOINT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DEFAULT_SPLITPOINT&#160;&#160;&#160;0.75</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00026">26</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5a5fbd7a78051c2134b21324e5c74bdc" name="a5a5fbd7a78051c2134b21324e5c74bdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a5fbd7a78051c2134b21324e5c74bdc">&#9670;&#160;</a></span>DISPLAY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DISPLAY</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">  {                                                                            \</div>
+<div class="line">    fprintf(stderr, __VA_ARGS__);                                              \</div>
+<div class="line">    fflush(stderr);                                                            \</div>
+<div class="line">  }</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00035">35</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9200da68a37a9ae33332f82599d00e67" name="a9200da68a37a9ae33332f82599d00e67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9200da68a37a9ae33332f82599d00e67">&#9670;&#160;</a></span>DISPLAYLEVEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DISPLAYLEVEL</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">l, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="cover_8c.html#aed3edb401d7feb70e609cff1a2956f1e">LOCALDISPLAYLEVEL</a>(<a class="el" href="cover_8c.html#acc504051bdf74b2bba3326a56ed566c6">g_displayLevel</a>, l, __VA_ARGS__)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00044">44</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a40fa793cc466bb4f03748de2352e8e8c" name="a40fa793cc466bb4f03748de2352e8e8c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40fa793cc466bb4f03748de2352e8e8c">&#9670;&#160;</a></span>DISPLAYUPDATE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DISPLAYUPDATE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">l, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="cover_8c.html#a0683103c0036daae676e99dff5def66f">LOCALDISPLAYUPDATE</a>(<a class="el" href="cover_8c.html#acc504051bdf74b2bba3326a56ed566c6">g_displayLevel</a>, l, __VA_ARGS__)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00053">53</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4a5496cd8d3d52c13994a31cca42448b" name="a4a5496cd8d3d52c13994a31cca42448b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a5496cd8d3d52c13994a31cca42448b">&#9670;&#160;</a></span>FASTCOVER_MAX_ACCEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FASTCOVER_MAX_ACCEL&#160;&#160;&#160;10</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00025">25</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ace2b44127de1a3a52d1c2a420545171a" name="ace2b44127de1a3a52d1c2a420545171a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace2b44127de1a3a52d1c2a420545171a">&#9670;&#160;</a></span>FASTCOVER_MAX_F</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FASTCOVER_MAX_F&#160;&#160;&#160;31</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00024">24</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9636f8b85954a677e9e429f9ba90f21a" name="a9636f8b85954a677e9e429f9ba90f21a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9636f8b85954a677e9e429f9ba90f21a">&#9670;&#160;</a></span>FASTCOVER_MAX_SAMPLES_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FASTCOVER_MAX_SAMPLES_SIZE&#160;&#160;&#160;(sizeof(size_t) == 8 ? ((unsigned)-1) : ((unsigned)1 <a class="el" href="zdict_8c.html#a44172ac633c517cb4c9e278cef36b000">GB</a>))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00023">23</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aed3edb401d7feb70e609cff1a2956f1e" name="aed3edb401d7feb70e609cff1a2956f1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed3edb401d7feb70e609cff1a2956f1e">&#9670;&#160;</a></span>LOCALDISPLAYLEVEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LOCALDISPLAYLEVEL</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">displayLevel, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">l, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">  <span class="keywordflow">if</span> (displayLevel &gt;= l) {                                                     \</div>
+<div class="line">    DISPLAY(__VA_ARGS__);                                                      \</div>
+<div class="line">  } <span class="comment">/* 0 : no display;   1: errors;   2: default;  3: details;  4: debug */</span></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00040">40</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0683103c0036daae676e99dff5def66f" name="a0683103c0036daae676e99dff5def66f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0683103c0036daae676e99dff5def66f">&#9670;&#160;</a></span>LOCALDISPLAYUPDATE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LOCALDISPLAYUPDATE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">displayLevel, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">l, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">  <span class="keywordflow">if</span> (displayLevel &gt;= l) {                                                     \</div>
+<div class="line">    if ((clock() - <a class="code hl_variable" href="fastcover_8c.html#aacaf904c2035258561ef34f18706a638">g_time</a> &gt; <a class="code hl_variable" href="fastcover_8c.html#aefc094acd97c214655e20602823c224a">refreshRate</a>) || (displayLevel &gt;= 4)) {             \</div>
+<div class="line">      <a class="code hl_variable" href="fastcover_8c.html#aacaf904c2035258561ef34f18706a638">g_time</a> = clock();                                                        \</div>
+<div class="line">      DISPLAY(__VA_ARGS__);                                                    \</div>
+<div class="line">    }                                                                          \</div>
+<div class="line">  }</div>
+<div class="ttc" id="afastcover_8c_html_aacaf904c2035258561ef34f18706a638"><div class="ttname"><a href="fastcover_8c.html#aacaf904c2035258561ef34f18706a638">g_time</a></div><div class="ttdeci">static clock_t g_time</div><div class="ttdef"><b>Definition</b> <a href="fastcover_8c_source.html#l00055">fastcover.c:55</a></div></div>
+<div class="ttc" id="afastcover_8c_html_aefc094acd97c214655e20602823c224a"><div class="ttname"><a href="fastcover_8c.html#aefc094acd97c214655e20602823c224a">refreshRate</a></div><div class="ttdeci">static const clock_t refreshRate</div><div class="ttdef"><b>Definition</b> <a href="fastcover_8c_source.html#l00054">fastcover.c:54</a></div></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00046">46</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类型定义说明</h2>
+<a id="a7509ace266912c8ba8e10d3f7fc479bb" name="a7509ace266912c8ba8e10d3f7fc479bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7509ace266912c8ba8e10d3f7fc479bb">&#9670;&#160;</a></span>FASTCOVER_tryParameters_data_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structFASTCOVER__tryParameters__data__s.html">FASTCOVER_tryParameters_data_s</a> <a class="el" href="fastcover_8c.html#a7509ace266912c8ba8e10d3f7fc479bb">FASTCOVER_tryParameters_data_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Parameters for <a class="el" href="fastcover_8c.html#ad80f77d1a3062dac3816435eccf83e4c">FASTCOVER_tryParameters()</a>. </p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a2a02a5f33c0643231393a99f875ec2e2" name="a2a02a5f33c0643231393a99f875ec2e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a02a5f33c0643231393a99f875ec2e2">&#9670;&#160;</a></span>FASTCOVER_buildDictionary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t FASTCOVER_buildDictionary </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structFASTCOVER__ctx__t.html">FASTCOVER_ctx_t</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *&#160;</td>
+          <td class="paramname"><em>freqs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictBufferCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_cover_params_t&#160;</td>
+          <td class="paramname"><em>parameters</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a> *&#160;</td>
+          <td class="paramname"><em>segmentFreqs</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Given the prepared context build the dictionary. </p>
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00381">381</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a95459763cbc491a58cd441b98877dd8b" name="a95459763cbc491a58cd441b98877dd8b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95459763cbc491a58cd441b98877dd8b">&#9670;&#160;</a></span>FASTCOVER_checkParameters()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int FASTCOVER_checkParameters </td>
+          <td>(</td>
+          <td class="paramtype">ZDICT_cover_params_t&#160;</td>
+          <td class="paramname"><em>parameters</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>maxDictSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>f</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>accel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00210">210</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac81d46237c265ff2a7eb46e872560943" name="ac81d46237c265ff2a7eb46e872560943"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac81d46237c265ff2a7eb46e872560943">&#9670;&#160;</a></span>FASTCOVER_computeFrequency()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void FASTCOVER_computeFrequency </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *&#160;</td>
+          <td class="paramname"><em>freqs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structFASTCOVER__ctx__t.html">FASTCOVER_ctx_t</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Calculate for frequency of hash value of each dmer in ctx-&gt;samples </p>
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00265">265</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9b74bce1b2e8a6382c70e0379c54f97e" name="a9b74bce1b2e8a6382c70e0379c54f97e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b74bce1b2e8a6382c70e0379c54f97e">&#9670;&#160;</a></span>FASTCOVER_convertToCoverParams()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void FASTCOVER_convertToCoverParams </td>
+          <td>(</td>
+          <td class="paramtype">ZDICT_fastCover_params_t&#160;</td>
+          <td class="paramname"><em>fastCoverParams</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_cover_params_t *&#160;</td>
+          <td class="paramname"><em>coverParams</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00499">499</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0fb1925c7e6fc33fd11e8b53a8a48a4f" name="a0fb1925c7e6fc33fd11e8b53a8a48a4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0fb1925c7e6fc33fd11e8b53a8a48a4f">&#9670;&#160;</a></span>FASTCOVER_convertToFastCoverParams()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void FASTCOVER_convertToFastCoverParams </td>
+          <td>(</td>
+          <td class="paramtype">ZDICT_cover_params_t&#160;</td>
+          <td class="paramname"><em>coverParams</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_fastCover_params_t *&#160;</td>
+          <td class="paramname"><em>fastCoverParams</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>f</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>accel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00513">513</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a797e27f943fb9a009c2ddcafb789d652" name="a797e27f943fb9a009c2ddcafb789d652"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a797e27f943fb9a009c2ddcafb789d652">&#9670;&#160;</a></span>FASTCOVER_ctx_destroy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void FASTCOVER_ctx_destroy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structFASTCOVER__ctx__t.html">FASTCOVER_ctx_t</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Clean up a context initialized with <code><a class="el" href="fastcover_8c.html#aa958197c3493892a8f61ccf83413d644">FASTCOVER_ctx_init()</a></code>. </p>
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00249">249</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa958197c3493892a8f61ccf83413d644" name="aa958197c3493892a8f61ccf83413d644"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa958197c3493892a8f61ccf83413d644">&#9670;&#160;</a></span>FASTCOVER_ctx_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t FASTCOVER_ctx_init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structFASTCOVER__ctx__t.html">FASTCOVER_ctx_t</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>samplesBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>d</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>splitPoint</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>f</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structFASTCOVER__accel__t.html">FASTCOVER_accel_t</a>&#160;</td>
+          <td class="paramname"><em>accelParams</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Prepare a context for dictionary building. The context is only dependent on the parameter <code>d</code> and can used multiple times. Returns 0 on success or error code on error. The context must be destroyed with <code><a class="el" href="fastcover_8c.html#a797e27f943fb9a009c2ddcafb789d652">FASTCOVER_ctx_destroy()</a></code>. </p>
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00294">294</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0e08c3a22c1937dd2ec5febcc67ff0e7" name="a0e08c3a22c1937dd2ec5febcc67ff0e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e08c3a22c1937dd2ec5febcc67ff0e7">&#9670;&#160;</a></span>FASTCOVER_hashPtrToIndex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t FASTCOVER_hashPtrToIndex </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>p</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>h</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>d</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Hash the d-byte value pointed to by p and mod 2^f </p>
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00073">73</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aec5c299a79e62b9d05761f4cd1a9c32f" name="aec5c299a79e62b9d05761f4cd1a9c32f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec5c299a79e62b9d05761f4cd1a9c32f">&#9670;&#160;</a></span>FASTCOVER_selectSegment()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structCOVER__segment__t.html">COVER_segment_t</a> FASTCOVER_selectSegment </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structFASTCOVER__ctx__t.html">FASTCOVER_ctx_t</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *&#160;</td>
+          <td class="paramname"><em>freqs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>begin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_cover_params_t&#160;</td>
+          <td class="paramname"><em>parameters</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a> *&#160;</td>
+          <td class="paramname"><em>segmentFreqs</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Selects the best segment in an epoch. Segments of are scored according to the function:</p>
+<p>Let F(d) be the frequency of all dmers with hash value d. Let S_i be hash value of the dmer at position i of segment S which has length k. </p><pre class="fragment">Score(S) = F(S_1) + F(S_2) + ... + F(S_{k-d+1})
+</pre><p> Once the dmer with hash value d is in the dictionary we set F(d) = 0. </p>
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00137">137</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad80f77d1a3062dac3816435eccf83e4c" name="ad80f77d1a3062dac3816435eccf83e4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad80f77d1a3062dac3816435eccf83e4c">&#9670;&#160;</a></span>FASTCOVER_tryParameters()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void FASTCOVER_tryParameters </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>opaque</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Tries a set of parameters and updates the COVER_best_t with the results. This function is thread safe if zstd is compiled with multithreaded support. It takes its parameters as an <em>OWNING</em> opaque pointer to support threading. </p>
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00454">454</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a56745742202f55abaece58a70f587a58" name="a56745742202f55abaece58a70f587a58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56745742202f55abaece58a70f587a58">&#9670;&#160;</a></span>ZDICT_optimizeTrainFromBuffer_fastCover()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> size_t ZDICT_optimizeTrainFromBuffer_fastCover </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictBufferCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>samplesBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_fastCover_params_t *&#160;</td>
+          <td class="paramname"><em>parameters</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00599">599</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2d44130fccc4101fcc8f13488c9ce3e2" name="a2d44130fccc4101fcc8f13488c9ce3e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d44130fccc4101fcc8f13488c9ce3e2">&#9670;&#160;</a></span>ZDICT_trainFromBuffer_fastCover()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> size_t ZDICT_trainFromBuffer_fastCover </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictBufferCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>samplesBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t *&#160;</td>
+          <td class="paramname"><em>samplesSizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbSamples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZDICT_fastCover_params_t&#160;</td>
+          <td class="paramname"><em>parameters</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00530">530</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1ab54be54d550573a2e9af97153b05da" name="a1ab54be54d550573a2e9af97153b05da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ab54be54d550573a2e9af97153b05da">&#9670;&#160;</a></span>ZSTD_hash6()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTD_hash6 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>h</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00062">62</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0e57434382dc24a608464b1743c2f3e8" name="a0e57434382dc24a608464b1743c2f3e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e57434382dc24a608464b1743c2f3e8">&#9670;&#160;</a></span>ZSTD_hash6Ptr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTD_hash6Ptr </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>p</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>h</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00063">63</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a46cc106ddc61e2ae332c2bdfe92ccf10" name="a46cc106ddc61e2ae332c2bdfe92ccf10"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46cc106ddc61e2ae332c2bdfe92ccf10">&#9670;&#160;</a></span>ZSTD_hash8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTD_hash8 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>h</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00066">66</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5e63d547f3c86dcdb4fc6673cc9e2313" name="a5e63d547f3c86dcdb4fc6673cc9e2313"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e63d547f3c86dcdb4fc6673cc9e2313">&#9670;&#160;</a></span>ZSTD_hash8Ptr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTD_hash8Ptr </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>p</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>h</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00067">67</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="accd17f07664ff091bba31d2a5e3b3609" name="accd17f07664ff091bba31d2a5e3b3609"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#accd17f07664ff091bba31d2a5e3b3609">&#9670;&#160;</a></span>FASTCOVER_defaultAccelParameters</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structFASTCOVER__accel__t.html">FASTCOVER_accel_t</a> FASTCOVER_defaultAccelParameters[<a class="el" href="fastcover_8c.html#a4a5496cd8d3d52c13994a31cca42448b">FASTCOVER_MAX_ACCEL</a>+1]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>初始值:</b><div class="fragment"><div class="line">= {</div>
+<div class="line">  { 100, 0 },   </div>
+<div class="line">  { 100, 0 },   </div>
+<div class="line">  { 50, 1 },   </div>
+<div class="line">  { 34, 2 },   </div>
+<div class="line">  { 25, 3 },   </div>
+<div class="line">  { 20, 4 },   </div>
+<div class="line">  { 17, 5 },   </div>
+<div class="line">  { 14, 6 },   </div>
+<div class="line">  { 13, 7 },   </div>
+<div class="line">  { 11, 8 },   </div>
+<div class="line">  { 10, 9 },   </div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00090">90</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acc504051bdf74b2bba3326a56ed566c6" name="acc504051bdf74b2bba3326a56ed566c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc504051bdf74b2bba3326a56ed566c6">&#9670;&#160;</a></span>g_displayLevel</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int g_displayLevel = 2</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00034">34</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aacaf904c2035258561ef34f18706a638" name="aacaf904c2035258561ef34f18706a638"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aacaf904c2035258561ef34f18706a638">&#9670;&#160;</a></span>g_time</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">clock_t g_time = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00055">55</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a34385622176f79487a887a9412d5037e" name="a34385622176f79487a887a9412d5037e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34385622176f79487a887a9412d5037e">&#9670;&#160;</a></span>prime6bytes</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> prime6bytes = 227718039650203ULL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00061">61</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac61dc420c7785010cee37d5ee3e39d44" name="ac61dc420c7785010cee37d5ee3e39d44"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac61dc420c7785010cee37d5ee3e39d44">&#9670;&#160;</a></span>prime8bytes</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> prime8bytes = 0xCF1BBCDCB7A56463ULL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00065">65</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aefc094acd97c214655e20602823c224a" name="aefc094acd97c214655e20602823c224a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aefc094acd97c214655e20602823c224a">&#9670;&#160;</a></span>refreshRate</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> clock_t refreshRate = CLOCKS_PER_SEC * 15 / 100</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="fastcover_8c_source.html">fastcover.c</a> 第 <a class="el" href="fastcover_8c_source.html#l00054">54</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="fastcover_8c.html">fastcover.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

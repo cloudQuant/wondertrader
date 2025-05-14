@@ -1,0 +1,2197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/xxhash.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('xxhash_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#define-members">宏定义</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#enum-members">枚举</a> &#124;
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">xxhash.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;stdlib.h&gt;</code><br />
+<code>#include &lt;stddef.h&gt;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="xxhash_8h_source.html">xxhash.h</a>&quot;</code><br />
+</div>
+<p><a href="xxhash_8c_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:afd620e67e55f7db0b0d700af3edff885" id="r_afd620e67e55f7db0b0d700af3edff885"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#afd620e67e55f7db0b0d700af3edff885">XXH_FORCE_NATIVE_FORMAT</a>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:afd620e67e55f7db0b0d700af3edff885"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee35763869a969d5576e70dac1c08b8d" id="r_aee35763869a969d5576e70dac1c08b8d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#aee35763869a969d5576e70dac1c08b8d">XXH_FORCE_ALIGN_CHECK</a>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:aee35763869a969d5576e70dac1c08b8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a546f2633ae1036f49bdc5582971d7f1e" id="r_a546f2633ae1036f49bdc5582971d7f1e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a546f2633ae1036f49bdc5582971d7f1e">XXH_STATIC_LINKING_ONLY</a></td></tr>
+<tr class="separator:a546f2633ae1036f49bdc5582971d7f1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7ec650a4045eb3e9c0b1e22f11183f7" id="r_ae7ec650a4045eb3e9c0b1e22f11183f7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#ae7ec650a4045eb3e9c0b1e22f11183f7">INLINE_KEYWORD</a></td></tr>
+<tr class="separator:ae7ec650a4045eb3e9c0b1e22f11183f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdb32e49e718aa032c6b04b4a237131e" id="r_acdb32e49e718aa032c6b04b4a237131e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#acdb32e49e718aa032c6b04b4a237131e">FORCE_INLINE_ATTR</a></td></tr>
+<tr class="separator:acdb32e49e718aa032c6b04b4a237131e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf752dd6259117e6d4da3b8b1fb13aaf" id="r_abf752dd6259117e6d4da3b8b1fb13aaf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a>&#160;&#160;&#160;static <a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#ae7ec650a4045eb3e9c0b1e22f11183f7">INLINE_KEYWORD</a> <a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#acdb32e49e718aa032c6b04b4a237131e">FORCE_INLINE_ATTR</a></td></tr>
+<tr class="separator:abf752dd6259117e6d4da3b8b1fb13aaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02d9b620a75ca60cd5d24b51309af887" id="r_a02d9b620a75ca60cd5d24b51309af887"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a02d9b620a75ca60cd5d24b51309af887">MEM_MODULE</a></td></tr>
+<tr class="separator:a02d9b620a75ca60cd5d24b51309af887"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbba0f726fc66d7100916c683b7568ae" id="r_adbba0f726fc66d7100916c683b7568ae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#adbba0f726fc66d7100916c683b7568ae">GCC_VERSION</a>&#160;&#160;&#160;(__GNUC__ * 100 + __GNUC_MINOR__)</td></tr>
+<tr class="separator:adbba0f726fc66d7100916c683b7568ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70a4b202f9523a2a811da16cde3f52eb" id="r_a70a4b202f9523a2a811da16cde3f52eb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a70a4b202f9523a2a811da16cde3f52eb">XXH_rotl32</a>(x,  r)&#160;&#160;&#160;((x &lt;&lt; r) | (x &gt;&gt; (32 - r)))</td></tr>
+<tr class="separator:a70a4b202f9523a2a811da16cde3f52eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a056473e50ab5e7acb43d00ca3d41632e" id="r_a056473e50ab5e7acb43d00ca3d41632e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a056473e50ab5e7acb43d00ca3d41632e">XXH_rotl64</a>(x,  r)&#160;&#160;&#160;((x &lt;&lt; r) | (x &gt;&gt; (64 - r)))</td></tr>
+<tr class="separator:a056473e50ab5e7acb43d00ca3d41632e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a408fac02658eb4a81f7a1877f1ca3b3f" id="r_a408fac02658eb4a81f7a1877f1ca3b3f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a408fac02658eb4a81f7a1877f1ca3b3f">XXH_CPU_LITTLE_ENDIAN</a>&#160;&#160;&#160;(*(<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char*)(&amp;<a class="el" href="xxhash_8c.html#a92c2b4bf886849f859c9664a1115b114">g_one</a>))</td></tr>
+<tr class="separator:a408fac02658eb4a81f7a1877f1ca3b3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bc33577f47cf99f8b35a52d87c642c4" id="r_a3bc33577f47cf99f8b35a52d87c642c4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a3bc33577f47cf99f8b35a52d87c642c4">XXH_STATIC_ASSERT</a>(c)&#160;&#160;&#160;{ enum { XXH_static_assert = 1/(int)(!!(c)) }; }    /* use only *after* variable declarations */</td></tr>
+<tr class="separator:a3bc33577f47cf99f8b35a52d87c642c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada11171377462c53a42c6f5bf450de7b" id="r_ada11171377462c53a42c6f5bf450de7b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#ada11171377462c53a42c6f5bf450de7b">XXH_get32bits</a>(p)&#160;&#160;&#160;<a class="el" href="xxhash_8c.html#a581ae5fb720dbc6be93f36b4adfa4b05">XXH_readLE32_align</a>(p, endian, align)</td></tr>
+<tr class="separator:ada11171377462c53a42c6f5bf450de7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5c5037e820ac15ae30f36c553d5b95e" id="r_ac5c5037e820ac15ae30f36c553d5b95e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#ac5c5037e820ac15ae30f36c553d5b95e">XXH_get64bits</a>(p)&#160;&#160;&#160;<a class="el" href="xxhash_8c.html#a839ebef9c1d2db9500bf60061eff46ac">XXH_readLE64_align</a>(p, endian, align)</td></tr>
+<tr class="separator:ac5c5037e820ac15ae30f36c553d5b95e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a4ae1dab0fb4b072a66584546209e7d58" id="r_a4ae1dab0fb4b072a66584546209e7d58"><td class="memItemLeft" align="right" valign="top">typedef unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a></td></tr>
+<tr class="separator:a4ae1dab0fb4b072a66584546209e7d58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf928e51a60dba0df29d615401cc55a8" id="r_adf928e51a60dba0df29d615401cc55a8"><td class="memItemLeft" align="right" valign="top">typedef unsigned short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#adf928e51a60dba0df29d615401cc55a8">U16</a></td></tr>
+<tr class="separator:adf928e51a60dba0df29d615401cc55a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3df7cf3c8cb172a588adec881447d68" id="r_ac3df7cf3c8cb172a588adec881447d68"><td class="memItemLeft" align="right" valign="top">typedef unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#ac3df7cf3c8cb172a588adec881447d68">U32</a></td></tr>
+<tr class="separator:ac3df7cf3c8cb172a588adec881447d68"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57a2244776e01ad620c556de58eb7880" id="r_a57a2244776e01ad620c556de58eb7880"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="stdc_8h.html#ae31516cd0c4adc3d52b93ef2e5c6117b">signed</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a57a2244776e01ad620c556de58eb7880">S32</a></td></tr>
+<tr class="separator:a57a2244776e01ad620c556de58eb7880"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24c386d3758eba951eb7532fdbb45804" id="r_a24c386d3758eba951eb7532fdbb45804"><td class="memItemLeft" align="right" valign="top">typedef unsigned long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a24c386d3758eba951eb7532fdbb45804">U64</a></td></tr>
+<tr class="separator:a24c386d3758eba951eb7532fdbb45804"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+枚举</h2></td></tr>
+<tr class="memitem:a235e518684d715cbb04353c997ad81e9" id="r_a235e518684d715cbb04353c997ad81e9"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a> { <a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9ae38c7420bad548564395edb8cb4b6b60">XXH_bigEndian</a> =0
+, <a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9ab42c8f08d82d02dee14a685dc4c39539">XXH_littleEndian</a> =1
+ }</td></tr>
+<tr class="separator:a235e518684d715cbb04353c997ad81e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adec56fccd4f83e34902b6b09ecccfff5" id="r_adec56fccd4f83e34902b6b09ecccfff5"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#adec56fccd4f83e34902b6b09ecccfff5">XXH_alignment</a> { <a class="el" href="xxhash_8c.html#adec56fccd4f83e34902b6b09ecccfff5a41340c9f33fe739cef7a1c56dc617194">XXH_aligned</a>
+, <a class="el" href="xxhash_8c.html#adec56fccd4f83e34902b6b09ecccfff5ab082c14fd7eef12bcb1dfda2e813586f">XXH_unaligned</a>
+ }</td></tr>
+<tr class="separator:adec56fccd4f83e34902b6b09ecccfff5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a0bd0e6873ef7d3b3520f9af3c44c357a" id="r_a0bd0e6873ef7d3b3520f9af3c44c357a"><td class="memItemLeft" align="right" valign="top">static void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a0bd0e6873ef7d3b3520f9af3c44c357a">XXH_malloc</a> (size_t s)</td></tr>
+<tr class="separator:a0bd0e6873ef7d3b3520f9af3c44c357a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72dbb2775c66d0f9bdbe1529104c38c5" id="r_a72dbb2775c66d0f9bdbe1529104c38c5"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a72dbb2775c66d0f9bdbe1529104c38c5">XXH_free</a> (void *p)</td></tr>
+<tr class="separator:a72dbb2775c66d0f9bdbe1529104c38c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d592f4a788e3da08bad709247452018" id="r_a8d592f4a788e3da08bad709247452018"><td class="memItemLeft" align="right" valign="top">static void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a8d592f4a788e3da08bad709247452018">XXH_memcpy</a> (void *dest, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t size)</td></tr>
+<tr class="separator:a8d592f4a788e3da08bad709247452018"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4232c93479fe0627ad25798b1f08f7d" id="r_ad4232c93479fe0627ad25798b1f08f7d"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#ad4232c93479fe0627ad25798b1f08f7d">XXH_read32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *memPtr)</td></tr>
+<tr class="separator:ad4232c93479fe0627ad25798b1f08f7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11cafddd4eb4e10fc12ff86d74460089" id="r_a11cafddd4eb4e10fc12ff86d74460089"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a11cafddd4eb4e10fc12ff86d74460089">XXH_read64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *memPtr)</td></tr>
+<tr class="separator:a11cafddd4eb4e10fc12ff86d74460089"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77a5849877fe70d96dc3c64cb1b0a94e" id="r_a77a5849877fe70d96dc3c64cb1b0a94e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a77a5849877fe70d96dc3c64cb1b0a94e">XXH_swap32</a> (<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> x)</td></tr>
+<tr class="separator:a77a5849877fe70d96dc3c64cb1b0a94e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58b16ab7563a34d1236b326441102dac" id="r_a58b16ab7563a34d1236b326441102dac"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a58b16ab7563a34d1236b326441102dac">XXH_swap64</a> (<a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> x)</td></tr>
+<tr class="separator:a58b16ab7563a34d1236b326441102dac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a581ae5fb720dbc6be93f36b4adfa4b05" id="r_a581ae5fb720dbc6be93f36b4adfa4b05"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a581ae5fb720dbc6be93f36b4adfa4b05">XXH_readLE32_align</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *ptr, <a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a> endian, <a class="el" href="xxhash_8c.html#adec56fccd4f83e34902b6b09ecccfff5">XXH_alignment</a> align)</td></tr>
+<tr class="separator:a581ae5fb720dbc6be93f36b4adfa4b05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34dc1b83e262d4bbb32fd1277a324946" id="r_a34dc1b83e262d4bbb32fd1277a324946"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a34dc1b83e262d4bbb32fd1277a324946">XXH_readLE32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *ptr, <a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a> endian)</td></tr>
+<tr class="separator:a34dc1b83e262d4bbb32fd1277a324946"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec9f74629b478dcc3d578dab2f5a911e" id="r_aec9f74629b478dcc3d578dab2f5a911e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#aec9f74629b478dcc3d578dab2f5a911e">XXH_readBE32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *ptr)</td></tr>
+<tr class="separator:aec9f74629b478dcc3d578dab2f5a911e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a839ebef9c1d2db9500bf60061eff46ac" id="r_a839ebef9c1d2db9500bf60061eff46ac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a839ebef9c1d2db9500bf60061eff46ac">XXH_readLE64_align</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *ptr, <a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a> endian, <a class="el" href="xxhash_8c.html#adec56fccd4f83e34902b6b09ecccfff5">XXH_alignment</a> align)</td></tr>
+<tr class="separator:a839ebef9c1d2db9500bf60061eff46ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d8d26c12e483e2fc21fa37d45b56cfb" id="r_a0d8d26c12e483e2fc21fa37d45b56cfb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a0d8d26c12e483e2fc21fa37d45b56cfb">XXH_readLE64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *ptr, <a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a> endian)</td></tr>
+<tr class="separator:a0d8d26c12e483e2fc21fa37d45b56cfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a832fe016b6b892806794a07b92ba8717" id="r_a832fe016b6b892806794a07b92ba8717"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a832fe016b6b892806794a07b92ba8717">XXH_readBE64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *ptr)</td></tr>
+<tr class="separator:a832fe016b6b892806794a07b92ba8717"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af435229c36fbbc6a23a5f187752a6fe4" id="r_af435229c36fbbc6a23a5f187752a6fe4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#af435229c36fbbc6a23a5f187752a6fe4">XXH_versionNumber</a> (void)</td></tr>
+<tr class="separator:af435229c36fbbc6a23a5f187752a6fe4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9bb751d7485be02a31705573c492bf3d" id="r_a9bb751d7485be02a31705573c492bf3d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a9bb751d7485be02a31705573c492bf3d">XXH32_copyState</a> (<a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *<a class="el" href="xxhash_8h.html#a080abdcb9c02438f1cd2bb707af25af8">restrict</a> dstState, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *<a class="el" href="xxhash_8h.html#a080abdcb9c02438f1cd2bb707af25af8">restrict</a> srcState)</td></tr>
+<tr class="separator:a9bb751d7485be02a31705573c492bf3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5c11ebd85c3d3bbed832dd5d77a0329" id="r_ad5c11ebd85c3d3bbed832dd5d77a0329"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#ad5c11ebd85c3d3bbed832dd5d77a0329">XXH64_copyState</a> (<a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *<a class="el" href="xxhash_8h.html#a080abdcb9c02438f1cd2bb707af25af8">restrict</a> dstState, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *<a class="el" href="xxhash_8h.html#a080abdcb9c02438f1cd2bb707af25af8">restrict</a> srcState)</td></tr>
+<tr class="separator:ad5c11ebd85c3d3bbed832dd5d77a0329"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a557aa104c7060e621c10085230c63d10" id="r_a557aa104c7060e621c10085230c63d10"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a557aa104c7060e621c10085230c63d10">XXH32_round</a> (<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> seed, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> input)</td></tr>
+<tr class="separator:a557aa104c7060e621c10085230c63d10"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace915417a5eab373128e97f3e0a95166" id="r_ace915417a5eab373128e97f3e0a95166"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#ace915417a5eab373128e97f3e0a95166">XXH32_endian_align</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *input, size_t len, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> seed, <a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a> endian, <a class="el" href="xxhash_8c.html#adec56fccd4f83e34902b6b09ecccfff5">XXH_alignment</a> align)</td></tr>
+<tr class="separator:ace915417a5eab373128e97f3e0a95166"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29d77e97a0b22dbd7e174b9bb852ae9b" id="r_a29d77e97a0b22dbd7e174b9bb852ae9b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a29d77e97a0b22dbd7e174b9bb852ae9b">XXH32</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *input, size_t len, unsigned int seed)</td></tr>
+<tr class="separator:a29d77e97a0b22dbd7e174b9bb852ae9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade66033c618558e0d976b6476911eedc" id="r_ade66033c618558e0d976b6476911eedc"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#ade66033c618558e0d976b6476911eedc">XXH64_round</a> (<a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> acc, <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> input)</td></tr>
+<tr class="separator:ade66033c618558e0d976b6476911eedc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36a0958315e63b8b535fbe2a41fc211f" id="r_a36a0958315e63b8b535fbe2a41fc211f"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a36a0958315e63b8b535fbe2a41fc211f">XXH64_mergeRound</a> (<a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> acc, <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> val)</td></tr>
+<tr class="separator:a36a0958315e63b8b535fbe2a41fc211f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afbaca2dc6ea4e8ce9555206d25e80748" id="r_afbaca2dc6ea4e8ce9555206d25e80748"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#afbaca2dc6ea4e8ce9555206d25e80748">XXH64_endian_align</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *input, size_t len, <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> seed, <a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a> endian, <a class="el" href="xxhash_8c.html#adec56fccd4f83e34902b6b09ecccfff5">XXH_alignment</a> align)</td></tr>
+<tr class="separator:afbaca2dc6ea4e8ce9555206d25e80748"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac26e9d13367a5a7d83bc77965b9342e8" id="r_ac26e9d13367a5a7d83bc77965b9342e8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> unsigned long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#ac26e9d13367a5a7d83bc77965b9342e8">XXH64</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *input, size_t len, unsigned long long seed)</td></tr>
+<tr class="separator:ac26e9d13367a5a7d83bc77965b9342e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51931b4d4f02a6d818aaa6a258e8c076" id="r_a51931b4d4f02a6d818aaa6a258e8c076"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a51931b4d4f02a6d818aaa6a258e8c076">XXH32_createState</a> (void)</td></tr>
+<tr class="separator:a51931b4d4f02a6d818aaa6a258e8c076"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab2c0ec5dbb1b738d3f58aa3fc640243" id="r_aab2c0ec5dbb1b738d3f58aa3fc640243"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#aab2c0ec5dbb1b738d3f58aa3fc640243">XXH32_freeState</a> (<a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *statePtr)</td></tr>
+<tr class="separator:aab2c0ec5dbb1b738d3f58aa3fc640243"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79efe920b4f18004110a6e9bcc0385e0" id="r_a79efe920b4f18004110a6e9bcc0385e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a79efe920b4f18004110a6e9bcc0385e0">XXH64_createState</a> (void)</td></tr>
+<tr class="separator:a79efe920b4f18004110a6e9bcc0385e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae490ef51db9c960da09189c2774cf82e" id="r_ae490ef51db9c960da09189c2774cf82e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#ae490ef51db9c960da09189c2774cf82e">XXH64_freeState</a> (<a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *statePtr)</td></tr>
+<tr class="separator:ae490ef51db9c960da09189c2774cf82e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ad2de72b93cb6396ee595484c0ced14" id="r_a5ad2de72b93cb6396ee595484c0ced14"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a5ad2de72b93cb6396ee595484c0ced14">XXH32_reset</a> (<a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *statePtr, unsigned int seed)</td></tr>
+<tr class="separator:a5ad2de72b93cb6396ee595484c0ced14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81c80f1f143238a37ebc39a100ade6d5" id="r_a81c80f1f143238a37ebc39a100ade6d5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a81c80f1f143238a37ebc39a100ade6d5">XXH64_reset</a> (<a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *statePtr, unsigned long long seed)</td></tr>
+<tr class="separator:a81c80f1f143238a37ebc39a100ade6d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d26ac38b9a6d99738125b355e34ecbe" id="r_a4d26ac38b9a6d99738125b355e34ecbe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a4d26ac38b9a6d99738125b355e34ecbe">XXH32_update_endian</a> (<a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *state, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *input, size_t len, <a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a> endian)</td></tr>
+<tr class="separator:a4d26ac38b9a6d99738125b355e34ecbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4920be3d369f2520d096214d5199a46" id="r_af4920be3d369f2520d096214d5199a46"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#af4920be3d369f2520d096214d5199a46">XXH32_update</a> (<a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *state_in, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *input, size_t len)</td></tr>
+<tr class="separator:af4920be3d369f2520d096214d5199a46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61315094b94c483a533927311dedc9bc" id="r_a61315094b94c483a533927311dedc9bc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a61315094b94c483a533927311dedc9bc">XXH32_digest_endian</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *state, <a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a> endian)</td></tr>
+<tr class="separator:a61315094b94c483a533927311dedc9bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07c35eafb66c0557575801b79e624b80" id="r_a07c35eafb66c0557575801b79e624b80"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a07c35eafb66c0557575801b79e624b80">XXH32_digest</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *state_in)</td></tr>
+<tr class="separator:a07c35eafb66c0557575801b79e624b80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27f260b47df70bca25c7028d27d2c933" id="r_a27f260b47df70bca25c7028d27d2c933"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a27f260b47df70bca25c7028d27d2c933">XXH64_update_endian</a> (<a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *state, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *input, size_t len, <a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a> endian)</td></tr>
+<tr class="separator:a27f260b47df70bca25c7028d27d2c933"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2dc0796681564cdf8a73f86b3758db73" id="r_a2dc0796681564cdf8a73f86b3758db73"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a2dc0796681564cdf8a73f86b3758db73">XXH64_update</a> (<a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *state_in, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *input, size_t len)</td></tr>
+<tr class="separator:a2dc0796681564cdf8a73f86b3758db73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a93636a981f6fa38b79c840a1c7f2bd" id="r_a8a93636a981f6fa38b79c840a1c7f2bd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a8a93636a981f6fa38b79c840a1c7f2bd">XXH64_digest_endian</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *state, <a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a> endian)</td></tr>
+<tr class="separator:a8a93636a981f6fa38b79c840a1c7f2bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae06c95901716c1a8a81de540713eca77" id="r_ae06c95901716c1a8a81de540713eca77"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> unsigned long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#ae06c95901716c1a8a81de540713eca77">XXH64_digest</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *state_in)</td></tr>
+<tr class="separator:ae06c95901716c1a8a81de540713eca77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade47204bc3908fdc401a68e9c295e233" id="r_ade47204bc3908fdc401a68e9c295e233"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#ade47204bc3908fdc401a68e9c295e233">XXH32_canonicalFromHash</a> (<a class="el" href="structXXH32__canonical__t.html">XXH32_canonical_t</a> *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <a class="el" href="xxhash_8h.html#ab96bf7612b1f829b593220ab7acdc7a6">XXH32_hash_t</a> hash)</td></tr>
+<tr class="separator:ade47204bc3908fdc401a68e9c295e233"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecb9c0887b2cc4f4444cfa439e6c2c6b" id="r_aecb9c0887b2cc4f4444cfa439e6c2c6b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#aecb9c0887b2cc4f4444cfa439e6c2c6b">XXH64_canonicalFromHash</a> (<a class="el" href="structXXH64__canonical__t.html">XXH64_canonical_t</a> *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <a class="el" href="xxhash_8h.html#a3d2b19e87ac87eb107372946fce59b26">XXH64_hash_t</a> hash)</td></tr>
+<tr class="separator:aecb9c0887b2cc4f4444cfa439e6c2c6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a206cac74a0c149b244d3532186a4930f" id="r_a206cac74a0c149b244d3532186a4930f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#ab96bf7612b1f829b593220ab7acdc7a6">XXH32_hash_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a206cac74a0c149b244d3532186a4930f">XXH32_hashFromCanonical</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structXXH32__canonical__t.html">XXH32_canonical_t</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>)</td></tr>
+<tr class="separator:a206cac74a0c149b244d3532186a4930f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add7f64d0c0590f222747e7f703cfd3b0" id="r_add7f64d0c0590f222747e7f703cfd3b0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a3d2b19e87ac87eb107372946fce59b26">XXH64_hash_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#add7f64d0c0590f222747e7f703cfd3b0">XXH64_hashFromCanonical</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structXXH64__canonical__t.html">XXH64_canonical_t</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>)</td></tr>
+<tr class="separator:add7f64d0c0590f222747e7f703cfd3b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a92c2b4bf886849f859c9664a1115b114" id="r_a92c2b4bf886849f859c9664a1115b114"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a92c2b4bf886849f859c9664a1115b114">g_one</a> = 1</td></tr>
+<tr class="separator:a92c2b4bf886849f859c9664a1115b114"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a573a174f7a40630ee1cf1f3dc6d64468" id="r_a573a174f7a40630ee1cf1f3dc6d64468"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a573a174f7a40630ee1cf1f3dc6d64468">PRIME32_1</a> = 2654435761U</td></tr>
+<tr class="separator:a573a174f7a40630ee1cf1f3dc6d64468"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81a1105a63679284f3b9d746f0a7faf0" id="r_a81a1105a63679284f3b9d746f0a7faf0"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a81a1105a63679284f3b9d746f0a7faf0">PRIME32_2</a> = 2246822519U</td></tr>
+<tr class="separator:a81a1105a63679284f3b9d746f0a7faf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b379d974595487da776b24fce6b85cf" id="r_a8b379d974595487da776b24fce6b85cf"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a8b379d974595487da776b24fce6b85cf">PRIME32_3</a> = 3266489917U</td></tr>
+<tr class="separator:a8b379d974595487da776b24fce6b85cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad200028a5f75af6d9cb0152f7c1d62d5" id="r_ad200028a5f75af6d9cb0152f7c1d62d5"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#ad200028a5f75af6d9cb0152f7c1d62d5">PRIME32_4</a> = 668265263U</td></tr>
+<tr class="separator:ad200028a5f75af6d9cb0152f7c1d62d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a400727b7dcdd9be931f626643c67cc53" id="r_a400727b7dcdd9be931f626643c67cc53"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a400727b7dcdd9be931f626643c67cc53">PRIME32_5</a> = 374761393U</td></tr>
+<tr class="separator:a400727b7dcdd9be931f626643c67cc53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a792df9666997c1b075d9791d49418c4b" id="r_a792df9666997c1b075d9791d49418c4b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a792df9666997c1b075d9791d49418c4b">PRIME64_1</a> = 11400714785074694791ULL</td></tr>
+<tr class="separator:a792df9666997c1b075d9791d49418c4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a448ffb9e2b71d788d7dd14b7a4ea8af5" id="r_a448ffb9e2b71d788d7dd14b7a4ea8af5"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a448ffb9e2b71d788d7dd14b7a4ea8af5">PRIME64_2</a> = 14029467366897019727ULL</td></tr>
+<tr class="separator:a448ffb9e2b71d788d7dd14b7a4ea8af5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a853639fd5414749bd79b35893f5fbf5f" id="r_a853639fd5414749bd79b35893f5fbf5f"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a853639fd5414749bd79b35893f5fbf5f">PRIME64_3</a> = 1609587929392839161ULL</td></tr>
+<tr class="separator:a853639fd5414749bd79b35893f5fbf5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57787b87cd98d2fa8f86607bc2f52ef0" id="r_a57787b87cd98d2fa8f86607bc2f52ef0"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a57787b87cd98d2fa8f86607bc2f52ef0">PRIME64_4</a> = 9650029242287828579ULL</td></tr>
+<tr class="separator:a57787b87cd98d2fa8f86607bc2f52ef0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28aa0264a8f563f968bb423c55e446fb" id="r_a28aa0264a8f563f968bb423c55e446fb"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="xxhash_8c.html#a28aa0264a8f563f968bb423c55e446fb">PRIME64_5</a> = 2870177450012600261ULL</td></tr>
+<tr class="separator:a28aa0264a8f563f968bb423c55e446fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="acdb32e49e718aa032c6b04b4a237131e" name="acdb32e49e718aa032c6b04b4a237131e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdb32e49e718aa032c6b04b4a237131e">&#9670;&#160;</a></span>FORCE_INLINE_ATTR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FORCE_INLINE_ATTR</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00129">129</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abf752dd6259117e6d4da3b8b1fb13aaf" name="abf752dd6259117e6d4da3b8b1fb13aaf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf752dd6259117e6d4da3b8b1fb13aaf">&#9670;&#160;</a></span>FORCE_INLINE_TEMPLATE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FORCE_INLINE_TEMPLATE&#160;&#160;&#160;static <a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#ae7ec650a4045eb3e9c0b1e22f11183f7">INLINE_KEYWORD</a> <a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#acdb32e49e718aa032c6b04b4a237131e">FORCE_INLINE_ATTR</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00132">132</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adbba0f726fc66d7100916c683b7568ae" name="adbba0f726fc66d7100916c683b7568ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adbba0f726fc66d7100916c683b7568ae">&#9670;&#160;</a></span>GCC_VERSION</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define GCC_VERSION&#160;&#160;&#160;(__GNUC__ * 100 + __GNUC_MINOR__)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00203">203</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae7ec650a4045eb3e9c0b1e22f11183f7" name="ae7ec650a4045eb3e9c0b1e22f11183f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7ec650a4045eb3e9c0b1e22f11183f7">&#9670;&#160;</a></span>INLINE_KEYWORD</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define INLINE_KEYWORD</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00121">121</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a02d9b620a75ca60cd5d24b51309af887" name="a02d9b620a75ca60cd5d24b51309af887"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02d9b620a75ca60cd5d24b51309af887">&#9670;&#160;</a></span>MEM_MODULE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MEM_MODULE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00144">144</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a408fac02658eb4a81f7a1877f1ca3b3f" name="a408fac02658eb4a81f7a1877f1ca3b3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a408fac02658eb4a81f7a1877f1ca3b3f">&#9670;&#160;</a></span>XXH_CPU_LITTLE_ENDIAN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define XXH_CPU_LITTLE_ENDIAN&#160;&#160;&#160;(*(<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char*)(&amp;<a class="el" href="xxhash_8c.html#a92c2b4bf886849f859c9664a1115b114">g_one</a>))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00255">255</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aee35763869a969d5576e70dac1c08b8d" name="aee35763869a969d5576e70dac1c08b8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee35763869a969d5576e70dac1c08b8d">&#9670;&#160;</a></span>XXH_FORCE_ALIGN_CHECK</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define XXH_FORCE_ALIGN_CHECK&#160;&#160;&#160;1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>XXH_FORCE_ALIGN_CHECK : This is a minor performance trick, only useful with lots of very small keys. It means : check for aligned/unaligned input. The check costs one initial branch per hash; set to 0 when the input data is guaranteed to be aligned. </p>
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00091">91</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afd620e67e55f7db0b0d700af3edff885" name="afd620e67e55f7db0b0d700af3edff885"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd620e67e55f7db0b0d700af3edff885">&#9670;&#160;</a></span>XXH_FORCE_NATIVE_FORMAT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define XXH_FORCE_NATIVE_FORMAT&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>XXH_FORCE_MEMORY_ACCESS : By default, access to unaligned memory is controlled by <code>memcpy()</code>, which is safe and portable. Unfortunately, on some target/compiler combinations, the generated assembly is sub-optimal. The below switch allow to select different access method for improved performance. Method 0 (default) : use <code>memcpy()</code>. Safe and portable. Method 1 : <code>__packed</code> statement. It depends on compiler extension (ie, not portable). This method is safe if your compiler supports it, and <em>generally</em> as fast or faster than <code>memcpy</code>. Method 2 : direct access. This method doesn't depend on compiler but violate C standard. It can generate buggy code on targets which do not support unaligned memory accesses. But in some circumstances, it's the only known way to get the most performance (ie GCC + ARMv6) See <a href="http://stackoverflow.com/a/32095106/646947">http://stackoverflow.com/a/32095106/646947</a> for details. Prefer these methods in priority order (0 &gt; 1 &gt; 2)</p>
+<p>XXH_ACCEPT_NULL_INPUT_POINTER : If the input pointer is a null pointer, xxHash default behavior is to trigger a memory access error, since it is a bad pointer. When this option is enabled, xxHash output for null input pointers will be the same as a null-length input. By default, this option is disabled. To enable it, uncomment below define :</p>
+<p>XXH_FORCE_NATIVE_FORMAT : By default, xxHash library provides endian-independent Hash values, based on little-endian convention. Results are therefore identical for little-endian and big-endian CPU. This comes at a performance cost for big-endian CPU, since some swapping is required to emulate little-endian format. Should endian-independence be of no importance for your application, you may set the #define below to 1, to improve speed for Big-endian CPU. This option has no impact on Little_Endian CPU. </p>
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00078">78</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ada11171377462c53a42c6f5bf450de7b" name="ada11171377462c53a42c6f5bf450de7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada11171377462c53a42c6f5bf450de7b">&#9670;&#160;</a></span>XXH_get32bits</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define XXH_get32bits</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">p</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="xxhash_8c.html#a581ae5fb720dbc6be93f36b4adfa4b05">XXH_readLE32_align</a>(p, endian, align)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac5c5037e820ac15ae30f36c553d5b95e" name="ac5c5037e820ac15ae30f36c553d5b95e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5c5037e820ac15ae30f36c553d5b95e">&#9670;&#160;</a></span>XXH_get64bits</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define XXH_get64bits</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">p</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="xxhash_8c.html#a839ebef9c1d2db9500bf60061eff46ac">XXH_readLE64_align</a>(p, endian, align)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a70a4b202f9523a2a811da16cde3f52eb" name="a70a4b202f9523a2a811da16cde3f52eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70a4b202f9523a2a811da16cde3f52eb">&#9670;&#160;</a></span>XXH_rotl32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define XXH_rotl32</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">r&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;((x &lt;&lt; r) | (x &gt;&gt; (32 - r)))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00214">214</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a056473e50ab5e7acb43d00ca3d41632e" name="a056473e50ab5e7acb43d00ca3d41632e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a056473e50ab5e7acb43d00ca3d41632e">&#9670;&#160;</a></span>XXH_rotl64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define XXH_rotl64</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">r&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;((x &lt;&lt; r) | (x &gt;&gt; (64 - r)))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00216">216</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3bc33577f47cf99f8b35a52d87c642c4" name="a3bc33577f47cf99f8b35a52d87c642c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bc33577f47cf99f8b35a52d87c642c4">&#9670;&#160;</a></span>XXH_STATIC_ASSERT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define XXH_STATIC_ASSERT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">c</td><td>)</td>
+          <td>&#160;&#160;&#160;{ enum { XXH_static_assert = 1/(int)(!!(c)) }; }    /* use only *after* variable declarations */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00304">304</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a546f2633ae1036f49bdc5582971d7f1e" name="a546f2633ae1036f49bdc5582971d7f1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a546f2633ae1036f49bdc5582971d7f1e">&#9670;&#160;</a></span>XXH_STATIC_LINKING_ONLY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define XXH_STATIC_LINKING_ONLY</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00110">110</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类型定义说明</h2>
+<a id="a4ae1dab0fb4b072a66584546209e7d58" name="a4ae1dab0fb4b072a66584546209e7d58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ae1dab0fb4b072a66584546209e7d58">&#9670;&#160;</a></span>BYTE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef unsigned char <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00153">153</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a57a2244776e01ad620c556de58eb7880" name="a57a2244776e01ad620c556de58eb7880"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57a2244776e01ad620c556de58eb7880">&#9670;&#160;</a></span>S32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="stdc_8h.html#ae31516cd0c4adc3d52b93ef2e5c6117b">signed</a> int <a class="el" href="mem_8h.html#a57a2244776e01ad620c556de58eb7880">S32</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00156">156</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adf928e51a60dba0df29d615401cc55a8" name="adf928e51a60dba0df29d615401cc55a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf928e51a60dba0df29d615401cc55a8">&#9670;&#160;</a></span>U16</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef unsigned short <a class="el" href="mem_8h.html#adf928e51a60dba0df29d615401cc55a8">U16</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00154">154</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac3df7cf3c8cb172a588adec881447d68" name="ac3df7cf3c8cb172a588adec881447d68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3df7cf3c8cb172a588adec881447d68">&#9670;&#160;</a></span>U32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef unsigned int <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00155">155</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a24c386d3758eba951eb7532fdbb45804" name="a24c386d3758eba951eb7532fdbb45804"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24c386d3758eba951eb7532fdbb45804">&#9670;&#160;</a></span>U64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef unsigned long long <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00157">157</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">枚举类型说明</h2>
+<a id="adec56fccd4f83e34902b6b09ecccfff5" name="adec56fccd4f83e34902b6b09ecccfff5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adec56fccd4f83e34902b6b09ecccfff5">&#9670;&#160;</a></span>XXH_alignment</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="xxhash_8c.html#adec56fccd4f83e34902b6b09ecccfff5">XXH_alignment</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="adec56fccd4f83e34902b6b09ecccfff5a41340c9f33fe739cef7a1c56dc617194" name="adec56fccd4f83e34902b6b09ecccfff5a41340c9f33fe739cef7a1c56dc617194"></a>XXH_aligned&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="adec56fccd4f83e34902b6b09ecccfff5ab082c14fd7eef12bcb1dfda2e813586f" name="adec56fccd4f83e34902b6b09ecccfff5ab082c14fd7eef12bcb1dfda2e813586f"></a>XXH_unaligned&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00262">262</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a235e518684d715cbb04353c997ad81e9" name="a235e518684d715cbb04353c997ad81e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a235e518684d715cbb04353c997ad81e9">&#9670;&#160;</a></span>XXH_endianess</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a235e518684d715cbb04353c997ad81e9ae38c7420bad548564395edb8cb4b6b60" name="a235e518684d715cbb04353c997ad81e9ae38c7420bad548564395edb8cb4b6b60"></a>XXH_bigEndian&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a235e518684d715cbb04353c997ad81e9ab42c8f08d82d02dee14a685dc4c39539" name="a235e518684d715cbb04353c997ad81e9ab42c8f08d82d02dee14a685dc4c39539"></a>XXH_littleEndian&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00250">250</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a29d77e97a0b22dbd7e174b9bb852ae9b" name="a29d77e97a0b22dbd7e174b9bb852ae9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29d77e97a0b22dbd7e174b9bb852ae9b">&#9670;&#160;</a></span>XXH32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> unsigned int XXH32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>len</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>seed</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00408">408</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ade47204bc3908fdc401a68e9c295e233" name="ade47204bc3908fdc401a68e9c295e233"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade47204bc3908fdc401a68e9c295e233">&#9670;&#160;</a></span>XXH32_canonicalFromHash()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> void XXH32_canonicalFromHash </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structXXH32__canonical__t.html">XXH32_canonical_t</a> *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8h.html#ab96bf7612b1f829b593220ab7acdc7a6">XXH32_hash_t</a>&#160;</td>
+          <td class="paramname"><em>hash</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Default XXH result types are basic unsigned 32 and 64 bits. The canonical representation follows human-readable write convention, aka big-endian (large digits first). These functions allow transformation of hash result into and from its canonical format. This way, hash values can be written into a file or buffer, and remain comparable across different systems and programs. </p>
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00860">860</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9bb751d7485be02a31705573c492bf3d" name="a9bb751d7485be02a31705573c492bf3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9bb751d7485be02a31705573c492bf3d">&#9670;&#160;</a></span>XXH32_copyState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> void XXH32_copyState </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *<a class="el" href="xxhash_8h.html#a080abdcb9c02438f1cd2bb707af25af8">restrict</a>&#160;</td>
+          <td class="paramname"><em>dstState</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *<a class="el" href="xxhash_8h.html#a080abdcb9c02438f1cd2bb707af25af8">restrict</a>&#160;</td>
+          <td class="paramname"><em>srcState</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00328">328</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a51931b4d4f02a6d818aaa6a258e8c076" name="a51931b4d4f02a6d818aaa6a258e8c076"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51931b4d4f02a6d818aaa6a258e8c076">&#9670;&#160;</a></span>XXH32_createState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> * XXH32_createState </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>State allocation, compatible with dynamic libraries </p>
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00551">551</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a07c35eafb66c0557575801b79e624b80" name="a07c35eafb66c0557575801b79e624b80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07c35eafb66c0557575801b79e624b80">&#9670;&#160;</a></span>XXH32_digest()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> unsigned int XXH32_digest </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *&#160;</td>
+          <td class="paramname"><em>state_in</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00706">706</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a61315094b94c483a533927311dedc9bc" name="a61315094b94c483a533927311dedc9bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61315094b94c483a533927311dedc9bc">&#9670;&#160;</a></span>XXH32_digest_endian()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> XXH32_digest_endian </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *&#160;</td>
+          <td class="paramname"><em>state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a>&#160;</td>
+          <td class="paramname"><em>endian</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00670">670</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ace915417a5eab373128e97f3e0a95166" name="ace915417a5eab373128e97f3e0a95166"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace915417a5eab373128e97f3e0a95166">&#9670;&#160;</a></span>XXH32_endian_align()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> XXH32_endian_align </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>len</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>seed</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a>&#160;</td>
+          <td class="paramname"><em>endian</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8c.html#adec56fccd4f83e34902b6b09ecccfff5">XXH_alignment</a>&#160;</td>
+          <td class="paramname"><em>align</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00351">351</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aab2c0ec5dbb1b738d3f58aa3fc640243" name="aab2c0ec5dbb1b738d3f58aa3fc640243"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab2c0ec5dbb1b738d3f58aa3fc640243">&#9670;&#160;</a></span>XXH32_freeState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a> XXH32_freeState </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *&#160;</td>
+          <td class="paramname"><em>statePtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00555">555</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a206cac74a0c149b244d3532186a4930f" name="a206cac74a0c149b244d3532186a4930f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a206cac74a0c149b244d3532186a4930f">&#9670;&#160;</a></span>XXH32_hashFromCanonical()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#ab96bf7612b1f829b593220ab7acdc7a6">XXH32_hash_t</a> XXH32_hashFromCanonical </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structXXH32__canonical__t.html">XXH32_canonical_t</a> *&#160;</td>
+          <td class="paramname"><em>src</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00874">874</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5ad2de72b93cb6396ee595484c0ced14" name="a5ad2de72b93cb6396ee595484c0ced14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ad2de72b93cb6396ee595484c0ced14">&#9670;&#160;</a></span>XXH32_reset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a> XXH32_reset </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *&#160;</td>
+          <td class="paramname"><em>statePtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>seed</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00574">574</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a557aa104c7060e621c10085230c63d10" name="a557aa104c7060e621c10085230c63d10"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a557aa104c7060e621c10085230c63d10">&#9670;&#160;</a></span>XXH32_round()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> XXH32_round </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>seed</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>input</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00343">343</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af4920be3d369f2520d096214d5199a46" name="af4920be3d369f2520d096214d5199a46"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4920be3d369f2520d096214d5199a46">&#9670;&#160;</a></span>XXH32_update()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a> XXH32_update </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *&#160;</td>
+          <td class="paramname"><em>state_in</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00658">658</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4d26ac38b9a6d99738125b355e34ecbe" name="a4d26ac38b9a6d99738125b355e34ecbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d26ac38b9a6d99738125b355e34ecbe">&#9670;&#160;</a></span>XXH32_update_endian()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a> XXH32_update_endian </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="xxhash_8h.html#a0048f07d4a3051c20598464f007aa6c5">XXH32_state_t</a> *&#160;</td>
+          <td class="paramname"><em>state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>len</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a>&#160;</td>
+          <td class="paramname"><em>endian</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00600">600</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac26e9d13367a5a7d83bc77965b9342e8" name="ac26e9d13367a5a7d83bc77965b9342e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac26e9d13367a5a7d83bc77965b9342e8">&#9670;&#160;</a></span>XXH64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> unsigned long long XXH64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>len</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long long&#160;</td>
+          <td class="paramname"><em>seed</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00520">520</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aecb9c0887b2cc4f4444cfa439e6c2c6b" name="aecb9c0887b2cc4f4444cfa439e6c2c6b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aecb9c0887b2cc4f4444cfa439e6c2c6b">&#9670;&#160;</a></span>XXH64_canonicalFromHash()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> void XXH64_canonicalFromHash </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structXXH64__canonical__t.html">XXH64_canonical_t</a> *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8h.html#a3d2b19e87ac87eb107372946fce59b26">XXH64_hash_t</a>&#160;</td>
+          <td class="paramname"><em>hash</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00867">867</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad5c11ebd85c3d3bbed832dd5d77a0329" name="ad5c11ebd85c3d3bbed832dd5d77a0329"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5c11ebd85c3d3bbed832dd5d77a0329">&#9670;&#160;</a></span>XXH64_copyState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> void XXH64_copyState </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *<a class="el" href="xxhash_8h.html#a080abdcb9c02438f1cd2bb707af25af8">restrict</a>&#160;</td>
+          <td class="paramname"><em>dstState</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *<a class="el" href="xxhash_8h.html#a080abdcb9c02438f1cd2bb707af25af8">restrict</a>&#160;</td>
+          <td class="paramname"><em>srcState</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00333">333</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a79efe920b4f18004110a6e9bcc0385e0" name="a79efe920b4f18004110a6e9bcc0385e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79efe920b4f18004110a6e9bcc0385e0">&#9670;&#160;</a></span>XXH64_createState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> * XXH64_createState </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00561">561</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae06c95901716c1a8a81de540713eca77" name="ae06c95901716c1a8a81de540713eca77"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae06c95901716c1a8a81de540713eca77">&#9670;&#160;</a></span>XXH64_digest()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> unsigned long long XXH64_digest </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *&#160;</td>
+          <td class="paramname"><em>state_in</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00839">839</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8a93636a981f6fa38b79c840a1c7f2bd" name="a8a93636a981f6fa38b79c840a1c7f2bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a93636a981f6fa38b79c840a1c7f2bd">&#9670;&#160;</a></span>XXH64_digest_endian()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> XXH64_digest_endian </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *&#160;</td>
+          <td class="paramname"><em>state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a>&#160;</td>
+          <td class="paramname"><em>endian</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00787">787</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afbaca2dc6ea4e8ce9555206d25e80748" name="afbaca2dc6ea4e8ce9555206d25e80748"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afbaca2dc6ea4e8ce9555206d25e80748">&#9670;&#160;</a></span>XXH64_endian_align()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> XXH64_endian_align </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>len</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>seed</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a>&#160;</td>
+          <td class="paramname"><em>endian</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8c.html#adec56fccd4f83e34902b6b09ecccfff5">XXH_alignment</a>&#160;</td>
+          <td class="paramname"><em>align</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00451">451</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae490ef51db9c960da09189c2774cf82e" name="ae490ef51db9c960da09189c2774cf82e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae490ef51db9c960da09189c2774cf82e">&#9670;&#160;</a></span>XXH64_freeState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a> XXH64_freeState </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *&#160;</td>
+          <td class="paramname"><em>statePtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00565">565</a> 行定义.</p>
+
+</div>
+</div>
+<a id="add7f64d0c0590f222747e7f703cfd3b0" name="add7f64d0c0590f222747e7f703cfd3b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add7f64d0c0590f222747e7f703cfd3b0">&#9670;&#160;</a></span>XXH64_hashFromCanonical()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a3d2b19e87ac87eb107372946fce59b26">XXH64_hash_t</a> XXH64_hashFromCanonical </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structXXH64__canonical__t.html">XXH64_canonical_t</a> *&#160;</td>
+          <td class="paramname"><em>src</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00879">879</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a36a0958315e63b8b535fbe2a41fc211f" name="a36a0958315e63b8b535fbe2a41fc211f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36a0958315e63b8b535fbe2a41fc211f">&#9670;&#160;</a></span>XXH64_mergeRound()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> XXH64_mergeRound </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>acc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00443">443</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a81c80f1f143238a37ebc39a100ade6d5" name="a81c80f1f143238a37ebc39a100ade6d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81c80f1f143238a37ebc39a100ade6d5">&#9670;&#160;</a></span>XXH64_reset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a> XXH64_reset </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *&#160;</td>
+          <td class="paramname"><em>statePtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long long&#160;</td>
+          <td class="paramname"><em>seed</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00587">587</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ade66033c618558e0d976b6476911eedc" name="ade66033c618558e0d976b6476911eedc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade66033c618558e0d976b6476911eedc">&#9670;&#160;</a></span>XXH64_round()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> XXH64_round </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>acc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>input</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00435">435</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2dc0796681564cdf8a73f86b3758db73" name="a2dc0796681564cdf8a73f86b3758db73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2dc0796681564cdf8a73f86b3758db73">&#9670;&#160;</a></span>XXH64_update()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a> XXH64_update </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *&#160;</td>
+          <td class="paramname"><em>state_in</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00775">775</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a27f260b47df70bca25c7028d27d2c933" name="a27f260b47df70bca25c7028d27d2c933"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27f260b47df70bca25c7028d27d2c933">&#9670;&#160;</a></span>XXH64_update_endian()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="xxhash_8h.html#a5020905455674b8c83c1dbc73f0d3534">XXH_errorcode</a> XXH64_update_endian </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> *&#160;</td>
+          <td class="paramname"><em>state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>len</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a>&#160;</td>
+          <td class="paramname"><em>endian</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00720">720</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a72dbb2775c66d0f9bdbe1529104c38c5" name="a72dbb2775c66d0f9bdbe1529104c38c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72dbb2775c66d0f9bdbe1529104c38c5">&#9670;&#160;</a></span>XXH_free()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void XXH_free </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>p</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00104">104</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0bd0e6873ef7d3b3520f9af3c44c357a" name="a0bd0e6873ef7d3b3520f9af3c44c357a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0bd0e6873ef7d3b3520f9af3c44c357a">&#9670;&#160;</a></span>XXH_malloc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void * XXH_malloc </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00103">103</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8d592f4a788e3da08bad709247452018" name="a8d592f4a788e3da08bad709247452018"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d592f4a788e3da08bad709247452018">&#9670;&#160;</a></span>XXH_memcpy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void * XXH_memcpy </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dest</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00107">107</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad4232c93479fe0627ad25798b1f08f7d" name="ad4232c93479fe0627ad25798b1f08f7d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4232c93479fe0627ad25798b1f08f7d">&#9670;&#160;</a></span>XXH_read32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> XXH_read32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>memPtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00183">183</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a11cafddd4eb4e10fc12ff86d74460089" name="a11cafddd4eb4e10fc12ff86d74460089"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a11cafddd4eb4e10fc12ff86d74460089">&#9670;&#160;</a></span>XXH_read64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> XXH_read64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>memPtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00190">190</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aec9f74629b478dcc3d578dab2f5a911e" name="aec9f74629b478dcc3d578dab2f5a911e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec9f74629b478dcc3d578dab2f5a911e">&#9670;&#160;</a></span>XXH_readBE32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> XXH_readBE32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>ptr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00277">277</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a832fe016b6b892806794a07b92ba8717" name="a832fe016b6b892806794a07b92ba8717"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a832fe016b6b892806794a07b92ba8717">&#9670;&#160;</a></span>XXH_readBE64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> XXH_readBE64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>ptr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00295">295</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a34dc1b83e262d4bbb32fd1277a324946" name="a34dc1b83e262d4bbb32fd1277a324946"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34dc1b83e262d4bbb32fd1277a324946">&#9670;&#160;</a></span>XXH_readLE32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> XXH_readLE32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a>&#160;</td>
+          <td class="paramname"><em>endian</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00272">272</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a581ae5fb720dbc6be93f36b4adfa4b05" name="a581ae5fb720dbc6be93f36b4adfa4b05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a581ae5fb720dbc6be93f36b4adfa4b05">&#9670;&#160;</a></span>XXH_readLE32_align()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> XXH_readLE32_align </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a>&#160;</td>
+          <td class="paramname"><em>endian</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8c.html#adec56fccd4f83e34902b6b09ecccfff5">XXH_alignment</a>&#160;</td>
+          <td class="paramname"><em>align</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00264">264</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0d8d26c12e483e2fc21fa37d45b56cfb" name="a0d8d26c12e483e2fc21fa37d45b56cfb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d8d26c12e483e2fc21fa37d45b56cfb">&#9670;&#160;</a></span>XXH_readLE64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> XXH_readLE64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a>&#160;</td>
+          <td class="paramname"><em>endian</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00290">290</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a839ebef9c1d2db9500bf60061eff46ac" name="a839ebef9c1d2db9500bf60061eff46ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a839ebef9c1d2db9500bf60061eff46ac">&#9670;&#160;</a></span>XXH_readLE64_align()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> XXH_readLE64_align </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8c.html#a235e518684d715cbb04353c997ad81e9">XXH_endianess</a>&#160;</td>
+          <td class="paramname"><em>endian</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="xxhash_8c.html#adec56fccd4f83e34902b6b09ecccfff5">XXH_alignment</a>&#160;</td>
+          <td class="paramname"><em>align</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00282">282</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a77a5849877fe70d96dc3c64cb1b0a94e" name="a77a5849877fe70d96dc3c64cb1b0a94e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77a5849877fe70d96dc3c64cb1b0a94e">&#9670;&#160;</a></span>XXH_swap32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> XXH_swap32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>x</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00226">226</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a58b16ab7563a34d1236b326441102dac" name="a58b16ab7563a34d1236b326441102dac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58b16ab7563a34d1236b326441102dac">&#9670;&#160;</a></span>XXH_swap64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> XXH_swap64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>x</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00233">233</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af435229c36fbbc6a23a5f187752a6fe4" name="af435229c36fbbc6a23a5f187752a6fe4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af435229c36fbbc6a23a5f187752a6fe4">&#9670;&#160;</a></span>XXH_versionNumber()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="xxhash_8h.html#a5832897ed49938aefa629a76034b36b1">XXH_PUBLIC_API</a> unsigned XXH_versionNumber </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00322">322</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a92c2b4bf886849f859c9664a1115b114" name="a92c2b4bf886849f859c9664a1115b114"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92c2b4bf886849f859c9664a1115b114">&#9670;&#160;</a></span>g_one</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int g_one = 1</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00254">254</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a573a174f7a40630ee1cf1f3dc6d64468" name="a573a174f7a40630ee1cf1f3dc6d64468"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a573a174f7a40630ee1cf1f3dc6d64468">&#9670;&#160;</a></span>PRIME32_1</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> PRIME32_1 = 2654435761U</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00310">310</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a81a1105a63679284f3b9d746f0a7faf0" name="a81a1105a63679284f3b9d746f0a7faf0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81a1105a63679284f3b9d746f0a7faf0">&#9670;&#160;</a></span>PRIME32_2</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> PRIME32_2 = 2246822519U</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00311">311</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8b379d974595487da776b24fce6b85cf" name="a8b379d974595487da776b24fce6b85cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b379d974595487da776b24fce6b85cf">&#9670;&#160;</a></span>PRIME32_3</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> PRIME32_3 = 3266489917U</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00312">312</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad200028a5f75af6d9cb0152f7c1d62d5" name="ad200028a5f75af6d9cb0152f7c1d62d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad200028a5f75af6d9cb0152f7c1d62d5">&#9670;&#160;</a></span>PRIME32_4</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> PRIME32_4 = 668265263U</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00313">313</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a400727b7dcdd9be931f626643c67cc53" name="a400727b7dcdd9be931f626643c67cc53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a400727b7dcdd9be931f626643c67cc53">&#9670;&#160;</a></span>PRIME32_5</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> PRIME32_5 = 374761393U</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00314">314</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a792df9666997c1b075d9791d49418c4b" name="a792df9666997c1b075d9791d49418c4b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a792df9666997c1b075d9791d49418c4b">&#9670;&#160;</a></span>PRIME64_1</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> PRIME64_1 = 11400714785074694791ULL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00316">316</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a448ffb9e2b71d788d7dd14b7a4ea8af5" name="a448ffb9e2b71d788d7dd14b7a4ea8af5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a448ffb9e2b71d788d7dd14b7a4ea8af5">&#9670;&#160;</a></span>PRIME64_2</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> PRIME64_2 = 14029467366897019727ULL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00317">317</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a853639fd5414749bd79b35893f5fbf5f" name="a853639fd5414749bd79b35893f5fbf5f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a853639fd5414749bd79b35893f5fbf5f">&#9670;&#160;</a></span>PRIME64_3</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> PRIME64_3 = 1609587929392839161ULL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00318">318</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a57787b87cd98d2fa8f86607bc2f52ef0" name="a57787b87cd98d2fa8f86607bc2f52ef0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57787b87cd98d2fa8f86607bc2f52ef0">&#9670;&#160;</a></span>PRIME64_4</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> PRIME64_4 = 9650029242287828579ULL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00319">319</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a28aa0264a8f563f968bb423c55e446fb" name="a28aa0264a8f563f968bb423c55e446fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28aa0264a8f563f968bb423c55e446fb">&#9670;&#160;</a></span>PRIME64_5</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> PRIME64_5 = 2870177450012600261ULL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="xxhash_8c_source.html">xxhash.c</a> 第 <a class="el" href="xxhash_8c_source.html#l00320">320</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="xxhash_8c.html">xxhash.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

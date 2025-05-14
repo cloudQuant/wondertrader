@@ -1,0 +1,26 @@
+var struct__OesInvAcctOverview =
+[
+    [ "__filler1", "struct__OesInvAcctOverview.html#aef74ff6dae10ec8aa4c2e65b0c0376a0", null ],
+    [ "__filler2", "struct__OesInvAcctOverview.html#a96e7cc5cd601bed4cfb943782fe33489", null ],
+    [ "__reserve", "struct__OesInvAcctOverview.html#aa8176ef043e5e26b4409860c21ee2cb9", null ],
+    [ "acctType", "struct__OesInvAcctOverview.html#a5a98c858a3c3fd7c4a4241bd14b0d7df", null ],
+    [ "cancelOrdCnt", "struct__OesInvAcctOverview.html#a88ee84d6f5ffea5c4606314004159b6e", null ],
+    [ "custId", "struct__OesInvAcctOverview.html#a1ea33daf081a13abfe91147539655243", null ],
+    [ "exchRejectOrdCnt", "struct__OesInvAcctOverview.html#a28c08f8de18f80daa268be09a513a123", null ],
+    [ "invAcctId", "struct__OesInvAcctOverview.html#abb673ad57f065f6bb6ca570754c8f46e", null ],
+    [ "isTradeDisabled", "struct__OesInvAcctOverview.html#aebaa213f47bb905a1e56a33172f94d78", null ],
+    [ "isValid", "struct__OesInvAcctOverview.html#ae7f412f7b6135e1449f9bd479b49ed9c", null ],
+    [ "kcSubscriptionQuota", "struct__OesInvAcctOverview.html#af1d59d5af56207bdcc0122afbc3bbbf4", null ],
+    [ "limits", "struct__OesInvAcctOverview.html#a721354e623092ed4b6fbd66ddbe88f50", null ],
+    [ "mktId", "struct__OesInvAcctOverview.html#a8f23e48cbd7181b1ae68a6189328c8a0", null ],
+    [ "nonTrdOrdCnt", "struct__OesInvAcctOverview.html#af756d1f7e2427919a5f1abe90573373d", null ],
+    [ "oesRejectOrdCnt", "struct__OesInvAcctOverview.html#afa22c394b8eb417c0949b544d7f38d6a", null ],
+    [ "optInvLevel", "struct__OesInvAcctOverview.html#a6e884d7d64582825ce2e23d53e5eb7a5", null ],
+    [ "ownerType", "struct__OesInvAcctOverview.html#af18937616c759e1453c59f3df6e0c6a6", null ],
+    [ "pbuId", "struct__OesInvAcctOverview.html#a02ade81dae75dadf7686e953678af182", null ],
+    [ "permissions", "struct__OesInvAcctOverview.html#a7b848598c81991066c95db18ffca70b8", null ],
+    [ "status", "struct__OesInvAcctOverview.html#a686426f9cb502defefe77ccb599d38a6", null ],
+    [ "subscriptionQuota", "struct__OesInvAcctOverview.html#a227bc795e4ee6922e0373661af9799cd", null ],
+    [ "trdCnt", "struct__OesInvAcctOverview.html#a1749310d25d159c56d36db8a8c10d38c", null ],
+    [ "trdOrdCnt", "struct__OesInvAcctOverview.html#acf512d98db00917e26d4cb97a21a4544", null ]
+];

@@ -1,0 +1,752 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: boost::threadpool::thread_pool&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt; 模板类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classboost_1_1threadpool_1_1thread__pool.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Public 类型</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-types">Private 类型</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classboost_1_1threadpool_1_1thread__pool-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">boost::threadpool::thread_pool&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt; 模板类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>线程池类  
+ <a href="classboost_1_1threadpool_1_1thread__pool.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="pool_8hpp_source.html">pool.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public 类型</h2></td></tr>
+<tr class="memitem:a321da9e252f14645cd3e433305576a4b" id="r_a321da9e252f14645cd3e433305576a4b"><td class="memItemLeft" align="right" valign="top">typedef Task&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a321da9e252f14645cd3e433305576a4b">task_type</a></td></tr>
+<tr class="memdesc:a321da9e252f14645cd3e433305576a4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">任务类型  <br /></td></tr>
+<tr class="separator:a321da9e252f14645cd3e433305576a4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4bdb3cef94393456f2b7ec0d171d6b11" id="r_a4bdb3cef94393456f2b7ec0d171d6b11"><td class="memItemLeft" align="right" valign="top">typedef SchedulingPolicy&lt; <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a321da9e252f14645cd3e433305576a4b">task_type</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a4bdb3cef94393456f2b7ec0d171d6b11">scheduler_type</a></td></tr>
+<tr class="memdesc:a4bdb3cef94393456f2b7ec0d171d6b11"><td class="mdescLeft">&#160;</td><td class="mdescRight">调度器类型  <br /></td></tr>
+<tr class="separator:a4bdb3cef94393456f2b7ec0d171d6b11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a654dc8a75dc2ea813dc6307f8707658d" id="r_a654dc8a75dc2ea813dc6307f8707658d"><td class="memItemLeft" align="right" valign="top">typedef SizePolicy&lt; <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a9ba3db6520664f8bbb7225bcb9bf70ca">pool_core_type</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a654dc8a75dc2ea813dc6307f8707658d">size_policy_type</a></td></tr>
+<tr class="memdesc:a654dc8a75dc2ea813dc6307f8707658d"><td class="mdescLeft">&#160;</td><td class="mdescRight">大小策略类型  <br /></td></tr>
+<tr class="separator:a654dc8a75dc2ea813dc6307f8707658d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7e01650ffec650c0279782eacb4be80" id="r_ac7e01650ffec650c0279782eacb4be80"><td class="memItemLeft" align="right" valign="top">typedef SizePolicyController&lt; <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a9ba3db6520664f8bbb7225bcb9bf70ca">pool_core_type</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#ac7e01650ffec650c0279782eacb4be80">size_controller_type</a></td></tr>
+<tr class="memdesc:ac7e01650ffec650c0279782eacb4be80"><td class="mdescLeft">&#160;</td><td class="mdescRight">大小控制器类型  <br /></td></tr>
+<tr class="separator:ac7e01650ffec650c0279782eacb4be80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a6eba12acd49dfe14c7de44073a138aa1" id="r_a6eba12acd49dfe14c7de44073a138aa1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a6eba12acd49dfe14c7de44073a138aa1">thread_pool</a> (size_t initial_threads=0)</td></tr>
+<tr class="memdesc:a6eba12acd49dfe14c7de44073a138aa1"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a6eba12acd49dfe14c7de44073a138aa1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a965f249200025312bd3a3a0f8144e3a5" id="r_a965f249200025312bd3a3a0f8144e3a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#ac7e01650ffec650c0279782eacb4be80">size_controller_type</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a965f249200025312bd3a3a0f8144e3a5">size_controller</a> ()</td></tr>
+<tr class="memdesc:a965f249200025312bd3a3a0f8144e3a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取管理线程池中线程数量的大小控制器  <br /></td></tr>
+<tr class="separator:a965f249200025312bd3a3a0f8144e3a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89708441182e6348588232f37b56413a" id="r_a89708441182e6348588232f37b56413a"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a89708441182e6348588232f37b56413a">size</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a89708441182e6348588232f37b56413a"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取线程池中的线程数量  <br /></td></tr>
+<tr class="separator:a89708441182e6348588232f37b56413a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3daf5e17f6c2ba9a0ecdeb73b41478e6" id="r_a3daf5e17f6c2ba9a0ecdeb73b41478e6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a3daf5e17f6c2ba9a0ecdeb73b41478e6">schedule</a> (<a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a321da9e252f14645cd3e433305576a4b">task_type</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;task)</td></tr>
+<tr class="memdesc:a3daf5e17f6c2ba9a0ecdeb73b41478e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">将任务调度用于异步执行  <br /></td></tr>
+<tr class="separator:a3daf5e17f6c2ba9a0ecdeb73b41478e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa65dde104a32bb2ef9bd5efe82fd6ea6" id="r_aa65dde104a32bb2ef9bd5efe82fd6ea6"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#aa65dde104a32bb2ef9bd5efe82fd6ea6">active</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:aa65dde104a32bb2ef9bd5efe82fd6ea6"><td class="mdescLeft">&#160;</td><td class="mdescRight">返回当前正在执行的任务数量  <br /></td></tr>
+<tr class="separator:aa65dde104a32bb2ef9bd5efe82fd6ea6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad1be5414fcaced11e3a09512b6f741a" id="r_aad1be5414fcaced11e3a09512b6f741a"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#aad1be5414fcaced11e3a09512b6f741a">pending</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:aad1be5414fcaced11e3a09512b6f741a"><td class="mdescLeft">&#160;</td><td class="mdescRight">返回准备执行的任务数量  <br /></td></tr>
+<tr class="separator:aad1be5414fcaced11e3a09512b6f741a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d98ecc57fb790ad12e9c12dcead921b" id="r_a9d98ecc57fb790ad12e9c12dcead921b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a9d98ecc57fb790ad12e9c12dcead921b">clear</a> ()</td></tr>
+<tr class="memdesc:a9d98ecc57fb790ad12e9c12dcead921b"><td class="mdescLeft">&#160;</td><td class="mdescRight">移除线程池调度器中的所有等待任务  <br /></td></tr>
+<tr class="separator:a9d98ecc57fb790ad12e9c12dcead921b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18780f4260f1317c462cd28a4c825e2f" id="r_a18780f4260f1317c462cd28a4c825e2f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a18780f4260f1317c462cd28a4c825e2f">empty</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a18780f4260f1317c462cd28a4c825e2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">检查是否没有等待任务  <br /></td></tr>
+<tr class="separator:a18780f4260f1317c462cd28a4c825e2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a979b040c13a30aab36cc2dc91e693b85" id="r_a979b040c13a30aab36cc2dc91e693b85"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a979b040c13a30aab36cc2dc91e693b85">wait</a> (size_t task_threshold=0) <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a979b040c13a30aab36cc2dc91e693b85"><td class="mdescLeft">&#160;</td><td class="mdescRight">阻塞当前线程直到任务总数小于等于指定阈值  <br /></td></tr>
+<tr class="separator:a979b040c13a30aab36cc2dc91e693b85"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e22f604b8c1a58260884b0907372fcb" id="r_a7e22f604b8c1a58260884b0907372fcb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a7e22f604b8c1a58260884b0907372fcb">wait</a> (xtime <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;timestamp, size_t task_threshold=0) <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a7e22f604b8c1a58260884b0907372fcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">阻塞当前线程直到指定时间或任务数量满足条件  <br /></td></tr>
+<tr class="separator:a7e22f604b8c1a58260884b0907372fcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 类型</h2></td></tr>
+<tr class="memitem:a9ba3db6520664f8bbb7225bcb9bf70ca" id="r_a9ba3db6520664f8bbb7225bcb9bf70ca"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classboost_1_1threadpool_1_1detail_1_1pool__core.html">detail::pool_core</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a9ba3db6520664f8bbb7225bcb9bf70ca">pool_core_type</a></td></tr>
+<tr class="memdesc:a9ba3db6520664f8bbb7225bcb9bf70ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">线程池内部核心类型  <br /></td></tr>
+<tr class="separator:a9ba3db6520664f8bbb7225bcb9bf70ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:a2e519a2ed4023a8f2c7141e999a9262d" id="r_a2e519a2ed4023a8f2c7141e999a9262d"><td class="memItemLeft" align="right" valign="top">shared_ptr&lt; <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a9ba3db6520664f8bbb7225bcb9bf70ca">pool_core_type</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a2e519a2ed4023a8f2c7141e999a9262d">m_core</a></td></tr>
+<tr class="memdesc:a2e519a2ed4023a8f2c7141e999a9262d"><td class="mdescLeft">&#160;</td><td class="mdescRight">指向核心实现的智能指针  <br /></td></tr>
+<tr class="separator:a2e519a2ed4023a8f2c7141e999a9262d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03de077e0ebfbb5efc4baf2bc3ffc49d" id="r_a03de077e0ebfbb5efc4baf2bc3ffc49d"><td class="memItemLeft" align="right" valign="top">shared_ptr&lt; void &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a03de077e0ebfbb5efc4baf2bc3ffc49d">m_shutdown_controller</a></td></tr>
+<tr class="memdesc:a03de077e0ebfbb5efc4baf2bc3ffc49d"><td class="mdescLeft">&#160;</td><td class="mdescRight">关闭控制器  <br /></td></tr>
+<tr class="separator:a03de077e0ebfbb5efc4baf2bc3ffc49d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename Task = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt;<br />
+class boost::threadpool::thread_pool&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;</div><p>线程池类 </p>
+<p>线程池是一种在同一进程内实现异步和并行处理的机制。 pool 类提供了一种便捷的方式，将函数对象作为异步任务调度执行。 任务的调度方式可以通过使用自定义的调度器轻松控制。 任务函数不应该抛出异常。</p>
+<p>线程池类支持默认构造、拷贝构造和赋值。 它具有引用语义，同一个池的所有副本都是等价的且可以互换的。 除了赋值操作外，池上的所有操作都是完全线程安全或顺序一致的； 也就是说，并发调用的行为就好像这些调用是按照未指定的顺序顺序发出的。</p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Task</td><td>任务函数对象类型，实现了 'void operator() (void) const' 操作符。 operator() 由池调用来执行任务。任何抛出的异常都会被忽略。 </td></tr>
+    <tr><td class="paramname">SchedulingPolicy</td><td>任务容器类型，决定了任务如何调度。 保证每次只有一个线程访问这个容器。调度器不应抛出异常。 </td></tr>
+    <tr><td class="paramname">SizePolicy</td><td>大小策略，用于控制线程池中线程的数量 </td></tr>
+    <tr><td class="paramname">SizePolicyController</td><td>大小策略控制器，用于调整线程池的大小 </td></tr>
+    <tr><td class="paramname">ShutdownPolicy</td><td>关闭策略，决定线程池关闭时的行为</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>注解</dt><dd>线程池类是线程安全的。</dd></dl>
+<dl class="section see"><dt>参见</dt><dd>任务类型： <a class="el" href="namespaceboost_1_1threadpool.html#ac6f15485d0c9225572afc57b30f50358" title="标准任务函数对象">task_func</a>, <a class="el" href="classboost_1_1threadpool_1_1prio__task__func.html" title="带优先级的任务函数对象">prio_task_func</a> </dd>
+<dd>
+调度策略： <a class="el" href="classboost_1_1threadpool_1_1fifo__scheduler.html" title="实现FIFO（先进先出）排序的调度策略">fifo_scheduler</a>, <a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html" title="实现LIFO（后进先出）排序的调度策略">lifo_scheduler</a>, <a class="el" href="classboost_1_1threadpool_1_1prio__scheduler.html" title="实现优先级排序的调度策略">prio_scheduler</a> </dd>
+<dd>
+大小策略： <a class="el" href="classboost_1_1threadpool_1_1static__size.html" title="保持线程数量的大小策略">static_size</a>, dynamic_size </dd>
+<dd>
+关闭策略： <a class="el" href="classboost_1_1threadpool_1_1wait__for__all__tasks.html" title="等待所有任务完成的关闭策略">wait_for_all_tasks</a>, <a class="el" href="classboost_1_1threadpool_1_1immediately.html" title="立即关闭策略，不等待任务或工作线程终止">immediately</a> </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00081">81</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="a9ba3db6520664f8bbb7225bcb9bf70ca" name="a9ba3db6520664f8bbb7225bcb9bf70ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ba3db6520664f8bbb7225bcb9bf70ca">&#9670;&#160;</a></span>pool_core_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="classboost_1_1threadpool_1_1detail_1_1pool__core.html">detail::pool_core</a>&lt;Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy&gt; <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::pool_core_type</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>线程池内部核心类型 </p>
+<p>定义了线程池内部实现所使用的核心类型，包含了所有模板参数 </p>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00091">91</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4bdb3cef94393456f2b7ec0d171d6b11" name="a4bdb3cef94393456f2b7ec0d171d6b11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4bdb3cef94393456f2b7ec0d171d6b11">&#9670;&#160;</a></span>scheduler_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef SchedulingPolicy&lt;<a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a321da9e252f14645cd3e433305576a4b">task_type</a>&gt; <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::scheduler_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>调度器类型 </p>
+<p>指示用于任务调度的容器类型 </p>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00116">116</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac7e01650ffec650c0279782eacb4be80" name="ac7e01650ffec650c0279782eacb4be80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7e01650ffec650c0279782eacb4be80">&#9670;&#160;</a></span>size_controller_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef SizePolicyController&lt;<a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a9ba3db6520664f8bbb7225bcb9bf70ca">pool_core_type</a>&gt; <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::size_controller_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>大小控制器类型 </p>
+<p>指示用于操作线程池大小的控制器类型 </p>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00135">135</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a654dc8a75dc2ea813dc6307f8707658d" name="a654dc8a75dc2ea813dc6307f8707658d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a654dc8a75dc2ea813dc6307f8707658d">&#9670;&#160;</a></span>size_policy_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef SizePolicy&lt;<a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a9ba3db6520664f8bbb7225bcb9bf70ca">pool_core_type</a>&gt; <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::size_policy_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>大小策略类型 </p>
+<p>指示用于控制线程池大小的策略类型 </p>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00129">129</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a321da9e252f14645cd3e433305576a4b" name="a321da9e252f14645cd3e433305576a4b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a321da9e252f14645cd3e433305576a4b">&#9670;&#160;</a></span>task_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef Task <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::task_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>任务类型 </p>
+<p>指示线程池中执行的任务函数对象类型 </p>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00110">110</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a6eba12acd49dfe14c7de44073a138aa1" name="a6eba12acd49dfe14c7de44073a138aa1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6eba12acd49dfe14c7de44073a138aa1">&#9670;&#160;</a></span>thread_pool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::thread_pool </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>initial_threads</em> = <code>0</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>创建一个新的线程池实例。建立核心实现并设置关闭控制器。 线程池创建时会立即调整大小以匹配指定的线程数量。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">initial_threads</td><td>初始线程数量。池立即调整大小以设置指定的线程数量。 池的实际线程数量取决于 SizePolicy 策略。默认值为 0。 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00148">148</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="aa65dde104a32bb2ef9bd5efe82fd6ea6" name="aa65dde104a32bb2ef9bd5efe82fd6ea6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa65dde104a32bb2ef9bd5efe82fd6ea6">&#9670;&#160;</a></span>active()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::active </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>返回当前正在执行的任务数量 </p>
+<p>获取线程池中当前正在执行的活动任务数量。 这个值表示有多少任务正在线程池的线程中运行。</p>
+<dl class="section return"><dt>返回</dt><dd>活动任务的数量 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00207">207</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9d98ecc57fb790ad12e9c12dcead921b" name="a9d98ecc57fb790ad12e9c12dcead921b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d98ecc57fb790ad12e9c12dcead921b">&#9670;&#160;</a></span>clear()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::clear </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>移除线程池调度器中的所有等待任务 </p>
+<p>清除线程池的调度器中所有待处理的任务。 这些任务将不再执行。正在执行的任务不受影响。 </p>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00233">233</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a18780f4260f1317c462cd28a4c825e2f" name="a18780f4260f1317c462cd28a4c825e2f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18780f4260f1317c462cd28a4c825e2f">&#9670;&#160;</a></span>empty()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::empty </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>检查是否没有等待任务 </p>
+<p>判断线程池的调度器中是否没有待处理的任务。 这个函数比使用 '<a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#aad1be5414fcaced11e3a09512b6f741a" title="返回准备执行的任务数量">pending()</a> == 0' 检查更高效。</p>
+<dl class="section return"><dt>返回</dt><dd>如果没有准备执行的任务则返回 true </dd></dl>
+<dl class="section note"><dt>注解</dt><dd>这个函数比检查 '<a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#aad1be5414fcaced11e3a09512b6f741a" title="返回准备执行的任务数量">pending()</a> == 0' 更高效 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00248">248</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aad1be5414fcaced11e3a09512b6f741a" name="aad1be5414fcaced11e3a09512b6f741a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad1be5414fcaced11e3a09512b6f741a">&#9670;&#160;</a></span>pending()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::pending </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>返回准备执行的任务数量 </p>
+<p>获取线程池中当前已调度但尚未开始执行的任务数量。 这个值表示调度器中有多少任务正在等待执行。</p>
+<dl class="section return"><dt>返回</dt><dd>等待任务的数量 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00221">221</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3daf5e17f6c2ba9a0ecdeb73b41478e6" name="a3daf5e17f6c2ba9a0ecdeb73b41478e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3daf5e17f6c2ba9a0ecdeb73b41478e6">&#9670;&#160;</a></span>schedule()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::schedule </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a321da9e252f14645cd3e433305576a4b">task_type</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;&#160;</td>
+          <td class="paramname"><em>task</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>将任务调度用于异步执行 </p>
+<p>将任务函数对象添加到线程池的调度队列中，并在线程可用时异步执行。 每个任务只会执行一次。如果线程池正在关闭或已经关闭，则任务可能不会被执行。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">task</td><td>任务函数对象。它不应该抛出异常，因为任何异常都将被忽略。 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>如果任务能够被调度则返回 true，否则返回 false。 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00193">193</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a89708441182e6348588232f37b56413a" name="a89708441182e6348588232f37b56413a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89708441182e6348588232f37b56413a">&#9670;&#160;</a></span>size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::size </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取线程池中的线程数量 </p>
+<p>返回当前线程池中活动线程的数量。这个值可能会根据线程池的大小策略而动态变化。</p>
+<dl class="section return"><dt>返回</dt><dd>线程池中的线程数量 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00178">178</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a965f249200025312bd3a3a0f8144e3a5" name="a965f249200025312bd3a3a0f8144e3a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a965f249200025312bd3a3a0f8144e3a5">&#9670;&#160;</a></span>size_controller()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#ac7e01650ffec650c0279782eacb4be80">size_controller_type</a> <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::size_controller </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取管理线程池中线程数量的大小控制器 </p>
+<p>返回一个大小控制器对象，可用于检查和调整线程池的大小。 通过这个对象可以动态地控制线程池中的线程数量。</p>
+<dl class="section return"><dt>返回</dt><dd>大小控制器对象 </dd></dl>
+<dl class="section see"><dt>参见</dt><dd>SizePolicy 大小策略类 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00165">165</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a979b040c13a30aab36cc2dc91e693b85" name="a979b040c13a30aab36cc2dc91e693b85"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a979b040c13a30aab36cc2dc91e693b85">&#9670;&#160;</a></span>wait() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::wait </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>task_threshold</em> = <code>0</code></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>阻塞当前线程直到任务总数小于等于指定阈值 </p>
+<p>当前线程的执行被阻塞，直到所有活动和等待任务的总和等于或小于给定的阈值。 这个方法允许程序等待直到线程池中的工作负载降低到指定水平。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">task_threshold</td><td>线程池和调度器中任务的最大数量阈值。默认值为 0， 表示等待直到所有任务完成。 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00263">263</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7e22f604b8c1a58260884b0907372fcb" name="a7e22f604b8c1a58260884b0907372fcb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e22f604b8c1a58260884b0907372fcb">&#9670;&#160;</a></span>wait() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::wait </td>
+          <td>(</td>
+          <td class="paramtype">xtime <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> &amp;&#160;</td>
+          <td class="paramname"><em>timestamp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>task_threshold</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>阻塞当前线程直到指定时间或任务数量满足条件 </p>
+<p>当前线程的执行被阻塞，直到达到指定的时间点或者所有活动和等待任务的总和 等于或小于给定的阈值。这个方法在等待任务完成的同时提供了超时机制。</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">timestamp</td><td>函数最迟返回的时间点 </td></tr>
+    <tr><td class="paramname">task_threshold</td><td>线程池和调度器中任务的最大数量阈值。默认值为 0， 表示等待直到所有任务完成。 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>如果任务总数等于或小于阈值返回 true，否则（超时情况下）返回 false </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00280">280</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a2e519a2ed4023a8f2c7141e999a9262d" name="a2e519a2ed4023a8f2c7141e999a9262d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e519a2ed4023a8f2c7141e999a9262d">&#9670;&#160;</a></span>m_core</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">shared_ptr&lt;<a class="el" href="classboost_1_1threadpool_1_1thread__pool.html#a9ba3db6520664f8bbb7225bcb9bf70ca">pool_core_type</a>&gt; <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::m_core</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>指向核心实现的智能指针 </p>
+<p>使用 pimpl 模式将实现细节隐藏在内部类中 </p>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00097">97</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a03de077e0ebfbb5efc4baf2bc3ffc49d" name="a03de077e0ebfbb5efc4baf2bc3ffc49d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03de077e0ebfbb5efc4baf2bc3ffc49d">&#9670;&#160;</a></span>m_shutdown_controller</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Task  = task_func, template&lt; typename &gt; class SchedulingPolicy = fifo_scheduler, template&lt; typename &gt; class SizePolicy = static_size, template&lt; typename &gt; class SizePolicyController = resize_controller, template&lt; typename &gt; class ShutdownPolicy = wait_for_all_tasks&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">shared_ptr&lt;void&gt; <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool</a>&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;::m_shutdown_controller</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>关闭控制器 </p>
+<p>当持有指向核心的最后一个池被删除时，控制器将关闭池 </p>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 第 <a class="el" href="pool_8hpp_source.html#l00103">103</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/Share/threadpool/<a class="el" href="pool_8hpp_source.html">pool.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespaceboost.html">boost</a></li><li class="navelem"><a class="el" href="namespaceboost_1_1threadpool.html">threadpool</a></li><li class="navelem"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">thread_pool</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

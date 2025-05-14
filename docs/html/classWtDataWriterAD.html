@@ -1,0 +1,1999 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: WtDataWriterAD类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classWtDataWriterAD.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-types">Private 类型</a> &#124;
+<a href="#pri-methods">Private 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classWtDataWriterAD-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">WtDataWriterAD类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>基于LMDB的数据存储引擎，负责行情数据的写入和缓存管理  
+ <a href="classWtDataWriterAD.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structWtDataWriterAD_1_1__RTBarCacheWrapper.html">_RTBarCacheWrapper</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">K线数据缓存相关成员  <a href="structWtDataWriterAD_1_1__RTBarCacheWrapper.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:aa7f9ec556e67d74a460f735cce15b20b" id="r_aa7f9ec556e67d74a460f735cce15b20b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#aa7f9ec556e67d74a460f735cce15b20b">WtDataWriterAD</a> ()</td></tr>
+<tr class="memdesc:aa7f9ec556e67d74a460f735cce15b20b"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:aa7f9ec556e67d74a460f735cce15b20b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55abbc808f0a661231dc30301cdb33a3" id="r_a55abbc808f0a661231dc30301cdb33a3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a55abbc808f0a661231dc30301cdb33a3">~WtDataWriterAD</a> ()</td></tr>
+<tr class="memdesc:a55abbc808f0a661231dc30301cdb33a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:a55abbc808f0a661231dc30301cdb33a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab15715e882b19275e1fe9abfaab742be" id="r_ab15715e882b19275e1fe9abfaab742be"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#ab15715e882b19275e1fe9abfaab742be">init</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *params, <a class="el" href="classIDataWriterSink.html">IDataWriterSink</a> *sink) override</td></tr>
+<tr class="memdesc:ab15715e882b19275e1fe9abfaab742be"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化数据写入器  <br /></td></tr>
+<tr class="separator:ab15715e882b19275e1fe9abfaab742be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09eace2432a118ef7c409fe30ea7fb5e" id="r_a09eace2432a118ef7c409fe30ea7fb5e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a09eace2432a118ef7c409fe30ea7fb5e">release</a> () override</td></tr>
+<tr class="memdesc:a09eace2432a118ef7c409fe30ea7fb5e"><td class="mdescLeft">&#160;</td><td class="mdescRight">释放数据写入器资源  <br /></td></tr>
+<tr class="separator:a09eace2432a118ef7c409fe30ea7fb5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6b22b59981164696b80638d0c7c9738" id="r_af6b22b59981164696b80638d0c7c9738"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#af6b22b59981164696b80638d0c7c9738">writeTick</a> (<a class="el" href="classWTSTickData.html">WTSTickData</a> *curTick, uint32_t procFlag) override</td></tr>
+<tr class="memdesc:af6b22b59981164696b80638d0c7c9738"><td class="mdescLeft">&#160;</td><td class="mdescRight">写入Tick数据  <br /></td></tr>
+<tr class="separator:af6b22b59981164696b80638d0c7c9738"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8afdd94b3a3019a2c548c9f03a18760" id="r_ad8afdd94b3a3019a2c548c9f03a18760"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#ad8afdd94b3a3019a2c548c9f03a18760">getCurTick</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg=&quot;&quot;) override</td></tr>
+<tr class="memdesc:ad8afdd94b3a3019a2c548c9f03a18760"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取当前的Tick数据  <br /></td></tr>
+<tr class="separator:ad8afdd94b3a3019a2c548c9f03a18760"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classIDataWriter"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classIDataWriter')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classIDataWriter.html">IDataWriter</a></td></tr>
+<tr class="memitem:a2cd3815642382a7ca0126212a14cf359 inherit pub_methods_classIDataWriter" id="r_a2cd3815642382a7ca0126212a14cf359"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataWriter.html#a2cd3815642382a7ca0126212a14cf359">IDataWriter</a> ()</td></tr>
+<tr class="separator:a2cd3815642382a7ca0126212a14cf359 inherit pub_methods_classIDataWriter"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f62f6aa5caba1c1695167ff0cfcbe95 inherit pub_methods_classIDataWriter" id="r_a4f62f6aa5caba1c1695167ff0cfcbe95"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataWriter.html#a4f62f6aa5caba1c1695167ff0cfcbe95">add_ext_dumper</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *id, <a class="el" href="classIHisDataDumper.html">IHisDataDumper</a> *dumper)</td></tr>
+<tr class="separator:a4f62f6aa5caba1c1695167ff0cfcbe95 inherit pub_methods_classIDataWriter"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8fb141733920de6d5830517a05c11c8 inherit pub_methods_classIDataWriter" id="r_ae8fb141733920de6d5830517a05c11c8"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataWriter.html#ae8fb141733920de6d5830517a05c11c8">writeOrderQueue</a> (<a class="el" href="classWTSOrdQueData.html">WTSOrdQueData</a> *curOrdQue)</td></tr>
+<tr class="separator:ae8fb141733920de6d5830517a05c11c8 inherit pub_methods_classIDataWriter"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae58deaf82d2b6e8ef880f41daefbff60 inherit pub_methods_classIDataWriter" id="r_ae58deaf82d2b6e8ef880f41daefbff60"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataWriter.html#ae58deaf82d2b6e8ef880f41daefbff60">writeOrderDetail</a> (<a class="el" href="classWTSOrdDtlData.html">WTSOrdDtlData</a> *curOrdDetail)</td></tr>
+<tr class="separator:ae58deaf82d2b6e8ef880f41daefbff60 inherit pub_methods_classIDataWriter"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76d75fdd6477184112b5754f413e1d44 inherit pub_methods_classIDataWriter" id="r_a76d75fdd6477184112b5754f413e1d44"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataWriter.html#a76d75fdd6477184112b5754f413e1d44">writeTransaction</a> (<a class="el" href="classWTSTransData.html">WTSTransData</a> *curTrans)</td></tr>
+<tr class="separator:a76d75fdd6477184112b5754f413e1d44 inherit pub_methods_classIDataWriter"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8f660f817a17cec0772cfb60a8b2c8a inherit pub_methods_classIDataWriter" id="r_ad8f660f817a17cec0772cfb60a8b2c8a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataWriter.html#ad8f660f817a17cec0772cfb60a8b2c8a">transHisData</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *sid)</td></tr>
+<tr class="separator:ad8f660f817a17cec0772cfb60a8b2c8a inherit pub_methods_classIDataWriter"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae36386c6dcb53ded0908747bca672670 inherit pub_methods_classIDataWriter" id="r_ae36386c6dcb53ded0908747bca672670"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataWriter.html#ae36386c6dcb53ded0908747bca672670">isSessionProceeded</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *sid)</td></tr>
+<tr class="separator:ae36386c6dcb53ded0908747bca672670 inherit pub_methods_classIDataWriter"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 类型</h2></td></tr>
+<tr class="memitem:ad56402d7090620d903993e1778578c5c" id="r_ad56402d7090620d903993e1778578c5c"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structWtDataWriterAD_1_1__RTBarCacheWrapper.html">WtDataWriterAD::_RTBarCacheWrapper</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#ad56402d7090620d903993e1778578c5c">RTBarCacheWrapper</a></td></tr>
+<tr class="memdesc:ad56402d7090620d903993e1778578c5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">K线数据缓存相关成员  <br /></td></tr>
+<tr class="separator:ad56402d7090620d903993e1778578c5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7801cee94e49edeb47d9cb9f8f1f6e72" id="r_a7801cee94e49edeb47d9cb9f8f1f6e72"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; void()&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a7801cee94e49edeb47d9cb9f8f1f6e72">TaskInfo</a></td></tr>
+<tr class="memdesc:a7801cee94e49edeb47d9cb9f8f1f6e72"><td class="mdescLeft">&#160;</td><td class="mdescRight">任务信息类型定义  <br /></td></tr>
+<tr class="separator:a7801cee94e49edeb47d9cb9f8f1f6e72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aacac5657532c9c5376e69dedb25868a6" id="r_aacac5657532c9c5376e69dedb25868a6"><td class="memItemLeft" align="right" valign="top">typedef std::shared_ptr&lt; <a class="el" href="classWtLMDB.html">WtLMDB</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#aacac5657532c9c5376e69dedb25868a6">WtLMDBPtr</a></td></tr>
+<tr class="memdesc:aacac5657532c9c5376e69dedb25868a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">LMDB数据库定义  <br /></td></tr>
+<tr class="separator:aacac5657532c9c5376e69dedb25868a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc4e84e9cb536ad20dedc3aec0eae90c" id="r_afc4e84e9cb536ad20dedc3aec0eae90c"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt; std::string, <a class="el" href="classWtDataWriterAD.html#aacac5657532c9c5376e69dedb25868a6">WtLMDBPtr</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#afc4e84e9cb536ad20dedc3aec0eae90c">WtLMDBMap</a></td></tr>
+<tr class="memdesc:afc4e84e9cb536ad20dedc3aec0eae90c"><td class="mdescLeft">&#160;</td><td class="mdescRight">LMDB数据库映射类型定义  <br /></td></tr>
+<tr class="separator:afc4e84e9cb536ad20dedc3aec0eae90c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 成员函数</h2></td></tr>
+<tr class="memitem:ae54abb89366ab986f74df460a6af8cdd" id="r_ae54abb89366ab986f74df460a6af8cdd"><td class="memTemplParams" colspan="2">template&lt;typename HeaderType , typename T &gt; </td></tr>
+<tr class="memitem:ae54abb89366ab986f74df460a6af8cdd"><td class="memTemplItemLeft" align="right" valign="top">void *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#ae54abb89366ab986f74df460a6af8cdd">resizeRTBlock</a> (<a class="el" href="WtDataWriterAD_8h.html#a16644ae522884159c76caeb752193f4f">BoostMFPtr</a> &amp;mfPtr, uint32_t nCount)</td></tr>
+<tr class="memdesc:ae54abb89366ab986f74df460a6af8cdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">调整实时数据块的大小  <br /></td></tr>
+<tr class="separator:ae54abb89366ab986f74df460a6af8cdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69bffb89ead143c755d1a47d2371e862" id="r_a69bffb89ead143c755d1a47d2371e862"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtDataWriterAD.html#aacac5657532c9c5376e69dedb25868a6">WtLMDBPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a69bffb89ead143c755d1a47d2371e862">get_k_db</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period)</td></tr>
+<tr class="memdesc:a69bffb89ead143c755d1a47d2371e862"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取K线数据库  <br /></td></tr>
+<tr class="separator:a69bffb89ead143c755d1a47d2371e862"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab82ca0d547b79b25b52ec01f529b29af" id="r_ab82ca0d547b79b25b52ec01f529b29af"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtDataWriterAD.html#aacac5657532c9c5376e69dedb25868a6">WtLMDBPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#ab82ca0d547b79b25b52ec01f529b29af">get_t_db</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code)</td></tr>
+<tr class="memdesc:ab82ca0d547b79b25b52ec01f529b29af"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取Tick数据库  <br /></td></tr>
+<tr class="separator:ab82ca0d547b79b25b52ec01f529b29af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:affcda01555966a60472898862d428c80" id="r_affcda01555966a60472898862d428c80"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#affcda01555966a60472898862d428c80">loadCache</a> ()</td></tr>
+<tr class="memdesc:affcda01555966a60472898862d428c80"><td class="mdescLeft">&#160;</td><td class="mdescRight">加载缓存  <br /></td></tr>
+<tr class="separator:affcda01555966a60472898862d428c80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1b56f3d287acaca13dfa4d2f5ee51a2" id="r_ab1b56f3d287acaca13dfa4d2f5ee51a2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#ab1b56f3d287acaca13dfa4d2f5ee51a2">updateTickCache</a> (<a class="el" href="classWTSContractInfo.html">WTSContractInfo</a> *ct, <a class="el" href="classWTSTickData.html">WTSTickData</a> *curTick, uint32_t procFlag)</td></tr>
+<tr class="memdesc:ab1b56f3d287acaca13dfa4d2f5ee51a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">更新Tick缓存  <br /></td></tr>
+<tr class="separator:ab1b56f3d287acaca13dfa4d2f5ee51a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ff17baa8ac0e7c8c9aab2d87bc791d6" id="r_a2ff17baa8ac0e7c8c9aab2d87bc791d6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a2ff17baa8ac0e7c8c9aab2d87bc791d6">updateBarCache</a> (<a class="el" href="classWTSContractInfo.html">WTSContractInfo</a> *ct, <a class="el" href="classWTSTickData.html">WTSTickData</a> *curTick)</td></tr>
+<tr class="memdesc:a2ff17baa8ac0e7c8c9aab2d87bc791d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">更新K线缓存  <br /></td></tr>
+<tr class="separator:a2ff17baa8ac0e7c8c9aab2d87bc791d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae74ad350f9d499089f9b75efd99b0632" id="r_ae74ad350f9d499089f9b75efd99b0632"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#ae74ad350f9d499089f9b75efd99b0632">pipeToTicks</a> (<a class="el" href="classWTSContractInfo.html">WTSContractInfo</a> *ct, <a class="el" href="classWTSTickData.html">WTSTickData</a> *curTick)</td></tr>
+<tr class="memdesc:ae74ad350f9d499089f9b75efd99b0632"><td class="mdescLeft">&#160;</td><td class="mdescRight">将Tick数据写入数据库  <br /></td></tr>
+<tr class="separator:ae74ad350f9d499089f9b75efd99b0632"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abfbb43493f0482cc6ed6188b34f60d0a" id="r_abfbb43493f0482cc6ed6188b34f60d0a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#abfbb43493f0482cc6ed6188b34f60d0a">pipeToDayBars</a> (<a class="el" href="classWTSContractInfo.html">WTSContractInfo</a> *ct, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> &amp;bar)</td></tr>
+<tr class="memdesc:abfbb43493f0482cc6ed6188b34f60d0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">将日K线数据写入数据库  <br /></td></tr>
+<tr class="separator:abfbb43493f0482cc6ed6188b34f60d0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90cee768c85c4222625765140cfa923d" id="r_a90cee768c85c4222625765140cfa923d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a90cee768c85c4222625765140cfa923d">pipeToM1Bars</a> (<a class="el" href="classWTSContractInfo.html">WTSContractInfo</a> *ct, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> &amp;bar)</td></tr>
+<tr class="memdesc:a90cee768c85c4222625765140cfa923d"><td class="mdescLeft">&#160;</td><td class="mdescRight">将1分钟K线数据写入数据库  <br /></td></tr>
+<tr class="separator:a90cee768c85c4222625765140cfa923d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a734ff62e1464ae7f6cab1b67cd96ffa8" id="r_a734ff62e1464ae7f6cab1b67cd96ffa8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a734ff62e1464ae7f6cab1b67cd96ffa8">pipeToM5Bars</a> (<a class="el" href="classWTSContractInfo.html">WTSContractInfo</a> *ct, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> &amp;bar)</td></tr>
+<tr class="memdesc:a734ff62e1464ae7f6cab1b67cd96ffa8"><td class="mdescLeft">&#160;</td><td class="mdescRight">将5分钟K线数据写入数据库  <br /></td></tr>
+<tr class="separator:a734ff62e1464ae7f6cab1b67cd96ffa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8129084140a0190d3cadd0202934c57" id="r_ab8129084140a0190d3cadd0202934c57"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#ab8129084140a0190d3cadd0202934c57">pushTask</a> (<a class="el" href="classWtDataWriterAD.html#a7801cee94e49edeb47d9cb9f8f1f6e72">TaskInfo</a> task)</td></tr>
+<tr class="memdesc:ab8129084140a0190d3cadd0202934c57"><td class="mdescLeft">&#160;</td><td class="mdescRight">添加异步任务  <br /></td></tr>
+<tr class="separator:ab8129084140a0190d3cadd0202934c57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:acf529ac68ec53af2e337a7e8e5e79ba7" id="r_acf529ac68ec53af2e337a7e8e5e79ba7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#acf529ac68ec53af2e337a7e8e5e79ba7">_bd_mgr</a></td></tr>
+<tr class="memdesc:acf529ac68ec53af2e337a7e8e5e79ba7"><td class="mdescLeft">&#160;</td><td class="mdescRight">基础数据管理器指针  <br /></td></tr>
+<tr class="separator:acf529ac68ec53af2e337a7e8e5e79ba7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bbf0f2143535009f5df58c66697e055" id="r_a1bbf0f2143535009f5df58c66697e055"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a1bbf0f2143535009f5df58c66697e055">_mtx_tick_cache</a></td></tr>
+<tr class="memdesc:a1bbf0f2143535009f5df58c66697e055"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick数据缓存相关成员  <br /></td></tr>
+<tr class="separator:a1bbf0f2143535009f5df58c66697e055"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1a9ecc0bfe85f3a19e892107e54db76" id="r_af1a9ecc0bfe85f3a19e892107e54db76"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#af1a9ecc0bfe85f3a19e892107e54db76">_cache_file_tick</a></td></tr>
+<tr class="memdesc:af1a9ecc0bfe85f3a19e892107e54db76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick缓存文件名  <br /></td></tr>
+<tr class="separator:af1a9ecc0bfe85f3a19e892107e54db76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb7b6983187013f8227bce4b780cd9c0" id="r_adb7b6983187013f8227bce4b780cd9c0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt; std::string, uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#adb7b6983187013f8227bce4b780cd9c0">_tick_cache_idx</a></td></tr>
+<tr class="memdesc:adb7b6983187013f8227bce4b780cd9c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick缓存索引映射  <br /></td></tr>
+<tr class="separator:adb7b6983187013f8227bce4b780cd9c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab84ac40d214680d9e6d34ab1ba33be0d" id="r_ab84ac40d214680d9e6d34ab1ba33be0d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WtDataWriterAD_8h.html#a16644ae522884159c76caeb752193f4f">BoostMFPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#ab84ac40d214680d9e6d34ab1ba33be0d">_tick_cache_file</a></td></tr>
+<tr class="memdesc:ab84ac40d214680d9e6d34ab1ba33be0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick缓存文件指针  <br /></td></tr>
+<tr class="separator:ab84ac40d214680d9e6d34ab1ba33be0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a174f1cdf08ae47e80cf48cc4838ca5c7" id="r_a174f1cdf08ae47e80cf48cc4838ca5c7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="DataDefine_8h.html#ac580515caa1b2e9f1d8134fc0d2b6588">RTTickCache</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a174f1cdf08ae47e80cf48cc4838ca5c7">_tick_cache_block</a></td></tr>
+<tr class="memdesc:a174f1cdf08ae47e80cf48cc4838ca5c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick缓存块指针  <br /></td></tr>
+<tr class="separator:a174f1cdf08ae47e80cf48cc4838ca5c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1234485b023b1a77bf7cdf373781dab0" id="r_a1234485b023b1a77bf7cdf373781dab0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtDataWriterAD.html#ad56402d7090620d903993e1778578c5c">RTBarCacheWrapper</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a1234485b023b1a77bf7cdf373781dab0">_m1_cache</a></td></tr>
+<tr class="memdesc:a1234485b023b1a77bf7cdf373781dab0"><td class="mdescLeft">&#160;</td><td class="mdescRight">1分钟K线缓存  <br /></td></tr>
+<tr class="separator:a1234485b023b1a77bf7cdf373781dab0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac71c59ebf5f1f240355b4cd67e78229f" id="r_ac71c59ebf5f1f240355b4cd67e78229f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtDataWriterAD.html#ad56402d7090620d903993e1778578c5c">RTBarCacheWrapper</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#ac71c59ebf5f1f240355b4cd67e78229f">_m5_cache</a></td></tr>
+<tr class="memdesc:ac71c59ebf5f1f240355b4cd67e78229f"><td class="mdescLeft">&#160;</td><td class="mdescRight">5分钟K线缓存  <br /></td></tr>
+<tr class="separator:ac71c59ebf5f1f240355b4cd67e78229f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f659b22e9272ac3c8501024e8699805" id="r_a4f659b22e9272ac3c8501024e8699805"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtDataWriterAD.html#ad56402d7090620d903993e1778578c5c">RTBarCacheWrapper</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a4f659b22e9272ac3c8501024e8699805">_d1_cache</a></td></tr>
+<tr class="memdesc:a4f659b22e9272ac3c8501024e8699805"><td class="mdescLeft">&#160;</td><td class="mdescRight">日K线缓存  <br /></td></tr>
+<tr class="separator:a4f659b22e9272ac3c8501024e8699805"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a058a937f3993fbdbee54a4d04f524865" id="r_a058a937f3993fbdbee54a4d04f524865"><td class="memItemLeft" align="right" valign="top">std::queue&lt; <a class="el" href="classWtDataWriterAD.html#a7801cee94e49edeb47d9cb9f8f1f6e72">TaskInfo</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a058a937f3993fbdbee54a4d04f524865">_tasks</a></td></tr>
+<tr class="memdesc:a058a937f3993fbdbee54a4d04f524865"><td class="mdescLeft">&#160;</td><td class="mdescRight">任务队列  <br /></td></tr>
+<tr class="separator:a058a937f3993fbdbee54a4d04f524865"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30b50b28290e03666565f3cb6ac4a5e1" id="r_a30b50b28290e03666565f3cb6ac4a5e1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a30b50b28290e03666565f3cb6ac4a5e1">_task_thrd</a></td></tr>
+<tr class="memdesc:a30b50b28290e03666565f3cb6ac4a5e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">任务处理线程指针  <br /></td></tr>
+<tr class="separator:a30b50b28290e03666565f3cb6ac4a5e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5555e364a9ffb4ae53b686754d1907d6" id="r_a5555e364a9ffb4ae53b686754d1907d6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a5555e364a9ffb4ae53b686754d1907d6">_task_mtx</a></td></tr>
+<tr class="memdesc:a5555e364a9ffb4ae53b686754d1907d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">任务队列互斥锁  <br /></td></tr>
+<tr class="separator:a5555e364a9ffb4ae53b686754d1907d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8af2a0d302da69bef4524012ea256e0f" id="r_a8af2a0d302da69bef4524012ea256e0f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__MutexUtils.html#gafaa630f2eecc6c68bc508cb484fcd3a3">StdCondVariable</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a8af2a0d302da69bef4524012ea256e0f">_task_cond</a></td></tr>
+<tr class="memdesc:a8af2a0d302da69bef4524012ea256e0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">任务条件变量  <br /></td></tr>
+<tr class="separator:a8af2a0d302da69bef4524012ea256e0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7862af252da9a4379ab3e7d66d6df6e4" id="r_a7862af252da9a4379ab3e7d66d6df6e4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a7862af252da9a4379ab3e7d66d6df6e4">_async_task</a></td></tr>
+<tr class="memdesc:a7862af252da9a4379ab3e7d66d6df6e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">异步任务标志  <br /></td></tr>
+<tr class="separator:a7862af252da9a4379ab3e7d66d6df6e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55052f4f04a96155b0acc2c36906aa66" id="r_a55052f4f04a96155b0acc2c36906aa66"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a55052f4f04a96155b0acc2c36906aa66">_base_dir</a></td></tr>
+<tr class="memdesc:a55052f4f04a96155b0acc2c36906aa66"><td class="mdescLeft">&#160;</td><td class="mdescRight">数据存储基础目录  <br /></td></tr>
+<tr class="separator:a55052f4f04a96155b0acc2c36906aa66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbc8a178a623878ae0c26ec55c3b2b19" id="r_adbc8a178a623878ae0c26ec55c3b2b19"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#adbc8a178a623878ae0c26ec55c3b2b19">_log_group_size</a></td></tr>
+<tr class="memdesc:adbc8a178a623878ae0c26ec55c3b2b19"><td class="mdescLeft">&#160;</td><td class="mdescRight">日志分组大小  <br /></td></tr>
+<tr class="separator:adbc8a178a623878ae0c26ec55c3b2b19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae63f02753f97e54be9f2adc9a8e3b69" id="r_aae63f02753f97e54be9f2adc9a8e3b69"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#aae63f02753f97e54be9f2adc9a8e3b69">_terminated</a></td></tr>
+<tr class="memdesc:aae63f02753f97e54be9f2adc9a8e3b69"><td class="mdescLeft">&#160;</td><td class="mdescRight">终止标志  <br /></td></tr>
+<tr class="separator:aae63f02753f97e54be9f2adc9a8e3b69"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a435dc5f76aff4a1b6e19685143f9aa73" id="r_a435dc5f76aff4a1b6e19685143f9aa73"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a435dc5f76aff4a1b6e19685143f9aa73">_disable_tick</a></td></tr>
+<tr class="memdesc:a435dc5f76aff4a1b6e19685143f9aa73"><td class="mdescLeft">&#160;</td><td class="mdescRight">禁用Tick数据存储标志  <br /></td></tr>
+<tr class="separator:a435dc5f76aff4a1b6e19685143f9aa73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03b280c92fa45263637da8dea1e3a085" id="r_a03b280c92fa45263637da8dea1e3a085"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a03b280c92fa45263637da8dea1e3a085">_disable_min1</a></td></tr>
+<tr class="memdesc:a03b280c92fa45263637da8dea1e3a085"><td class="mdescLeft">&#160;</td><td class="mdescRight">禁用1分钟K线存储标志  <br /></td></tr>
+<tr class="separator:a03b280c92fa45263637da8dea1e3a085"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae48d22eec5e39d9aa88828319db59535" id="r_ae48d22eec5e39d9aa88828319db59535"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#ae48d22eec5e39d9aa88828319db59535">_disable_min5</a></td></tr>
+<tr class="memdesc:ae48d22eec5e39d9aa88828319db59535"><td class="mdescLeft">&#160;</td><td class="mdescRight">禁用5分钟K线存储标志  <br /></td></tr>
+<tr class="separator:ae48d22eec5e39d9aa88828319db59535"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9320472f72404d091d11a2f7a236fc3" id="r_ac9320472f72404d091d11a2f7a236fc3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#ac9320472f72404d091d11a2f7a236fc3">_disable_day</a></td></tr>
+<tr class="memdesc:ac9320472f72404d091d11a2f7a236fc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">禁用日K线存储标志  <br /></td></tr>
+<tr class="separator:ac9320472f72404d091d11a2f7a236fc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b6552aec5db7ae2549ca13f845e2d81" id="r_a2b6552aec5db7ae2549ca13f845e2d81"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a2b6552aec5db7ae2549ca13f845e2d81">_tick_mapsize</a></td></tr>
+<tr class="memdesc:a2b6552aec5db7ae2549ca13f845e2d81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick数据库映射大小  <br /></td></tr>
+<tr class="separator:a2b6552aec5db7ae2549ca13f845e2d81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c51861bedf95ec2070c6d608d88aa54" id="r_a0c51861bedf95ec2070c6d608d88aa54"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a0c51861bedf95ec2070c6d608d88aa54">_kline_mapsize</a></td></tr>
+<tr class="memdesc:a0c51861bedf95ec2070c6d608d88aa54"><td class="mdescLeft">&#160;</td><td class="mdescRight">K线数据库映射大小  <br /></td></tr>
+<tr class="separator:a0c51861bedf95ec2070c6d608d88aa54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad93d816c3b41e97629ca328a8934ecd5" id="r_ad93d816c3b41e97629ca328a8934ecd5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtDataWriterAD.html#afc4e84e9cb536ad20dedc3aec0eae90c">WtLMDBMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#ad93d816c3b41e97629ca328a8934ecd5">_exchg_m1_dbs</a></td></tr>
+<tr class="memdesc:ad93d816c3b41e97629ca328a8934ecd5"><td class="mdescLeft">&#160;</td><td class="mdescRight">1分钟K线数据库映射  <br /></td></tr>
+<tr class="separator:ad93d816c3b41e97629ca328a8934ecd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40c188fe5a83b25ed67820d4055dab1c" id="r_a40c188fe5a83b25ed67820d4055dab1c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtDataWriterAD.html#afc4e84e9cb536ad20dedc3aec0eae90c">WtLMDBMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a40c188fe5a83b25ed67820d4055dab1c">_exchg_m5_dbs</a></td></tr>
+<tr class="memdesc:a40c188fe5a83b25ed67820d4055dab1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">5分钟K线数据库映射  <br /></td></tr>
+<tr class="separator:a40c188fe5a83b25ed67820d4055dab1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80c1e1779d652ffbbbebc2925bfd3081" id="r_a80c1e1779d652ffbbbebc2925bfd3081"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtDataWriterAD.html#afc4e84e9cb536ad20dedc3aec0eae90c">WtLMDBMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a80c1e1779d652ffbbbebc2925bfd3081">_exchg_d1_dbs</a></td></tr>
+<tr class="memdesc:a80c1e1779d652ffbbbebc2925bfd3081"><td class="mdescLeft">&#160;</td><td class="mdescRight">日K线数据库映射  <br /></td></tr>
+<tr class="separator:a80c1e1779d652ffbbbebc2925bfd3081"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93900be54237e2c0645343d68e57c62d" id="r_a93900be54237e2c0645343d68e57c62d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtDataWriterAD.html#afc4e84e9cb536ad20dedc3aec0eae90c">WtLMDBMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtDataWriterAD.html#a93900be54237e2c0645343d68e57c62d">_tick_dbs</a></td></tr>
+<tr class="memdesc:a93900be54237e2c0645343d68e57c62d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick数据库映射  <br /></td></tr>
+<tr class="separator:a93900be54237e2c0645343d68e57c62d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+额外继承的成员函数</h2></td></tr>
+<tr class="inherit_header pro_attribs_classIDataWriter"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classIDataWriter')"><img src="closed.png" alt="-"/>&#160;Protected 属性 继承自 <a class="el" href="classIDataWriter.html">IDataWriter</a></td></tr>
+<tr class="memitem:a6ec4e45b1f4083d7e2d8fc2043bafdd6 inherit pro_attribs_classIDataWriter" id="r_a6ec4e45b1f4083d7e2d8fc2043bafdd6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="IDataWriter_8h.html#a5f5320ee7e01e8f06eeaa86e4de615a1">ExtDumpers</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataWriter.html#a6ec4e45b1f4083d7e2d8fc2043bafdd6">_dumpers</a></td></tr>
+<tr class="separator:a6ec4e45b1f4083d7e2d8fc2043bafdd6 inherit pro_attribs_classIDataWriter"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f83a75c200bd034c9ed4e92d733fcf7 inherit pro_attribs_classIDataWriter" id="r_a8f83a75c200bd034c9ed4e92d733fcf7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIDataWriterSink.html">IDataWriterSink</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataWriter.html#a8f83a75c200bd034c9ed4e92d733fcf7">_sink</a></td></tr>
+<tr class="separator:a8f83a75c200bd034c9ed4e92d733fcf7 inherit pro_attribs_classIDataWriter"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>基于LMDB的数据存储引擎，负责行情数据的写入和缓存管理 </p>
+<p>该类实现了IDataWriter接口，用于将Tick数据和K线数据写入LMDB数据库， 并管理相关的内存缓存，支持多种周期的数据存储 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00035">35</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="ad56402d7090620d903993e1778578c5c" name="ad56402d7090620d903993e1778578c5c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad56402d7090620d903993e1778578c5c">&#9670;&#160;</a></span>RTBarCacheWrapper</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structWtDataWriterAD_1_1__RTBarCacheWrapper.html">WtDataWriterAD::_RTBarCacheWrapper</a> <a class="el" href="classWtDataWriterAD.html#ad56402d7090620d903993e1778578c5c">WtDataWriterAD::RTBarCacheWrapper</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>K线数据缓存相关成员 </p>
+<p>用于存储和管理不同周期的K线数据缓存</p>
+<p>实时K线缓存包装器结构体</p>
+<p>封装了K线数据缓存的相关属性和方法 </p>
+
+</div>
+</div>
+<a id="a7801cee94e49edeb47d9cb9f8f1f6e72" name="a7801cee94e49edeb47d9cb9f8f1f6e72"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7801cee94e49edeb47d9cb9f8f1f6e72">&#9670;&#160;</a></span>TaskInfo</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::function&lt;void()&gt; <a class="el" href="classWtDataWriterAD.html#a7801cee94e49edeb47d9cb9f8f1f6e72">WtDataWriterAD::TaskInfo</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>任务信息类型定义 </p>
+<p>定义了无参数无返回值的函数对象类型，用于异步任务处理 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00215">215</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afc4e84e9cb536ad20dedc3aec0eae90c" name="afc4e84e9cb536ad20dedc3aec0eae90c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc4e84e9cb536ad20dedc3aec0eae90c">&#9670;&#160;</a></span>WtLMDBMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt;std::string, <a class="el" href="classWtDataWriterAD.html#aacac5657532c9c5376e69dedb25868a6">WtLMDBPtr</a>&gt; <a class="el" href="classWtDataWriterAD.html#afc4e84e9cb536ad20dedc3aec0eae90c">WtDataWriterAD::WtLMDBMap</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>LMDB数据库映射类型定义 </p>
+<p>将字符串键映射到LMDB数据库实例的哈希表 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00320">320</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aacac5657532c9c5376e69dedb25868a6" name="aacac5657532c9c5376e69dedb25868a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aacac5657532c9c5376e69dedb25868a6">&#9670;&#160;</a></span>WtLMDBPtr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::shared_ptr&lt;<a class="el" href="classWtLMDB.html">WtLMDB</a>&gt; <a class="el" href="classWtDataWriterAD.html#aacac5657532c9c5376e69dedb25868a6">WtDataWriterAD::WtLMDBPtr</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>LMDB数据库定义 </p>
+<p>该部分定义了LMDB数据库的结构和组织方式 K线数据，按照每个市场m1/m5/d1三个周期一共三个数据库，路径如./m1/CFFEX Tick数据，每个合约一个数据库，路径如./ticks/CFFEX/IF2101</p>
+<p>WtLMDB智能指针类型定义</p>
+<p>使用智能指针管理LMDB数据库实例，自动处理内存释放 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00314">314</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="aa7f9ec556e67d74a460f735cce15b20b" name="aa7f9ec556e67d74a460f735cce15b20b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa7f9ec556e67d74a460f735cce15b20b">&#9670;&#160;</a></span>WtDataWriterAD()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">WtDataWriterAD::WtDataWriterAD </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>WtDataWriterAD类的构造函数</p>
+<p>初始化数据写入器的基本参数和默认设置</p>
+<p>初始化数据写入器的各项参数，设置默认值 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l00097">97</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a55abbc808f0a661231dc30301cdb33a3" name="a55abbc808f0a661231dc30301cdb33a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55abbc808f0a661231dc30301cdb33a3">&#9670;&#160;</a></span>~WtDataWriterAD()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">WtDataWriterAD::~WtDataWriterAD </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>析构函数 </p>
+<p>WtDataWriterAD类的析构函数</p>
+<p>释放数据写入器占用的资源 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l00115">115</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a69bffb89ead143c755d1a47d2371e862" name="a69bffb89ead143c755d1a47d2371e862"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69bffb89ead143c755d1a47d2371e862">&#9670;&#160;</a></span>get_k_db()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtDataWriterAD.html#aacac5657532c9c5376e69dedb25868a6">WtDataWriterAD::WtLMDBPtr</a> WtDataWriterAD::get_k_db </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a>&#160;</td>
+          <td class="paramname"><em>period</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取K线数据库 </p>
+<p>获取指定交易所和周期的K线数据库</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期类型（分钟、1分钟、5分钟等） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtLMDBPtr 数据库实例的智能指针</dd></dl>
+<p>根据交易所和周期获取或创建相应的K线数据库</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期（日、1分钟、5分钟） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtLMDBPtr LMDB数据库指针，如果失败则返回空指针</dd></dl>
+<p>根据交易所和K线周期获取相应的LMDB数据库，如果数据库不存在则创建新的数据库 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l01364">1364</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab82ca0d547b79b25b52ec01f529b29af" name="ab82ca0d547b79b25b52ec01f529b29af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab82ca0d547b79b25b52ec01f529b29af">&#9670;&#160;</a></span>get_t_db()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtDataWriterAD.html#aacac5657532c9c5376e69dedb25868a6">WtDataWriterAD::WtLMDBPtr</a> WtDataWriterAD::get_t_db </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>code</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取Tick数据库 </p>
+<p>获取指定交易所和合约的Tick数据库</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtLMDBPtr 数据库实例的智能指针</dd></dl>
+<p>根据交易所和合约代码获取或创建相应的Tick数据库</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtLMDBPtr LMDB数据库指针，如果失败则返回空指针</dd></dl>
+<p>根据交易所和合约代码获取相应的Tick数据库，如果数据库不存在则创建新的数据库 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l01420">1420</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad8afdd94b3a3019a2c548c9f03a18760" name="ad8afdd94b3a3019a2c548c9f03a18760"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8afdd94b3a3019a2c548c9f03a18760">&#9670;&#160;</a></span>getCurTick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSTickData.html">WTSTickData</a> * WtDataWriterAD::getCurTick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取当前的Tick数据 </p>
+<p>获取合约当前的Tick数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">exchg</td><td>交易所代码，默认为空字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSTickData* 当前的Tick数据指针，如果不存在则返回NULL</dd></dl>
+<p>从缓存中获取指定合约的最新Tick数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">exchg</td><td>交易所代码，默认为空字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSTickData* 返回合约的最新Tick数据指针，如果不存在则返回NULL</dd></dl>
+<p>从缓存中获取指定合约的最新Tick数据 </p>
+
+<p>实现了 <a class="el" href="classIDataWriter.html#a86ef2f1c1604fda4d315d3152665ea8d">IDataWriter</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l01126">1126</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab15715e882b19275e1fe9abfaab742be" name="ab15715e882b19275e1fe9abfaab742be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab15715e882b19275e1fe9abfaab742be">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtDataWriterAD::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classIDataWriterSink.html">IDataWriterSink</a> *&#160;</td>
+          <td class="paramname"><em>sink</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>初始化数据写入器 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">params</td><td>初始化参数，包含数据存储路径、缓存设置等 </td></tr>
+    <tr><td class="paramname">sink</td><td>数据写入器的回调接口，用于输出日志和获取基础数据管理器 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 初始化是否成功</dd></dl>
+<p>该方法负责创建必要的目录结构、加载缓存文件并准备数据存储环境</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">params</td><td>初始化参数，包含数据存储路径、缓存设置等 </td></tr>
+    <tr><td class="paramname">sink</td><td>数据写入器的回调接口，用于输出日志和获取基础数据管理器 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 初始化是否成功</dd></dl>
+<p>该方法负责创建必要的目录结构、设置缓存文件名称、解析配置参数并加载缓存 </p>
+
+<p>重载 <a class="el" href="classIDataWriter.html#a27ce9df961576b0f61f0a3e7afec98f1">IDataWriter</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l00127">127</a> 行定义.</p>
+
+</div>
+</div>
+<a id="affcda01555966a60472898862d428c80" name="affcda01555966a60472898862d428c80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#affcda01555966a60472898862d428c80">&#9670;&#160;</a></span>loadCache()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtDataWriterAD::loadCache </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>加载缓存 </p>
+<p>加载缓存文件</p>
+<p>加载或创建Tick和K线缓存文件，并初始化相关的内存结构 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l00191">191</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abfbb43493f0482cc6ed6188b34f60d0a" name="abfbb43493f0482cc6ed6188b34f60d0a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abfbb43493f0482cc6ed6188b34f60d0a">&#9670;&#160;</a></span>pipeToDayBars()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtDataWriterAD::pipeToDayBars </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSContractInfo.html">WTSContractInfo</a> *&#160;</td>
+          <td class="paramname"><em>ct</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> &amp;&#160;</td>
+          <td class="paramname"><em>bar</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>将日K线数据写入数据库 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ct</td><td>合约信息指针 </td></tr>
+    <tr><td class="paramname">bar</td><td>待写入的K线数据结构</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将日K线数据写入到LMDB数据库中进行持久化存储</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ct</td><td>合约信息指针 </td></tr>
+    <tr><td class="paramname">bar</td><td>待写入的K线数据结构</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将日K线数据写入到LMDB数据库中进行持久化存储，并调用外部数据导出器 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l00615">615</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a90cee768c85c4222625765140cfa923d" name="a90cee768c85c4222625765140cfa923d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90cee768c85c4222625765140cfa923d">&#9670;&#160;</a></span>pipeToM1Bars()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtDataWriterAD::pipeToM1Bars </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSContractInfo.html">WTSContractInfo</a> *&#160;</td>
+          <td class="paramname"><em>ct</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> &amp;&#160;</td>
+          <td class="paramname"><em>bar</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>将1分钟K线数据写入数据库 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ct</td><td>合约信息指针 </td></tr>
+    <tr><td class="paramname">bar</td><td>待写入的K线数据结构</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将1分钟K线数据写入到LMDB数据库中进行持久化存储</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ct</td><td>合约信息指针 </td></tr>
+    <tr><td class="paramname">bar</td><td>待写入的K线数据结构</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将1分钟K线数据写入到LMDB数据库中进行持久化存储，并调用外部数据导出器 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l00662">662</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a734ff62e1464ae7f6cab1b67cd96ffa8" name="a734ff62e1464ae7f6cab1b67cd96ffa8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a734ff62e1464ae7f6cab1b67cd96ffa8">&#9670;&#160;</a></span>pipeToM5Bars()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtDataWriterAD::pipeToM5Bars </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSContractInfo.html">WTSContractInfo</a> *&#160;</td>
+          <td class="paramname"><em>ct</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> &amp;&#160;</td>
+          <td class="paramname"><em>bar</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>将5分钟K线数据写入数据库 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ct</td><td>合约信息指针 </td></tr>
+    <tr><td class="paramname">bar</td><td>待写入的K线数据结构</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将5分钟K线数据写入到LMDB数据库中进行持久化存储</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ct</td><td>合约信息指针 </td></tr>
+    <tr><td class="paramname">bar</td><td>待写入的K线数据结构</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将5分钟K线数据写入到LMDB数据库中进行持久化存储，并调用外部数据导出器 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l00709">709</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae74ad350f9d499089f9b75efd99b0632" name="ae74ad350f9d499089f9b75efd99b0632"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae74ad350f9d499089f9b75efd99b0632">&#9670;&#160;</a></span>pipeToTicks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtDataWriterAD::pipeToTicks </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSContractInfo.html">WTSContractInfo</a> *&#160;</td>
+          <td class="paramname"><em>ct</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>curTick</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>将Tick数据写入数据库 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ct</td><td>合约信息指针 </td></tr>
+    <tr><td class="paramname">curTick</td><td>当前的Tick数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将Tick数据写入到LMDB数据库中进行持久化存储</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ct</td><td>合约信息指针 </td></tr>
+    <tr><td class="paramname">curTick</td><td>当前的Tick数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将Tick数据写入到LMDB数据库中进行持久化存储，并调用外部数据导出器 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l00567">567</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab8129084140a0190d3cadd0202934c57" name="ab8129084140a0190d3cadd0202934c57"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab8129084140a0190d3cadd0202934c57">&#9670;&#160;</a></span>pushTask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtDataWriterAD::pushTask </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWtDataWriterAD.html#a7801cee94e49edeb47d9cb9f8f1f6e72">TaskInfo</a>&#160;</td>
+          <td class="paramname"><em>task</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>添加异步任务 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">task</td><td>任务函数对象</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将任务添加到任务队列中，并通知处理线程执行</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">task</td><td>任务函数对象</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>将任务添加到任务队列中，并根据配置决定是否异步执行。 如果开启异步模式，则由任务线程处理；否则直接同步执行。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l00509">509</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a09eace2432a118ef7c409fe30ea7fb5e" name="a09eace2432a118ef7c409fe30ea7fb5e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09eace2432a118ef7c409fe30ea7fb5e">&#9670;&#160;</a></span>release()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtDataWriterAD::release </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>释放数据写入器资源 </p>
+<p>终止异步任务处理线程并释放相关资源 </p>
+
+<p>实现了 <a class="el" href="classIDataWriter.html#ac076f35d84daa3e3ebe61ed65400c9bc">IDataWriter</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l00173">173</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae54abb89366ab986f74df460a6af8cdd" name="ae54abb89366ab986f74df460a6af8cdd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae54abb89366ab986f74df460a6af8cdd">&#9670;&#160;</a></span>resizeRTBlock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename HeaderType , typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * WtDataWriterAD::resizeRTBlock </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WtDataWriterAD_8h.html#a16644ae522884159c76caeb752193f4f">BoostMFPtr</a> &amp;&#160;</td>
+          <td class="paramname"><em>mfPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>nCount</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>调整实时数据块的大小 </p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">HeaderType</td><td>数据块头部类型 </td></tr>
+    <tr><td class="paramname">T</td><td>数据项类型 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mfPtr</td><td>内存映射文件指针 </td></tr>
+    <tr><td class="paramname">nCount</td><td>需要的数据项数量 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>void* 调整后的内存块指针</dd></dl>
+<p>当缓存容量不足时，该方法会重新分配内存并调整映射文件的大小 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l00388">388</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2ff17baa8ac0e7c8c9aab2d87bc791d6" name="a2ff17baa8ac0e7c8c9aab2d87bc791d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ff17baa8ac0e7c8c9aab2d87bc791d6">&#9670;&#160;</a></span>updateBarCache()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtDataWriterAD::updateBarCache </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSContractInfo.html">WTSContractInfo</a> *&#160;</td>
+          <td class="paramname"><em>ct</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>curTick</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>更新K线缓存 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ct</td><td>合约信息指针 </td></tr>
+    <tr><td class="paramname">curTick</td><td>当前的Tick数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>根据Tick数据更新不同周期的K线缓存，包括日、1分钟、5分钟K线 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l00756">756</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab1b56f3d287acaca13dfa4d2f5ee51a2" name="ab1b56f3d287acaca13dfa4d2f5ee51a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1b56f3d287acaca13dfa4d2f5ee51a2">&#9670;&#160;</a></span>updateTickCache()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtDataWriterAD::updateTickCache </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSContractInfo.html">WTSContractInfo</a> *&#160;</td>
+          <td class="paramname"><em>ct</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>curTick</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>procFlag</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>更新Tick缓存 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ct</td><td>合约信息指针 </td></tr>
+    <tr><td class="paramname">curTick</td><td>当前的Tick数据 </td></tr>
+    <tr><td class="paramname">procFlag</td><td>处理标志，控制数据处理方式 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 更新是否成功</dd></dl>
+<p>将新的Tick数据更新到内存缓存中，并根据处理标志进行不同的处理</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ct</td><td>合约信息指针 </td></tr>
+    <tr><td class="paramname">curTick</td><td>当前的Tick数据 </td></tr>
+    <tr><td class="paramname">procFlag</td><td>处理标志，0-不预处理，1-预处理成交量和成交额，2-特殊处理 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 更新成功返回true，失败返回false</dd></dl>
+<p>将最新的Tick数据更新到内存缓存中，并根据处理标志进行不同的预处理 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l01164">1164</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af6b22b59981164696b80638d0c7c9738" name="af6b22b59981164696b80638d0c7c9738"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6b22b59981164696b80638d0c7c9738">&#9670;&#160;</a></span>writeTick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtDataWriterAD::writeTick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>curTick</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>procFlag</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>写入Tick数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curTick</td><td>当前的Tick数据 </td></tr>
+    <tr><td class="paramname">procFlag</td><td>处理标志，控制数据处理方式（0=直接写入，1=预处理，2=自动累加） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 写入是否成功</dd></dl>
+<p>将Tick数据写入缓存和数据库，并触发相关的K线生成和存储逻辑 </p>
+
+<p>实现了 <a class="el" href="classIDataWriter.html#a32a6e17485cc926938c87e00c85faae5">IDataWriter</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a> 第 <a class="el" href="WtDataWriterAD_8cpp_source.html#l00449">449</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a7862af252da9a4379ab3e7d66d6df6e4" name="a7862af252da9a4379ab3e7d66d6df6e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7862af252da9a4379ab3e7d66d6df6e4">&#9670;&#160;</a></span>_async_task</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtDataWriterAD::_async_task</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>异步任务标志 </p>
+<p>标记是否启用异步任务处理模式 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00245">245</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a55052f4f04a96155b0acc2c36906aa66" name="a55052f4f04a96155b0acc2c36906aa66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55052f4f04a96155b0acc2c36906aa66">&#9670;&#160;</a></span>_base_dir</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string WtDataWriterAD::_base_dir</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>数据存储基础目录 </p>
+<p>用于存储缓存文件和数据库文件的根目录 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00251">251</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acf529ac68ec53af2e337a7e8e5e79ba7" name="acf529ac68ec53af2e337a7e8e5e79ba7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf529ac68ec53af2e337a7e8e5e79ba7">&#9670;&#160;</a></span>_bd_mgr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a>* WtDataWriterAD::_bd_mgr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>基础数据管理器指针 </p>
+<p>用于获取合约信息、交易时间等基础数据 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00102">102</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af1a9ecc0bfe85f3a19e892107e54db76" name="af1a9ecc0bfe85f3a19e892107e54db76"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1a9ecc0bfe85f3a19e892107e54db76">&#9670;&#160;</a></span>_cache_file_tick</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string WtDataWriterAD::_cache_file_tick</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tick缓存文件名 </p>
+<p>存储Tick数据缓存的文件名 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00119">119</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4f659b22e9272ac3c8501024e8699805" name="a4f659b22e9272ac3c8501024e8699805"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f659b22e9272ac3c8501024e8699805">&#9670;&#160;</a></span>_d1_cache</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtDataWriterAD.html#ad56402d7090620d903993e1778578c5c">RTBarCacheWrapper</a> WtDataWriterAD::_d1_cache</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>日K线缓存 </p>
+<p>存储和管理实时日K线数据 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00209">209</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac9320472f72404d091d11a2f7a236fc3" name="ac9320472f72404d091d11a2f7a236fc3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9320472f72404d091d11a2f7a236fc3">&#9670;&#160;</a></span>_disable_day</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtDataWriterAD::_disable_day</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>禁用日K线存储标志 </p>
+<p>如果为true，则不存储日K线数据 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00287">287</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a03b280c92fa45263637da8dea1e3a085" name="a03b280c92fa45263637da8dea1e3a085"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03b280c92fa45263637da8dea1e3a085">&#9670;&#160;</a></span>_disable_min1</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtDataWriterAD::_disable_min1</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>禁用1分钟K线存储标志 </p>
+<p>如果为true，则不存储1分钟K线数据 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00275">275</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae48d22eec5e39d9aa88828319db59535" name="ae48d22eec5e39d9aa88828319db59535"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae48d22eec5e39d9aa88828319db59535">&#9670;&#160;</a></span>_disable_min5</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtDataWriterAD::_disable_min5</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>禁用5分钟K线存储标志 </p>
+<p>如果为true，则不存储5分钟K线数据 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00281">281</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a435dc5f76aff4a1b6e19685143f9aa73" name="a435dc5f76aff4a1b6e19685143f9aa73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a435dc5f76aff4a1b6e19685143f9aa73">&#9670;&#160;</a></span>_disable_tick</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtDataWriterAD::_disable_tick</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>禁用Tick数据存储标志 </p>
+<p>如果为true，则不存储Tick数据 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00269">269</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a80c1e1779d652ffbbbebc2925bfd3081" name="a80c1e1779d652ffbbbebc2925bfd3081"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80c1e1779d652ffbbbebc2925bfd3081">&#9670;&#160;</a></span>_exchg_d1_dbs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtDataWriterAD.html#afc4e84e9cb536ad20dedc3aec0eae90c">WtLMDBMap</a> WtDataWriterAD::_exchg_d1_dbs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>日K线数据库映射 </p>
+<p>按交易所组织的不同日K线数据库集合 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00338">338</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad93d816c3b41e97629ca328a8934ecd5" name="ad93d816c3b41e97629ca328a8934ecd5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad93d816c3b41e97629ca328a8934ecd5">&#9670;&#160;</a></span>_exchg_m1_dbs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtDataWriterAD.html#afc4e84e9cb536ad20dedc3aec0eae90c">WtLMDBMap</a> WtDataWriterAD::_exchg_m1_dbs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>1分钟K线数据库映射 </p>
+<p>按交易所组织的不同1分钟K线数据库集合 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00326">326</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a40c188fe5a83b25ed67820d4055dab1c" name="a40c188fe5a83b25ed67820d4055dab1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40c188fe5a83b25ed67820d4055dab1c">&#9670;&#160;</a></span>_exchg_m5_dbs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtDataWriterAD.html#afc4e84e9cb536ad20dedc3aec0eae90c">WtLMDBMap</a> WtDataWriterAD::_exchg_m5_dbs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>5分钟K线数据库映射 </p>
+<p>按交易所组织的不同5分钟K线数据库集合 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00332">332</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0c51861bedf95ec2070c6d608d88aa54" name="a0c51861bedf95ec2070c6d608d88aa54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c51861bedf95ec2070c6d608d88aa54">&#9670;&#160;</a></span>_kline_mapsize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtDataWriterAD::_kline_mapsize</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>K线数据库映射大小 </p>
+<p>控制LMDB中K线数据库的内存映射大小，单位为字节 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00299">299</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adbc8a178a623878ae0c26ec55c3b2b19" name="adbc8a178a623878ae0c26ec55c3b2b19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adbc8a178a623878ae0c26ec55c3b2b19">&#9670;&#160;</a></span>_log_group_size</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtDataWriterAD::_log_group_size</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>日志分组大小 </p>
+<p>控制日志输出的分组大小，用于性能统计 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00257">257</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1234485b023b1a77bf7cdf373781dab0" name="a1234485b023b1a77bf7cdf373781dab0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1234485b023b1a77bf7cdf373781dab0">&#9670;&#160;</a></span>_m1_cache</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtDataWriterAD.html#ad56402d7090620d903993e1778578c5c">RTBarCacheWrapper</a> WtDataWriterAD::_m1_cache</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>1分钟K线缓存 </p>
+<p>存储和管理实时1分钟K线数据 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00197">197</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac71c59ebf5f1f240355b4cd67e78229f" name="ac71c59ebf5f1f240355b4cd67e78229f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac71c59ebf5f1f240355b4cd67e78229f">&#9670;&#160;</a></span>_m5_cache</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtDataWriterAD.html#ad56402d7090620d903993e1778578c5c">RTBarCacheWrapper</a> WtDataWriterAD::_m5_cache</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>5分钟K线缓存 </p>
+<p>存储和管理实时5分钟K线数据 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00203">203</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1bbf0f2143535009f5df58c66697e055" name="a1bbf0f2143535009f5df58c66697e055"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bbf0f2143535009f5df58c66697e055">&#9670;&#160;</a></span>_mtx_tick_cache</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a> WtDataWriterAD::_mtx_tick_cache</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tick数据缓存相关成员 </p>
+<p>用于存储和管理实时Tick数据的内存缓存</p>
+<p>Tick缓存互斥锁</p>
+<p>保护Tick缓存在多线程环境下的安全访问 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00113">113</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8af2a0d302da69bef4524012ea256e0f" name="a8af2a0d302da69bef4524012ea256e0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8af2a0d302da69bef4524012ea256e0f">&#9670;&#160;</a></span>_task_cond</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__MutexUtils.html#gafaa630f2eecc6c68bc508cb484fcd3a3">StdCondVariable</a> WtDataWriterAD::_task_cond</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>任务条件变量 </p>
+<p>用于线程同步，当有新任务时通知处理线程 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00239">239</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5555e364a9ffb4ae53b686754d1907d6" name="a5555e364a9ffb4ae53b686754d1907d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5555e364a9ffb4ae53b686754d1907d6">&#9670;&#160;</a></span>_task_mtx</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a> WtDataWriterAD::_task_mtx</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>任务队列互斥锁 </p>
+<p>保护任务队列在多线程环境下的安全访问 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00233">233</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a30b50b28290e03666565f3cb6ac4a5e1" name="a30b50b28290e03666565f3cb6ac4a5e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30b50b28290e03666565f3cb6ac4a5e1">&#9670;&#160;</a></span>_task_thrd</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a> WtDataWriterAD::_task_thrd</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>任务处理线程指针 </p>
+<p>指向处理异步任务的工作线程 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00227">227</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a058a937f3993fbdbee54a4d04f524865" name="a058a937f3993fbdbee54a4d04f524865"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a058a937f3993fbdbee54a4d04f524865">&#9670;&#160;</a></span>_tasks</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::queue&lt;<a class="el" href="classWtDataWriterAD.html#a7801cee94e49edeb47d9cb9f8f1f6e72">TaskInfo</a>&gt; WtDataWriterAD::_tasks</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>任务队列 </p>
+<p>存储待处理的异步任务 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00221">221</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aae63f02753f97e54be9f2adc9a8e3b69" name="aae63f02753f97e54be9f2adc9a8e3b69"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae63f02753f97e54be9f2adc9a8e3b69">&#9670;&#160;</a></span>_terminated</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtDataWriterAD::_terminated</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>终止标志 </p>
+<p>标记数据写入器是否已终止运行 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00263">263</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a174f1cdf08ae47e80cf48cc4838ca5c7" name="a174f1cdf08ae47e80cf48cc4838ca5c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a174f1cdf08ae47e80cf48cc4838ca5c7">&#9670;&#160;</a></span>_tick_cache_block</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="DataDefine_8h.html#ac580515caa1b2e9f1d8134fc0d2b6588">RTTickCache</a>* WtDataWriterAD::_tick_cache_block</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tick缓存块指针 </p>
+<p>指向内存中的Tick数据缓存块 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00137">137</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab84ac40d214680d9e6d34ab1ba33be0d" name="ab84ac40d214680d9e6d34ab1ba33be0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab84ac40d214680d9e6d34ab1ba33be0d">&#9670;&#160;</a></span>_tick_cache_file</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WtDataWriterAD_8h.html#a16644ae522884159c76caeb752193f4f">BoostMFPtr</a> WtDataWriterAD::_tick_cache_file</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tick缓存文件指针 </p>
+<p>指向内存映射的Tick缓存文件 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00131">131</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adb7b6983187013f8227bce4b780cd9c0" name="adb7b6983187013f8227bce4b780cd9c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb7b6983187013f8227bce4b780cd9c0">&#9670;&#160;</a></span>_tick_cache_idx</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt;std::string, uint32_t&gt; WtDataWriterAD::_tick_cache_idx</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tick缓存索引映射 </p>
+<p>将合约标识映射到缓存数组中的索引位置 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00125">125</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a93900be54237e2c0645343d68e57c62d" name="a93900be54237e2c0645343d68e57c62d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a93900be54237e2c0645343d68e57c62d">&#9670;&#160;</a></span>_tick_dbs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtDataWriterAD.html#afc4e84e9cb536ad20dedc3aec0eae90c">WtLMDBMap</a> WtDataWriterAD::_tick_dbs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tick数据库映射 </p>
+<p>用exchg.code作为key，如BINANCE.BTCUSDT，每个合约对应一个数据库 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00344">344</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2b6552aec5db7ae2549ca13f845e2d81" name="a2b6552aec5db7ae2549ca13f845e2d81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b6552aec5db7ae2549ca13f845e2d81">&#9670;&#160;</a></span>_tick_mapsize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtDataWriterAD::_tick_mapsize</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tick数据库映射大小 </p>
+<p>控制LMDB中Tick数据库的内存映射大小，单位为字节 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a> 第 <a class="el" href="WtDataWriterAD_8h_source.html#l00293">293</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WtDataStorageAD/<a class="el" href="WtDataWriterAD_8h_source.html">WtDataWriterAD.h</a></li>
+<li>src/WtDataStorageAD/<a class="el" href="WtDataWriterAD_8cpp_source.html">WtDataWriterAD.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classWtDataWriterAD.html">WtDataWriterAD</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+var structATPReqCashAuctionOrderMsg =
+[
+    [ "ATPReqCashAuctionOrderMsg", "structATPReqCashAuctionOrderMsg.html#a2c82929f093fda04d58967ce4c97536c", null ],
+    [ "ATPReqCashAuctionOrderMsg", "structATPReqCashAuctionOrderMsg.html#a2c82929f093fda04d58967ce4c97536c", null ],
+    [ "account_id", "structATPReqCashAuctionOrderMsg.html#a2926e0f1b4325da4986de4bb31b0c213", null ],
+    [ "batch_cl_ord_no", "structATPReqCashAuctionOrderMsg.html#a983c4c9fdd6d5ffaedb9f39b69706595", null ],
+    [ "branch_id", "structATPReqCashAuctionOrderMsg.html#a5daedcf48599bdc6f577f628a2e04df0", null ],
+    [ "client_feature_code", "structATPReqCashAuctionOrderMsg.html#a4e7f358c2fe7a2143ffb5a59f0f412b8", null ],
+    [ "client_seq_id", "structATPReqCashAuctionOrderMsg.html#a60f898fd0f7f66939a0e7e9fe29ff180", null ],
+    [ "cust_id", "structATPReqCashAuctionOrderMsg.html#a07ff327046241a82a7ea4fd17828d691", null ],
+    [ "enforce_flag", "structATPReqCashAuctionOrderMsg.html#a66c5a62878dca14b294c9be5a8bc2881", null ],
+    [ "extra_data", "structATPReqCashAuctionOrderMsg.html#ac2b6ad7ceb6859b138ae69939c78a2a1", null ],
+    [ "fund_account_id", "structATPReqCashAuctionOrderMsg.html#a22d5e2ab2d161c4446afb21df55da38e", null ],
+    [ "market_id", "structATPReqCashAuctionOrderMsg.html#a9cc3b00c33422b0f5f32b5f570165395", null ],
+    [ "max_price_levels", "structATPReqCashAuctionOrderMsg.html#a09efc246fc555e30587dea2306e0bf03", null ],
+    [ "min_qty", "structATPReqCashAuctionOrderMsg.html#a51cfa302bd852840a41fc7f7c2791a81", null ],
+    [ "order_qty", "structATPReqCashAuctionOrderMsg.html#a65574b8612cf2a22b91889f698fbba4d", null ],
+    [ "order_type", "structATPReqCashAuctionOrderMsg.html#a6241a619d21ed00af78fb074dbb8a9a3", null ],
+    [ "order_way", "structATPReqCashAuctionOrderMsg.html#ae1de788ef2d4defa336ef7e492ed13e6", null ],
+    [ "password", "structATPReqCashAuctionOrderMsg.html#ad34fd3ad6a69eb9ec3c125f43907ace6", null ],
+    [ "price", "structATPReqCashAuctionOrderMsg.html#adee370eb94013f200c5cfaf310f9cabb", null ],
+    [ "security_id", "structATPReqCashAuctionOrderMsg.html#a7e64fd85eea3cc27646978117ed13f2b", null ],
+    [ "side", "structATPReqCashAuctionOrderMsg.html#a3e04961bc3b46df72ff730f14bb49e4f", null ],
+    [ "stop_px", "structATPReqCashAuctionOrderMsg.html#a27621070d3590ce77d732cf27d71b814", null ],
+    [ "time_in_force", "structATPReqCashAuctionOrderMsg.html#a4d45294b077e95e03dd4780931f91a07", null ],
+    [ "user_info", "structATPReqCashAuctionOrderMsg.html#ad7a476501f90059eab34973fe694d813", null ]
+];

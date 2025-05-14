@@ -1,0 +1,750 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: WTSTickSlice类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classWTSTickSlice.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pub-static-methods">静态 Public 成员函数</a> &#124;
+<a href="#pro-methods">Protected 成员函数</a> &#124;
+<a href="#pri-types">Private 类型</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classWTSTickSlice-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">WTSTickSlice类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Tick数据切片类  
+ <a href="classWTSTickSlice.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:ad560e8ad28a36313db005268c0c9cc33" id="r_ad560e8ad28a36313db005268c0c9cc33"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#ad560e8ad28a36313db005268c0c9cc33">appendBlock</a> (<a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *ticks, uint32_t count)</td></tr>
+<tr class="memdesc:ad560e8ad28a36313db005268c0c9cc33"><td class="mdescLeft">&#160;</td><td class="mdescRight">追加一个Tick数据块  <br /></td></tr>
+<tr class="separator:ad560e8ad28a36313db005268c0c9cc33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabec8f40810003509e78ec01b3b7d8dd" id="r_aabec8f40810003509e78ec01b3b7d8dd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#aabec8f40810003509e78ec01b3b7d8dd">insertBlock</a> (std::size_t idx, <a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *ticks, uint32_t count)</td></tr>
+<tr class="memdesc:aabec8f40810003509e78ec01b3b7d8dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">在指定位置插入一个Tick数据块  <br /></td></tr>
+<tr class="separator:aabec8f40810003509e78ec01b3b7d8dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a926a036c5939d799ab46390c4542bbde" id="r_a926a036c5939d799ab46390c4542bbde"><td class="memItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#a926a036c5939d799ab46390c4542bbde">get_block_counts</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a926a036c5939d799ab46390c4542bbde"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取数据块数量  <br /></td></tr>
+<tr class="separator:a926a036c5939d799ab46390c4542bbde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a521a6dc789392a657c5e12a560e16a4f" id="r_a521a6dc789392a657c5e12a560e16a4f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#a521a6dc789392a657c5e12a560e16a4f">get_block_addr</a> (std::size_t blkIdx)</td></tr>
+<tr class="memdesc:a521a6dc789392a657c5e12a560e16a4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定数据块的地址  <br /></td></tr>
+<tr class="separator:a521a6dc789392a657c5e12a560e16a4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80e65a26a9722f492cc5a525af2e12dc" id="r_a80e65a26a9722f492cc5a525af2e12dc"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#a80e65a26a9722f492cc5a525af2e12dc">get_block_size</a> (std::size_t blkIdx)</td></tr>
+<tr class="memdesc:a80e65a26a9722f492cc5a525af2e12dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定数据块的大小  <br /></td></tr>
+<tr class="separator:a80e65a26a9722f492cc5a525af2e12dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefe68c93c7a904a1daec29f2f10f6ea1" id="r_aefe68c93c7a904a1daec29f2f10f6ea1"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#aefe68c93c7a904a1daec29f2f10f6ea1">size</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:aefe68c93c7a904a1daec29f2f10f6ea1"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取切片的总数据数量  <br /></td></tr>
+<tr class="separator:aefe68c93c7a904a1daec29f2f10f6ea1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae78e2f20a6c992d8377d73288c815d7e" id="r_ae78e2f20a6c992d8377d73288c815d7e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#ae78e2f20a6c992d8377d73288c815d7e">empty</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:ae78e2f20a6c992d8377d73288c815d7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">判断切片是否为空  <br /></td></tr>
+<tr class="separator:ae78e2f20a6c992d8377d73288c815d7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b0625a04807a326a0e9016945579f7a" id="r_a9b0625a04807a326a0e9016945579f7a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#a9b0625a04807a326a0e9016945579f7a">at</a> (int32_t idx)</td></tr>
+<tr class="memdesc:a9b0625a04807a326a0e9016945579f7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取指定位置的Tick数据  <br /></td></tr>
+<tr class="separator:a9b0625a04807a326a0e9016945579f7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classWTSObject"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classWTSObject')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classWTSObject.html">WTSObject</a></td></tr>
+<tr class="memitem:aaa1501722eea3c1368ba68bf97b12d4b inherit pub_methods_classWTSObject" id="r_aaa1501722eea3c1368ba68bf97b12d4b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSObject.html#aaa1501722eea3c1368ba68bf97b12d4b">WTSObject</a> ()</td></tr>
+<tr class="separator:aaa1501722eea3c1368ba68bf97b12d4b inherit pub_methods_classWTSObject"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac3557f86dcdcbc08ebe4b95e0b5f3c2 inherit pub_methods_classWTSObject" id="r_aac3557f86dcdcbc08ebe4b95e0b5f3c2"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSObject.html#aac3557f86dcdcbc08ebe4b95e0b5f3c2">~WTSObject</a> ()</td></tr>
+<tr class="separator:aac3557f86dcdcbc08ebe4b95e0b5f3c2 inherit pub_methods_classWTSObject"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e41434e26313af90b03c8c8b395b049 inherit pub_methods_classWTSObject" id="r_a3e41434e26313af90b03c8c8b395b049"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSObject.html#a3e41434e26313af90b03c8c8b395b049">retain</a> ()</td></tr>
+<tr class="separator:a3e41434e26313af90b03c8c8b395b049 inherit pub_methods_classWTSObject"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57b87f47529974f735f4989eaf2dd55f inherit pub_methods_classWTSObject" id="r_a57b87f47529974f735f4989eaf2dd55f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSObject.html#a57b87f47529974f735f4989eaf2dd55f">release</a> ()</td></tr>
+<tr class="separator:a57b87f47529974f735f4989eaf2dd55f inherit pub_methods_classWTSObject"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5add3c4b61260e79d5abc764a2507bb7 inherit pub_methods_classWTSObject" id="r_a5add3c4b61260e79d5abc764a2507bb7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSObject.html#a5add3c4b61260e79d5abc764a2507bb7">isSingleRefs</a> ()</td></tr>
+<tr class="separator:a5add3c4b61260e79d5abc764a2507bb7 inherit pub_methods_classWTSObject"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89db877af3320c3c4b9a756bbacd3925 inherit pub_methods_classWTSObject" id="r_a89db877af3320c3c4b9a756bbacd3925"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSObject.html#a89db877af3320c3c4b9a756bbacd3925">retainCount</a> ()</td></tr>
+<tr class="separator:a89db877af3320c3c4b9a756bbacd3925 inherit pub_methods_classWTSObject"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+静态 Public 成员函数</h2></td></tr>
+<tr class="memitem:a370515e4189bc4bb6c69b17375704878" id="r_a370515e4189bc4bb6c69b17375704878"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#a370515e4189bc4bb6c69b17375704878">create</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code, <a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *ticks=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, uint32_t count=0)</td></tr>
+<tr class="memdesc:a370515e4189bc4bb6c69b17375704878"><td class="mdescLeft">&#160;</td><td class="mdescRight">创建一个Tick数据切片对象  <br /></td></tr>
+<tr class="separator:a370515e4189bc4bb6c69b17375704878"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+Protected 成员函数</h2></td></tr>
+<tr class="memitem:a7426669576bd00d43dd559a341e95d24" id="r_a7426669576bd00d43dd559a341e95d24"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#a7426669576bd00d43dd559a341e95d24">WTSTickSlice</a> ()</td></tr>
+<tr class="memdesc:a7426669576bd00d43dd559a341e95d24"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数（保护类型）  <br /></td></tr>
+<tr class="separator:a7426669576bd00d43dd559a341e95d24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4251785d57088666f5a73f0d940b291b" id="r_a4251785d57088666f5a73f0d940b291b"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#a4251785d57088666f5a73f0d940b291b">translateIdx</a> (int32_t idx) <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a4251785d57088666f5a73f0d940b291b"><td class="mdescLeft">&#160;</td><td class="mdescRight">转换索引位置  <br /></td></tr>
+<tr class="separator:a4251785d57088666f5a73f0d940b291b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 类型</h2></td></tr>
+<tr class="memitem:a9a28352060b9902b703f21ff7b13cbdf" id="r_a9a28352060b9902b703f21ff7b13cbdf"><td class="memItemLeft" align="right" valign="top">typedef std::pair&lt; <a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *, uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#a9a28352060b9902b703f21ff7b13cbdf">TickBlock</a></td></tr>
+<tr class="memdesc:a9a28352060b9902b703f21ff7b13cbdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick数据块类型，第一个元素是数据指针，第二个是数据数量  <br /></td></tr>
+<tr class="separator:a9a28352060b9902b703f21ff7b13cbdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:a041efae74e35425bc59a88f5825eb4ce" id="r_a041efae74e35425bc59a88f5825eb4ce"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#a041efae74e35425bc59a88f5825eb4ce">_code</a> [<a class="el" href="WTSMarcos_8h.html#a43110534aa06a6d801f0f875c3cf4f1c">MAX_INSTRUMENT_LENGTH</a>]</td></tr>
+<tr class="memdesc:a041efae74e35425bc59a88f5825eb4ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">合约代码  <br /></td></tr>
+<tr class="separator:a041efae74e35425bc59a88f5825eb4ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88afb2856baafc6cb6489c0635e2755a" id="r_a88afb2856baafc6cb6489c0635e2755a"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="classWTSTickSlice.html#a9a28352060b9902b703f21ff7b13cbdf">TickBlock</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#a88afb2856baafc6cb6489c0635e2755a">_blocks</a></td></tr>
+<tr class="memdesc:a88afb2856baafc6cb6489c0635e2755a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick数据块容器，存储多个数据块的引用  <br /></td></tr>
+<tr class="separator:a88afb2856baafc6cb6489c0635e2755a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6c19545ddbfb03086746091b561a215" id="r_aa6c19545ddbfb03086746091b561a215"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSTickSlice.html#aa6c19545ddbfb03086746091b561a215">_count</a></td></tr>
+<tr class="memdesc:aa6c19545ddbfb03086746091b561a215"><td class="mdescLeft">&#160;</td><td class="mdescRight">总数据数量  <br /></td></tr>
+<tr class="separator:aa6c19545ddbfb03086746091b561a215"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+额外继承的成员函数</h2></td></tr>
+<tr class="inherit_header pro_attribs_classWTSObject"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classWTSObject')"><img src="closed.png" alt="-"/>&#160;Protected 属性 继承自 <a class="el" href="classWTSObject.html">WTSObject</a></td></tr>
+<tr class="memitem:afc6ccb094bdb9a5d82a6b684a23870a1 inherit pro_attribs_classWTSObject" id="r_afc6ccb094bdb9a5d82a6b684a23870a1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> std::atomic&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWTSObject.html#afc6ccb094bdb9a5d82a6b684a23870a1">m_uRefs</a></td></tr>
+<tr class="separator:afc6ccb094bdb9a5d82a6b684a23870a1 inherit pro_attribs_classWTSObject"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>Tick数据切片类 </p>
+<p>从连续的tick缓存中创建的数据切片 重要特性：切片并没有真实地复制内存，而只是引用原始数据并记录开始和结尾的位置 这种实现方式提高了效率，但使用场景需要小心，因为它依赖于基础数据对象的生命周期 支持多个数据块的管理，适用于非连续内存的数据集合 </p>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02128">2128</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="a9a28352060b9902b703f21ff7b13cbdf" name="a9a28352060b9902b703f21ff7b13cbdf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a28352060b9902b703f21ff7b13cbdf">&#9670;&#160;</a></span>TickBlock</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::pair&lt;<a class="el" href="structWTSTickStruct.html">WTSTickStruct</a>*, uint32_t&gt; <a class="el" href="classWTSTickSlice.html#a9a28352060b9902b703f21ff7b13cbdf">WTSTickSlice::TickBlock</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tick数据块类型，第一个元素是数据指针，第二个是数据数量 </p>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02132">2132</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a7426669576bd00d43dd559a341e95d24" name="a7426669576bd00d43dd559a341e95d24"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7426669576bd00d43dd559a341e95d24">&#9670;&#160;</a></span>WTSTickSlice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">WTSTickSlice::WTSTickSlice </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>构造函数（保护类型） </p>
+<p>初始化Tick切片对象，清空数据块容器 构造函数为保护类型，禁止外部直接创建对象，必须通过静态create方法创建 </p>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02143">2143</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="ad560e8ad28a36313db005268c0c9cc33" name="ad560e8ad28a36313db005268c0c9cc33"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad560e8ad28a36313db005268c0c9cc33">&#9670;&#160;</a></span>appendBlock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WTSTickSlice::appendBlock </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *&#160;</td>
+          <td class="paramname"><em>ticks</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>追加一个Tick数据块 </p>
+<p>将新的Tick数据块添加到切片对象的末尾 这允许切片管理多个不连续的内存数据块</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ticks</td><td>要添加的Tick数据结构体数组指针 </td></tr>
+    <tr><td class="paramname">count</td><td>数据数量 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 如果添加成功返回true，否则返回false </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02203">2203</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9b0625a04807a326a0e9016945579f7a" name="a9b0625a04807a326a0e9016945579f7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b0625a04807a326a0e9016945579f7a">&#9670;&#160;</a></span>at()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> * WTSTickSlice::at </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>idx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取指定位置的Tick数据 </p>
+<p>返回切片中指定索引位置的Tick数据结构体 支持负数索引，可介面向后索引 该方法会跨数据块进行定位，将多个块看作一个连续的数据集</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">idx</td><td>索引位置（可正可负） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>const WTSTickStruct* 指定位置的Tick数据结构体指针，如果索引无效则返回NULL </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02306">2306</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a370515e4189bc4bb6c69b17375704878" name="a370515e4189bc4bb6c69b17375704878"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a370515e4189bc4bb6c69b17375704878">&#9670;&#160;</a></span>create()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> * WTSTickSlice::create </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *&#160;</td>
+          <td class="paramname"><em>ticks</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>创建一个Tick数据切片对象 </p>
+<p>静态工厂方法，创建并初始化一个Tick数据切片对象 可以初始化为空切片，也可以指定初始数据块</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">ticks</td><td>Tick数据结构体数组指针，默认为NULL </td></tr>
+    <tr><td class="paramname">count</td><td>数据数量，默认为0 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSTickSlice* 创建的Tick数据切片对象指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02177">2177</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae78e2f20a6c992d8377d73288c815d7e" name="ae78e2f20a6c992d8377d73288c815d7e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae78e2f20a6c992d8377d73288c815d7e">&#9670;&#160;</a></span>empty()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WTSTickSlice::empty </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>判断切片是否为空 </p>
+<p>检查当前切片对象是否没有包含任何数据</p>
+<dl class="section return"><dt>返回</dt><dd>bool 如果没有数据返回true，否则返回false </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02294">2294</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a521a6dc789392a657c5e12a560e16a4f" name="a521a6dc789392a657c5e12a560e16a4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a521a6dc789392a657c5e12a560e16a4f">&#9670;&#160;</a></span>get_block_addr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> * WTSTickSlice::get_block_addr </td>
+          <td>(</td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>blkIdx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取指定数据块的地址 </p>
+<p>返回指定索引的数据块的内存地址指针</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blkIdx</td><td>数据块索引 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSTickStruct* 数据块的内存地址指针，如果索引无效则返回NULL </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02254">2254</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a926a036c5939d799ab46390c4542bbde" name="a926a036c5939d799ab46390c4542bbde"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a926a036c5939d799ab46390c4542bbde">&#9670;&#160;</a></span>get_block_counts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::size_t WTSTickSlice::get_block_counts </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取数据块数量 </p>
+<p>返回当前切片对象中包含的数据块数量</p>
+<dl class="section return"><dt>返回</dt><dd>std::size_t 数据块数量 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02241">2241</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a80e65a26a9722f492cc5a525af2e12dc" name="a80e65a26a9722f492cc5a525af2e12dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80e65a26a9722f492cc5a525af2e12dc">&#9670;&#160;</a></span>get_block_size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WTSTickSlice::get_block_size </td>
+          <td>(</td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>blkIdx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取指定数据块的大小 </p>
+<p>返回指定索引的数据块包含的数据数量</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blkIdx</td><td>数据块索引 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>uint32_t 数据块的大小（数据数量），如果索引无效则返回INVALID_UINT32 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02270">2270</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aabec8f40810003509e78ec01b3b7d8dd" name="aabec8f40810003509e78ec01b3b7d8dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aabec8f40810003509e78ec01b3b7d8dd">&#9670;&#160;</a></span>insertBlock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WTSTickSlice::insertBlock </td>
+          <td>(</td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>idx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *&#160;</td>
+          <td class="paramname"><em>ticks</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>在指定位置插入一个Tick数据块 </p>
+<p>在切片对象的指定位置插入新的Tick数据块 与追加不同，这允许在特定位置插入数据块</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">idx</td><td>要插入的位置索引 </td></tr>
+    <tr><td class="paramname">ticks</td><td>要插入的Tick数据结构体数组指针 </td></tr>
+    <tr><td class="paramname">count</td><td>数据数量 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 如果插入成功返回true，否则返回false </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02224">2224</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aefe68c93c7a904a1daec29f2f10f6ea1" name="aefe68c93c7a904a1daec29f2f10f6ea1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aefe68c93c7a904a1daec29f2f10f6ea1">&#9670;&#160;</a></span>size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WTSTickSlice::size </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取切片的总数据数量 </p>
+<p>返回当前切片对象包含的所有数据块中的总数据数量</p>
+<dl class="section return"><dt>返回</dt><dd>uint32_t 总数据数量 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02285">2285</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4251785d57088666f5a73f0d940b291b" name="a4251785d57088666f5a73f0d940b291b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4251785d57088666f5a73f0d940b291b">&#9670;&#160;</a></span>translateIdx()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t WTSTickSlice::translateIdx </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>idx</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>转换索引位置 </p>
+<p>将传入的索引转换为有效的正向索引位置 支持负数索引，负数索引表示从尾部开始向前数 例如：-1表示最后一个元素，-2表示倒数第二个元素</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">idx</td><td>输入的索引值（可正可负） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>int32_t 转换后的有效正向索引 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02155">2155</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a88afb2856baafc6cb6489c0635e2755a" name="a88afb2856baafc6cb6489c0635e2755a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88afb2856baafc6cb6489c0635e2755a">&#9670;&#160;</a></span>_blocks</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;<a class="el" href="classWTSTickSlice.html#a9a28352060b9902b703f21ff7b13cbdf">TickBlock</a>&gt; WTSTickSlice::_blocks</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tick数据块容器，存储多个数据块的引用 </p>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02133">2133</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a041efae74e35425bc59a88f5825eb4ce" name="a041efae74e35425bc59a88f5825eb4ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a041efae74e35425bc59a88f5825eb4ce">&#9670;&#160;</a></span>_code</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">char WTSTickSlice::_code[<a class="el" href="WTSMarcos_8h.html#a43110534aa06a6d801f0f875c3cf4f1c">MAX_INSTRUMENT_LENGTH</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>合约代码 </p>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02131">2131</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa6c19545ddbfb03086746091b561a215" name="aa6c19545ddbfb03086746091b561a215"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6c19545ddbfb03086746091b561a215">&#9670;&#160;</a></span>_count</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WTSTickSlice::_count</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>总数据数量 </p>
+
+<p class="definition">在文件 <a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a> 第 <a class="el" href="WTSDataDef_8hpp_source.html#l02134">2134</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/Includes/<a class="el" href="WTSDataDef_8hpp_source.html">WTSDataDef.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classWTSTickSlice.html">WTSTickSlice</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

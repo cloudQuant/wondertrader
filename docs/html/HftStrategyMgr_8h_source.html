@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtCore/HftStrategyMgr.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('HftStrategyMgr_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">HftStrategyMgr.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="HftStrategyMgr_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;boost/core/noncopyable.hpp&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/FasterDefs.h&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../Includes/HftStrategyDefs.h&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;../Share/DLLHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="foldopen" id="foldopen00024" data-start="{" data-end="};">
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="classHftStraWrapper.html">   24</a></span><span class="keyword">class </span><a class="code hl_class" href="classHftStraWrapper.html">HftStraWrapper</a></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>{</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classHftStraWrapper.html#add39c96e13d6f67b7e7d9d0e5ecf69ce">   32</a></span>    <a class="code hl_function" href="classHftStraWrapper.html#add39c96e13d6f67b7e7d9d0e5ecf69ce">HftStraWrapper</a>(<a class="code hl_class" href="classHftStrategy.html">HftStrategy</a>* stra, <a class="code hl_class" href="classIHftStrategyFact.html">IHftStrategyFact</a>* fact) :<a class="code hl_variable" href="classHftStraWrapper.html#a22ce5e0beb2f32c8e6a0bcdee37e6a3f">_stra</a>(stra), <a class="code hl_variable" href="classHftStraWrapper.html#a2b7c26ca0ed2af2107e3377b0a631983">_fact</a>(fact){}</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="foldopen" id="foldopen00038" data-start="{" data-end="}">
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="classHftStraWrapper.html#ad08fbd042543a42550c100b95239648f">   38</a></span>    <a class="code hl_function" href="classHftStraWrapper.html#ad08fbd042543a42550c100b95239648f">~HftStraWrapper</a>()</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    {</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classHftStraWrapper.html#a22ce5e0beb2f32c8e6a0bcdee37e6a3f">_stra</a>)</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        {</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>            <a class="code hl_variable" href="classHftStraWrapper.html#a2b7c26ca0ed2af2107e3377b0a631983">_fact</a>-&gt;<a class="code hl_function" href="classIHftStrategyFact.html#a8ebbd725caf341c51f563ae7e183e4ad">deleteStrategy</a>(<a class="code hl_variable" href="classHftStraWrapper.html#a22ce5e0beb2f32c8e6a0bcdee37e6a3f">_stra</a>);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        }</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    }</div>
+</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="classHftStraWrapper.html#ae679b30d23395a245d1a235b01553d91">   50</a></span>    <a class="code hl_class" href="classHftStrategy.html">HftStrategy</a>* <a class="code hl_function" href="classHftStraWrapper.html#ae679b30d23395a245d1a235b01553d91">self</a>(){ <span class="keywordflow">return</span> <a class="code hl_variable" href="classHftStraWrapper.html#a22ce5e0beb2f32c8e6a0bcdee37e6a3f">_stra</a>; }</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="classHftStraWrapper.html#a22ce5e0beb2f32c8e6a0bcdee37e6a3f">   53</a></span>    <a class="code hl_class" href="classHftStrategy.html">HftStrategy</a>*        <a class="code hl_variable" href="classHftStraWrapper.html#a22ce5e0beb2f32c8e6a0bcdee37e6a3f">_stra</a>;  </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="classHftStraWrapper.html#a2b7c26ca0ed2af2107e3377b0a631983">   54</a></span>    <a class="code hl_class" href="classIHftStrategyFact.html">IHftStrategyFact</a>*   <a class="code hl_variable" href="classHftStraWrapper.html#a2b7c26ca0ed2af2107e3377b0a631983">_fact</a>;  </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>};</div>
+</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="HftStrategyMgr_8h.html#a2da0d1f46e7b7bb1ae235f01351f992f">   61</a></span><span class="keyword">typedef</span> std::shared_ptr&lt;HftStraWrapper&gt; <a class="code hl_typedef" href="HftStrategyMgr_8h.html#a2da0d1f46e7b7bb1ae235f01351f992f">HftStrategyPtr</a>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="foldopen" id="foldopen00067" data-start="{" data-end="};">
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classHftStrategyMgr.html">   67</a></span><span class="keyword">class </span><a class="code hl_class" href="classHftStrategyMgr.html">HftStrategyMgr</a> : <span class="keyword">private</span> boost::noncopyable</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>{</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <a class="code hl_function" href="classHftStrategyMgr.html#af2ef52cc91ed4f11cbffa4b9adcb56f2">HftStrategyMgr</a>();</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <a class="code hl_function" href="classHftStrategyMgr.html#a9e1060cf797085cf0d26130975be836c">~HftStrategyMgr</a>();</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classHftStrategyMgr.html#af6512b48ce069b138e1fb7efccceb068">loadFactories</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* path);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <a class="code hl_typedef" href="HftStrategyMgr_8h.html#a2da0d1f46e7b7bb1ae235f01351f992f">HftStrategyPtr</a> <a class="code hl_function" href="classHftStrategyMgr.html#ad5ba43f8ea6d50e628dd34bd07db738a">createStrategy</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* name, <span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <a class="code hl_typedef" href="HftStrategyMgr_8h.html#a2da0d1f46e7b7bb1ae235f01351f992f">HftStrategyPtr</a> <a class="code hl_function" href="classHftStrategyMgr.html#ad5ba43f8ea6d50e628dd34bd07db738a">createStrategy</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* factname, <span class="keyword">const</span> <span class="keywordtype">char</span>* unitname, <span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <a class="code hl_typedef" href="HftStrategyMgr_8h.html#a2da0d1f46e7b7bb1ae235f01351f992f">HftStrategyPtr</a> <a class="code hl_function" href="classHftStrategyMgr.html#aecce99fbbfcfb297e867ac4d35a256e2">getStrategy</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="keyword">private</span>:</div>
+<div class="foldopen" id="foldopen00121" data-start="{" data-end="};">
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno"><a class="line" href="structHftStrategyMgr_1_1__StraFactInfo.html">  121</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structHftStrategyMgr_1_1__StraFactInfo.html">_StraFactInfo</a></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    {</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="structHftStrategyMgr_1_1__StraFactInfo.html#a0001fb7d8fe8698b70e750754941b1ac">  123</a></span>        std::string     <a class="code hl_variable" href="structHftStrategyMgr_1_1__StraFactInfo.html#a0001fb7d8fe8698b70e750754941b1ac">_module_path</a>;   </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="structHftStrategyMgr_1_1__StraFactInfo.html#ac45063b61d6477aa89b45f8baa929e36">  124</a></span>        <a class="code hl_typedef" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a>       <a class="code hl_variable" href="structHftStrategyMgr_1_1__StraFactInfo.html#ac45063b61d6477aa89b45f8baa929e36">_module_inst</a>;   </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="structHftStrategyMgr_1_1__StraFactInfo.html#a6deaef15829eca1a12b8ece80b059e9b">  125</a></span>        <a class="code hl_class" href="classIHftStrategyFact.html">IHftStrategyFact</a>*   <a class="code hl_variable" href="structHftStrategyMgr_1_1__StraFactInfo.html#a6deaef15829eca1a12b8ece80b059e9b">_fact</a>;      </div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno"><a class="line" href="structHftStrategyMgr_1_1__StraFactInfo.html#af41920bccccae0fdaaa4899501f9a6b5">  126</a></span>        <a class="code hl_typedef" href="HftStrategyDefs_8h.html#a6512f6dbef02d43a3251565cd0b8d3e2">FuncCreateHftStraFact</a>   <a class="code hl_variable" href="structHftStrategyMgr_1_1__StraFactInfo.html#af41920bccccae0fdaaa4899501f9a6b5">_creator</a>;   </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="structHftStrategyMgr_1_1__StraFactInfo.html#ae8e7565d7781ff846790aba13d466d34">  127</a></span>        <a class="code hl_typedef" href="HftStrategyDefs_8h.html#a35370476a3ed59fbd7071805b795894f">FuncDeleteHftStraFact</a>   <a class="code hl_variable" href="structHftStrategyMgr_1_1__StraFactInfo.html#ae8e7565d7781ff846790aba13d466d34">_remover</a>;   </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="foldopen" id="foldopen00133" data-start="{" data-end="}">
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno"><a class="line" href="structHftStrategyMgr_1_1__StraFactInfo.html#a364a869dba089330a42827f97232b1ed">  133</a></span>        <a class="code hl_function" href="structHftStrategyMgr_1_1__StraFactInfo.html#a364a869dba089330a42827f97232b1ed">_StraFactInfo</a>()</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>        {</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>            <a class="code hl_variable" href="structHftStrategyMgr_1_1__StraFactInfo.html#ac45063b61d6477aa89b45f8baa929e36">_module_inst</a> = <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>            <a class="code hl_variable" href="structHftStrategyMgr_1_1__StraFactInfo.html#a6deaef15829eca1a12b8ece80b059e9b">_fact</a> = <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        }</div>
+</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="foldopen" id="foldopen00143" data-start="{" data-end="}">
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="structHftStrategyMgr_1_1__StraFactInfo.html#a1df7c0f1a82fa6f19b89fd15dd3a9630">  143</a></span>        <a class="code hl_function" href="structHftStrategyMgr_1_1__StraFactInfo.html#a1df7c0f1a82fa6f19b89fd15dd3a9630">~_StraFactInfo</a>()</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>        {</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="structHftStrategyMgr_1_1__StraFactInfo.html#a6deaef15829eca1a12b8ece80b059e9b">_fact</a>)</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>                <a class="code hl_variable" href="structHftStrategyMgr_1_1__StraFactInfo.html#ae8e7565d7781ff846790aba13d466d34">_remover</a>(<a class="code hl_variable" href="structHftStrategyMgr_1_1__StraFactInfo.html#a6deaef15829eca1a12b8ece80b059e9b">_fact</a>);</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>        }</div>
+</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno"><a class="line" href="classHftStrategyMgr.html#a9bc9f2592750d64d2235d21f5b4bd42e">  148</a></span>    } <a class="code hl_typedef" href="classHftStrategyMgr.html#a9bc9f2592750d64d2235d21f5b4bd42e">StraFactInfo</a>;</div>
+</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno"><a class="line" href="classHftStrategyMgr.html#a0fd951d8acda239ade6fa20e2655f75e">  153</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, StraFactInfo&gt;</a> <a class="code hl_typedef" href="classHftStrategyMgr.html#a0fd951d8acda239ade6fa20e2655f75e">StraFactMap</a>;</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno"><a class="line" href="classHftStrategyMgr.html#a351428e53255de5caff1c27aecc10442">  155</a></span>    <a class="code hl_class" href="classwt__hashmap.html">StraFactMap</a> <a class="code hl_variable" href="classHftStrategyMgr.html#a351428e53255de5caff1c27aecc10442">_factories</a>; </div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno"><a class="line" href="classHftStrategyMgr.html#aed21bb4fe22b1cdb71bbaa2fea498454">  161</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, HftStrategyPtr&gt;</a> <a class="code hl_typedef" href="classHftStrategyMgr.html#aed21bb4fe22b1cdb71bbaa2fea498454">StrategyMap</a>;</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno"><a class="line" href="classHftStrategyMgr.html#abeb1066f5d2e1817dc52765168fda62b">  162</a></span>    <a class="code hl_class" href="classwt__hashmap.html">StrategyMap</a> <a class="code hl_variable" href="classHftStrategyMgr.html#abeb1066f5d2e1817dc52765168fda62b">_strategies</a>;    </div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>};</div>
+</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="ttc" id="aDLLHelper_8hpp_html_a40972742af38c16d3ab2f521abf0ca8a"><div class="ttname"><a href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a></div><div class="ttdeci">void * DllHandle</div><div class="ttdoc">动态库句柄类型（非Windows平台）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00032">DLLHelper.hpp:32</a></div></div>
+<div class="ttc" id="aHftStrategyDefs_8h_html_a35370476a3ed59fbd7071805b795894f"><div class="ttname"><a href="HftStrategyDefs_8h.html#a35370476a3ed59fbd7071805b795894f">FuncDeleteHftStraFact</a></div><div class="ttdeci">void(* FuncDeleteHftStraFact)(IHftStrategyFact *&amp;fact)</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyDefs_8h_source.html#l00164">HftStrategyDefs.h:164</a></div></div>
+<div class="ttc" id="aHftStrategyDefs_8h_html_a6512f6dbef02d43a3251565cd0b8d3e2"><div class="ttname"><a href="HftStrategyDefs_8h.html#a6512f6dbef02d43a3251565cd0b8d3e2">FuncCreateHftStraFact</a></div><div class="ttdeci">IHftStrategyFact *(* FuncCreateHftStraFact)()</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyDefs_8h_source.html#l00162">HftStrategyDefs.h:162</a></div></div>
+<div class="ttc" id="aHftStrategyMgr_8h_html_a2da0d1f46e7b7bb1ae235f01351f992f"><div class="ttname"><a href="HftStrategyMgr_8h.html#a2da0d1f46e7b7bb1ae235f01351f992f">HftStrategyPtr</a></div><div class="ttdeci">std::shared_ptr&lt; HftStraWrapper &gt; HftStrategyPtr</div><div class="ttdoc">高频交易策略智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00061">HftStrategyMgr.h:61</a></div></div>
+<div class="ttc" id="aclassHftStraWrapper_html"><div class="ttname"><a href="classHftStraWrapper.html">HftStraWrapper</a></div><div class="ttdoc">高频交易策略包装器</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00024">HftStrategyMgr.h:25</a></div></div>
+<div class="ttc" id="aclassHftStraWrapper_html_a22ce5e0beb2f32c8e6a0bcdee37e6a3f"><div class="ttname"><a href="classHftStraWrapper.html#a22ce5e0beb2f32c8e6a0bcdee37e6a3f">HftStraWrapper::_stra</a></div><div class="ttdeci">HftStrategy * _stra</div><div class="ttdoc">策略实例指针</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00053">HftStrategyMgr.h:53</a></div></div>
+<div class="ttc" id="aclassHftStraWrapper_html_a2b7c26ca0ed2af2107e3377b0a631983"><div class="ttname"><a href="classHftStraWrapper.html#a2b7c26ca0ed2af2107e3377b0a631983">HftStraWrapper::_fact</a></div><div class="ttdeci">IHftStrategyFact * _fact</div><div class="ttdoc">策略工厂接口指针</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00054">HftStrategyMgr.h:54</a></div></div>
+<div class="ttc" id="aclassHftStraWrapper_html_ad08fbd042543a42550c100b95239648f"><div class="ttname"><a href="classHftStraWrapper.html#ad08fbd042543a42550c100b95239648f">HftStraWrapper::~HftStraWrapper</a></div><div class="ttdeci">~HftStraWrapper()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00038">HftStrategyMgr.h:38</a></div></div>
+<div class="ttc" id="aclassHftStraWrapper_html_add39c96e13d6f67b7e7d9d0e5ecf69ce"><div class="ttname"><a href="classHftStraWrapper.html#add39c96e13d6f67b7e7d9d0e5ecf69ce">HftStraWrapper::HftStraWrapper</a></div><div class="ttdeci">HftStraWrapper(HftStrategy *stra, IHftStrategyFact *fact)</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00032">HftStrategyMgr.h:32</a></div></div>
+<div class="ttc" id="aclassHftStraWrapper_html_ae679b30d23395a245d1a235b01553d91"><div class="ttname"><a href="classHftStraWrapper.html#ae679b30d23395a245d1a235b01553d91">HftStraWrapper::self</a></div><div class="ttdeci">HftStrategy * self()</div><div class="ttdoc">获取策略实例</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00050">HftStrategyMgr.h:50</a></div></div>
+<div class="ttc" id="aclassHftStrategyMgr_html"><div class="ttname"><a href="classHftStrategyMgr.html">HftStrategyMgr</a></div><div class="ttdoc">高频交易策略管理器</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00067">HftStrategyMgr.h:68</a></div></div>
+<div class="ttc" id="aclassHftStrategyMgr_html_a0fd951d8acda239ade6fa20e2655f75e"><div class="ttname"><a href="classHftStrategyMgr.html#a0fd951d8acda239ade6fa20e2655f75e">HftStrategyMgr::StraFactMap</a></div><div class="ttdeci">wt_hashmap&lt; std::string, StraFactInfo &gt; StraFactMap</div><div class="ttdoc">策略工厂映射表类型</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00153">HftStrategyMgr.h:153</a></div></div>
+<div class="ttc" id="aclassHftStrategyMgr_html_a351428e53255de5caff1c27aecc10442"><div class="ttname"><a href="classHftStrategyMgr.html#a351428e53255de5caff1c27aecc10442">HftStrategyMgr::_factories</a></div><div class="ttdeci">StraFactMap _factories</div><div class="ttdoc">存储已加载的策略工厂</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00155">HftStrategyMgr.h:155</a></div></div>
+<div class="ttc" id="aclassHftStrategyMgr_html_a9bc9f2592750d64d2235d21f5b4bd42e"><div class="ttname"><a href="classHftStrategyMgr.html#a9bc9f2592750d64d2235d21f5b4bd42e">HftStrategyMgr::StraFactInfo</a></div><div class="ttdeci">struct HftStrategyMgr::_StraFactInfo StraFactInfo</div><div class="ttdoc">策略工厂信息结构体</div></div>
+<div class="ttc" id="aclassHftStrategyMgr_html_a9e1060cf797085cf0d26130975be836c"><div class="ttname"><a href="classHftStrategyMgr.html#a9e1060cf797085cf0d26130975be836c">HftStrategyMgr::~HftStrategyMgr</a></div><div class="ttdeci">~HftStrategyMgr()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8cpp_source.html#l00035">HftStrategyMgr.cpp:35</a></div></div>
+<div class="ttc" id="aclassHftStrategyMgr_html_abeb1066f5d2e1817dc52765168fda62b"><div class="ttname"><a href="classHftStrategyMgr.html#abeb1066f5d2e1817dc52765168fda62b">HftStrategyMgr::_strategies</a></div><div class="ttdeci">StrategyMap _strategies</div><div class="ttdoc">存储已创建的策略实例</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00162">HftStrategyMgr.h:162</a></div></div>
+<div class="ttc" id="aclassHftStrategyMgr_html_ad5ba43f8ea6d50e628dd34bd07db738a"><div class="ttname"><a href="classHftStrategyMgr.html#ad5ba43f8ea6d50e628dd34bd07db738a">HftStrategyMgr::createStrategy</a></div><div class="ttdeci">HftStrategyPtr createStrategy(const char *name, const char *id)</div><div class="ttdoc">创建策略</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8cpp_source.html#l00149">HftStrategyMgr.cpp:149</a></div></div>
+<div class="ttc" id="aclassHftStrategyMgr_html_aecce99fbbfcfb297e867ac4d35a256e2"><div class="ttname"><a href="classHftStrategyMgr.html#aecce99fbbfcfb297e867ac4d35a256e2">HftStrategyMgr::getStrategy</a></div><div class="ttdeci">HftStrategyPtr getStrategy(const char *id)</div><div class="ttdoc">获取策略</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8cpp_source.html#l00181">HftStrategyMgr.cpp:181</a></div></div>
+<div class="ttc" id="aclassHftStrategyMgr_html_aed21bb4fe22b1cdb71bbaa2fea498454"><div class="ttname"><a href="classHftStrategyMgr.html#aed21bb4fe22b1cdb71bbaa2fea498454">HftStrategyMgr::StrategyMap</a></div><div class="ttdeci">wt_hashmap&lt; std::string, HftStrategyPtr &gt; StrategyMap</div><div class="ttdoc">策略映射表类型</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00161">HftStrategyMgr.h:161</a></div></div>
+<div class="ttc" id="aclassHftStrategyMgr_html_af2ef52cc91ed4f11cbffa4b9adcb56f2"><div class="ttname"><a href="classHftStrategyMgr.html#af2ef52cc91ed4f11cbffa4b9adcb56f2">HftStrategyMgr::HftStrategyMgr</a></div><div class="ttdeci">HftStrategyMgr()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8cpp_source.html#l00025">HftStrategyMgr.cpp:25</a></div></div>
+<div class="ttc" id="aclassHftStrategyMgr_html_af6512b48ce069b138e1fb7efccceb068"><div class="ttname"><a href="classHftStrategyMgr.html#af6512b48ce069b138e1fb7efccceb068">HftStrategyMgr::loadFactories</a></div><div class="ttdeci">bool loadFactories(const char *path)</div><div class="ttdoc">加载策略工厂</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8cpp_source.html#l00046">HftStrategyMgr.cpp:46</a></div></div>
+<div class="ttc" id="aclassHftStrategy_html"><div class="ttname"><a href="classHftStrategy.html">HftStrategy</a></div><div class="ttdef"><b>Definition</b> <a href="HftStrategyDefs_8h_source.html#l00028">HftStrategyDefs.h:29</a></div></div>
+<div class="ttc" id="aclassIHftStrategyFact_html"><div class="ttname"><a href="classIHftStrategyFact.html">IHftStrategyFact</a></div><div class="ttdef"><b>Definition</b> <a href="HftStrategyDefs_8h_source.html#l00133">HftStrategyDefs.h:134</a></div></div>
+<div class="ttc" id="aclassIHftStrategyFact_html_a8ebbd725caf341c51f563ae7e183e4ad"><div class="ttname"><a href="classIHftStrategyFact.html#a8ebbd725caf341c51f563ae7e183e4ad">IHftStrategyFact::deleteStrategy</a></div><div class="ttdeci">virtual bool deleteStrategy(HftStrategy *stra)=0</div></div>
+<div class="ttc" id="aclasswt__hashmap_html"><div class="ttname"><a href="classwt__hashmap.html">wt_hashmap</a></div><div class="ttdoc">WonderTrader通用高性能哈希表模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00162">FasterDefs.h:163</a></div></div>
+<div class="ttc" id="astructHftStrategyMgr_1_1__StraFactInfo_html"><div class="ttname"><a href="structHftStrategyMgr_1_1__StraFactInfo.html">HftStrategyMgr::_StraFactInfo</a></div><div class="ttdoc">策略工厂信息结构体</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00121">HftStrategyMgr.h:122</a></div></div>
+<div class="ttc" id="astructHftStrategyMgr_1_1__StraFactInfo_html_a0001fb7d8fe8698b70e750754941b1ac"><div class="ttname"><a href="structHftStrategyMgr_1_1__StraFactInfo.html#a0001fb7d8fe8698b70e750754941b1ac">HftStrategyMgr::_StraFactInfo::_module_path</a></div><div class="ttdeci">std::string _module_path</div><div class="ttdoc">模块路径</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00123">HftStrategyMgr.h:123</a></div></div>
+<div class="ttc" id="astructHftStrategyMgr_1_1__StraFactInfo_html_a1df7c0f1a82fa6f19b89fd15dd3a9630"><div class="ttname"><a href="structHftStrategyMgr_1_1__StraFactInfo.html#a1df7c0f1a82fa6f19b89fd15dd3a9630">HftStrategyMgr::_StraFactInfo::~_StraFactInfo</a></div><div class="ttdeci">~_StraFactInfo()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00143">HftStrategyMgr.h:143</a></div></div>
+<div class="ttc" id="astructHftStrategyMgr_1_1__StraFactInfo_html_a364a869dba089330a42827f97232b1ed"><div class="ttname"><a href="structHftStrategyMgr_1_1__StraFactInfo.html#a364a869dba089330a42827f97232b1ed">HftStrategyMgr::_StraFactInfo::_StraFactInfo</a></div><div class="ttdeci">_StraFactInfo()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00133">HftStrategyMgr.h:133</a></div></div>
+<div class="ttc" id="astructHftStrategyMgr_1_1__StraFactInfo_html_a6deaef15829eca1a12b8ece80b059e9b"><div class="ttname"><a href="structHftStrategyMgr_1_1__StraFactInfo.html#a6deaef15829eca1a12b8ece80b059e9b">HftStrategyMgr::_StraFactInfo::_fact</a></div><div class="ttdeci">IHftStrategyFact * _fact</div><div class="ttdoc">策略工厂接口</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00125">HftStrategyMgr.h:125</a></div></div>
+<div class="ttc" id="astructHftStrategyMgr_1_1__StraFactInfo_html_ac45063b61d6477aa89b45f8baa929e36"><div class="ttname"><a href="structHftStrategyMgr_1_1__StraFactInfo.html#ac45063b61d6477aa89b45f8baa929e36">HftStrategyMgr::_StraFactInfo::_module_inst</a></div><div class="ttdeci">DllHandle _module_inst</div><div class="ttdoc">动态库句柄</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00124">HftStrategyMgr.h:124</a></div></div>
+<div class="ttc" id="astructHftStrategyMgr_1_1__StraFactInfo_html_ae8e7565d7781ff846790aba13d466d34"><div class="ttname"><a href="structHftStrategyMgr_1_1__StraFactInfo.html#ae8e7565d7781ff846790aba13d466d34">HftStrategyMgr::_StraFactInfo::_remover</a></div><div class="ttdeci">FuncDeleteHftStraFact _remover</div><div class="ttdoc">删除工厂函数</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00127">HftStrategyMgr.h:127</a></div></div>
+<div class="ttc" id="astructHftStrategyMgr_1_1__StraFactInfo_html_af41920bccccae0fdaaa4899501f9a6b5"><div class="ttname"><a href="structHftStrategyMgr_1_1__StraFactInfo.html#af41920bccccae0fdaaa4899501f9a6b5">HftStrategyMgr::_StraFactInfo::_creator</a></div><div class="ttdeci">FuncCreateHftStraFact _creator</div><div class="ttdoc">创建工厂函数</div><div class="ttdef"><b>Definition</b> <a href="HftStrategyMgr_8h_source.html#l00126">HftStrategyMgr.h:126</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3ce996bf6400c0a215df0636043a382c.html">WtCore</a></li><li class="navelem"><a class="el" href="HftStrategyMgr_8h.html">HftStrategyMgr.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,2841 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: WtRdmDtReader类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classWtRdmDtReader.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-types">Private 类型</a> &#124;
+<a href="#pri-methods">Private 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classWtRdmDtReader-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">WtRdmDtReader类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>数据随机访问器类<br  />
+ *  
+ <a href="classWtRdmDtReader.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structWtRdmDtReader_1_1__AdjFactor.html">_AdjFactor</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structWtRdmDtReader_1_1__BarsList.html">_BarsList</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structWtRdmDtReader_1_1__HisOrdDtlBlockPair.html">_HisOrdDtlBlockPair</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">历史委托明细数据块对结构体  <a href="structWtRdmDtReader_1_1__HisOrdDtlBlockPair.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structWtRdmDtReader_1_1__HisOrdQueBlockPair.html">_HisOrdQueBlockPair</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">历史委托队列数据块对结构体  <a href="structWtRdmDtReader_1_1__HisOrdQueBlockPair.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structWtRdmDtReader_1_1__HisTBlockPair.html">_HisTBlockPair</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">历史Tick数据块对结构体  <a href="structWtRdmDtReader_1_1__HisTBlockPair.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structWtRdmDtReader_1_1__HisTransBlockPair.html">_HisTransBlockPair</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">历史成交数据块对结构体  <a href="structWtRdmDtReader_1_1__HisTransBlockPair.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structWtRdmDtReader_1_1__OdeDtlBlockPair.html">_OdeDtlBlockPair</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">实时委托明细数据块对结构体  <a href="structWtRdmDtReader_1_1__OdeDtlBlockPair.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structWtRdmDtReader_1_1__OdeQueBlockPair.html">_OdeQueBlockPair</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">实时委托队列数据块对结构体  <a href="structWtRdmDtReader_1_1__OdeQueBlockPair.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structWtRdmDtReader_1_1__RTKBlockPair.html">_RTKBlockPair</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">实时K线数据块对结构体  <a href="structWtRdmDtReader_1_1__RTKBlockPair.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structWtRdmDtReader_1_1__TBlockPair.html">_TBlockPair</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">实时Tick数据块对结构体  <a href="structWtRdmDtReader_1_1__TBlockPair.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structWtRdmDtReader_1_1__TransBlockPair.html">_TransBlockPair</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">实时成交数据块对结构体  <a href="structWtRdmDtReader_1_1__TransBlockPair.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a3d3b05f3282ffdb2b7213797bb02c9bd" id="r_a3d3b05f3282ffdb2b7213797bb02c9bd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a3d3b05f3282ffdb2b7213797bb02c9bd">WtRdmDtReader</a> ()</td></tr>
+<tr class="memdesc:a3d3b05f3282ffdb2b7213797bb02c9bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a3d3b05f3282ffdb2b7213797bb02c9bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86eef4a8389b346a4668c68855747d7c" id="r_a86eef4a8389b346a4668c68855747d7c"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a86eef4a8389b346a4668c68855747d7c">~WtRdmDtReader</a> ()</td></tr>
+<tr class="memdesc:a86eef4a8389b346a4668c68855747d7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:a86eef4a8389b346a4668c68855747d7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e0bcff604e11137add3782674503ef4" id="r_a9e0bcff604e11137add3782674503ef4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a9e0bcff604e11137add3782674503ef4">init</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *cfg, <a class="el" href="classIRdmDtReaderSink.html">IRdmDtReaderSink</a> *sink)</td></tr>
+<tr class="memdesc:a9e0bcff604e11137add3782674503ef4"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化随机数据访问器  <br /></td></tr>
+<tr class="separator:a9e0bcff604e11137add3782674503ef4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a426adc4734aa1f0d13891d823cc5f2af" id="r_a426adc4734aa1f0d13891d823cc5f2af"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSOrdDtlSlice.html">WTSOrdDtlSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a426adc4734aa1f0d13891d823cc5f2af">readOrdDtlSliceByRange</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint64_t stime, uint64_t etime=0) override</td></tr>
+<tr class="memdesc:a426adc4734aa1f0d13891d823cc5f2af"><td class="mdescLeft">&#160;</td><td class="mdescRight">按时间范围读取委托明细数据切片  <br /></td></tr>
+<tr class="separator:a426adc4734aa1f0d13891d823cc5f2af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1b5307ccaa9c8b216b76818a3fcf2a1" id="r_af1b5307ccaa9c8b216b76818a3fcf2a1"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSOrdQueSlice.html">WTSOrdQueSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#af1b5307ccaa9c8b216b76818a3fcf2a1">readOrdQueSliceByRange</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint64_t stime, uint64_t etime=0) override</td></tr>
+<tr class="memdesc:af1b5307ccaa9c8b216b76818a3fcf2a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">按时间范围读取委托队列数据切片  <br /></td></tr>
+<tr class="separator:af1b5307ccaa9c8b216b76818a3fcf2a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8375c31a0c4351f8b9954d36df7e19cf" id="r_a8375c31a0c4351f8b9954d36df7e19cf"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTransSlice.html">WTSTransSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a8375c31a0c4351f8b9954d36df7e19cf">readTransSliceByRange</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint64_t stime, uint64_t etime=0) override</td></tr>
+<tr class="memdesc:a8375c31a0c4351f8b9954d36df7e19cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">按时间范围读取成交数据切片  <br /></td></tr>
+<tr class="separator:a8375c31a0c4351f8b9954d36df7e19cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afbad47e17b7d32d6e7582ced1fb06d3d" id="r_afbad47e17b7d32d6e7582ced1fb06d3d"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#afbad47e17b7d32d6e7582ced1fb06d3d">readTickSliceByRange</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint64_t stime, uint64_t etime=0) override</td></tr>
+<tr class="memdesc:afbad47e17b7d32d6e7582ced1fb06d3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">按时间范围读取Tick数据切片  <br /></td></tr>
+<tr class="separator:afbad47e17b7d32d6e7582ced1fb06d3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1661c5a70c608ad9c895a0d15c05c6b1" id="r_a1661c5a70c608ad9c895a0d15c05c6b1"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a1661c5a70c608ad9c895a0d15c05c6b1">readKlineSliceByRange</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, uint64_t stime, uint64_t etime=0) override</td></tr>
+<tr class="memdesc:a1661c5a70c608ad9c895a0d15c05c6b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">按时间范围读取K线数据切片  <br /></td></tr>
+<tr class="separator:a1661c5a70c608ad9c895a0d15c05c6b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a44159c4dfa3fac84a027c700eeb664" id="r_a4a44159c4dfa3fac84a027c700eeb664"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a4a44159c4dfa3fac84a027c700eeb664">readTickSliceByCount</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t count, uint64_t etime=0) override</td></tr>
+<tr class="memdesc:a4a44159c4dfa3fac84a027c700eeb664"><td class="mdescLeft">&#160;</td><td class="mdescRight">按数量读取Tick数据切片  <br /></td></tr>
+<tr class="separator:a4a44159c4dfa3fac84a027c700eeb664"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30d749696a0f431904677913aa0a0380" id="r_a30d749696a0f431904677913aa0a0380"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a30d749696a0f431904677913aa0a0380">readKlineSliceByCount</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, uint32_t count, uint64_t etime=0) override</td></tr>
+<tr class="memdesc:a30d749696a0f431904677913aa0a0380"><td class="mdescLeft">&#160;</td><td class="mdescRight">按数量读取K线数据切片  <br /></td></tr>
+<tr class="separator:a30d749696a0f431904677913aa0a0380"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c0e407391697c0932affe5a5ef276ee" id="r_a6c0e407391697c0932affe5a5ef276ee"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a6c0e407391697c0932affe5a5ef276ee">readTickSliceByDate</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t uDate=0) override</td></tr>
+<tr class="memdesc:a6c0e407391697c0932affe5a5ef276ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">按日期读取Tick数据切片  <br /></td></tr>
+<tr class="separator:a6c0e407391697c0932affe5a5ef276ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92845a02f9b6c6cfb6ebc2c7c1145b09" id="r_a92845a02f9b6c6cfb6ebc2c7c1145b09"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a92845a02f9b6c6cfb6ebc2c7c1145b09">getAdjFactorByDate</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t date=0) override</td></tr>
+<tr class="memdesc:a92845a02f9b6c6cfb6ebc2c7c1145b09"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据日期获取除权因子  <br /></td></tr>
+<tr class="separator:a92845a02f9b6c6cfb6ebc2c7c1145b09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5507f071aa07e3312e4ecbcc3e65450a" id="r_a5507f071aa07e3312e4ecbcc3e65450a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a5507f071aa07e3312e4ecbcc3e65450a">clearCache</a> () override</td></tr>
+<tr class="memdesc:a5507f071aa07e3312e4ecbcc3e65450a"><td class="mdescLeft">&#160;</td><td class="mdescRight">清理内存数据缓存  <br /></td></tr>
+<tr class="separator:a5507f071aa07e3312e4ecbcc3e65450a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classIRdmDtReader"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classIRdmDtReader')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classIRdmDtReader.html">IRdmDtReader</a></td></tr>
+<tr class="memitem:addf08aa93688f92924b7a80d83681ac5 inherit pub_methods_classIRdmDtReader" id="r_addf08aa93688f92924b7a80d83681ac5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIRdmDtReader.html#addf08aa93688f92924b7a80d83681ac5">IRdmDtReader</a> ()</td></tr>
+<tr class="separator:addf08aa93688f92924b7a80d83681ac5 inherit pub_methods_classIRdmDtReader"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9374579c62e54ba6b3ade302d6f8bd5c inherit pub_methods_classIRdmDtReader" id="r_a9374579c62e54ba6b3ade302d6f8bd5c"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIRdmDtReader.html#a9374579c62e54ba6b3ade302d6f8bd5c">~IRdmDtReader</a> ()</td></tr>
+<tr class="separator:a9374579c62e54ba6b3ade302d6f8bd5c inherit pub_methods_classIRdmDtReader"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 类型</h2></td></tr>
+<tr class="memitem:a10db9104cd2cebeaece6a9e8ca4a1257" id="r_a10db9104cd2cebeaece6a9e8ca4a1257"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structWtRdmDtReader_1_1__RTKBlockPair.html">WtRdmDtReader::_RTKBlockPair</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a10db9104cd2cebeaece6a9e8ca4a1257">RTKlineBlockPair</a></td></tr>
+<tr class="memdesc:a10db9104cd2cebeaece6a9e8ca4a1257"><td class="mdescLeft">&#160;</td><td class="mdescRight">实时K线数据块对结构体  <br /></td></tr>
+<tr class="separator:a10db9104cd2cebeaece6a9e8ca4a1257"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a890a1ed88d3ac167458b243d5c69c7cc" id="r_a890a1ed88d3ac167458b243d5c69c7cc"><td class="memItemLeft" align="right" valign="top">typedef std::unordered_map&lt; std::string, <a class="el" href="classWtRdmDtReader.html#a10db9104cd2cebeaece6a9e8ca4a1257">RTKlineBlockPair</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a890a1ed88d3ac167458b243d5c69c7cc">RTKBlockFilesMap</a></td></tr>
+<tr class="separator:a890a1ed88d3ac167458b243d5c69c7cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94ec11f1172c4f87adc62e7bf4dcac59" id="r_a94ec11f1172c4f87adc62e7bf4dcac59"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structWtRdmDtReader_1_1__TBlockPair.html">WtRdmDtReader::_TBlockPair</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a94ec11f1172c4f87adc62e7bf4dcac59">TickBlockPair</a></td></tr>
+<tr class="memdesc:a94ec11f1172c4f87adc62e7bf4dcac59"><td class="mdescLeft">&#160;</td><td class="mdescRight">实时Tick数据块对结构体  <br /></td></tr>
+<tr class="separator:a94ec11f1172c4f87adc62e7bf4dcac59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefd087401db54391aafb2ad47d5e19ac" id="r_aefd087401db54391aafb2ad47d5e19ac"><td class="memItemLeft" align="right" valign="top">typedef std::unordered_map&lt; std::string, <a class="el" href="classWtRdmDtReader.html#a94ec11f1172c4f87adc62e7bf4dcac59">TickBlockPair</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#aefd087401db54391aafb2ad47d5e19ac">TBlockFilesMap</a></td></tr>
+<tr class="separator:aefd087401db54391aafb2ad47d5e19ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b321c1c9f3eb1991fb373f883dbc440" id="r_a4b321c1c9f3eb1991fb373f883dbc440"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structWtRdmDtReader_1_1__TransBlockPair.html">WtRdmDtReader::_TransBlockPair</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a4b321c1c9f3eb1991fb373f883dbc440">TransBlockPair</a></td></tr>
+<tr class="memdesc:a4b321c1c9f3eb1991fb373f883dbc440"><td class="mdescLeft">&#160;</td><td class="mdescRight">实时成交数据块对结构体  <br /></td></tr>
+<tr class="separator:a4b321c1c9f3eb1991fb373f883dbc440"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7115f7e7c4c6ce7596285fe5e10d325f" id="r_a7115f7e7c4c6ce7596285fe5e10d325f"><td class="memItemLeft" align="right" valign="top">typedef std::unordered_map&lt; std::string, <a class="el" href="classWtRdmDtReader.html#a4b321c1c9f3eb1991fb373f883dbc440">TransBlockPair</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a7115f7e7c4c6ce7596285fe5e10d325f">TransBlockFilesMap</a></td></tr>
+<tr class="separator:a7115f7e7c4c6ce7596285fe5e10d325f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a8720e8dd220d69b0ecf7c5cb665f1b" id="r_a9a8720e8dd220d69b0ecf7c5cb665f1b"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structWtRdmDtReader_1_1__OdeDtlBlockPair.html">WtRdmDtReader::_OdeDtlBlockPair</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a9a8720e8dd220d69b0ecf7c5cb665f1b">OrdDtlBlockPair</a></td></tr>
+<tr class="memdesc:a9a8720e8dd220d69b0ecf7c5cb665f1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">实时委托明细数据块对结构体  <br /></td></tr>
+<tr class="separator:a9a8720e8dd220d69b0ecf7c5cb665f1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a148b62aeef360993b39d9f79e0531ed2" id="r_a148b62aeef360993b39d9f79e0531ed2"><td class="memItemLeft" align="right" valign="top">typedef std::unordered_map&lt; std::string, <a class="el" href="classWtRdmDtReader.html#a9a8720e8dd220d69b0ecf7c5cb665f1b">OrdDtlBlockPair</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a148b62aeef360993b39d9f79e0531ed2">OrdDtlBlockFilesMap</a></td></tr>
+<tr class="separator:a148b62aeef360993b39d9f79e0531ed2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8330041c077d6285cbe78f6f013ee5e3" id="r_a8330041c077d6285cbe78f6f013ee5e3"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structWtRdmDtReader_1_1__OdeQueBlockPair.html">WtRdmDtReader::_OdeQueBlockPair</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a8330041c077d6285cbe78f6f013ee5e3">OrdQueBlockPair</a></td></tr>
+<tr class="memdesc:a8330041c077d6285cbe78f6f013ee5e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">实时委托队列数据块对结构体  <br /></td></tr>
+<tr class="separator:a8330041c077d6285cbe78f6f013ee5e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf27f07582614cad7c3792ffb7822474" id="r_acf27f07582614cad7c3792ffb7822474"><td class="memItemLeft" align="right" valign="top">typedef std::unordered_map&lt; std::string, <a class="el" href="classWtRdmDtReader.html#a8330041c077d6285cbe78f6f013ee5e3">OrdQueBlockPair</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#acf27f07582614cad7c3792ffb7822474">OrdQueBlockFilesMap</a></td></tr>
+<tr class="separator:acf27f07582614cad7c3792ffb7822474"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af82cd3e86c642c522dfd47a89c84d800" id="r_af82cd3e86c642c522dfd47a89c84d800"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structWtRdmDtReader_1_1__HisTBlockPair.html">WtRdmDtReader::_HisTBlockPair</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#af82cd3e86c642c522dfd47a89c84d800">HisTBlockPair</a></td></tr>
+<tr class="memdesc:af82cd3e86c642c522dfd47a89c84d800"><td class="mdescLeft">&#160;</td><td class="mdescRight">历史Tick数据块对结构体  <br /></td></tr>
+<tr class="separator:af82cd3e86c642c522dfd47a89c84d800"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8cab67edaefce2384b52833e211dba6" id="r_aa8cab67edaefce2384b52833e211dba6"><td class="memItemLeft" align="right" valign="top">typedef std::unordered_map&lt; std::string, <a class="el" href="classWtRdmDtReader.html#af82cd3e86c642c522dfd47a89c84d800">HisTBlockPair</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#aa8cab67edaefce2384b52833e211dba6">HisTickBlockMap</a></td></tr>
+<tr class="separator:aa8cab67edaefce2384b52833e211dba6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4698caf1f3ab7808aaa46e8bcbe7cc63" id="r_a4698caf1f3ab7808aaa46e8bcbe7cc63"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structWtRdmDtReader_1_1__HisTransBlockPair.html">WtRdmDtReader::_HisTransBlockPair</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a4698caf1f3ab7808aaa46e8bcbe7cc63">HisTransBlockPair</a></td></tr>
+<tr class="memdesc:a4698caf1f3ab7808aaa46e8bcbe7cc63"><td class="mdescLeft">&#160;</td><td class="mdescRight">历史成交数据块对结构体  <br /></td></tr>
+<tr class="separator:a4698caf1f3ab7808aaa46e8bcbe7cc63"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac62276250ba9dd7da38bb82efcdce9cb" id="r_ac62276250ba9dd7da38bb82efcdce9cb"><td class="memItemLeft" align="right" valign="top">typedef std::unordered_map&lt; std::string, <a class="el" href="classWtRdmDtReader.html#a4698caf1f3ab7808aaa46e8bcbe7cc63">HisTransBlockPair</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#ac62276250ba9dd7da38bb82efcdce9cb">HisTransBlockMap</a></td></tr>
+<tr class="separator:ac62276250ba9dd7da38bb82efcdce9cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee961384e4bc8890f58bdb7aa0590290" id="r_aee961384e4bc8890f58bdb7aa0590290"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structWtRdmDtReader_1_1__HisOrdDtlBlockPair.html">WtRdmDtReader::_HisOrdDtlBlockPair</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#aee961384e4bc8890f58bdb7aa0590290">HisOrdDtlBlockPair</a></td></tr>
+<tr class="memdesc:aee961384e4bc8890f58bdb7aa0590290"><td class="mdescLeft">&#160;</td><td class="mdescRight">历史委托明细数据块对结构体  <br /></td></tr>
+<tr class="separator:aee961384e4bc8890f58bdb7aa0590290"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc7ea997c87b08fede3035fc53fde753" id="r_afc7ea997c87b08fede3035fc53fde753"><td class="memItemLeft" align="right" valign="top">typedef std::unordered_map&lt; std::string, <a class="el" href="classWtRdmDtReader.html#aee961384e4bc8890f58bdb7aa0590290">HisOrdDtlBlockPair</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#afc7ea997c87b08fede3035fc53fde753">HisOrdDtlBlockMap</a></td></tr>
+<tr class="separator:afc7ea997c87b08fede3035fc53fde753"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8cd78f99ac451b2de8a1414384e6a8eb" id="r_a8cd78f99ac451b2de8a1414384e6a8eb"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structWtRdmDtReader_1_1__HisOrdQueBlockPair.html">WtRdmDtReader::_HisOrdQueBlockPair</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a8cd78f99ac451b2de8a1414384e6a8eb">HisOrdQueBlockPair</a></td></tr>
+<tr class="memdesc:a8cd78f99ac451b2de8a1414384e6a8eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">历史委托队列数据块对结构体  <br /></td></tr>
+<tr class="separator:a8cd78f99ac451b2de8a1414384e6a8eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b0a38d42de1d24b85166cba540dee94" id="r_a0b0a38d42de1d24b85166cba540dee94"><td class="memItemLeft" align="right" valign="top">typedef std::unordered_map&lt; std::string, <a class="el" href="classWtRdmDtReader.html#a8cd78f99ac451b2de8a1414384e6a8eb">HisOrdQueBlockPair</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a0b0a38d42de1d24b85166cba540dee94">HisOrdQueBlockMap</a></td></tr>
+<tr class="separator:a0b0a38d42de1d24b85166cba540dee94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ec7644b33daca6322463547568cfd50" id="r_a5ec7644b33daca6322463547568cfd50"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structWtRdmDtReader_1_1__BarsList.html">WtRdmDtReader::_BarsList</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a5ec7644b33daca6322463547568cfd50">BarsList</a></td></tr>
+<tr class="separator:a5ec7644b33daca6322463547568cfd50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f0c8471c5dba3c11afff169ac89e3f9" id="r_a1f0c8471c5dba3c11afff169ac89e3f9"><td class="memItemLeft" align="right" valign="top">typedef std::unordered_map&lt; std::string, <a class="el" href="classWtRdmDtReader.html#a5ec7644b33daca6322463547568cfd50">BarsList</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a1f0c8471c5dba3c11afff169ac89e3f9">BarsCache</a></td></tr>
+<tr class="memdesc:a1f0c8471c5dba3c11afff169ac89e3f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">数据缓存映射类型定义  <br /></td></tr>
+<tr class="separator:a1f0c8471c5dba3c11afff169ac89e3f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad89ac961187ad72236d9ef27c7bb21b" id="r_aad89ac961187ad72236d9ef27c7bb21b"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structWtRdmDtReader_1_1__AdjFactor.html">WtRdmDtReader::_AdjFactor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#aad89ac961187ad72236d9ef27c7bb21b">AdjFactor</a></td></tr>
+<tr class="separator:aad89ac961187ad72236d9ef27c7bb21b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98def2abab1b96a6584c5326845332c6" id="r_a98def2abab1b96a6584c5326845332c6"><td class="memItemLeft" align="right" valign="top">typedef std::vector&lt; <a class="el" href="classWtRdmDtReader.html#aad89ac961187ad72236d9ef27c7bb21b">AdjFactor</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a98def2abab1b96a6584c5326845332c6">AdjFactorList</a></td></tr>
+<tr class="memdesc:a98def2abab1b96a6584c5326845332c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">除权因子列表类型定义  <br /></td></tr>
+<tr class="separator:a98def2abab1b96a6584c5326845332c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47d65639ee2a75ae06d0cbf3b560b22b" id="r_a47d65639ee2a75ae06d0cbf3b560b22b"><td class="memItemLeft" align="right" valign="top">typedef std::unordered_map&lt; std::string, <a class="el" href="classWtRdmDtReader.html#a98def2abab1b96a6584c5326845332c6">AdjFactorList</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a47d65639ee2a75ae06d0cbf3b560b22b">AdjFactorMap</a></td></tr>
+<tr class="memdesc:a47d65639ee2a75ae06d0cbf3b560b22b"><td class="mdescLeft">&#160;</td><td class="mdescRight">除权因子映射类型定义，每个合约对应一个除权因子列表  <br /></td></tr>
+<tr class="separator:a47d65639ee2a75ae06d0cbf3b560b22b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 成员函数</h2></td></tr>
+<tr class="memitem:abc6c787f01ad7b8fde6f3e84acc0f915" id="r_abc6c787f01ad7b8fde6f3e84acc0f915"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#a10db9104cd2cebeaece6a9e8ca4a1257">RTKlineBlockPair</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#abc6c787f01ad7b8fde6f3e84acc0f915">getRTKilneBlock</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code, <a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period)</td></tr>
+<tr class="memdesc:abc6c787f01ad7b8fde6f3e84acc0f915"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取实时K线数据块  <br /></td></tr>
+<tr class="separator:abc6c787f01ad7b8fde6f3e84acc0f915"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a217c4da9779bab3fa169d32a3e90a945" id="r_a217c4da9779bab3fa169d32a3e90a945"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#a94ec11f1172c4f87adc62e7bf4dcac59">TickBlockPair</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a217c4da9779bab3fa169d32a3e90a945">getRTTickBlock</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code)</td></tr>
+<tr class="memdesc:a217c4da9779bab3fa169d32a3e90a945"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取实时Tick数据块  <br /></td></tr>
+<tr class="separator:a217c4da9779bab3fa169d32a3e90a945"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5250a1ea0c0bf74f061ef7297700bb50" id="r_a5250a1ea0c0bf74f061ef7297700bb50"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#a8330041c077d6285cbe78f6f013ee5e3">OrdQueBlockPair</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a5250a1ea0c0bf74f061ef7297700bb50">getRTOrdQueBlock</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code)</td></tr>
+<tr class="memdesc:a5250a1ea0c0bf74f061ef7297700bb50"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取实时委托队列数据块  <br /></td></tr>
+<tr class="separator:a5250a1ea0c0bf74f061ef7297700bb50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0573cb0f8690e19b40dd8d43733acc15" id="r_a0573cb0f8690e19b40dd8d43733acc15"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#a9a8720e8dd220d69b0ecf7c5cb665f1b">OrdDtlBlockPair</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a0573cb0f8690e19b40dd8d43733acc15">getRTOrdDtlBlock</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code)</td></tr>
+<tr class="memdesc:a0573cb0f8690e19b40dd8d43733acc15"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取实时委托明细数据块  <br /></td></tr>
+<tr class="separator:a0573cb0f8690e19b40dd8d43733acc15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97465ac7dd969f00cb0e6ada0a728679" id="r_a97465ac7dd969f00cb0e6ada0a728679"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#a4b321c1c9f3eb1991fb373f883dbc440">TransBlockPair</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a97465ac7dd969f00cb0e6ada0a728679">getRTTransBlock</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code)</td></tr>
+<tr class="memdesc:a97465ac7dd969f00cb0e6ada0a728679"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取实时成交数据块  <br /></td></tr>
+<tr class="separator:a97465ac7dd969f00cb0e6ada0a728679"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7512a12ffdf1cb8729b05649a6a7924" id="r_ad7512a12ffdf1cb8729b05649a6a7924"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#ad7512a12ffdf1cb8729b05649a6a7924">cacheHisBarsFromFile</a> (void *codeInfo, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;key, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period)</td></tr>
+<tr class="memdesc:ad7512a12ffdf1cb8729b05649a6a7924"><td class="mdescLeft">&#160;</td><td class="mdescRight">将历史数据放入缓存  <br /></td></tr>
+<tr class="separator:ad7512a12ffdf1cb8729b05649a6a7924"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a441fc2cd918889a2f8580f9ab53be376" id="r_a441fc2cd918889a2f8580f9ab53be376"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a441fc2cd918889a2f8580f9ab53be376">readBarsFromCacheByRange</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;key, uint64_t stime, uint64_t etime, std::vector&lt; <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> &gt; &amp;ayBars, bool isDay=false)</td></tr>
+<tr class="memdesc:a441fc2cd918889a2f8580f9ab53be376"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据时间范围从缓存中读取K线数据  <br /></td></tr>
+<tr class="separator:a441fc2cd918889a2f8580f9ab53be376"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeac52bb66fc2e9640f10fee52b163082" id="r_aeac52bb66fc2e9640f10fee52b163082"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#aeac52bb66fc2e9640f10fee52b163082">indexBarFromCacheByRange</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;key, uint64_t stime, uint64_t etime, uint32_t &amp;count, bool isDay=false)</td></tr>
+<tr class="memdesc:aeac52bb66fc2e9640f10fee52b163082"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据时间范围从缓存中获取K线数据指针  <br /></td></tr>
+<tr class="separator:aeac52bb66fc2e9640f10fee52b163082"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29f5b04feeb6bd7049f62ee45eb4ca48" id="r_a29f5b04feeb6bd7049f62ee45eb4ca48"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a29f5b04feeb6bd7049f62ee45eb4ca48">indexBarFromCacheByCount</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;key, uint64_t etime, uint32_t &amp;count, bool isDay=false)</td></tr>
+<tr class="memdesc:a29f5b04feeb6bd7049f62ee45eb4ca48"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据数量从缓存中获取K线数据指针  <br /></td></tr>
+<tr class="separator:a29f5b04feeb6bd7049f62ee45eb4ca48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a944cbe8c5e09d6e168157c807730687b" id="r_a944cbe8c5e09d6e168157c807730687b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a944cbe8c5e09d6e168157c807730687b">loadStkAdjFactorsFromFile</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *adjfile)</td></tr>
+<tr class="memdesc:a944cbe8c5e09d6e168157c807730687b"><td class="mdescLeft">&#160;</td><td class="mdescRight">从文件加载股票除权因子  <br /></td></tr>
+<tr class="separator:a944cbe8c5e09d6e168157c807730687b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a151c195ef03ff47385263680c0b9c987" id="r_a151c195ef03ff47385263680c0b9c987"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classWtRdmDtReader.html#a98def2abab1b96a6584c5326845332c6">AdjFactorList</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a151c195ef03ff47385263680c0b9c987">getAdjFactors</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pid)</td></tr>
+<tr class="separator:a151c195ef03ff47385263680c0b9c987"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:aee84edcd56c54eedd3c67496b08e2337" id="r_aee84edcd56c54eedd3c67496b08e2337"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#a890a1ed88d3ac167458b243d5c69c7cc">RTKBlockFilesMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#aee84edcd56c54eedd3c67496b08e2337">_rt_min1_map</a></td></tr>
+<tr class="memdesc:aee84edcd56c54eedd3c67496b08e2337"><td class="mdescLeft">&#160;</td><td class="mdescRight">1分钟实时K线数据映射  <br /></td></tr>
+<tr class="separator:aee84edcd56c54eedd3c67496b08e2337"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9cb012ab7421cb99c92731f16645da19" id="r_a9cb012ab7421cb99c92731f16645da19"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#a890a1ed88d3ac167458b243d5c69c7cc">RTKBlockFilesMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a9cb012ab7421cb99c92731f16645da19">_rt_min5_map</a></td></tr>
+<tr class="memdesc:a9cb012ab7421cb99c92731f16645da19"><td class="mdescLeft">&#160;</td><td class="mdescRight">5分钟实时K线数据映射  <br /></td></tr>
+<tr class="separator:a9cb012ab7421cb99c92731f16645da19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1fe0afab04c8d2e85064b1a68268554" id="r_ae1fe0afab04c8d2e85064b1a68268554"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#aefd087401db54391aafb2ad47d5e19ac">TBlockFilesMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#ae1fe0afab04c8d2e85064b1a68268554">_rt_tick_map</a></td></tr>
+<tr class="memdesc:ae1fe0afab04c8d2e85064b1a68268554"><td class="mdescLeft">&#160;</td><td class="mdescRight">实时Tick数据映射  <br /></td></tr>
+<tr class="separator:ae1fe0afab04c8d2e85064b1a68268554"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfe48b9f8f9413b7c5c5b319709bb284" id="r_adfe48b9f8f9413b7c5c5b319709bb284"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#a7115f7e7c4c6ce7596285fe5e10d325f">TransBlockFilesMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#adfe48b9f8f9413b7c5c5b319709bb284">_rt_trans_map</a></td></tr>
+<tr class="memdesc:adfe48b9f8f9413b7c5c5b319709bb284"><td class="mdescLeft">&#160;</td><td class="mdescRight">实时成交数据映射  <br /></td></tr>
+<tr class="separator:adfe48b9f8f9413b7c5c5b319709bb284"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7888689870cd3563a61b26bdad64919" id="r_aa7888689870cd3563a61b26bdad64919"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#a148b62aeef360993b39d9f79e0531ed2">OrdDtlBlockFilesMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#aa7888689870cd3563a61b26bdad64919">_rt_orddtl_map</a></td></tr>
+<tr class="memdesc:aa7888689870cd3563a61b26bdad64919"><td class="mdescLeft">&#160;</td><td class="mdescRight">实时委托明细映射  <br /></td></tr>
+<tr class="separator:aa7888689870cd3563a61b26bdad64919"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7dc59b890297158cd84de8f2577f734" id="r_aa7dc59b890297158cd84de8f2577f734"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#acf27f07582614cad7c3792ffb7822474">OrdQueBlockFilesMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#aa7dc59b890297158cd84de8f2577f734">_rt_ordque_map</a></td></tr>
+<tr class="memdesc:aa7dc59b890297158cd84de8f2577f734"><td class="mdescLeft">&#160;</td><td class="mdescRight">实时委托队列映射  <br /></td></tr>
+<tr class="separator:aa7dc59b890297158cd84de8f2577f734"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a858f541ba43f6f1d6128f9d2398a010e" id="r_a858f541ba43f6f1d6128f9d2398a010e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#aa8cab67edaefce2384b52833e211dba6">HisTickBlockMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a858f541ba43f6f1d6128f9d2398a010e">_his_tick_map</a></td></tr>
+<tr class="memdesc:a858f541ba43f6f1d6128f9d2398a010e"><td class="mdescLeft">&#160;</td><td class="mdescRight">历史Tick数据映射  <br /></td></tr>
+<tr class="separator:a858f541ba43f6f1d6128f9d2398a010e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67a2539e752d9c774e75529ecbf40d17" id="r_a67a2539e752d9c774e75529ecbf40d17"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#afc7ea997c87b08fede3035fc53fde753">HisOrdDtlBlockMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a67a2539e752d9c774e75529ecbf40d17">_his_orddtl_map</a></td></tr>
+<tr class="memdesc:a67a2539e752d9c774e75529ecbf40d17"><td class="mdescLeft">&#160;</td><td class="mdescRight">历史委托明细映射  <br /></td></tr>
+<tr class="separator:a67a2539e752d9c774e75529ecbf40d17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad348ff8f9cba8088c850f61052f3be59" id="r_ad348ff8f9cba8088c850f61052f3be59"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#a0b0a38d42de1d24b85166cba540dee94">HisOrdQueBlockMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#ad348ff8f9cba8088c850f61052f3be59">_his_ordque_map</a></td></tr>
+<tr class="memdesc:ad348ff8f9cba8088c850f61052f3be59"><td class="mdescLeft">&#160;</td><td class="mdescRight">历史委托队列映射  <br /></td></tr>
+<tr class="separator:ad348ff8f9cba8088c850f61052f3be59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade9726283cfa4e761a54c57f7e2c521e" id="r_ade9726283cfa4e761a54c57f7e2c521e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#ac62276250ba9dd7da38bb82efcdce9cb">HisTransBlockMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#ade9726283cfa4e761a54c57f7e2c521e">_his_trans_map</a></td></tr>
+<tr class="memdesc:ade9726283cfa4e761a54c57f7e2c521e"><td class="mdescLeft">&#160;</td><td class="mdescRight">历史成交数据映射  <br /></td></tr>
+<tr class="separator:ade9726283cfa4e761a54c57f7e2c521e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee10c72db7c8ae09c6483d34a3f05f13" id="r_aee10c72db7c8ae09c6483d34a3f05f13"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#aee10c72db7c8ae09c6483d34a3f05f13">_base_dir</a></td></tr>
+<tr class="memdesc:aee10c72db7c8ae09c6483d34a3f05f13"><td class="mdescLeft">&#160;</td><td class="mdescRight">数据文件存放的基础目录  <br /></td></tr>
+<tr class="separator:aee10c72db7c8ae09c6483d34a3f05f13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f8ddcd9f5b5a2d4592b4d9e3486d240" id="r_a1f8ddcd9f5b5a2d4592b4d9e3486d240"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a1f8ddcd9f5b5a2d4592b4d9e3486d240">_base_data_mgr</a></td></tr>
+<tr class="memdesc:a1f8ddcd9f5b5a2d4592b4d9e3486d240"><td class="mdescLeft">&#160;</td><td class="mdescRight">基础数据管理器指针  <br /></td></tr>
+<tr class="separator:a1f8ddcd9f5b5a2d4592b4d9e3486d240"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ac12c04b29c6c4ced2dcecde792a1d0" id="r_a0ac12c04b29c6c4ced2dcecde792a1d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIHotMgr.html">IHotMgr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a0ac12c04b29c6c4ced2dcecde792a1d0">_hot_mgr</a></td></tr>
+<tr class="memdesc:a0ac12c04b29c6c4ced2dcecde792a1d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">热点合约管理器指针  <br /></td></tr>
+<tr class="separator:a0ac12c04b29c6c4ced2dcecde792a1d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a220526d539cdd761d3268ba52552fe13" id="r_a220526d539cdd761d3268ba52552fe13"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a220526d539cdd761d3268ba52552fe13">_thrd_check</a></td></tr>
+<tr class="memdesc:a220526d539cdd761d3268ba52552fe13"><td class="mdescLeft">&#160;</td><td class="mdescRight">检查线稍指针，用于定期检查数据状态  <br /></td></tr>
+<tr class="separator:a220526d539cdd761d3268ba52552fe13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4653ef31f2b3db2d9deb309ecf34be12" id="r_a4653ef31f2b3db2d9deb309ecf34be12"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#a4653ef31f2b3db2d9deb309ecf34be12">_stopped</a></td></tr>
+<tr class="memdesc:a4653ef31f2b3db2d9deb309ecf34be12"><td class="mdescLeft">&#160;</td><td class="mdescRight">线程是否已停止的标志  <br /></td></tr>
+<tr class="separator:a4653ef31f2b3db2d9deb309ecf34be12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeff9e8c787244a703966cf0921b3e0da" id="r_aeff9e8c787244a703966cf0921b3e0da"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#a1f0c8471c5dba3c11afff169ac89e3f9">BarsCache</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#aeff9e8c787244a703966cf0921b3e0da">_bars_cache</a></td></tr>
+<tr class="memdesc:aeff9e8c787244a703966cf0921b3e0da"><td class="mdescLeft">&#160;</td><td class="mdescRight">K线数据缓存映射  <br /></td></tr>
+<tr class="separator:aeff9e8c787244a703966cf0921b3e0da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdbbf261825f5b2a7e97ad17d06001e4" id="r_afdbbf261825f5b2a7e97ad17d06001e4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtRdmDtReader.html#a47d65639ee2a75ae06d0cbf3b560b22b">AdjFactorMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWtRdmDtReader.html#afdbbf261825f5b2a7e97ad17d06001e4">_adj_factors</a></td></tr>
+<tr class="memdesc:afdbbf261825f5b2a7e97ad17d06001e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">除权因子映射表  <br /></td></tr>
+<tr class="separator:afdbbf261825f5b2a7e97ad17d06001e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+额外继承的成员函数</h2></td></tr>
+<tr class="inherit_header pro_attribs_classIRdmDtReader"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classIRdmDtReader')"><img src="closed.png" alt="-"/>&#160;Protected 属性 继承自 <a class="el" href="classIRdmDtReader.html">IRdmDtReader</a></td></tr>
+<tr class="memitem:a26d66c3f3ab38f1d8b8a47b1f86164f4 inherit pro_attribs_classIRdmDtReader" id="r_a26d66c3f3ab38f1d8b8a47b1f86164f4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIRdmDtReaderSink.html">IRdmDtReaderSink</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIRdmDtReader.html#a26d66c3f3ab38f1d8b8a47b1f86164f4">_sink</a></td></tr>
+<tr class="separator:a26d66c3f3ab38f1d8b8a47b1f86164f4 inherit pro_attribs_classIRdmDtReader"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>数据随机访问器类<br  />
+ * </p>
+<p><br  />
+ *</p>
+<p>实现IRdmDtReader接口，提供对各种类型历史和实时行情数据的随机访问功能，<br  />
+ * 包括K线数据、Tick数据、成交明细、委托明细、委托队列等<br  />
+ </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00035">35</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="aad89ac961187ad72236d9ef27c7bb21b" name="aad89ac961187ad72236d9ef27c7bb21b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad89ac961187ad72236d9ef27c7bb21b">&#9670;&#160;</a></span>AdjFactor</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structWtRdmDtReader_1_1__AdjFactor.html">WtRdmDtReader::_AdjFactor</a> <a class="el" href="classWtRdmDtReader.html#aad89ac961187ad72236d9ef27c7bb21b">WtRdmDtReader::AdjFactor</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a98def2abab1b96a6584c5326845332c6" name="a98def2abab1b96a6584c5326845332c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98def2abab1b96a6584c5326845332c6">&#9670;&#160;</a></span>AdjFactorList</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::vector&lt;<a class="el" href="classWtRdmDtReader.html#aad89ac961187ad72236d9ef27c7bb21b">AdjFactor</a>&gt; <a class="el" href="classWtRdmDtReader.html#a98def2abab1b96a6584c5326845332c6">WtRdmDtReader::AdjFactorList</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>除权因子列表类型定义 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00528">528</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a47d65639ee2a75ae06d0cbf3b560b22b" name="a47d65639ee2a75ae06d0cbf3b560b22b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47d65639ee2a75ae06d0cbf3b560b22b">&#9670;&#160;</a></span>AdjFactorMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::unordered_map&lt;std::string, <a class="el" href="classWtRdmDtReader.html#a98def2abab1b96a6584c5326845332c6">AdjFactorList</a>&gt; <a class="el" href="classWtRdmDtReader.html#a47d65639ee2a75ae06d0cbf3b560b22b">WtRdmDtReader::AdjFactorMap</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>除权因子映射类型定义，每个合约对应一个除权因子列表 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00533">533</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1f0c8471c5dba3c11afff169ac89e3f9" name="a1f0c8471c5dba3c11afff169ac89e3f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f0c8471c5dba3c11afff169ac89e3f9">&#9670;&#160;</a></span>BarsCache</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::unordered_map&lt;std::string, <a class="el" href="classWtRdmDtReader.html#a5ec7644b33daca6322463547568cfd50">BarsList</a>&gt; <a class="el" href="classWtRdmDtReader.html#a1f0c8471c5dba3c11afff169ac89e3f9">WtRdmDtReader::BarsCache</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>数据缓存映射类型定义 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00516">516</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5ec7644b33daca6322463547568cfd50" name="a5ec7644b33daca6322463547568cfd50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ec7644b33daca6322463547568cfd50">&#9670;&#160;</a></span>BarsList</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structWtRdmDtReader_1_1__BarsList.html">WtRdmDtReader::_BarsList</a> <a class="el" href="classWtRdmDtReader.html#a5ec7644b33daca6322463547568cfd50">WtRdmDtReader::BarsList</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afc7ea997c87b08fede3035fc53fde753" name="afc7ea997c87b08fede3035fc53fde753"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc7ea997c87b08fede3035fc53fde753">&#9670;&#160;</a></span>HisOrdDtlBlockMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::unordered_map&lt;std::string, <a class="el" href="classWtRdmDtReader.html#aee961384e4bc8890f58bdb7aa0590290">HisOrdDtlBlockPair</a>&gt; <a class="el" href="classWtRdmDtReader.html#afc7ea997c87b08fede3035fc53fde753">WtRdmDtReader::HisOrdDtlBlockMap</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00241">241</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aee961384e4bc8890f58bdb7aa0590290" name="aee961384e4bc8890f58bdb7aa0590290"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee961384e4bc8890f58bdb7aa0590290">&#9670;&#160;</a></span>HisOrdDtlBlockPair</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structWtRdmDtReader_1_1__HisOrdDtlBlockPair.html">WtRdmDtReader::_HisOrdDtlBlockPair</a> <a class="el" href="classWtRdmDtReader.html#aee961384e4bc8890f58bdb7aa0590290">WtRdmDtReader::HisOrdDtlBlockPair</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>历史委托明细数据块对结构体 </p>
+<p>用于管理内存中缓存的历史委托明细数据 </p>
+
+</div>
+</div>
+<a id="a0b0a38d42de1d24b85166cba540dee94" name="a0b0a38d42de1d24b85166cba540dee94"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b0a38d42de1d24b85166cba540dee94">&#9670;&#160;</a></span>HisOrdQueBlockMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::unordered_map&lt;std::string, <a class="el" href="classWtRdmDtReader.html#a8cd78f99ac451b2de8a1414384e6a8eb">HisOrdQueBlockPair</a>&gt; <a class="el" href="classWtRdmDtReader.html#a0b0a38d42de1d24b85166cba540dee94">WtRdmDtReader::HisOrdQueBlockMap</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00264">264</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8cd78f99ac451b2de8a1414384e6a8eb" name="a8cd78f99ac451b2de8a1414384e6a8eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8cd78f99ac451b2de8a1414384e6a8eb">&#9670;&#160;</a></span>HisOrdQueBlockPair</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structWtRdmDtReader_1_1__HisOrdQueBlockPair.html">WtRdmDtReader::_HisOrdQueBlockPair</a> <a class="el" href="classWtRdmDtReader.html#a8cd78f99ac451b2de8a1414384e6a8eb">WtRdmDtReader::HisOrdQueBlockPair</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>历史委托队列数据块对结构体 </p>
+<p>用于管理内存中缓存的历史委托队列数据 </p>
+
+</div>
+</div>
+<a id="af82cd3e86c642c522dfd47a89c84d800" name="af82cd3e86c642c522dfd47a89c84d800"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af82cd3e86c642c522dfd47a89c84d800">&#9670;&#160;</a></span>HisTBlockPair</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structWtRdmDtReader_1_1__HisTBlockPair.html">WtRdmDtReader::_HisTBlockPair</a> <a class="el" href="classWtRdmDtReader.html#af82cd3e86c642c522dfd47a89c84d800">WtRdmDtReader::HisTBlockPair</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>历史Tick数据块对结构体 </p>
+<p>用于管理内存中缓存的历史Tick数据 </p>
+
+</div>
+</div>
+<a id="aa8cab67edaefce2384b52833e211dba6" name="aa8cab67edaefce2384b52833e211dba6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8cab67edaefce2384b52833e211dba6">&#9670;&#160;</a></span>HisTickBlockMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::unordered_map&lt;std::string, <a class="el" href="classWtRdmDtReader.html#af82cd3e86c642c522dfd47a89c84d800">HisTBlockPair</a>&gt; <a class="el" href="classWtRdmDtReader.html#aa8cab67edaefce2384b52833e211dba6">WtRdmDtReader::HisTickBlockMap</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00195">195</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac62276250ba9dd7da38bb82efcdce9cb" name="ac62276250ba9dd7da38bb82efcdce9cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac62276250ba9dd7da38bb82efcdce9cb">&#9670;&#160;</a></span>HisTransBlockMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::unordered_map&lt;std::string, <a class="el" href="classWtRdmDtReader.html#a4698caf1f3ab7808aaa46e8bcbe7cc63">HisTransBlockPair</a>&gt; <a class="el" href="classWtRdmDtReader.html#ac62276250ba9dd7da38bb82efcdce9cb">WtRdmDtReader::HisTransBlockMap</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00218">218</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4698caf1f3ab7808aaa46e8bcbe7cc63" name="a4698caf1f3ab7808aaa46e8bcbe7cc63"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4698caf1f3ab7808aaa46e8bcbe7cc63">&#9670;&#160;</a></span>HisTransBlockPair</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structWtRdmDtReader_1_1__HisTransBlockPair.html">WtRdmDtReader::_HisTransBlockPair</a> <a class="el" href="classWtRdmDtReader.html#a4698caf1f3ab7808aaa46e8bcbe7cc63">WtRdmDtReader::HisTransBlockPair</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>历史成交数据块对结构体 </p>
+<p>用于管理内存中缓存的历史成交数据 </p>
+
+</div>
+</div>
+<a id="a148b62aeef360993b39d9f79e0531ed2" name="a148b62aeef360993b39d9f79e0531ed2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a148b62aeef360993b39d9f79e0531ed2">&#9670;&#160;</a></span>OrdDtlBlockFilesMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::unordered_map&lt;std::string, <a class="el" href="classWtRdmDtReader.html#a9a8720e8dd220d69b0ecf7c5cb665f1b">OrdDtlBlockPair</a>&gt; <a class="el" href="classWtRdmDtReader.html#a148b62aeef360993b39d9f79e0531ed2">WtRdmDtReader::OrdDtlBlockFilesMap</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00140">140</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9a8720e8dd220d69b0ecf7c5cb665f1b" name="a9a8720e8dd220d69b0ecf7c5cb665f1b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a8720e8dd220d69b0ecf7c5cb665f1b">&#9670;&#160;</a></span>OrdDtlBlockPair</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structWtRdmDtReader_1_1__OdeDtlBlockPair.html">WtRdmDtReader::_OdeDtlBlockPair</a> <a class="el" href="classWtRdmDtReader.html#a9a8720e8dd220d69b0ecf7c5cb665f1b">WtRdmDtReader::OrdDtlBlockPair</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>实时委托明细数据块对结构体 </p>
+<p>用于管理内存映射文件中存储的实时委托明细数据 </p>
+
+</div>
+</div>
+<a id="acf27f07582614cad7c3792ffb7822474" name="acf27f07582614cad7c3792ffb7822474"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf27f07582614cad7c3792ffb7822474">&#9670;&#160;</a></span>OrdQueBlockFilesMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::unordered_map&lt;std::string, <a class="el" href="classWtRdmDtReader.html#a8330041c077d6285cbe78f6f013ee5e3">OrdQueBlockPair</a>&gt; <a class="el" href="classWtRdmDtReader.html#acf27f07582614cad7c3792ffb7822474">WtRdmDtReader::OrdQueBlockFilesMap</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00164">164</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8330041c077d6285cbe78f6f013ee5e3" name="a8330041c077d6285cbe78f6f013ee5e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8330041c077d6285cbe78f6f013ee5e3">&#9670;&#160;</a></span>OrdQueBlockPair</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structWtRdmDtReader_1_1__OdeQueBlockPair.html">WtRdmDtReader::_OdeQueBlockPair</a> <a class="el" href="classWtRdmDtReader.html#a8330041c077d6285cbe78f6f013ee5e3">WtRdmDtReader::OrdQueBlockPair</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>实时委托队列数据块对结构体 </p>
+<p>用于管理内存映射文件中存储的实时委托队列数据 </p>
+
+</div>
+</div>
+<a id="a890a1ed88d3ac167458b243d5c69c7cc" name="a890a1ed88d3ac167458b243d5c69c7cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a890a1ed88d3ac167458b243d5c69c7cc">&#9670;&#160;</a></span>RTKBlockFilesMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::unordered_map&lt;std::string, <a class="el" href="classWtRdmDtReader.html#a10db9104cd2cebeaece6a9e8ca4a1257">RTKlineBlockPair</a>&gt; <a class="el" href="classWtRdmDtReader.html#a890a1ed88d3ac167458b243d5c69c7cc">WtRdmDtReader::RTKBlockFilesMap</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00068">68</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a10db9104cd2cebeaece6a9e8ca4a1257" name="a10db9104cd2cebeaece6a9e8ca4a1257"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10db9104cd2cebeaece6a9e8ca4a1257">&#9670;&#160;</a></span>RTKlineBlockPair</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structWtRdmDtReader_1_1__RTKBlockPair.html">WtRdmDtReader::_RTKBlockPair</a> <a class="el" href="classWtRdmDtReader.html#a10db9104cd2cebeaece6a9e8ca4a1257">WtRdmDtReader::RTKlineBlockPair</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>实时K线数据块对结构体 </p>
+<p>用于管理内存映射文件中存储的实时K线数据 </p>
+
+</div>
+</div>
+<a id="aefd087401db54391aafb2ad47d5e19ac" name="aefd087401db54391aafb2ad47d5e19ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aefd087401db54391aafb2ad47d5e19ac">&#9670;&#160;</a></span>TBlockFilesMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::unordered_map&lt;std::string, <a class="el" href="classWtRdmDtReader.html#a94ec11f1172c4f87adc62e7bf4dcac59">TickBlockPair</a>&gt; <a class="el" href="classWtRdmDtReader.html#aefd087401db54391aafb2ad47d5e19ac">WtRdmDtReader::TBlockFilesMap</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00092">92</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a94ec11f1172c4f87adc62e7bf4dcac59" name="a94ec11f1172c4f87adc62e7bf4dcac59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a94ec11f1172c4f87adc62e7bf4dcac59">&#9670;&#160;</a></span>TickBlockPair</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structWtRdmDtReader_1_1__TBlockPair.html">WtRdmDtReader::_TBlockPair</a> <a class="el" href="classWtRdmDtReader.html#a94ec11f1172c4f87adc62e7bf4dcac59">WtRdmDtReader::TickBlockPair</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>实时Tick数据块对结构体 </p>
+<p>用于管理内存映射文件中存储的实时Tick数据 </p>
+
+</div>
+</div>
+<a id="a7115f7e7c4c6ce7596285fe5e10d325f" name="a7115f7e7c4c6ce7596285fe5e10d325f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7115f7e7c4c6ce7596285fe5e10d325f">&#9670;&#160;</a></span>TransBlockFilesMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::unordered_map&lt;std::string, <a class="el" href="classWtRdmDtReader.html#a4b321c1c9f3eb1991fb373f883dbc440">TransBlockPair</a>&gt; <a class="el" href="classWtRdmDtReader.html#a7115f7e7c4c6ce7596285fe5e10d325f">WtRdmDtReader::TransBlockFilesMap</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00116">116</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4b321c1c9f3eb1991fb373f883dbc440" name="a4b321c1c9f3eb1991fb373f883dbc440"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b321c1c9f3eb1991fb373f883dbc440">&#9670;&#160;</a></span>TransBlockPair</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structWtRdmDtReader_1_1__TransBlockPair.html">WtRdmDtReader::_TransBlockPair</a> <a class="el" href="classWtRdmDtReader.html#a4b321c1c9f3eb1991fb373f883dbc440">WtRdmDtReader::TransBlockPair</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>实时成交数据块对结构体 </p>
+<p>用于管理内存映射文件中存储的实时成交明细数据 </p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a3d3b05f3282ffdb2b7213797bb02c9bd" name="a3d3b05f3282ffdb2b7213797bb02c9bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d3b05f3282ffdb2b7213797bb02c9bd">&#9670;&#160;</a></span>WtRdmDtReader()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">WtRdmDtReader::WtRdmDtReader </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>WtRdmDtReader类的构造函数</p>
+<p>初始化随机数据访问器对象，设置初始状态。 将基础数据管理器、主力合约管理器设置为空， 并将停止标志初始化为false。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l00104">104</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a86eef4a8389b346a4668c68855747d7c" name="a86eef4a8389b346a4668c68855747d7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86eef4a8389b346a4668c68855747d7c">&#9670;&#160;</a></span>~WtRdmDtReader()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">WtRdmDtReader::~WtRdmDtReader </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>析构函数 </p>
+<p>WtRdmDtReader类的析构函数</p>
+<p>清理资源，停止检查线程，并等待线程安全结束。 首先设置_stopped标志为true，通知后台线程停止运行， 然后等待线程结束，避免资源泄漏。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l00119">119</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="ad7512a12ffdf1cb8729b05649a6a7924" name="ad7512a12ffdf1cb8729b05649a6a7924"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7512a12ffdf1cb8729b05649a6a7924">&#9670;&#160;</a></span>cacheHisBarsFromFile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtRdmDtReader::cacheHisBarsFromFile </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>codeInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a>&#160;</td>
+          <td class="paramname"><em>period</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>将历史数据放入缓存 </p>
+<p>从文件中缓存历史K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">codeInfo</td><td>合约信息指针 </td></tr>
+    <tr><td class="paramname">key</td><td>数据缓存键 </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 缓存是否成功</dd></dl>
+<p>根据给定的合约信息和周期，从文件读取历史K线数据并加载到内存缓存中</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">codeInfo</td><td>合约信息指针，包含交易所、品种等信息 </td></tr>
+    <tr><td class="paramname">key</td><td>缓存映射的键名 </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 缓存是否成功</dd></dl>
+<p>根据给定的合约信息和周期，从磁盘文件中加载历史K线数据并存入内存缓存。 处理多种不同的数据存储格式，包括日线、分钟线等，并支持前复权和后复权的处理。 该方法会根据不同的存储路径规则查找相应的数据文件，对于股票数据还会进行复权处理。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l01271">1271</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5507f071aa07e3312e4ecbcc3e65450a" name="a5507f071aa07e3312e4ecbcc3e65450a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5507f071aa07e3312e4ecbcc3e65450a">&#9670;&#160;</a></span>clearCache()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtRdmDtReader::clearCache </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>清理内存数据缓存 </p>
+<p>清理所有数据缓存</p>
+<p>清除所有已缓存的数据，释放相关内存资源，包括K线、Tick、委托全印、委托队列和成交数据等</p>
+<p>清空所有数据缓存，包括K线缓存、实时分钟线缓存、Tick数据缓存、 成交数据缓存、委托明细缓存和委托队列缓存等。 这个方法通常在系统重置或清理内存时调用。 </p>
+
+<p>重载 <a class="el" href="classIRdmDtReader.html#a804724663a7514c28a0bfd8c1b7136e0">IRdmDtReader</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l02932">2932</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a92845a02f9b6c6cfb6ebc2c7c1145b09" name="a92845a02f9b6c6cfb6ebc2c7c1145b09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92845a02f9b6c6cfb6ebc2c7c1145b09">&#9670;&#160;</a></span>getAdjFactorByDate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double WtRdmDtReader::getAdjFactorByDate </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>date</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>根据日期获取除权因子 </p>
+<p>根据日期获取股票除权因子</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">date</td><td>日期，默认为0（表示当前日期） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>double 除权因子值</dd></dl>
+<p>获取指定日期的股票除权因子，用于实现前复权或者后复权</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">date</td><td>日期，默认为0（表示当前日期） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>double 除权因子值</dd></dl>
+<p>根据指定的合约代码和日期，从缓存中查找并返回适用的除权因子。 如果指定日期没有对应因子，则返回小于等于当前日期的最近一个因子。 非股票品种永远返回1.0。 </p>
+
+<p>重载 <a class="el" href="classIRdmDtReader.html#a3a9c89ff077905892afa62a949180765">IRdmDtReader</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l02889">2889</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a151c195ef03ff47385263680c0b9c987" name="a151c195ef03ff47385263680c0b9c987"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a151c195ef03ff47385263680c0b9c987">&#9670;&#160;</a></span>getAdjFactors()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classWtRdmDtReader.html#a98def2abab1b96a6584c5326845332c6">AdjFactorList</a> &amp; WtRdmDtReader::getAdjFactors </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pid</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00536">536</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abc6c787f01ad7b8fde6f3e84acc0f915" name="abc6c787f01ad7b8fde6f3e84acc0f915"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc6c787f01ad7b8fde6f3e84acc0f915">&#9670;&#160;</a></span>getRTKilneBlock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#a10db9104cd2cebeaece6a9e8ca4a1257">WtRdmDtReader::RTKlineBlockPair</a> * WtRdmDtReader::getRTKilneBlock </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a>&#160;</td>
+          <td class="paramname"><em>period</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取实时K线数据块 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期类型 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>RTKlineBlockPair* 实时K线数据块对象指针</dd></dl>
+<p>根据合约和周期找到或创建实时K线数据块，用于后续访问</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期，目前仅支持1分钟和5分钟K线 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd><a class="el" href="classWtRdmDtReader.html#a10db9104cd2cebeaece6a9e8ca4a1257" title="实时K线数据块对结构体">WtRdmDtReader::RTKlineBlockPair</a>* K线数据块对象指针，如果不存在则返回NULL</dd></dl>
+<p>根据交易所、合约代码和K线周期获取实时K线数据块。 目前仅支持1分钟和5分钟周期的K线数据。 如果已经存在内存缓存中，则直接返回；否则，从磁盘文件中加载。 该方法会更新数据块的最后访问时间以支持缓存过期机制。 当文件大小发生变化时，会自动重新映射文件。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l02402">2402</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0573cb0f8690e19b40dd8d43733acc15" name="a0573cb0f8690e19b40dd8d43733acc15"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0573cb0f8690e19b40dd8d43733acc15">&#9670;&#160;</a></span>getRTOrdDtlBlock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#a9a8720e8dd220d69b0ecf7c5cb665f1b">WtRdmDtReader::OrdDtlBlockPair</a> * WtRdmDtReader::getRTOrdDtlBlock </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>code</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取实时委托明细数据块 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>OrdDtlBlockPair* 实时委托明细数据块对象指针</dd></dl>
+<p>根据合约找到或创建实时委托明细数据块，用于后续访问</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd><a class="el" href="classWtRdmDtReader.html#a9a8720e8dd220d69b0ecf7c5cb665f1b" title="实时委托明细数据块对结构体">WtRdmDtReader::OrdDtlBlockPair</a>* 委托明细数据块对象指针，如果不存在则返回NULL</dd></dl>
+<p>根据交易所和合约代码获取实时委托明细数据块。 如果已经存在内存缓存中，则直接返回；否则，从磁盘文件中加载。 该方法会更新数据块的最后访问时间以支持缓存过期机制。 当文件大小发生变化时，会自动重新映射文件。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l02247">2247</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5250a1ea0c0bf74f061ef7297700bb50" name="a5250a1ea0c0bf74f061ef7297700bb50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5250a1ea0c0bf74f061ef7297700bb50">&#9670;&#160;</a></span>getRTOrdQueBlock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#a8330041c077d6285cbe78f6f013ee5e3">WtRdmDtReader::OrdQueBlockPair</a> * WtRdmDtReader::getRTOrdQueBlock </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>code</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取实时委托队列数据块 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>OrdQueBlockPair* 实时委托队列数据块对象指针</dd></dl>
+<p>根据合约找到或创建实时委托队列数据块，用于后续访问</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd><a class="el" href="classWtRdmDtReader.html#a8330041c077d6285cbe78f6f013ee5e3" title="实时委托队列数据块对结构体">WtRdmDtReader::OrdQueBlockPair</a>* 委托队列数据块对象指针，如果不存在则返回NULL</dd></dl>
+<p>根据交易所和合约代码获取实时委托队列数据块。 如果已经存在内存缓存中，则直接返回；否则，从磁盘文件中加载。 该方法会更新数据块的最后访问时间以支持缓存过期机制。 当文件大小发生变化时，会自动重新映射文件。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l02298">2298</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a217c4da9779bab3fa169d32a3e90a945" name="a217c4da9779bab3fa169d32a3e90a945"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a217c4da9779bab3fa169d32a3e90a945">&#9670;&#160;</a></span>getRTTickBlock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#a94ec11f1172c4f87adc62e7bf4dcac59">WtRdmDtReader::TickBlockPair</a> * WtRdmDtReader::getRTTickBlock </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>code</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取实时Tick数据块 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>TickBlockPair* 实时Tick数据块对象指针</dd></dl>
+<p>根据合约找到或创建实时Tick数据块，用于后续访问</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd><a class="el" href="classWtRdmDtReader.html#a94ec11f1172c4f87adc62e7bf4dcac59" title="实时Tick数据块对结构体">WtRdmDtReader::TickBlockPair</a>* Tick数据块对象指针，如果不存在则返回NULL</dd></dl>
+<p>根据交易所和合约代码获取实时Tick数据块。 如果已经存在内存缓存中，则直接返回；否则，从磁盘文件中加载。 该方法会更新数据块的最后访问时间以支持缓存过期机制。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l02196">2196</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a97465ac7dd969f00cb0e6ada0a728679" name="a97465ac7dd969f00cb0e6ada0a728679"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a97465ac7dd969f00cb0e6ada0a728679">&#9670;&#160;</a></span>getRTTransBlock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#a4b321c1c9f3eb1991fb373f883dbc440">WtRdmDtReader::TransBlockPair</a> * WtRdmDtReader::getRTTransBlock </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>code</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取实时成交数据块 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>TransBlockPair* 实时成交数据块对象指针</dd></dl>
+<p>根据合约找到或创建实时成交数据块，用于后续访问</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码 </td></tr>
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd><a class="el" href="classWtRdmDtReader.html#a4b321c1c9f3eb1991fb373f883dbc440" title="实时成交数据块对结构体">WtRdmDtReader::TransBlockPair</a>* 成交数据块对象指针，如果不存在则返回NULL</dd></dl>
+<p>根据交易所和合约代码获取实时成交数据块。 如果已经存在内存缓存中，则直接返回；否则，从磁盘文件中加载。 该方法会更新数据块的最后访问时间以支持缓存过期机制。 当文件大小发生变化时，会自动重新映射文件。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l02349">2349</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a29f5b04feeb6bd7049f62ee45eb4ca48" name="a29f5b04feeb6bd7049f62ee45eb4ca48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29f5b04feeb6bd7049f62ee45eb4ca48">&#9670;&#160;</a></span>indexBarFromCacheByCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> * WtRdmDtReader::indexBarFromCacheByCount </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t &amp;&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isDay</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>根据数量从缓存中获取K线数据指针 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>数据缓存键 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间 </td></tr>
+    <tr><td class="paramname">count</td><td>请求的数据条数如果条数不足，将返回实际读取到的条数 </td></tr>
+    <tr><td class="paramname">isDay</td><td>是否是日线数据，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 返回K线数据数组指针</dd></dl>
+<p>从缓存中向前读取指定数量的K线数据，不复制数据，提高效率</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>缓存键名 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间 </td></tr>
+    <tr><td class="paramname">count</td><td>输入输出参数，输入时指定要获取的数量，输出时返回实际获取到的数量 </td></tr>
+    <tr><td class="paramname">isDay</td><td>是否为日线数据，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 返回K线数据数组的开始指针</dd></dl>
+<p>根据给定的结束时间和数量，向前获取指定数量的K线数据。 返回的是直接指向缓存中数据的指针，不进行数据复制，效率更高。 该方法会先定位到结束时间的数据，然后向前获取指定数量的数据。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l01846">1846</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aeac52bb66fc2e9640f10fee52b163082" name="aeac52bb66fc2e9640f10fee52b163082"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeac52bb66fc2e9640f10fee52b163082">&#9670;&#160;</a></span>indexBarFromCacheByRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> * WtRdmDtReader::indexBarFromCacheByRange </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>stime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t &amp;&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isDay</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>根据时间范围从缓存中获取K线数据指针 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>数据缓存键 </td></tr>
+    <tr><td class="paramname">stime</td><td>开始时间 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间 </td></tr>
+    <tr><td class="paramname">count</td><td>数据条数，通过引用方式返回 </td></tr>
+    <tr><td class="paramname">isDay</td><td>是否是日线数据，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 返回K线数据数组指针</dd></dl>
+<p>根据时间范围，从缓存中获取指定区间的K线数据的指针，不复制数据，提高效率</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>缓存键名 </td></tr>
+    <tr><td class="paramname">stime</td><td>开始时间 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间 </td></tr>
+    <tr><td class="paramname">count</td><td>输出参数，返回获取到的K线数量 </td></tr>
+    <tr><td class="paramname">isDay</td><td>是否为日线数据，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSBarStruct* 返回K线数据数组的开始指针</dd></dl>
+<p>根据给定的时间范围，从内存缓存中快速检索符合条件的K线数据。 返回的是直接指向缓存中数据的指针，不进行数据复制，效率更高。 根据时间格式不同（日线或分钟线），使用不同的比较方法定位数据。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l01775">1775</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9e0bcff604e11137add3782674503ef4" name="a9e0bcff604e11137add3782674503ef4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e0bcff604e11137add3782674503ef4">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WtRdmDtReader::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>cfg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classIRdmDtReaderSink.html">IRdmDtReaderSink</a> *&#160;</td>
+          <td class="paramname"><em>sink</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>初始化随机数据访问器 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfg</td><td>配置项 </td></tr>
+    <tr><td class="paramname">sink</td><td>数据存储回调接口</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>根据给定的配置对象初始化数据存储器，设置数据路径和其他相关参数</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfg</td><td>配置项参数，包含数据路径和除权因子文件等配置 </td></tr>
+    <tr><td class="paramname">sink</td><td>数据收集器接口，用于日志输出和获取其他管理器</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>根据配置参数初始化随机数据访问器，设置数据路径、加载除权因子， 并启动资源清理线程，定期释放长时间未访问的数据块缓存。 该方法首先收集基础数据管理器和主力合约管理器，然后根据配置初始化 数据路径并加载除权因子文件。最后创建内存资源清理线程，定期清理 长时间不使用的数据块，以节省内存使用。 </p>
+
+<p>重载 <a class="el" href="classIRdmDtReader.html#af5d745e6ec454b6e7469d946d28553c3">IRdmDtReader</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l00137">137</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a944cbe8c5e09d6e168157c807730687b" name="a944cbe8c5e09d6e168157c807730687b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a944cbe8c5e09d6e168157c807730687b">&#9670;&#160;</a></span>loadStkAdjFactorsFromFile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtRdmDtReader::loadStkAdjFactorsFromFile </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>adjfile</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>从文件加载股票除权因子 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">adjfile</td><td>除权因子文件路径 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 返回是否加载成功</dd></dl>
+<p>从指定文件路径读取股票的除权因子列表，用于实现前复权或者后复权的功能</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">adjfile</td><td>除权因子文件路径 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 加载是否成功</dd></dl>
+<p>该方法从指定的JSON文件中加载股票除权因子数据， 用于实现前复权或者后复权的功能。文件格式为交易所-&gt;股票代码-&gt;除权因子列表。 除权因子用于调整股票历史价格，使得股票分红除权后的价格可比。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l00246">246</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a441fc2cd918889a2f8580f9ab53be376" name="a441fc2cd918889a2f8580f9ab53be376"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a441fc2cd918889a2f8580f9ab53be376">&#9670;&#160;</a></span>readBarsFromCacheByRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t WtRdmDtReader::readBarsFromCacheByRange </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>stime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>ayBars</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isDay</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>根据时间范围从缓存中读取K线数据 </p>
+<p>根据时间范围从缓存中读取K线数据并复制到向量中</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>数据缓存键 </td></tr>
+    <tr><td class="paramname">stime</td><td>开始时间 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间 </td></tr>
+    <tr><td class="paramname">ayBars</td><td>K线数据存储数组，用于存放返回结果 </td></tr>
+    <tr><td class="paramname">isDay</td><td>是否是日线数据，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>uint32_t 返回读取到的K线条数</dd></dl>
+<p>根据时间范围，从缓存中提取指定区间的K线数据，并存入参数提供的数组中</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>缓存键名 </td></tr>
+    <tr><td class="paramname">stime</td><td>开始时间 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间 </td></tr>
+    <tr><td class="paramname">ayBars</td><td>输出参数，用于存放获取到的K线数据 </td></tr>
+    <tr><td class="paramname">isDay</td><td>是否为日线数据，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>uint32_t 返回获取到的K线数量</dd></dl>
+<p>根据给定的时间范围，从内存缓存中获取K线数据并复制到提供的向量中。 用于需要对数据进行进一步处理的场景。 该方法会先从缓存中定位符合时间范围的数据，然后复制到提供的向量中返回。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l01900">1900</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a30d749696a0f431904677913aa0a0380" name="a30d749696a0f431904677913aa0a0380"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30d749696a0f431904677913aa0a0380">&#9670;&#160;</a></span>readKlineSliceByCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> * WtRdmDtReader::readKlineSliceByCount </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a>&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>按数量读取K线数据切片 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期 </td></tr>
+    <tr><td class="paramname">count</td><td>请求的数据条数 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0（表示当前时间） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSKlineSlice* K线数据切片指针</dd></dl>
+<p>根据指定数量、周期和截止时间，获取指定合约的K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期 </td></tr>
+    <tr><td class="paramname">count</td><td>要读取的K线数量 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0（表示当前时间） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSKlineSlice* K线数据切片指针，如果无数据则返回NULL</dd></dl>
+<p>根据给定的合约代码、周期、数量和结束时间，向前获取指定数量的K线数据切片。 该方法会同时查询历史数据和实时数据，并将它们合并成一个完整的数据切片返回。 如果是股票数据，还会根据需要对数据进行复权处理。 </p>
+
+<p>实现了 <a class="el" href="classIRdmDtReader.html#a1a15e3eb2694d108906ab9fffb8eab20">IRdmDtReader</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l02471">2471</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1661c5a70c608ad9c895a0d15c05c6b1" name="a1661c5a70c608ad9c895a0d15c05c6b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1661c5a70c608ad9c895a0d15c05c6b1">&#9670;&#160;</a></span>readKlineSliceByRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> * WtRdmDtReader::readKlineSliceByRange </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a>&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>stime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>按时间范围读取K线数据切片 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期 </td></tr>
+    <tr><td class="paramname">stime</td><td>起始时间 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0（表示当前时间） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSKlineSlice* K线数据切片指针</dd></dl>
+<p>根据时间范围和周期获取指定合约的K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期 </td></tr>
+    <tr><td class="paramname">stime</td><td>开始时间 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0（表示当前时间） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSKlineSlice* K线数据切片指针，如果无数据则返回NULL</dd></dl>
+<p>根据给定的合约代码、周期和时间范围，获取对应的K线数据切片。 数据包括历史数据和实时数据，并会根据需要对股票数据进行复权处理。 该方法首先会查询缓存中是否已有数据，如果没有则从文件中加载。然后根据周期类型和时间范围 获取历史和实时数据，并合并成完整的数据切片返回。 </p>
+
+<p>实现了 <a class="el" href="classIRdmDtReader.html#ae6dee0ef9507cc6dffaca81e877a92fb">IRdmDtReader</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l01973">1973</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a426adc4734aa1f0d13891d823cc5f2af" name="a426adc4734aa1f0d13891d823cc5f2af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a426adc4734aa1f0d13891d823cc5f2af">&#9670;&#160;</a></span>readOrdDtlSliceByRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSOrdDtlSlice.html">WTSOrdDtlSlice</a> * WtRdmDtReader::readOrdDtlSliceByRange </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>stime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>按时间范围读取委托明细数据切片 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">stime</td><td>起始时间 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0（表示当前时间） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSOrdDtlSlice* 委托明细数据切片指针</dd></dl>
+<p>根据时间范围获取指定合约的委托明细数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">stime</td><td>开始时间 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0（表示当前时间） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSOrdDtlSlice* 委托明细数据切片指针，如果无数据则返回NULL</dd></dl>
+<p>根据给定的合约代码和时间范围，获取对应的委托明细数据切片。 时间格式为年月日时分秒毫秒，例如：20190807124533900。 数据包括历史委托明细数据和实时委托明细数据，会根据时间范围自动判断是否需要根据交易日分批处理数据。 </p>
+
+<p>实现了 <a class="el" href="classIRdmDtReader.html#a54fdbe842387807701f6ba0a91519b7a">IRdmDtReader</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l00900">900</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af1b5307ccaa9c8b216b76818a3fcf2a1" name="af1b5307ccaa9c8b216b76818a3fcf2a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1b5307ccaa9c8b216b76818a3fcf2a1">&#9670;&#160;</a></span>readOrdQueSliceByRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSOrdQueSlice.html">WTSOrdQueSlice</a> * WtRdmDtReader::readOrdQueSliceByRange </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>stime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>按时间范围读取委托队列数据切片 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">stime</td><td>起始时间 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0（表示当前时间） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSOrdQueSlice* 委托队列数据切片指针</dd></dl>
+<p>根据时间范围获取指定合约的委托队列数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">stime</td><td>开始时间 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0（表示当前时间） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSOrdQueSlice* 委托队列数据切片指针，如果无数据则返回NULL</dd></dl>
+<p>根据给定的合约代码和时间范围，获取对应的委托队列数据切片。 时间格式为年月日时分秒毫秒，例如：20190807124533900。 数据包括历史委托队列数据和实时委托队列数据，会根据时间范围自动判断是否需要根据交易日分批处理数据。 </p>
+
+<p>实现了 <a class="el" href="classIRdmDtReader.html#aef2ebe87f4786506fca1e77ba27069f3">IRdmDtReader</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l00714">714</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4a44159c4dfa3fac84a027c700eeb664" name="a4a44159c4dfa3fac84a027c700eeb664"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a44159c4dfa3fac84a027c700eeb664">&#9670;&#160;</a></span>readTickSliceByCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> * WtRdmDtReader::readTickSliceByCount </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>按数量读取Tick数据切片 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">count</td><td>请求的数据条数 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0（表示当前时间） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSTickSlice* Tick数据切片指针</dd></dl>
+<p>根据指定数量和截止时间，获取指定合约的Tick数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">count</td><td>要读取的Tick数量 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0（表示当前时间） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSTickSlice* Tick数据切片指针，如果无数据则返回NULL</dd></dl>
+<p>根据给定的合约代码、数量和结束时间，向前获取指定数量的Tick数据切片。 该方法会同时查询实时数据和历史数据，并将它们合并成一个完整的数据切片返回。 对于期货合约，会根据规则标签自动处理主力合约转换。 时间格式为年月日时分秒毫秒，例如：20190807124533900。 </p>
+
+<p>实现了 <a class="el" href="classIRdmDtReader.html#a39ed1d2a5fb28f864ae78719b6f6c9d7">IRdmDtReader</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l02659">2659</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6c0e407391697c0932affe5a5ef276ee" name="a6c0e407391697c0932affe5a5ef276ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c0e407391697c0932affe5a5ef276ee">&#9670;&#160;</a></span>readTickSliceByDate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> * WtRdmDtReader::readTickSliceByDate </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uDate</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>按日期读取Tick数据切片 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">uDate</td><td>交易日期，默认为0（表示当前日期） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSTickSlice* Tick数据切片指针</dd></dl>
+<p>根据指定日期，获取指定合约当日的全部Tick数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">uDate</td><td>交易日期，默认为0（表示当前日期） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSTickSlice* Tick数据切片指针，如果无数据则返回NULL</dd></dl>
+<p>根据给定的合约代码和日期，获取对应日期的全部Tick数据切片。 如果是当日数据，会同时查询实时数据和历史数据。 如果是期货合约，会根据访问规则获取真实合约的数据。 </p>
+
+<p>实现了 <a class="el" href="classIRdmDtReader.html#a94051503a476cc261fe09c0a41a69e4d">IRdmDtReader</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l00326">326</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afbad47e17b7d32d6e7582ced1fb06d3d" name="afbad47e17b7d32d6e7582ced1fb06d3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afbad47e17b7d32d6e7582ced1fb06d3d">&#9670;&#160;</a></span>readTickSliceByRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> * WtRdmDtReader::readTickSliceByRange </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>stime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>按时间范围读取Tick数据切片 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">stime</td><td>起始时间 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0（表示当前时间） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSTickSlice* Tick数据切片指针</dd></dl>
+<p>根据时间范围获取指定合约的Tick数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">stime</td><td>开始时间 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0（表示当前时间） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSTickSlice* Tick数据切片指针，如果无数据则返回NULL</dd></dl>
+<p>根据给定的合约代码和时间范围，获取对应的Tick数据切片。 时间格式为年月日时分秒毫秒，例如：20190807124533900。 数据包括历史Tick数据和实时Tick数据，会根据时间范围自动判断是否需要根据交易日分批处理数据。 </p>
+
+<p>实现了 <a class="el" href="classIRdmDtReader.html#a0efef61ba16b63ce588a5ddf5cb8842b">IRdmDtReader</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l00461">461</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8375c31a0c4351f8b9954d36df7e19cf" name="a8375c31a0c4351f8b9954d36df7e19cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8375c31a0c4351f8b9954d36df7e19cf">&#9670;&#160;</a></span>readTransSliceByRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWTSTransSlice.html">WTSTransSlice</a> * WtRdmDtReader::readTransSliceByRange </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>stime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>按时间范围读取成交数据切片 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">stime</td><td>起始时间 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0（表示当前时间） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSTransSlice* 成交数据切片指针</dd></dl>
+<p>根据时间范围获取指定合约的成交数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">stime</td><td>开始时间 </td></tr>
+    <tr><td class="paramname">etime</td><td>结束时间，默认为0（表示当前时间） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WTSTransSlice* 成交数据切片指针，如果无数据则返回NULL</dd></dl>
+<p>根据给定的合约代码和时间范围，获取对应的成交数据切片。 时间格式为年月日时分秒毫秒，例如：20190807124533900。 数据包括历史成交数据和实时成交数据，会根据时间范围自动判断是否需要根据交易日分批处理数据。 </p>
+
+<p>实现了 <a class="el" href="classIRdmDtReader.html#a77af781b741867fed1e1be3e35d1435c">IRdmDtReader</a>.</p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a> 第 <a class="el" href="WtRdmDtReader_8cpp_source.html#l01085">1085</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="afdbbf261825f5b2a7e97ad17d06001e4" name="afdbbf261825f5b2a7e97ad17d06001e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afdbbf261825f5b2a7e97ad17d06001e4">&#9670;&#160;</a></span>_adj_factors</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#a47d65639ee2a75ae06d0cbf3b560b22b">AdjFactorMap</a> WtRdmDtReader::_adj_factors</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>除权因子映射表 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00534">534</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aeff9e8c787244a703966cf0921b3e0da" name="aeff9e8c787244a703966cf0921b3e0da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeff9e8c787244a703966cf0921b3e0da">&#9670;&#160;</a></span>_bars_cache</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#a1f0c8471c5dba3c11afff169ac89e3f9">BarsCache</a> WtRdmDtReader::_bars_cache</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>K线数据缓存映射 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00517">517</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1f8ddcd9f5b5a2d4592b4d9e3486d240" name="a1f8ddcd9f5b5a2d4592b4d9e3486d240"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f8ddcd9f5b5a2d4592b4d9e3486d240">&#9670;&#160;</a></span>_base_data_mgr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a>* WtRdmDtReader::_base_data_mgr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>基础数据管理器指针 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00494">494</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aee10c72db7c8ae09c6483d34a3f05f13" name="aee10c72db7c8ae09c6483d34a3f05f13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee10c72db7c8ae09c6483d34a3f05f13">&#9670;&#160;</a></span>_base_dir</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string WtRdmDtReader::_base_dir</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>数据文件存放的基础目录 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00493">493</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a67a2539e752d9c774e75529ecbf40d17" name="a67a2539e752d9c774e75529ecbf40d17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67a2539e752d9c774e75529ecbf40d17">&#9670;&#160;</a></span>_his_orddtl_map</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#afc7ea997c87b08fede3035fc53fde753">HisOrdDtlBlockMap</a> WtRdmDtReader::_his_orddtl_map</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>历史委托明细映射 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00267">267</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad348ff8f9cba8088c850f61052f3be59" name="ad348ff8f9cba8088c850f61052f3be59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad348ff8f9cba8088c850f61052f3be59">&#9670;&#160;</a></span>_his_ordque_map</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#a0b0a38d42de1d24b85166cba540dee94">HisOrdQueBlockMap</a> WtRdmDtReader::_his_ordque_map</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>历史委托队列映射 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00268">268</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a858f541ba43f6f1d6128f9d2398a010e" name="a858f541ba43f6f1d6128f9d2398a010e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a858f541ba43f6f1d6128f9d2398a010e">&#9670;&#160;</a></span>_his_tick_map</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#aa8cab67edaefce2384b52833e211dba6">HisTickBlockMap</a> WtRdmDtReader::_his_tick_map</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>历史Tick数据映射 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00266">266</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ade9726283cfa4e761a54c57f7e2c521e" name="ade9726283cfa4e761a54c57f7e2c521e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade9726283cfa4e761a54c57f7e2c521e">&#9670;&#160;</a></span>_his_trans_map</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#ac62276250ba9dd7da38bb82efcdce9cb">HisTransBlockMap</a> WtRdmDtReader::_his_trans_map</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>历史成交数据映射 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00269">269</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0ac12c04b29c6c4ced2dcecde792a1d0" name="a0ac12c04b29c6c4ced2dcecde792a1d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ac12c04b29c6c4ced2dcecde792a1d0">&#9670;&#160;</a></span>_hot_mgr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIHotMgr.html">IHotMgr</a>* WtRdmDtReader::_hot_mgr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>热点合约管理器指针 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00495">495</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aee84edcd56c54eedd3c67496b08e2337" name="aee84edcd56c54eedd3c67496b08e2337"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee84edcd56c54eedd3c67496b08e2337">&#9670;&#160;</a></span>_rt_min1_map</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#a890a1ed88d3ac167458b243d5c69c7cc">RTKBlockFilesMap</a> WtRdmDtReader::_rt_min1_map</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>1分钟实时K线数据映射 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00166">166</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9cb012ab7421cb99c92731f16645da19" name="a9cb012ab7421cb99c92731f16645da19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9cb012ab7421cb99c92731f16645da19">&#9670;&#160;</a></span>_rt_min5_map</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#a890a1ed88d3ac167458b243d5c69c7cc">RTKBlockFilesMap</a> WtRdmDtReader::_rt_min5_map</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>5分钟实时K线数据映射 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00167">167</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa7888689870cd3563a61b26bdad64919" name="aa7888689870cd3563a61b26bdad64919"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa7888689870cd3563a61b26bdad64919">&#9670;&#160;</a></span>_rt_orddtl_map</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#a148b62aeef360993b39d9f79e0531ed2">OrdDtlBlockFilesMap</a> WtRdmDtReader::_rt_orddtl_map</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>实时委托明细映射 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00171">171</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa7dc59b890297158cd84de8f2577f734" name="aa7dc59b890297158cd84de8f2577f734"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa7dc59b890297158cd84de8f2577f734">&#9670;&#160;</a></span>_rt_ordque_map</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#acf27f07582614cad7c3792ffb7822474">OrdQueBlockFilesMap</a> WtRdmDtReader::_rt_ordque_map</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>实时委托队列映射 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00172">172</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae1fe0afab04c8d2e85064b1a68268554" name="ae1fe0afab04c8d2e85064b1a68268554"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1fe0afab04c8d2e85064b1a68268554">&#9670;&#160;</a></span>_rt_tick_map</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#aefd087401db54391aafb2ad47d5e19ac">TBlockFilesMap</a> WtRdmDtReader::_rt_tick_map</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>实时Tick数据映射 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00169">169</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adfe48b9f8f9413b7c5c5b319709bb284" name="adfe48b9f8f9413b7c5c5b319709bb284"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adfe48b9f8f9413b7c5c5b319709bb284">&#9670;&#160;</a></span>_rt_trans_map</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtRdmDtReader.html#a7115f7e7c4c6ce7596285fe5e10d325f">TransBlockFilesMap</a> WtRdmDtReader::_rt_trans_map</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>实时成交数据映射 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00170">170</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4653ef31f2b3db2d9deb309ecf34be12" name="a4653ef31f2b3db2d9deb309ecf34be12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4653ef31f2b3db2d9deb309ecf34be12">&#9670;&#160;</a></span>_stopped</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool WtRdmDtReader::_stopped</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>线程是否已停止的标志 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00497">497</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a220526d539cdd761d3268ba52552fe13" name="a220526d539cdd761d3268ba52552fe13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a220526d539cdd761d3268ba52552fe13">&#9670;&#160;</a></span>_thrd_check</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a> WtRdmDtReader::_thrd_check</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>检查线稍指针，用于定期检查数据状态 </p>
+
+<p class="definition">在文件 <a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a> 第 <a class="el" href="WtRdmDtReader_8h_source.html#l00496">496</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WtDataStorage/<a class="el" href="WtRdmDtReader_8h_source.html">WtRdmDtReader.h</a></li>
+<li>src/WtDataStorage/<a class="el" href="WtRdmDtReader_8cpp_source.html">WtRdmDtReader.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classWtRdmDtReader.html">WtRdmDtReader</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

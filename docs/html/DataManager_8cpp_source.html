@@ -1,0 +1,414 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtDtCore/DataManager.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('DataManager_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">DataManager.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="DataManager_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="DataManager_8h.html">DataManager.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="StateMonitor_8h.html">StateMonitor.h</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="UDPCaster_8h.html">UDPCaster.h</a>&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="WtUftCore_2WtHelper_8h.html">WtHelper.h</a>&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;<a class="code" href="IDataCaster_8h.html">IDataCaster.h</a>&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;../Includes/WTSVariant.hpp&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;../Share/DLLHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;../WTSTools/WTSBaseDataMgr.h&quot;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;../WTSTools/WTSLogger.h&quot;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="}">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classDataManager.html#ac2eec7fa355109eda41308e1de76d2a8">   29</a></span><a class="code hl_function" href="classDataManager.html#ac2eec7fa355109eda41308e1de76d2a8">DataManager::DataManager</a>()</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    : _writer(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    , _bd_mgr(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    , _state_mon(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>{</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>}</div>
+</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="foldopen" id="foldopen00041" data-start="{" data-end="}">
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="classDataManager.html#a291f3b4df4392598b2d7064da062705f">   41</a></span><a class="code hl_function" href="classDataManager.html#a291f3b4df4392598b2d7064da062705f">DataManager::~DataManager</a>()</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>{</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>}</div>
+</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="foldopen" id="foldopen00051" data-start="{" data-end="}">
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="classDataManager.html#ae8ba66981d456f940d3ff5e7af6a575a">   51</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classDataManager.html#ae8ba66981d456f940d3ff5e7af6a575a">DataManager::isSessionProceeded</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* sid)</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>{</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a>-&gt;<a class="code hl_function" href="classIDataWriter.html#ae36386c6dcb53ded0908747bca672670">isSessionProceeded</a>(sid);</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>}</div>
+</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="foldopen" id="foldopen00067" data-start="{" data-end="}">
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classDataManager.html#a16c1230fe08116741ee5eace42e3b9fd">   67</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classDataManager.html#a16c1230fe08116741ee5eace42e3b9fd">DataManager::init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* params, <a class="code hl_class" href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a>* bdMgr, <a class="code hl_class" href="classStateMonitor.html">StateMonitor</a>* stMonitor)</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>{</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <a class="code hl_variable" href="classDataManager.html#adf1bd84104573dba1cb9b5921137e4c2">_bd_mgr</a> = bdMgr;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <a class="code hl_variable" href="classDataManager.html#ae3f9f07c8955641da49b40604d637789">_state_mon</a> = stMonitor;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    std::string <span class="keyword">module</span> = params-&gt;getCString(&quot;module&quot;);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keywordflow">if</span> (module.empty())</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keyword">module</span> = WtHelper::get_module_dir() + DLLHelper::wrap_module(&quot;WtDataStorage&quot;);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        <span class="keyword">module</span> = WtHelper::get_module_dir() + DLLHelper::wrap_module(module.c_str());</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <a class="code hl_typedef" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a> libWriter = <a class="code hl_function" href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a>(module.c_str());</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keywordflow">if</span> (libWriter)</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    {</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <a class="code hl_variable" href="IDataWriter_8h.html#aecd638b651e6f9082058f8b02e7db6a5">FuncCreateWriter</a> pFuncCreateWriter = (<a class="code hl_variable" href="IDataWriter_8h.html#aecd638b651e6f9082058f8b02e7db6a5">FuncCreateWriter</a>)<a class="code hl_function" href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a>(libWriter, <span class="stringliteral">&quot;createWriter&quot;</span>);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <span class="keywordflow">if</span> (pFuncCreateWriter == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        {</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>            <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;Initializing of data writer failed: function createWriter not found...&quot;</span>);</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        }</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        <a class="code hl_typedef" href="IDataWriter_8h.html#a18cd33681b67ac7e7d5f575a8a7f9310">FuncDeleteWriter</a> pFuncDeleteWriter = (<a class="code hl_typedef" href="IDataWriter_8h.html#a18cd33681b67ac7e7d5f575a8a7f9310">FuncDeleteWriter</a>)<a class="code hl_function" href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a>(libWriter, <span class="stringliteral">&quot;deleteWriter&quot;</span>);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        <span class="keywordflow">if</span> (pFuncDeleteWriter == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        {</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>            <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;Initializing of data writer failed: function deleteWriter not found...&quot;</span>);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        }</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        <span class="keywordflow">if</span> (pFuncCreateWriter &amp;&amp; pFuncDeleteWriter)</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        {</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>            <a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a> = pFuncCreateWriter();</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>            <a class="code hl_variable" href="classDataManager.html#ae8dc8dc510fb873989998aeb5e9930ed">_remover</a> = pFuncDeleteWriter;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        }</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        <a class="code hl_function" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a>(<span class="stringliteral">&quot;Data storage module {} loaded&quot;</span>, module);</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    }</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    {</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;Initializing of data writer failed: loading module {} failed...&quot;</span>, module.c_str());</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    }</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a>-&gt;<a class="code hl_function" href="classIDataWriter.html#a27ce9df961576b0f61f0a3e7afec98f1">init</a>(params, <span class="keyword">this</span>);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>}</div>
+</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="foldopen" id="foldopen00115" data-start="{" data-end="}">
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="classDataManager.html#a9efbbb5e79778c7d7e21b2d64b69fe89">  115</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classDataManager.html#a9efbbb5e79778c7d7e21b2d64b69fe89">DataManager::add_ext_dumper</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>, <a class="code hl_class" href="classIHisDataDumper.html">IHisDataDumper</a>* dumper)</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>{</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a>-&gt;<a class="code hl_function" href="classIDataWriter.html#a4f62f6aa5caba1c1695167ff0cfcbe95">add_ext_dumper</a>(<span class="keywordtype">id</span>, dumper);</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>}</div>
+</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="foldopen" id="foldopen00127" data-start="{" data-end="}">
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="classDataManager.html#a4faf299fd6992bf7f88947c46f0e8883">  127</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classDataManager.html#a4faf299fd6992bf7f88947c46f0e8883">DataManager::release</a>()</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>{</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a>)</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    {</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>        <a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a>-&gt;<a class="code hl_function" href="classIDataWriter.html#ac076f35d84daa3e3ebe61ed65400c9bc">release</a>();</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>        <a class="code hl_variable" href="classDataManager.html#ae8dc8dc510fb873989998aeb5e9930ed">_remover</a>(<a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a>);</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    }</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>}</div>
+</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="foldopen" id="foldopen00143" data-start="{" data-end="}">
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="classDataManager.html#a52c19023bc512956bb1f5654389c7144">  143</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classDataManager.html#a52c19023bc512956bb1f5654389c7144">DataManager::writeTick</a>(<a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* curTick, uint32_t procFlag)</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>{</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a>-&gt;<a class="code hl_function" href="classIDataWriter.html#a32a6e17485cc926938c87e00c85faae5">writeTick</a>(curTick, procFlag);</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>}</div>
+</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
+<div class="foldopen" id="foldopen00157" data-start="{" data-end="}">
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno"><a class="line" href="classDataManager.html#aedb1f07db0165efe7ed4acab62d8c72d">  157</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classDataManager.html#aedb1f07db0165efe7ed4acab62d8c72d">DataManager::writeOrderQueue</a>(<a class="code hl_class" href="classWTSOrdQueData.html">WTSOrdQueData</a>* curOrdQue)</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>{</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span> </div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a>-&gt;<a class="code hl_function" href="classIDataWriter.html#ae8fb141733920de6d5830517a05c11c8">writeOrderQueue</a>(curOrdQue);</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>}</div>
+</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="foldopen" id="foldopen00171" data-start="{" data-end="}">
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno"><a class="line" href="classDataManager.html#ae1d1a5fa4fd2cfb9af0e985bfb287867">  171</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classDataManager.html#ae1d1a5fa4fd2cfb9af0e985bfb287867">DataManager::writeOrderDetail</a>(<a class="code hl_class" href="classWTSOrdDtlData.html">WTSOrdDtlData</a>* curOrdDtl)</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>{</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a>-&gt;<a class="code hl_function" href="classIDataWriter.html#ae58deaf82d2b6e8ef880f41daefbff60">writeOrderDetail</a>(curOrdDtl);</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>}</div>
+</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
+<div class="foldopen" id="foldopen00185" data-start="{" data-end="}">
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno"><a class="line" href="classDataManager.html#a464c85daf7499ed773515f8ecb80dc75">  185</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classDataManager.html#a464c85daf7499ed773515f8ecb80dc75">DataManager::writeTransaction</a>(<a class="code hl_class" href="classWTSTransData.html">WTSTransData</a>* curTrans)</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>{</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span> </div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a>-&gt;<a class="code hl_function" href="classIDataWriter.html#a76d75fdd6477184112b5754f413e1d44">writeTransaction</a>(curTrans);</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>}</div>
+</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span> </div>
+<div class="foldopen" id="foldopen00200" data-start="{" data-end="}">
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno"><a class="line" href="classDataManager.html#aee3461c86010ed85a197df29c8ff52d6">  200</a></span><a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* <a class="code hl_function" href="classDataManager.html#aee3461c86010ed85a197df29c8ff52d6">DataManager::getCurTick</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* code, <span class="keyword">const</span> <span class="keywordtype">char</span>* exchg<span class="comment">/* = &quot;&quot;*/</span>)</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>{</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a>-&gt;<a class="code hl_function" href="classIDataWriter.html#a86ef2f1c1604fda4d315d3152665ea8d">getCurTick</a>(code, exchg);</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>}</div>
+</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span> </div>
+<div class="foldopen" id="foldopen00213" data-start="{" data-end="}">
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno"><a class="line" href="classDataManager.html#abe8e55f8735d3885a44e6f5648dcd4f8">  213</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classDataManager.html#abe8e55f8735d3885a44e6f5648dcd4f8">DataManager::transHisData</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* sid)</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>{</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a>)</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        <a class="code hl_variable" href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">_writer</a>-&gt;<a class="code hl_function" href="classIDataWriter.html#ad8f660f817a17cec0772cfb60a8b2c8a">transHisData</a>(sid);</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>}</div>
+</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span><span class="preprocessor">#pragma region &quot;IDataWriterSink&quot;</span></div>
+<div class="foldopen" id="foldopen00226" data-start="{" data-end="}">
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno"><a class="line" href="classDataManager.html#ae639e459d5cb3416eea4afa5bd04283b">  226</a></span><a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>* <a class="code hl_function" href="classDataManager.html#ae639e459d5cb3416eea4afa5bd04283b">DataManager::getBDMgr</a>()</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>{</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classDataManager.html#adf1bd84104573dba1cb9b5921137e4c2">_bd_mgr</a>;</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>}</div>
+</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span> </div>
+<div class="foldopen" id="foldopen00237" data-start="{" data-end="}">
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno"><a class="line" href="classDataManager.html#a8187384f9fd3d1d911850aed95de1ba3">  237</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classDataManager.html#a8187384f9fd3d1d911850aed95de1ba3">DataManager::canSessionReceive</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* sid)</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>{</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    <span class="comment">//By Wesley @ 2021.12.27</span></div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    <span class="comment">//如果状态机为NULL，说明是全天候模式，直接返回true即可</span></div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classDataManager.html#ae3f9f07c8955641da49b40604d637789">_state_mon</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span> </div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classDataManager.html#ae3f9f07c8955641da49b40604d637789">_state_mon</a>-&gt;<a class="code hl_function" href="classStateMonitor.html#aa36965beda4a3349ce9f8024cc9b9334">isInState</a>(sid, <a class="code hl_enumvalue" href="StateMonitor_8h.html#a027c449f8bfdd45eed5fadd1a669c85caf1dd1a52fc93dbd2d9ddb7cbaaa4ef23">SS_RECEIVING</a>);</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>}</div>
+</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span> </div>
+<div class="foldopen" id="foldopen00252" data-start="{" data-end="}">
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno"><a class="line" href="classDataManager.html#a32b7ed106d06dad7d473066c228ec09a">  252</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classDataManager.html#a32b7ed106d06dad7d473066c228ec09a">DataManager::broadcastTick</a>(<a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* curTick)</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>{</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>    <span class="keywordflow">for</span>(<a class="code hl_class" href="classIDataCaster.html">IDataCaster</a>* caster : <a class="code hl_variable" href="classDataManager.html#a45299a7456550d800bd0200e8250da03">_casters</a>)</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        caster-&gt;broadcast(curTick);</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>}</div>
+</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
+<div class="foldopen" id="foldopen00263" data-start="{" data-end="}">
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno"><a class="line" href="classDataManager.html#a89391b0a2500159d773defdb95d55bcc">  263</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classDataManager.html#a89391b0a2500159d773defdb95d55bcc">DataManager::broadcastOrdDtl</a>(<a class="code hl_class" href="classWTSOrdDtlData.html">WTSOrdDtlData</a>* curOrdDtl)</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>{</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    <span class="keywordflow">for</span> (<a class="code hl_class" href="classIDataCaster.html">IDataCaster</a>* caster : <a class="code hl_variable" href="classDataManager.html#a45299a7456550d800bd0200e8250da03">_casters</a>)</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>        caster-&gt;broadcast(curOrdDtl);</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>}</div>
+</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
+<div class="foldopen" id="foldopen00274" data-start="{" data-end="}">
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno"><a class="line" href="classDataManager.html#ab5c5a78068d1729014e916bc871edf89">  274</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classDataManager.html#ab5c5a78068d1729014e916bc871edf89">DataManager::broadcastOrdQue</a>(<a class="code hl_class" href="classWTSOrdQueData.html">WTSOrdQueData</a>* curOrdQue)</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>{</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    <span class="keywordflow">for</span> (<a class="code hl_class" href="classIDataCaster.html">IDataCaster</a>* caster : <a class="code hl_variable" href="classDataManager.html#a45299a7456550d800bd0200e8250da03">_casters</a>)</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>        caster-&gt;broadcast(curOrdQue);</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>}</div>
+</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
+<div class="foldopen" id="foldopen00285" data-start="{" data-end="}">
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno"><a class="line" href="classDataManager.html#a025bd6e28325865350efa1fb65d06059">  285</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classDataManager.html#a025bd6e28325865350efa1fb65d06059">DataManager::broadcastTrans</a>(<a class="code hl_class" href="classWTSTransData.html">WTSTransData</a>* curTrans)</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>{</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>    <span class="keywordflow">for</span> (<a class="code hl_class" href="classIDataCaster.html">IDataCaster</a>* caster : <a class="code hl_variable" href="classDataManager.html#a45299a7456550d800bd0200e8250da03">_casters</a>)</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>        caster-&gt;broadcast(curTrans);</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>}</div>
+</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span> </div>
+<div class="foldopen" id="foldopen00297" data-start="{" data-end="}">
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno"><a class="line" href="classDataManager.html#a1282e74bf1020a91cc17d3b01a26b943">  297</a></span><a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a>* <a class="code hl_function" href="classDataManager.html#a1282e74bf1020a91cc17d3b01a26b943">DataManager::getSessionComms</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* sid)</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>{</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>    <span class="keywordflow">return</span>  <a class="code hl_variable" href="classDataManager.html#adf1bd84104573dba1cb9b5921137e4c2">_bd_mgr</a>-&gt;<a class="code hl_function" href="classWTSBaseDataMgr.html#ac266e833193103d566d3f15dba590245">getSessionComms</a>(sid);</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>}</div>
+</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
+<div class="foldopen" id="foldopen00308" data-start="{" data-end="}">
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno"><a class="line" href="classDataManager.html#ac15c450a2ae334f4799452dc7d0e24bf">  308</a></span>uint32_t <a class="code hl_function" href="classDataManager.html#ac15c450a2ae334f4799452dc7d0e24bf">DataManager::getTradingDate</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* pid)</div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>{</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>    <span class="keywordflow">return</span>  <a class="code hl_variable" href="classDataManager.html#adf1bd84104573dba1cb9b5921137e4c2">_bd_mgr</a>-&gt;<a class="code hl_function" href="classWTSBaseDataMgr.html#a490678d017a3095f8f80956eb24e158b">getTradingDate</a>(pid);</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>}</div>
+</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span> </div>
+<div class="foldopen" id="foldopen00319" data-start="{" data-end="}">
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno"><a class="line" href="classDataManager.html#aec5503e306ad370cbe97237ee8245a64">  319</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classDataManager.html#aec5503e306ad370cbe97237ee8245a64">DataManager::outputLog</a>(<a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* message)</div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>{</div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>    <a class="code hl_function" href="classWTSLogger.html#aa3257bbd8e5b1db25f65cd936f50025c">WTSLogger::log_raw</a>(ll, message);</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>}</div>
+</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span> </div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span><span class="preprocessor">#pragma endregion &quot;IDataWriterSink&quot;</span></div>
+<div class="ttc" id="aDLLHelper_8hpp_html_a40972742af38c16d3ab2f521abf0ca8a"><div class="ttname"><a href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a></div><div class="ttdeci">void * DllHandle</div><div class="ttdoc">动态库句柄类型（非Windows平台）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00032">DLLHelper.hpp:32</a></div></div>
+<div class="ttc" id="aDataManager_8h_html"><div class="ttname"><a href="DataManager_8h.html">DataManager.h</a></div><div class="ttdoc">数据管理器定义</div></div>
+<div class="ttc" id="aIDataCaster_8h_html"><div class="ttname"><a href="IDataCaster_8h.html">IDataCaster.h</a></div><div class="ttdoc">数据广播器接口定义</div></div>
+<div class="ttc" id="aIDataWriter_8h_html_a18cd33681b67ac7e7d5f575a8a7f9310"><div class="ttname"><a href="IDataWriter_8h.html#a18cd33681b67ac7e7d5f575a8a7f9310">FuncDeleteWriter</a></div><div class="ttdeci">void(* FuncDeleteWriter)(wtp::IDataWriter *&amp;writer)</div><div class="ttdef"><b>Definition</b> <a href="IDataWriter_8h_source.html#l00108">IDataWriter.h:108</a></div></div>
+<div class="ttc" id="aIDataWriter_8h_html_aecd638b651e6f9082058f8b02e7db6a5"><div class="ttname"><a href="IDataWriter_8h.html#aecd638b651e6f9082058f8b02e7db6a5">FuncCreateWriter</a></div><div class="ttdeci">NS_WTP_END typedef wtp::IDataWriter *(* FuncCreateWriter)()</div><div class="ttdef"><b>Definition</b> <a href="IDataWriter_8h_source.html#l00107">IDataWriter.h:107</a></div></div>
+<div class="ttc" id="aStateMonitor_8h_html"><div class="ttname"><a href="StateMonitor_8h.html">StateMonitor.h</a></div><div class="ttdoc">交易状态监控器定义</div></div>
+<div class="ttc" id="aStateMonitor_8h_html_a027c449f8bfdd45eed5fadd1a669c85caf1dd1a52fc93dbd2d9ddb7cbaaa4ef23"><div class="ttname"><a href="StateMonitor_8h.html#a027c449f8bfdd45eed5fadd1a669c85caf1dd1a52fc93dbd2d9ddb7cbaaa4ef23">SS_RECEIVING</a></div><div class="ttdeci">@ SS_RECEIVING</div><div class="ttdoc">交易中状态，正在接收数据</div><div class="ttdef"><b>Definition</b> <a href="StateMonitor_8h_source.html#l00033">StateMonitor.h:33</a></div></div>
+<div class="ttc" id="aUDPCaster_8h_html"><div class="ttname"><a href="UDPCaster_8h.html">UDPCaster.h</a></div><div class="ttdoc">UDP广播对象定义</div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aa7b93f4aa2259e69e48f27448c247dc8"><div class="ttname"><a href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a></div><div class="ttdeci">enum tagLogLevel WTSLogLevel</div></div>
+<div class="ttc" id="aWtUftCore_2WtHelper_8h_html"><div class="ttname"><a href="WtUftCore_2WtHelper_8h.html">WtHelper.h</a></div><div class="ttdoc">WonderTrader辅助工具类头文件</div></div>
+<div class="ttc" id="aclassDLLHelper_html_ac5d55450ea114206242d9ccbfd65ac82"><div class="ttname"><a href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a></div><div class="ttdeci">static DllHandle load_library(const char *filename)</div><div class="ttdoc">加载动态库</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00058">DLLHelper.hpp:58</a></div></div>
+<div class="ttc" id="aclassDLLHelper_html_ae01c3a299dd418d0298d29fa5f5f9b2c"><div class="ttname"><a href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a></div><div class="ttdeci">static ProcHandle get_symbol(DllHandle handle, const char *name)</div><div class="ttdoc">获取动态库中的符号（函数或变量）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00107">DLLHelper.hpp:107</a></div></div>
+<div class="ttc" id="aclassDataManager_html_a025bd6e28325865350efa1fb65d06059"><div class="ttname"><a href="classDataManager.html#a025bd6e28325865350efa1fb65d06059">DataManager::broadcastTrans</a></div><div class="ttdeci">virtual void broadcastTrans(WTSTransData *curTrans) override</div><div class="ttdoc">广播成交数据</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00285">DataManager.cpp:285</a></div></div>
+<div class="ttc" id="aclassDataManager_html_a1282e74bf1020a91cc17d3b01a26b943"><div class="ttname"><a href="classDataManager.html#a1282e74bf1020a91cc17d3b01a26b943">DataManager::getSessionComms</a></div><div class="ttdeci">virtual CodeSet * getSessionComms(const char *sid) override</div><div class="ttdoc">获取会话关联的合约集合</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00297">DataManager.cpp:297</a></div></div>
+<div class="ttc" id="aclassDataManager_html_a16c1230fe08116741ee5eace42e3b9fd"><div class="ttname"><a href="classDataManager.html#a16c1230fe08116741ee5eace42e3b9fd">DataManager::init</a></div><div class="ttdeci">bool init(WTSVariant *params, WTSBaseDataMgr *bdMgr, StateMonitor *stMonitor)</div><div class="ttdoc">初始化数据管理器</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00067">DataManager.cpp:67</a></div></div>
+<div class="ttc" id="aclassDataManager_html_a291f3b4df4392598b2d7064da062705f"><div class="ttname"><a href="classDataManager.html#a291f3b4df4392598b2d7064da062705f">DataManager::~DataManager</a></div><div class="ttdeci">~DataManager()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00041">DataManager.cpp:41</a></div></div>
+<div class="ttc" id="aclassDataManager_html_a32b7ed106d06dad7d473066c228ec09a"><div class="ttname"><a href="classDataManager.html#a32b7ed106d06dad7d473066c228ec09a">DataManager::broadcastTick</a></div><div class="ttdeci">virtual void broadcastTick(WTSTickData *curTick) override</div><div class="ttdoc">广播Tick数据</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00252">DataManager.cpp:252</a></div></div>
+<div class="ttc" id="aclassDataManager_html_a45299a7456550d800bd0200e8250da03"><div class="ttname"><a href="classDataManager.html#a45299a7456550d800bd0200e8250da03">DataManager::_casters</a></div><div class="ttdeci">std::vector&lt; IDataCaster * &gt; _casters</div><div class="ttdoc">数据广播器列表</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8h_source.html#l00248">DataManager.h:248</a></div></div>
+<div class="ttc" id="aclassDataManager_html_a464c85daf7499ed773515f8ecb80dc75"><div class="ttname"><a href="classDataManager.html#a464c85daf7499ed773515f8ecb80dc75">DataManager::writeTransaction</a></div><div class="ttdeci">bool writeTransaction(WTSTransData *curTrans)</div><div class="ttdoc">写入成交数据</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00185">DataManager.cpp:185</a></div></div>
+<div class="ttc" id="aclassDataManager_html_a4faf299fd6992bf7f88947c46f0e8883"><div class="ttname"><a href="classDataManager.html#a4faf299fd6992bf7f88947c46f0e8883">DataManager::release</a></div><div class="ttdeci">void release()</div><div class="ttdoc">释放数据管理器资源</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00127">DataManager.cpp:127</a></div></div>
+<div class="ttc" id="aclassDataManager_html_a52c19023bc512956bb1f5654389c7144"><div class="ttname"><a href="classDataManager.html#a52c19023bc512956bb1f5654389c7144">DataManager::writeTick</a></div><div class="ttdeci">bool writeTick(WTSTickData *curTick, uint32_t procFlag)</div><div class="ttdoc">写入Tick数据</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00143">DataManager.cpp:143</a></div></div>
+<div class="ttc" id="aclassDataManager_html_a542206a7205c00f8b5e904b6387f2e07"><div class="ttname"><a href="classDataManager.html#a542206a7205c00f8b5e904b6387f2e07">DataManager::_writer</a></div><div class="ttdeci">IDataWriter * _writer</div><div class="ttdoc">数据写入器指针</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8h_source.html#l00224">DataManager.h:224</a></div></div>
+<div class="ttc" id="aclassDataManager_html_a8187384f9fd3d1d911850aed95de1ba3"><div class="ttname"><a href="classDataManager.html#a8187384f9fd3d1d911850aed95de1ba3">DataManager::canSessionReceive</a></div><div class="ttdeci">virtual bool canSessionReceive(const char *sid) override</div><div class="ttdoc">检查会话是否可以接收数据</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00237">DataManager.cpp:237</a></div></div>
+<div class="ttc" id="aclassDataManager_html_a89391b0a2500159d773defdb95d55bcc"><div class="ttname"><a href="classDataManager.html#a89391b0a2500159d773defdb95d55bcc">DataManager::broadcastOrdDtl</a></div><div class="ttdeci">virtual void broadcastOrdDtl(WTSOrdDtlData *curOrdDtl) override</div><div class="ttdoc">广播委托明细数据</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00263">DataManager.cpp:263</a></div></div>
+<div class="ttc" id="aclassDataManager_html_a9efbbb5e79778c7d7e21b2d64b69fe89"><div class="ttname"><a href="classDataManager.html#a9efbbb5e79778c7d7e21b2d64b69fe89">DataManager::add_ext_dumper</a></div><div class="ttdeci">void add_ext_dumper(const char *id, IHisDataDumper *dumper)</div><div class="ttdoc">添加外部历史数据转储器</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00115">DataManager.cpp:115</a></div></div>
+<div class="ttc" id="aclassDataManager_html_ab5c5a78068d1729014e916bc871edf89"><div class="ttname"><a href="classDataManager.html#ab5c5a78068d1729014e916bc871edf89">DataManager::broadcastOrdQue</a></div><div class="ttdeci">virtual void broadcastOrdQue(WTSOrdQueData *curOrdQue) override</div><div class="ttdoc">广播委托队列数据</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00274">DataManager.cpp:274</a></div></div>
+<div class="ttc" id="aclassDataManager_html_abe8e55f8735d3885a44e6f5648dcd4f8"><div class="ttname"><a href="classDataManager.html#abe8e55f8735d3885a44e6f5648dcd4f8">DataManager::transHisData</a></div><div class="ttdeci">void transHisData(const char *sid)</div><div class="ttdoc">转换历史数据</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00213">DataManager.cpp:213</a></div></div>
+<div class="ttc" id="aclassDataManager_html_ac15c450a2ae334f4799452dc7d0e24bf"><div class="ttname"><a href="classDataManager.html#ac15c450a2ae334f4799452dc7d0e24bf">DataManager::getTradingDate</a></div><div class="ttdeci">virtual uint32_t getTradingDate(const char *pid) override</div><div class="ttdoc">获取交易日期</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00308">DataManager.cpp:308</a></div></div>
+<div class="ttc" id="aclassDataManager_html_ac2eec7fa355109eda41308e1de76d2a8"><div class="ttname"><a href="classDataManager.html#ac2eec7fa355109eda41308e1de76d2a8">DataManager::DataManager</a></div><div class="ttdeci">DataManager()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00029">DataManager.cpp:29</a></div></div>
+<div class="ttc" id="aclassDataManager_html_adf1bd84104573dba1cb9b5921137e4c2"><div class="ttname"><a href="classDataManager.html#adf1bd84104573dba1cb9b5921137e4c2">DataManager::_bd_mgr</a></div><div class="ttdeci">WTSBaseDataMgr * _bd_mgr</div><div class="ttdoc">基础数据管理器指针</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8h_source.html#l00236">DataManager.h:236</a></div></div>
+<div class="ttc" id="aclassDataManager_html_ae1d1a5fa4fd2cfb9af0e985bfb287867"><div class="ttname"><a href="classDataManager.html#ae1d1a5fa4fd2cfb9af0e985bfb287867">DataManager::writeOrderDetail</a></div><div class="ttdeci">bool writeOrderDetail(WTSOrdDtlData *curOrdDetail)</div><div class="ttdoc">写入委托明细数据</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00171">DataManager.cpp:171</a></div></div>
+<div class="ttc" id="aclassDataManager_html_ae3f9f07c8955641da49b40604d637789"><div class="ttname"><a href="classDataManager.html#ae3f9f07c8955641da49b40604d637789">DataManager::_state_mon</a></div><div class="ttdeci">StateMonitor * _state_mon</div><div class="ttdoc">状态监控器指针</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8h_source.html#l00242">DataManager.h:242</a></div></div>
+<div class="ttc" id="aclassDataManager_html_ae639e459d5cb3416eea4afa5bd04283b"><div class="ttname"><a href="classDataManager.html#ae639e459d5cb3416eea4afa5bd04283b">DataManager::getBDMgr</a></div><div class="ttdeci">virtual IBaseDataMgr * getBDMgr() override</div><div class="ttdoc">获取基础数据管理器</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00226">DataManager.cpp:226</a></div></div>
+<div class="ttc" id="aclassDataManager_html_ae8ba66981d456f940d3ff5e7af6a575a"><div class="ttname"><a href="classDataManager.html#ae8ba66981d456f940d3ff5e7af6a575a">DataManager::isSessionProceeded</a></div><div class="ttdeci">bool isSessionProceeded(const char *sid)</div><div class="ttdoc">检查会话是否已处理</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00051">DataManager.cpp:51</a></div></div>
+<div class="ttc" id="aclassDataManager_html_ae8dc8dc510fb873989998aeb5e9930ed"><div class="ttname"><a href="classDataManager.html#ae8dc8dc510fb873989998aeb5e9930ed">DataManager::_remover</a></div><div class="ttdeci">FuncDeleteWriter _remover</div><div class="ttdoc">数据写入器删除函数</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8h_source.html#l00230">DataManager.h:230</a></div></div>
+<div class="ttc" id="aclassDataManager_html_aec5503e306ad370cbe97237ee8245a64"><div class="ttname"><a href="classDataManager.html#aec5503e306ad370cbe97237ee8245a64">DataManager::outputLog</a></div><div class="ttdeci">virtual void outputLog(WTSLogLevel ll, const char *message) override</div><div class="ttdoc">处理解析模块的日志</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00319">DataManager.cpp:319</a></div></div>
+<div class="ttc" id="aclassDataManager_html_aedb1f07db0165efe7ed4acab62d8c72d"><div class="ttname"><a href="classDataManager.html#aedb1f07db0165efe7ed4acab62d8c72d">DataManager::writeOrderQueue</a></div><div class="ttdeci">bool writeOrderQueue(WTSOrdQueData *curOrdQue)</div><div class="ttdoc">写入委托队列数据</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00157">DataManager.cpp:157</a></div></div>
+<div class="ttc" id="aclassDataManager_html_aee3461c86010ed85a197df29c8ff52d6"><div class="ttname"><a href="classDataManager.html#aee3461c86010ed85a197df29c8ff52d6">DataManager::getCurTick</a></div><div class="ttdeci">WTSTickData * getCurTick(const char *code, const char *exchg=&quot;&quot;)</div><div class="ttdoc">获取当前的Tick数据</div><div class="ttdef"><b>Definition</b> <a href="DataManager_8cpp_source.html#l00200">DataManager.cpp:200</a></div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html"><div class="ttname"><a href="classIBaseDataMgr.html">IBaseDataMgr</a></div><div class="ttdoc">基础数据管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IBaseDataMgr_8h_source.html#l00075">IBaseDataMgr.h:76</a></div></div>
+<div class="ttc" id="aclassIDataCaster_html"><div class="ttname"><a href="classIDataCaster.html">IDataCaster</a></div><div class="ttdoc">数据广播器接口</div><div class="ttdef"><b>Definition</b> <a href="IDataCaster_8h_source.html#l00026">IDataCaster.h:27</a></div></div>
+<div class="ttc" id="aclassIDataWriter_html_a27ce9df961576b0f61f0a3e7afec98f1"><div class="ttname"><a href="classIDataWriter.html#a27ce9df961576b0f61f0a3e7afec98f1">IDataWriter::init</a></div><div class="ttdeci">virtual bool init(WTSVariant *params, IDataWriterSink *sink)</div><div class="ttdef"><b>Definition</b> <a href="IDataWriter_8h_source.html#l00077">IDataWriter.h:77</a></div></div>
+<div class="ttc" id="aclassIDataWriter_html_a32a6e17485cc926938c87e00c85faae5"><div class="ttname"><a href="classIDataWriter.html#a32a6e17485cc926938c87e00c85faae5">IDataWriter::writeTick</a></div><div class="ttdeci">virtual bool writeTick(WTSTickData *curTick, uint32_t procFlag)=0</div></div>
+<div class="ttc" id="aclassIDataWriter_html_a4f62f6aa5caba1c1695167ff0cfcbe95"><div class="ttname"><a href="classIDataWriter.html#a4f62f6aa5caba1c1695167ff0cfcbe95">IDataWriter::add_ext_dumper</a></div><div class="ttdeci">void add_ext_dumper(const char *id, IHisDataDumper *dumper)</div><div class="ttdef"><b>Definition</b> <a href="IDataWriter_8h_source.html#l00081">IDataWriter.h:81</a></div></div>
+<div class="ttc" id="aclassIDataWriter_html_a76d75fdd6477184112b5754f413e1d44"><div class="ttname"><a href="classIDataWriter.html#a76d75fdd6477184112b5754f413e1d44">IDataWriter::writeTransaction</a></div><div class="ttdeci">virtual bool writeTransaction(WTSTransData *curTrans)</div><div class="ttdef"><b>Definition</b> <a href="IDataWriter_8h_source.html#l00090">IDataWriter.h:90</a></div></div>
+<div class="ttc" id="aclassIDataWriter_html_a86ef2f1c1604fda4d315d3152665ea8d"><div class="ttname"><a href="classIDataWriter.html#a86ef2f1c1604fda4d315d3152665ea8d">IDataWriter::getCurTick</a></div><div class="ttdeci">virtual WTSTickData * getCurTick(const char *code, const char *exchg=&quot;&quot;)=0</div></div>
+<div class="ttc" id="aclassIDataWriter_html_ac076f35d84daa3e3ebe61ed65400c9bc"><div class="ttname"><a href="classIDataWriter.html#ac076f35d84daa3e3ebe61ed65400c9bc">IDataWriter::release</a></div><div class="ttdeci">virtual void release()=0</div></div>
+<div class="ttc" id="aclassIDataWriter_html_ad8f660f817a17cec0772cfb60a8b2c8a"><div class="ttname"><a href="classIDataWriter.html#ad8f660f817a17cec0772cfb60a8b2c8a">IDataWriter::transHisData</a></div><div class="ttdeci">virtual void transHisData(const char *sid)</div><div class="ttdef"><b>Definition</b> <a href="IDataWriter_8h_source.html#l00092">IDataWriter.h:92</a></div></div>
+<div class="ttc" id="aclassIDataWriter_html_ae36386c6dcb53ded0908747bca672670"><div class="ttname"><a href="classIDataWriter.html#ae36386c6dcb53ded0908747bca672670">IDataWriter::isSessionProceeded</a></div><div class="ttdeci">virtual bool isSessionProceeded(const char *sid)</div><div class="ttdef"><b>Definition</b> <a href="IDataWriter_8h_source.html#l00094">IDataWriter.h:94</a></div></div>
+<div class="ttc" id="aclassIDataWriter_html_ae58deaf82d2b6e8ef880f41daefbff60"><div class="ttname"><a href="classIDataWriter.html#ae58deaf82d2b6e8ef880f41daefbff60">IDataWriter::writeOrderDetail</a></div><div class="ttdeci">virtual bool writeOrderDetail(WTSOrdDtlData *curOrdDetail)</div><div class="ttdef"><b>Definition</b> <a href="IDataWriter_8h_source.html#l00088">IDataWriter.h:88</a></div></div>
+<div class="ttc" id="aclassIDataWriter_html_ae8fb141733920de6d5830517a05c11c8"><div class="ttname"><a href="classIDataWriter.html#ae8fb141733920de6d5830517a05c11c8">IDataWriter::writeOrderQueue</a></div><div class="ttdeci">virtual bool writeOrderQueue(WTSOrdQueData *curOrdQue)</div><div class="ttdef"><b>Definition</b> <a href="IDataWriter_8h_source.html#l00086">IDataWriter.h:86</a></div></div>
+<div class="ttc" id="aclassIHisDataDumper_html"><div class="ttname"><a href="classIHisDataDumper.html">IHisDataDumper</a></div><div class="ttdef"><b>Definition</b> <a href="IDataWriter_8h_source.html#l00056">IDataWriter.h:57</a></div></div>
+<div class="ttc" id="aclassStateMonitor_html"><div class="ttname"><a href="classStateMonitor.html">StateMonitor</a></div><div class="ttdoc">交易状态监控器类</div><div class="ttdef"><b>Definition</b> <a href="StateMonitor_8h_source.html#l00127">StateMonitor.h:128</a></div></div>
+<div class="ttc" id="aclassStateMonitor_html_aa36965beda4a3349ce9f8024cc9b9334"><div class="ttname"><a href="classStateMonitor.html#aa36965beda4a3349ce9f8024cc9b9334">StateMonitor::isInState</a></div><div class="ttdeci">bool isInState(const char *sid, SimpleState ss) const</div><div class="ttdoc">检查指定交易时间段是否处于特定状态</div><div class="ttdef"><b>Definition</b> <a href="StateMonitor_8h_source.html#l00211">StateMonitor.h:211</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html"><div class="ttname"><a href="classWTSBaseDataMgr.html">WTSBaseDataMgr</a></div><div class="ttdoc">基础数据管理器类</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8h_source.html#l00073">WTSBaseDataMgr.h:74</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a490678d017a3095f8f80956eb24e158b"><div class="ttname"><a href="classWTSBaseDataMgr.html#a490678d017a3095f8f80956eb24e158b">WTSBaseDataMgr::getTradingDate</a></div><div class="ttdeci">uint32_t getTradingDate(const char *stdPID, uint32_t uOffDate=0, uint32_t uOffMinute=0, bool isTpl=false)</div><div class="ttdoc">获取交易日期</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l01030">WTSBaseDataMgr.cpp:1030</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_ac266e833193103d566d3f15dba590245"><div class="ttname"><a href="classWTSBaseDataMgr.html#ac266e833193103d566d3f15dba590245">WTSBaseDataMgr::getSessionComms</a></div><div class="ttdeci">CodeSet * getSessionComms(const char *sid)</div><div class="ttdoc">获取交易时段对应的代码集合</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l01222">WTSBaseDataMgr.cpp:1222</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a20d65255542e3ed5d694b529892a0f57"><div class="ttname"><a href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a></div><div class="ttdeci">static void info(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出信息级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00187">WTSLogger.h:187</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a618c41d0ff3c1f5ce0a70d83c28bc9fc"><div class="ttname"><a href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a></div><div class="ttdeci">static void error(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出错误级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00239">WTSLogger.h:239</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_aa3257bbd8e5b1db25f65cd936f50025c"><div class="ttname"><a href="classWTSLogger.html#aa3257bbd8e5b1db25f65cd936f50025c">WTSLogger::log_raw</a></div><div class="ttdeci">static void log_raw(WTSLogLevel ll, const char *message)</div><div class="ttdoc">直接输出日志消息</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00407">WTSLogger.cpp:407</a></div></div>
+<div class="ttc" id="aclassWTSOrdDtlData_html"><div class="ttname"><a href="classWTSOrdDtlData.html">WTSOrdDtlData</a></div><div class="ttdoc">委托明细数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01726">WTSDataDef.hpp:1727</a></div></div>
+<div class="ttc" id="aclassWTSOrdQueData_html"><div class="ttname"><a href="classWTSOrdQueData.html">WTSOrdQueData</a></div><div class="ttdoc">委托队列数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01613">WTSDataDef.hpp:1614</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSTransData_html"><div class="ttname"><a href="classWTSTransData.html">WTSTransData</a></div><div class="ttdoc">成交数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01840">WTSDataDef.hpp:1841</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassfastest__hashset_3_01std_1_1string_01_4_html"><div class="ttname"><a href="classfastest__hashset_3_01std_1_1string_01_4.html">fastest_hashset&lt; std::string &gt;</a></div><div class="ttdoc">字符串元素的高性能哈希集合类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00134">FasterDefs.h:135</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_a28b32a32e43d6abee9cd6e629f0fe5a.html">WtDtCore</a></li><li class="navelem"><a class="el" href="DataManager_8cpp.html">DataManager.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

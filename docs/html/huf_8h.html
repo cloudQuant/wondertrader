@@ -1,0 +1,497 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/huf.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('huf_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">huf.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;stddef.h&gt;</code><br />
+</div>
+<p><a href="huf_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a1c1c22f5cc7bed4607fe7200f346d544" id="r_a1c1c22f5cc7bed4607fe7200f346d544"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf_8h.html#a1c1c22f5cc7bed4607fe7200f346d544">HUF_H_298734234</a></td></tr>
+<tr class="separator:a1c1c22f5cc7bed4607fe7200f346d544"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e1bbac986bf333ee78d686cc81fa078" id="r_a3e1bbac986bf333ee78d686cc81fa078"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a></td></tr>
+<tr class="separator:a3e1bbac986bf333ee78d686cc81fa078"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a85a93e7aec3443f516c69bc9f41afd" id="r_a1a85a93e7aec3443f516c69bc9f41afd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf_8h.html#a1a85a93e7aec3443f516c69bc9f41afd">HUF_BLOCKSIZE_MAX</a>&#160;&#160;&#160;(128 * 1024)</td></tr>
+<tr class="separator:a1a85a93e7aec3443f516c69bc9f41afd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64c2d50f510f73bd3886e232704f5c89" id="r_a64c2d50f510f73bd3886e232704f5c89"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf_8h.html#a64c2d50f510f73bd3886e232704f5c89">HUF_WORKSPACE_SIZE</a>&#160;&#160;&#160;(6 &lt;&lt; 10)</td></tr>
+<tr class="separator:a64c2d50f510f73bd3886e232704f5c89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afce88445575b2836fe0e8766470d7cd1" id="r_afce88445575b2836fe0e8766470d7cd1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf_8h.html#afce88445575b2836fe0e8766470d7cd1">HUF_WORKSPACE_SIZE_U32</a>&#160;&#160;&#160;(<a class="el" href="huf_8h.html#a64c2d50f510f73bd3886e232704f5c89">HUF_WORKSPACE_SIZE</a> / sizeof(<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>))</td></tr>
+<tr class="separator:afce88445575b2836fe0e8766470d7cd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:ad334d7d2d97830ce9b4eef5356fb7b78" id="r_ad334d7d2d97830ce9b4eef5356fb7b78"><td class="memItemLeft" align="right" valign="top"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf_8h.html#ad334d7d2d97830ce9b4eef5356fb7b78">HUF_compress</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:ad334d7d2d97830ce9b4eef5356fb7b78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e27beb5fab648d9e686964a17c84840" id="r_a2e27beb5fab648d9e686964a17c84840"><td class="memItemLeft" align="right" valign="top"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf_8h.html#a2e27beb5fab648d9e686964a17c84840">HUF_decompress</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t originalSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *cSrc, size_t cSrcSize)</td></tr>
+<tr class="separator:a2e27beb5fab648d9e686964a17c84840"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1907a544fbfa39e141735f928653568a" id="r_a1907a544fbfa39e141735f928653568a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf_8h.html#a1907a544fbfa39e141735f928653568a">HUF_compressBound</a> (size_t size)</td></tr>
+<tr class="separator:a1907a544fbfa39e141735f928653568a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af096de46388cc4ada6d463b9b3b23f7c" id="r_af096de46388cc4ada6d463b9b3b23f7c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a> unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf_8h.html#af096de46388cc4ada6d463b9b3b23f7c">HUF_isError</a> (size_t code)</td></tr>
+<tr class="separator:af096de46388cc4ada6d463b9b3b23f7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8486584523cd9c56ed09e056048149a" id="r_aa8486584523cd9c56ed09e056048149a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf_8h.html#aa8486584523cd9c56ed09e056048149a">HUF_getErrorName</a> (size_t code)</td></tr>
+<tr class="separator:aa8486584523cd9c56ed09e056048149a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa5982936a5754626081cf06319679e4" id="r_aaa5982936a5754626081cf06319679e4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf_8h.html#aaa5982936a5754626081cf06319679e4">HUF_compress2</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, unsigned maxSymbolValue, unsigned tableLog)</td></tr>
+<tr class="separator:aaa5982936a5754626081cf06319679e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa090f9b76762edc716509df736cf273f" id="r_aa090f9b76762edc716509df736cf273f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="huf_8h.html#aa090f9b76762edc716509df736cf273f">HUF_compress4X_wksp</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstCapacity, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, unsigned maxSymbolValue, unsigned tableLog, void *workSpace, size_t wkspSize)</td></tr>
+<tr class="separator:aa090f9b76762edc716509df736cf273f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a1a85a93e7aec3443f516c69bc9f41afd" name="a1a85a93e7aec3443f516c69bc9f41afd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a85a93e7aec3443f516c69bc9f41afd">&#9670;&#160;</a></span>HUF_BLOCKSIZE_MAX</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_BLOCKSIZE_MAX&#160;&#160;&#160;(128 * 1024)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>maximum input size for a single block compressed with HUF_compress </p>
+
+<p class="definition">在文件 <a class="el" href="huf_8h_source.html">huf.h</a> 第 <a class="el" href="huf_8h_source.html#l00092">92</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1c1c22f5cc7bed4607fe7200f346d544" name="a1c1c22f5cc7bed4607fe7200f346d544"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c1c22f5cc7bed4607fe7200f346d544">&#9670;&#160;</a></span>HUF_H_298734234</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_H_298734234</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf_8h_source.html">huf.h</a> 第 <a class="el" href="huf_8h_source.html#l00040">40</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3e1bbac986bf333ee78d686cc81fa078" name="a3e1bbac986bf333ee78d686cc81fa078"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e1bbac986bf333ee78d686cc81fa078">&#9670;&#160;</a></span>HUF_PUBLIC_API</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_PUBLIC_API</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf_8h_source.html">huf.h</a> 第 <a class="el" href="huf_8h_source.html#l00057">57</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a64c2d50f510f73bd3886e232704f5c89" name="a64c2d50f510f73bd3886e232704f5c89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64c2d50f510f73bd3886e232704f5c89">&#9670;&#160;</a></span>HUF_WORKSPACE_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_WORKSPACE_SIZE&#160;&#160;&#160;(6 &lt;&lt; 10)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="huf_8h.html#aa090f9b76762edc716509df736cf273f">HUF_compress4X_wksp()</a> : Same as <a class="el" href="huf_8h.html#aaa5982936a5754626081cf06319679e4">HUF_compress2()</a>, but uses externally allocated <code>workSpace</code>. <code>workspace</code> must have minimum alignment of 4, and be at least as large as HUF_WORKSPACE_SIZE </p>
+
+<p class="definition">在文件 <a class="el" href="huf_8h_source.html">huf.h</a> 第 <a class="el" href="huf_8h_source.html#l00113">113</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afce88445575b2836fe0e8766470d7cd1" name="afce88445575b2836fe0e8766470d7cd1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afce88445575b2836fe0e8766470d7cd1">&#9670;&#160;</a></span>HUF_WORKSPACE_SIZE_U32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_WORKSPACE_SIZE_U32&#160;&#160;&#160;(<a class="el" href="huf_8h.html#a64c2d50f510f73bd3886e232704f5c89">HUF_WORKSPACE_SIZE</a> / sizeof(<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf_8h_source.html">huf.h</a> 第 <a class="el" href="huf_8h_source.html#l00114">114</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="ad334d7d2d97830ce9b4eef5356fb7b78" name="ad334d7d2d97830ce9b4eef5356fb7b78"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad334d7d2d97830ce9b4eef5356fb7b78">&#9670;&#160;</a></span>HUF_compress()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a> size_t HUF_compress </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="huf_8h.html#ad334d7d2d97830ce9b4eef5356fb7b78">HUF_compress()</a> : Compress content from buffer 'src', of size 'srcSize', into buffer 'dst'. 'dst' buffer must be already allocated. Compression runs faster if <code>dstCapacity</code> &gt;= HUF_compressBound(srcSize). <code>srcSize</code> must be &lt;= <code>HUF_BLOCKSIZE_MAX</code> == 128 KB. </p><dl class="section return"><dt>返回</dt><dd>: size of compressed data (&lt;= <code>dstCapacity</code>). Special values : if return == 0, srcData is not compressible =&gt; Nothing is stored within dst !!! if <a class="el" href="huf__compress_8c.html#ad2de9e4837283ff6a5d5f4e2f43c6fed">HUF_isError(return)</a>, compression failed (more details using <a class="el" href="huf_8h.html#aa8486584523cd9c56ed09e056048149a">HUF_getErrorName()</a>) </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00795">795</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaa5982936a5754626081cf06319679e4" name="aaa5982936a5754626081cf06319679e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa5982936a5754626081cf06319679e4">&#9670;&#160;</a></span>HUF_compress2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a> size_t HUF_compress2 </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>tableLog</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="huf_8h.html#aaa5982936a5754626081cf06319679e4">HUF_compress2()</a> : Same as <a class="el" href="huf_8h.html#ad334d7d2d97830ce9b4eef5356fb7b78">HUF_compress()</a>, but offers control over <code>maxSymbolValue</code> and <code>tableLog</code>. <code>maxSymbolValue</code> must be &lt;= HUF_SYMBOLVALUE_MAX . <code>tableLog</code> must be <code>&lt;= HUF_TABLELOG_MAX</code> . </p>
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00787">787</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa090f9b76762edc716509df736cf273f" name="aa090f9b76762edc716509df736cf273f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa090f9b76762edc716509df736cf273f">&#9670;&#160;</a></span>HUF_compress4X_wksp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a> size_t HUF_compress4X_wksp </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>maxSymbolValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>tableLog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>workSpace</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>wkspSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00761">761</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1907a544fbfa39e141735f928653568a" name="a1907a544fbfa39e141735f928653568a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1907a544fbfa39e141735f928653568a">&#9670;&#160;</a></span>HUF_compressBound()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a> size_t HUF_compressBound </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>maximum compressed size (worst case) </p>
+
+<p class="definition">在文件 <a class="el" href="huf__compress_8c_source.html">huf_compress.c</a> 第 <a class="el" href="huf__compress_8c_source.html#l00449">449</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2e27beb5fab648d9e686964a17c84840" name="a2e27beb5fab648d9e686964a17c84840"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e27beb5fab648d9e686964a17c84840">&#9670;&#160;</a></span>HUF_decompress()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a> size_t HUF_decompress </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>originalSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>cSrc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>cSrcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="huf_8h.html#a2e27beb5fab648d9e686964a17c84840">HUF_decompress()</a> : Decompress HUF data from buffer 'cSrc', of size 'cSrcSize', into already allocated buffer 'dst', of minimum size 'dstSize'. <code>originalSize</code> : <b>must</b> be the <em><b>exact</b></em> size of original (uncompressed) data. Note : in contrast with FSE, HUF_decompress can regenerate RLE (cSrcSize==1) and uncompressed (cSrcSize==dstSize) data, because it knows size to regenerate (originalSize). </p><dl class="section return"><dt>返回</dt><dd>: size of regenerated data (== originalSize), or an error code, which can be tested using <a class="el" href="huf__compress_8c.html#ad2de9e4837283ff6a5d5f4e2f43c6fed">HUF_isError()</a> </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="huf__decompress_8c_source.html">huf_decompress.c</a> 第 <a class="el" href="huf__decompress_8c_source.html#l01042">1042</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa8486584523cd9c56ed09e056048149a" name="aa8486584523cd9c56ed09e056048149a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8486584523cd9c56ed09e056048149a">&#9670;&#160;</a></span>HUF_getErrorName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * HUF_getErrorName </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>code</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>provides error code string (useful for debugging) </p>
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00055">55</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af096de46388cc4ada6d463b9b3b23f7c" name="af096de46388cc4ada6d463b9b3b23f7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af096de46388cc4ada6d463b9b3b23f7c">&#9670;&#160;</a></span>HUF_isError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="huf_8h.html#a3e1bbac986bf333ee78d686cc81fa078">HUF_PUBLIC_API</a> unsigned HUF_isError </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>code</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>tells if a return value is an error code </p>
+
+<p class="definition">在文件 <a class="el" href="entropy__common_8c_source.html">entropy_common.c</a> 第 <a class="el" href="entropy__common_8c_source.html#l00054">54</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="huf_8h.html">huf.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

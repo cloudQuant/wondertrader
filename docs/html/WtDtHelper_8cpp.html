@@ -1,0 +1,1264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtDtHelper/WtDtHelper.cpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtDtHelper_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">WtDtHelper.cpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>WonderTrader数据处理辅助工具实现文件  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="WtDtHelper_8h_source.html">WtDtHelper.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="StrUtil_8hpp_source.html">../Share/StrUtil.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="TimeUtils_8hpp_source.html">../Share/TimeUtils.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="BoostFile_8hpp_source.html">../Share/BoostFile.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="DataDefine_8h_source.html">../WtDataStorage/DataDefine.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSCmpHelper_8hpp_source.html">../WTSUtils/WTSCmpHelper.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="CsvHelper_8h_source.html">../WTSTools/CsvHelper.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSDataFactory_8h_source.html">../WTSTools/WTSDataFactory.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSDataDef_8hpp_source.html">../Includes/WTSDataDef.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSSessionInfo_8hpp_source.html">../Includes/WTSSessionInfo.hpp</a>&quot;</code><br />
+<code>#include &lt;rapidjson/document.h&gt;</code><br />
+</div>
+<p><a href="WtDtHelper_8cpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:af4121e0ca49fabb58e2d0a0b0521e50a" id="r_af4121e0ca49fabb58e2d0a0b0521e50a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#af4121e0ca49fabb58e2d0a0b0521e50a">proc_block_data</a> (std::string &amp;content, bool isBar, bool bKeepHead)</td></tr>
+<tr class="memdesc:af4121e0ca49fabb58e2d0a0b0521e50a"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理数据块内容  <br /></td></tr>
+<tr class="separator:af4121e0ca49fabb58e2d0a0b0521e50a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5308fc3b3a07c15795ba2042046f7ee" id="r_af5308fc3b3a07c15795ba2042046f7ee"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#af5308fc3b3a07c15795ba2042046f7ee">strToTime</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *strTime, bool bKeepSec=false)</td></tr>
+<tr class="memdesc:af5308fc3b3a07c15795ba2042046f7ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">将时间字符串转换为整数时间  <br /></td></tr>
+<tr class="separator:af5308fc3b3a07c15795ba2042046f7ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ce5519d16ea24faeb3a1eee589fea02" id="r_a3ce5519d16ea24faeb3a1eee589fea02"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#a3ce5519d16ea24faeb3a1eee589fea02">strToDate</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *strDate)</td></tr>
+<tr class="memdesc:a3ce5519d16ea24faeb3a1eee589fea02"><td class="mdescLeft">&#160;</td><td class="mdescRight">将日期字符串转换为整数日期  <br /></td></tr>
+<tr class="separator:a3ce5519d16ea24faeb3a1eee589fea02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab74aa34a4cbd5cb52e61e0f7c02832af" id="r_ab74aa34a4cbd5cb52e61e0f7c02832af"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#ab74aa34a4cbd5cb52e61e0f7c02832af">dump_bars</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> binFolder, <a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> csvFolder, <a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> strFilter, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:ab74aa34a4cbd5cb52e61e0f7c02832af"><td class="mdescLeft">&#160;</td><td class="mdescRight">将二进制K线数据导出为CSV格式  <br /></td></tr>
+<tr class="separator:ab74aa34a4cbd5cb52e61e0f7c02832af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15d3ad2f30de90fda2cf37a5cf6ac4a5" id="r_a15d3ad2f30de90fda2cf37a5cf6ac4a5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#a15d3ad2f30de90fda2cf37a5cf6ac4a5">dump_ticks</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> binFolder, <a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> csvFolder, <a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> strFilter, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:a15d3ad2f30de90fda2cf37a5cf6ac4a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">将二进制Tick数据导出为CSV格式  <br /></td></tr>
+<tr class="separator:a15d3ad2f30de90fda2cf37a5cf6ac4a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86b64d0c591e2a8056716a92de203715" id="r_a86b64d0c591e2a8056716a92de203715"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#a86b64d0c591e2a8056716a92de203715">trans_csv_bars</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> csvFolder, <a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> binFolder, <a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> period, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:a86b64d0c591e2a8056716a92de203715"><td class="mdescLeft">&#160;</td><td class="mdescRight">将CSV格式的K线数据转换为二进制格式  <br /></td></tr>
+<tr class="separator:a86b64d0c591e2a8056716a92de203715"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0fb31f01944b0cff539e0fb026983b5" id="r_ae0fb31f01944b0cff539e0fb026983b5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#ae0fb31f01944b0cff539e0fb026983b5">read_dsb_ticks</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> tickFile, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#a8b92e6a2486fb919bc36cdf65da1a33e">FuncGetTicksCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:ae0fb31f01944b0cff539e0fb026983b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">读取二进制Tick数据文件（.dsb格式）  <br /></td></tr>
+<tr class="separator:ae0fb31f01944b0cff539e0fb026983b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb1c9129adf59450dea3d8b78c384685" id="r_abb1c9129adf59450dea3d8b78c384685"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#abb1c9129adf59450dea3d8b78c384685">read_dsb_order_details</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> dataFile, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#ae206eac8a3c7517f3519250777b77e51">FuncGetOrdDtlCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:abb1c9129adf59450dea3d8b78c384685"><td class="mdescLeft">&#160;</td><td class="mdescRight">读取二进制委托明细数据文件（.dsb格式）  <br /></td></tr>
+<tr class="separator:abb1c9129adf59450dea3d8b78c384685"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae767e4b98c505769c44f62f2d20ffa9c" id="r_ae767e4b98c505769c44f62f2d20ffa9c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#ae767e4b98c505769c44f62f2d20ffa9c">read_dsb_order_queues</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> dataFile, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#a6fdf1aa7a67f8c0dd83fb0cd74bd7a79">FuncGetOrdQueCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:ae767e4b98c505769c44f62f2d20ffa9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">读取二进制委托队列数据文件（.dsb格式）  <br /></td></tr>
+<tr class="separator:ae767e4b98c505769c44f62f2d20ffa9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a848c083ba6d70c77c978db5540f6489b" id="r_a848c083ba6d70c77c978db5540f6489b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#a848c083ba6d70c77c978db5540f6489b">read_dsb_transactions</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> dataFile, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#a4017585870765dae785244513ead457c">FuncGetTransCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:a848c083ba6d70c77c978db5540f6489b"><td class="mdescLeft">&#160;</td><td class="mdescRight">读取二进制成交数据文件（.dsb格式）  <br /></td></tr>
+<tr class="separator:a848c083ba6d70c77c978db5540f6489b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9688929a7a8442d44255d87e363de835" id="r_a9688929a7a8442d44255d87e363de835"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#a9688929a7a8442d44255d87e363de835">read_dsb_bars</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> barFile, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#aa50d30d10ed7c19942ff7c599313947e">FuncGetBarsCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:a9688929a7a8442d44255d87e363de835"><td class="mdescLeft">&#160;</td><td class="mdescRight">读取二进制K线数据文件（.dsb格式）  <br /></td></tr>
+<tr class="separator:a9688929a7a8442d44255d87e363de835"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98c7add7329ec41b14a9d5c6a1e1843a" id="r_a98c7add7329ec41b14a9d5c6a1e1843a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#a98c7add7329ec41b14a9d5c6a1e1843a">read_dmb_bars</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> barFile, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#aa50d30d10ed7c19942ff7c599313947e">FuncGetBarsCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:a98c7add7329ec41b14a9d5c6a1e1843a"><td class="mdescLeft">&#160;</td><td class="mdescRight">读取内存映射二进制K线数据文件（.dmb格式）  <br /></td></tr>
+<tr class="separator:a98c7add7329ec41b14a9d5c6a1e1843a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae90feb0a8eb31e7d128e7663440a607c" id="r_ae90feb0a8eb31e7d128e7663440a607c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#ae90feb0a8eb31e7d128e7663440a607c">read_dmb_ticks</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> tickFile, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#a8b92e6a2486fb919bc36cdf65da1a33e">FuncGetTicksCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:ae90feb0a8eb31e7d128e7663440a607c"><td class="mdescLeft">&#160;</td><td class="mdescRight">读取内存映射二进制Tick数据文件（.dmb格式）  <br /></td></tr>
+<tr class="separator:ae90feb0a8eb31e7d128e7663440a607c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad31e5513e9235a97b00e777c670d1e19" id="r_ad31e5513e9235a97b00e777c670d1e19"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#ad31e5513e9235a97b00e777c670d1e19">resample_bars</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> barFile, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#aa50d30d10ed7c19942ff7c599313947e">FuncGetBarsCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt, <a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a> fromTime, <a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a> endTime, <a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> period, <a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> times, <a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> sessInfo, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger, bool bAlignSec)</td></tr>
+<tr class="memdesc:ad31e5513e9235a97b00e777c670d1e19"><td class="mdescLeft">&#160;</td><td class="mdescRight">对K线数据进行重采样  <br /></td></tr>
+<tr class="separator:ad31e5513e9235a97b00e777c670d1e19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71fb51c14a80487ce1b02b501a3d0a59" id="r_a71fb51c14a80487ce1b02b501a3d0a59"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#a71fb51c14a80487ce1b02b501a3d0a59">store_bars</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> barFile, <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *firstBar, int count, <a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> period, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:a71fb51c14a80487ce1b02b501a3d0a59"><td class="mdescLeft">&#160;</td><td class="mdescRight">将K线数据存储为二进制文件  <br /></td></tr>
+<tr class="separator:a71fb51c14a80487ce1b02b501a3d0a59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56bf55b6d12558d61c04cc2c4225cda7" id="r_a56bf55b6d12558d61c04cc2c4225cda7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#a56bf55b6d12558d61c04cc2c4225cda7">store_ticks</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> tickFile, <a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *firstTick, int count, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:a56bf55b6d12558d61c04cc2c4225cda7"><td class="mdescLeft">&#160;</td><td class="mdescRight">将Tick数据存储为二进制文件  <br /></td></tr>
+<tr class="separator:a56bf55b6d12558d61c04cc2c4225cda7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72914235da01a3e86592701a2e87fe48" id="r_a72914235da01a3e86592701a2e87fe48"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#a72914235da01a3e86592701a2e87fe48">store_order_details</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> tickFile, <a class="el" href="structWTSOrdDtlStruct.html">WTSOrdDtlStruct</a> *firstItem, int count, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:a72914235da01a3e86592701a2e87fe48"><td class="mdescLeft">&#160;</td><td class="mdescRight">将委托明细数据存储为二进制文件（股票Level2数据）  <br /></td></tr>
+<tr class="separator:a72914235da01a3e86592701a2e87fe48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a490bcb146cf00692c6ce0d22081f3cd9" id="r_a490bcb146cf00692c6ce0d22081f3cd9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#a490bcb146cf00692c6ce0d22081f3cd9">store_order_queues</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> tickFile, <a class="el" href="structWTSOrdQueStruct.html">WTSOrdQueStruct</a> *firstItem, int count, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:a490bcb146cf00692c6ce0d22081f3cd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">将委托队列数据存储为二进制文件（股票Level2数据）  <br /></td></tr>
+<tr class="separator:a490bcb146cf00692c6ce0d22081f3cd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac69f64de4c6cf4a370f6bfaa9534ccb8" id="r_ac69f64de4c6cf4a370f6bfaa9534ccb8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#ac69f64de4c6cf4a370f6bfaa9534ccb8">store_transactions</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> tickFile, <a class="el" href="structWTSTransStruct.html">WTSTransStruct</a> *firstItem, int count, <a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLogger)</td></tr>
+<tr class="memdesc:ac69f64de4c6cf4a370f6bfaa9534ccb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">将成交数据存储为二进制文件（股票Level2数据）  <br /></td></tr>
+<tr class="separator:ac69f64de4c6cf4a370f6bfaa9534ccb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a17226795848decb565e90624584e5c0f" id="r_a17226795848decb565e90624584e5c0f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtHelper_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></td></tr>
+<tr class="separator:a17226795848decb565e90624584e5c0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>WonderTrader数据处理辅助工具实现文件 </p>
+<p>@project WonderTrader</p>
+<dl class="section author"><dt>作者</dt><dd>Wesley </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2020/03/30</dd></dl>
+<p>该文件实现了WonderTrader数据处理辅助工具的接口函数， 包括数据转换、数据导出、数据读取和数据重采样等功能。 这些函数主要用于处理K线、Tick、委托明细、委托队列和成交数据， 支持二进制数据与CSV格式之间的转换，以及数据的读取和重采样操作。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="ab74aa34a4cbd5cb52e61e0f7c02832af" name="ab74aa34a4cbd5cb52e61e0f7c02832af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab74aa34a4cbd5cb52e61e0f7c02832af">&#9670;&#160;</a></span>dump_bars()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void dump_bars </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>binFolder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>csvFolder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>strFilter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将二进制K线数据导出为CSV格式 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">binFolder</td><td>二进制数据文件夹路径 </td></tr>
+    <tr><td class="paramname">csvFolder</td><td>CSV输出文件夹路径 </td></tr>
+    <tr><td class="paramname">strFilter</td><td>合约过滤器，支持通配符，默认为空（处理所有合约） </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数，默认为NULL</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>该函数遍历指定目录中的.dsb文件，将其中的K线数据转换为CSV格式并存储到目标文件夹。 对于每个文件，首先检查是否是K线数据，然后读取并处理数据块，最后将数据写入CSV文件。 可以通过strFilter参数指定要处理的合约。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00203">203</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a15d3ad2f30de90fda2cf37a5cf6ac4a5" name="a15d3ad2f30de90fda2cf37a5cf6ac4a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15d3ad2f30de90fda2cf37a5cf6ac4a5">&#9670;&#160;</a></span>dump_ticks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void dump_ticks </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>binFolder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>csvFolder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>strFilter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将二进制Tick数据导出为CSV格式 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">binFolder</td><td>二进制数据文件夹路径 </td></tr>
+    <tr><td class="paramname">csvFolder</td><td>CSV输出文件夹路径 </td></tr>
+    <tr><td class="paramname">strFilter</td><td>合约过滤器，支持通配符，默认为空（处理所有合约） </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数，默认为NULL</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>该函数遍历指定目录中的.dsb文件，将其中的Tick数据转换为CSV格式并存储到目标文件夹。 对于每个文件，首先检查是否是Tick数据，然后读取并处理数据块，最后将数据写入CSV文件。 可以通过strFilter参数指定要处理的合约。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00319">319</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af4121e0ca49fabb58e2d0a0b0521e50a" name="af4121e0ca49fabb58e2d0a0b0521e50a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4121e0ca49fabb58e2d0a0b0521e50a">&#9670;&#160;</a></span>proc_block_data()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool proc_block_data </td>
+          <td>(</td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>content</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isBar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bKeepHead</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>处理数据块内容 </p>
+<p>处理数据块</p>
+<p>外部函数声明，用于处理数据块</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">content</td><td>数据块内容，传入传出参数 </td></tr>
+    <tr><td class="paramname">isBar</td><td>是否是K线数据块，如果是false则表示是Tick数据块 </td></tr>
+    <tr><td class="paramname">bKeepHead</td><td>是否保留块头部，默认为true </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 处理是否成功</dd></dl>
+<p>该函数用于处理数据块内容，包括解压缩、版本转换等操作。 如果数据块是压缩的，则先解压缩；如果是旧版本的数据结构，则转换为新版本。 该函数主要用于数据读取和转换过程中的数据预处理。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00045">45</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a98c7add7329ec41b14a9d5c6a1e1843a" name="a98c7add7329ec41b14a9d5c6a1e1843a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98c7add7329ec41b14a9d5c6a1e1843a">&#9670;&#160;</a></span>read_dmb_bars()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> read_dmb_bars </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>barFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#aa50d30d10ed7c19942ff7c599313947e">FuncGetBarsCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>读取内存映射二进制K线数据文件（.dmb格式） </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">barFile</td><td>K线数据文件路径 </td></tr>
+    <tr><td class="paramname">cb</td><td>K线数据获取回调函数 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数 </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 读取到的数据数量</dd></dl>
+<p>该函数从指定的.dmb格式文件中读取K线数据，并通过回调函数返回给调用者。 .dmb格式是内存映射二进制格式，读取效率更高。 首先读取文件内容，然后处理数据块， 最后通过cbCnt回调函数通知总数量，并通过cb回调函数返回数据。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00902">902</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae90feb0a8eb31e7d128e7663440a607c" name="ae90feb0a8eb31e7d128e7663440a607c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae90feb0a8eb31e7d128e7663440a607c">&#9670;&#160;</a></span>read_dmb_ticks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> read_dmb_ticks </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>tickFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#a8b92e6a2486fb919bc36cdf65da1a33e">FuncGetTicksCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>读取内存映射二进制Tick数据文件（.dmb格式） </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tickFile</td><td>Tick数据文件路径 </td></tr>
+    <tr><td class="paramname">cb</td><td>Tick数据获取回调函数 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数 </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数，默认为NULL </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 读取到的数据数量</dd></dl>
+<p>该函数从指定的.dmb格式文件中读取Tick数据，并通过回调函数返回给调用者。 .dmb格式是内存映射二进制格式，读取效率更高。 首先读取文件内容，然后处理数据块， 最后通过cbCnt回调函数通知总数量，并通过cb回调函数返回数据。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00945">945</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9688929a7a8442d44255d87e363de835" name="a9688929a7a8442d44255d87e363de835"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9688929a7a8442d44255d87e363de835">&#9670;&#160;</a></span>read_dsb_bars()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> read_dsb_bars </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>barFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#aa50d30d10ed7c19942ff7c599313947e">FuncGetBarsCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>读取二进制K线数据文件（.dsb格式） </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">barFile</td><td>K线数据文件路径 </td></tr>
+    <tr><td class="paramname">cb</td><td>K线数据获取回调函数 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数 </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 读取到的数据数量</dd></dl>
+<p>该函数从指定的.dsb格式文件中读取K线数据，并通过回调函数返回给调用者。 首先读取文件内容，然后处理数据块（包括解压缩和版本转换）， 最后通过cbCnt回调函数通知总数量，并通过cb回调函数返回数据。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00855">855</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abb1c9129adf59450dea3d8b78c384685" name="abb1c9129adf59450dea3d8b78c384685"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb1c9129adf59450dea3d8b78c384685">&#9670;&#160;</a></span>read_dsb_order_details()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> read_dsb_order_details </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>dataFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#ae206eac8a3c7517f3519250777b77e51">FuncGetOrdDtlCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>读取二进制委托明细数据文件（.dsb格式） </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dataFile</td><td>委托明细数据文件路径 </td></tr>
+    <tr><td class="paramname">cb</td><td>委托明细数据获取回调函数 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数 </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数，默认为NULL </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 读取到的数据数量</dd></dl>
+<p>该函数从指定的.dsb格式文件中读取委托明细数据，并通过回调函数返回给调用者。 首先读取文件内容，然后处理数据块（包括解压缩和版本转换）， 最后通过cbCnt回调函数通知总数量，并通过cb回调函数返回数据。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00714">714</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae767e4b98c505769c44f62f2d20ffa9c" name="ae767e4b98c505769c44f62f2d20ffa9c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae767e4b98c505769c44f62f2d20ffa9c">&#9670;&#160;</a></span>read_dsb_order_queues()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> read_dsb_order_queues </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>dataFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#a6fdf1aa7a67f8c0dd83fb0cd74bd7a79">FuncGetOrdQueCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>读取二进制委托队列数据文件（.dsb格式） </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dataFile</td><td>委托队列数据文件路径 </td></tr>
+    <tr><td class="paramname">cb</td><td>委托队列数据获取回调函数 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数 </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数，默认为NULL </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 读取到的数据数量</dd></dl>
+<p>该函数从指定的.dsb格式文件中读取委托队列数据，并通过回调函数返回给调用者。 首先读取文件内容，然后处理数据块（包括解压缩和版本转换）， 最后通过cbCnt回调函数通知总数量，并通过cb回调函数返回数据。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00761">761</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae0fb31f01944b0cff539e0fb026983b5" name="ae0fb31f01944b0cff539e0fb026983b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0fb31f01944b0cff539e0fb026983b5">&#9670;&#160;</a></span>read_dsb_ticks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> read_dsb_ticks </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>tickFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#a8b92e6a2486fb919bc36cdf65da1a33e">FuncGetTicksCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>读取二进制Tick数据文件（.dsb格式） </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tickFile</td><td>Tick数据文件路径 </td></tr>
+    <tr><td class="paramname">cb</td><td>Tick数据获取回调函数 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数 </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数，默认为NULL </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 读取到的数据数量</dd></dl>
+<p>该函数从指定的.dsb格式文件中读取Tick数据，并通过回调函数返回给调用者。 首先读取文件内容，然后处理数据块（包括解压缩和版本转换）， 最后通过cbCnt回调函数通知总数量，并通过cb回调函数返回数据。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00667">667</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a848c083ba6d70c77c978db5540f6489b" name="a848c083ba6d70c77c978db5540f6489b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a848c083ba6d70c77c978db5540f6489b">&#9670;&#160;</a></span>read_dsb_transactions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> read_dsb_transactions </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>dataFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#a4017585870765dae785244513ead457c">FuncGetTransCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>读取二进制成交数据文件（.dsb格式） </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dataFile</td><td>成交数据文件路径 </td></tr>
+    <tr><td class="paramname">cb</td><td>成交数据获取回调函数 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数 </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数，默认为NULL </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 读取到的数据数量</dd></dl>
+<p>该函数从指定的.dsb格式文件中读取成交数据，并通过回调函数返回给调用者。 首先读取文件内容，然后处理数据块（包括解压缩和版本转换）， 最后通过cbCnt回调函数通知总数量，并通过cb回调函数返回数据。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00808">808</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad31e5513e9235a97b00e777c670d1e19" name="ad31e5513e9235a97b00e777c670d1e19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad31e5513e9235a97b00e777c670d1e19">&#9670;&#160;</a></span>resample_bars()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> resample_bars </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>barFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#aa50d30d10ed7c19942ff7c599313947e">FuncGetBarsCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a>&#160;</td>
+          <td class="paramname"><em>fromTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a>&#160;</td>
+          <td class="paramname"><em>endTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td>
+          <td class="paramname"><em>times</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>sessInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAlignSec</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>对K线数据进行重采样 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">barFile</td><td>输入K线数据文件路径 </td></tr>
+    <tr><td class="paramname">cb</td><td>K线数据获取回调函数，用于返回重采样后的数据 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数 </td></tr>
+    <tr><td class="paramname">fromTime</td><td>开始时间 </td></tr>
+    <tr><td class="paramname">endTime</td><td>结束时间 </td></tr>
+    <tr><td class="paramname">period</td><td>目标K线周期，如"m5"/"d1" </td></tr>
+    <tr><td class="paramname">times</td><td>周期倍数，如将分钟线采样为5分钟线，则为5 </td></tr>
+    <tr><td class="paramname">sessInfo</td><td>交易时段信息 </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数，默认为NULL </td></tr>
+    <tr><td class="paramname">bAlignSec</td><td>是否按秒对齐，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 重采样后的数据数量</dd></dl>
+<p>该函数将指定文件中的K线数据进行重采样，生成新的周期的K线数据。 首先读取原始数据，然后根据指定的周期和倍数进行采样， 最后通过cb回调函数返回采样后的数据。 该函数支持将分钟线采样为更高周期的K线，如将分钟线采样为5分钟线、日线等。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00998">998</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a71fb51c14a80487ce1b02b501a3d0a59" name="a71fb51c14a80487ce1b02b501a3d0a59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71fb51c14a80487ce1b02b501a3d0a59">&#9670;&#160;</a></span>store_bars()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool store_bars </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>barFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td>
+          <td class="paramname"><em>firstBar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将K线数据存储为二进制文件 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">barFile</td><td>输出文件路径 </td></tr>
+    <tr><td class="paramname">firstBar</td><td>第一个K线数据结构指针，数据数组的起始地址 </td></tr>
+    <tr><td class="paramname">count</td><td>数据数量 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期，如"m1"/"d1" </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数，默认为NULL </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 存储是否成功</dd></dl>
+<p>该函数将内存中的K线数据数组存储为二进制文件（.dsb格式）。 首先检查数据有效性，然后将数据复制到缓冲区， 根据周期类型设置数据块类型，将数据压缩后写入文件。 该函数支持存储分钟线、日线等不同周期的K线数据。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l01205">1205</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a72914235da01a3e86592701a2e87fe48" name="a72914235da01a3e86592701a2e87fe48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72914235da01a3e86592701a2e87fe48">&#9670;&#160;</a></span>store_order_details()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool store_order_details </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>tickFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWTSOrdDtlStruct.html">WTSOrdDtlStruct</a> *&#160;</td>
+          <td class="paramname"><em>firstItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将委托明细数据存储为二进制文件（股票Level2数据） </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tickFile</td><td>输出文件路径 </td></tr>
+    <tr><td class="paramname">firstItem</td><td>第一个委托明细数据结构指针，数据数组的起始地址 </td></tr>
+    <tr><td class="paramname">count</td><td>数据数量 </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数，默认为NULL </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 存储是否成功</dd></dl>
+<p>该函数将内存中的委托明细数据数组存储为二进制文件（.dsb格式）。 首先检查数据有效性，然后将数据复制到缓冲区， 设置数据块类型为BT_HIS_OrdDetail，将数据压缩后写入文件。 该函数主要用于存储股票Level2数据中的委托明细信息。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l01324">1324</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a490bcb146cf00692c6ce0d22081f3cd9" name="a490bcb146cf00692c6ce0d22081f3cd9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a490bcb146cf00692c6ce0d22081f3cd9">&#9670;&#160;</a></span>store_order_queues()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool store_order_queues </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>tickFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWTSOrdQueStruct.html">WTSOrdQueStruct</a> *&#160;</td>
+          <td class="paramname"><em>firstItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将委托队列数据存储为二进制文件（股票Level2数据） </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tickFile</td><td>输出文件路径 </td></tr>
+    <tr><td class="paramname">firstItem</td><td>第一个委托队列数据结构指针，数据数组的起始地址 </td></tr>
+    <tr><td class="paramname">count</td><td>数据数量 </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数，默认为NULL </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 存储是否成功</dd></dl>
+<p>该函数将内存中的委托队列数据数组存储为二进制文件（.dsb格式）。 首先检查数据有效性，然后将数据复制到缓冲区， 设置数据块类型为BT_HIS_OrdQueue，将数据压缩后写入文件。 该函数主要用于存储股票Level2数据中的委托队列信息。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l01377">1377</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a56bf55b6d12558d61c04cc2c4225cda7" name="a56bf55b6d12558d61c04cc2c4225cda7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56bf55b6d12558d61c04cc2c4225cda7">&#9670;&#160;</a></span>store_ticks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool store_ticks </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>tickFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *&#160;</td>
+          <td class="paramname"><em>firstTick</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将Tick数据存储为二进制文件 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tickFile</td><td>输出文件路径 </td></tr>
+    <tr><td class="paramname">firstTick</td><td>第一个Tick数据结构指针，数据数组的起始地址 </td></tr>
+    <tr><td class="paramname">count</td><td>数据数量 </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数，默认为NULL </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 存储是否成功</dd></dl>
+<p>该函数将内存中的Tick数据数组存储为二进制文件（.dsb格式）。 首先检查数据有效性，然后将数据复制到缓冲区， 设置数据块类型为BT_HIS_Ticks，将数据压缩后写入文件。 该函数用于存储各种金融市场的Tick数据，包括股票、期货等。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l01271">1271</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac69f64de4c6cf4a370f6bfaa9534ccb8" name="ac69f64de4c6cf4a370f6bfaa9534ccb8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac69f64de4c6cf4a370f6bfaa9534ccb8">&#9670;&#160;</a></span>store_transactions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool store_transactions </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>tickFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWTSTransStruct.html">WTSTransStruct</a> *&#160;</td>
+          <td class="paramname"><em>firstItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将成交数据存储为二进制文件（股票Level2数据） </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tickFile</td><td>输出文件路径 </td></tr>
+    <tr><td class="paramname">firstItem</td><td>第一个成交数据结构指针，数据数组的起始地址 </td></tr>
+    <tr><td class="paramname">count</td><td>数据数量 </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数，默认为NULL </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>bool 存储是否成功</dd></dl>
+<p>该函数将内存中的成交数据数组存储为二进制文件（.dsb格式）。 首先检查数据有效性，然后将数据复制到缓冲区， 设置数据块类型为BT_HIS_Trnsctn，将数据压缩后写入文件。 该函数主要用于存储股票Level2数据中的成交信息。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l01430">1430</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3ce5519d16ea24faeb3a1eee589fea02" name="a3ce5519d16ea24faeb3a1eee589fea02"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ce5519d16ea24faeb3a1eee589fea02">&#9670;&#160;</a></span>strToDate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t strToDate </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>strDate</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将日期字符串转换为整数日期 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">strDate</td><td>日期字符串，支持格式如"2020/03/30"或"2020-03-30" </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>uint32_t 转换后的整数日期，格式为YYYYMMDD</dd></dl>
+<p>该函数将日期字符串转换为整数格式的日期。 首先根据分隔符（"/"或"-"）将字符串分割为年、月、日部分， 然后将其组合成YYYYMMDD格式的整数。如果月或日为单位数，会自动添加前导零。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00173">173</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af5308fc3b3a07c15795ba2042046f7ee" name="af5308fc3b3a07c15795ba2042046f7ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5308fc3b3a07c15795ba2042046f7ee">&#9670;&#160;</a></span>strToTime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t strToTime </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>strTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bKeepSec</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将时间字符串转换为整数时间 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">strTime</td><td>时间字符串，格式如"10:30:25" </td></tr>
+    <tr><td class="paramname">bKeepSec</td><td>是否保留秒数，默认为false </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>uint32_t 转换后的整数时间，如果bKeepSec为false则返回小时分钟（HHMM），否则返回小时分钟秒（HHMMSS）</dd></dl>
+<p>该函数将包含冒号的时间字符串转换为整数格式的时间。 首先移除字符串中的冒号，然后将其转换为整数。 如果bKeepSec为false且结果大于10000（即包含秒），则会将结果除以100以移除秒数。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00144">144</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a86b64d0c591e2a8056716a92de203715" name="a86b64d0c591e2a8056716a92de203715"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86b64d0c591e2a8056716a92de203715">&#9670;&#160;</a></span>trans_csv_bars()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void trans_csv_bars </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>csvFolder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>binFolder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLogger</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>将CSV格式的K线数据转换为二进制格式 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">csvFolder</td><td>CSV数据文件夹路径 </td></tr>
+    <tr><td class="paramname">binFolder</td><td>二进制输出文件夹路径 </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期，如"m1"/"d1" </td></tr>
+    <tr><td class="paramname">cbLogger</td><td>日志回调函数，默认为NULL</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>该函数遍历指定目录中的CSV文件，将其中的K线数据转换为二进制格式并存储到目标文件夹。 对于每个文件，首先读取CSV数据，然后将其转换为K线结构数组，最后压缩并写入二进制文件。 输出文件的类型由period参数决定，支持分钟线、日线等不同周期的K线数据。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00436">436</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a17226795848decb565e90624584e5c0f" name="a17226795848decb565e90624584e5c0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17226795848decb565e90624584e5c0f">&#9670;&#160;</a></span>USING_NS_WTP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">USING_NS_WTP</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtDtHelper_8cpp_source.html">WtDtHelper.cpp</a> 第 <a class="el" href="WtDtHelper_8cpp_source.html#l00032">32</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3eb3603784df4281d918041f4ab2aa41.html">WtDtHelper</a></li><li class="navelem"><a class="el" href="WtDtHelper_8cpp.html">WtDtHelper.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

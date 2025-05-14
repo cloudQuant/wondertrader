@@ -1,0 +1,26 @@
+var structctp__sopt_1_1CThostFtdcInputQuoteField =
+[
+    [ "AskHedgeFlag", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#abdc3ab02306b9a8f7b1f2bb1882d3c17", null ],
+    [ "AskOffsetFlag", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a76f026e8d506210c5df0be9512c84377", null ],
+    [ "AskOrderRef", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#af2aa300d052b0ac157d13467b89839ae", null ],
+    [ "AskPrice", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a72c525103199223eb04e7449fbb07aec", null ],
+    [ "AskVolume", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#af25ecab7d1d6780955c05febd5e66262", null ],
+    [ "BidHedgeFlag", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#ab9b0b75f6375c79bf6d6c8826c8fa958", null ],
+    [ "BidOffsetFlag", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a77a473a284d6f4711b3e7a7a29f96fce", null ],
+    [ "BidOrderRef", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a0b6d9332ccc9a6f7ddc1d3eb16ee6a00", null ],
+    [ "BidPrice", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a3030784026d8792af1a6990c892eadb7", null ],
+    [ "BidVolume", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a920e570066f9a8430a616b5c38758857", null ],
+    [ "BrokerID", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a1d761d8133190cd1ddf1e92e72736ce2", null ],
+    [ "BusinessUnit", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#ad0feb95f6ccc23ffc52de7d7a82e4f5d", null ],
+    [ "ClientID", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#af1b5fca1aad2dc54f4699e12008fbf59", null ],
+    [ "ExchangeID", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a41c873116558748b8555f8874f4e7c66", null ],
+    [ "ForQuoteSysID", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a0f50cf3b0a95ec0ae368ca85ab1e54e3", null ],
+    [ "InstrumentID", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#ab5d95f9f207abb6c456a1f5a72889325", null ],
+    [ "InvestorID", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a99ec4cd092b2707141c7cf9c2020214f", null ],
+    [ "InvestUnitID", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#ab3c0231b61ebce4402718c70c804545c", null ],
+    [ "IPAddress", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a9b9497f20f1bb5a1fcbe7360caec9e06", null ],
+    [ "MacAddress", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a07a9b83a96a454769db54f788aa39c8f", null ],
+    [ "QuoteRef", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a73c31b30a40f11326292badded7b0ade", null ],
+    [ "RequestID", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a5615fb79b6ad21b6e839be99dfd936f3", null ],
+    [ "UserID", "structctp__sopt_1_1CThostFtdcInputQuoteField.html#a02710c5ebb653c30de8da726fb7895ce", null ]
+];

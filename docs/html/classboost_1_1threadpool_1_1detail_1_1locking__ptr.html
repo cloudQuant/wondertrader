@@ -1,0 +1,361 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: boost::threadpool::detail::locking_ptr&lt; T, Mutex &gt; 模板类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classboost_1_1threadpool_1_1detail_1_1locking__ptr.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classboost_1_1threadpool_1_1detail_1_1locking__ptr-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">boost::threadpool::detail::locking_ptr&lt; T, Mutex &gt; 模板类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>带有作用域锁定机制的智能指针  
+ <a href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="locking__ptr_8hpp_source.html">locking_ptr.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a791c8a23a2f6435794a733074607a856" id="r_a791c8a23a2f6435794a733074607a856"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a791c8a23a2f6435794a733074607a856">locking_ptr</a> (<a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> T &amp;obj, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> Mutex &amp;mtx)</td></tr>
+<tr class="memdesc:a791c8a23a2f6435794a733074607a856"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a791c8a23a2f6435794a733074607a856"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f801066955b7a6b200c42940457d6b1" id="r_a4f801066955b7a6b200c42940457d6b1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a4f801066955b7a6b200c42940457d6b1">~locking_ptr</a> ()</td></tr>
+<tr class="memdesc:a4f801066955b7a6b200c42940457d6b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:a4f801066955b7a6b200c42940457d6b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6af81fee1281f817aff49d6889882674" id="r_a6af81fee1281f817aff49d6889882674"><td class="memItemLeft" align="right" valign="top">T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a6af81fee1281f817aff49d6889882674">operator*</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a6af81fee1281f817aff49d6889882674"><td class="mdescLeft">&#160;</td><td class="mdescRight">解引用运算符  <br /></td></tr>
+<tr class="separator:a6af81fee1281f817aff49d6889882674"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a386fdf58cb863dcd2a99dba2458f6dcc" id="r_a386fdf58cb863dcd2a99dba2458f6dcc"><td class="memItemLeft" align="right" valign="top">T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#a386fdf58cb863dcd2a99dba2458f6dcc">operator-&gt;</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a386fdf58cb863dcd2a99dba2458f6dcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">成员访问运算符  <br /></td></tr>
+<tr class="separator:a386fdf58cb863dcd2a99dba2458f6dcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:ae1d2c8dbbdb6b715b8a4a6efcde7f6f2" id="r_ae1d2c8dbbdb6b715b8a4a6efcde7f6f2"><td class="memItemLeft" align="right" valign="top">T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#ae1d2c8dbbdb6b715b8a4a6efcde7f6f2">m_obj</a></td></tr>
+<tr class="memdesc:ae1d2c8dbbdb6b715b8a4a6efcde7f6f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">被包装的对象指针  <br /></td></tr>
+<tr class="separator:ae1d2c8dbbdb6b715b8a4a6efcde7f6f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1f32cbb914fbdd9fd739b25193cc483" id="r_ac1f32cbb914fbdd9fd739b25193cc483"><td class="memItemLeft" align="right" valign="top">Mutex &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html#ac1f32cbb914fbdd9fd739b25193cc483">m_mutex</a></td></tr>
+<tr class="memdesc:ac1f32cbb914fbdd9fd739b25193cc483"><td class="mdescLeft">&#160;</td><td class="mdescRight">互斥量引用  <br /></td></tr>
+<tr class="separator:ac1f32cbb914fbdd9fd739b25193cc483"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename T, typename Mutex&gt;<br />
+class boost::threadpool::detail::locking_ptr&lt; T, Mutex &gt;</div><p>带有作用域锁定机制的智能指针 </p>
+<p>该类是对易变指针的包装器。它通过锁定传入的互斥量实现对内部指针的同步访问。 在构造时自动锁定互斥量，在析构时自动解锁，从而确保线程安全的访问模式。 </p><dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>指针指向的对象类型 </td></tr>
+    <tr><td class="paramname">Mutex</td><td>互斥量类型，用于同步访问 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="locking__ptr_8hpp_source.html">locking_ptr.hpp</a> 第 <a class="el" href="locking__ptr_8hpp_source.html#l00045">45</a> 行定义.</p>
+</div><h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a791c8a23a2f6435794a733074607a856" name="a791c8a23a2f6435794a733074607a856"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a791c8a23a2f6435794a733074607a856">&#9670;&#160;</a></span>locking_ptr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename Mutex &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html">boost::threadpool::detail::locking_ptr</a>&lt; T, Mutex &gt;::locking_ptr </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> T &amp;&#160;</td>
+          <td class="paramname"><em>obj</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> Mutex &amp;&#160;</td>
+          <td class="paramname"><em>mtx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<p>创建一个 <a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html" title="带有作用域锁定机制的智能指针">locking_ptr</a> 对象，接受要访问的对象和用于同步的互斥量。 构造函数会自动锁定互斥量，确保对象的独占访问。 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj</td><td>被包装的对象的引用，声明为 volatile </td></tr>
+    <tr><td class="paramname">mtx</td><td>用于同步访问的互斥量的引用 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="locking__ptr_8hpp_source.html">locking_ptr.hpp</a> 第 <a class="el" href="locking__ptr_8hpp_source.html#l00068">68</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4f801066955b7a6b200c42940457d6b1" name="a4f801066955b7a6b200c42940457d6b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f801066955b7a6b200c42940457d6b1">&#9670;&#160;</a></span>~locking_ptr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename Mutex &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html">boost::threadpool::detail::locking_ptr</a>&lt; T, Mutex &gt;::~<a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html">locking_ptr</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>析构函数 </p>
+<p>当 <a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html" title="带有作用域锁定机制的智能指针">locking_ptr</a> 对象被销毁时自动解锁互斥量。 这确保了在访问对象后释放锁，实现了自动的锁管理。 </p>
+
+<p class="definition">在文件 <a class="el" href="locking__ptr_8hpp_source.html">locking_ptr.hpp</a> 第 <a class="el" href="locking__ptr_8hpp_source.html#l00082">82</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a6af81fee1281f817aff49d6889882674" name="a6af81fee1281f817aff49d6889882674"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6af81fee1281f817aff49d6889882674">&#9670;&#160;</a></span>operator*()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename Mutex &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T &amp; <a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html">boost::threadpool::detail::locking_ptr</a>&lt; T, Mutex &gt;::operator* </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>解引用运算符 </p>
+<p>返回被锁定的对象的引用。由于互斥量已经锁定， 所以可以安全地访问该对象而不会发生竞态条件。 </p><dl class="section return"><dt>返回</dt><dd>被包装对象的引用 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="locking__ptr_8hpp_source.html">locking_ptr.hpp</a> 第 <a class="el" href="locking__ptr_8hpp_source.html#l00095">95</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a386fdf58cb863dcd2a99dba2458f6dcc" name="a386fdf58cb863dcd2a99dba2458f6dcc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a386fdf58cb863dcd2a99dba2458f6dcc">&#9670;&#160;</a></span>operator-&gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename Mutex &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T * <a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html">boost::threadpool::detail::locking_ptr</a>&lt; T, Mutex &gt;::operator-&gt; </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>成员访问运算符 </p>
+<p>返回被锁定对象的指针，允许访问其成员变量和方法。 由于互斥量已经锁定，所以可以安全地访问对象的成员。 </p><dl class="section return"><dt>返回</dt><dd>被包装对象的指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="locking__ptr_8hpp_source.html">locking_ptr.hpp</a> 第 <a class="el" href="locking__ptr_8hpp_source.html#l00107">107</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="ac1f32cbb914fbdd9fd739b25193cc483" name="ac1f32cbb914fbdd9fd739b25193cc483"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1f32cbb914fbdd9fd739b25193cc483">&#9670;&#160;</a></span>m_mutex</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename Mutex &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Mutex&amp; <a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html">boost::threadpool::detail::locking_ptr</a>&lt; T, Mutex &gt;::m_mutex</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>互斥量引用 </p>
+<p>用于实现作用域锁定的互斥量对象引用 </p>
+
+<p class="definition">在文件 <a class="el" href="locking__ptr_8hpp_source.html">locking_ptr.hpp</a> 第 <a class="el" href="locking__ptr_8hpp_source.html#l00058">58</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae1d2c8dbbdb6b715b8a4a6efcde7f6f2" name="ae1d2c8dbbdb6b715b8a4a6efcde7f6f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1d2c8dbbdb6b715b8a4a6efcde7f6f2">&#9670;&#160;</a></span>m_obj</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename Mutex &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T* <a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html">boost::threadpool::detail::locking_ptr</a>&lt; T, Mutex &gt;::m_obj</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被包装的对象指针 </p>
+<p>指向实际要访问的对象实例 </p>
+
+<p class="definition">在文件 <a class="el" href="locking__ptr_8hpp_source.html">locking_ptr.hpp</a> 第 <a class="el" href="locking__ptr_8hpp_source.html#l00052">52</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/Share/threadpool/detail/<a class="el" href="locking__ptr_8hpp_source.html">locking_ptr.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespaceboost.html">boost</a></li><li class="navelem"><a class="el" href="namespaceboost_1_1threadpool.html">threadpool</a></li><li class="navelem"><a class="el" href="namespaceboost_1_1threadpool_1_1detail.html">detail</a></li><li class="navelem"><a class="el" href="classboost_1_1threadpool_1_1detail_1_1locking__ptr.html">locking_ptr</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

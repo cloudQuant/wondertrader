@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/zstd_compress_literals.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('zstd__compress__literals_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">zstd_compress_literals.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="zstd__compress__literals_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (c) 2016-present, Yann Collet, Facebook, Inc.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * This source code is licensed under both the BSD-style license (found in the</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * LICENSE file in the root directory of this source tree) and the GPLv2 (found</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * in the COPYING file in the root directory of this source tree).</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * You may select, at your option, one of the above-listed licenses.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#ifndef ZSTD_COMPRESS_LITERALS_H</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#define ZSTD_COMPRESS_LITERALS_H</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="zstd__compress__internal_8h.html">zstd_compress_internal.h</a>&quot;</span> <span class="comment">/* ZSTD_hufCTables_t, ZSTD_minGain() */</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zstd__compress__literals_8h.html#a499af15218a3888f7e4b120a24ff2d96">ZSTD_noCompressLiterals</a> (<span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <span class="keywordtype">size_t</span> dstCapacity, <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, <span class="keywordtype">size_t</span> srcSize);</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zstd__compress__literals_8h.html#ae67291bd3cf0eb279e3b6d25f6945e63">ZSTD_compressRleLiteralsBlock</a> (<span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <span class="keywordtype">size_t</span> dstCapacity, <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, <span class="keywordtype">size_t</span> srcSize);</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keywordtype">size_t</span> <a class="code hl_function" href="zstd__compress__literals_8h.html#a7c9df9ca4cea84ffcfe70a87fd2bf15e">ZSTD_compressLiterals</a> (<a class="code hl_struct" href="structZSTD__hufCTables__t.html">ZSTD_hufCTables_t</a> <span class="keyword">const</span>* prevHuf,</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>                              <a class="code hl_struct" href="structZSTD__hufCTables__t.html">ZSTD_hufCTables_t</a>* nextHuf,</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>                              <a class="code hl_enumeration" href="zstd_8h.html#a852a7e43e763f198f70b9c93121717a3">ZSTD_strategy</a> strategy, <span class="keywordtype">int</span> disableLiteralCompression,</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>                              <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <span class="keywordtype">size_t</span> dstCapacity,</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>                        <span class="keyword">const</span> <span class="keywordtype">void</span>* <a class="code hl_variable" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, <span class="keywordtype">size_t</span> srcSize,</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>                              <span class="keywordtype">void</span>* entropyWorkspace, <span class="keywordtype">size_t</span> entropyWorkspaceSize,</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>                        <span class="keyword">const</span> <span class="keywordtype">int</span> bmi2);</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#endif </span><span class="comment">/* ZSTD_COMPRESS_LITERALS_H */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="astructZSTD__hufCTables__t_html"><div class="ttname"><a href="structZSTD__hufCTables__t.html">ZSTD_hufCTables_t</a></div><div class="ttdef"><b>Definition</b> <a href="zstd__compress__internal_8h_source.html#l00060">zstd_compress_internal.h:60</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a08f683b5840d86269fccb0ca7609598c"><div class="ttname"><a href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a></div><div class="ttdeci">void * dst</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00078">zbuff.h:78</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a49286b6a0dd3728961b8ff1f1730a982"><div class="ttname"><a href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a></div><div class="ttdeci">void size_t const void * src</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00078">zbuff.h:78</a></div></div>
+<div class="ttc" id="azstd_8h_html_a852a7e43e763f198f70b9c93121717a3"><div class="ttname"><a href="zstd_8h.html#a852a7e43e763f198f70b9c93121717a3">ZSTD_strategy</a></div><div class="ttdeci">ZSTD_strategy</div><div class="ttdef"><b>Definition</b> <a href="zstd_8h_source.html#l00251">zstd.h:251</a></div></div>
+<div class="ttc" id="azstd__compress__internal_8h_html"><div class="ttname"><a href="zstd__compress__internal_8h.html">zstd_compress_internal.h</a></div></div>
+<div class="ttc" id="azstd__compress__literals_8h_html_a499af15218a3888f7e4b120a24ff2d96"><div class="ttname"><a href="zstd__compress__literals_8h.html#a499af15218a3888f7e4b120a24ff2d96">ZSTD_noCompressLiterals</a></div><div class="ttdeci">size_t ZSTD_noCompressLiterals(void *dst, size_t dstCapacity, const void *src, size_t srcSize)</div><div class="ttdef"><b>Definition</b> <a href="zstd__compress__literals_8c_source.html#l00016">zstd_compress_literals.c:16</a></div></div>
+<div class="ttc" id="azstd__compress__literals_8h_html_a7c9df9ca4cea84ffcfe70a87fd2bf15e"><div class="ttname"><a href="zstd__compress__literals_8h.html#a7c9df9ca4cea84ffcfe70a87fd2bf15e">ZSTD_compressLiterals</a></div><div class="ttdeci">size_t ZSTD_compressLiterals(ZSTD_hufCTables_t const *prevHuf, ZSTD_hufCTables_t *nextHuf, ZSTD_strategy strategy, int disableLiteralCompression, void *dst, size_t dstCapacity, const void *src, size_t srcSize, void *entropyWorkspace, size_t entropyWorkspaceSize, const int bmi2)</div><div class="ttdef"><b>Definition</b> <a href="zstd__compress__literals_8c_source.html#l00068">zstd_compress_literals.c:68</a></div></div>
+<div class="ttc" id="azstd__compress__literals_8h_html_ae67291bd3cf0eb279e3b6d25f6945e63"><div class="ttname"><a href="zstd__compress__literals_8h.html#ae67291bd3cf0eb279e3b6d25f6945e63">ZSTD_compressRleLiteralsBlock</a></div><div class="ttdeci">size_t ZSTD_compressRleLiteralsBlock(void *dst, size_t dstCapacity, const void *src, size_t srcSize)</div><div class="ttdef"><b>Definition</b> <a href="zstd__compress__literals_8c_source.html#l00042">zstd_compress_literals.c:42</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="zstd__compress__literals_8h.html">zstd_compress_literals.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

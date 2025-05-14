@@ -1,0 +1,2132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: YDApi类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classYDApi.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Public 类型</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="classYDApi-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">YDApi类 参考<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="ydApi_8h_source.html">ydApi.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public 类型</h2></td></tr>
+<tr class="memitem:a56bde3917748537b2a9e63bc838d3d91" id="r_a56bde3917748537b2a9e63bc838d3d91"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a56bde3917748537b2a9e63bc838d3d91">YDPacketType</a> { <a class="el" href="classYDApi.html#a56bde3917748537b2a9e63bc838d3d91aa510f90dae9dda9facb1436bb05a5872">YD_CLIENT_PACKET_INSERT_ORDER</a>
+, <a class="el" href="classYDApi.html#a56bde3917748537b2a9e63bc838d3d91a4921a3516bb286ef5e0a0adf17ff76af">YD_CLIENT_PACKET_CANCEL_ORDER</a>
+ }</td></tr>
+<tr class="separator:a56bde3917748537b2a9e63bc838d3d91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a73bfdfcc6b0e3d64366c898153daba51" id="r_a73bfdfcc6b0e3d64366c898153daba51"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a73bfdfcc6b0e3d64366c898153daba51">~YDApi</a> (void)</td></tr>
+<tr class="separator:a73bfdfcc6b0e3d64366c898153daba51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac293c3f5fc08e039b4ed3294d76c3e40" id="r_ac293c3f5fc08e039b4ed3294d76c3e40"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#ac293c3f5fc08e039b4ed3294d76c3e40">start</a> (<a class="el" href="classYDListener.html">YDListener</a> *pListener)=0</td></tr>
+<tr class="separator:ac293c3f5fc08e039b4ed3294d76c3e40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25ca40c49845dc6f0bfe6ba178eef0a9" id="r_a25ca40c49845dc6f0bfe6ba178eef0a9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a25ca40c49845dc6f0bfe6ba178eef0a9">startDestroy</a> (void)=0</td></tr>
+<tr class="separator:a25ca40c49845dc6f0bfe6ba178eef0a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4abbf3d25db6ec55737d589c840f42cc" id="r_a4abbf3d25db6ec55737d589c840f42cc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a4abbf3d25db6ec55737d589c840f42cc">disconnect</a> (void)=0</td></tr>
+<tr class="separator:a4abbf3d25db6ec55737d589c840f42cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb8e6c776b3e8d0e5d9486fd040311bb" id="r_aeb8e6c776b3e8d0e5d9486fd040311bb"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#aeb8e6c776b3e8d0e5d9486fd040311bb">login</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *username, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="demo__send__order_8cpp.html#a36531f1b290721250b384bbae34f9f1f">password</a>, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *appID, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *authCode)=0</td></tr>
+<tr class="separator:aeb8e6c776b3e8d0e5d9486fd040311bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6758235c9e69db24386da23c5ff86511" id="r_a6758235c9e69db24386da23c5ff86511"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a6758235c9e69db24386da23c5ff86511">insertOrder</a> (<a class="el" href="classYDInputOrder.html">YDInputOrder</a> *pInputOrder, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *pInstrument, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)=0</td></tr>
+<tr class="separator:a6758235c9e69db24386da23c5ff86511"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae304c8e08b0c3a998f0e02277a3d14a1" id="r_ae304c8e08b0c3a998f0e02277a3d14a1"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#ae304c8e08b0c3a998f0e02277a3d14a1">cancelOrder</a> (<a class="el" href="classYDCancelOrder.html">YDCancelOrder</a> *pCancelOrder, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *pExchange, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)=0</td></tr>
+<tr class="separator:ae304c8e08b0c3a998f0e02277a3d14a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afbaddac897366810b530d4a4d3cb9df0" id="r_afbaddac897366810b530d4a4d3cb9df0"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#afbaddac897366810b530d4a4d3cb9df0">insertQuote</a> (<a class="el" href="classYDInputQuote.html">YDInputQuote</a> *pInputQuote, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *pInstrument, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)=0</td></tr>
+<tr class="separator:afbaddac897366810b530d4a4d3cb9df0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f17216b0d69475c74d297e75bd9003f" id="r_a1f17216b0d69475c74d297e75bd9003f"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a1f17216b0d69475c74d297e75bd9003f">cancelQuote</a> (<a class="el" href="classYDCancelQuote.html">YDCancelQuote</a> *pCancelQuote, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *pExchange, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)=0</td></tr>
+<tr class="separator:a1f17216b0d69475c74d297e75bd9003f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a887c3a6af5f66a8d5489f75b30d8c6" id="r_a3a887c3a6af5f66a8d5489f75b30d8c6"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a3a887c3a6af5f66a8d5489f75b30d8c6">insertCombPositionOrder</a> (<a class="el" href="classYDInputOrder.html">YDInputOrder</a> *pInputOrder, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDCombPositionDef.html">YDCombPositionDef</a> *pCombPositionDef, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)=0</td></tr>
+<tr class="separator:a3a887c3a6af5f66a8d5489f75b30d8c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa66962b3aaac162f909c1048feeda6a6" id="r_aa66962b3aaac162f909c1048feeda6a6"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#aa66962b3aaac162f909c1048feeda6a6">insertOptionExecTogetherOrder</a> (<a class="el" href="classYDInputOrder.html">YDInputOrder</a> *pInputOrder, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *pInstrument, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *pInstrument2, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount)=0</td></tr>
+<tr class="separator:aa66962b3aaac162f909c1048feeda6a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a8b526adcdc029db1065f451c339685" id="r_a7a8b526adcdc029db1065f451c339685"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a7a8b526adcdc029db1065f451c339685">insertMultiOrders</a> (unsigned count, <a class="el" href="classYDInputOrder.html">YDInputOrder</a> inputOrders[], <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *instruments[], <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)=0</td></tr>
+<tr class="separator:a7a8b526adcdc029db1065f451c339685"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5aa54441bc2372a8764b0a0fa1fdac0d" id="r_a5aa54441bc2372a8764b0a0fa1fdac0d"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a5aa54441bc2372a8764b0a0fa1fdac0d">cancelMultiOrders</a> (unsigned count, <a class="el" href="classYDCancelOrder.html">YDCancelOrder</a> cancelOrders[], <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *exchanges[], <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)=0</td></tr>
+<tr class="separator:a5aa54441bc2372a8764b0a0fa1fdac0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2adeaf37b3abf99f407339d3e1587e6b" id="r_a2adeaf37b3abf99f407339d3e1587e6b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a2adeaf37b3abf99f407339d3e1587e6b">insertMultiQuotes</a> (unsigned count, <a class="el" href="classYDInputQuote.html">YDInputQuote</a> inputQuotes[], <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *instruments[], <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)=0</td></tr>
+<tr class="separator:a2adeaf37b3abf99f407339d3e1587e6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac3599f9d347694706c554161516151f" id="r_aac3599f9d347694706c554161516151f"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#aac3599f9d347694706c554161516151f">cancelMultiQuotes</a> (unsigned count, <a class="el" href="classYDCancelQuote.html">YDCancelQuote</a> cancelQuotes[], <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *exchanges[], <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)=0</td></tr>
+<tr class="separator:aac3599f9d347694706c554161516151f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6651c0503d0206a1c0d2614230569eb" id="r_ab6651c0503d0206a1c0d2614230569eb"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#ab6651c0503d0206a1c0d2614230569eb">subscribe</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *pInstrument)=0</td></tr>
+<tr class="separator:ab6651c0503d0206a1c0d2614230569eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0f20a72b599c71eed0616c4226bd284" id="r_ad0f20a72b599c71eed0616c4226bd284"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#ad0f20a72b599c71eed0616c4226bd284">unsubscribe</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *pInstrument)=0</td></tr>
+<tr class="separator:ad0f20a72b599c71eed0616c4226bd284"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56df99c7df9f7c9d96ee8312125a06f5" id="r_a56df99c7df9f7c9d96ee8312125a06f5"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a56df99c7df9f7c9d96ee8312125a06f5">setTradingRight</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *pInstrument, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDProduct.html">YDProduct</a> *pProduct, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *pExchange, int tradingRight)=0</td></tr>
+<tr class="memdesc:a56df99c7df9f7c9d96ee8312125a06f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">setTradingRight, alterMoney and updateMarginRate can only be used by administor, trader should not call them  <br /></td></tr>
+<tr class="separator:a56df99c7df9f7c9d96ee8312125a06f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27cd20b87e1d01d29842475d2e2bbe81" id="r_a27cd20b87e1d01d29842475d2e2bbe81"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a27cd20b87e1d01d29842475d2e2bbe81">alterMoney</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount, int alterMoneyType, double alterValue)=0</td></tr>
+<tr class="separator:a27cd20b87e1d01d29842475d2e2bbe81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2860b28342a58899c4742b5837f66d0" id="r_aa2860b28342a58899c4742b5837f66d0"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#aa2860b28342a58899c4742b5837f66d0">updateMarginRate</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDUpdateMarginRate.html">YDUpdateMarginRate</a> *pUpdateMarginRate)=0</td></tr>
+<tr class="separator:aa2860b28342a58899c4742b5837f66d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91fca2a3079bf47e202e2ff3dd4740f2" id="r_a91fca2a3079bf47e202e2ff3dd4740f2"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a91fca2a3079bf47e202e2ff3dd4740f2">changePassword</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *username, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *oldPassword, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *newPassword)=0</td></tr>
+<tr class="separator:a91fca2a3079bf47e202e2ff3dd4740f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf337d14712eaf54969cc6c7e7e93308" id="r_adf337d14712eaf54969cc6c7e7e93308"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#adf337d14712eaf54969cc6c7e7e93308">selectConnections</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *pExchange, unsigned long long connectionList)=0</td></tr>
+<tr class="separator:adf337d14712eaf54969cc6c7e7e93308"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24adb5287b69ef650d3ed3f8b4e26ec8" id="r_a24adb5287b69ef650d3ed3f8b4e26ec8"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a24adb5287b69ef650d3ed3f8b4e26ec8">hasFinishedInit</a> (void)=0</td></tr>
+<tr class="separator:a24adb5287b69ef650d3ed3f8b4e26ec8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c7ca560915c17436ab4bfa0009f106d" id="r_a0c7ca560915c17436ab4bfa0009f106d"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a0c7ca560915c17436ab4bfa0009f106d">getSystemParamCount</a> (void)=0</td></tr>
+<tr class="separator:a0c7ca560915c17436ab4bfa0009f106d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8387c605dda24e20f9eef03b3f9490e8" id="r_a8387c605dda24e20f9eef03b3f9490e8"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDSystemParam.html">YDSystemParam</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a8387c605dda24e20f9eef03b3f9490e8">getSystemParam</a> (int pos)=0</td></tr>
+<tr class="separator:a8387c605dda24e20f9eef03b3f9490e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa8c15f24751eb656f7658e31a4442c3" id="r_afa8c15f24751eb656f7658e31a4442c3"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDSystemParam.html">YDSystemParam</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#afa8c15f24751eb656f7658e31a4442c3">getSystemParamByName</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *name, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *target)=0</td></tr>
+<tr class="separator:afa8c15f24751eb656f7658e31a4442c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae733bb1c46c4e539bd7600ff73cb64ed" id="r_ae733bb1c46c4e539bd7600ff73cb64ed"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#ae733bb1c46c4e539bd7600ff73cb64ed">getExchangeCount</a> (void)=0</td></tr>
+<tr class="separator:ae733bb1c46c4e539bd7600ff73cb64ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa145dd81b8912b53cadc4e4453397bce" id="r_aa145dd81b8912b53cadc4e4453397bce"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#aa145dd81b8912b53cadc4e4453397bce">getExchange</a> (int pos)=0</td></tr>
+<tr class="separator:aa145dd81b8912b53cadc4e4453397bce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a18e88fddfe2d8bd7056fe91b8cf4d0" id="r_a7a18e88fddfe2d8bd7056fe91b8cf4d0"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a7a18e88fddfe2d8bd7056fe91b8cf4d0">getExchangeByID</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchangeID)=0</td></tr>
+<tr class="separator:a7a18e88fddfe2d8bd7056fe91b8cf4d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c125966f17c0bd0ec607a1efa73c580" id="r_a8c125966f17c0bd0ec607a1efa73c580"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a8c125966f17c0bd0ec607a1efa73c580">getProductCount</a> (void)=0</td></tr>
+<tr class="separator:a8c125966f17c0bd0ec607a1efa73c580"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a736e0046203e51ae60e6af85386b76b5" id="r_a736e0046203e51ae60e6af85386b76b5"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDProduct.html">YDProduct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a736e0046203e51ae60e6af85386b76b5">getProduct</a> (int pos)=0</td></tr>
+<tr class="separator:a736e0046203e51ae60e6af85386b76b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a191418df6fa78e0a56a42fb360164366" id="r_a191418df6fa78e0a56a42fb360164366"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDProduct.html">YDProduct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a191418df6fa78e0a56a42fb360164366">getProductByID</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *productID)=0</td></tr>
+<tr class="separator:a191418df6fa78e0a56a42fb360164366"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7244859ef350dd8167908fba665bc10b" id="r_a7244859ef350dd8167908fba665bc10b"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a7244859ef350dd8167908fba665bc10b">getInstrumentCount</a> (void)=0</td></tr>
+<tr class="separator:a7244859ef350dd8167908fba665bc10b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa90eaf805707968fffb6c608f69d6cf4" id="r_aa90eaf805707968fffb6c608f69d6cf4"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#aa90eaf805707968fffb6c608f69d6cf4">getInstrument</a> (int pos)=0</td></tr>
+<tr class="separator:aa90eaf805707968fffb6c608f69d6cf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8685a42a7f601f38a12d519eb117501d" id="r_a8685a42a7f601f38a12d519eb117501d"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a8685a42a7f601f38a12d519eb117501d">getInstrumentByID</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *instrumentID)=0</td></tr>
+<tr class="separator:a8685a42a7f601f38a12d519eb117501d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acac17046176a011d57c87007b86a1479" id="r_acac17046176a011d57c87007b86a1479"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#acac17046176a011d57c87007b86a1479">getCombPositionDefCount</a> (void)=0</td></tr>
+<tr class="separator:acac17046176a011d57c87007b86a1479"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdfdc2026b3dcf2e7ce44db13b6d9524" id="r_acdfdc2026b3dcf2e7ce44db13b6d9524"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDCombPositionDef.html">YDCombPositionDef</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#acdfdc2026b3dcf2e7ce44db13b6d9524">getCombPositionDef</a> (int pos)=0</td></tr>
+<tr class="separator:acdfdc2026b3dcf2e7ce44db13b6d9524"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3da083a6ad34b88e42abc1a0c91582a" id="r_af3da083a6ad34b88e42abc1a0c91582a"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDCombPositionDef.html">YDCombPositionDef</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#af3da083a6ad34b88e42abc1a0c91582a">getCombPositionDefByID</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *combPositionID, int combHedgeFlag)=0</td></tr>
+<tr class="separator:af3da083a6ad34b88e42abc1a0c91582a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a212d4c53675ec8a696bde7c944d887d5" id="r_a212d4c53675ec8a696bde7c944d887d5"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a212d4c53675ec8a696bde7c944d887d5">getAccountCount</a> (void)=0</td></tr>
+<tr class="memdesc:a212d4c53675ec8a696bde7c944d887d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">following 3 functions for <a class="el" href="classYDAccount.html">YDAccount</a> can only be used by monitor  <br /></td></tr>
+<tr class="separator:a212d4c53675ec8a696bde7c944d887d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41cd21090732de92bd826ee1282e4a76" id="r_a41cd21090732de92bd826ee1282e4a76"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a41cd21090732de92bd826ee1282e4a76">getAccount</a> (int pos)=0</td></tr>
+<tr class="separator:a41cd21090732de92bd826ee1282e4a76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab60742afbbd868eeea492369a80c44da" id="r_ab60742afbbd868eeea492369a80c44da"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#ab60742afbbd868eeea492369a80c44da">getAccountByID</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *accountID)=0</td></tr>
+<tr class="separator:ab60742afbbd868eeea492369a80c44da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaee8137276fd73e0f1fd1665a721e8a8" id="r_aaee8137276fd73e0f1fd1665a721e8a8"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#aaee8137276fd73e0f1fd1665a721e8a8">getMyAccount</a> (void)=0</td></tr>
+<tr class="memdesc:aaee8137276fd73e0f1fd1665a721e8a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">following function for <a class="el" href="classYDAccount.html">YDAccount</a> can only be used by trader  <br /></td></tr>
+<tr class="separator:aaee8137276fd73e0f1fd1665a721e8a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a041feb14b5061f761dc5e7f24b20e1db" id="r_a041feb14b5061f761dc5e7f24b20e1db"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a041feb14b5061f761dc5e7f24b20e1db">getPrePositionCount</a> (void)=0</td></tr>
+<tr class="separator:a041feb14b5061f761dc5e7f24b20e1db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fc89bb3f5530872eef284772a4abf3d" id="r_a1fc89bb3f5530872eef284772a4abf3d"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDPrePosition.html">YDPrePosition</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a1fc89bb3f5530872eef284772a4abf3d">getPrePosition</a> (int pos)=0</td></tr>
+<tr class="separator:a1fc89bb3f5530872eef284772a4abf3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71c8a13910ea2d2adbf1942aea8d751b" id="r_a71c8a13910ea2d2adbf1942aea8d751b"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a71c8a13910ea2d2adbf1942aea8d751b">getMarginRateCount</a> (void)=0</td></tr>
+<tr class="memdesc:a71c8a13910ea2d2adbf1942aea8d751b"><td class="mdescLeft">&#160;</td><td class="mdescRight">it is not neccessary to use following 4 functions, as all these rates can be found in <a class="el" href="classYDAccountInstrumentInfo.html">YDAccountInstrumentInfo</a>  <br /></td></tr>
+<tr class="separator:a71c8a13910ea2d2adbf1942aea8d751b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7f121e6c3f4c2cd9144c0b6b2dd20ab" id="r_aa7f121e6c3f4c2cd9144c0b6b2dd20ab"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDMarginRate.html">YDMarginRate</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#aa7f121e6c3f4c2cd9144c0b6b2dd20ab">getMarginRate</a> (int pos)=0</td></tr>
+<tr class="separator:aa7f121e6c3f4c2cd9144c0b6b2dd20ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a327db56389640cc79b9faeac2e27f0fe" id="r_a327db56389640cc79b9faeac2e27f0fe"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a327db56389640cc79b9faeac2e27f0fe">getCommissionRateCount</a> (void)=0</td></tr>
+<tr class="separator:a327db56389640cc79b9faeac2e27f0fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90f7fb05e8670852830d8147f43fb5ca" id="r_a90f7fb05e8670852830d8147f43fb5ca"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDCommissionRate.html">YDCommissionRate</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a90f7fb05e8670852830d8147f43fb5ca">getCommissionRate</a> (int pos)=0</td></tr>
+<tr class="separator:a90f7fb05e8670852830d8147f43fb5ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb1da80cbc7b4bb228a43c8eb50a6cbd" id="r_acb1da80cbc7b4bb228a43c8eb50a6cbd"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccountExchangeInfo.html">YDAccountExchangeInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#acb1da80cbc7b4bb228a43c8eb50a6cbd">getAccountExchangeInfo</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *pExchange, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)=0</td></tr>
+<tr class="memdesc:acb1da80cbc7b4bb228a43c8eb50a6cbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">when trader call following 3 functions, pAccount should be NULL  <br /></td></tr>
+<tr class="separator:acb1da80cbc7b4bb228a43c8eb50a6cbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9be26b407c9f721c1665f28a62a62841" id="r_a9be26b407c9f721c1665f28a62a62841"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccountProductInfo.html">YDAccountProductInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a9be26b407c9f721c1665f28a62a62841">getAccountProductInfo</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDProduct.html">YDProduct</a> *pProduct, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)=0</td></tr>
+<tr class="separator:a9be26b407c9f721c1665f28a62a62841"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a910794b957033e755c602b2d0f87b240" id="r_a910794b957033e755c602b2d0f87b240"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccountInstrumentInfo.html">YDAccountInstrumentInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a910794b957033e755c602b2d0f87b240">getAccountInstrumentInfo</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *pInstrument, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *pAccount=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)=0</td></tr>
+<tr class="separator:a910794b957033e755c602b2d0f87b240"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37b22d5d55868a25508229903e024522" id="r_a37b22d5d55868a25508229903e024522"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a37b22d5d55868a25508229903e024522">getGeneralRiskParamCount</a> (void)=0</td></tr>
+<tr class="separator:a37b22d5d55868a25508229903e024522"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0234d90f84b8b753bbf0d18cdc8b5afe" id="r_a0234d90f84b8b753bbf0d18cdc8b5afe"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDGeneralRiskParam.html">YDGeneralRiskParam</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a0234d90f84b8b753bbf0d18cdc8b5afe">getGeneralRiskParam</a> (int pos)=0</td></tr>
+<tr class="separator:a0234d90f84b8b753bbf0d18cdc8b5afe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62a89c784a139526d92b8875b9b4de3b" id="r_a62a89c784a139526d92b8875b9b4de3b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a62a89c784a139526d92b8875b9b4de3b">writeLog</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format,...)=0</td></tr>
+<tr class="separator:a62a89c784a139526d92b8875b9b4de3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74bb69a853baafb7aa10c36f65ecebd6" id="r_a74bb69a853baafb7aa10c36f65ecebd6"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#a74bb69a853baafb7aa10c36f65ecebd6">getVersion</a> (void)=0</td></tr>
+<tr class="separator:a74bb69a853baafb7aa10c36f65ecebd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0dd22138a8950f057a4a7c34b9219e2" id="r_ad0dd22138a8950f057a4a7c34b9219e2"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#ad0dd22138a8950f057a4a7c34b9219e2">getClientPacketHeader</a> (<a class="el" href="classYDApi.html#a56bde3917748537b2a9e63bc838d3d91">YDPacketType</a> type, unsigned char *pHeader, int len)=0</td></tr>
+<tr class="separator:ad0dd22138a8950f057a4a7c34b9219e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd0db33415a1cbdbb06c3ac83cf996cd" id="r_acd0db33415a1cbdbb06c3ac83cf996cd"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYDApi.html#acd0db33415a1cbdbb06c3ac83cf996cd">getTradingDay</a> (void)=0</td></tr>
+<tr class="memdesc:acd0db33415a1cbdbb06c3ac83cf996cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">can get trading day after login successfully  <br /></td></tr>
+<tr class="separator:acd0db33415a1cbdbb06c3ac83cf996cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock">
+<p class="definition">在文件 <a class="el" href="ydApi_8h_source.html">ydApi.h</a> 第 <a class="el" href="ydApi_8h_source.html#l00134">134</a> 行定义.</p>
+</div><h2 class="groupheader">成员枚举类型说明</h2>
+<a id="a56bde3917748537b2a9e63bc838d3d91" name="a56bde3917748537b2a9e63bc838d3d91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56bde3917748537b2a9e63bc838d3d91">&#9670;&#160;</a></span>YDPacketType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classYDApi.html#a56bde3917748537b2a9e63bc838d3d91">YDApi::YDPacketType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a56bde3917748537b2a9e63bc838d3d91aa510f90dae9dda9facb1436bb05a5872" name="a56bde3917748537b2a9e63bc838d3d91aa510f90dae9dda9facb1436bb05a5872"></a>YD_CLIENT_PACKET_INSERT_ORDER&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a56bde3917748537b2a9e63bc838d3d91a4921a3516bb286ef5e0a0adf17ff76af" name="a56bde3917748537b2a9e63bc838d3d91a4921a3516bb286ef5e0a0adf17ff76af"></a>YD_CLIENT_PACKET_CANCEL_ORDER&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="ydApi_8h_source.html">ydApi.h</a> 第 <a class="el" href="ydApi_8h_source.html#l00231">231</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a73bfdfcc6b0e3d64366c898153daba51" name="a73bfdfcc6b0e3d64366c898153daba51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73bfdfcc6b0e3d64366c898153daba51">&#9670;&#160;</a></span>~YDApi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual YDApi::~YDApi </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ydApi_8h_source.html">ydApi.h</a> 第 <a class="el" href="ydApi_8h_source.html#l00137">137</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a27cd20b87e1d01d29842475d2e2bbe81" name="a27cd20b87e1d01d29842475d2e2bbe81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27cd20b87e1d01d29842475d2e2bbe81">&#9670;&#160;</a></span>alterMoney()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::alterMoney </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>alterMoneyType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>alterValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5aa54441bc2372a8764b0a0fa1fdac0d" name="a5aa54441bc2372a8764b0a0fa1fdac0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5aa54441bc2372a8764b0a0fa1fdac0d">&#9670;&#160;</a></span>cancelMultiOrders()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::cancelMultiOrders </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classYDCancelOrder.html">YDCancelOrder</a>&#160;</td>
+          <td class="paramname"><em>cancelOrders</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *&#160;</td>
+          <td class="paramname"><em>exchanges</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>send multiple cancel orders in same time. cancelOrders and exchanges must have size of count, return true if all are successful maximum value of count is 16 </p>
+
+</div>
+</div>
+<a id="aac3599f9d347694706c554161516151f" name="aac3599f9d347694706c554161516151f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac3599f9d347694706c554161516151f">&#9670;&#160;</a></span>cancelMultiQuotes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::cancelMultiQuotes </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classYDCancelQuote.html">YDCancelQuote</a>&#160;</td>
+          <td class="paramname"><em>cancelQuotes</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *&#160;</td>
+          <td class="paramname"><em>exchanges</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>send multiple cancel quotes in same time. cancelQuotes and exchanges must have size of count, return true if all are successful maximum value of count is 16 </p>
+
+</div>
+</div>
+<a id="ae304c8e08b0c3a998f0e02277a3d14a1" name="ae304c8e08b0c3a998f0e02277a3d14a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae304c8e08b0c3a998f0e02277a3d14a1">&#9670;&#160;</a></span>cancelOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::cancelOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYDCancelOrder.html">YDCancelOrder</a> *&#160;</td>
+          <td class="paramname"><em>pCancelOrder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *&#160;</td>
+          <td class="paramname"><em>pExchange</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1f17216b0d69475c74d297e75bd9003f" name="a1f17216b0d69475c74d297e75bd9003f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f17216b0d69475c74d297e75bd9003f">&#9670;&#160;</a></span>cancelQuote()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::cancelQuote </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYDCancelQuote.html">YDCancelQuote</a> *&#160;</td>
+          <td class="paramname"><em>pCancelQuote</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *&#160;</td>
+          <td class="paramname"><em>pExchange</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a91fca2a3079bf47e202e2ff3dd4740f2" name="a91fca2a3079bf47e202e2ff3dd4740f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91fca2a3079bf47e202e2ff3dd4740f2">&#9670;&#160;</a></span>changePassword()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::changePassword </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>username</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>oldPassword</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>newPassword</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4abbf3d25db6ec55737d589c840f42cc" name="a4abbf3d25db6ec55737d589c840f42cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4abbf3d25db6ec55737d589c840f42cc">&#9670;&#160;</a></span>disconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void YDApi::disconnect </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a41cd21090732de92bd826ee1282e4a76" name="a41cd21090732de92bd826ee1282e4a76"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41cd21090732de92bd826ee1282e4a76">&#9670;&#160;</a></span>getAccount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> * YDApi::getAccount </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pos</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab60742afbbd868eeea492369a80c44da" name="ab60742afbbd868eeea492369a80c44da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab60742afbbd868eeea492369a80c44da">&#9670;&#160;</a></span>getAccountByID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> * YDApi::getAccountByID </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>accountID</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a212d4c53675ec8a696bde7c944d887d5" name="a212d4c53675ec8a696bde7c944d887d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a212d4c53675ec8a696bde7c944d887d5">&#9670;&#160;</a></span>getAccountCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int YDApi::getAccountCount </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>following 3 functions for <a class="el" href="classYDAccount.html">YDAccount</a> can only be used by monitor </p>
+
+</div>
+</div>
+<a id="acb1da80cbc7b4bb228a43c8eb50a6cbd" name="acb1da80cbc7b4bb228a43c8eb50a6cbd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb1da80cbc7b4bb228a43c8eb50a6cbd">&#9670;&#160;</a></span>getAccountExchangeInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccountExchangeInfo.html">YDAccountExchangeInfo</a> * YDApi::getAccountExchangeInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *&#160;</td>
+          <td class="paramname"><em>pExchange</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>when trader call following 3 functions, pAccount should be NULL </p>
+
+</div>
+</div>
+<a id="a910794b957033e755c602b2d0f87b240" name="a910794b957033e755c602b2d0f87b240"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a910794b957033e755c602b2d0f87b240">&#9670;&#160;</a></span>getAccountInstrumentInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccountInstrumentInfo.html">YDAccountInstrumentInfo</a> * YDApi::getAccountInstrumentInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *&#160;</td>
+          <td class="paramname"><em>pInstrument</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9be26b407c9f721c1665f28a62a62841" name="a9be26b407c9f721c1665f28a62a62841"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9be26b407c9f721c1665f28a62a62841">&#9670;&#160;</a></span>getAccountProductInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccountProductInfo.html">YDAccountProductInfo</a> * YDApi::getAccountProductInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDProduct.html">YDProduct</a> *&#160;</td>
+          <td class="paramname"><em>pProduct</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad0dd22138a8950f057a4a7c34b9219e2" name="ad0dd22138a8950f057a4a7c34b9219e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0dd22138a8950f057a4a7c34b9219e2">&#9670;&#160;</a></span>getClientPacketHeader()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int YDApi::getClientPacketHeader </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYDApi.html#a56bde3917748537b2a9e63bc838d3d91">YDPacketType</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned char *&#160;</td>
+          <td class="paramname"><em>pHeader</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acdfdc2026b3dcf2e7ce44db13b6d9524" name="acdfdc2026b3dcf2e7ce44db13b6d9524"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdfdc2026b3dcf2e7ce44db13b6d9524">&#9670;&#160;</a></span>getCombPositionDef()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDCombPositionDef.html">YDCombPositionDef</a> * YDApi::getCombPositionDef </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pos</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af3da083a6ad34b88e42abc1a0c91582a" name="af3da083a6ad34b88e42abc1a0c91582a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af3da083a6ad34b88e42abc1a0c91582a">&#9670;&#160;</a></span>getCombPositionDefByID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDCombPositionDef.html">YDCombPositionDef</a> * YDApi::getCombPositionDefByID </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>combPositionID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>combHedgeFlag</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acac17046176a011d57c87007b86a1479" name="acac17046176a011d57c87007b86a1479"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acac17046176a011d57c87007b86a1479">&#9670;&#160;</a></span>getCombPositionDefCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int YDApi::getCombPositionDefCount </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a90f7fb05e8670852830d8147f43fb5ca" name="a90f7fb05e8670852830d8147f43fb5ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90f7fb05e8670852830d8147f43fb5ca">&#9670;&#160;</a></span>getCommissionRate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDCommissionRate.html">YDCommissionRate</a> * YDApi::getCommissionRate </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pos</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a327db56389640cc79b9faeac2e27f0fe" name="a327db56389640cc79b9faeac2e27f0fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a327db56389640cc79b9faeac2e27f0fe">&#9670;&#160;</a></span>getCommissionRateCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int YDApi::getCommissionRateCount </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa145dd81b8912b53cadc4e4453397bce" name="aa145dd81b8912b53cadc4e4453397bce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa145dd81b8912b53cadc4e4453397bce">&#9670;&#160;</a></span>getExchange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> * YDApi::getExchange </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pos</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7a18e88fddfe2d8bd7056fe91b8cf4d0" name="a7a18e88fddfe2d8bd7056fe91b8cf4d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a18e88fddfe2d8bd7056fe91b8cf4d0">&#9670;&#160;</a></span>getExchangeByID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> * YDApi::getExchangeByID </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchangeID</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae733bb1c46c4e539bd7600ff73cb64ed" name="ae733bb1c46c4e539bd7600ff73cb64ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae733bb1c46c4e539bd7600ff73cb64ed">&#9670;&#160;</a></span>getExchangeCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int YDApi::getExchangeCount </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0234d90f84b8b753bbf0d18cdc8b5afe" name="a0234d90f84b8b753bbf0d18cdc8b5afe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0234d90f84b8b753bbf0d18cdc8b5afe">&#9670;&#160;</a></span>getGeneralRiskParam()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDGeneralRiskParam.html">YDGeneralRiskParam</a> * YDApi::getGeneralRiskParam </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pos</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a37b22d5d55868a25508229903e024522" name="a37b22d5d55868a25508229903e024522"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37b22d5d55868a25508229903e024522">&#9670;&#160;</a></span>getGeneralRiskParamCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int YDApi::getGeneralRiskParamCount </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa90eaf805707968fffb6c608f69d6cf4" name="aa90eaf805707968fffb6c608f69d6cf4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa90eaf805707968fffb6c608f69d6cf4">&#9670;&#160;</a></span>getInstrument()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> * YDApi::getInstrument </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pos</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8685a42a7f601f38a12d519eb117501d" name="a8685a42a7f601f38a12d519eb117501d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8685a42a7f601f38a12d519eb117501d">&#9670;&#160;</a></span>getInstrumentByID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> * YDApi::getInstrumentByID </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>instrumentID</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7244859ef350dd8167908fba665bc10b" name="a7244859ef350dd8167908fba665bc10b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7244859ef350dd8167908fba665bc10b">&#9670;&#160;</a></span>getInstrumentCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int YDApi::getInstrumentCount </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa7f121e6c3f4c2cd9144c0b6b2dd20ab" name="aa7f121e6c3f4c2cd9144c0b6b2dd20ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa7f121e6c3f4c2cd9144c0b6b2dd20ab">&#9670;&#160;</a></span>getMarginRate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDMarginRate.html">YDMarginRate</a> * YDApi::getMarginRate </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pos</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a71c8a13910ea2d2adbf1942aea8d751b" name="a71c8a13910ea2d2adbf1942aea8d751b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71c8a13910ea2d2adbf1942aea8d751b">&#9670;&#160;</a></span>getMarginRateCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int YDApi::getMarginRateCount </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>it is not neccessary to use following 4 functions, as all these rates can be found in <a class="el" href="classYDAccountInstrumentInfo.html">YDAccountInstrumentInfo</a> </p>
+
+</div>
+</div>
+<a id="aaee8137276fd73e0f1fd1665a721e8a8" name="aaee8137276fd73e0f1fd1665a721e8a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaee8137276fd73e0f1fd1665a721e8a8">&#9670;&#160;</a></span>getMyAccount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> * YDApi::getMyAccount </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>following function for <a class="el" href="classYDAccount.html">YDAccount</a> can only be used by trader </p>
+
+</div>
+</div>
+<a id="a1fc89bb3f5530872eef284772a4abf3d" name="a1fc89bb3f5530872eef284772a4abf3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fc89bb3f5530872eef284772a4abf3d">&#9670;&#160;</a></span>getPrePosition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDPrePosition.html">YDPrePosition</a> * YDApi::getPrePosition </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pos</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a041feb14b5061f761dc5e7f24b20e1db" name="a041feb14b5061f761dc5e7f24b20e1db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a041feb14b5061f761dc5e7f24b20e1db">&#9670;&#160;</a></span>getPrePositionCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int YDApi::getPrePositionCount </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a736e0046203e51ae60e6af85386b76b5" name="a736e0046203e51ae60e6af85386b76b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a736e0046203e51ae60e6af85386b76b5">&#9670;&#160;</a></span>getProduct()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDProduct.html">YDProduct</a> * YDApi::getProduct </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pos</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a191418df6fa78e0a56a42fb360164366" name="a191418df6fa78e0a56a42fb360164366"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a191418df6fa78e0a56a42fb360164366">&#9670;&#160;</a></span>getProductByID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDProduct.html">YDProduct</a> * YDApi::getProductByID </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>productID</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8c125966f17c0bd0ec607a1efa73c580" name="a8c125966f17c0bd0ec607a1efa73c580"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c125966f17c0bd0ec607a1efa73c580">&#9670;&#160;</a></span>getProductCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int YDApi::getProductCount </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8387c605dda24e20f9eef03b3f9490e8" name="a8387c605dda24e20f9eef03b3f9490e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8387c605dda24e20f9eef03b3f9490e8">&#9670;&#160;</a></span>getSystemParam()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDSystemParam.html">YDSystemParam</a> * YDApi::getSystemParam </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pos</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afa8c15f24751eb656f7658e31a4442c3" name="afa8c15f24751eb656f7658e31a4442c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa8c15f24751eb656f7658e31a4442c3">&#9670;&#160;</a></span>getSystemParamByName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDSystemParam.html">YDSystemParam</a> * YDApi::getSystemParamByName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>target</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0c7ca560915c17436ab4bfa0009f106d" name="a0c7ca560915c17436ab4bfa0009f106d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c7ca560915c17436ab4bfa0009f106d">&#9670;&#160;</a></span>getSystemParamCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int YDApi::getSystemParamCount </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acd0db33415a1cbdbb06c3ac83cf996cd" name="acd0db33415a1cbdbb06c3ac83cf996cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd0db33415a1cbdbb06c3ac83cf996cd">&#9670;&#160;</a></span>getTradingDay()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int YDApi::getTradingDay </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>can get trading day after login successfully </p>
+
+</div>
+</div>
+<a id="a74bb69a853baafb7aa10c36f65ecebd6" name="a74bb69a853baafb7aa10c36f65ecebd6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74bb69a853baafb7aa10c36f65ecebd6">&#9670;&#160;</a></span>getVersion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * YDApi::getVersion </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a24adb5287b69ef650d3ed3f8b4e26ec8" name="a24adb5287b69ef650d3ed3f8b4e26ec8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24adb5287b69ef650d3ed3f8b4e26ec8">&#9670;&#160;</a></span>hasFinishedInit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::hasFinishedInit </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3a887c3a6af5f66a8d5489f75b30d8c6" name="a3a887c3a6af5f66a8d5489f75b30d8c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a887c3a6af5f66a8d5489f75b30d8c6">&#9670;&#160;</a></span>insertCombPositionOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::insertCombPositionOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYDInputOrder.html">YDInputOrder</a> *&#160;</td>
+          <td class="paramname"><em>pInputOrder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDCombPositionDef.html">YDCombPositionDef</a> *&#160;</td>
+          <td class="paramname"><em>pCombPositionDef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7a8b526adcdc029db1065f451c339685" name="a7a8b526adcdc029db1065f451c339685"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a8b526adcdc029db1065f451c339685">&#9670;&#160;</a></span>insertMultiOrders()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::insertMultiOrders </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classYDInputOrder.html">YDInputOrder</a>&#160;</td>
+          <td class="paramname"><em>inputOrders</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *&#160;</td>
+          <td class="paramname"><em>instruments</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>send multiple insert orders in same time. inputOrders and instruments must have size of count, return true if all are successful maximum value of count is 16 </p>
+
+</div>
+</div>
+<a id="a2adeaf37b3abf99f407339d3e1587e6b" name="a2adeaf37b3abf99f407339d3e1587e6b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2adeaf37b3abf99f407339d3e1587e6b">&#9670;&#160;</a></span>insertMultiQuotes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::insertMultiQuotes </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classYDInputQuote.html">YDInputQuote</a>&#160;</td>
+          <td class="paramname"><em>inputQuotes</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *&#160;</td>
+          <td class="paramname"><em>instruments</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>send multiple insert quotes in same time. inputQuotes and instruments must have size of count, return true if all are successful maximum value of count is 16 </p>
+
+</div>
+</div>
+<a id="aa66962b3aaac162f909c1048feeda6a6" name="aa66962b3aaac162f909c1048feeda6a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa66962b3aaac162f909c1048feeda6a6">&#9670;&#160;</a></span>insertOptionExecTogetherOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::insertOptionExecTogetherOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYDInputOrder.html">YDInputOrder</a> *&#160;</td>
+          <td class="paramname"><em>pInputOrder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *&#160;</td>
+          <td class="paramname"><em>pInstrument</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *&#160;</td>
+          <td class="paramname"><em>pInstrument2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6758235c9e69db24386da23c5ff86511" name="a6758235c9e69db24386da23c5ff86511"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6758235c9e69db24386da23c5ff86511">&#9670;&#160;</a></span>insertOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::insertOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYDInputOrder.html">YDInputOrder</a> *&#160;</td>
+          <td class="paramname"><em>pInputOrder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *&#160;</td>
+          <td class="paramname"><em>pInstrument</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afbaddac897366810b530d4a4d3cb9df0" name="afbaddac897366810b530d4a4d3cb9df0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afbaddac897366810b530d4a4d3cb9df0">&#9670;&#160;</a></span>insertQuote()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::insertQuote </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYDInputQuote.html">YDInputQuote</a> *&#160;</td>
+          <td class="paramname"><em>pInputQuote</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *&#160;</td>
+          <td class="paramname"><em>pInstrument</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aeb8e6c776b3e8d0e5d9486fd040311bb" name="aeb8e6c776b3e8d0e5d9486fd040311bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb8e6c776b3e8d0e5d9486fd040311bb">&#9670;&#160;</a></span>login()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::login </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>username</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>password</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>appID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>authCode</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adf337d14712eaf54969cc6c7e7e93308" name="adf337d14712eaf54969cc6c7e7e93308"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf337d14712eaf54969cc6c7e7e93308">&#9670;&#160;</a></span>selectConnections()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::selectConnections </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *&#160;</td>
+          <td class="paramname"><em>pExchange</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long long&#160;</td>
+          <td class="paramname"><em>connectionList</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>tell server how to select connection if use YD_CS_Any, can only be used by administrator or accounts with YD_AF_SelectConnection flag connectionList is or of serial of 4 bits, lowest one has highest priority, must cover all connections of specified exchange </p>
+
+</div>
+</div>
+<a id="a56df99c7df9f7c9d96ee8312125a06f5" name="a56df99c7df9f7c9d96ee8312125a06f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56df99c7df9f7c9d96ee8312125a06f5">&#9670;&#160;</a></span>setTradingRight()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::setTradingRight </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDAccount.html">YDAccount</a> *&#160;</td>
+          <td class="paramname"><em>pAccount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *&#160;</td>
+          <td class="paramname"><em>pInstrument</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDProduct.html">YDProduct</a> *&#160;</td>
+          <td class="paramname"><em>pProduct</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDExchange.html">YDExchange</a> *&#160;</td>
+          <td class="paramname"><em>pExchange</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>tradingRight</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>setTradingRight, alterMoney and updateMarginRate can only be used by administor, trader should not call them </p>
+
+</div>
+</div>
+<a id="ac293c3f5fc08e039b4ed3294d76c3e40" name="ac293c3f5fc08e039b4ed3294d76c3e40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac293c3f5fc08e039b4ed3294d76c3e40">&#9670;&#160;</a></span>start()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::start </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYDListener.html">YDListener</a> *&#160;</td>
+          <td class="paramname"><em>pListener</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a25ca40c49845dc6f0bfe6ba178eef0a9" name="a25ca40c49845dc6f0bfe6ba178eef0a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a25ca40c49845dc6f0bfe6ba178eef0a9">&#9670;&#160;</a></span>startDestroy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void YDApi::startDestroy </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>startDestroy will start a process to destroy this api instance After calling this method, api will try to close all connections and stop all threads belong to this api. In this period, all trading functions can not be used any more, and no trading notification will be received, but all functions of getting data can still be used. At the end of this period, notifyBeforeApiDestroy will be sent to listener. Then start the second period to free all data structure of api. All functions of api cannot be used in this period, and all data pointers given by api are not valid any more. At the end of second period, notifyAfterApiDestroy will send to listener, indicating all resources of api are freed. User should not ever try to delete api, but the listener itself should be deleted by user after this. </p>
+
+</div>
+</div>
+<a id="ab6651c0503d0206a1c0d2614230569eb" name="ab6651c0503d0206a1c0d2614230569eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6651c0503d0206a1c0d2614230569eb">&#9670;&#160;</a></span>subscribe()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::subscribe </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *&#160;</td>
+          <td class="paramname"><em>pInstrument</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad0f20a72b599c71eed0616c4226bd284" name="ad0f20a72b599c71eed0616c4226bd284"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0f20a72b599c71eed0616c4226bd284">&#9670;&#160;</a></span>unsubscribe()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::unsubscribe </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDInstrument.html">YDInstrument</a> *&#160;</td>
+          <td class="paramname"><em>pInstrument</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa2860b28342a58899c4742b5837f66d0" name="aa2860b28342a58899c4742b5837f66d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2860b28342a58899c4742b5837f66d0">&#9670;&#160;</a></span>updateMarginRate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool YDApi::updateMarginRate </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYDUpdateMarginRate.html">YDUpdateMarginRate</a> *&#160;</td>
+          <td class="paramname"><em>pUpdateMarginRate</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a62a89c784a139526d92b8875b9b4de3b" name="a62a89c784a139526d92b8875b9b4de3b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62a89c784a139526d92b8875b9b4de3b">&#9670;&#160;</a></span>writeLog()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void YDApi::writeLog </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/API/yd1.108.360/<a class="el" href="ydApi_8h_source.html">ydApi.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classYDApi.html">YDApi</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

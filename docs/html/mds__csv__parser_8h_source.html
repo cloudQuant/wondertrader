@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/mds_api/parser/csv_parser/mds_csv_parser.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('mds__csv__parser_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">mds_csv_parser.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="mds__csv__parser_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright 2020 the original author or authors.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * you may not use this file except in compliance with the License.</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * You may obtain a copy of the License at</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *     http://www.apache.org/licenses/LICENSE-2.0</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * Unless required by applicable law or agreed to in writing, software</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * See the License for the specific language governing permissions and</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * limitations under the License.</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#ifndef _MDS_CSV_PARSER_H</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#define _MDS_CSV_PARSER_H</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include    &lt;<a class="code" href="mds__mkt__packets_8h.html">mds_global/mds_mkt_packets.h</a>&gt;</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#include    &lt;<a class="code" href="mds__api_8h.html">mds_api/mds_api.h</a>&gt;</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#include    &lt;<a class="code" href="spk__global__packet_8h.html">sutil/net/spk_global_packet.h</a>&gt;</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#include    &lt;<a class="code" href="types_8h.html">sutil/types.h</a>&gt;</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment"> * 函数声明</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="mds__csv__parser_8h.html#a3b1126c543ffe4d11d024d992a0a1d40">   61</a></span><span class="keywordtype">void</span>*   <a class="code hl_function" href="mds__csv__parser_8h.html#a3b1126c543ffe4d11d024d992a0a1d40">MdsCsvParser_EncodeReq</a>(</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>                <a class="code hl_struct" href="struct__SMsgHead.html">SMsgHeadT</a> *pReqHead,</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>                <span class="keyword">const</span> <a class="code hl_union" href="union__MdsMktReqMsgBody.html">MdsMktReqMsgBodyT</a> *pReqBody,</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>                <span class="keywordtype">char</span> *pBuf,</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>                <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize,</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>                <span class="keyword">const</span> <span class="keywordtype">char</span> *pRemoteInfo);</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><a class="code hl_union" href="union__MdsMktReqMsgBody.html">MdsMktReqMsgBodyT</a>*</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="mds__csv__parser_8h.html#a09f104c3279deeecb9d1179b52b6a2a8">   78</a></span>        <a class="code hl_function" href="mds__csv__parser_8h.html#a09f104c3279deeecb9d1179b52b6a2a8">MdsCsvParser_DecodeReq</a>(</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>                <a class="code hl_struct" href="struct__SMsgHead.html">SMsgHeadT</a> *pReqHead,</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>                <span class="keyword">const</span> <span class="keywordtype">void</span> *pMsgBody,</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>                <a class="code hl_union" href="union__MdsMktReqMsgBody.html">MdsMktReqMsgBodyT</a> *pReqMsgBuf,</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>                <span class="keyword">const</span> <span class="keywordtype">char</span> *pRemoteInfo);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="mds__csv__parser_8h.html#aa91e94f0737c49a7ecfead6cc8eff682">   94</a></span><span class="keywordtype">void</span>*   <a class="code hl_function" href="mds__csv__parser_8h.html#aa91e94f0737c49a7ecfead6cc8eff682">MdsCsvParser_EncodeRsp</a>(</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>                <a class="code hl_struct" href="struct__SMsgHead.html">SMsgHeadT</a> *pRspHead,</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>                <span class="keyword">const</span> <a class="code hl_union" href="union__MdsMktRspMsgBody.html">MdsMktRspMsgBodyT</a> *pRspBody,</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>                <span class="keywordtype">char</span> *pBuf,</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>                <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize,</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>                <span class="keyword">const</span> <span class="keywordtype">char</span> *pRemoteInfo);</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><a class="code hl_union" href="union__MdsMktRspMsgBody.html">MdsMktRspMsgBodyT</a>*</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="mds__csv__parser_8h.html#af00eb90c8311aef9536bbe843cdd2d55">  111</a></span>        <a class="code hl_function" href="mds__csv__parser_8h.html#af00eb90c8311aef9536bbe843cdd2d55">MdsCsvParser_DecodeRsp</a>(</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>                <a class="code hl_struct" href="struct__SMsgHead.html">SMsgHeadT</a> *pRspHead,</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>                <span class="keyword">const</span> <span class="keywordtype">void</span> *pMsgBody,</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>                <a class="code hl_union" href="union__MdsMktRspMsgBody.html">MdsMktRspMsgBodyT</a> *pRspMsgBuf,</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>                <span class="keyword">const</span> <span class="keywordtype">char</span> *pRemoteInfo);</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="mds__csv__parser_8h.html#a911b421af4ab7891169cd416f4344b35">  125</a></span><a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>   <a class="code hl_function" href="mds__csv__parser_8h.html#a911b421af4ab7891169cd416f4344b35">MdsCsvParser_GetRspFields</a>(</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>                <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a> msgType,</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>                <span class="keywordtype">char</span> *pBuf,</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>                <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize);</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><span class="comment"> * CVS行情数据文件解析相关的函数声明</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="mds__csv__parser_8h.html#a0f1177015b2bf69d2160b14c6288f88f">  145</a></span><a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>   <a class="code hl_function" href="mds__csv__parser_8h.html#a0f1177015b2bf69d2160b14c6288f88f">MdsCsvParser_ParseCsvFile</a>(</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>                <span class="keyword">const</span> <span class="keywordtype">char</span> *pCsvFile,</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>                <a class="code hl_typedef" href="mds__api_8h.html#ab18ec82bd38ad0465322fe5cedcfe914">F_MDSAPI_ONMSG_T</a> fnOnMsgCallback,</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>                <span class="keywordtype">void</span> *pCallbackParams);</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span><a class="code hl_union" href="union__MdsMktRspMsgBody.html">MdsMktRspMsgBodyT</a>*</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno"><a class="line" href="mds__csv__parser_8h.html#ac4e84ab8f23cf1db8e2e434186cca382">  159</a></span>        <a class="code hl_function" href="mds__csv__parser_8h.html#ac4e84ab8f23cf1db8e2e434186cca382">MdsCsvParser_DecodeCsvRecord</a>(</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>                <span class="keyword">const</span> <span class="keywordtype">char</span> *pCsvRecord,</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>                <a class="code hl_struct" href="struct__SMsgHead.html">SMsgHeadT</a> *pOutMsgHead,</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>                <a class="code hl_union" href="union__MdsMktRspMsgBody.html">MdsMktRspMsgBodyT</a> *pOutMsgBuf);</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span><span class="comment"> * 用于具体数据条目的编码/解码处理的函数声明</span></div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno"><a class="line" href="mds__csv__parser_8h.html#abd282485ed8bdf805892893d634b78cc">  178</a></span><a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>   <a class="code hl_function" href="mds__csv__parser_8h.html#abd282485ed8bdf805892893d634b78cc">MdsCsvParser_EncodeStockStaticItem</a>(</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>                <span class="keyword">const</span> <a class="code hl_struct" href="struct__MdsStockStaticInfo.html">MdsStockStaticInfoT</a> *pItem,</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>                <span class="keywordtype">char</span> *pBuf,</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>                <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize);</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span> </div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno"><a class="line" href="mds__csv__parser_8h.html#a81a8974d628a2a209cf6d531fb9632ea">  191</a></span><a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>   <a class="code hl_function" href="mds__csv__parser_8h.html#a81a8974d628a2a209cf6d531fb9632ea">MdsCsvParser_EncodeOptionStaticItem</a>(</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>                <span class="keyword">const</span> <a class="code hl_struct" href="struct__MdsOptionStaticInfo.html">MdsOptionStaticInfoT</a> *pItem,</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>                <span class="keywordtype">char</span> *pBuf,</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>                <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize);</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno"><a class="line" href="mds__csv__parser_8h.html#a1c91fdaa69106325f4b95ff221389c06">  204</a></span><a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>   <a class="code hl_function" href="mds__csv__parser_8h.html#a1c91fdaa69106325f4b95ff221389c06">MdsCsvParser_EncodeSnapshotListItem</a>(</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>                <span class="keyword">const</span> <a class="code hl_struct" href="struct__MdsL1Snapshot.html">MdsL1SnapshotT</a> *pItem,</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>                <span class="keywordtype">char</span> *pBuf,</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>                <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> bufSize);</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span> </div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span> </div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>}</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span> </div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span><span class="preprocessor">#endif  </span><span class="comment">/* _MDS_CSV_PARSER_H */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_a1b09856a6463f2bcc4bd8ff0e4e3ee0f"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a></div><div class="ttdeci">unsigned __int8 uint8</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00073">itpdk_typedef.h:73</a></div></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_ad3ce9f24199b79b2629169eebf59489b"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a></div><div class="ttdeci">__int32 int32</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00070">itpdk_typedef.h:70</a></div></div>
+<div class="ttc" id="amds__api_8h_html"><div class="ttname"><a href="mds__api_8h.html">mds_api.h</a></div></div>
+<div class="ttc" id="amds__api_8h_html_ab18ec82bd38ad0465322fe5cedcfe914"><div class="ttname"><a href="mds__api_8h.html#ab18ec82bd38ad0465322fe5cedcfe914">F_MDSAPI_ONMSG_T</a></div><div class="ttdeci">int32(* F_MDSAPI_ONMSG_T)(MdsApiSessionInfoT *pSessionInfo, SMsgHeadT *pMsgHead, void *pMsgItem, void *pCallbackParams)</div><div class="ttdef"><b>Definition</b> <a href="mds__api_8h_source.html#l00469">mds_api.h:469</a></div></div>
+<div class="ttc" id="amds__csv__parser_8h_html_a09f104c3279deeecb9d1179b52b6a2a8"><div class="ttname"><a href="mds__csv__parser_8h.html#a09f104c3279deeecb9d1179b52b6a2a8">MdsCsvParser_DecodeReq</a></div><div class="ttdeci">MdsMktReqMsgBodyT * MdsCsvParser_DecodeReq(SMsgHeadT *pReqHead, const void *pMsgBody, MdsMktReqMsgBodyT *pReqMsgBuf, const char *pRemoteInfo)</div></div>
+<div class="ttc" id="amds__csv__parser_8h_html_a0f1177015b2bf69d2160b14c6288f88f"><div class="ttname"><a href="mds__csv__parser_8h.html#a0f1177015b2bf69d2160b14c6288f88f">MdsCsvParser_ParseCsvFile</a></div><div class="ttdeci">int32 MdsCsvParser_ParseCsvFile(const char *pCsvFile, F_MDSAPI_ONMSG_T fnOnMsgCallback, void *pCallbackParams)</div></div>
+<div class="ttc" id="amds__csv__parser_8h_html_a1c91fdaa69106325f4b95ff221389c06"><div class="ttname"><a href="mds__csv__parser_8h.html#a1c91fdaa69106325f4b95ff221389c06">MdsCsvParser_EncodeSnapshotListItem</a></div><div class="ttdeci">int32 MdsCsvParser_EncodeSnapshotListItem(const MdsL1SnapshotT *pItem, char *pBuf, int32 bufSize)</div></div>
+<div class="ttc" id="amds__csv__parser_8h_html_a3b1126c543ffe4d11d024d992a0a1d40"><div class="ttname"><a href="mds__csv__parser_8h.html#a3b1126c543ffe4d11d024d992a0a1d40">MdsCsvParser_EncodeReq</a></div><div class="ttdeci">void * MdsCsvParser_EncodeReq(SMsgHeadT *pReqHead, const MdsMktReqMsgBodyT *pReqBody, char *pBuf, int32 bufSize, const char *pRemoteInfo)</div></div>
+<div class="ttc" id="amds__csv__parser_8h_html_a81a8974d628a2a209cf6d531fb9632ea"><div class="ttname"><a href="mds__csv__parser_8h.html#a81a8974d628a2a209cf6d531fb9632ea">MdsCsvParser_EncodeOptionStaticItem</a></div><div class="ttdeci">int32 MdsCsvParser_EncodeOptionStaticItem(const MdsOptionStaticInfoT *pItem, char *pBuf, int32 bufSize)</div></div>
+<div class="ttc" id="amds__csv__parser_8h_html_a911b421af4ab7891169cd416f4344b35"><div class="ttname"><a href="mds__csv__parser_8h.html#a911b421af4ab7891169cd416f4344b35">MdsCsvParser_GetRspFields</a></div><div class="ttdeci">int32 MdsCsvParser_GetRspFields(uint8 msgType, char *pBuf, int32 bufSize)</div></div>
+<div class="ttc" id="amds__csv__parser_8h_html_aa91e94f0737c49a7ecfead6cc8eff682"><div class="ttname"><a href="mds__csv__parser_8h.html#aa91e94f0737c49a7ecfead6cc8eff682">MdsCsvParser_EncodeRsp</a></div><div class="ttdeci">void * MdsCsvParser_EncodeRsp(SMsgHeadT *pRspHead, const MdsMktRspMsgBodyT *pRspBody, char *pBuf, int32 bufSize, const char *pRemoteInfo)</div></div>
+<div class="ttc" id="amds__csv__parser_8h_html_abd282485ed8bdf805892893d634b78cc"><div class="ttname"><a href="mds__csv__parser_8h.html#abd282485ed8bdf805892893d634b78cc">MdsCsvParser_EncodeStockStaticItem</a></div><div class="ttdeci">int32 MdsCsvParser_EncodeStockStaticItem(const MdsStockStaticInfoT *pItem, char *pBuf, int32 bufSize)</div></div>
+<div class="ttc" id="amds__csv__parser_8h_html_ac4e84ab8f23cf1db8e2e434186cca382"><div class="ttname"><a href="mds__csv__parser_8h.html#ac4e84ab8f23cf1db8e2e434186cca382">MdsCsvParser_DecodeCsvRecord</a></div><div class="ttdeci">MdsMktRspMsgBodyT * MdsCsvParser_DecodeCsvRecord(const char *pCsvRecord, SMsgHeadT *pOutMsgHead, MdsMktRspMsgBodyT *pOutMsgBuf)</div></div>
+<div class="ttc" id="amds__csv__parser_8h_html_af00eb90c8311aef9536bbe843cdd2d55"><div class="ttname"><a href="mds__csv__parser_8h.html#af00eb90c8311aef9536bbe843cdd2d55">MdsCsvParser_DecodeRsp</a></div><div class="ttdeci">MdsMktRspMsgBodyT * MdsCsvParser_DecodeRsp(SMsgHeadT *pRspHead, const void *pMsgBody, MdsMktRspMsgBodyT *pRspMsgBuf, const char *pRemoteInfo)</div></div>
+<div class="ttc" id="amds__mkt__packets_8h_html"><div class="ttname"><a href="mds__mkt__packets_8h.html">mds_mkt_packets.h</a></div></div>
+<div class="ttc" id="aspk__global__packet_8h_html"><div class="ttname"><a href="spk__global__packet_8h.html">spk_global_packet.h</a></div></div>
+<div class="ttc" id="astruct__MdsL1Snapshot_html"><div class="ttname"><a href="struct__MdsL1Snapshot.html">_MdsL1Snapshot</a></div><div class="ttdef"><b>Definition</b> <a href="mds__base__model_8h_source.html#l01100">mds_base_model.h:1100</a></div></div>
+<div class="ttc" id="astruct__MdsOptionStaticInfo_html"><div class="ttname"><a href="struct__MdsOptionStaticInfo.html">_MdsOptionStaticInfo</a></div><div class="ttdef"><b>Definition</b> <a href="mds__base__model_8h_source.html#l02011">mds_base_model.h:2011</a></div></div>
+<div class="ttc" id="astruct__MdsStockStaticInfo_html"><div class="ttname"><a href="struct__MdsStockStaticInfo.html">_MdsStockStaticInfo</a></div><div class="ttdef"><b>Definition</b> <a href="mds__base__model_8h_source.html#l01884">mds_base_model.h:1884</a></div></div>
+<div class="ttc" id="astruct__SMsgHead_html"><div class="ttname"><a href="struct__SMsgHead.html">_SMsgHead</a></div><div class="ttdef"><b>Definition</b> <a href="spk__global__packet_8h_source.html#l00086">spk_global_packet.h:86</a></div></div>
+<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div></div>
+<div class="ttc" id="aunion__MdsMktReqMsgBody_html"><div class="ttname"><a href="union__MdsMktReqMsgBody.html">_MdsMktReqMsgBody</a></div><div class="ttdef"><b>Definition</b> <a href="mds__mkt__packets_8h_source.html#l01076">mds_mkt_packets.h:1076</a></div></div>
+<div class="ttc" id="aunion__MdsMktRspMsgBody_html"><div class="ttname"><a href="union__MdsMktRspMsgBody.html">_MdsMktRspMsgBody</a></div><div class="ttdef"><b>Definition</b> <a href="mds__mkt__packets_8h_source.html#l01115">mds_mkt_packets.h:1115</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_e76444fc31ce260c247acf70d3cb201c.html">mds_api</a></li><li class="navelem"><a class="el" href="dir_d45b6daf708766e291b891a634f9577a.html">parser</a></li><li class="navelem"><a class="el" href="dir_8c86b5ce491922de6f3a274619792e70.html">csv_parser</a></li><li class="navelem"><a class="el" href="mds__csv__parser_8h.html">mds_csv_parser.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

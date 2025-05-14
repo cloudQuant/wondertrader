@@ -1,0 +1,616 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/zstd_ddict.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('zstd__ddict_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">zstd_ddict.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;string.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="cpu_8h_source.html">cpu.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="mem_8h_source.html">mem.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="fse_8h_source.html">fse.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="huf_8h_source.html">huf.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="zstd__decompress__internal_8h_source.html">zstd_decompress_internal.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="zstd__ddict_8h_source.html">zstd_ddict.h</a>&quot;</code><br />
+</div>
+<p><a href="zstd__ddict_8c_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__DDict__s.html">ZSTD_DDict_s</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a0d2a6fcfd814db079898717019641487" id="r_a0d2a6fcfd814db079898717019641487"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#a0d2a6fcfd814db079898717019641487">FSE_STATIC_LINKING_ONLY</a></td></tr>
+<tr class="separator:a0d2a6fcfd814db079898717019641487"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7691fd75a0d8bc9d2b1544f0df8e381c" id="r_a7691fd75a0d8bc9d2b1544f0df8e381c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#a7691fd75a0d8bc9d2b1544f0df8e381c">HUF_STATIC_LINKING_ONLY</a></td></tr>
+<tr class="separator:a7691fd75a0d8bc9d2b1544f0df8e381c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a76365037bee4336a8f3db94a5afbe665" id="r_a76365037bee4336a8f3db94a5afbe665"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#a76365037bee4336a8f3db94a5afbe665">ZSTD_DDict_dictContent</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *ddict)</td></tr>
+<tr class="separator:a76365037bee4336a8f3db94a5afbe665"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac420ed034ce4edbe8a8fb4bdce8075bb" id="r_ac420ed034ce4edbe8a8fb4bdce8075bb"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#ac420ed034ce4edbe8a8fb4bdce8075bb">ZSTD_DDict_dictSize</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *ddict)</td></tr>
+<tr class="separator:ac420ed034ce4edbe8a8fb4bdce8075bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5bfe859207981d85e750824a21e74d61" id="r_a5bfe859207981d85e750824a21e74d61"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#a5bfe859207981d85e750824a21e74d61">ZSTD_copyDDictParameters</a> (<a class="el" href="zstd_8h.html#a9ce4435ca683f0e7cb2b90ca9eb1fce4">ZSTD_DCtx</a> *dctx, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *ddict)</td></tr>
+<tr class="separator:a5bfe859207981d85e750824a21e74d61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a15f2059a122798473935b1db2d9535" id="r_a8a15f2059a122798473935b1db2d9535"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#a8a15f2059a122798473935b1db2d9535">ZSTD_loadEntropy_intoDDict</a> (<a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *ddict, ZSTD_dictContentType_e dictContentType)</td></tr>
+<tr class="separator:a8a15f2059a122798473935b1db2d9535"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52db937781a276b8f65d3391a3352347" id="r_a52db937781a276b8f65d3391a3352347"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#a52db937781a276b8f65d3391a3352347">ZSTD_initDDict_internal</a> (<a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *ddict, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a>, size_t <a class="el" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>, ZSTD_dictLoadMethod_e dictLoadMethod, ZSTD_dictContentType_e dictContentType)</td></tr>
+<tr class="separator:a52db937781a276b8f65d3391a3352347"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09a772876384dedb4c511c4b37f79e56" id="r_a09a772876384dedb4c511c4b37f79e56"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#a09a772876384dedb4c511c4b37f79e56">ZSTD_createDDict_advanced</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a>, size_t <a class="el" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>, ZSTD_dictLoadMethod_e dictLoadMethod, ZSTD_dictContentType_e dictContentType, ZSTD_customMem customMem)</td></tr>
+<tr class="separator:a09a772876384dedb4c511c4b37f79e56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ad3c8099bee95463c0dafe57377e018" id="r_a8ad3c8099bee95463c0dafe57377e018"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#a8ad3c8099bee95463c0dafe57377e018">ZSTD_createDDict</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a>, size_t <a class="el" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>)</td></tr>
+<tr class="separator:a8ad3c8099bee95463c0dafe57377e018"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8df88e8b7d1663f64b4bdee696299ac1" id="r_a8df88e8b7d1663f64b4bdee696299ac1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#a8df88e8b7d1663f64b4bdee696299ac1">ZSTD_createDDict_byReference</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *dictBuffer, size_t <a class="el" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>)</td></tr>
+<tr class="separator:a8df88e8b7d1663f64b4bdee696299ac1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e1c6e122152644abc1139af1dfa86a7" id="r_a5e1c6e122152644abc1139af1dfa86a7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#a5e1c6e122152644abc1139af1dfa86a7">ZSTD_initStaticDDict</a> (void *sBuffer, size_t sBufferSize, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a>, size_t <a class="el" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>, ZSTD_dictLoadMethod_e dictLoadMethod, ZSTD_dictContentType_e dictContentType)</td></tr>
+<tr class="separator:a5e1c6e122152644abc1139af1dfa86a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a652594c16c4a53519a22ceac780a1158" id="r_a652594c16c4a53519a22ceac780a1158"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#a652594c16c4a53519a22ceac780a1158">ZSTD_freeDDict</a> (<a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *ddict)</td></tr>
+<tr class="separator:a652594c16c4a53519a22ceac780a1158"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58508bbc810517a70a002961b9aa855c" id="r_a58508bbc810517a70a002961b9aa855c"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#a58508bbc810517a70a002961b9aa855c">ZSTD_estimateDDictSize</a> (size_t <a class="el" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>, ZSTD_dictLoadMethod_e dictLoadMethod)</td></tr>
+<tr class="separator:a58508bbc810517a70a002961b9aa855c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af942918c82a467ec60f6b074e2320fb8" id="r_af942918c82a467ec60f6b074e2320fb8"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#af942918c82a467ec60f6b074e2320fb8">ZSTD_sizeof_DDict</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *ddict)</td></tr>
+<tr class="separator:af942918c82a467ec60f6b074e2320fb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a220ae369de09fde1ed3b71dd270ed6a6" id="r_a220ae369de09fde1ed3b71dd270ed6a6"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ddict_8c.html#a220ae369de09fde1ed3b71dd270ed6a6">ZSTD_getDictID_fromDDict</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *ddict)</td></tr>
+<tr class="separator:a220ae369de09fde1ed3b71dd270ed6a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a0d2a6fcfd814db079898717019641487" name="a0d2a6fcfd814db079898717019641487"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d2a6fcfd814db079898717019641487">&#9670;&#160;</a></span>FSE_STATIC_LINKING_ONLY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_STATIC_LINKING_ONLY</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00020">20</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7691fd75a0d8bc9d2b1544f0df8e381c" name="a7691fd75a0d8bc9d2b1544f0df8e381c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7691fd75a0d8bc9d2b1544f0df8e381c">&#9670;&#160;</a></span>HUF_STATIC_LINKING_ONLY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_STATIC_LINKING_ONLY</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00022">22</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a5bfe859207981d85e750824a21e74d61" name="a5bfe859207981d85e750824a21e74d61"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5bfe859207981d85e750824a21e74d61">&#9670;&#160;</a></span>ZSTD_copyDDictParameters()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ZSTD_copyDDictParameters </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a9ce4435ca683f0e7cb2b90ca9eb1fce4">ZSTD_DCtx</a> *&#160;</td>
+          <td class="paramname"><em>dctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *&#160;</td>
+          <td class="paramname"><em>ddict</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00058">58</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8ad3c8099bee95463c0dafe57377e018" name="a8ad3c8099bee95463c0dafe57377e018"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ad3c8099bee95463c0dafe57377e018">&#9670;&#160;</a></span>ZSTD_createDDict()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> * ZSTD_createDDict </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>dict</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ddict_8c.html#a8ad3c8099bee95463c0dafe57377e018">ZSTD_createDDict()</a> : Create a digested dictionary, to start decompression without startup delay. <code>dict</code> content is copied inside DDict. Consequently, <code>dict</code> can be released after <code>ZSTD_DDict</code> creation </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00166">166</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a09a772876384dedb4c511c4b37f79e56" name="a09a772876384dedb4c511c4b37f79e56"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09a772876384dedb4c511c4b37f79e56">&#9670;&#160;</a></span>ZSTD_createDDict_advanced()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> * ZSTD_createDDict_advanced </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>dict</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_dictLoadMethod_e&#160;</td>
+          <td class="paramname"><em>dictLoadMethod</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_dictContentType_e&#160;</td>
+          <td class="paramname"><em>dictContentType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_customMem&#160;</td>
+          <td class="paramname"><em>customMem</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00141">141</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8df88e8b7d1663f64b4bdee696299ac1" name="a8df88e8b7d1663f64b4bdee696299ac1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8df88e8b7d1663f64b4bdee696299ac1">&#9670;&#160;</a></span>ZSTD_createDDict_byReference()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> * ZSTD_createDDict_byReference </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>dictBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ddict_8c.html#a8df88e8b7d1663f64b4bdee696299ac1">ZSTD_createDDict_byReference()</a> : Create a digested dictionary, to start decompression without startup delay. Dictionary content is simply referenced, it will be accessed during decompression. Warning : dictBuffer must outlive DDict (DDict must be freed before dictBuffer) </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00176">176</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a76365037bee4336a8f3db94a5afbe665" name="a76365037bee4336a8f3db94a5afbe665"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76365037bee4336a8f3db94a5afbe665">&#9670;&#160;</a></span>ZSTD_DDict_dictContent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void * ZSTD_DDict_dictContent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *&#160;</td>
+          <td class="paramname"><em>ddict</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00046">46</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac420ed034ce4edbe8a8fb4bdce8075bb" name="ac420ed034ce4edbe8a8fb4bdce8075bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac420ed034ce4edbe8a8fb4bdce8075bb">&#9670;&#160;</a></span>ZSTD_DDict_dictSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_DDict_dictSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *&#160;</td>
+          <td class="paramname"><em>ddict</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00052">52</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a58508bbc810517a70a002961b9aa855c" name="a58508bbc810517a70a002961b9aa855c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58508bbc810517a70a002961b9aa855c">&#9670;&#160;</a></span>ZSTD_estimateDDictSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_estimateDDictSize </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_dictLoadMethod_e&#160;</td>
+          <td class="paramname"><em>dictLoadMethod</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ddict_8c.html#a58508bbc810517a70a002961b9aa855c">ZSTD_estimateDDictSize()</a> : Estimate amount of memory that will be needed to create a dictionary for decompression. Note : dictionary created by reference using ZSTD_dlm_byRef are smaller </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00221">221</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a652594c16c4a53519a22ceac780a1158" name="a652594c16c4a53519a22ceac780a1158"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a652594c16c4a53519a22ceac780a1158">&#9670;&#160;</a></span>ZSTD_freeDDict()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_freeDDict </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *&#160;</td>
+          <td class="paramname"><em>ddict</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd_8h.html#a981d36fc0f8d85fbe13202cd85d6d667">ZSTD_freeDDict()</a> : Function frees memory allocated with <a class="el" href="zstd_8h.html#a2224ca79c4ad79a54c6f2089744ef900">ZSTD_createDDict()</a> </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00208">208</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a220ae369de09fde1ed3b71dd270ed6a6" name="a220ae369de09fde1ed3b71dd270ed6a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a220ae369de09fde1ed3b71dd270ed6a6">&#9670;&#160;</a></span>ZSTD_getDictID_fromDDict()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned ZSTD_getDictID_fromDDict </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *&#160;</td>
+          <td class="paramname"><em>ddict</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ddict_8c.html#a220ae369de09fde1ed3b71dd270ed6a6">ZSTD_getDictID_fromDDict()</a> : Provides the dictID of the dictionary loaded into <code>ddict</code>. If </p><dl class="section return"><dt>返回</dt><dd>== 0, the dictionary is not conformant to Zstandard specification, or empty. Non-conformant dictionaries can still be loaded, but as content-only dictionaries. </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00236">236</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a52db937781a276b8f65d3391a3352347" name="a52db937781a276b8f65d3391a3352347"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52db937781a276b8f65d3391a3352347">&#9670;&#160;</a></span>ZSTD_initDDict_internal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTD_initDDict_internal </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *&#160;</td>
+          <td class="paramname"><em>ddict</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>dict</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_dictLoadMethod_e&#160;</td>
+          <td class="paramname"><em>dictLoadMethod</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_dictContentType_e&#160;</td>
+          <td class="paramname"><em>dictContentType</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00116">116</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5e1c6e122152644abc1139af1dfa86a7" name="a5e1c6e122152644abc1139af1dfa86a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e1c6e122152644abc1139af1dfa86a7">&#9670;&#160;</a></span>ZSTD_initStaticDDict()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> * ZSTD_initStaticDDict </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>sBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>sBufferSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>dict</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dictSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_dictLoadMethod_e&#160;</td>
+          <td class="paramname"><em>dictLoadMethod</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_dictContentType_e&#160;</td>
+          <td class="paramname"><em>dictContentType</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00183">183</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8a15f2059a122798473935b1db2d9535" name="a8a15f2059a122798473935b1db2d9535"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a15f2059a122798473935b1db2d9535">&#9670;&#160;</a></span>ZSTD_loadEntropy_intoDDict()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTD_loadEntropy_intoDDict </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *&#160;</td>
+          <td class="paramname"><em>ddict</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_dictContentType_e&#160;</td>
+          <td class="paramname"><em>dictContentType</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00086">86</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af942918c82a467ec60f6b074e2320fb8" name="af942918c82a467ec60f6b074e2320fb8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af942918c82a467ec60f6b074e2320fb8">&#9670;&#160;</a></span>ZSTD_sizeof_DDict()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_sizeof_DDict </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#af34d948830a0684f90121d51d663f9aa">ZSTD_DDict</a> *&#160;</td>
+          <td class="paramname"><em>ddict</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ddict_8c_source.html">zstd_ddict.c</a> 第 <a class="el" href="zstd__ddict_8c_source.html#l00226">226</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="zstd__ddict_8c.html">zstd_ddict.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

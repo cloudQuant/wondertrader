@@ -1,0 +1,1973 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: TraderDD类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classTraderDD.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Public 类型</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pro-types">Protected 类型</a> &#124;
+<a href="#pro-attribs">Protected 属性</a> &#124;
+<a href="#pri-methods">Private 成员函数</a> &#124;
+<a href="classTraderDD-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">TraderDD类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="TraderDD_8h_source.html">TraderDD.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public 类型</h2></td></tr>
+<tr class="memitem:a4e60286231233cdcd13e231413ba546e" id="r_a4e60286231233cdcd13e231413ba546e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a4e60286231233cdcd13e231413ba546e">WrapperState</a> { <br />
+&#160;&#160;<a class="el" href="classTraderDD.html#a4e60286231233cdcd13e231413ba546eaf3fdb666f726742a25b6edf7e488fc42">WS_NOTLOGIN</a>
+, <a class="el" href="classTraderDD.html#a4e60286231233cdcd13e231413ba546ea0f651ac4498ecf14ae2fee55a277a474">WS_LOGINING</a>
+, <a class="el" href="classTraderDD.html#a4e60286231233cdcd13e231413ba546eaeffa98f150086cc85b8b60b572fff1cd">WS_LOGINED</a>
+, <a class="el" href="classTraderDD.html#a4e60286231233cdcd13e231413ba546ea0f457b18a701ed5ac4a2181e9c87fb83">WS_LOGINFAILED</a>
+, <br />
+&#160;&#160;<a class="el" href="classTraderDD.html#a4e60286231233cdcd13e231413ba546ea5376d7d6000dcd0d12bcfdfc51bead49">WS_ALLREADY</a>
+<br />
+ }</td></tr>
+<tr class="separator:a4e60286231233cdcd13e231413ba546e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ba9c3f16b0876d8bf04eade8a7003a7" id="r_a1ba9c3f16b0876d8bf04eade8a7003a7"><td class="memItemLeft" align="right" valign="top">typedef std::unordered_map&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a1ba9c3f16b0876d8bf04eade8a7003a7">StringMap</a></td></tr>
+<tr class="separator:a1ba9c3f16b0876d8bf04eade8a7003a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a2ab52d4e49b4e59e5c523999ccb82b91" id="r_a2ab52d4e49b4e59e5c523999ccb82b91"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a2ab52d4e49b4e59e5c523999ccb82b91">TraderDD</a> ()</td></tr>
+<tr class="separator:a2ab52d4e49b4e59e5c523999ccb82b91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d2af36031803bf0b771ba69473b03f0" id="r_a9d2af36031803bf0b771ba69473b03f0"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a9d2af36031803bf0b771ba69473b03f0">~TraderDD</a> ()</td></tr>
+<tr class="separator:a9d2af36031803bf0b771ba69473b03f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a154d75ee66f7982d870493817c6332ea" id="r_a154d75ee66f7982d870493817c6332ea"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a154d75ee66f7982d870493817c6332ea">OnRtnOrder</a> (<a class="el" href="FixApi_8h.html#ae84f6bf59ecd636f3d32001dbe82301a">HANDLE_CONN</a> hconn, <a class="el" href="FixApi_8h.html#a7892e6d6d6fe58adde8517213a748ec1">HANDLE_SESSION</a> hsess)</td></tr>
+<tr class="separator:a154d75ee66f7982d870493817c6332ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e049b48db808e1c5e71343e6213a37d" id="r_a1e049b48db808e1c5e71343e6213a37d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a1e049b48db808e1c5e71343e6213a37d">OnRtnTrade</a> (<a class="el" href="FixApi_8h.html#ae84f6bf59ecd636f3d32001dbe82301a">HANDLE_CONN</a> hconn, <a class="el" href="FixApi_8h.html#a7892e6d6d6fe58adde8517213a748ec1">HANDLE_SESSION</a> hsess)</td></tr>
+<tr class="separator:a1e049b48db808e1c5e71343e6213a37d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade7ea197b9cb1232685c3d8b8b3bf607" id="r_ade7ea197b9cb1232685c3d8b8b3bf607"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#ade7ea197b9cb1232685c3d8b8b3bf607">init</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *params) override</td></tr>
+<tr class="separator:ade7ea197b9cb1232685c3d8b8b3bf607"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab00b4492af643bb6fc26cb6ed5b7da60" id="r_ab00b4492af643bb6fc26cb6ed5b7da60"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#ab00b4492af643bb6fc26cb6ed5b7da60">release</a> () override</td></tr>
+<tr class="separator:ab00b4492af643bb6fc26cb6ed5b7da60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e39fe7c3ebca9df04f0215a37b34426" id="r_a6e39fe7c3ebca9df04f0215a37b34426"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a6e39fe7c3ebca9df04f0215a37b34426">registerSpi</a> (<a class="el" href="classITraderSpi.html">ITraderSpi</a> *listener) override</td></tr>
+<tr class="separator:a6e39fe7c3ebca9df04f0215a37b34426"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a217628a27b624c1cea99850b9d3883eb" id="r_a217628a27b624c1cea99850b9d3883eb"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a217628a27b624c1cea99850b9d3883eb">makeEntrustID</a> (char *buffer, int length) override</td></tr>
+<tr class="separator:a217628a27b624c1cea99850b9d3883eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4953f134e1d39569955eef8a62818b5" id="r_ab4953f134e1d39569955eef8a62818b5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#ab4953f134e1d39569955eef8a62818b5">connect</a> () override</td></tr>
+<tr class="separator:ab4953f134e1d39569955eef8a62818b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb1ed64ebc81fa409c707d0878493eb4" id="r_acb1ed64ebc81fa409c707d0878493eb4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#acb1ed64ebc81fa409c707d0878493eb4">disconnect</a> () override</td></tr>
+<tr class="separator:acb1ed64ebc81fa409c707d0878493eb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94284c4c319ff75d5c2065de31928bc5" id="r_a94284c4c319ff75d5c2065de31928bc5"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a94284c4c319ff75d5c2065de31928bc5">isConnected</a> () override</td></tr>
+<tr class="separator:a94284c4c319ff75d5c2065de31928bc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3e721b954fd33ecc2890f6462d3ab3a" id="r_ab3e721b954fd33ecc2890f6462d3ab3a"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#ab3e721b954fd33ecc2890f6462d3ab3a">login</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="demo__send__order_8cpp.html#a6dfa0071362986f2680867cd51fa2ea8">user</a>, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pass, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *productInfo) override</td></tr>
+<tr class="separator:ab3e721b954fd33ecc2890f6462d3ab3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e668c92a963fa53961537e614371cea" id="r_a2e668c92a963fa53961537e614371cea"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a2e668c92a963fa53961537e614371cea">logout</a> () override</td></tr>
+<tr class="separator:a2e668c92a963fa53961537e614371cea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9498079ecc2d0823939f915cef26fbc" id="r_ae9498079ecc2d0823939f915cef26fbc"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#ae9498079ecc2d0823939f915cef26fbc">orderInsert</a> (<a class="el" href="classWTSEntrust.html">WTSEntrust</a> *eutrust) override</td></tr>
+<tr class="separator:ae9498079ecc2d0823939f915cef26fbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b9789d94794bd6e055e72919794795f" id="r_a6b9789d94794bd6e055e72919794795f"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a6b9789d94794bd6e055e72919794795f">orderAction</a> (<a class="el" href="classWTSEntrustAction.html">WTSEntrustAction</a> *action) override</td></tr>
+<tr class="separator:a6b9789d94794bd6e055e72919794795f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a535977057cf6bb163e4d1054a1d797fd" id="r_a535977057cf6bb163e4d1054a1d797fd"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a535977057cf6bb163e4d1054a1d797fd">queryAccount</a> () override</td></tr>
+<tr class="separator:a535977057cf6bb163e4d1054a1d797fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad37ad35dd4f1c0772afe8bf706f009c9" id="r_ad37ad35dd4f1c0772afe8bf706f009c9"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#ad37ad35dd4f1c0772afe8bf706f009c9">queryPositions</a> () override</td></tr>
+<tr class="separator:ad37ad35dd4f1c0772afe8bf706f009c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43298dfc5e846312052df3bc685c5bd8" id="r_a43298dfc5e846312052df3bc685c5bd8"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a43298dfc5e846312052df3bc685c5bd8">queryOrders</a> () override</td></tr>
+<tr class="separator:a43298dfc5e846312052df3bc685c5bd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c4520c97a881d4f6e19a1695ac3ca97" id="r_a9c4520c97a881d4f6e19a1695ac3ca97"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a9c4520c97a881d4f6e19a1695ac3ca97">queryTrades</a> () override</td></tr>
+<tr class="separator:a9c4520c97a881d4f6e19a1695ac3ca97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classITraderApi"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classITraderApi')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classITraderApi.html">ITraderApi</a></td></tr>
+<tr class="memitem:a3c9fbb974fc0c2a248290448f3bfe4c4 inherit pub_methods_classITraderApi" id="r_a3c9fbb974fc0c2a248290448f3bfe4c4"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderApi.html#a3c9fbb974fc0c2a248290448f3bfe4c4">~ITraderApi</a> ()</td></tr>
+<tr class="separator:a3c9fbb974fc0c2a248290448f3bfe4c4 inherit pub_methods_classITraderApi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a008374139717e7e6dd86b7f117ec8dc1 inherit pub_methods_classITraderApi" id="r_a008374139717e7e6dd86b7f117ec8dc1"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classIStkTraderApi.html">IStkTraderApi</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderApi.html#a008374139717e7e6dd86b7f117ec8dc1">getStkTrader</a> ()</td></tr>
+<tr class="separator:a008374139717e7e6dd86b7f117ec8dc1 inherit pub_methods_classITraderApi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85ba593d89855f87b64b535eeda88117 inherit pub_methods_classITraderApi" id="r_a85ba593d89855f87b64b535eeda88117"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classIOptTraderApi.html">IOptTraderApi</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderApi.html#a85ba593d89855f87b64b535eeda88117">getOptTrader</a> ()</td></tr>
+<tr class="separator:a85ba593d89855f87b64b535eeda88117 inherit pub_methods_classITraderApi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca40d1a215642cb3942aca5043c6d46b inherit pub_methods_classITraderApi" id="r_aca40d1a215642cb3942aca5043c6d46b"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderApi.html#aca40d1a215642cb3942aca5043c6d46b">querySettlement</a> (uint32_t uDate)</td></tr>
+<tr class="separator:aca40d1a215642cb3942aca5043c6d46b inherit pub_methods_classITraderApi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-types" name="pro-types"></a>
+Protected 类型</h2></td></tr>
+<tr class="memitem:aca816f078c807837463c233dd232516b" id="r_aca816f078c807837463c233dd232516b"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classWTSHashMap.html">WTSHashMap</a>&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#aca816f078c807837463c233dd232516b">TradeDataMap</a></td></tr>
+<tr class="separator:aca816f078c807837463c233dd232516b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3a7088bde9f6e3e15c21ef739779fb7" id="r_ad3a7088bde9f6e3e15c21ef739779fb7"><td class="memItemLeft" align="right" valign="top">typedef std::queue&lt; <a class="el" href="ITraderApi_8h.html#a57b247dc3af86678c8e536123a6876cf">CommonExecuter</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#ad3a7088bde9f6e3e15c21ef739779fb7">QueryQue</a></td></tr>
+<tr class="separator:ad3a7088bde9f6e3e15c21ef739779fb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
+Protected 属性</h2></td></tr>
+<tr class="memitem:a2d1610290819f225233463e3a4e38933" id="r_a2d1610290819f225233463e3a4e38933"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a2d1610290819f225233463e3a4e38933">m_strFront</a></td></tr>
+<tr class="separator:a2d1610290819f225233463e3a4e38933"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94ded1e873829eaabe1c99f327ec329b" id="r_a94ded1e873829eaabe1c99f327ec329b"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a94ded1e873829eaabe1c99f327ec329b">m_strCommUser</a></td></tr>
+<tr class="separator:a94ded1e873829eaabe1c99f327ec329b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab35da905cd9f952dcbf4e33c0b2e4de6" id="r_ab35da905cd9f952dcbf4e33c0b2e4de6"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#ab35da905cd9f952dcbf4e33c0b2e4de6">m_strCommPass</a></td></tr>
+<tr class="separator:ab35da905cd9f952dcbf4e33c0b2e4de6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acea885e42e1760ef12e0d7d0a24b9fba" id="r_acea885e42e1760ef12e0d7d0a24b9fba"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#acea885e42e1760ef12e0d7d0a24b9fba">m_strUser</a></td></tr>
+<tr class="separator:acea885e42e1760ef12e0d7d0a24b9fba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5895aeb285e3fd4aeaab54551a8f2c72" id="r_a5895aeb285e3fd4aeaab54551a8f2c72"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a5895aeb285e3fd4aeaab54551a8f2c72">m_strPass</a></td></tr>
+<tr class="separator:a5895aeb285e3fd4aeaab54551a8f2c72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a406e574adc5c26e9d120daba8c9b0ef9" id="r_a406e574adc5c26e9d120daba8c9b0ef9"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a406e574adc5c26e9d120daba8c9b0ef9">m_strNode</a></td></tr>
+<tr class="separator:a406e574adc5c26e9d120daba8c9b0ef9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5e8c7c184e66144aa4b79aecab2f24a" id="r_ab5e8c7c184e66144aa4b79aecab2f24a"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#ab5e8c7c184e66144aa4b79aecab2f24a">m_strSHNO</a></td></tr>
+<tr class="separator:ab5e8c7c184e66144aa4b79aecab2f24a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee110b41a0bf214fd39f421d6d5ddb40" id="r_aee110b41a0bf214fd39f421d6d5ddb40"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#aee110b41a0bf214fd39f421d6d5ddb40">m_strSZNO</a></td></tr>
+<tr class="separator:aee110b41a0bf214fd39f421d6d5ddb40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c6b72750e423c69ff3578bb75bb8467" id="r_a9c6b72750e423c69ff3578bb75bb8467"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a9c6b72750e423c69ff3578bb75bb8467">m_strFDNO</a></td></tr>
+<tr class="separator:a9c6b72750e423c69ff3578bb75bb8467"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a025d51030404b91335641643be31e22b" id="r_a025d51030404b91335641643be31e22b"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a025d51030404b91335641643be31e22b">m_strProdInfo</a></td></tr>
+<tr class="separator:a025d51030404b91335641643be31e22b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b62c3921b51fb720c386d015e1dc91c" id="r_a8b62c3921b51fb720c386d015e1dc91c"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a8b62c3921b51fb720c386d015e1dc91c">m_strTag</a></td></tr>
+<tr class="separator:a8b62c3921b51fb720c386d015e1dc91c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed0b376280d62786dce2464c6c108dfb" id="r_aed0b376280d62786dce2464c6c108dfb"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#aed0b376280d62786dce2464c6c108dfb">m_strToken</a></td></tr>
+<tr class="separator:aed0b376280d62786dce2464c6c108dfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a472a1b47a74df7a5e338a52bfab18f75" id="r_a472a1b47a74df7a5e338a52bfab18f75"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a472a1b47a74df7a5e338a52bfab18f75">m_strUserName</a></td></tr>
+<tr class="separator:a472a1b47a74df7a5e338a52bfab18f75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1b6b88902ed5ca336d3063a67e887a1" id="r_ae1b6b88902ed5ca336d3063a67e887a1"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#ae1b6b88902ed5ca336d3063a67e887a1">m_strSystemID</a></td></tr>
+<tr class="separator:ae1b6b88902ed5ca336d3063a67e887a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af83ff9c89a6cf47a5e42c8434610b4bc" id="r_af83ff9c89a6cf47a5e42c8434610b4bc"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#af83ff9c89a6cf47a5e42c8434610b4bc">m_strNodeID</a></td></tr>
+<tr class="separator:af83ff9c89a6cf47a5e42c8434610b4bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac21fd229480fc5ef5303fa866b892db" id="r_aac21fd229480fc5ef5303fa866b892db"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#aac21fd229480fc5ef5303fa866b892db">m_strTrust</a></td></tr>
+<tr class="separator:aac21fd229480fc5ef5303fa866b892db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15a20240a5752e57fa14fe67d0215d6d" id="r_a15a20240a5752e57fa14fe67d0215d6d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a15a20240a5752e57fa14fe67d0215d6d">m_nNodeID</a></td></tr>
+<tr class="separator:a15a20240a5752e57fa14fe67d0215d6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac61d97c9a88d4deb06208dc6a6aa290f" id="r_ac61d97c9a88d4deb06208dc6a6aa290f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classITraderSpi.html">ITraderSpi</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#ac61d97c9a88d4deb06208dc6a6aa290f">m_traderSink</a></td></tr>
+<tr class="separator:ac61d97c9a88d4deb06208dc6a6aa290f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:accf32c09096114aaebac976a9b72b696" id="r_accf32c09096114aaebac976a9b72b696"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#accf32c09096114aaebac976a9b72b696">m_uLastQryTime</a></td></tr>
+<tr class="separator:accf32c09096114aaebac976a9b72b696"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af13815d15e25fe70ae26514712b6ff0d" id="r_af13815d15e25fe70ae26514712b6ff0d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTraderDD.html#aca816f078c807837463c233dd232516b">TradeDataMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#af13815d15e25fe70ae26514712b6ff0d">m_mapLives</a></td></tr>
+<tr class="separator:af13815d15e25fe70ae26514712b6ff0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4668273121d64dc678ee9c064294115" id="r_ab4668273121d64dc678ee9c064294115"><td class="memItemLeft" align="right" valign="top">std::unordered_set&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#ab4668273121d64dc678ee9c064294115">m_tradeids</a></td></tr>
+<tr class="separator:ab4668273121d64dc678ee9c064294115"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa1d696a1078187addcd96625cda00e4" id="r_aaa1d696a1078187addcd96625cda00e4"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#aaa1d696a1078187addcd96625cda00e4">m_lDate</a></td></tr>
+<tr class="separator:aaa1d696a1078187addcd96625cda00e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79843693a9878af42fd6410a9523bbe7" id="r_a79843693a9878af42fd6410a9523bbe7"><td class="memItemLeft" align="right" valign="top">std::atomic&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a79843693a9878af42fd6410a9523bbe7">m_orderRef</a></td></tr>
+<tr class="separator:a79843693a9878af42fd6410a9523bbe7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8510febba2c311c17292451094ec8276" id="r_a8510febba2c311c17292451094ec8276"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTraderDD.html#a4e60286231233cdcd13e231413ba546e">WrapperState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a8510febba2c311c17292451094ec8276">m_wrapperState</a></td></tr>
+<tr class="separator:a8510febba2c311c17292451094ec8276"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a443f478888ddc731c61db6712a220956" id="r_a443f478888ddc731c61db6712a220956"><td class="memItemLeft" align="right" valign="top"><a class="el" href="FixApi_8h.html#ae84f6bf59ecd636f3d32001dbe82301a">HANDLE_CONN</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a443f478888ddc731c61db6712a220956">m_hConn</a></td></tr>
+<tr class="separator:a443f478888ddc731c61db6712a220956"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4751b9c142852f0eeac7c066c44bac87" id="r_a4751b9c142852f0eeac7c066c44bac87"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a4751b9c142852f0eeac7c066c44bac87">m_uSessID</a></td></tr>
+<tr class="separator:a4751b9c142852f0eeac7c066c44bac87"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b587b1cd622d408c07177f64cb8955c" id="r_a2b587b1cd622d408c07177f64cb8955c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a2b587b1cd622d408c07177f64cb8955c">m_bdMgr</a></td></tr>
+<tr class="separator:a2b587b1cd622d408c07177f64cb8955c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee4e2f0a06260db9054f83b0d1be140e" id="r_aee4e2f0a06260db9054f83b0d1be140e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTraderDD.html#ad3a7088bde9f6e3e15c21ef739779fb7">QueryQue</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#aee4e2f0a06260db9054f83b0d1be140e">m_queQuery</a></td></tr>
+<tr class="separator:aee4e2f0a06260db9054f83b0d1be140e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f8e8745e22979654ab15bf6bff28d31" id="r_a4f8e8745e22979654ab15bf6bff28d31"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a4f8e8745e22979654ab15bf6bff28d31">m_bInQuery</a></td></tr>
+<tr class="separator:a4f8e8745e22979654ab15bf6bff28d31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7eddb17f30dc8f3e610e3692c4df486f" id="r_a7eddb17f30dc8f3e610e3692c4df486f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a7eddb17f30dc8f3e610e3692c4df486f">m_mtxQuery</a></td></tr>
+<tr class="separator:a7eddb17f30dc8f3e610e3692c4df486f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5749750d3eae36b7bda618c38937a132" id="r_a5749750d3eae36b7bda618c38937a132"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a5749750d3eae36b7bda618c38937a132">m_lastQryTime</a></td></tr>
+<tr class="separator:a5749750d3eae36b7bda618c38937a132"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70824bed49a7a98a58fc41d3bdd3d7d4" id="r_a70824bed49a7a98a58fc41d3bdd3d7d4"><td class="memItemLeft" align="right" valign="top">boost::asio::io_service&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a70824bed49a7a98a58fc41d3bdd3d7d4">m_asyncIO</a></td></tr>
+<tr class="separator:a70824bed49a7a98a58fc41d3bdd3d7d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a517833f69995050828ec6ab7f8696eff" id="r_a517833f69995050828ec6ab7f8696eff"><td class="memItemLeft" align="right" valign="top">boost::asio::io_service::strand *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a517833f69995050828ec6ab7f8696eff">m_strandIO</a></td></tr>
+<tr class="separator:a517833f69995050828ec6ab7f8696eff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a705f8b21d50788bfcbf86ef8ab4943b0" id="r_a705f8b21d50788bfcbf86ef8ab4943b0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a705f8b21d50788bfcbf86ef8ab4943b0">m_thrdWorker</a></td></tr>
+<tr class="separator:a705f8b21d50788bfcbf86ef8ab4943b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4a1689907135bd57103db0b21e1a1c2" id="r_ae4a1689907135bd57103db0b21e1a1c2"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#ae4a1689907135bd57103db0b21e1a1c2">m_strModule</a></td></tr>
+<tr class="separator:ae4a1689907135bd57103db0b21e1a1c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae4cde9677d949c3330eeff0b483259d" id="r_aae4cde9677d949c3330eeff0b483259d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#aae4cde9677d949c3330eeff0b483259d">m_hInstDD</a></td></tr>
+<tr class="separator:aae4cde9677d949c3330eeff0b483259d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac9ee7c7e0381ce93c6372142e1d74ed" id="r_aac9ee7c7e0381ce93c6372142e1d74ed"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIniHelper.html">IniHelper</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#aac9ee7c7e0381ce93c6372142e1d74ed">m_iniHelper</a></td></tr>
+<tr class="separator:aac9ee7c7e0381ce93c6372142e1d74ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 成员函数</h2></td></tr>
+<tr class="memitem:accacf16a77f14658414a973feeb5935c" id="r_accacf16a77f14658414a973feeb5935c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#accacf16a77f14658414a973feeb5935c">doLogin</a> ()</td></tr>
+<tr class="separator:accacf16a77f14658414a973feeb5935c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b53397c946af9e03f89da13514726ab" id="r_a8b53397c946af9e03f89da13514726ab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a8b53397c946af9e03f89da13514726ab">qryGDNo</a> ()</td></tr>
+<tr class="separator:a8b53397c946af9e03f89da13514726ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a210c3c1e6f9e2ab7f8c97f65232d3240" id="r_a210c3c1e6f9e2ab7f8c97f65232d3240"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a210c3c1e6f9e2ab7f8c97f65232d3240">qryZJZH</a> ()</td></tr>
+<tr class="separator:a210c3c1e6f9e2ab7f8c97f65232d3240"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1f2a951c19dedd0cf8e16d713d52b92" id="r_af1f2a951c19dedd0cf8e16d713d52b92"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#af1f2a951c19dedd0cf8e16d713d52b92">reconnect</a> ()</td></tr>
+<tr class="separator:af1f2a951c19dedd0cf8e16d713d52b92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96a7b0886218e07b74333536a60729ea" id="r_a96a7b0886218e07b74333536a60729ea"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTraderDD.html#a96a7b0886218e07b74333536a60729ea">triggerQuery</a> ()</td></tr>
+<tr class="separator:a96a7b0886218e07b74333536a60729ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock">
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00033">33</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="ad3a7088bde9f6e3e15c21ef739779fb7" name="ad3a7088bde9f6e3e15c21ef739779fb7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3a7088bde9f6e3e15c21ef739779fb7">&#9670;&#160;</a></span>QueryQue</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::queue&lt;<a class="el" href="ITraderApi_8h.html#a57b247dc3af86678c8e536123a6876cf">CommonExecuter</a>&gt; <a class="el" href="classTraderDD.html#ad3a7088bde9f6e3e15c21ef739779fb7">TraderDD::QueryQue</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00140">140</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1ba9c3f16b0876d8bf04eade8a7003a7" name="a1ba9c3f16b0876d8bf04eade8a7003a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ba9c3f16b0876d8bf04eade8a7003a7">&#9670;&#160;</a></span>StringMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::unordered_map&lt;std::string, std::string&gt; <a class="el" href="classTraderDD.html#a1ba9c3f16b0876d8bf04eade8a7003a7">TraderDD::StringMap</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00039">39</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aca816f078c807837463c233dd232516b" name="aca816f078c807837463c233dd232516b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca816f078c807837463c233dd232516b">&#9670;&#160;</a></span>TradeDataMap</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="classWTSHashMap.html">WTSHashMap</a>&lt;std::string&gt; <a class="el" href="classTraderDD.html#aca816f078c807837463c233dd232516b">TraderDD::TradeDataMap</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00126">126</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员枚举类型说明</h2>
+<a id="a4e60286231233cdcd13e231413ba546e" name="a4e60286231233cdcd13e231413ba546e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e60286231233cdcd13e231413ba546e">&#9670;&#160;</a></span>WrapperState</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classTraderDD.html#a4e60286231233cdcd13e231413ba546e">TraderDD::WrapperState</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a4e60286231233cdcd13e231413ba546eaf3fdb666f726742a25b6edf7e488fc42" name="a4e60286231233cdcd13e231413ba546eaf3fdb666f726742a25b6edf7e488fc42"></a>WS_NOTLOGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a4e60286231233cdcd13e231413ba546ea0f651ac4498ecf14ae2fee55a277a474" name="a4e60286231233cdcd13e231413ba546ea0f651ac4498ecf14ae2fee55a277a474"></a>WS_LOGINING&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a4e60286231233cdcd13e231413ba546eaeffa98f150086cc85b8b60b572fff1cd" name="a4e60286231233cdcd13e231413ba546eaeffa98f150086cc85b8b60b572fff1cd"></a>WS_LOGINED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a4e60286231233cdcd13e231413ba546ea0f457b18a701ed5ac4a2181e9c87fb83" name="a4e60286231233cdcd13e231413ba546ea0f457b18a701ed5ac4a2181e9c87fb83"></a>WS_LOGINFAILED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a4e60286231233cdcd13e231413ba546ea5376d7d6000dcd0d12bcfdfc51bead49" name="a4e60286231233cdcd13e231413ba546ea5376d7d6000dcd0d12bcfdfc51bead49"></a>WS_ALLREADY&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00042">42</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a2ab52d4e49b4e59e5c523999ccb82b91" name="a2ab52d4e49b4e59e5c523999ccb82b91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ab52d4e49b4e59e5c523999ccb82b91">&#9670;&#160;</a></span>TraderDD()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">TraderDD::TraderDD </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00326">326</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9d2af36031803bf0b771ba69473b03f0" name="a9d2af36031803bf0b771ba69473b03f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d2af36031803bf0b771ba69473b03f0">&#9670;&#160;</a></span>~TraderDD()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">TraderDD::~TraderDD </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00341">341</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="ab4953f134e1d39569955eef8a62818b5" name="ab4953f134e1d39569955eef8a62818b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4953f134e1d39569955eef8a62818b5">&#9670;&#160;</a></span>connect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderDD::connect </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a11c094c1c14154bb4891c293a07deabf">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00472">472</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acb1ed64ebc81fa409c707d0878493eb4" name="acb1ed64ebc81fa409c707d0878493eb4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb1ed64ebc81fa409c707d0878493eb4">&#9670;&#160;</a></span>disconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderDD::disconnect </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a7c246697b25277da2d9fbb58c30913d0">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00490">490</a> 行定义.</p>
+
+</div>
+</div>
+<a id="accacf16a77f14658414a973feeb5935c" name="accacf16a77f14658414a973feeb5935c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#accacf16a77f14658414a973feeb5935c">&#9670;&#160;</a></span>doLogin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderDD::doLogin </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00649">649</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ade7ea197b9cb1232685c3d8b8b3bf607" name="ade7ea197b9cb1232685c3d8b8b3bf607"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade7ea197b9cb1232685c3d8b8b3bf607">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TraderDD::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>params</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a80a978e6a1bd9d058cb4b48c7044177a">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00346">346</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a94284c4c319ff75d5c2065de31928bc5" name="a94284c4c319ff75d5c2065de31928bc5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a94284c4c319ff75d5c2065de31928bc5">&#9670;&#160;</a></span>isConnected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TraderDD::isConnected </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a6a394d7c8f262a4a1ddf98c802eca6b6">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l01588">1588</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab3e721b954fd33ecc2890f6462d3ab3a" name="ab3e721b954fd33ecc2890f6462d3ab3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3e721b954fd33ecc2890f6462d3ab3a">&#9670;&#160;</a></span>login()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderDD::login </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>user</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pass</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>productInfo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#af7b094f6e60e77d4bce04dbe12b5eadf">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00537">537</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2e668c92a963fa53961537e614371cea" name="a2e668c92a963fa53961537e614371cea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e668c92a963fa53961537e614371cea">&#9670;&#160;</a></span>logout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderDD::logout </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a59fc8bf49c09920ced220d2c000f6b38">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00797">797</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a217628a27b624c1cea99850b9d3883eb" name="a217628a27b624c1cea99850b9d3883eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a217628a27b624c1cea99850b9d3883eb">&#9670;&#160;</a></span>makeEntrustID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TraderDD::makeEntrustID </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a68e6d3df33d58bffede1250b693e3a83">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00507">507</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a154d75ee66f7982d870493817c6332ea" name="a154d75ee66f7982d870493817c6332ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a154d75ee66f7982d870493817c6332ea">&#9670;&#160;</a></span>OnRtnOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderDD::OnRtnOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="FixApi_8h.html#ae84f6bf59ecd636f3d32001dbe82301a">HANDLE_CONN</a>&#160;</td>
+          <td class="paramname"><em>hconn</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="FixApi_8h.html#a7892e6d6d6fe58adde8517213a748ec1">HANDLE_SESSION</a>&#160;</td>
+          <td class="paramname"><em>hsess</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l01096">1096</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1e049b48db808e1c5e71343e6213a37d" name="a1e049b48db808e1c5e71343e6213a37d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1e049b48db808e1c5e71343e6213a37d">&#9670;&#160;</a></span>OnRtnTrade()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderDD::OnRtnTrade </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="FixApi_8h.html#ae84f6bf59ecd636f3d32001dbe82301a">HANDLE_CONN</a>&#160;</td>
+          <td class="paramname"><em>hconn</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="FixApi_8h.html#a7892e6d6d6fe58adde8517213a748ec1">HANDLE_SESSION</a>&#160;</td>
+          <td class="paramname"><em>hsess</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l01239">1239</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6b9789d94794bd6e055e72919794795f" name="a6b9789d94794bd6e055e72919794795f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b9789d94794bd6e055e72919794795f">&#9670;&#160;</a></span>orderAction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderDD::orderAction </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSEntrustAction.html">WTSEntrustAction</a> *&#160;</td>
+          <td class="paramname"><em>action</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a0954196bff87c1feda39a35d6c7b0755">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00895">895</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae9498079ecc2d0823939f915cef26fbc" name="ae9498079ecc2d0823939f915cef26fbc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9498079ecc2d0823939f915cef26fbc">&#9670;&#160;</a></span>orderInsert()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderDD::orderInsert </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSEntrust.html">WTSEntrust</a> *&#160;</td>
+          <td class="paramname"><em>eutrust</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a78748c281d107a7d9c78e345df60de91">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00807">807</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8b53397c946af9e03f89da13514726ab" name="a8b53397c946af9e03f89da13514726ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b53397c946af9e03f89da13514726ab">&#9670;&#160;</a></span>qryGDNo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderDD::qryGDNo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00554">554</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a210c3c1e6f9e2ab7f8c97f65232d3240" name="a210c3c1e6f9e2ab7f8c97f65232d3240"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a210c3c1e6f9e2ab7f8c97f65232d3240">&#9670;&#160;</a></span>qryZJZH()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderDD::qryZJZH </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00608">608</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a535977057cf6bb163e4d1054a1d797fd" name="a535977057cf6bb163e4d1054a1d797fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a535977057cf6bb163e4d1054a1d797fd">&#9670;&#160;</a></span>queryAccount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderDD::queryAccount </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#ad7b357520a344762ac0933405805d843">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00937">937</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a43298dfc5e846312052df3bc685c5bd8" name="a43298dfc5e846312052df3bc685c5bd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43298dfc5e846312052df3bc685c5bd8">&#9670;&#160;</a></span>queryOrders()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderDD::queryOrders </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#aac2cac3062d153b79e10fa1f0a47690f">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l01331">1331</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad37ad35dd4f1c0772afe8bf706f009c9" name="ad37ad35dd4f1c0772afe8bf706f009c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad37ad35dd4f1c0772afe8bf706f009c9">&#9670;&#160;</a></span>queryPositions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderDD::queryPositions </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#aff24ec83af307f5031b4deb40e16df88">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00993">993</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9c4520c97a881d4f6e19a1695ac3ca97" name="a9c4520c97a881d4f6e19a1695ac3ca97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c4520c97a881d4f6e19a1695ac3ca97">&#9670;&#160;</a></span>queryTrades()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderDD::queryTrades </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a97f0206848bdc00cf467e899743d4515">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l01474">1474</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af1f2a951c19dedd0cf8e16d713d52b92" name="af1f2a951c19dedd0cf8e16d713d52b92"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1f2a951c19dedd0cf8e16d713d52b92">&#9670;&#160;</a></span>reconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderDD::reconnect </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00399">399</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6e39fe7c3ebca9df04f0215a37b34426" name="a6e39fe7c3ebca9df04f0215a37b34426"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e39fe7c3ebca9df04f0215a37b34426">&#9670;&#160;</a></span>registerSpi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderDD::registerSpi </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classITraderSpi.html">ITraderSpi</a> *&#160;</td>
+          <td class="paramname"><em>listener</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#aa41e08712aa6135febb746404efe4840">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00528">528</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab00b4492af643bb6fc26cb6ed5b7da60" name="ab00b4492af643bb6fc26cb6ed5b7da60"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab00b4492af643bb6fc26cb6ed5b7da60">&#9670;&#160;</a></span>release()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderDD::release </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classITraderApi.html#a1aa9fabb60e4c5e70dd4eed8e8e200ce">ITraderApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l00387">387</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a96a7b0886218e07b74333536a60729ea" name="a96a7b0886218e07b74333536a60729ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96a7b0886218e07b74333536a60729ea">&#9670;&#160;</a></span>triggerQuery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TraderDD::triggerQuery </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a> 第 <a class="el" href="TraderDD_8cpp_source.html#l01592">1592</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a70824bed49a7a98a58fc41d3bdd3d7d4" name="a70824bed49a7a98a58fc41d3bdd3d7d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70824bed49a7a98a58fc41d3bdd3d7d4">&#9670;&#160;</a></span>m_asyncIO</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">boost::asio::io_service TraderDD::m_asyncIO</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00146">146</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2b587b1cd622d408c07177f64cb8955c" name="a2b587b1cd622d408c07177f64cb8955c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b587b1cd622d408c07177f64cb8955c">&#9670;&#160;</a></span>m_bdMgr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a>* TraderDD::m_bdMgr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00138">138</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4f8e8745e22979654ab15bf6bff28d31" name="a4f8e8745e22979654ab15bf6bff28d31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f8e8745e22979654ab15bf6bff28d31">&#9670;&#160;</a></span>m_bInQuery</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TraderDD::m_bInQuery</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00142">142</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a443f478888ddc731c61db6712a220956" name="a443f478888ddc731c61db6712a220956"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a443f478888ddc731c61db6712a220956">&#9670;&#160;</a></span>m_hConn</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="FixApi_8h.html#ae84f6bf59ecd636f3d32001dbe82301a">HANDLE_CONN</a> TraderDD::m_hConn</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00135">135</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aae4cde9677d949c3330eeff0b483259d" name="aae4cde9677d949c3330eeff0b483259d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae4cde9677d949c3330eeff0b483259d">&#9670;&#160;</a></span>m_hInstDD</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a> TraderDD::m_hInstDD</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00151">151</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aac9ee7c7e0381ce93c6372142e1d74ed" name="aac9ee7c7e0381ce93c6372142e1d74ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac9ee7c7e0381ce93c6372142e1d74ed">&#9670;&#160;</a></span>m_iniHelper</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIniHelper.html">IniHelper</a> TraderDD::m_iniHelper</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00153">153</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5749750d3eae36b7bda618c38937a132" name="a5749750d3eae36b7bda618c38937a132"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5749750d3eae36b7bda618c38937a132">&#9670;&#160;</a></span>m_lastQryTime</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t TraderDD::m_lastQryTime</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00144">144</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaa1d696a1078187addcd96625cda00e4" name="aaa1d696a1078187addcd96625cda00e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa1d696a1078187addcd96625cda00e4">&#9670;&#160;</a></span>m_lDate</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t TraderDD::m_lDate</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00130">130</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af13815d15e25fe70ae26514712b6ff0d" name="af13815d15e25fe70ae26514712b6ff0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af13815d15e25fe70ae26514712b6ff0d">&#9670;&#160;</a></span>m_mapLives</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTraderDD.html#aca816f078c807837463c233dd232516b">TradeDataMap</a>* TraderDD::m_mapLives</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00127">127</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7eddb17f30dc8f3e610e3692c4df486f" name="a7eddb17f30dc8f3e610e3692c4df486f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7eddb17f30dc8f3e610e3692c4df486f">&#9670;&#160;</a></span>m_mtxQuery</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a> TraderDD::m_mtxQuery</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00143">143</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a15a20240a5752e57fa14fe67d0215d6d" name="a15a20240a5752e57fa14fe67d0215d6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15a20240a5752e57fa14fe67d0215d6d">&#9670;&#160;</a></span>m_nNodeID</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TraderDD::m_nNodeID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00121">121</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a79843693a9878af42fd6410a9523bbe7" name="a79843693a9878af42fd6410a9523bbe7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79843693a9878af42fd6410a9523bbe7">&#9670;&#160;</a></span>m_orderRef</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::atomic&lt;uint32_t&gt; TraderDD::m_orderRef</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00131">131</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aee4e2f0a06260db9054f83b0d1be140e" name="aee4e2f0a06260db9054f83b0d1be140e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee4e2f0a06260db9054f83b0d1be140e">&#9670;&#160;</a></span>m_queQuery</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTraderDD.html#ad3a7088bde9f6e3e15c21ef739779fb7">QueryQue</a> TraderDD::m_queQuery</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00141">141</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a517833f69995050828ec6ab7f8696eff" name="a517833f69995050828ec6ab7f8696eff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a517833f69995050828ec6ab7f8696eff">&#9670;&#160;</a></span>m_strandIO</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">boost::asio::io_service::strand* TraderDD::m_strandIO</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00147">147</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab35da905cd9f952dcbf4e33c0b2e4de6" name="ab35da905cd9f952dcbf4e33c0b2e4de6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab35da905cd9f952dcbf4e33c0b2e4de6">&#9670;&#160;</a></span>m_strCommPass</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strCommPass</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00101">101</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a94ded1e873829eaabe1c99f327ec329b" name="a94ded1e873829eaabe1c99f327ec329b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a94ded1e873829eaabe1c99f327ec329b">&#9670;&#160;</a></span>m_strCommUser</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strCommUser</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00100">100</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9c6b72750e423c69ff3578bb75bb8467" name="a9c6b72750e423c69ff3578bb75bb8467"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c6b72750e423c69ff3578bb75bb8467">&#9670;&#160;</a></span>m_strFDNO</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strFDNO</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00109">109</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2d1610290819f225233463e3a4e38933" name="a2d1610290819f225233463e3a4e38933"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d1610290819f225233463e3a4e38933">&#9670;&#160;</a></span>m_strFront</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strFront</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00098">98</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae4a1689907135bd57103db0b21e1a1c2" name="ae4a1689907135bd57103db0b21e1a1c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4a1689907135bd57103db0b21e1a1c2">&#9670;&#160;</a></span>m_strModule</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strModule</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00150">150</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a406e574adc5c26e9d120daba8c9b0ef9" name="a406e574adc5c26e9d120daba8c9b0ef9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a406e574adc5c26e9d120daba8c9b0ef9">&#9670;&#160;</a></span>m_strNode</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strNode</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00105">105</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af83ff9c89a6cf47a5e42c8434610b4bc" name="af83ff9c89a6cf47a5e42c8434610b4bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af83ff9c89a6cf47a5e42c8434610b4bc">&#9670;&#160;</a></span>m_strNodeID</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strNodeID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00118">118</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5895aeb285e3fd4aeaab54551a8f2c72" name="a5895aeb285e3fd4aeaab54551a8f2c72"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5895aeb285e3fd4aeaab54551a8f2c72">&#9670;&#160;</a></span>m_strPass</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strPass</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00104">104</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a025d51030404b91335641643be31e22b" name="a025d51030404b91335641643be31e22b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a025d51030404b91335641643be31e22b">&#9670;&#160;</a></span>m_strProdInfo</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strProdInfo</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00111">111</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab5e8c7c184e66144aa4b79aecab2f24a" name="ab5e8c7c184e66144aa4b79aecab2f24a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5e8c7c184e66144aa4b79aecab2f24a">&#9670;&#160;</a></span>m_strSHNO</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strSHNO</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00107">107</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae1b6b88902ed5ca336d3063a67e887a1" name="ae1b6b88902ed5ca336d3063a67e887a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1b6b88902ed5ca336d3063a67e887a1">&#9670;&#160;</a></span>m_strSystemID</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strSystemID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00117">117</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aee110b41a0bf214fd39f421d6d5ddb40" name="aee110b41a0bf214fd39f421d6d5ddb40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee110b41a0bf214fd39f421d6d5ddb40">&#9670;&#160;</a></span>m_strSZNO</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strSZNO</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00108">108</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8b62c3921b51fb720c386d015e1dc91c" name="a8b62c3921b51fb720c386d015e1dc91c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b62c3921b51fb720c386d015e1dc91c">&#9670;&#160;</a></span>m_strTag</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strTag</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00113">113</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aed0b376280d62786dce2464c6c108dfb" name="aed0b376280d62786dce2464c6c108dfb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed0b376280d62786dce2464c6c108dfb">&#9670;&#160;</a></span>m_strToken</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strToken</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00115">115</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aac21fd229480fc5ef5303fa866b892db" name="aac21fd229480fc5ef5303fa866b892db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac21fd229480fc5ef5303fa866b892db">&#9670;&#160;</a></span>m_strTrust</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strTrust</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00119">119</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acea885e42e1760ef12e0d7d0a24b9fba" name="acea885e42e1760ef12e0d7d0a24b9fba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acea885e42e1760ef12e0d7d0a24b9fba">&#9670;&#160;</a></span>m_strUser</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strUser</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00103">103</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a472a1b47a74df7a5e338a52bfab18f75" name="a472a1b47a74df7a5e338a52bfab18f75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a472a1b47a74df7a5e338a52bfab18f75">&#9670;&#160;</a></span>m_strUserName</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string TraderDD::m_strUserName</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00116">116</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a705f8b21d50788bfcbf86ef8ab4943b0" name="a705f8b21d50788bfcbf86ef8ab4943b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a705f8b21d50788bfcbf86ef8ab4943b0">&#9670;&#160;</a></span>m_thrdWorker</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a> TraderDD::m_thrdWorker</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00148">148</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab4668273121d64dc678ee9c064294115" name="ab4668273121d64dc678ee9c064294115"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4668273121d64dc678ee9c064294115">&#9670;&#160;</a></span>m_tradeids</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::unordered_set&lt;std::string&gt; TraderDD::m_tradeids</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00128">128</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac61d97c9a88d4deb06208dc6a6aa290f" name="ac61d97c9a88d4deb06208dc6a6aa290f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac61d97c9a88d4deb06208dc6a6aa290f">&#9670;&#160;</a></span>m_traderSink</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classITraderSpi.html">ITraderSpi</a>* TraderDD::m_traderSink</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00123">123</a> 行定义.</p>
+
+</div>
+</div>
+<a id="accf32c09096114aaebac976a9b72b696" name="accf32c09096114aaebac976a9b72b696"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#accf32c09096114aaebac976a9b72b696">&#9670;&#160;</a></span>m_uLastQryTime</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t TraderDD::m_uLastQryTime</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00124">124</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4751b9c142852f0eeac7c066c44bac87" name="a4751b9c142852f0eeac7c066c44bac87"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4751b9c142852f0eeac7c066c44bac87">&#9670;&#160;</a></span>m_uSessID</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t TraderDD::m_uSessID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00136">136</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8510febba2c311c17292451094ec8276" name="a8510febba2c311c17292451094ec8276"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8510febba2c311c17292451094ec8276">&#9670;&#160;</a></span>m_wrapperState</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTraderDD.html#a4e60286231233cdcd13e231413ba546e">WrapperState</a> TraderDD::m_wrapperState</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderDD_8h_source.html">TraderDD.h</a> 第 <a class="el" href="TraderDD_8h_source.html#l00133">133</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/TraderDD/<a class="el" href="TraderDD_8h_source.html">TraderDD.h</a></li>
+<li>src/TraderDD/<a class="el" href="TraderDD_8cpp_source.html">TraderDD.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classTraderDD.html">TraderDD</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

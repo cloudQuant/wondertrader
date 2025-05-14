@@ -1,0 +1,25 @@
+var classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg =
+[
+    [ "ATPRspExtQueryResultETFInfoMsg", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#ac2e5e55464ee2c1de0e91da817c9f756", null ],
+    [ "~ATPRspExtQueryResultETFInfoMsg", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#a19a58d9e1b277feee0838324906fa129", null ],
+    [ "ATPRspExtQueryResultETFInfoMsg", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#a2f6f03355a3e93d09828425726f4eaea", null ],
+    [ "GetEstimateCashComponent", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#a5df67070ab6294884d2be0bca5e7f174", null ],
+    [ "GetIsPdBroker", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#a4b59bde46661ed030605823066be1b53", null ],
+    [ "GetIsPurchase", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#a1171f7c47a8ecade3df12f2344b4f69f", null ],
+    [ "GetIsRedemption", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#ac7dd5dc481e22fc4f17fa4103431ff48", null ],
+    [ "GetMarketId", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#a4cb43d72dc823a76ec8ceb85c200ea0f", null ],
+    [ "GetMaxCashRatio", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#a6434e1b3977bd7519397f349a9212acc", null ],
+    [ "GetNav", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#ad5ca44fadf68d057474eb2a4ef28b0f5", null ],
+    [ "GetNavPerCu", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#a12391384748bce7e4d5fa54c9ed2442d", null ],
+    [ "GetNetPurchaseLimitPerUser", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#aeefbe827062a9ca975ae5c9320c83505", null ],
+    [ "GetNetRedemptionLimitPerUser", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#a746ab5c9b03df805a7df8cb4ef54e13a", null ],
+    [ "GetPrType", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#aedfd4528bd0e210473358f1156b08dfe", null ],
+    [ "GetPurchaseLimitPerUser", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#ad19bef04297d9478a6ef8971f1db9c6b", null ],
+    [ "GetPurchaseRedemptionUnit", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#a1a71db6636d36a99568895ddbdae16af", null ],
+    [ "GetRedemptionLimitPerUser", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#ab95e634b9d8b1a2f0bf7a8f1eac00a46", null ],
+    [ "GetSecurityId", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#a9b729dfec0017daf9d8deeac38fc14ae", null ],
+    [ "GetSecuritySymbol", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#a839750ceed1f19e2602ee42e1538a3a3", null ],
+    [ "GetSecurityType", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#a66ab2246e24fcebfa1691c394af479ae", null ],
+    [ "GetTotalRecordNum", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#a27d6dd5c792395b22c2b9a83f4b27b89", null ],
+    [ "operator=", "classatp_1_1quant__api_1_1ATPRspExtQueryResultETFInfoMsg.html#aa452cedb499b18d3ebe3147e72cf60b4", null ]
+];

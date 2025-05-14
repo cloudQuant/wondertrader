@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtRiskMonFact/WtRiskMonFact.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtRiskMonFact_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtRiskMonFact.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtRiskMonFact_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="WtRiskMonFact_8h.html">WtRiskMonFact.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="WtSimpRiskMon_8h.html">WtSimpRiskMon.h</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="WtRiskMonFact_8cpp.html#aee880c24316260593ee859c8443ff4b6">   19</a></span><span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_variable" href="WtRiskMonFact_8cpp.html#aee880c24316260593ee859c8443ff4b6">FACT_NAME</a> = <span class="stringliteral">&quot;WtRiskMonFact&quot;</span>;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>{</div>
+<div class="foldopen" id="foldopen00032" data-start="{" data-end="}">
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="WtRiskMonFact_8cpp.html#a72dd24ba2ebb56699cee295abb26ecde">   32</a></span>    <a class="code hl_define" href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a> <a class="code hl_class" href="classIRiskMonitorFact.html">IRiskMonitorFact</a>* <a class="code hl_function" href="WtRiskMonFact_8cpp.html#a72dd24ba2ebb56699cee295abb26ecde">createRiskMonFact</a>()</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    {</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <a class="code hl_class" href="classIRiskMonitorFact.html">IRiskMonitorFact</a>* fact = <span class="keyword">new</span> <a class="code hl_class" href="classWtRiskMonFact.html">WtRiskMonFact</a>();</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        <span class="keywordflow">return</span> fact;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    }</div>
+</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="foldopen" id="foldopen00043" data-start="{" data-end="}">
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="WtRiskMonFact_8cpp.html#a98eb26e7c147d3d8b34007de13413f97">   43</a></span>    <a class="code hl_define" href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a> <span class="keywordtype">void</span> <a class="code hl_function" href="WtRiskMonFact_8cpp.html#a98eb26e7c147d3d8b34007de13413f97">deleteRiskMonFact</a>(<a class="code hl_class" href="classIRiskMonitorFact.html">IRiskMonitorFact</a>* fact)</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    {</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="keywordflow">if</span> (fact != <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>            <span class="keyword">delete</span> fact;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    }</div>
+</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>}</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="foldopen" id="foldopen00055" data-start="{" data-end="}">
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="classWtRiskMonFact.html#ac02473525fb9156ebde3821e4d5bed22">   55</a></span><a class="code hl_function" href="classWtRiskMonFact.html#ac02473525fb9156ebde3821e4d5bed22">WtRiskMonFact::WtRiskMonFact</a>()</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>{</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="comment">// 构造函数不需要额外的初始化操作</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>}</div>
+</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="foldopen" id="foldopen00065" data-start="{" data-end="}">
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classWtRiskMonFact.html#a9898163147f374531351ec9d2e4fb745">   65</a></span><a class="code hl_function" href="classWtRiskMonFact.html#a9898163147f374531351ec9d2e4fb745">WtRiskMonFact::~WtRiskMonFact</a>()</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>{</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="comment">// 析构函数不需要额外的清理操作</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>}</div>
+</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="foldopen" id="foldopen00075" data-start="{" data-end="}">
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="classWtRiskMonFact.html#a5716a1f1e37b89206d46dbf77565e9ba">   75</a></span><span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtRiskMonFact.html#a5716a1f1e37b89206d46dbf77565e9ba">WtRiskMonFact::getName</a>()</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>{</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="comment">// 返回工厂名称常量</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="WtCtaStraFact_8cpp.html#aee880c24316260593ee859c8443ff4b6">FACT_NAME</a>;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>}</div>
+</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="foldopen" id="foldopen00086" data-start="{" data-end="}">
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classWtRiskMonFact.html#adc392b91dd3c4e283d2c36bfdad9520e">   86</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtRiskMonFact.html#adc392b91dd3c4e283d2c36bfdad9520e">WtRiskMonFact::enumRiskMonitors</a>(<a class="code hl_typedef" href="RiskMonDefs_8h.html#af1e8886b66c150e110c30cb42f854ba1">FuncEnumRiskMonCallback</a> cb)</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>{</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="comment">// 注释掉的代码是不再使用的风控模块</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="comment">//cb(FACT_NAME, &quot;WtSimpExeUnit&quot;, false);</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="comment">// 调用回调函数返回当前支持的风控模块</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="comment">// 参数为：工厂名称、模块名称、是否是最后一个模块</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    cb(<a class="code hl_variable" href="WtCtaStraFact_8cpp.html#aee880c24316260593ee859c8443ff4b6">FACT_NAME</a>, <span class="stringliteral">&quot;SimpleRiskMon&quot;</span>, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>}</div>
+</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="foldopen" id="foldopen00102" data-start="{" data-end="}">
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="classWtRiskMonFact.html#a6d1749679abb8d19667cc14acf24bff4">  102</a></span><a class="code hl_class" href="classWtRiskMonitor.html">WtRiskMonitor</a>* <a class="code hl_function" href="classWtRiskMonFact.html#a6d1749679abb8d19667cc14acf24bff4">WtRiskMonFact::createRiskMonotor</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* name)</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>{</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="comment">// 判断要创建的风控模块类型</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="keywordflow">if</span> (strcmp(name, <span class="stringliteral">&quot;SimpleRiskMon&quot;</span>) == 0)</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        <span class="comment">// 创建简单风控模块</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        <span class="keywordflow">return</span> <span class="keyword">new</span> <a class="code hl_class" href="classWtSimpleRiskMon.html">WtSimpleRiskMon</a>();</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="comment">// 如果模块名称不匹配，返回NULL</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keywordflow">return</span> <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>}</div>
+</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="foldopen" id="foldopen00119" data-start="{" data-end="}">
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno"><a class="line" href="classWtRiskMonFact.html#abd0365d9d0ea57c71303833978e73da0">  119</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classWtRiskMonFact.html#abd0365d9d0ea57c71303833978e73da0">WtRiskMonFact::deleteRiskMonotor</a>(<a class="code hl_class" href="classWtRiskMonitor.html">WtRiskMonitor</a>* unit)</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>{</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="comment">// 如果传入的指针为空，直接返回true</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    <span class="keywordflow">if</span> (unit == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    <span class="comment">// 检查风控模块是否属于当前工厂</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="comment">// 如果不属于当前工厂，返回false</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="keywordflow">if</span> (strcmp(unit-&gt;<a class="code hl_function" href="classWtRiskMonitor.html#ab3a5f96a754c73125a6108fba85d9ee1">getFactName</a>(), <a class="code hl_variable" href="WtCtaStraFact_8cpp.html#aee880c24316260593ee859c8443ff4b6">FACT_NAME</a>) != 0)</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="comment">// 删除风控模块对象</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keyword">delete</span> unit;</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>}</div>
+</div>
+<div class="ttc" id="aCTPLoader_8cpp_html_ab21f8ef3ba992efc1eda405bccdde69a"><div class="ttname"><a href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a></div><div class="ttdeci">#define EXPORT_FLAG</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_8cpp_source.html#l00098">CTPLoader.cpp:98</a></div></div>
+<div class="ttc" id="aRiskMonDefs_8h_html_af1e8886b66c150e110c30cb42f854ba1"><div class="ttname"><a href="RiskMonDefs_8h.html#af1e8886b66c150e110c30cb42f854ba1">FuncEnumRiskMonCallback</a></div><div class="ttdeci">void(* FuncEnumRiskMonCallback)(const char *factName, const char *unitName, bool isLast)</div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00124">RiskMonDefs.h:124</a></div></div>
+<div class="ttc" id="aWtCtaStraFact_8cpp_html_aee880c24316260593ee859c8443ff4b6"><div class="ttname"><a href="WtCtaStraFact_8cpp.html#aee880c24316260593ee859c8443ff4b6">FACT_NAME</a></div><div class="ttdeci">const char * FACT_NAME</div><div class="ttdoc">外部声明的工厂名称常量</div><div class="ttdef"><b>Definition</b> <a href="WtCtaStraFact_8cpp_source.html#l00017">WtCtaStraFact.cpp:17</a></div></div>
+<div class="ttc" id="aWtRiskMonFact_8cpp_html_a72dd24ba2ebb56699cee295abb26ecde"><div class="ttname"><a href="WtRiskMonFact_8cpp.html#a72dd24ba2ebb56699cee295abb26ecde">createRiskMonFact</a></div><div class="ttdeci">EXPORT_FLAG IRiskMonitorFact * createRiskMonFact()</div><div class="ttdoc">C接口函数定义</div><div class="ttdef"><b>Definition</b> <a href="WtRiskMonFact_8cpp_source.html#l00032">WtRiskMonFact.cpp:32</a></div></div>
+<div class="ttc" id="aWtRiskMonFact_8cpp_html_a98eb26e7c147d3d8b34007de13413f97"><div class="ttname"><a href="WtRiskMonFact_8cpp.html#a98eb26e7c147d3d8b34007de13413f97">deleteRiskMonFact</a></div><div class="ttdeci">EXPORT_FLAG void deleteRiskMonFact(IRiskMonitorFact *fact)</div><div class="ttdoc">删除风控模块工厂的导出函数</div><div class="ttdef"><b>Definition</b> <a href="WtRiskMonFact_8cpp_source.html#l00043">WtRiskMonFact.cpp:43</a></div></div>
+<div class="ttc" id="aWtRiskMonFact_8cpp_html_aee880c24316260593ee859c8443ff4b6"><div class="ttname"><a href="WtRiskMonFact_8cpp.html#aee880c24316260593ee859c8443ff4b6">FACT_NAME</a></div><div class="ttdeci">const char * FACT_NAME</div><div class="ttdoc">风控模块工厂名称</div><div class="ttdef"><b>Definition</b> <a href="WtRiskMonFact_8cpp_source.html#l00019">WtRiskMonFact.cpp:19</a></div></div>
+<div class="ttc" id="aWtRiskMonFact_8h_html"><div class="ttname"><a href="WtRiskMonFact_8h.html">WtRiskMonFact.h</a></div><div class="ttdoc">风控模块工厂头文件</div></div>
+<div class="ttc" id="aWtSimpRiskMon_8h_html"><div class="ttname"><a href="WtSimpRiskMon_8h.html">WtSimpRiskMon.h</a></div><div class="ttdoc">WonderTrader简单风险监控器头文件</div></div>
+<div class="ttc" id="aclassIRiskMonitorFact_html"><div class="ttname"><a href="classIRiskMonitorFact.html">IRiskMonitorFact</a></div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00126">RiskMonDefs.h:127</a></div></div>
+<div class="ttc" id="aclassWtRiskMonFact_html"><div class="ttname"><a href="classWtRiskMonFact.html">WtRiskMonFact</a></div><div class="ttdoc">风控模块工厂类</div><div class="ttdef"><b>Definition</b> <a href="WtRiskMonFact_8h_source.html#l00022">WtRiskMonFact.h:23</a></div></div>
+<div class="ttc" id="aclassWtRiskMonFact_html_a5716a1f1e37b89206d46dbf77565e9ba"><div class="ttname"><a href="classWtRiskMonFact.html#a5716a1f1e37b89206d46dbf77565e9ba">WtRiskMonFact::getName</a></div><div class="ttdeci">virtual const char * getName() override</div><div class="ttdoc">获取工厂名称</div><div class="ttdef"><b>Definition</b> <a href="WtRiskMonFact_8cpp_source.html#l00075">WtRiskMonFact.cpp:75</a></div></div>
+<div class="ttc" id="aclassWtRiskMonFact_html_a6d1749679abb8d19667cc14acf24bff4"><div class="ttname"><a href="classWtRiskMonFact.html#a6d1749679abb8d19667cc14acf24bff4">WtRiskMonFact::createRiskMonotor</a></div><div class="ttdeci">virtual WtRiskMonitor * createRiskMonotor(const char *name) override</div><div class="ttdoc">创建风控模块</div><div class="ttdef"><b>Definition</b> <a href="WtRiskMonFact_8cpp_source.html#l00102">WtRiskMonFact.cpp:102</a></div></div>
+<div class="ttc" id="aclassWtRiskMonFact_html_a9898163147f374531351ec9d2e4fb745"><div class="ttname"><a href="classWtRiskMonFact.html#a9898163147f374531351ec9d2e4fb745">WtRiskMonFact::~WtRiskMonFact</a></div><div class="ttdeci">virtual ~WtRiskMonFact()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="WtRiskMonFact_8cpp_source.html#l00065">WtRiskMonFact.cpp:65</a></div></div>
+<div class="ttc" id="aclassWtRiskMonFact_html_abd0365d9d0ea57c71303833978e73da0"><div class="ttname"><a href="classWtRiskMonFact.html#abd0365d9d0ea57c71303833978e73da0">WtRiskMonFact::deleteRiskMonotor</a></div><div class="ttdeci">virtual bool deleteRiskMonotor(WtRiskMonitor *unit) override</div><div class="ttdoc">删除风控模块</div><div class="ttdef"><b>Definition</b> <a href="WtRiskMonFact_8cpp_source.html#l00119">WtRiskMonFact.cpp:119</a></div></div>
+<div class="ttc" id="aclassWtRiskMonFact_html_ac02473525fb9156ebde3821e4d5bed22"><div class="ttname"><a href="classWtRiskMonFact.html#ac02473525fb9156ebde3821e4d5bed22">WtRiskMonFact::WtRiskMonFact</a></div><div class="ttdeci">WtRiskMonFact()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtRiskMonFact_8cpp_source.html#l00055">WtRiskMonFact.cpp:55</a></div></div>
+<div class="ttc" id="aclassWtRiskMonFact_html_adc392b91dd3c4e283d2c36bfdad9520e"><div class="ttname"><a href="classWtRiskMonFact.html#adc392b91dd3c4e283d2c36bfdad9520e">WtRiskMonFact::enumRiskMonitors</a></div><div class="ttdeci">virtual void enumRiskMonitors(FuncEnumRiskMonCallback cb) override</div><div class="ttdoc">枚举风控模块</div><div class="ttdef"><b>Definition</b> <a href="WtRiskMonFact_8cpp_source.html#l00086">WtRiskMonFact.cpp:86</a></div></div>
+<div class="ttc" id="aclassWtRiskMonitor_html"><div class="ttname"><a href="classWtRiskMonitor.html">WtRiskMonitor</a></div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00083">RiskMonDefs.h:84</a></div></div>
+<div class="ttc" id="aclassWtRiskMonitor_html_ab3a5f96a754c73125a6108fba85d9ee1"><div class="ttname"><a href="classWtRiskMonitor.html#ab3a5f96a754c73125a6108fba85d9ee1">WtRiskMonitor::getFactName</a></div><div class="ttdeci">virtual const char * getFactName()=0</div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html"><div class="ttname"><a href="classWtSimpleRiskMon.html">WtSimpleRiskMon</a></div><div class="ttdoc">简单风险监控器类</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00024">WtSimpRiskMon.h:25</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_fcd746cc1472f3da7d7cf6dbf959d9fa.html">WtRiskMonFact</a></li><li class="navelem"><a class="el" href="WtRiskMonFact_8cpp.html">WtRiskMonFact.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,689 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtLatencyUFT/UftLatencyTool.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('UftLatencyTool_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">UftLatencyTool.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="UftLatencyTool_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="UftLatencyTool_8h.html">UftLatencyTool.h</a>&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;../WtUftCore/UftStraContext.h&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Includes/WTSVariant.hpp&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/IParserApi.h&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../Includes/ITraderApi.h&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../Includes/WTSContractInfo.hpp&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;../WTSTools/WTSLogger.h&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;../WTSUtils/WTSCfgLoader.h&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;../Share/StrUtil.hpp&quot;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;../Share/TimeUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;../Share/CpuHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="UftLatencyTool_8cpp.html#a17226795848decb565e90624584e5c0f">   27</a></span><a class="code hl_variable" href="UftLatencyTool_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="foldopen" id="foldopen00033" data-start="{" data-end="}">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="WtLatencyUFT_2main_8cpp.html#a134ff1f2bc38dc8fcff5456b491155d9">   33</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="UftLatencyTool_8cpp.html#a134ff1f2bc38dc8fcff5456b491155d9">test_uft</a>()</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>{</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="comment">// 创建延迟测试工具实例</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <a class="code hl_class" href="classuft_1_1UftLatencyTool.html">uft::UftLatencyTool</a> runner;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="comment">// 初始化延迟测试工具</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    runner.<a class="code hl_function" href="classuft_1_1UftLatencyTool.html#af92a0a7b0095a48c935b2a49f17d3fb2">init</a>();</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="comment">// 执行延迟测试</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    runner.<a class="code hl_function" href="classuft_1_1UftLatencyTool.html#a89dd651d5dd92da67874d2a52616312f">run</a>();</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}</div>
+</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="foldopen" id="foldopen00044" data-start="{" data-end="}">
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="namespaceuft.html">   44</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceuft.html">uft</a></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>{</div>
+<div class="foldopen" id="foldopen00052" data-start="{" data-end="}">
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="namespaceuft.html#aeeb86862675326cc7921c8a2e233e45d">   52</a></span>    <span class="keyword">inline</span> <span class="keywordtype">double</span> <a class="code hl_function" href="namespaceuft.html#aeeb86862675326cc7921c8a2e233e45d">checkValid</a>(<span class="keywordtype">double</span> x)</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    {</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <span class="keywordflow">return</span> ((x == <a class="code hl_define" href="WTSMarcos_8h.html#af78670ee54c1203d613f8fb0e022d214">DBL_MAX</a> || x == <a class="code hl_define" href="WTSMarcos_8h.html#a7fbf1534f9e0f0bfdb86fb928902474c">FLT_MAX</a>) ? 0.0 : x);</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    }</div>
+</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="foldopen" id="foldopen00064" data-start="{" data-end="}">
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="namespaceuft.html#ad953f6e172f2d4a9813c58a10ce5f367">   64</a></span>    <span class="keyword">inline</span> uint32_t <a class="code hl_function" href="namespaceuft.html#ad953f6e172f2d4a9813c58a10ce5f367">strToTime</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* strTime)</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    {</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keyword">static</span> <span class="keywordtype">char</span> str[10] = { 0 };</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <span class="keyword">const</span> <span class="keywordtype">char</span> *pos = strTime;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="keywordtype">int</span> idx = 0;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keyword">auto</span> len = strlen(strTime);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="comment">// 移除字符串中的冒号</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; len; i++)</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        {</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>            <span class="keywordflow">if</span> (strTime[i] != <span class="charliteral">&#39;:&#39;</span>)</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>            {</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>                str[idx] = strTime[i];</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>                idx++;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>            }</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        }</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        str[idx] = <span class="charliteral">&#39;\0&#39;</span>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <span class="comment">// 将字符串转换为整数</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <span class="keywordflow">return</span> strtoul(str, <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, 10);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    }</div>
+</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="foldopen" id="foldopen00089" data-start="{" data-end="};">
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="classuft_1_1TestParser.html">   89</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classuft_1_1TestParser.html">TestParser</a> : <span class="keyword">public</span> <a class="code hl_class" href="classIParserApi.html">IParserApi</a></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    {</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00097" data-start="{" data-end="}">
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="classuft_1_1TestParser.html#a9208b4edb17a67c42b7adaf030bc31bd">   97</a></span>        <span class="keywordtype">void</span>    <a class="code hl_function" href="classuft_1_1TestParser.html#a9208b4edb17a67c42b7adaf030bc31bd">run</a>(uint32_t times)</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        {</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>            <span class="comment">// 初始化随机数生成器</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>            srand(time(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>));</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>            <span class="comment">// 创建时间计数器，用于测量总耗时</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>            <a class="code hl_class" href="classTimeUtils_1_1Ticker.html">TimeUtils::Ticker</a> ticker;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>            <span class="comment">// 生成指定数量的模拟行情</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>            <span class="keywordflow">for</span> (uint32_t i = 0; i &lt; times; i++)</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>            {</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>                <span class="comment">// 设置交易日期</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>                uint32_t actDate = 20220303;<span class="comment">// strtoul(&quot;20220303&quot;, NULL, 10);</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>                <span class="comment">// 设置交易时间，格式为时分秒毫秒</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>                uint32_t actTime = 100523 * 1000 + 500; <span class="comment">//strToTime(&quot;10:05:23&quot;) * 1000 + 500;</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>                <span class="comment">// 获取铁矿石合约信息</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>                <a class="code hl_class" href="classWTSContractInfo.html">WTSContractInfo</a>* contract = <a class="code hl_variable" href="classuft_1_1TestParser.html#ac95da80a3d2e6ea8bdb61d7c81fcc7c6">_bd_mgr</a>-&gt;<a class="code hl_function" href="classIBaseDataMgr.html#a7902cf7c19636ee381ba9fa7a6e3f065">getContract</a>(<span class="stringliteral">&quot;rb2205&quot;</span>, <span class="stringliteral">&quot;SHFE&quot;</span>);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>                <span class="keywordflow">if</span> (contract == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>                    <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>                <span class="comment">// 生成随机数作为行情价格</span></div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>                <span class="keywordtype">double</span> x = rand();</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>                <span class="comment">// 获取商品信息</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>                <a class="code hl_class" href="classWTSCommodityInfo.html">WTSCommodityInfo</a>* pCommInfo = contract-&gt;<a class="code hl_function" href="classWTSContractInfo.html#a8fa410ebad3ac115725f7c06c0440211">getCommInfo</a>();</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>                <span class="comment">// 创建新的tick数据对象</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>                <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* tick = <a class="code hl_function" href="classWTSTickData.html#a4b56adfd1cd4e6b95833653ca987ce43">WTSTickData::create</a>(<span class="stringliteral">&quot;rb2205&quot;</span>);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>                <span class="comment">// 设置合约信息</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>                tick-&gt;<a class="code hl_function" href="classWTSTickData.html#a3f5ca8ee02338f1991293bb33ba0318d">setContractInfo</a>(contract);</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>                <span class="comment">// 获取tick结构引用，并填充数据</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>                <a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>&amp; quote = tick-&gt;<a class="code hl_function" href="classWTSTickData.html#a6a81212366831e7afe3eeac41b42e7b0">getTickStruct</a>();</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>                <span class="comment">// 设置交易所代码</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>                <a class="code hl_function" href="WTSMarcos_8h.html#ae3e2cd00c20ce8b9ae0ae37a089d7d5e">wt_strcpy</a>(quote.<a class="code hl_variable" href="structWTSTickStruct.html#a1fae83488fbdd65e552944bb1502b8fd">exchg</a>, pCommInfo-&gt;<a class="code hl_function" href="classWTSCommodityInfo.html#a4c21b058429923391bb099b2063ed029">getExchg</a>());</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>                <span class="comment">// 设置日期和时间</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#afd2eb785cc5bfd6ca1f93375732a09ef">action_date</a> = actDate;</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a44aea5df719841d66b883c572ecd291d">action_time</a> = actTime;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>                <span class="comment">// 设置价格信息</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a72563ba28f49fb904ddefbf652727c82">price</a> = x;      <span class="comment">// 当前价</span></div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#ae27988b263f90158e7e86c0039a1290b">open</a> = x;       <span class="comment">// 开盘价</span></div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#ac44468303bfc5acde6ca341490e6e51f">high</a> = x;       <span class="comment">// 最高价</span></div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a07aab56a57a594daa634b8f28381ffaa">low</a> = x;        <span class="comment">// 最低价</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#aabf07c4d7040b85931f0882de3398379">total_volume</a> = 0; <span class="comment">// 成交量</span></div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a9fe18bba3bedd1c23830ba835cdf5fba">trading_date</a> = 20220303; <span class="comment">// 交易日期</span></div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#afc11e9090102f4c73b5a1bb2b3092e37">settle_price</a> = x; <span class="comment">// 结算价</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a9f77ec5a68aa78149ff70544d1a5325c">open_interest</a> = 0; <span class="comment">// 持仓量</span></div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>                <span class="comment">// 设置涨跌停板</span></div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a571f622c146287aeb5750e974fe434ae">upper_limit</a> = x; <span class="comment">// 涨停价</span></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#aa765254d43077f75d8916cf2feb919fd">lower_limit</a> = x; <span class="comment">// 跌停价</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>                <span class="comment">// 设置前一交易日信息</span></div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a17bd5a2e41a49b42c52017a208bb9375">pre_close</a> = x;    <span class="comment">// 前收盘价</span></div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a08e5338b44b175e874d45be91da587e8">pre_settle</a> = x;   <span class="comment">// 前结算价</span></div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a748c94f5e832b7c622d1b3ee6968e9a5">pre_interest</a> = 0; <span class="comment">// 前持仓量</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>                <span class="comment">// 委卖价格</span></div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#aab9d98249498f3987bc114764edca24e">ask_prices</a>[0] = x;</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#aab9d98249498f3987bc114764edca24e">ask_prices</a>[1] = x;</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#aab9d98249498f3987bc114764edca24e">ask_prices</a>[2] = x;</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#aab9d98249498f3987bc114764edca24e">ask_prices</a>[3] = x;</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#aab9d98249498f3987bc114764edca24e">ask_prices</a>[4] = x;</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span> </div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>                <span class="comment">// 委买价格</span></div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a92c83647dcd3d77d659bff2967480489">bid_prices</a>[0] = x;</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a92c83647dcd3d77d659bff2967480489">bid_prices</a>[1] = x;</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a92c83647dcd3d77d659bff2967480489">bid_prices</a>[2] = x;</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a92c83647dcd3d77d659bff2967480489">bid_prices</a>[3] = x;</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a92c83647dcd3d77d659bff2967480489">bid_prices</a>[4] = x;</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>                <span class="comment">// 委卖量</span></div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a0c229638a3bda7a9dae9f042534b566b">ask_qty</a>[0] = 0;</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a0c229638a3bda7a9dae9f042534b566b">ask_qty</a>[1] = 0;</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a0c229638a3bda7a9dae9f042534b566b">ask_qty</a>[2] = 0;</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a0c229638a3bda7a9dae9f042534b566b">ask_qty</a>[3] = 0;</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a0c229638a3bda7a9dae9f042534b566b">ask_qty</a>[4] = 0;</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>                <span class="comment">// 委买量</span></div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a70aac8776b4932b236b58a1043002f4b">bid_qty</a>[0] = 0;</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a70aac8776b4932b236b58a1043002f4b">bid_qty</a>[1] = 0;</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a70aac8776b4932b236b58a1043002f4b">bid_qty</a>[2] = 0;</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a70aac8776b4932b236b58a1043002f4b">bid_qty</a>[3] = 0;</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>                quote.<a class="code hl_variable" href="structWTSTickStruct.html#a70aac8776b4932b236b58a1043002f4b">bid_qty</a>[4] = 0;</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span> </div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>                <span class="comment">// 将tick数据提交给解析器SPI接口</span></div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>                <a class="code hl_variable" href="classuft_1_1TestParser.html#aca6dcb631b9f287f5d4c0a4d00714f7f">_parser_spi</a>-&gt;<a class="code hl_function" href="classIParserSpi.html#af9c5154456462c9b115bdc45de05ff29">handleQuote</a>(tick, 0);</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>                <span class="comment">// 释放tick数据对象</span></div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>                tick-&gt;<a class="code hl_function" href="classWTSPoolObject.html#a868f127b3ccc31cba6b077803cb00951">release</a>();</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>            }</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>            <span class="comment">// 获取总耗时（纳秒）</span></div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>            <span class="keyword">auto</span> total = ticker.<a class="code hl_function" href="classTimeUtils_1_1Ticker.html#a9f5a908d00243147bdba73ea43a80fe7">nano_seconds</a>();</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>            <span class="comment">// 计算平均每个tick处理时间</span></div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>            <span class="keywordtype">double</span> t2t = total * 1.0 / times;</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>            <span class="comment">// 输出延迟性能测试结果</span></div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>            <a class="code hl_function" href="classWTSLogger.html#a147defb6e1fb287cc8d95bfb753f6f11">WTSLogger::warn</a>(<span class="stringliteral">&quot;{} ticks simulated in {:.0f} ns, UftEngine Innner Latency: {:.3f} ns&quot;</span>, times, total*1.0, t2t);</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        }</div>
+</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    <span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00203" data-start="{" data-end="}">
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno"><a class="line" href="classuft_1_1TestParser.html#a19446014bdec1967104455f46a03aaf2">  203</a></span>        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classuft_1_1TestParser.html#a19446014bdec1967104455f46a03aaf2">registerSpi</a>(<a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>* listener)<span class="keyword"> override</span></div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span><span class="keyword">        </span>{</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>            <span class="comment">// 保存解析器回调接口</span></div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>            <a class="code hl_variable" href="classuft_1_1TestParser.html#aca6dcb631b9f287f5d4c0a4d00714f7f">_parser_spi</a> = listener;</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>            <span class="comment">// 从回调接口获取基础数据管理器</span></div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>            <a class="code hl_variable" href="classuft_1_1TestParser.html#ac95da80a3d2e6ea8bdb61d7c81fcc7c6">_bd_mgr</a> = listener-&gt;<a class="code hl_function" href="classIParserSpi.html#a48bc03c868be4a38bf50b355c9149a93">getBaseDataMgr</a>();</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>        }</div>
+</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span> </div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno"><a class="line" href="classuft_1_1TestParser.html#aca6dcb631b9f287f5d4c0a4d00714f7f">  212</a></span>        <a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>*     <a class="code hl_variable" href="classuft_1_1TestParser.html#aca6dcb631b9f287f5d4c0a4d00714f7f">_parser_spi</a>;  </div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno"><a class="line" href="classuft_1_1TestParser.html#ac95da80a3d2e6ea8bdb61d7c81fcc7c6">  213</a></span>        <a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>*   <a class="code hl_variable" href="classuft_1_1TestParser.html#ac95da80a3d2e6ea8bdb61d7c81fcc7c6">_bd_mgr</a>;      </div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    };</div>
+</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span> </div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno"><a class="line" href="namespaceuft.html#a60c871954b15b7a83684010dccb7863e">  217</a></span>    <a class="code hl_class" href="classuft_1_1TestParser.html">TestParser</a>* <a class="code hl_variable" href="namespaceuft.html#a60c871954b15b7a83684010dccb7863e">theParser</a> = <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
+<div class="foldopen" id="foldopen00223" data-start="{" data-end="};">
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno"><a class="line" href="classuft_1_1TestTrader.html">  223</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classuft_1_1TestTrader.html">TestTrader</a> : <span class="keyword">public</span> <a class="code hl_class" href="classITraderApi.html">ITraderApi</a></div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    {</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span> </div>
+<div class="foldopen" id="foldopen00232" data-start="{" data-end="}">
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno"><a class="line" href="classuft_1_1TestTrader.html#a461970a36f583cef702cf697f2d17ef8">  232</a></span>        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classuft_1_1TestTrader.html#a461970a36f583cef702cf697f2d17ef8">registerSpi</a>(<a class="code hl_class" href="classITraderSpi.html">ITraderSpi</a>* listener)<span class="keyword"> override</span></div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span><span class="keyword">        </span>{</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>            <span class="comment">// 保存交易器回调接口</span></div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>            <a class="code hl_variable" href="classuft_1_1TestTrader.html#a2162ef26309a38aabdec4ed54091a833">_trader_spi</a> = listener;</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        }</div>
+</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span> </div>
+<div class="foldopen" id="foldopen00245" data-start="{" data-end="}">
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno"><a class="line" href="classuft_1_1TestTrader.html#a6b10447d2c7973fa99fcf5da086dd6d4">  245</a></span>        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classuft_1_1TestTrader.html#a6b10447d2c7973fa99fcf5da086dd6d4">makeEntrustID</a>(<span class="keywordtype">char</span>* buffer, <span class="keywordtype">int</span> length)<span class="keyword"> override</span></div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span><span class="keyword">        </span>{</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>            <span class="comment">// 生成固定的委托单号（测试用途）</span></div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>            <a class="code hl_function" href="WTSMarcos_8h.html#ae3e2cd00c20ce8b9ae0ae37a089d7d5e">wt_strcpy</a>(buffer, <span class="stringliteral">&quot;123456&quot;</span>);</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        }</div>
+</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span> </div>
+<div class="foldopen" id="foldopen00258" data-start="{" data-end="}">
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno"><a class="line" href="classuft_1_1TestTrader.html#a06cab98efc80112db2959471137a91fd">  258</a></span>        <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classuft_1_1TestTrader.html#a06cab98efc80112db2959471137a91fd">orderInsert</a>(<a class="code hl_class" href="classWTSEntrust.html">WTSEntrust</a>* eutrust)<span class="keyword"> override</span></div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span><span class="keyword">        </span>{</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>            <span class="comment">//WTSLogger::debug(&quot;{}&quot;, __FUNCTION__);</span></div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>            <span class="comment">// 测试环境下直接返回成功</span></div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>            <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>        }</div>
+</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span> </div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno"><a class="line" href="classuft_1_1TestTrader.html#a2162ef26309a38aabdec4ed54091a833">  266</a></span>        <a class="code hl_class" href="classITraderSpi.html">ITraderSpi</a>* <a class="code hl_variable" href="classuft_1_1TestTrader.html#a2162ef26309a38aabdec4ed54091a833">_trader_spi</a>;  </div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>    };</div>
+</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
+<div class="foldopen" id="foldopen00273" data-start="{" data-end="};">
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno"><a class="line" href="classuft_1_1TestStrategy.html">  273</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classuft_1_1TestStrategy.html">TestStrategy</a> : <span class="keyword">public</span> <a class="code hl_class" href="classUftStrategy.html">UftStrategy</a></div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>    {</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno"><a class="line" href="classuft_1_1TestStrategy.html#af4a94100041a8aa5a554c01f6c33cd2c">  281</a></span>        <a class="code hl_function" href="classuft_1_1TestStrategy.html#af4a94100041a8aa5a554c01f6c33cd2c">TestStrategy</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>) : <a class="code hl_class" href="classUftStrategy.html">UftStrategy</a>(<a class="code hl_function" href="classUftStrategy.html#add26428e74d34a34c9fd55ae047ab7fa">id</a>) {}</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span> </div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno"><a class="line" href="classuft_1_1TestStrategy.html#a5f9633362164c395fad353f813cad275">  288</a></span>        <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classuft_1_1TestStrategy.html#a5f9633362164c395fad353f813cad275">getName</a>() { <span class="keywordflow">return</span> <span class="stringliteral">&quot;TestStrategy&quot;</span>; }</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span> </div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno"><a class="line" href="classuft_1_1TestStrategy.html#a6d98a6c71429471366e2effe9b6cf45c">  295</a></span>        <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classuft_1_1TestStrategy.html#a6d98a6c71429471366e2effe9b6cf45c">getFactName</a>() { <span class="keywordflow">return</span> <span class="stringliteral">&quot;TestStrategyFact&quot;</span>; }</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span> </div>
+<div class="foldopen" id="foldopen00302" data-start="{" data-end="}">
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno"><a class="line" href="classuft_1_1TestStrategy.html#ad8f20da5265d8e2a8a40e3eb083404b7">  302</a></span>        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classuft_1_1TestStrategy.html#ad8f20da5265d8e2a8a40e3eb083404b7">on_init</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx)<span class="keyword"> override</span></div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span><span class="keyword">        </span>{</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>            <span class="comment">// 订阅铁矿石合约的tick数据</span></div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>            ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a5eafaadd9aaddb9fd11a2d00826592f8">stra_sub_ticks</a>(<span class="stringliteral">&quot;SHFE.rb2205&quot;</span>);</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>        }</div>
+</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span> </div>
+<div class="foldopen" id="foldopen00315" data-start="{" data-end="}">
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno"><a class="line" href="classuft_1_1TestStrategy.html#a387914b94b8cc39566b048a0c3f1edca">  315</a></span>        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classuft_1_1TestStrategy.html#a387914b94b8cc39566b048a0c3f1edca">on_tick</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick)</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>        {</div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>            <span class="comment">//WTSLogger::debug(&quot;{}&quot;, __FUNCTION__);</span></div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>            <span class="comment">// 多头建仓，价格2300，数量1手，测试超高频交易引擎的响应速度</span></div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>            ctx-&gt;<a class="code hl_function" href="classIUftStraCtx.html#a3cd3aecf080f63f2554d3c32bbd183de">stra_enter_long</a>(<span class="stringliteral">&quot;SHFE.rb2205&quot;</span>, 2300, 1, 0);</div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>            <span class="comment">//ctx-&gt;stra_enter_short(&quot;SHFE.rb2205&quot;, 2300, 1, 0);</span></div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>        }</div>
+</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>    };</div>
+</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span> </div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span> </div>
+<div class="foldopen" id="foldopen00329" data-start="{" data-end="}">
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html#a2b65d28724cea9da11615c00d5acc181">  329</a></span>    <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#a2b65d28724cea9da11615c00d5acc181">UftLatencyTool::UftLatencyTool</a>()</div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>    {</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>        <span class="comment">// 因为成员变量都是对象，会自动调用默认构造函数，这里不需要特殊的初始化</span></div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>    }</div>
+</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span> </div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span> </div>
+<div class="foldopen" id="foldopen00339" data-start="{" data-end="}">
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html#ad02e4ca3f21f9292d4be756e6858adc2">  339</a></span>    <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#ad02e4ca3f21f9292d4be756e6858adc2">UftLatencyTool::~UftLatencyTool</a>()</div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>    {</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>        <span class="comment">// 成员变量会自动析构，不需要特殊的清理代码</span></div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>    }</div>
+</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span> </div>
+<div class="foldopen" id="foldopen00349" data-start="{" data-end="}">
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html#af92a0a7b0095a48c935b2a49f17d3fb2">  349</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#af92a0a7b0095a48c935b2a49f17d3fb2">UftLatencyTool::init</a>()</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>    {</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>        <span class="comment">// 初始化日志系统</span></div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>        <a class="code hl_function" href="classWTSLogger.html#a316399910d3af4aef6c4a6e85c50c729">WTSLogger::init</a>(<span class="stringliteral">&quot;logcfg.yaml&quot;</span>);</div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span> </div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>        <span class="comment">// 设置配置文件路径</span></div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>        std::string cfgFile = <span class="stringliteral">&quot;config.yaml&quot;</span>;</div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span> </div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>        <span class="comment">// 加载配置文件</span></div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>        <a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* _config = <a class="code hl_function" href="classWTSCfgLoader.html#a222f42e290bc1aa38b4f67c005e10887">WTSCfgLoader::load_from_file</a>(cfgFile);</div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>        <span class="keywordflow">if</span> (_config == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>        {</div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>            <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;Loading config file {} failed&quot;</span>, cfgFile);</div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>        }</div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span> </div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>        <span class="comment">// 加载基础数据文件</span></div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>        <a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfgBF = _config-&gt;<a class="code hl_function" href="classWTSVariant.html#a4dacb2b4afd195d05dedb5323d7982f3">get</a>(<span class="stringliteral">&quot;basefiles&quot;</span>);</div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>        <span class="comment">// 加载交易时间段数据</span></div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>        <span class="keywordflow">if</span> (cfgBF-&gt;<a class="code hl_function" href="classWTSVariant.html#a4dacb2b4afd195d05dedb5323d7982f3">get</a>(<span class="stringliteral">&quot;session&quot;</span>))</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>            <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#ad079ba5c85fdbd9f7d8e8433ec48a8cb">_bd_mgr</a>.<a class="code hl_function" href="classWTSBaseDataMgr.html#a57021af47b2f06c2be9f8b4c4656c497">loadSessions</a>(cfgBF-&gt;<a class="code hl_function" href="classWTSVariant.html#a830db11fc8daceff409fdbebaa7bea8a">getCString</a>(<span class="stringliteral">&quot;session&quot;</span>));</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span> </div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>        <span class="comment">// 加载商品数据</span></div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>        <a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfgItem = cfgBF-&gt;<a class="code hl_function" href="classWTSVariant.html#a4dacb2b4afd195d05dedb5323d7982f3">get</a>(<span class="stringliteral">&quot;commodity&quot;</span>);</div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>        <span class="keywordflow">if</span> (cfgItem)</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>        {</div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>            <span class="comment">// 单个商品文件</span></div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>            <span class="keywordflow">if</span> (cfgItem-&gt;<a class="code hl_function" href="classWTSVariant.html#a6c3d9f96879751cecc0a8ff45da340ce">type</a>() == <a class="code hl_enumvalue" href="classWTSVariant.html#a5ec4cabed50cc176d513abd4bd08061fa0c6250ac4bb09f5d3eebb4d21e1d2b67">WTSVariant::VT_String</a>)</div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>            {</div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>                <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#ad079ba5c85fdbd9f7d8e8433ec48a8cb">_bd_mgr</a>.<a class="code hl_function" href="classWTSBaseDataMgr.html#a4a497f559d9cef1296216ddab48ecdc4">loadCommodities</a>(cfgItem-&gt;<a class="code hl_function" href="classWTSVariant.html#a64c27f6f7019edcf49404fe8d5e7a826">asCString</a>());</div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>            }</div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>            <span class="comment">// 多个商品文件</span></div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (cfgItem-&gt;<a class="code hl_function" href="classWTSVariant.html#a6c3d9f96879751cecc0a8ff45da340ce">type</a>() == <a class="code hl_enumvalue" href="classWTSVariant.html#a5ec4cabed50cc176d513abd4bd08061fa4cd513ceff00f7cabca99547ddc18f77">WTSVariant::VT_Array</a>)</div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>            {</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>                <span class="keywordflow">for</span> (uint32_t i = 0; i &lt; cfgItem-&gt;<a class="code hl_function" href="classWTSVariant.html#ad20e7bbd06d2fd4437a8a4d6b5c141b2">size</a>(); i++)</div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>                {</div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>                    <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#ad079ba5c85fdbd9f7d8e8433ec48a8cb">_bd_mgr</a>.<a class="code hl_function" href="classWTSBaseDataMgr.html#a4a497f559d9cef1296216ddab48ecdc4">loadCommodities</a>(cfgItem-&gt;<a class="code hl_function" href="classWTSVariant.html#a4dacb2b4afd195d05dedb5323d7982f3">get</a>(i)-&gt;<a class="code hl_function" href="classWTSVariant.html#a64c27f6f7019edcf49404fe8d5e7a826">asCString</a>());</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>                }</div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>            }</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>        }</div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span> </div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>        <span class="comment">// 加载合约数据</span></div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>        cfgItem = cfgBF-&gt;<a class="code hl_function" href="classWTSVariant.html#a4dacb2b4afd195d05dedb5323d7982f3">get</a>(<span class="stringliteral">&quot;contract&quot;</span>);</div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>        <span class="keywordflow">if</span> (cfgItem)</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>        {</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>            <span class="comment">// 单个合约文件</span></div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>            <span class="keywordflow">if</span> (cfgItem-&gt;<a class="code hl_function" href="classWTSVariant.html#a6c3d9f96879751cecc0a8ff45da340ce">type</a>() == <a class="code hl_enumvalue" href="classWTSVariant.html#a5ec4cabed50cc176d513abd4bd08061fa0c6250ac4bb09f5d3eebb4d21e1d2b67">WTSVariant::VT_String</a>)</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>            {</div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>                <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#ad079ba5c85fdbd9f7d8e8433ec48a8cb">_bd_mgr</a>.<a class="code hl_function" href="classWTSBaseDataMgr.html#af6af96bd4a0b191460c36d572febf80a">loadContracts</a>(cfgItem-&gt;<a class="code hl_function" href="classWTSVariant.html#a64c27f6f7019edcf49404fe8d5e7a826">asCString</a>());</div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>            }</div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>            <span class="comment">// 多个合约文件</span></div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (cfgItem-&gt;<a class="code hl_function" href="classWTSVariant.html#a6c3d9f96879751cecc0a8ff45da340ce">type</a>() == <a class="code hl_enumvalue" href="classWTSVariant.html#a5ec4cabed50cc176d513abd4bd08061fa4cd513ceff00f7cabca99547ddc18f77">WTSVariant::VT_Array</a>)</div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>            {</div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>                <span class="keywordflow">for</span> (uint32_t i = 0; i &lt; cfgItem-&gt;<a class="code hl_function" href="classWTSVariant.html#ad20e7bbd06d2fd4437a8a4d6b5c141b2">size</a>(); i++)</div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>                {</div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>                    <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#ad079ba5c85fdbd9f7d8e8433ec48a8cb">_bd_mgr</a>.<a class="code hl_function" href="classWTSBaseDataMgr.html#af6af96bd4a0b191460c36d572febf80a">loadContracts</a>(cfgItem-&gt;<a class="code hl_function" href="classWTSVariant.html#a4dacb2b4afd195d05dedb5323d7982f3">get</a>(i)-&gt;<a class="code hl_function" href="classWTSVariant.html#a64c27f6f7019edcf49404fe8d5e7a826">asCString</a>());</div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>                }</div>
+<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>            }</div>
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>        }</div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span> </div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>        <span class="comment">// 设置模拟tick个数</span></div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>        <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a9efb0ead0c0a5bf763ac9a27c38b6bbf">_times</a> = _config-&gt;<a class="code hl_function" href="classWTSVariant.html#a9c09f146129a4f35dc04b490fef8887c">getUInt32</a>(<span class="stringliteral">&quot;times&quot;</span>);</div>
+<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span>        <a class="code hl_function" href="classWTSLogger.html#a147defb6e1fb287cc8d95bfb753f6f11">WTSLogger::warn</a>(<span class="stringliteral">&quot;{} ticks will be simulated&quot;</span>, <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a9efb0ead0c0a5bf763ac9a27c38b6bbf">_times</a>);</div>
+<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span> </div>
+<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>        <span class="comment">// 设置测试线程绑定的CPU核心</span></div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>        <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#aea0c6619e1a3f98b760af88dc6e36a5e">_core</a> = _config-&gt;<a class="code hl_function" href="classWTSVariant.html#a9c09f146129a4f35dc04b490fef8887c">getUInt32</a>(<span class="stringliteral">&quot;core&quot;</span>);</div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>        <a class="code hl_function" href="classWTSLogger.html#a147defb6e1fb287cc8d95bfb753f6f11">WTSLogger::warn</a>(<span class="stringliteral">&quot;Testing thread will be bind to core {}&quot;</span>, <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#aea0c6619e1a3f98b760af88dc6e36a5e">_core</a>);</div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span> </div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>        <span class="comment">// 初始化交易引擎</span></div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>        <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#ab37cba7c75df4fbfcdfbe613c2c0c5b9">initEngine</a>(_config-&gt;<a class="code hl_function" href="classWTSVariant.html#a4dacb2b4afd195d05dedb5323d7982f3">get</a>(<span class="stringliteral">&quot;env&quot;</span>));</div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>        <span class="comment">// 初始化交易和解析模块</span></div>
+<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span>        <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#a85233d6dafa56c113e265ef4a642e3bc">initModules</a>();</div>
+<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span>        <span class="comment">// 初始化测试策略</span></div>
+<div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span>        <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#a22d3f0cd77d456a57c96a3a4224e4835">initStrategies</a>();</div>
+<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span> </div>
+<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>        <span class="comment">// 释放配置对象内存</span></div>
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>        _config-&gt;<a class="code hl_function" href="classWTSVariant.html#a888d00f531f1a3ae9d0f12543f302522">release</a>();</div>
+<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>    }</div>
+</div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span> </div>
+<div class="foldopen" id="foldopen00434" data-start="{" data-end="}">
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html#a22d3f0cd77d456a57c96a3a4224e4835">  434</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#a22d3f0cd77d456a57c96a3a4224e4835">UftLatencyTool::initStrategies</a>()</div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>    {</div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>        <span class="comment">// 创建策略上下文，并关联到引擎</span></div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>        <a class="code hl_class" href="classUftStraContext.html">UftStraContext</a>* ctx = <span class="keyword">new</span> <a class="code hl_class" href="classUftStraContext.html">UftStraContext</a>(&amp;<a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a53ac7b1918134992f57db3b406b420f6">_engine</a>, <span class="stringliteral">&quot;stra&quot;</span>);</div>
+<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span>        <span class="comment">// 为上下文设置测试策略</span></div>
+<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span>        ctx-&gt;<a class="code hl_function" href="classUftStraContext.html#ae1b382b1813c4fd7d68b30191ede9bcd">set_strategy</a>(<span class="keyword">new</span> <a class="code hl_class" href="classuft_1_1TestStrategy.html">TestStrategy</a>(<span class="stringliteral">&quot;stra&quot;</span>));</div>
+<div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span> </div>
+<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span>        <span class="comment">// 获取交易器适配器</span></div>
+<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span>        <a class="code hl_typedef" href="TraderDumper_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a> trader = <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a8c49e432a30ab3fe7a35bdba942aad1d">_traders</a>.<a class="code hl_function" href="classTraderAdapterMgr.html#af72c5f78898d2990528fce49c91cb9a3">getAdapter</a>(<span class="stringliteral">&quot;trader&quot;</span>);</div>
+<div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span>        <span class="comment">// 为策略上下文设置交易器</span></div>
+<div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span>        ctx-&gt;<a class="code hl_function" href="classUftStraContext.html#ab8aef1ec3c899ee5c1392da69144039f">setTrader</a>(trader.get());</div>
+<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span>        <span class="comment">// 将策略上下文添加为交易器的数据接收器</span></div>
+<div class="line"><a id="l00446" name="l00446"></a><span class="lineno">  446</span>        trader-&gt;addSink(ctx);</div>
+<div class="line"><a id="l00447" name="l00447"></a><span class="lineno">  447</span> </div>
+<div class="line"><a id="l00448" name="l00448"></a><span class="lineno">  448</span>        <span class="comment">// 将策略上下文添加到引擎中</span></div>
+<div class="line"><a id="l00449" name="l00449"></a><span class="lineno">  449</span>        <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a53ac7b1918134992f57db3b406b420f6">_engine</a>.<a class="code hl_function" href="classWtUftEngine.html#a0fecac7cefd663767c63ff8c4b58b4b1">addContext</a>(<a class="code hl_typedef" href="WtUftEngine_8h.html#a70e7f31749c92706ee99a28faa65d146">UftContextPtr</a>(ctx));</div>
+<div class="line"><a id="l00450" name="l00450"></a><span class="lineno">  450</span> </div>
+<div class="line"><a id="l00451" name="l00451"></a><span class="lineno">  451</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00452" name="l00452"></a><span class="lineno">  452</span>    }</div>
+</div>
+<div class="line"><a id="l00453" name="l00453"></a><span class="lineno">  453</span> </div>
+<div class="foldopen" id="foldopen00460" data-start="{" data-end="}">
+<div class="line"><a id="l00460" name="l00460"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html#ab37cba7c75df4fbfcdfbe613c2c0c5b9">  460</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#ab37cba7c75df4fbfcdfbe613c2c0c5b9">UftLatencyTool::initEngine</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg)</div>
+<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span>    {</div>
+<div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span>        <span class="comment">// 记录引擎初始化信息</span></div>
+<div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span>        <a class="code hl_function" href="classWTSLogger.html#a147defb6e1fb287cc8d95bfb753f6f11">WTSLogger::warn</a>(<span class="stringliteral">&quot;Trading enviroment initialzied with engine: UFT&quot;</span>);</div>
+<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>        <span class="comment">// 初始化引擎，设置基础数据管理器</span></div>
+<div class="line"><a id="l00465" name="l00465"></a><span class="lineno">  465</span>        <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a53ac7b1918134992f57db3b406b420f6">_engine</a>.<a class="code hl_function" href="classWtUftEngine.html#a8a3d939148efc9da2b3a6a5e5e55c26e">init</a>(cfg, &amp;<a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#ad079ba5c85fdbd9f7d8e8433ec48a8cb">_bd_mgr</a>, <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>);</div>
+<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>        <span class="comment">// 设置交易适配器管理器</span></div>
+<div class="line"><a id="l00467" name="l00467"></a><span class="lineno">  467</span>        <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a53ac7b1918134992f57db3b406b420f6">_engine</a>.<a class="code hl_function" href="classWtUftEngine.html#a3bc3c474e880edfb32f1b597dc37a11e">set_adapter_mgr</a>(&amp;<a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a8c49e432a30ab3fe7a35bdba942aad1d">_traders</a>);</div>
+<div class="line"><a id="l00468" name="l00468"></a><span class="lineno">  468</span> </div>
+<div class="line"><a id="l00469" name="l00469"></a><span class="lineno">  469</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00470" name="l00470"></a><span class="lineno">  470</span>    }</div>
+</div>
+<div class="line"><a id="l00471" name="l00471"></a><span class="lineno">  471</span> </div>
+<div class="line"><a id="l00472" name="l00472"></a><span class="lineno">  472</span> </div>
+<div class="foldopen" id="foldopen00478" data-start="{" data-end="}">
+<div class="line"><a id="l00478" name="l00478"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html#a85233d6dafa56c113e265ef4a642e3bc">  478</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#a85233d6dafa56c113e265ef4a642e3bc">UftLatencyTool::initModules</a>()</div>
+<div class="line"><a id="l00479" name="l00479"></a><span class="lineno">  479</span>    {</div>
+<div class="line"><a id="l00480" name="l00480"></a><span class="lineno">  480</span>        <span class="comment">// 初始化解析器</span></div>
+<div class="line"><a id="l00481" name="l00481"></a><span class="lineno">  481</span>        {</div>
+<div class="line"><a id="l00482" name="l00482"></a><span class="lineno">  482</span>            <span class="comment">// 创建测试解析器实例</span></div>
+<div class="line"><a id="l00483" name="l00483"></a><span class="lineno">  483</span>            <a class="code hl_variable" href="namespaceuft.html#a60c871954b15b7a83684010dccb7863e">theParser</a> = <span class="keyword">new</span> <a class="code hl_class" href="classuft_1_1TestParser.html">TestParser</a>();</div>
+<div class="line"><a id="l00484" name="l00484"></a><span class="lineno">  484</span>            <span class="comment">// 创建解析器适配器</span></div>
+<div class="line"><a id="l00485" name="l00485"></a><span class="lineno">  485</span>            <a class="code hl_typedef" href="WtCore_2ParserAdapter_8h.html#a1d9c7bf33a1fcb12800fc8ab46341c88">ParserAdapterPtr</a> adapter(<span class="keyword">new</span> <a class="code hl_class" href="classParserAdapter.html">ParserAdapter</a>);</div>
+<div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span>            <span class="comment">// 初始化适配器，关联引擎和基础数据管理器</span></div>
+<div class="line"><a id="l00487" name="l00487"></a><span class="lineno">  487</span>            adapter-&gt;initExt(<span class="stringliteral">&quot;parser&quot;</span>, <a class="code hl_variable" href="namespaceuft.html#a60c871954b15b7a83684010dccb7863e">theParser</a>, &amp;<a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a53ac7b1918134992f57db3b406b420f6">_engine</a>, &amp;<a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#ad079ba5c85fdbd9f7d8e8433ec48a8cb">_bd_mgr</a>);</div>
+<div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span>            <span class="comment">// 将适配器添加到解析器管理器中</span></div>
+<div class="line"><a id="l00489" name="l00489"></a><span class="lineno">  489</span>            <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a568a74cc2396ad262f33825236a06dd4">_parsers</a>.<a class="code hl_function" href="classParserAdapterMgr.html#acb0f32a06edea30cb1debdf05442a34f">addAdapter</a>(<span class="stringliteral">&quot;parser&quot;</span>, adapter);</div>
+<div class="line"><a id="l00490" name="l00490"></a><span class="lineno">  490</span>        }</div>
+<div class="line"><a id="l00491" name="l00491"></a><span class="lineno">  491</span> </div>
+<div class="line"><a id="l00492" name="l00492"></a><span class="lineno">  492</span>        <span class="comment">// 初始化交易器</span></div>
+<div class="line"><a id="l00493" name="l00493"></a><span class="lineno">  493</span>        {</div>
+<div class="line"><a id="l00494" name="l00494"></a><span class="lineno">  494</span>            <span class="comment">// 创建测试交易器实例</span></div>
+<div class="line"><a id="l00495" name="l00495"></a><span class="lineno">  495</span>            <a class="code hl_class" href="classuft_1_1TestTrader.html">TestTrader</a> * tester = <span class="keyword">new</span> <a class="code hl_class" href="classuft_1_1TestTrader.html">TestTrader</a>();</div>
+<div class="line"><a id="l00496" name="l00496"></a><span class="lineno">  496</span>            <span class="comment">// 创建交易器适配器</span></div>
+<div class="line"><a id="l00497" name="l00497"></a><span class="lineno">  497</span>            <a class="code hl_typedef" href="TraderDumper_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a> adapter(<span class="keyword">new</span> <a class="code hl_class" href="classTraderAdapter.html">TraderAdapter</a>());</div>
+<div class="line"><a id="l00498" name="l00498"></a><span class="lineno">  498</span>            <span class="comment">// 初始化适配器，关联基础数据管理器</span></div>
+<div class="line"><a id="l00499" name="l00499"></a><span class="lineno">  499</span>            adapter-&gt;initExt(<span class="stringliteral">&quot;trader&quot;</span>, tester, &amp;<a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#ad079ba5c85fdbd9f7d8e8433ec48a8cb">_bd_mgr</a>, <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>);</div>
+<div class="line"><a id="l00500" name="l00500"></a><span class="lineno">  500</span>            <span class="comment">// 将适配器添加到交易器管理器中</span></div>
+<div class="line"><a id="l00501" name="l00501"></a><span class="lineno">  501</span>            <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a8c49e432a30ab3fe7a35bdba942aad1d">_traders</a>.<a class="code hl_function" href="classTraderAdapterMgr.html#aba592f7b9755d6a0855729528e22e44e">addAdapter</a>(<span class="stringliteral">&quot;trader&quot;</span>, adapter);</div>
+<div class="line"><a id="l00502" name="l00502"></a><span class="lineno">  502</span>        }</div>
+<div class="line"><a id="l00503" name="l00503"></a><span class="lineno">  503</span> </div>
+<div class="line"><a id="l00504" name="l00504"></a><span class="lineno">  504</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00505" name="l00505"></a><span class="lineno">  505</span>    }</div>
+</div>
+<div class="line"><a id="l00506" name="l00506"></a><span class="lineno">  506</span> </div>
+<div class="foldopen" id="foldopen00511" data-start="{" data-end="}">
+<div class="line"><a id="l00511" name="l00511"></a><span class="lineno"><a class="line" href="classuft_1_1UftLatencyTool.html#a89dd651d5dd92da67874d2a52616312f">  511</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classuft_1_1UftLatencyTool.html#a89dd651d5dd92da67874d2a52616312f">UftLatencyTool::run</a>()</div>
+<div class="line"><a id="l00512" name="l00512"></a><span class="lineno">  512</span>    {</div>
+<div class="line"><a id="l00513" name="l00513"></a><span class="lineno">  513</span>        <span class="comment">// 如果指定了CPU核心，则绑定当前线程到指定核心</span></div>
+<div class="line"><a id="l00514" name="l00514"></a><span class="lineno">  514</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#aea0c6619e1a3f98b760af88dc6e36a5e">_core</a> != 0)</div>
+<div class="line"><a id="l00515" name="l00515"></a><span class="lineno">  515</span>        {</div>
+<div class="line"><a id="l00516" name="l00516"></a><span class="lineno">  516</span>            <span class="comment">// 注意核心编号从0开始，所以需要-1</span></div>
+<div class="line"><a id="l00517" name="l00517"></a><span class="lineno">  517</span>            <span class="keywordflow">if</span>(!<a class="code hl_function" href="classCpuHelper.html#a70aa295257927e9d5a91ed73e79e2343">CpuHelper::bind_core</a>(<a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#aea0c6619e1a3f98b760af88dc6e36a5e">_core</a>-1))</div>
+<div class="line"><a id="l00518" name="l00518"></a><span class="lineno">  518</span>            {</div>
+<div class="line"><a id="l00519" name="l00519"></a><span class="lineno">  519</span>                <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;Binding to core {} failed&quot;</span>, <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#aea0c6619e1a3f98b760af88dc6e36a5e">_core</a>);</div>
+<div class="line"><a id="l00520" name="l00520"></a><span class="lineno">  520</span>            }</div>
+<div class="line"><a id="l00521" name="l00521"></a><span class="lineno">  521</span>        }</div>
+<div class="line"><a id="l00522" name="l00522"></a><span class="lineno">  522</span> </div>
+<div class="line"><a id="l00523" name="l00523"></a><span class="lineno">  523</span>        <span class="keywordflow">try</span></div>
+<div class="line"><a id="l00524" name="l00524"></a><span class="lineno">  524</span>        {</div>
+<div class="line"><a id="l00525" name="l00525"></a><span class="lineno">  525</span>            <span class="comment">// 启动解析器和交易器</span></div>
+<div class="line"><a id="l00526" name="l00526"></a><span class="lineno">  526</span>            <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a568a74cc2396ad262f33825236a06dd4">_parsers</a>.<a class="code hl_function" href="classParserAdapterMgr.html#ab6a50ec3aa7affc74e10ee4c7a930230">run</a>();</div>
+<div class="line"><a id="l00527" name="l00527"></a><span class="lineno">  527</span>            <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a8c49e432a30ab3fe7a35bdba942aad1d">_traders</a>.<a class="code hl_function" href="classTraderAdapterMgr.html#a6d321839dfa13802f208eb0a31f81cd8">run</a>();</div>
+<div class="line"><a id="l00528" name="l00528"></a><span class="lineno">  528</span> </div>
+<div class="line"><a id="l00529" name="l00529"></a><span class="lineno">  529</span>            <span class="comment">// 启动UFT引擎</span></div>
+<div class="line"><a id="l00530" name="l00530"></a><span class="lineno">  530</span>            <a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a53ac7b1918134992f57db3b406b420f6">_engine</a>.<a class="code hl_function" href="classWtUftEngine.html#a9fe69b13d9964888346b15e04ecf246c">run</a>();</div>
+<div class="line"><a id="l00531" name="l00531"></a><span class="lineno">  531</span> </div>
+<div class="line"><a id="l00532" name="l00532"></a><span class="lineno">  532</span>            <span class="comment">// 运行测试解析器，生成指定数量的tick数据并计算延迟</span></div>
+<div class="line"><a id="l00533" name="l00533"></a><span class="lineno">  533</span>            <a class="code hl_variable" href="namespaceuft.html#a60c871954b15b7a83684010dccb7863e">theParser</a>-&gt;<a class="code hl_function" href="classuft_1_1TestParser.html#a9208b4edb17a67c42b7adaf030bc31bd">run</a>(<a class="code hl_variable" href="classuft_1_1UftLatencyTool.html#a9efb0ead0c0a5bf763ac9a27c38b6bbf">_times</a>);</div>
+<div class="line"><a id="l00534" name="l00534"></a><span class="lineno">  534</span>        }</div>
+<div class="line"><a id="l00535" name="l00535"></a><span class="lineno">  535</span>        <span class="keywordflow">catch</span> (...)</div>
+<div class="line"><a id="l00536" name="l00536"></a><span class="lineno">  536</span>        {</div>
+<div class="line"><a id="l00537" name="l00537"></a><span class="lineno">  537</span>            <span class="comment">// 捕捉并忽略所有异常</span></div>
+<div class="line"><a id="l00538" name="l00538"></a><span class="lineno">  538</span>        }</div>
+<div class="line"><a id="l00539" name="l00539"></a><span class="lineno">  539</span>    }</div>
+</div>
+<div class="line"><a id="l00540" name="l00540"></a><span class="lineno">  540</span>}</div>
+</div>
+<div class="ttc" id="aTraderDumper_2TraderAdapter_8h_html_a70ae93302ae4750baca7a9677556b0fc"><div class="ttname"><a href="TraderDumper_2TraderAdapter_8h.html#a70ae93302ae4750baca7a9677556b0fc">TraderAdapterPtr</a></div><div class="ttdeci">std::shared_ptr&lt; TraderAdapter &gt; TraderAdapterPtr</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00092">TraderAdapter.h:92</a></div></div>
+<div class="ttc" id="aUftLatencyTool_8cpp_html_a134ff1f2bc38dc8fcff5456b491155d9"><div class="ttname"><a href="UftLatencyTool_8cpp.html#a134ff1f2bc38dc8fcff5456b491155d9">test_uft</a></div><div class="ttdeci">void test_uft()</div><div class="ttdoc">测试UFT模块延迟性能</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00033">UftLatencyTool.cpp:33</a></div></div>
+<div class="ttc" id="aUftLatencyTool_8cpp_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="UftLatencyTool_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00027">UftLatencyTool.cpp:27</a></div></div>
+<div class="ttc" id="aUftLatencyTool_8h_html"><div class="ttname"><a href="UftLatencyTool_8h.html">UftLatencyTool.h</a></div><div class="ttdoc">超高频交易延迟测试工具头文件</div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a7fbf1534f9e0f0bfdb86fb928902474c"><div class="ttname"><a href="WTSMarcos_8h.html#a7fbf1534f9e0f0bfdb86fb928902474c">FLT_MAX</a></div><div class="ttdeci">#define FLT_MAX</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00049">WTSMarcos.h:49</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_ae3e2cd00c20ce8b9ae0ae37a089d7d5e"><div class="ttname"><a href="WTSMarcos_8h.html#ae3e2cd00c20ce8b9ae0ae37a089d7d5e">wt_strcpy</a></div><div class="ttdeci">size_t wt_strcpy(char *des, const char *src, size_t len=0)</div><div class="ttdoc">字符串拷贝函数</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00155">WTSMarcos.h:155</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_af78670ee54c1203d613f8fb0e022d214"><div class="ttname"><a href="WTSMarcos_8h.html#af78670ee54c1203d613f8fb0e022d214">DBL_MAX</a></div><div class="ttdeci">#define DBL_MAX</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00045">WTSMarcos.h:45</a></div></div>
+<div class="ttc" id="aWtCore_2ParserAdapter_8h_html_a1d9c7bf33a1fcb12800fc8ab46341c88"><div class="ttname"><a href="WtCore_2ParserAdapter_8h.html#a1d9c7bf33a1fcb12800fc8ab46341c88">ParserAdapterPtr</a></div><div class="ttdeci">std::shared_ptr&lt; ParserAdapter &gt; ParserAdapterPtr</div><div class="ttdoc">解析器适配器智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ParserAdapter_8h_source.html#l00255">ParserAdapter.h:255</a></div></div>
+<div class="ttc" id="aWtUftEngine_8h_html_a70e7f31749c92706ee99a28faa65d146"><div class="ttname"><a href="WtUftEngine_8h.html#a70e7f31749c92706ee99a28faa65d146">UftContextPtr</a></div><div class="ttdeci">std::shared_ptr&lt; IUftStraCtx &gt; UftContextPtr</div><div class="ttdef"><b>Definition</b> <a href="WtUftEngine_8h_source.html#l00057">WtUftEngine.h:57</a></div></div>
+<div class="ttc" id="aclassCpuHelper_html_a70aa295257927e9d5a91ed73e79e2343"><div class="ttname"><a href="classCpuHelper.html#a70aa295257927e9d5a91ed73e79e2343">CpuHelper::bind_core</a></div><div class="ttdeci">static bool bind_core(uint32_t i)</div><div class="ttdoc">将当前线程绑定到指定的CPU核心</div><div class="ttdef"><b>Definition</b> <a href="CpuHelper_8hpp_source.html#l00093">CpuHelper.hpp:93</a></div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html"><div class="ttname"><a href="classIBaseDataMgr.html">IBaseDataMgr</a></div><div class="ttdoc">基础数据管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IBaseDataMgr_8h_source.html#l00075">IBaseDataMgr.h:76</a></div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html_a7902cf7c19636ee381ba9fa7a6e3f065"><div class="ttname"><a href="classIBaseDataMgr.html#a7902cf7c19636ee381ba9fa7a6e3f065">IBaseDataMgr::getContract</a></div><div class="ttdeci">virtual WTSContractInfo * getContract(const char *code, const char *exchg=&quot;&quot;, uint32_t uDate=0)=0</div><div class="ttdoc">获取合约信息</div></div>
+<div class="ttc" id="aclassIParserApi_html"><div class="ttname"><a href="classIParserApi.html">IParserApi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00083">IParserApi.h:84</a></div></div>
+<div class="ttc" id="aclassIParserSpi_html"><div class="ttname"><a href="classIParserSpi.html">IParserSpi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00028">IParserApi.h:29</a></div></div>
+<div class="ttc" id="aclassIParserSpi_html_a48bc03c868be4a38bf50b355c9149a93"><div class="ttname"><a href="classIParserSpi.html#a48bc03c868be4a38bf50b355c9149a93">IParserSpi::getBaseDataMgr</a></div><div class="ttdeci">virtual IBaseDataMgr * getBaseDataMgr()=0</div></div>
+<div class="ttc" id="aclassIParserSpi_html_af9c5154456462c9b115bdc45de05ff29"><div class="ttname"><a href="classIParserSpi.html#af9c5154456462c9b115bdc45de05ff29">IParserSpi::handleQuote</a></div><div class="ttdeci">virtual void handleQuote(WTSTickData *quote, uint32_t procFlag)=0</div></div>
+<div class="ttc" id="aclassITraderApi_html"><div class="ttname"><a href="classITraderApi.html">ITraderApi</a></div><div class="ttdef"><b>Definition</b> <a href="ITraderApi_8h_source.html#l00189">ITraderApi.h:190</a></div></div>
+<div class="ttc" id="aclassITraderSpi_html"><div class="ttname"><a href="classITraderSpi.html">ITraderSpi</a></div><div class="ttdef"><b>Definition</b> <a href="ITraderApi_8h_source.html#l00098">ITraderApi.h:99</a></div></div>
+<div class="ttc" id="aclassIUftStraCtx_html"><div class="ttname"><a href="classIUftStraCtx.html">IUftStraCtx</a></div><div class="ttdef"><b>Definition</b> <a href="IUftStraCtx_8h_source.html#l00031">IUftStraCtx.h:32</a></div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_a3cd3aecf080f63f2554d3c32bbd183de"><div class="ttname"><a href="classIUftStraCtx.html#a3cd3aecf080f63f2554d3c32bbd183de">IUftStraCtx::stra_enter_long</a></div><div class="ttdeci">virtual uint32_t stra_enter_long(const char *stdCode, double price, double qty, int flag=0)</div><div class="ttdef"><b>Definition</b> <a href="IUftStraCtx_8h_source.html#l00132">IUftStraCtx.h:132</a></div></div>
+<div class="ttc" id="aclassIUftStraCtx_html_a5eafaadd9aaddb9fd11a2d00826592f8"><div class="ttname"><a href="classIUftStraCtx.html#a5eafaadd9aaddb9fd11a2d00826592f8">IUftStraCtx::stra_sub_ticks</a></div><div class="ttdeci">virtual void stra_sub_ticks(const char *stdCode)=0</div></div>
+<div class="ttc" id="aclassParserAdapterMgr_html_ab6a50ec3aa7affc74e10ee4c7a930230"><div class="ttname"><a href="classParserAdapterMgr.html#ab6a50ec3aa7affc74e10ee4c7a930230">ParserAdapterMgr::run</a></div><div class="ttdeci">void run()</div><div class="ttdoc">启动所有解析器</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ParserAdapter_8cpp_source.html#l00602">ParserAdapter.cpp:602</a></div></div>
+<div class="ttc" id="aclassParserAdapterMgr_html_acb0f32a06edea30cb1debdf05442a34f"><div class="ttname"><a href="classParserAdapterMgr.html#acb0f32a06edea30cb1debdf05442a34f">ParserAdapterMgr::addAdapter</a></div><div class="ttdeci">bool addAdapter(const char *id, ParserAdapterPtr &amp;adapter)</div><div class="ttdoc">添加解析器适配器</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ParserAdapter_8cpp_source.html#l00558">ParserAdapter.cpp:558</a></div></div>
+<div class="ttc" id="aclassParserAdapter_html"><div class="ttname"><a href="classParserAdapter.html">ParserAdapter</a></div><div class="ttdoc">行情解析器适配器类</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2ParserAdapter_8h_source.html#l00068">ParserAdapter.h:70</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Ticker_html"><div class="ttname"><a href="classTimeUtils_1_1Ticker.html">TimeUtils::Ticker</a></div><div class="ttdoc">高精度计时器类</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00731">TimeUtils.hpp:732</a></div></div>
+<div class="ttc" id="aclassTimeUtils_1_1Ticker_html_a9f5a908d00243147bdba73ea43a80fe7"><div class="ttname"><a href="classTimeUtils_1_1Ticker.html#a9f5a908d00243147bdba73ea43a80fe7">TimeUtils::Ticker::nano_seconds</a></div><div class="ttdeci">int64_t nano_seconds() const</div><div class="ttdoc">获取从计时器初始化或重置开始经过的纳秒数</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00819">TimeUtils.hpp:819</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_a6d321839dfa13802f208eb0a31f81cd8"><div class="ttname"><a href="classTraderAdapterMgr.html#a6d321839dfa13802f208eb0a31f81cd8">TraderAdapterMgr::run</a></div><div class="ttdeci">void run()</div><div class="ttdoc">运行所有交易适配器</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00362">TraderAdapter.cpp:362</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_aba592f7b9755d6a0855729528e22e44e"><div class="ttname"><a href="classTraderAdapterMgr.html#aba592f7b9755d6a0855729528e22e44e">TraderAdapterMgr::addAdapter</a></div><div class="ttdeci">bool addAdapter(const char *tname, TraderAdapterPtr &amp;adapter)</div><div class="ttdoc">添加交易适配器</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00334">TraderAdapter.cpp:334</a></div></div>
+<div class="ttc" id="aclassTraderAdapterMgr_html_af72c5f78898d2990528fce49c91cb9a3"><div class="ttname"><a href="classTraderAdapterMgr.html#af72c5f78898d2990528fce49c91cb9a3">TraderAdapterMgr::getAdapter</a></div><div class="ttdeci">TraderAdapterPtr getAdapter(const char *tname)</div><div class="ttdoc">获取交易适配器</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8cpp_source.html#l00351">TraderAdapter.cpp:351</a></div></div>
+<div class="ttc" id="aclassTraderAdapter_html"><div class="ttname"><a href="classTraderAdapter.html">TraderAdapter</a></div><div class="ttdoc">交易适配器类</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_2TraderAdapter_8h_source.html#l00031">TraderAdapter.h:32</a></div></div>
+<div class="ttc" id="aclassUftStraContext_html"><div class="ttname"><a href="classUftStraContext.html">UftStraContext</a></div><div class="ttdoc">UFT策略执行上下文类</div><div class="ttdef"><b>Definition</b> <a href="UftStraContext_8h_source.html#l00032">UftStraContext.h:33</a></div></div>
+<div class="ttc" id="aclassUftStraContext_html_ab8aef1ec3c899ee5c1392da69144039f"><div class="ttname"><a href="classUftStraContext.html#ab8aef1ec3c899ee5c1392da69144039f">UftStraContext::setTrader</a></div><div class="ttdeci">void setTrader(TraderAdapter *trader)</div><div class="ttdoc">设置交易适配器</div><div class="ttdef"><b>Definition</b> <a href="UftStraContext_8cpp_source.html#l00077">UftStraContext.cpp:77</a></div></div>
+<div class="ttc" id="aclassUftStraContext_html_ae1b382b1813c4fd7d68b30191ede9bcd"><div class="ttname"><a href="classUftStraContext.html#ae1b382b1813c4fd7d68b30191ede9bcd">UftStraContext::set_strategy</a></div><div class="ttdeci">void set_strategy(UftStrategy *stra)</div><div class="ttdoc">设置策略对象</div><div class="ttdef"><b>Definition</b> <a href="UftStraContext_8h_source.html#l00051">UftStraContext.h:51</a></div></div>
+<div class="ttc" id="aclassUftStrategy_html"><div class="ttname"><a href="classUftStrategy.html">UftStrategy</a></div><div class="ttdef"><b>Definition</b> <a href="UftStrategyDefs_8h_source.html#l00028">UftStrategyDefs.h:29</a></div></div>
+<div class="ttc" id="aclassUftStrategy_html_add26428e74d34a34c9fd55ae047ab7fa"><div class="ttname"><a href="classUftStrategy.html#add26428e74d34a34c9fd55ae047ab7fa">UftStrategy::id</a></div><div class="ttdeci">virtual const char * id() const</div><div class="ttdef"><b>Definition</b> <a href="UftStrategyDefs_8h_source.html#l00050">UftStrategyDefs.h:50</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a4a497f559d9cef1296216ddab48ecdc4"><div class="ttname"><a href="classWTSBaseDataMgr.html#a4a497f559d9cef1296216ddab48ecdc4">WTSBaseDataMgr::loadCommodities</a></div><div class="ttdeci">bool loadCommodities(const char *filename)</div><div class="ttdoc">加载品种数据</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00543">WTSBaseDataMgr.cpp:543</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_a57021af47b2f06c2be9f8b4c4656c497"><div class="ttname"><a href="classWTSBaseDataMgr.html#a57021af47b2f06c2be9f8b4c4656c497">WTSBaseDataMgr::loadSessions</a></div><div class="ttdeci">bool loadSessions(const char *filename)</div><div class="ttdoc">加载交易时段数据</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00425">WTSBaseDataMgr.cpp:425</a></div></div>
+<div class="ttc" id="aclassWTSBaseDataMgr_html_af6af96bd4a0b191460c36d572febf80a"><div class="ttname"><a href="classWTSBaseDataMgr.html#af6af96bd4a0b191460c36d572febf80a">WTSBaseDataMgr::loadContracts</a></div><div class="ttdeci">bool loadContracts(const char *filename)</div><div class="ttdoc">加载合约数据</div><div class="ttdef"><b>Definition</b> <a href="WTSBaseDataMgr_8cpp_source.html#l00616">WTSBaseDataMgr.cpp:616</a></div></div>
+<div class="ttc" id="aclassWTSCfgLoader_html_a222f42e290bc1aa38b4f67c005e10887"><div class="ttname"><a href="classWTSCfgLoader.html#a222f42e290bc1aa38b4f67c005e10887">WTSCfgLoader::load_from_file</a></div><div class="ttdeci">static WTSVariant * load_from_file(const char *filename)</div><div class="ttdoc">从文件加载配置</div><div class="ttdef"><b>Definition</b> <a href="WTSCfgLoader_8cpp_source.html#l00291">WTSCfgLoader.cpp:291</a></div></div>
+<div class="ttc" id="aclassWTSCommodityInfo_html"><div class="ttname"><a href="classWTSCommodityInfo.html">WTSCommodityInfo</a></div><div class="ttdoc">品种信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00020">WTSContractInfo.hpp:21</a></div></div>
+<div class="ttc" id="aclassWTSCommodityInfo_html_a4c21b058429923391bb099b2063ed029"><div class="ttname"><a href="classWTSCommodityInfo.html#a4c21b058429923391bb099b2063ed029">WTSCommodityInfo::getExchg</a></div><div class="ttdeci">const char * getExchg() const</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00051">WTSContractInfo.hpp:51</a></div></div>
+<div class="ttc" id="aclassWTSContractInfo_html"><div class="ttname"><a href="classWTSContractInfo.html">WTSContractInfo</a></div><div class="ttdoc">合约信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00171">WTSContractInfo.hpp:172</a></div></div>
+<div class="ttc" id="aclassWTSContractInfo_html_a8fa410ebad3ac115725f7c06c0440211"><div class="ttname"><a href="classWTSContractInfo.html#a8fa410ebad3ac115725f7c06c0440211">WTSContractInfo::getCommInfo</a></div><div class="ttdeci">WTSCommodityInfo * getCommInfo() const</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00249">WTSContractInfo.hpp:249</a></div></div>
+<div class="ttc" id="aclassWTSEntrust_html"><div class="ttname"><a href="classWTSEntrust.html">WTSEntrust</a></div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00025">WTSTradeDef.hpp:26</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a147defb6e1fb287cc8d95bfb753f6f11"><div class="ttname"><a href="classWTSLogger.html#a147defb6e1fb287cc8d95bfb753f6f11">WTSLogger::warn</a></div><div class="ttdeci">static void warn(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出警告级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00213">WTSLogger.h:213</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a316399910d3af4aef6c4a6e85c50c729"><div class="ttname"><a href="classWTSLogger.html#a316399910d3af4aef6c4a6e85c50c729">WTSLogger::init</a></div><div class="ttdeci">static void init(const char *propFile=&quot;logcfg.json&quot;, bool isFile=true, ILogHandler *handler=NULL)</div><div class="ttdoc">初始化日志系统</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8cpp_source.html#l00249">WTSLogger.cpp:249</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a618c41d0ff3c1f5ce0a70d83c28bc9fc"><div class="ttname"><a href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a></div><div class="ttdeci">static void error(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出错误级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00239">WTSLogger.h:239</a></div></div>
+<div class="ttc" id="aclassWTSPoolObject_html_a868f127b3ccc31cba6b077803cb00951"><div class="ttname"><a href="classWTSPoolObject.html#a868f127b3ccc31cba6b077803cb00951">WTSPoolObject::release</a></div><div class="ttdeci">virtual void release() override</div><div class="ttdef"><b>Definition</b> <a href="WTSObject_8hpp_source.html#l00092">WTSObject.hpp:92</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a3f5ca8ee02338f1991293bb33ba0318d"><div class="ttname"><a href="classWTSTickData.html#a3f5ca8ee02338f1991293bb33ba0318d">WTSTickData::setContractInfo</a></div><div class="ttdeci">void setContractInfo(WTSContractInfo *cInfo)</div><div class="ttdoc">设置Tick数据对应的合约信息</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01590">WTSDataDef.hpp:1590</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a4b56adfd1cd4e6b95833653ca987ce43"><div class="ttname"><a href="classWTSTickData.html#a4b56adfd1cd4e6b95833653ca987ce43">WTSTickData::create</a></div><div class="ttdeci">static WTSTickData * create(const char *stdCode)</div><div class="ttdoc">创建一个Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01270">WTSDataDef.hpp:1270</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a6a81212366831e7afe3eeac41b42e7b0"><div class="ttname"><a href="classWTSTickData.html#a6a81212366831e7afe3eeac41b42e7b0">WTSTickData::getTickStruct</a></div><div class="ttdeci">WTSTickStruct &amp; getTickStruct()</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01580">WTSDataDef.hpp:1580</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a4dacb2b4afd195d05dedb5323d7982f3"><div class="ttname"><a href="classWTSVariant.html#a4dacb2b4afd195d05dedb5323d7982f3">WTSVariant::get</a></div><div class="ttdeci">WTSVariant * get(const char *name) const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00357">WTSVariant.hpp:357</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a5ec4cabed50cc176d513abd4bd08061fa0c6250ac4bb09f5d3eebb4d21e1d2b67"><div class="ttname"><a href="classWTSVariant.html#a5ec4cabed50cc176d513abd4bd08061fa0c6250ac4bb09f5d3eebb4d21e1d2b67">WTSVariant::VT_String</a></div><div class="ttdeci">@ VT_String</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00052">WTSVariant.hpp:52</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a5ec4cabed50cc176d513abd4bd08061fa4cd513ceff00f7cabca99547ddc18f77"><div class="ttname"><a href="classWTSVariant.html#a5ec4cabed50cc176d513abd4bd08061fa4cd513ceff00f7cabca99547ddc18f77">WTSVariant::VT_Array</a></div><div class="ttdeci">@ VT_Array</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00047">WTSVariant.hpp:47</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a64c27f6f7019edcf49404fe8d5e7a826"><div class="ttname"><a href="classWTSVariant.html#a64c27f6f7019edcf49404fe8d5e7a826">WTSVariant::asCString</a></div><div class="ttdeci">const char * asCString() const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00267">WTSVariant.hpp:267</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a6c3d9f96879751cecc0a8ff45da340ce"><div class="ttname"><a href="classWTSVariant.html#a6c3d9f96879751cecc0a8ff45da340ce">WTSVariant::type</a></div><div class="ttdeci">ValueType type() const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00720">WTSVariant.hpp:720</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a830db11fc8daceff409fdbebaa7bea8a"><div class="ttname"><a href="classWTSVariant.html#a830db11fc8daceff409fdbebaa7bea8a">WTSVariant::getCString</a></div><div class="ttdeci">const char * getCString(const char *name) const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00339">WTSVariant.hpp:339</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a888d00f531f1a3ae9d0f12543f302522"><div class="ttname"><a href="classWTSVariant.html#a888d00f531f1a3ae9d0f12543f302522">WTSVariant::release</a></div><div class="ttdeci">virtual void release()</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00691">WTSVariant.hpp:691</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_a9c09f146129a4f35dc04b490fef8887c"><div class="ttname"><a href="classWTSVariant.html#a9c09f146129a4f35dc04b490fef8887c">WTSVariant::getUInt32</a></div><div class="ttdeci">uint32_t getUInt32(const char *name) const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00294">WTSVariant.hpp:294</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html_ad20e7bbd06d2fd4437a8a4d6b5c141b2"><div class="ttname"><a href="classWTSVariant.html#ad20e7bbd06d2fd4437a8a4d6b5c141b2">WTSVariant::size</a></div><div class="ttdeci">uint32_t size() const</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00661">WTSVariant.hpp:661</a></div></div>
+<div class="ttc" id="aclassWtUftEngine_html_a0fecac7cefd663767c63ff8c4b58b4b1"><div class="ttname"><a href="classWtUftEngine.html#a0fecac7cefd663767c63ff8c4b58b4b1">WtUftEngine::addContext</a></div><div class="ttdeci">void addContext(UftContextPtr ctx)</div><div class="ttdoc">添加策略上下文</div><div class="ttdef"><b>Definition</b> <a href="WtUftEngine_8cpp_source.html#l00621">WtUftEngine.cpp:621</a></div></div>
+<div class="ttc" id="aclassWtUftEngine_html_a3bc3c474e880edfb32f1b597dc37a11e"><div class="ttname"><a href="classWtUftEngine.html#a3bc3c474e880edfb32f1b597dc37a11e">WtUftEngine::set_adapter_mgr</a></div><div class="ttdeci">void set_adapter_mgr(TraderAdapterMgr *mgr)</div><div class="ttdoc">设置交易适配器管理器</div><div class="ttdef"><b>Definition</b> <a href="WtUftEngine_8h_source.html#l00084">WtUftEngine.h:84</a></div></div>
+<div class="ttc" id="aclassWtUftEngine_html_a8a3d939148efc9da2b3a6a5e5e55c26e"><div class="ttname"><a href="classWtUftEngine.html#a8a3d939148efc9da2b3a6a5e5e55c26e">WtUftEngine::init</a></div><div class="ttdeci">void init(WTSVariant *cfg, IBaseDataMgr *bdMgr, WtUftDtMgr *dataMgr, EventNotifier *notifier)</div><div class="ttdoc">初始化引擎</div><div class="ttdef"><b>Definition</b> <a href="WtUftEngine_8cpp_source.html#l00308">WtUftEngine.cpp:308</a></div></div>
+<div class="ttc" id="aclassWtUftEngine_html_a9fe69b13d9964888346b15e04ecf246c"><div class="ttname"><a href="classWtUftEngine.html#a9fe69b13d9964888346b15e04ecf246c">WtUftEngine::run</a></div><div class="ttdeci">void run()</div><div class="ttdoc">启动引擎</div><div class="ttdef"><b>Definition</b> <a href="WtUftEngine_8cpp_source.html#l00326">WtUftEngine.cpp:326</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestParser_html"><div class="ttname"><a href="classuft_1_1TestParser.html">uft::TestParser</a></div><div class="ttdoc">测试用行情解析器类</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00089">UftLatencyTool.cpp:90</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestParser_html_a19446014bdec1967104455f46a03aaf2"><div class="ttname"><a href="classuft_1_1TestParser.html#a19446014bdec1967104455f46a03aaf2">uft::TestParser::registerSpi</a></div><div class="ttdeci">virtual void registerSpi(IParserSpi *listener) override</div><div class="ttdoc">注册解析器回调接口</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00203">UftLatencyTool.cpp:203</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestParser_html_a9208b4edb17a67c42b7adaf030bc31bd"><div class="ttname"><a href="classuft_1_1TestParser.html#a9208b4edb17a67c42b7adaf030bc31bd">uft::TestParser::run</a></div><div class="ttdeci">void run(uint32_t times)</div><div class="ttdoc">执行测试运行</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00097">UftLatencyTool.cpp:97</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestParser_html_ac95da80a3d2e6ea8bdb61d7c81fcc7c6"><div class="ttname"><a href="classuft_1_1TestParser.html#ac95da80a3d2e6ea8bdb61d7c81fcc7c6">uft::TestParser::_bd_mgr</a></div><div class="ttdeci">IBaseDataMgr * _bd_mgr</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00213">UftLatencyTool.cpp:213</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestParser_html_aca6dcb631b9f287f5d4c0a4d00714f7f"><div class="ttname"><a href="classuft_1_1TestParser.html#aca6dcb631b9f287f5d4c0a4d00714f7f">uft::TestParser::_parser_spi</a></div><div class="ttdeci">IParserSpi * _parser_spi</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00212">UftLatencyTool.cpp:212</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestStrategy_html"><div class="ttname"><a href="classuft_1_1TestStrategy.html">uft::TestStrategy</a></div><div class="ttdoc">测试用超高频策略类</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00273">UftLatencyTool.cpp:274</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestStrategy_html_a387914b94b8cc39566b048a0c3f1edca"><div class="ttname"><a href="classuft_1_1TestStrategy.html#a387914b94b8cc39566b048a0c3f1edca">uft::TestStrategy::on_tick</a></div><div class="ttdeci">virtual void on_tick(IUftStraCtx *ctx, const char *code, WTSTickData *newTick)</div><div class="ttdoc">行情数据Tick回调</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00315">UftLatencyTool.cpp:315</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestStrategy_html_a5f9633362164c395fad353f813cad275"><div class="ttname"><a href="classuft_1_1TestStrategy.html#a5f9633362164c395fad353f813cad275">uft::TestStrategy::getName</a></div><div class="ttdeci">virtual const char * getName()</div><div class="ttdoc">获取策略名称</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00288">UftLatencyTool.cpp:288</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestStrategy_html_a6d98a6c71429471366e2effe9b6cf45c"><div class="ttname"><a href="classuft_1_1TestStrategy.html#a6d98a6c71429471366e2effe9b6cf45c">uft::TestStrategy::getFactName</a></div><div class="ttdeci">virtual const char * getFactName()</div><div class="ttdoc">获取策略所属工厂名称</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00295">UftLatencyTool.cpp:295</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestStrategy_html_ad8f20da5265d8e2a8a40e3eb083404b7"><div class="ttname"><a href="classuft_1_1TestStrategy.html#ad8f20da5265d8e2a8a40e3eb083404b7">uft::TestStrategy::on_init</a></div><div class="ttdeci">virtual void on_init(IUftStraCtx *ctx) override</div><div class="ttdoc">策略初始化回调</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00302">UftLatencyTool.cpp:302</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestStrategy_html_af4a94100041a8aa5a554c01f6c33cd2c"><div class="ttname"><a href="classuft_1_1TestStrategy.html#af4a94100041a8aa5a554c01f6c33cd2c">uft::TestStrategy::TestStrategy</a></div><div class="ttdeci">TestStrategy(const char *id)</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00281">UftLatencyTool.cpp:281</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestTrader_html"><div class="ttname"><a href="classuft_1_1TestTrader.html">uft::TestTrader</a></div><div class="ttdoc">测试用交易器类</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00223">UftLatencyTool.cpp:224</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestTrader_html_a06cab98efc80112db2959471137a91fd"><div class="ttname"><a href="classuft_1_1TestTrader.html#a06cab98efc80112db2959471137a91fd">uft::TestTrader::orderInsert</a></div><div class="ttdeci">virtual int orderInsert(WTSEntrust *eutrust) override</div><div class="ttdoc">插入订单</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00258">UftLatencyTool.cpp:258</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestTrader_html_a2162ef26309a38aabdec4ed54091a833"><div class="ttname"><a href="classuft_1_1TestTrader.html#a2162ef26309a38aabdec4ed54091a833">uft::TestTrader::_trader_spi</a></div><div class="ttdeci">ITraderSpi * _trader_spi</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00266">UftLatencyTool.cpp:266</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestTrader_html_a461970a36f583cef702cf697f2d17ef8"><div class="ttname"><a href="classuft_1_1TestTrader.html#a461970a36f583cef702cf697f2d17ef8">uft::TestTrader::registerSpi</a></div><div class="ttdeci">virtual void registerSpi(ITraderSpi *listener) override</div><div class="ttdoc">注册交易器回调接口</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00232">UftLatencyTool.cpp:232</a></div></div>
+<div class="ttc" id="aclassuft_1_1TestTrader_html_a6b10447d2c7973fa99fcf5da086dd6d4"><div class="ttname"><a href="classuft_1_1TestTrader.html#a6b10447d2c7973fa99fcf5da086dd6d4">uft::TestTrader::makeEntrustID</a></div><div class="ttdeci">virtual bool makeEntrustID(char *buffer, int length) override</div><div class="ttdoc">生成委托单号</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00245">UftLatencyTool.cpp:245</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html">uft::UftLatencyTool</a></div><div class="ttdoc">超高频交易延迟测试工具类</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00029">UftLatencyTool.h:30</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a22d3f0cd77d456a57c96a3a4224e4835"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a22d3f0cd77d456a57c96a3a4224e4835">uft::UftLatencyTool::initStrategies</a></div><div class="ttdeci">bool initStrategies()</div><div class="ttdoc">初始化策略</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00434">UftLatencyTool.cpp:434</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a2b65d28724cea9da11615c00d5acc181"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a2b65d28724cea9da11615c00d5acc181">uft::UftLatencyTool::UftLatencyTool</a></div><div class="ttdeci">UftLatencyTool()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00329">UftLatencyTool.cpp:329</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a53ac7b1918134992f57db3b406b420f6"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a53ac7b1918134992f57db3b406b420f6">uft::UftLatencyTool::_engine</a></div><div class="ttdeci">WtUftEngine _engine</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00084">UftLatencyTool.h:84</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a568a74cc2396ad262f33825236a06dd4"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a568a74cc2396ad262f33825236a06dd4">uft::UftLatencyTool::_parsers</a></div><div class="ttdeci">ParserAdapterMgr _parsers</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00081">UftLatencyTool.h:81</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a85233d6dafa56c113e265ef4a642e3bc"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a85233d6dafa56c113e265ef4a642e3bc">uft::UftLatencyTool::initModules</a></div><div class="ttdeci">bool initModules()</div><div class="ttdoc">初始化模块</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00478">UftLatencyTool.cpp:478</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a89dd651d5dd92da67874d2a52616312f"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a89dd651d5dd92da67874d2a52616312f">uft::UftLatencyTool::run</a></div><div class="ttdeci">void run()</div><div class="ttdoc">执行延迟测试</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00511">UftLatencyTool.cpp:511</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a8c49e432a30ab3fe7a35bdba942aad1d"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a8c49e432a30ab3fe7a35bdba942aad1d">uft::UftLatencyTool::_traders</a></div><div class="ttdeci">TraderAdapterMgr _traders</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00080">UftLatencyTool.h:80</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_a9efb0ead0c0a5bf763ac9a27c38b6bbf"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#a9efb0ead0c0a5bf763ac9a27c38b6bbf">uft::UftLatencyTool::_times</a></div><div class="ttdeci">uint32_t _times</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00088">UftLatencyTool.h:88</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_ab37cba7c75df4fbfcdfbe613c2c0c5b9"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#ab37cba7c75df4fbfcdfbe613c2c0c5b9">uft::UftLatencyTool::initEngine</a></div><div class="ttdeci">bool initEngine(WTSVariant *cfg)</div><div class="ttdoc">初始化引擎</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00460">UftLatencyTool.cpp:460</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_ad02e4ca3f21f9292d4be756e6858adc2"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#ad02e4ca3f21f9292d4be756e6858adc2">uft::UftLatencyTool::~UftLatencyTool</a></div><div class="ttdeci">~UftLatencyTool()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00339">UftLatencyTool.cpp:339</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_ad079ba5c85fdbd9f7d8e8433ec48a8cb"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#ad079ba5c85fdbd9f7d8e8433ec48a8cb">uft::UftLatencyTool::_bd_mgr</a></div><div class="ttdeci">WTSBaseDataMgr _bd_mgr</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00086">UftLatencyTool.h:86</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_aea0c6619e1a3f98b760af88dc6e36a5e"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#aea0c6619e1a3f98b760af88dc6e36a5e">uft::UftLatencyTool::_core</a></div><div class="ttdeci">uint32_t _core</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8h_source.html#l00089">UftLatencyTool.h:89</a></div></div>
+<div class="ttc" id="aclassuft_1_1UftLatencyTool_html_af92a0a7b0095a48c935b2a49f17d3fb2"><div class="ttname"><a href="classuft_1_1UftLatencyTool.html#af92a0a7b0095a48c935b2a49f17d3fb2">uft::UftLatencyTool::init</a></div><div class="ttdeci">bool init()</div><div class="ttdoc">初始化延迟测试工具</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00349">UftLatencyTool.cpp:349</a></div></div>
+<div class="ttc" id="anamespaceuft_html"><div class="ttname"><a href="namespaceuft.html">uft</a></div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00044">UftLatencyTool.cpp:45</a></div></div>
+<div class="ttc" id="anamespaceuft_html_a60c871954b15b7a83684010dccb7863e"><div class="ttname"><a href="namespaceuft.html#a60c871954b15b7a83684010dccb7863e">uft::theParser</a></div><div class="ttdeci">TestParser * theParser</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00217">UftLatencyTool.cpp:217</a></div></div>
+<div class="ttc" id="anamespaceuft_html_ad953f6e172f2d4a9813c58a10ce5f367"><div class="ttname"><a href="namespaceuft.html#ad953f6e172f2d4a9813c58a10ce5f367">uft::strToTime</a></div><div class="ttdeci">uint32_t strToTime(const char *strTime)</div><div class="ttdoc">将时间字符串转换为整数表示</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00064">UftLatencyTool.cpp:64</a></div></div>
+<div class="ttc" id="anamespaceuft_html_aeeb86862675326cc7921c8a2e233e45d"><div class="ttname"><a href="namespaceuft.html#aeeb86862675326cc7921c8a2e233e45d">uft::checkValid</a></div><div class="ttdeci">double checkValid(double x)</div><div class="ttdoc">检查浮点数值是否有效</div><div class="ttdef"><b>Definition</b> <a href="UftLatencyTool_8cpp_source.html#l00052">UftLatencyTool.cpp:52</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html"><div class="ttname"><a href="structWTSTickStruct.html">WTSTickStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00158">WTSStruct.h:159</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a07aab56a57a594daa634b8f28381ffaa"><div class="ttname"><a href="structWTSTickStruct.html#a07aab56a57a594daa634b8f28381ffaa">WTSTickStruct::low</a></div><div class="ttdeci">double low</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00166">WTSStruct.h:166</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a08e5338b44b175e874d45be91da587e8"><div class="ttname"><a href="structWTSTickStruct.html#a08e5338b44b175e874d45be91da587e8">WTSTickStruct::pre_settle</a></div><div class="ttdeci">double pre_settle</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00185">WTSStruct.h:185</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a0c229638a3bda7a9dae9f042534b566b"><div class="ttname"><a href="structWTSTickStruct.html#a0c229638a3bda7a9dae9f042534b566b">WTSTickStruct::ask_qty</a></div><div class="ttdeci">double ask_qty[10]</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00191">WTSStruct.h:191</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a17bd5a2e41a49b42c52017a208bb9375"><div class="ttname"><a href="structWTSTickStruct.html#a17bd5a2e41a49b42c52017a208bb9375">WTSTickStruct::pre_close</a></div><div class="ttdeci">double pre_close</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00184">WTSStruct.h:184</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a1fae83488fbdd65e552944bb1502b8fd"><div class="ttname"><a href="structWTSTickStruct.html#a1fae83488fbdd65e552944bb1502b8fd">WTSTickStruct::exchg</a></div><div class="ttdeci">char exchg[MAX_EXCHANGE_LENGTH]</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00160">WTSStruct.h:160</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a44aea5df719841d66b883c572ecd291d"><div class="ttname"><a href="structWTSTickStruct.html#a44aea5df719841d66b883c572ecd291d">WTSTickStruct::action_time</a></div><div class="ttdeci">uint32_t action_time</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00181">WTSStruct.h:181</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a571f622c146287aeb5750e974fe434ae"><div class="ttname"><a href="structWTSTickStruct.html#a571f622c146287aeb5750e974fe434ae">WTSTickStruct::upper_limit</a></div><div class="ttdeci">double upper_limit</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00169">WTSStruct.h:169</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a70aac8776b4932b236b58a1043002f4b"><div class="ttname"><a href="structWTSTickStruct.html#a70aac8776b4932b236b58a1043002f4b">WTSTickStruct::bid_qty</a></div><div class="ttdeci">double bid_qty[10]</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00190">WTSStruct.h:190</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a72563ba28f49fb904ddefbf652727c82"><div class="ttname"><a href="structWTSTickStruct.html#a72563ba28f49fb904ddefbf652727c82">WTSTickStruct::price</a></div><div class="ttdeci">double price</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00163">WTSStruct.h:163</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a748c94f5e832b7c622d1b3ee6968e9a5"><div class="ttname"><a href="structWTSTickStruct.html#a748c94f5e832b7c622d1b3ee6968e9a5">WTSTickStruct::pre_interest</a></div><div class="ttdeci">double pre_interest</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00186">WTSStruct.h:186</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a92c83647dcd3d77d659bff2967480489"><div class="ttname"><a href="structWTSTickStruct.html#a92c83647dcd3d77d659bff2967480489">WTSTickStruct::bid_prices</a></div><div class="ttdeci">double bid_prices[10]</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00188">WTSStruct.h:188</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a9f77ec5a68aa78149ff70544d1a5325c"><div class="ttname"><a href="structWTSTickStruct.html#a9f77ec5a68aa78149ff70544d1a5325c">WTSTickStruct::open_interest</a></div><div class="ttdeci">double open_interest</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00176">WTSStruct.h:176</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a9fe18bba3bedd1c23830ba835cdf5fba"><div class="ttname"><a href="structWTSTickStruct.html#a9fe18bba3bedd1c23830ba835cdf5fba">WTSTickStruct::trading_date</a></div><div class="ttdeci">uint32_t trading_date</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00179">WTSStruct.h:179</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_aa765254d43077f75d8916cf2feb919fd"><div class="ttname"><a href="structWTSTickStruct.html#aa765254d43077f75d8916cf2feb919fd">WTSTickStruct::lower_limit</a></div><div class="ttdeci">double lower_limit</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00170">WTSStruct.h:170</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_aab9d98249498f3987bc114764edca24e"><div class="ttname"><a href="structWTSTickStruct.html#aab9d98249498f3987bc114764edca24e">WTSTickStruct::ask_prices</a></div><div class="ttdeci">double ask_prices[10]</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00189">WTSStruct.h:189</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_aabf07c4d7040b85931f0882de3398379"><div class="ttname"><a href="structWTSTickStruct.html#aabf07c4d7040b85931f0882de3398379">WTSTickStruct::total_volume</a></div><div class="ttdeci">double total_volume</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00172">WTSStruct.h:172</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_ac44468303bfc5acde6ca341490e6e51f"><div class="ttname"><a href="structWTSTickStruct.html#ac44468303bfc5acde6ca341490e6e51f">WTSTickStruct::high</a></div><div class="ttdeci">double high</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00165">WTSStruct.h:165</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_ae27988b263f90158e7e86c0039a1290b"><div class="ttname"><a href="structWTSTickStruct.html#ae27988b263f90158e7e86c0039a1290b">WTSTickStruct::open</a></div><div class="ttdeci">double open</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00164">WTSStruct.h:164</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_afc11e9090102f4c73b5a1bb2b3092e37"><div class="ttname"><a href="structWTSTickStruct.html#afc11e9090102f4c73b5a1bb2b3092e37">WTSTickStruct::settle_price</a></div><div class="ttdeci">double settle_price</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00167">WTSStruct.h:167</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_afd2eb785cc5bfd6ca1f93375732a09ef"><div class="ttname"><a href="structWTSTickStruct.html#afd2eb785cc5bfd6ca1f93375732a09ef">WTSTickStruct::action_date</a></div><div class="ttdeci">uint32_t action_date</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00180">WTSStruct.h:180</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_57e6a1706ae8294aba78822425d4a1da.html">WtLatencyUFT</a></li><li class="navelem"><a class="el" href="UftLatencyTool_8cpp.html">UftLatencyTool.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

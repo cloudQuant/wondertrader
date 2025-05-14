@@ -1,0 +1,978 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: IHotMgr类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classIHotMgr.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="classIHotMgr-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">IHotMgr类 参考<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>主力合约管理器接口  
+ <a href="classIHotMgr.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="IHotMgr_8h_source.html">IHotMgr.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:ac2a2acf1db4bd2f71a6bf24620abe558" id="r_ac2a2acf1db4bd2f71a6bf24620abe558"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHotMgr.html#ac2a2acf1db4bd2f71a6bf24620abe558">getRawCode</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pid, uint32_t dt)=0</td></tr>
+<tr class="memdesc:ac2a2acf1db4bd2f71a6bf24620abe558"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取主力合约分月代码  <br /></td></tr>
+<tr class="separator:ac2a2acf1db4bd2f71a6bf24620abe558"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad72258c6e5122fd7007c870096cf22a7" id="r_ad72258c6e5122fd7007c870096cf22a7"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHotMgr.html#ad72258c6e5122fd7007c870096cf22a7">getPrevRawCode</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pid, uint32_t dt)=0</td></tr>
+<tr class="memdesc:ad72258c6e5122fd7007c870096cf22a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取上一个主力合约分月代码  <br /></td></tr>
+<tr class="separator:ad72258c6e5122fd7007c870096cf22a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a934202194c5faeaa6d0c1dc13a1dc63a" id="r_a934202194c5faeaa6d0c1dc13a1dc63a"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHotMgr.html#a934202194c5faeaa6d0c1dc13a1dc63a">isHot</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *rawCode, uint32_t dt)=0</td></tr>
+<tr class="memdesc:a934202194c5faeaa6d0c1dc13a1dc63a"><td class="mdescLeft">&#160;</td><td class="mdescRight">判断是否为主力合约  <br /></td></tr>
+<tr class="separator:a934202194c5faeaa6d0c1dc13a1dc63a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3071b573fc8c26ae1a359909a3439e2e" id="r_a3071b573fc8c26ae1a359909a3439e2e"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHotMgr.html#a3071b573fc8c26ae1a359909a3439e2e">splitHotSecions</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *hotCode, uint32_t sDt, uint32_t eDt, <a class="el" href="IHotMgr_8h.html#a19a138614b519fa93a68a60a46330f30">HotSections</a> &amp;sections)=0</td></tr>
+<tr class="memdesc:a3071b573fc8c26ae1a359909a3439e2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">分割主力合约切段  <br /></td></tr>
+<tr class="separator:a3071b573fc8c26ae1a359909a3439e2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8be3a830b0225462c0e61b0829db9c68" id="r_a8be3a830b0225462c0e61b0829db9c68"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHotMgr.html#a8be3a830b0225462c0e61b0829db9c68">getSecondRawCode</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pid, uint32_t dt)=0</td></tr>
+<tr class="memdesc:a8be3a830b0225462c0e61b0829db9c68"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取次主力合约分月代码  <br /></td></tr>
+<tr class="separator:a8be3a830b0225462c0e61b0829db9c68"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9165a6d72a77da4dfe137c1887575ef" id="r_ad9165a6d72a77da4dfe137c1887575ef"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHotMgr.html#ad9165a6d72a77da4dfe137c1887575ef">getPrevSecondRawCode</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *pid, uint32_t dt)=0</td></tr>
+<tr class="memdesc:ad9165a6d72a77da4dfe137c1887575ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取上一个次主力合约分月代码  <br /></td></tr>
+<tr class="separator:ad9165a6d72a77da4dfe137c1887575ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3f59a868082766cea553af24d01fc25" id="r_ac3f59a868082766cea553af24d01fc25"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHotMgr.html#ac3f59a868082766cea553af24d01fc25">isSecond</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *rawCode, uint32_t dt)=0</td></tr>
+<tr class="memdesc:ac3f59a868082766cea553af24d01fc25"><td class="mdescLeft">&#160;</td><td class="mdescRight">判断是否为次主力合约  <br /></td></tr>
+<tr class="separator:ac3f59a868082766cea553af24d01fc25"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2491f3f195e70ae9e62c1791c6edc8e" id="r_aa2491f3f195e70ae9e62c1791c6edc8e"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHotMgr.html#aa2491f3f195e70ae9e62c1791c6edc8e">splitSecondSecions</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *hotCode, uint32_t sDt, uint32_t eDt, <a class="el" href="IHotMgr_8h.html#a19a138614b519fa93a68a60a46330f30">HotSections</a> &amp;sections)=0</td></tr>
+<tr class="memdesc:aa2491f3f195e70ae9e62c1791c6edc8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">分割次主力合约切段  <br /></td></tr>
+<tr class="separator:aa2491f3f195e70ae9e62c1791c6edc8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0eeb3b1944544abdcd6bcbfccadfc356" id="r_a0eeb3b1944544abdcd6bcbfccadfc356"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHotMgr.html#a0eeb3b1944544abdcd6bcbfccadfc356">getCustomRawCode</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *tag, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fullPid, uint32_t dt=0)=0</td></tr>
+<tr class="memdesc:a0eeb3b1944544abdcd6bcbfccadfc356"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取自定义主力合约的分月代码  <br /></td></tr>
+<tr class="separator:a0eeb3b1944544abdcd6bcbfccadfc356"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdbf55ad2b0abb12d2f7aa5a8645ff9c" id="r_acdbf55ad2b0abb12d2f7aa5a8645ff9c"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHotMgr.html#acdbf55ad2b0abb12d2f7aa5a8645ff9c">getPrevCustomRawCode</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *tag, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fullPid, uint32_t dt=0)=0</td></tr>
+<tr class="memdesc:acdbf55ad2b0abb12d2f7aa5a8645ff9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取自定义连续合约的上一期主力分月代码  <br /></td></tr>
+<tr class="separator:acdbf55ad2b0abb12d2f7aa5a8645ff9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae65a60812e30a62026f3679e8358c2d0" id="r_ae65a60812e30a62026f3679e8358c2d0"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHotMgr.html#ae65a60812e30a62026f3679e8358c2d0">isCustomHot</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *tag, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fullCode, uint32_t d=0)=0</td></tr>
+<tr class="memdesc:ae65a60812e30a62026f3679e8358c2d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">判断是否是自定义主力合约  <br /></td></tr>
+<tr class="separator:ae65a60812e30a62026f3679e8358c2d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed4cae684190f5b5304c96d221215157" id="r_aed4cae684190f5b5304c96d221215157"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHotMgr.html#aed4cae684190f5b5304c96d221215157">splitCustomSections</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *tag, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *hotCode, uint32_t sDt, uint32_t eDt, <a class="el" href="IHotMgr_8h.html#a19a138614b519fa93a68a60a46330f30">HotSections</a> &amp;sections)=0</td></tr>
+<tr class="memdesc:aed4cae684190f5b5304c96d221215157"><td class="mdescLeft">&#160;</td><td class="mdescRight">分割自定义主力合约切段  <br /></td></tr>
+<tr class="separator:aed4cae684190f5b5304c96d221215157"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af8bb8076fc8bf44ea9897f7dc418d5f6" id="r_af8bb8076fc8bf44ea9897f7dc418d5f6"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHotMgr.html#af8bb8076fc8bf44ea9897f7dc418d5f6">getRuleTag</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode)=0</td></tr>
+<tr class="memdesc:af8bb8076fc8bf44ea9897f7dc418d5f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据标准合约代码获取规则标签  <br /></td></tr>
+<tr class="separator:af8bb8076fc8bf44ea9897f7dc418d5f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca821cad1dccf944e7afa850fb848e30" id="r_aca821cad1dccf944e7afa850fb848e30"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHotMgr.html#aca821cad1dccf944e7afa850fb848e30">getRuleFactor</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *ruleTag, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *fullPid, uint32_t uDate=0)=0</td></tr>
+<tr class="memdesc:aca821cad1dccf944e7afa850fb848e30"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取规则因子  <br /></td></tr>
+<tr class="separator:aca821cad1dccf944e7afa850fb848e30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>主力合约管理器接口 </p>
+<p>主力管理器接口</p>
+<p>管理期货主力合约、次主力合约的切换和连续合约的生成，提供查询各时间点主力和次主力合约的方法 </p>
+
+<p class="definition">在文件 <a class="el" href="IHotMgr_8h_source.html">IHotMgr.h</a> 第 <a class="el" href="IHotMgr_8h_source.html#l00066">66</a> 行定义.</p>
+</div><h2 class="groupheader">成员函数说明</h2>
+<a id="a0eeb3b1944544abdcd6bcbfccadfc356" name="a0eeb3b1944544abdcd6bcbfccadfc356"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0eeb3b1944544abdcd6bcbfccadfc356">&#9670;&#160;</a></span>getCustomRawCode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * IHotMgr::getCustomRawCode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>tag</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fullPid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>dt</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取自定义主力合约的分月代码 </p>
+<p>根据自定义规则标签和品种代码获取特定交易日的分月合约代码</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tag</td><td>自定义规则标签，如"MONTHLY"、"WEEKLY"等 </td></tr>
+    <tr><td class="paramname">fullPid</td><td>带交易所的品种代码，如"SHFE.au"（上期黄金） </td></tr>
+    <tr><td class="paramname">dt</td><td>交易日期，格式为YYYYMMDD，默认为0，表示当前日期 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分月合约代码，如"au2106" </dd></dl>
+
+<p>在 <a class="el" href="classWTSHotMgr.html#a27cb54b92f391819e351016d3423e516">WTSHotMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="acdbf55ad2b0abb12d2f7aa5a8645ff9c" name="acdbf55ad2b0abb12d2f7aa5a8645ff9c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdbf55ad2b0abb12d2f7aa5a8645ff9c">&#9670;&#160;</a></span>getPrevCustomRawCode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * IHotMgr::getPrevCustomRawCode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>tag</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fullPid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>dt</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取自定义连续合约的上一期主力分月代码 </p>
+<p>根据自定义规则标签和品种代码获取特定交易日的上一期主力合约的分月代码</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tag</td><td>自定义规则标签，如"MONTHLY"、"WEEKLY"等 </td></tr>
+    <tr><td class="paramname">fullPid</td><td>带交易所的品种代码，如"SHFE.au"（上期黄金） </td></tr>
+    <tr><td class="paramname">dt</td><td>交易日期，格式为YYYYMMDD，默认为0，表示当前日期 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>上一期主力合约的分月代码，如"au2103" </dd></dl>
+
+<p>在 <a class="el" href="classWTSHotMgr.html#a43a1722ece4a0be1c32df6bdc2978e7f">WTSHotMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="ad72258c6e5122fd7007c870096cf22a7" name="ad72258c6e5122fd7007c870096cf22a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad72258c6e5122fd7007c870096cf22a7">&#9670;&#160;</a></span>getPrevRawCode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * IHotMgr::getPrevRawCode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>dt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取上一个主力合约分月代码 </p>
+<p>获取指定交易所和品种在特定交易日的上一个主力合约的分月代码</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码，如"SHFE"（上期） </td></tr>
+    <tr><td class="paramname">pid</td><td>品种代码，如"au"（黄金） </td></tr>
+    <tr><td class="paramname">dt</td><td>交易日期，格式为YYYYMMDD </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>上一个主力合约的分月代码，如"au2103" </dd></dl>
+
+<p>在 <a class="el" href="classWTSHotMgr.html#a793914ca9876d3a159c137e92350ba9e">WTSHotMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="ad9165a6d72a77da4dfe137c1887575ef" name="ad9165a6d72a77da4dfe137c1887575ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9165a6d72a77da4dfe137c1887575ef">&#9670;&#160;</a></span>getPrevSecondRawCode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * IHotMgr::getPrevSecondRawCode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>dt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取上一个次主力合约分月代码 </p>
+<p>获取指定交易所和品种在特定交易日的上一个次主力合约的分月代码</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码，如"SHFE"（上期） </td></tr>
+    <tr><td class="paramname">pid</td><td>品种代码，如"au"（黄金） </td></tr>
+    <tr><td class="paramname">dt</td><td>交易日期，格式为YYYYMMDD </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>上一个次主力合约的分月代码，如"au2106" </dd></dl>
+
+<p>在 <a class="el" href="classWTSHotMgr.html#a2c8461ec2ee5683fc14db4cd38d7acd1">WTSHotMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="ac2a2acf1db4bd2f71a6bf24620abe558" name="ac2a2acf1db4bd2f71a6bf24620abe558"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2a2acf1db4bd2f71a6bf24620abe558">&#9670;&#160;</a></span>getRawCode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * IHotMgr::getRawCode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>dt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取主力合约分月代码 </p>
+<p>获取指定交易所和品种在特定交易日的主力合约分月代码</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码，如"SHFE"（上期） </td></tr>
+    <tr><td class="paramname">pid</td><td>品种代码，如"au"（黄金） </td></tr>
+    <tr><td class="paramname">dt</td><td>交易日期，格式为YYYYMMDD </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>分月合约代码，如"au2106" </dd></dl>
+
+<p>在 <a class="el" href="classWTSHotMgr.html#a5f177f4076a7090cd6c166b56538f1c0">WTSHotMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="aca821cad1dccf944e7afa850fb848e30" name="aca821cad1dccf944e7afa850fb848e30"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca821cad1dccf944e7afa850fb848e30">&#9670;&#160;</a></span>getRuleFactor()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual double IHotMgr::getRuleFactor </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>ruleTag</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fullPid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uDate</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取规则因子 </p>
+<p>根据规则标签、品种代码和日期获取连续合约计算因子，用于计算连续合约价格</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ruleTag</td><td>规则标签，如"MONTHLY"、"WEEKLY"等 </td></tr>
+    <tr><td class="paramname">fullPid</td><td>带交易所的品种代码，如"SHFE.au"（上期黄金） </td></tr>
+    <tr><td class="paramname">uDate</td><td>交易日期，格式为YYYYMMDD，默认为0，表示当前日期 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>规则因子，用于计算连续合约价格 </dd></dl>
+
+<p>在 <a class="el" href="classWTSHotMgr.html#a06bcea536e6a26c8b6376e0eee0bd7bb">WTSHotMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="af8bb8076fc8bf44ea9897f7dc418d5f6" name="af8bb8076fc8bf44ea9897f7dc418d5f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af8bb8076fc8bf44ea9897f7dc418d5f6">&#9670;&#160;</a></span>getRuleTag()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * IHotMgr::getRuleTag </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>根据标准合约代码获取规则标签 </p>
+<p>从标准化合约代码中提取自定义规则标签，用于确定连续合约的计算规则</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码，如"SHFE.au@MONTHLY" </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>规则标签，如"MONTHLY" </dd></dl>
+
+<p>在 <a class="el" href="classWTSHotMgr.html#af21b6f42f09e9096e350803e442b91f2">WTSHotMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a8be3a830b0225462c0e61b0829db9c68" name="a8be3a830b0225462c0e61b0829db9c68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8be3a830b0225462c0e61b0829db9c68">&#9670;&#160;</a></span>getSecondRawCode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * IHotMgr::getSecondRawCode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>pid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>dt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取次主力合约分月代码 </p>
+<p>获取指定交易所和品种在特定交易日的次主力合约分月代码</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码，如"SHFE"（上期） </td></tr>
+    <tr><td class="paramname">pid</td><td>品种代码，如"au"（黄金） </td></tr>
+    <tr><td class="paramname">dt</td><td>交易日期，格式为YYYYMMDD </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>次主力合约的分月代码，如"au2109" </dd></dl>
+
+<p>在 <a class="el" href="classWTSHotMgr.html#a5ad4c37a874c8a83bff62720538415af">WTSHotMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="ae65a60812e30a62026f3679e8358c2d0" name="ae65a60812e30a62026f3679e8358c2d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae65a60812e30a62026f3679e8358c2d0">&#9670;&#160;</a></span>isCustomHot()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool IHotMgr::isCustomHot </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>tag</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>fullCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>d</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>判断是否是自定义主力合约 </p>
+<p>判断指定的合约代码在特定交易日是否满足自定义规则的主力合约条件</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tag</td><td>自定义规则标签，如"MONTHLY"、"WEEKLY"等 </td></tr>
+    <tr><td class="paramname">fullCode</td><td>标准化合约代码，如"SHFE.au.au2106" </td></tr>
+    <tr><td class="paramname">d</td><td>交易日期，格式为YYYYMMDD，默认为0，表示当前日期 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>如果是自定义主力合约返回true，否则返回false </dd></dl>
+
+<p>在 <a class="el" href="classWTSHotMgr.html#aa23caf5169325ec6a744d94b495c680d">WTSHotMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a934202194c5faeaa6d0c1dc13a1dc63a" name="a934202194c5faeaa6d0c1dc13a1dc63a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a934202194c5faeaa6d0c1dc13a1dc63a">&#9670;&#160;</a></span>isHot()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool IHotMgr::isHot </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>rawCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>dt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>判断是否为主力合约 </p>
+<p>判断指定交易所的某个分月合约在特定交易日是否为主力合约</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码，如"SHFE"（上期） </td></tr>
+    <tr><td class="paramname">rawCode</td><td>分月合约代码，如"au2106" </td></tr>
+    <tr><td class="paramname">dt</td><td>交易日期，格式为YYYYMMDD </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>如果是主力合约返回true，否则返回false </dd></dl>
+
+<p>在 <a class="el" href="classWTSHotMgr.html#aa560571d728b52d629ddc744d4bb2371">WTSHotMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="ac3f59a868082766cea553af24d01fc25" name="ac3f59a868082766cea553af24d01fc25"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3f59a868082766cea553af24d01fc25">&#9670;&#160;</a></span>isSecond()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool IHotMgr::isSecond </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>rawCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>dt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>判断是否为次主力合约 </p>
+<p>判断指定交易所的某个分月合约在特定交易日是否为次主力合约</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码，如"SHFE"（上期） </td></tr>
+    <tr><td class="paramname">rawCode</td><td>分月合约代码，如"au2109" </td></tr>
+    <tr><td class="paramname">dt</td><td>交易日期，格式为YYYYMMDD </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>如果是次主力合约返回true，否则返回false </dd></dl>
+
+<p>在 <a class="el" href="classWTSHotMgr.html#a8ccc2503183b11f1323849c0ec59f10a">WTSHotMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="aed4cae684190f5b5304c96d221215157" name="aed4cae684190f5b5304c96d221215157"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed4cae684190f5b5304c96d221215157">&#9670;&#160;</a></span>splitCustomSections()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool IHotMgr::splitCustomSections </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>tag</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>hotCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>sDt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>eDt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="IHotMgr_8h.html#a19a138614b519fa93a68a60a46330f30">HotSections</a> &amp;&#160;</td>
+          <td class="paramname"><em>sections</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>分割自定义主力合约切段 </p>
+<p>获取指定时间范围内自定义连续合约的全部分月合约切段，用于连续合约的生成</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tag</td><td>自定义规则标签，如"MONTHLY"、"WEEKLY"等 </td></tr>
+    <tr><td class="paramname">hotCode</td><td>自定义连续合约代码，如"SHFE.au@MONTHLY" </td></tr>
+    <tr><td class="paramname">sDt</td><td>开始交易日，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">eDt</td><td>结束交易日，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">sections</td><td>输出参数，用于返回自定义主力合约切段列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>如果成功分割切段返回true，否则返回false </dd></dl>
+
+<p>在 <a class="el" href="classWTSHotMgr.html#aeb12140701c18c983835826f7e387721">WTSHotMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a3071b573fc8c26ae1a359909a3439e2e" name="a3071b573fc8c26ae1a359909a3439e2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3071b573fc8c26ae1a359909a3439e2e">&#9670;&#160;</a></span>splitHotSecions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool IHotMgr::splitHotSecions </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>hotCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>sDt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>eDt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="IHotMgr_8h.html#a19a138614b519fa93a68a60a46330f30">HotSections</a> &amp;&#160;</td>
+          <td class="paramname"><em>sections</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>分割主力合约切段 </p>
+<p>获取指定时间范围内主力合约的全部分月合约切段，用于连续合约的生成</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码，如"SHFE"（上期） </td></tr>
+    <tr><td class="paramname">hotCode</td><td>主力合约代码，如"SHFE.au.HOT" </td></tr>
+    <tr><td class="paramname">sDt</td><td>开始交易日，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">eDt</td><td>结束交易日，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">sections</td><td>输出参数，用于返回主力合约切段列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>如果成功分割切段返回true，否则返回false </dd></dl>
+
+<p>在 <a class="el" href="classWTSHotMgr.html#a6584b38aa7d8396b73b303729c19d2b8">WTSHotMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="aa2491f3f195e70ae9e62c1791c6edc8e" name="aa2491f3f195e70ae9e62c1791c6edc8e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2491f3f195e70ae9e62c1791c6edc8e">&#9670;&#160;</a></span>splitSecondSecions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool IHotMgr::splitSecondSecions </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>hotCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>sDt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>eDt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="IHotMgr_8h.html#a19a138614b519fa93a68a60a46330f30">HotSections</a> &amp;&#160;</td>
+          <td class="paramname"><em>sections</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>分割次主力合约切段 </p>
+<p>获取指定时间范围内次主力合约的全部分月合约切段，用于连续合约的生成</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">exchg</td><td>交易所代码，如"SHFE"（上期） </td></tr>
+    <tr><td class="paramname">hotCode</td><td>次主力合约代码，如"SHFE.au.2ND" </td></tr>
+    <tr><td class="paramname">sDt</td><td>开始交易日，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">eDt</td><td>结束交易日，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">sections</td><td>输出参数，用于返回次主力合约切段列表 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>如果成功分割切段返回true，否则返回false </dd></dl>
+
+<p>在 <a class="el" href="classWTSHotMgr.html#a1fd4eef8806549d41395577cb1fb96aa">WTSHotMgr</a> 内被实现.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/Includes/<a class="el" href="IHotMgr_8h_source.html">IHotMgr.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classIHotMgr.html">IHotMgr</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,1656 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: ParserXTP类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classParserXTP.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Public 类型</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-types">Private 类型</a> &#124;
+<a href="#pri-methods">Private 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classParserXTP-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">ParserXTP类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public 类型</h2></td></tr>
+<tr class="memitem:a43a581d93806942728cfe4ba904abf1d" id="r_a43a581d93806942728cfe4ba904abf1d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1d">LoginStatus</a> { <a class="el" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1da47a687931fe41663889d2a47e92f7d1f">LS_NOTLOGIN</a>
+, <a class="el" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1da57c574f87fa6417b9545785513c2db42">LS_LOGINING</a>
+, <a class="el" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1da93a7c079121d50f976f0d3c95b989b36">LS_LOGINED</a>
+ }</td></tr>
+<tr class="separator:a43a581d93806942728cfe4ba904abf1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a8a121043e18f8b9074ae82ae6d539259" id="r_a8a121043e18f8b9074ae82ae6d539259"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a8a121043e18f8b9074ae82ae6d539259">ParserXTP</a> ()</td></tr>
+<tr class="separator:a8a121043e18f8b9074ae82ae6d539259"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9fd22550ecfb543042b0d0340a31bb70" id="r_a9fd22550ecfb543042b0d0340a31bb70"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a9fd22550ecfb543042b0d0340a31bb70">~ParserXTP</a> ()</td></tr>
+<tr class="separator:a9fd22550ecfb543042b0d0340a31bb70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9881a8101922c2e3615d9ade88071469" id="r_a9881a8101922c2e3615d9ade88071469"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a9881a8101922c2e3615d9ade88071469">init</a> (<a class="el" href="classWTSVariant.html">WTSVariant</a> *<a class="el" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>) override</td></tr>
+<tr class="separator:a9881a8101922c2e3615d9ade88071469"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8eefeefe972c99adcf6478234fd755b8" id="r_a8eefeefe972c99adcf6478234fd755b8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a8eefeefe972c99adcf6478234fd755b8">release</a> () override</td></tr>
+<tr class="separator:a8eefeefe972c99adcf6478234fd755b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af114fc3e1bb1b99a4906cac96e92810c" id="r_af114fc3e1bb1b99a4906cac96e92810c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#af114fc3e1bb1b99a4906cac96e92810c">connect</a> () override</td></tr>
+<tr class="separator:af114fc3e1bb1b99a4906cac96e92810c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ef6584652025f901a21d911559557bb" id="r_a5ef6584652025f901a21d911559557bb"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a5ef6584652025f901a21d911559557bb">disconnect</a> () override</td></tr>
+<tr class="separator:a5ef6584652025f901a21d911559557bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2d5236a23c54926dd51bbe65fe7110c" id="r_ac2d5236a23c54926dd51bbe65fe7110c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#ac2d5236a23c54926dd51bbe65fe7110c">isConnected</a> () override</td></tr>
+<tr class="separator:ac2d5236a23c54926dd51bbe65fe7110c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6835709c55d944760fd86e4a871ff57c" id="r_a6835709c55d944760fd86e4a871ff57c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a6835709c55d944760fd86e4a871ff57c">subscribe</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="FasterDefs_8h.html#ac6831b9d0154219721fb3c2b5d254eba">CodeSet</a> &amp;vecSymbols) override</td></tr>
+<tr class="separator:a6835709c55d944760fd86e4a871ff57c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0375e8539e6aee149f89f6bb68d70d93" id="r_a0375e8539e6aee149f89f6bb68d70d93"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a0375e8539e6aee149f89f6bb68d70d93">unsubscribe</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="FasterDefs_8h.html#ac6831b9d0154219721fb3c2b5d254eba">CodeSet</a> &amp;vecSymbols) override</td></tr>
+<tr class="separator:a0375e8539e6aee149f89f6bb68d70d93"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83ddac9dac981b12d3891f14bc84d8eb" id="r_a83ddac9dac981b12d3891f14bc84d8eb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a83ddac9dac981b12d3891f14bc84d8eb">registerSpi</a> (<a class="el" href="classIParserSpi.html">IParserSpi</a> *listener) override</td></tr>
+<tr class="separator:a83ddac9dac981b12d3891f14bc84d8eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae51afb04c142a6677443bb8f0d70e8b6" id="r_ae51afb04c142a6677443bb8f0d70e8b6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#ae51afb04c142a6677443bb8f0d70e8b6">OnDisconnected</a> (int reason) override</td></tr>
+<tr class="separator:ae51afb04c142a6677443bb8f0d70e8b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec21db60d95403066b11d3cefccae8df" id="r_aec21db60d95403066b11d3cefccae8df"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#aec21db60d95403066b11d3cefccae8df">OnError</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info) override</td></tr>
+<tr class="memdesc:aec21db60d95403066b11d3cefccae8df"><td class="mdescLeft">&#160;</td><td class="mdescRight">错误应答  <br /></td></tr>
+<tr class="separator:aec21db60d95403066b11d3cefccae8df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa31c25d9cbf4bb46d399aed33e74c7a1" id="r_aa31c25d9cbf4bb46d399aed33e74c7a1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#aa31c25d9cbf4bb46d399aed33e74c7a1">OnSubTickByTick</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a2d573c44df32172f88458008cfec93e8">XTPST</a> *ticker, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last) override</td></tr>
+<tr class="separator:aa31c25d9cbf4bb46d399aed33e74c7a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e441e0b0772233d86b9e3ae5bffe3b4" id="r_a2e441e0b0772233d86b9e3ae5bffe3b4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a2e441e0b0772233d86b9e3ae5bffe3b4">OnSubMarketData</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a2d573c44df32172f88458008cfec93e8">XTPST</a> *ticker, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last) override</td></tr>
+<tr class="separator:a2e441e0b0772233d86b9e3ae5bffe3b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc0fadd6aea0c5a634ab5ede6092c45f" id="r_adc0fadd6aea0c5a634ab5ede6092c45f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#adc0fadd6aea0c5a634ab5ede6092c45f">OnUnSubMarketData</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a2d573c44df32172f88458008cfec93e8">XTPST</a> *ticker, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last) override</td></tr>
+<tr class="separator:adc0fadd6aea0c5a634ab5ede6092c45f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a030daf8f2d006f42d1af6c828e51d613" id="r_a030daf8f2d006f42d1af6c828e51d613"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a030daf8f2d006f42d1af6c828e51d613">OnDepthMarketData</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a48286acaea0ae62a6b29a6bf988fe97f">XTPMD</a> *market_data, int64_t bid1_qty[], int32_t bid1_count, int32_t max_bid1_count, int64_t ask1_qty[], int32_t ask1_count, int32_t max_ask1_count) override</td></tr>
+<tr class="separator:a030daf8f2d006f42d1af6c828e51d613"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8018cdd79a9a4a900aca20a3f83b927" id="r_ae8018cdd79a9a4a900aca20a3f83b927"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#ae8018cdd79a9a4a900aca20a3f83b927">OnTickByTick</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#aac297e792b089a6ac26ea8d9cbaa7d4a">XTPTBT</a> *tbt_data) override</td></tr>
+<tr class="separator:ae8018cdd79a9a4a900aca20a3f83b927"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classIParserApi"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classIParserApi')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classIParserApi.html">IParserApi</a></td></tr>
+<tr class="memitem:afbf2a0fc9cfe198ccea70eaa5ec4ae4e inherit pub_methods_classIParserApi" id="r_afbf2a0fc9cfe198ccea70eaa5ec4ae4e"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIParserApi.html#afbf2a0fc9cfe198ccea70eaa5ec4ae4e">~IParserApi</a> ()</td></tr>
+<tr class="separator:afbf2a0fc9cfe198ccea70eaa5ec4ae4e inherit pub_methods_classIParserApi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classXTP_1_1API_1_1QuoteSpi"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classXTP_1_1API_1_1QuoteSpi')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classXTP_1_1API_1_1QuoteSpi.html">XTP::API::QuoteSpi</a></td></tr>
+<tr class="memitem:a1960eeae05ab4d05e403ea174c29402c inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a1960eeae05ab4d05e403ea174c29402c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a1960eeae05ab4d05e403ea174c29402c">OnSubOrderBook</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a2d573c44df32172f88458008cfec93e8">XTPST</a> *ticker, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last)</td></tr>
+<tr class="separator:a1960eeae05ab4d05e403ea174c29402c inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30fde15a3f9844c5024a2ef15418b5f6 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a30fde15a3f9844c5024a2ef15418b5f6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a30fde15a3f9844c5024a2ef15418b5f6">OnUnSubOrderBook</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a2d573c44df32172f88458008cfec93e8">XTPST</a> *ticker, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last)</td></tr>
+<tr class="separator:a30fde15a3f9844c5024a2ef15418b5f6 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab75999786a9a08d32a3b9dd870d88827 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_ab75999786a9a08d32a3b9dd870d88827"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#ab75999786a9a08d32a3b9dd870d88827">OnOrderBook</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a4b5eec392c09d43cdfc946469278f459">XTPOB</a> *order_book)</td></tr>
+<tr class="separator:ab75999786a9a08d32a3b9dd870d88827 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c50c815fd6d08529a2e658a403af6fe inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a5c50c815fd6d08529a2e658a403af6fe"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a5c50c815fd6d08529a2e658a403af6fe">OnUnSubTickByTick</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a2d573c44df32172f88458008cfec93e8">XTPST</a> *ticker, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last)</td></tr>
+<tr class="separator:a5c50c815fd6d08529a2e658a403af6fe inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5528cb3e3232a0bab6f9db16145bb968 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a5528cb3e3232a0bab6f9db16145bb968"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a5528cb3e3232a0bab6f9db16145bb968">OnSubscribeAllMarketData</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:a5528cb3e3232a0bab6f9db16145bb968 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6d7689fae949b3d4f15aae2cf19b41f inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_ab6d7689fae949b3d4f15aae2cf19b41f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#ab6d7689fae949b3d4f15aae2cf19b41f">OnUnSubscribeAllMarketData</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:ab6d7689fae949b3d4f15aae2cf19b41f inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecb93cc33621add6672574a37d5e9316 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_aecb93cc33621add6672574a37d5e9316"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#aecb93cc33621add6672574a37d5e9316">OnSubscribeAllOrderBook</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:aecb93cc33621add6672574a37d5e9316 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a2da6429b7dbb5743846fa883c9f804 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a4a2da6429b7dbb5743846fa883c9f804"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a4a2da6429b7dbb5743846fa883c9f804">OnUnSubscribeAllOrderBook</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:a4a2da6429b7dbb5743846fa883c9f804 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af262f99df41dc3426c6102b27b5bee99 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_af262f99df41dc3426c6102b27b5bee99"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#af262f99df41dc3426c6102b27b5bee99">OnSubscribeAllTickByTick</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:af262f99df41dc3426c6102b27b5bee99 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad62930026e482d6e744eba2c6c459595 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_ad62930026e482d6e744eba2c6c459595"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#ad62930026e482d6e744eba2c6c459595">OnUnSubscribeAllTickByTick</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:ad62930026e482d6e744eba2c6c459595 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cbe73fb112634abe887a5be8157da44 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a4cbe73fb112634abe887a5be8157da44"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a4cbe73fb112634abe887a5be8157da44">OnQueryAllTickers</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a1a5f90f866b8a75f2c23a7e06021c447">XTPQSI</a> *ticker_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last)</td></tr>
+<tr class="separator:a4cbe73fb112634abe887a5be8157da44 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd53392e3fcbac483f8f821c2eb0ced8 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_acd53392e3fcbac483f8f821c2eb0ced8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#acd53392e3fcbac483f8f821c2eb0ced8">OnQueryTickersPriceInfo</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a95147b4e8b75ff57a1fd2ac34eb9f7e9">XTPTPI</a> *ticker_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last)</td></tr>
+<tr class="separator:acd53392e3fcbac483f8f821c2eb0ced8 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c0f7b4e8e3da6446da7d24ed8eff9d6 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a8c0f7b4e8e3da6446da7d24ed8eff9d6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a8c0f7b4e8e3da6446da7d24ed8eff9d6">OnSubscribeAllOptionMarketData</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:a8c0f7b4e8e3da6446da7d24ed8eff9d6 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b07a49b55762a95002568f5b76e4a73 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a8b07a49b55762a95002568f5b76e4a73"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a8b07a49b55762a95002568f5b76e4a73">OnUnSubscribeAllOptionMarketData</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:a8b07a49b55762a95002568f5b76e4a73 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3f4c61c20bcfcd67a4b01cb61a8b017 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_ae3f4c61c20bcfcd67a4b01cb61a8b017"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#ae3f4c61c20bcfcd67a4b01cb61a8b017">OnSubscribeAllOptionOrderBook</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:ae3f4c61c20bcfcd67a4b01cb61a8b017 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac14382b6c1d8d75284aee41fb87cdf2a inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_ac14382b6c1d8d75284aee41fb87cdf2a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#ac14382b6c1d8d75284aee41fb87cdf2a">OnUnSubscribeAllOptionOrderBook</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:ac14382b6c1d8d75284aee41fb87cdf2a inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25c285c67b2c355ce95b916e9b85b31b inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a25c285c67b2c355ce95b916e9b85b31b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a25c285c67b2c355ce95b916e9b85b31b">OnSubscribeAllOptionTickByTick</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:a25c285c67b2c355ce95b916e9b85b31b inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac85a4623b78139d9c7bbbd1d0063b554 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_ac85a4623b78139d9c7bbbd1d0063b554"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#ac85a4623b78139d9c7bbbd1d0063b554">OnUnSubscribeAllOptionTickByTick</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:ac85a4623b78139d9c7bbbd1d0063b554 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26729fafdf20b62ddc78f77c9fb8411d inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a26729fafdf20b62ddc78f77c9fb8411d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a26729fafdf20b62ddc78f77c9fb8411d">OnQueryAllTickersFullInfo</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a904499ca9b04904366281606b9b8af0a">XTPQFI</a> *ticker_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last)</td></tr>
+<tr class="separator:a26729fafdf20b62ddc78f77c9fb8411d inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1960eeae05ab4d05e403ea174c29402c inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a1960eeae05ab4d05e403ea174c29402c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a1960eeae05ab4d05e403ea174c29402c">OnSubOrderBook</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a2d573c44df32172f88458008cfec93e8">XTPST</a> *ticker, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last)</td></tr>
+<tr class="separator:a1960eeae05ab4d05e403ea174c29402c inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30fde15a3f9844c5024a2ef15418b5f6 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a30fde15a3f9844c5024a2ef15418b5f6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a30fde15a3f9844c5024a2ef15418b5f6">OnUnSubOrderBook</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a2d573c44df32172f88458008cfec93e8">XTPST</a> *ticker, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last)</td></tr>
+<tr class="separator:a30fde15a3f9844c5024a2ef15418b5f6 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab75999786a9a08d32a3b9dd870d88827 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_ab75999786a9a08d32a3b9dd870d88827"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#ab75999786a9a08d32a3b9dd870d88827">OnOrderBook</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a4b5eec392c09d43cdfc946469278f459">XTPOB</a> *order_book)</td></tr>
+<tr class="separator:ab75999786a9a08d32a3b9dd870d88827 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c50c815fd6d08529a2e658a403af6fe inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a5c50c815fd6d08529a2e658a403af6fe"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a5c50c815fd6d08529a2e658a403af6fe">OnUnSubTickByTick</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a2d573c44df32172f88458008cfec93e8">XTPST</a> *ticker, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last)</td></tr>
+<tr class="separator:a5c50c815fd6d08529a2e658a403af6fe inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5528cb3e3232a0bab6f9db16145bb968 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a5528cb3e3232a0bab6f9db16145bb968"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a5528cb3e3232a0bab6f9db16145bb968">OnSubscribeAllMarketData</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:a5528cb3e3232a0bab6f9db16145bb968 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6d7689fae949b3d4f15aae2cf19b41f inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_ab6d7689fae949b3d4f15aae2cf19b41f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#ab6d7689fae949b3d4f15aae2cf19b41f">OnUnSubscribeAllMarketData</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:ab6d7689fae949b3d4f15aae2cf19b41f inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecb93cc33621add6672574a37d5e9316 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_aecb93cc33621add6672574a37d5e9316"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#aecb93cc33621add6672574a37d5e9316">OnSubscribeAllOrderBook</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:aecb93cc33621add6672574a37d5e9316 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a2da6429b7dbb5743846fa883c9f804 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a4a2da6429b7dbb5743846fa883c9f804"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a4a2da6429b7dbb5743846fa883c9f804">OnUnSubscribeAllOrderBook</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:a4a2da6429b7dbb5743846fa883c9f804 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af262f99df41dc3426c6102b27b5bee99 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_af262f99df41dc3426c6102b27b5bee99"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#af262f99df41dc3426c6102b27b5bee99">OnSubscribeAllTickByTick</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:af262f99df41dc3426c6102b27b5bee99 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad62930026e482d6e744eba2c6c459595 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_ad62930026e482d6e744eba2c6c459595"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#ad62930026e482d6e744eba2c6c459595">OnUnSubscribeAllTickByTick</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:ad62930026e482d6e744eba2c6c459595 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cbe73fb112634abe887a5be8157da44 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a4cbe73fb112634abe887a5be8157da44"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a4cbe73fb112634abe887a5be8157da44">OnQueryAllTickers</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a1a5f90f866b8a75f2c23a7e06021c447">XTPQSI</a> *ticker_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last)</td></tr>
+<tr class="separator:a4cbe73fb112634abe887a5be8157da44 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd53392e3fcbac483f8f821c2eb0ced8 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_acd53392e3fcbac483f8f821c2eb0ced8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#acd53392e3fcbac483f8f821c2eb0ced8">OnQueryTickersPriceInfo</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a95147b4e8b75ff57a1fd2ac34eb9f7e9">XTPTPI</a> *ticker_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last)</td></tr>
+<tr class="separator:acd53392e3fcbac483f8f821c2eb0ced8 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c0f7b4e8e3da6446da7d24ed8eff9d6 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a8c0f7b4e8e3da6446da7d24ed8eff9d6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a8c0f7b4e8e3da6446da7d24ed8eff9d6">OnSubscribeAllOptionMarketData</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:a8c0f7b4e8e3da6446da7d24ed8eff9d6 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b07a49b55762a95002568f5b76e4a73 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a8b07a49b55762a95002568f5b76e4a73"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a8b07a49b55762a95002568f5b76e4a73">OnUnSubscribeAllOptionMarketData</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:a8b07a49b55762a95002568f5b76e4a73 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3f4c61c20bcfcd67a4b01cb61a8b017 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_ae3f4c61c20bcfcd67a4b01cb61a8b017"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#ae3f4c61c20bcfcd67a4b01cb61a8b017">OnSubscribeAllOptionOrderBook</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:ae3f4c61c20bcfcd67a4b01cb61a8b017 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac14382b6c1d8d75284aee41fb87cdf2a inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_ac14382b6c1d8d75284aee41fb87cdf2a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#ac14382b6c1d8d75284aee41fb87cdf2a">OnUnSubscribeAllOptionOrderBook</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:ac14382b6c1d8d75284aee41fb87cdf2a inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25c285c67b2c355ce95b916e9b85b31b inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a25c285c67b2c355ce95b916e9b85b31b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a25c285c67b2c355ce95b916e9b85b31b">OnSubscribeAllOptionTickByTick</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:a25c285c67b2c355ce95b916e9b85b31b inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac85a4623b78139d9c7bbbd1d0063b554 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_ac85a4623b78139d9c7bbbd1d0063b554"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#ac85a4623b78139d9c7bbbd1d0063b554">OnUnSubscribeAllOptionTickByTick</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a203144c0823ab511756374a0ca6c8812">XTP_EXCHANGE_TYPE</a> exchange_id, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:ac85a4623b78139d9c7bbbd1d0063b554 inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26729fafdf20b62ddc78f77c9fb8411d inherit pub_methods_classXTP_1_1API_1_1QuoteSpi" id="r_a26729fafdf20b62ddc78f77c9fb8411d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a26729fafdf20b62ddc78f77c9fb8411d">OnQueryAllTickersFullInfo</a> (<a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a904499ca9b04904366281606b9b8af0a">XTPQFI</a> *ticker_info, <a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info, bool is_last)</td></tr>
+<tr class="separator:a26729fafdf20b62ddc78f77c9fb8411d inherit pub_methods_classXTP_1_1API_1_1QuoteSpi"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 类型</h2></td></tr>
+<tr class="memitem:aadeff304aabf9bf8fe698f3839f8121d" id="r_aadeff304aabf9bf8fe698f3839f8121d"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classXTP_1_1API_1_1QuoteApi.html">XTP::API::QuoteApi</a> *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#aadeff304aabf9bf8fe698f3839f8121d">XTPCreater</a>) (uint8_t, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a88235abf8fbc5541e11e53dbc85e192c">XTP_LOG_LEVEL</a> log_level)</td></tr>
+<tr class="separator:aadeff304aabf9bf8fe698f3839f8121d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d75b301e9229f65f057167aec8209a2" id="r_a2d75b301e9229f65f057167aec8209a2"><td class="memItemLeft" align="right" valign="top">typedef std::shared_ptr&lt; boost::asio::io_service::work &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a2d75b301e9229f65f057167aec8209a2">BoostWorkerPtr</a></td></tr>
+<tr class="separator:a2d75b301e9229f65f057167aec8209a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 成员函数</h2></td></tr>
+<tr class="memitem:a733f409edd796f08d6f1c6e988f42978" id="r_a733f409edd796f08d6f1c6e988f42978"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a733f409edd796f08d6f1c6e988f42978">DoLogin</a> ()</td></tr>
+<tr class="separator:a733f409edd796f08d6f1c6e988f42978"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab80f2e1782a515b8fb3981b01b2a323e" id="r_ab80f2e1782a515b8fb3981b01b2a323e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#ab80f2e1782a515b8fb3981b01b2a323e">DoSubscribeMD</a> ()</td></tr>
+<tr class="separator:ab80f2e1782a515b8fb3981b01b2a323e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50bf87f5df884a0c2d3d87002a496402" id="r_a50bf87f5df884a0c2d3d87002a496402"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a50bf87f5df884a0c2d3d87002a496402">IsErrorRspInfo</a> (<a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *error_info)</td></tr>
+<tr class="separator:a50bf87f5df884a0c2d3d87002a496402"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:a91713b519be83de0fdda4f8312d6ff50" id="r_a91713b519be83de0fdda4f8312d6ff50"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a91713b519be83de0fdda4f8312d6ff50">m_uTradingDate</a></td></tr>
+<tr class="separator:a91713b519be83de0fdda4f8312d6ff50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fac7128271b9c4a3b067eb7aaa2cf11" id="r_a3fac7128271b9c4a3b067eb7aaa2cf11"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1d">LoginStatus</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a3fac7128271b9c4a3b067eb7aaa2cf11">m_loginState</a></td></tr>
+<tr class="separator:a3fac7128271b9c4a3b067eb7aaa2cf11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a826b6fbb252c7192294ecd354648e06b" id="r_a826b6fbb252c7192294ecd354648e06b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classXTP_1_1API_1_1QuoteApi.html">XTP::API::QuoteApi</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a826b6fbb252c7192294ecd354648e06b">m_pUserAPI</a></td></tr>
+<tr class="separator:a826b6fbb252c7192294ecd354648e06b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc44a0e0c6ea0dff79a233bd518bcd8b" id="r_acc44a0e0c6ea0dff79a233bd518bcd8b"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#acc44a0e0c6ea0dff79a233bd518bcd8b">m_strHost</a></td></tr>
+<tr class="separator:acc44a0e0c6ea0dff79a233bd518bcd8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef5b7c056e8eead3237a2d2b95c57de1" id="r_aef5b7c056e8eead3237a2d2b95c57de1"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#aef5b7c056e8eead3237a2d2b95c57de1">m_iPort</a></td></tr>
+<tr class="separator:aef5b7c056e8eead3237a2d2b95c57de1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a988a39fe9facb0174fd4f51df70d7f14" id="r_a988a39fe9facb0174fd4f51df70d7f14"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a988a39fe9facb0174fd4f51df70d7f14">m_uClientID</a></td></tr>
+<tr class="separator:a988a39fe9facb0174fd4f51df70d7f14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25a4fb4e0f7191b12aebf056443df968" id="r_a25a4fb4e0f7191b12aebf056443df968"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a25a4fb4e0f7191b12aebf056443df968">m_strUser</a></td></tr>
+<tr class="separator:a25a4fb4e0f7191b12aebf056443df968"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1feed73f10416eec679e46744de53c22" id="r_a1feed73f10416eec679e46744de53c22"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a1feed73f10416eec679e46744de53c22">m_strPass</a></td></tr>
+<tr class="separator:a1feed73f10416eec679e46744de53c22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b2912b5db84153b184865b1ca0ec6cb" id="r_a6b2912b5db84153b184865b1ca0ec6cb"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a6b2912b5db84153b184865b1ca0ec6cb">m_strFlowDir</a></td></tr>
+<tr class="separator:a6b2912b5db84153b184865b1ca0ec6cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee00f30f3f9b2067195f61df2f572927" id="r_aee00f30f3f9b2067195f61df2f572927"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#aee00f30f3f9b2067195f61df2f572927">m_strLocalIP</a></td></tr>
+<tr class="separator:aee00f30f3f9b2067195f61df2f572927"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d967f571ffca33cc3181b82af6334a3" id="r_a0d967f571ffca33cc3181b82af6334a3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a2e2fd9668c3e0dff661965d0425d9109">XTP_PROTOCOL_TYPE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a0d967f571ffca33cc3181b82af6334a3">m_iProtocol</a></td></tr>
+<tr class="separator:a0d967f571ffca33cc3181b82af6334a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60a28bf4d38740a4a0ac195ab6aa7285" id="r_a60a28bf4d38740a4a0ac195ab6aa7285"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a60a28bf4d38740a4a0ac195ab6aa7285">m_uHBInterval</a></td></tr>
+<tr class="separator:a60a28bf4d38740a4a0ac195ab6aa7285"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afbedbceaf890ca91d665033ce3eed248" id="r_afbedbceaf890ca91d665033ce3eed248"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#afbedbceaf890ca91d665033ce3eed248">m_uBuffSize</a></td></tr>
+<tr class="separator:afbedbceaf890ca91d665033ce3eed248"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adee515b3c9569362f8f65ffa89893e6a" id="r_adee515b3c9569362f8f65ffa89893e6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="FasterDefs_8h.html#ac6831b9d0154219721fb3c2b5d254eba">CodeSet</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#adee515b3c9569362f8f65ffa89893e6a">m_fitSHSubs</a></td></tr>
+<tr class="separator:adee515b3c9569362f8f65ffa89893e6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7028562a0d080939525837182914823d" id="r_a7028562a0d080939525837182914823d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="FasterDefs_8h.html#ac6831b9d0154219721fb3c2b5d254eba">CodeSet</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a7028562a0d080939525837182914823d">m_fitSZSubs</a></td></tr>
+<tr class="separator:a7028562a0d080939525837182914823d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cfb8dc5e218b6c9928de451fc9ddaca" id="r_a4cfb8dc5e218b6c9928de451fc9ddaca"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a4cfb8dc5e218b6c9928de451fc9ddaca">m_iRequestID</a></td></tr>
+<tr class="separator:a4cfb8dc5e218b6c9928de451fc9ddaca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a235f6ed778973325e36db81676fbd8a9" id="r_a235f6ed778973325e36db81676fbd8a9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIParserSpi.html">IParserSpi</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a235f6ed778973325e36db81676fbd8a9">m_sink</a></td></tr>
+<tr class="separator:a235f6ed778973325e36db81676fbd8a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c2f36b41fdcc69d6980dee079e2e45f" id="r_a7c2f36b41fdcc69d6980dee079e2e45f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a7c2f36b41fdcc69d6980dee079e2e45f">m_pBaseDataMgr</a></td></tr>
+<tr class="separator:a7c2f36b41fdcc69d6980dee079e2e45f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87ef881805f59ce7f40c783dba412261" id="r_a87ef881805f59ce7f40c783dba412261"><td class="memItemLeft" align="right" valign="top"><a class="el" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a87ef881805f59ce7f40c783dba412261">m_hInst</a></td></tr>
+<tr class="separator:a87ef881805f59ce7f40c783dba412261"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90d1330ea9212520912bda5a55268869" id="r_a90d1330ea9212520912bda5a55268869"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParserXTP.html#aadeff304aabf9bf8fe698f3839f8121d">XTPCreater</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a90d1330ea9212520912bda5a55268869">m_funcCreator</a></td></tr>
+<tr class="separator:a90d1330ea9212520912bda5a55268869"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7edcf7eab31cfd818699962c7062f9a" id="r_ad7edcf7eab31cfd818699962c7062f9a"><td class="memItemLeft" align="right" valign="top">boost::asio::io_service&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#ad7edcf7eab31cfd818699962c7062f9a">_asyncio</a></td></tr>
+<tr class="separator:ad7edcf7eab31cfd818699962c7062f9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d53dd65d0c50acb5e161f4c7a7c0f3e" id="r_a8d53dd65d0c50acb5e161f4c7a7c0f3e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a8d53dd65d0c50acb5e161f4c7a7c0f3e">_thrd_worker</a></td></tr>
+<tr class="separator:a8d53dd65d0c50acb5e161f4c7a7c0f3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a187c9cdffc5998f35735932f0eeba406" id="r_a187c9cdffc5998f35735932f0eeba406"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParserXTP.html#a2d75b301e9229f65f057167aec8209a2">BoostWorkerPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParserXTP.html#a187c9cdffc5998f35735932f0eeba406">_worker</a></td></tr>
+<tr class="separator:a187c9cdffc5998f35735932f0eeba406"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock">
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00026">26</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="a2d75b301e9229f65f057167aec8209a2" name="a2d75b301e9229f65f057167aec8209a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d75b301e9229f65f057167aec8209a2">&#9670;&#160;</a></span>BoostWorkerPtr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::shared_ptr&lt;boost::asio::io_service::work&gt; <a class="el" href="classParserXTP.html#a2d75b301e9229f65f057167aec8209a2">ParserXTP::BoostWorkerPtr</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00126">126</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aadeff304aabf9bf8fe698f3839f8121d" name="aadeff304aabf9bf8fe698f3839f8121d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aadeff304aabf9bf8fe698f3839f8121d">&#9670;&#160;</a></span>XTPCreater</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="classXTP_1_1API_1_1QuoteApi.html">XTP::API::QuoteApi</a> *(* ParserXTP::XTPCreater) (uint8_t, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a88235abf8fbc5541e11e53dbc85e192c">XTP_LOG_LEVEL</a> log_level)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00120">120</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员枚举类型说明</h2>
+<a id="a43a581d93806942728cfe4ba904abf1d" name="a43a581d93806942728cfe4ba904abf1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43a581d93806942728cfe4ba904abf1d">&#9670;&#160;</a></span>LoginStatus</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1d">ParserXTP::LoginStatus</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a43a581d93806942728cfe4ba904abf1da47a687931fe41663889d2a47e92f7d1f" name="a43a581d93806942728cfe4ba904abf1da47a687931fe41663889d2a47e92f7d1f"></a>LS_NOTLOGIN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a43a581d93806942728cfe4ba904abf1da57c574f87fa6417b9545785513c2db42" name="a43a581d93806942728cfe4ba904abf1da57c574f87fa6417b9545785513c2db42"></a>LS_LOGINING&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a43a581d93806942728cfe4ba904abf1da93a7c079121d50f976f0d3c95b989b36" name="a43a581d93806942728cfe4ba904abf1da93a7c079121d50f976f0d3c95b989b36"></a>LS_LOGINED&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00033">33</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a8a121043e18f8b9074ae82ae6d539259" name="a8a121043e18f8b9074ae82ae6d539259"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a121043e18f8b9074ae82ae6d539259">&#9670;&#160;</a></span>ParserXTP()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ParserXTP::ParserXTP </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00079">79</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9fd22550ecfb543042b0d0340a31bb70" name="a9fd22550ecfb543042b0d0340a31bb70"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fd22550ecfb543042b0d0340a31bb70">&#9670;&#160;</a></span>~ParserXTP()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ParserXTP::~ParserXTP </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00087">87</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="af114fc3e1bb1b99a4906cac96e92810c" name="af114fc3e1bb1b99a4906cac96e92810c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af114fc3e1bb1b99a4906cac96e92810c">&#9670;&#160;</a></span>connect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ParserXTP::connect </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classIParserApi.html#ab318c4ada41576a863f75028f90b4d06">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00140">140</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5ef6584652025f901a21d911559557bb" name="a5ef6584652025f901a21d911559557bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ef6584652025f901a21d911559557bb">&#9670;&#160;</a></span>disconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ParserXTP::disconnect </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classIParserApi.html#ac8a3ec275e4afc0427fea1112c721eb0">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00161">161</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a733f409edd796f08d6f1c6e988f42978" name="a733f409edd796f08d6f1c6e988f42978"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a733f409edd796f08d6f1c6e988f42978">&#9670;&#160;</a></span>DoLogin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserXTP::DoLogin </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00441">441</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab80f2e1782a515b8fb3981b01b2a323e" name="ab80f2e1782a515b8fb3981b01b2a323e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab80f2e1782a515b8fb3981b01b2a323e">&#9670;&#160;</a></span>DoSubscribeMD()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserXTP::DoSubscribeMD </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00493">493</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9881a8101922c2e3615d9ade88071469" name="a9881a8101922c2e3615d9ade88071469"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9881a8101922c2e3615d9ade88071469">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ParserXTP::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSVariant.html">WTSVariant</a> *&#160;</td>
+          <td class="paramname"><em>config</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classIParserApi.html#a9b6eb9509e68e7bbc5901629ff7dcc43">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00092">92</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac2d5236a23c54926dd51bbe65fe7110c" name="ac2d5236a23c54926dd51bbe65fe7110c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2d5236a23c54926dd51bbe65fe7110c">&#9670;&#160;</a></span>isConnected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ParserXTP::isConnected </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classIParserApi.html#a6064c852322972cec9e76f915c727528">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00681">681</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a50bf87f5df884a0c2d3d87002a496402" name="a50bf87f5df884a0c2d3d87002a496402"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50bf87f5df884a0c2d3d87002a496402">&#9670;&#160;</a></span>IsErrorRspInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ParserXTP::IsErrorRspInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *&#160;</td>
+          <td class="paramname"><em>error_info</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00580">580</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a030daf8f2d006f42d1af6c828e51d613" name="a030daf8f2d006f42d1af6c828e51d613"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a030daf8f2d006f42d1af6c828e51d613">&#9670;&#160;</a></span>OnDepthMarketData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserXTP::OnDepthMarketData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a48286acaea0ae62a6b29a6bf988fe97f">XTPMD</a> *&#160;</td>
+          <td class="paramname"><em>market_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int64_t&#160;</td>
+          <td class="paramname"><em>bid1_qty</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>bid1_count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>max_bid1_count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int64_t&#160;</td>
+          <td class="paramname"><em>ask1_qty</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>ask1_count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>max_ask1_count</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>深度行情通知，包含买一卖一队列 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">market_data</td><td>行情数据 </td></tr>
+    <tr><td class="paramname">bid1_qty</td><td>买一队列数据 </td></tr>
+    <tr><td class="paramname">bid1_count</td><td>买一队列的有效委托笔数 </td></tr>
+    <tr><td class="paramname">max_bid1_count</td><td>买一队列总委托笔数 </td></tr>
+    <tr><td class="paramname">ask1_qty</td><td>卖一队列数据 </td></tr>
+    <tr><td class="paramname">ask1_count</td><td>卖一队列的有效委托笔数 </td></tr>
+    <tr><td class="paramname">max_ask1_count</td><td>卖一队列总委托笔数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>备注</dt><dd>需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线 </dd></dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a43e2db33bcaba02509b1f4e2b6e5a2ab">XTP::API::QuoteSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00281">281</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae51afb04c142a6677443bb8f0d70e8b6" name="ae51afb04c142a6677443bb8f0d70e8b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae51afb04c142a6677443bb8f0d70e8b6">&#9670;&#160;</a></span>OnDisconnected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserXTP::OnDisconnected </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>reason</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>当客户端与交易后台通信连接断开时,该方法被调用。当发生这个情况后,API会自动重新连接,客户端可不做处理。 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">reason</td><td>错误原因 0x1001 网络读失败 0x1002 网络写失败 0x2001 接收心跳超时 0x2002 发送心跳失败 0x2003 收到错误报文 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a4fff982deaae72d0eb8a62f431c74d59">XTP::API::QuoteSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00181">181</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aec21db60d95403066b11d3cefccae8df" name="aec21db60d95403066b11d3cefccae8df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec21db60d95403066b11d3cefccae8df">&#9670;&#160;</a></span>OnError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserXTP::OnError </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *&#160;</td>
+          <td class="paramname"><em>error_info</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>错误应答 </p>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a6701b17d4e6d6399666d834f6dcd0a7c">XTP::API::QuoteSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00173">173</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2e441e0b0772233d86b9e3ae5bffe3b4" name="a2e441e0b0772233d86b9e3ae5bffe3b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e441e0b0772233d86b9e3ae5bffe3b4">&#9670;&#160;</a></span>OnSubMarketData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserXTP::OnSubMarketData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a2d573c44df32172f88458008cfec93e8">XTPST</a> *&#160;</td>
+          <td class="paramname"><em>ticker</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *&#160;</td>
+          <td class="paramname"><em>error_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_last</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>订阅行情应答，包括股票、指数和期权 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ticker</td><td>详细的合约订阅情况 </td></tr>
+    <tr><td class="paramname">error_info</td><td>订阅合约发生错误时的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误 </td></tr>
+    <tr><td class="paramname">is_last</td><td>是否此次订阅的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>备注</dt><dd>每条订阅的合约均对应一条订阅应答，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线 </dd></dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a81edc393bcfbb3547c4258049164702a">XTP::API::QuoteSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00415">415</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa31c25d9cbf4bb46d399aed33e74c7a1" name="aa31c25d9cbf4bb46d399aed33e74c7a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa31c25d9cbf4bb46d399aed33e74c7a1">&#9670;&#160;</a></span>OnSubTickByTick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserXTP::OnSubTickByTick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a2d573c44df32172f88458008cfec93e8">XTPST</a> *&#160;</td>
+          <td class="paramname"><em>ticker</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *&#160;</td>
+          <td class="paramname"><em>error_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_last</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>订阅逐笔行情应答，包括股票、指数和期权 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ticker</td><td>详细的合约订阅情况 </td></tr>
+    <tr><td class="paramname">error_info</td><td>订阅合约发生错误时的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误 </td></tr>
+    <tr><td class="paramname">is_last</td><td>是否此次订阅的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>备注</dt><dd>每条订阅的合约均对应一条订阅应答，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线 </dd></dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a5cad5353ad112e59e2c3e49642195c04">XTP::API::QuoteSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00428">428</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae8018cdd79a9a4a900aca20a3f83b927" name="ae8018cdd79a9a4a900aca20a3f83b927"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8018cdd79a9a4a900aca20a3f83b927">&#9670;&#160;</a></span>OnTickByTick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserXTP::OnTickByTick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#aac297e792b089a6ac26ea8d9cbaa7d4a">XTPTBT</a> *&#160;</td>
+          <td class="paramname"><em>tbt_data</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>逐笔行情通知，包括股票、指数和期权 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tbt_data</td><td>逐笔行情数据，包括逐笔委托和逐笔成交，此为共用结构体，需要根据type来区分是逐笔委托还是逐笔成交，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a4ce5975ccdbe0c85cfb771d905bf75f7">XTP::API::QuoteSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00201">201</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adc0fadd6aea0c5a634ab5ede6092c45f" name="adc0fadd6aea0c5a634ab5ede6092c45f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc0fadd6aea0c5a634ab5ede6092c45f">&#9670;&#160;</a></span>OnUnSubMarketData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserXTP::OnUnSubMarketData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xquote__api__struct_8h.html#a2d573c44df32172f88458008cfec93e8">XTPST</a> *&#160;</td>
+          <td class="paramname"><em>ticker</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="XTP2_82_832_82_2xtp__api__struct__common_8h.html#ab86e0ff5d1d7f358aeb3ab1823ceb1cd">XTPRI</a> *&#160;</td>
+          <td class="paramname"><em>error_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_last</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>退订行情应答，包括股票、指数和期权 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ticker</td><td>详细的合约取消订阅情况 </td></tr>
+    <tr><td class="paramname">error_info</td><td>取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误 </td></tr>
+    <tr><td class="paramname">is_last</td><td>是否此次取消订阅的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>备注</dt><dd>每条取消订阅的合约均对应一条取消订阅应答，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线 </dd></dl>
+
+<p>重载 <a class="el" href="classXTP_1_1API_1_1QuoteSpi.html#a45c4c91389887eecad1a91fdf8aad2c9">XTP::API::QuoteSpi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00196">196</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a83ddac9dac981b12d3891f14bc84d8eb" name="a83ddac9dac981b12d3891f14bc84d8eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83ddac9dac981b12d3891f14bc84d8eb">&#9670;&#160;</a></span>registerSpi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserXTP::registerSpi </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classIParserSpi.html">IParserSpi</a> *&#160;</td>
+          <td class="paramname"><em>listener</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classIParserApi.html#a37ba828035dff6492ab185b462d070ec">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00686">686</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8eefeefe972c99adcf6478234fd755b8" name="a8eefeefe972c99adcf6478234fd755b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8eefeefe972c99adcf6478234fd755b8">&#9670;&#160;</a></span>release()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserXTP::release </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classIParserApi.html#a9053ed20289653de487d5fe5d9e88690">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00135">135</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6835709c55d944760fd86e4a871ff57c" name="a6835709c55d944760fd86e4a871ff57c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6835709c55d944760fd86e4a871ff57c">&#9670;&#160;</a></span>subscribe()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserXTP::subscribe </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="FasterDefs_8h.html#ac6831b9d0154219721fb3c2b5d254eba">CodeSet</a> &amp;&#160;</td>
+          <td class="paramname"><em>vecSymbols</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classIParserApi.html#ab20f1e4ddb820ef80e2aa0f31ac46e2b">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00588">588</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0375e8539e6aee149f89f6bb68d70d93" name="a0375e8539e6aee149f89f6bb68d70d93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0375e8539e6aee149f89f6bb68d70d93">&#9670;&#160;</a></span>unsubscribe()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParserXTP::unsubscribe </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="FasterDefs_8h.html#ac6831b9d0154219721fb3c2b5d254eba">CodeSet</a> &amp;&#160;</td>
+          <td class="paramname"><em>vecSymbols</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>重载 <a class="el" href="classIParserApi.html#a9bd40dd38a8b376ed24d63915af69770">IParserApi</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a> 第 <a class="el" href="ParserXTP_8cpp_source.html#l00677">677</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="ad7edcf7eab31cfd818699962c7062f9a" name="ad7edcf7eab31cfd818699962c7062f9a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7edcf7eab31cfd818699962c7062f9a">&#9670;&#160;</a></span>_asyncio</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">boost::asio::io_service ParserXTP::_asyncio</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00124">124</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8d53dd65d0c50acb5e161f4c7a7c0f3e" name="a8d53dd65d0c50acb5e161f4c7a7c0f3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d53dd65d0c50acb5e161f4c7a7c0f3e">&#9670;&#160;</a></span>_thrd_worker</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a> ParserXTP::_thrd_worker</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00125">125</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a187c9cdffc5998f35735932f0eeba406" name="a187c9cdffc5998f35735932f0eeba406"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a187c9cdffc5998f35735932f0eeba406">&#9670;&#160;</a></span>_worker</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classParserXTP.html#a2d75b301e9229f65f057167aec8209a2">BoostWorkerPtr</a> ParserXTP::_worker</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00127">127</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adee515b3c9569362f8f65ffa89893e6a" name="adee515b3c9569362f8f65ffa89893e6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adee515b3c9569362f8f65ffa89893e6a">&#9670;&#160;</a></span>m_fitSHSubs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="FasterDefs_8h.html#ac6831b9d0154219721fb3c2b5d254eba">CodeSet</a> ParserXTP::m_fitSHSubs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00111">111</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7028562a0d080939525837182914823d" name="a7028562a0d080939525837182914823d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7028562a0d080939525837182914823d">&#9670;&#160;</a></span>m_fitSZSubs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="FasterDefs_8h.html#ac6831b9d0154219721fb3c2b5d254eba">CodeSet</a> ParserXTP::m_fitSZSubs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00112">112</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a90d1330ea9212520912bda5a55268869" name="a90d1330ea9212520912bda5a55268869"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90d1330ea9212520912bda5a55268869">&#9670;&#160;</a></span>m_funcCreator</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classParserXTP.html#aadeff304aabf9bf8fe698f3839f8121d">XTPCreater</a> ParserXTP::m_funcCreator</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00122">122</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a87ef881805f59ce7f40c783dba412261" name="a87ef881805f59ce7f40c783dba412261"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87ef881805f59ce7f40c783dba412261">&#9670;&#160;</a></span>m_hInst</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a> ParserXTP::m_hInst</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00119">119</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aef5b7c056e8eead3237a2d2b95c57de1" name="aef5b7c056e8eead3237a2d2b95c57de1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef5b7c056e8eead3237a2d2b95c57de1">&#9670;&#160;</a></span>m_iPort</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t ParserXTP::m_iPort</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00100">100</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0d967f571ffca33cc3181b82af6334a3" name="a0d967f571ffca33cc3181b82af6334a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d967f571ffca33cc3181b82af6334a3">&#9670;&#160;</a></span>m_iProtocol</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#a2e2fd9668c3e0dff661965d0425d9109">XTP_PROTOCOL_TYPE</a> ParserXTP::m_iProtocol</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00107">107</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4cfb8dc5e218b6c9928de451fc9ddaca" name="a4cfb8dc5e218b6c9928de451fc9ddaca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4cfb8dc5e218b6c9928de451fc9ddaca">&#9670;&#160;</a></span>m_iRequestID</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ParserXTP::m_iRequestID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00114">114</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3fac7128271b9c4a3b067eb7aaa2cf11" name="a3fac7128271b9c4a3b067eb7aaa2cf11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fac7128271b9c4a3b067eb7aaa2cf11">&#9670;&#160;</a></span>m_loginState</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classParserXTP.html#a43a581d93806942728cfe4ba904abf1d">LoginStatus</a> ParserXTP::m_loginState</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00096">96</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7c2f36b41fdcc69d6980dee079e2e45f" name="a7c2f36b41fdcc69d6980dee079e2e45f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c2f36b41fdcc69d6980dee079e2e45f">&#9670;&#160;</a></span>m_pBaseDataMgr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a>* ParserXTP::m_pBaseDataMgr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00117">117</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a826b6fbb252c7192294ecd354648e06b" name="a826b6fbb252c7192294ecd354648e06b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a826b6fbb252c7192294ecd354648e06b">&#9670;&#160;</a></span>m_pUserAPI</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classXTP_1_1API_1_1QuoteApi.html">XTP::API::QuoteApi</a>* ParserXTP::m_pUserAPI</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00097">97</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a235f6ed778973325e36db81676fbd8a9" name="a235f6ed778973325e36db81676fbd8a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a235f6ed778973325e36db81676fbd8a9">&#9670;&#160;</a></span>m_sink</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIParserSpi.html">IParserSpi</a>* ParserXTP::m_sink</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00116">116</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6b2912b5db84153b184865b1ca0ec6cb" name="a6b2912b5db84153b184865b1ca0ec6cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b2912b5db84153b184865b1ca0ec6cb">&#9670;&#160;</a></span>m_strFlowDir</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string ParserXTP::m_strFlowDir</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00104">104</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acc44a0e0c6ea0dff79a233bd518bcd8b" name="acc44a0e0c6ea0dff79a233bd518bcd8b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc44a0e0c6ea0dff79a233bd518bcd8b">&#9670;&#160;</a></span>m_strHost</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string ParserXTP::m_strHost</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00099">99</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aee00f30f3f9b2067195f61df2f572927" name="aee00f30f3f9b2067195f61df2f572927"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee00f30f3f9b2067195f61df2f572927">&#9670;&#160;</a></span>m_strLocalIP</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string ParserXTP::m_strLocalIP</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00105">105</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1feed73f10416eec679e46744de53c22" name="a1feed73f10416eec679e46744de53c22"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1feed73f10416eec679e46744de53c22">&#9670;&#160;</a></span>m_strPass</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string ParserXTP::m_strPass</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00103">103</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a25a4fb4e0f7191b12aebf056443df968" name="a25a4fb4e0f7191b12aebf056443df968"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a25a4fb4e0f7191b12aebf056443df968">&#9670;&#160;</a></span>m_strUser</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string ParserXTP::m_strUser</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00102">102</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afbedbceaf890ca91d665033ce3eed248" name="afbedbceaf890ca91d665033ce3eed248"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afbedbceaf890ca91d665033ce3eed248">&#9670;&#160;</a></span>m_uBuffSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t ParserXTP::m_uBuffSize</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00109">109</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a988a39fe9facb0174fd4f51df70d7f14" name="a988a39fe9facb0174fd4f51df70d7f14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a988a39fe9facb0174fd4f51df70d7f14">&#9670;&#160;</a></span>m_uClientID</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t ParserXTP::m_uClientID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00101">101</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a60a28bf4d38740a4a0ac195ab6aa7285" name="a60a28bf4d38740a4a0ac195ab6aa7285"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60a28bf4d38740a4a0ac195ab6aa7285">&#9670;&#160;</a></span>m_uHBInterval</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t ParserXTP::m_uHBInterval</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00108">108</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a91713b519be83de0fdda4f8312d6ff50" name="a91713b519be83de0fdda4f8312d6ff50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91713b519be83de0fdda4f8312d6ff50">&#9670;&#160;</a></span>m_uTradingDate</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t ParserXTP::m_uTradingDate</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a> 第 <a class="el" href="ParserXTP_8h_source.html#l00095">95</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/ParserXTP/<a class="el" href="ParserXTP_8h_source.html">ParserXTP.h</a></li>
+<li>src/ParserXTP/<a class="el" href="ParserXTP_8cpp_source.html">ParserXTP.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classParserXTP.html">ParserXTP</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

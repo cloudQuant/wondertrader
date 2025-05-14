@@ -1,0 +1,28 @@
+var classCThostFtdcMdSpi =
+[
+    [ "OnFrontConnected", "classCThostFtdcMdSpi.html#ac9f31527e48926cf81ec0ca84fc952a5", null ],
+    [ "OnFrontConnected", "classCThostFtdcMdSpi.html#ac9f31527e48926cf81ec0ca84fc952a5", null ],
+    [ "OnFrontDisconnected", "classCThostFtdcMdSpi.html#ab5840abfd0695a0175a1175c9383a247", null ],
+    [ "OnFrontDisconnected", "classCThostFtdcMdSpi.html#ab5840abfd0695a0175a1175c9383a247", null ],
+    [ "OnHeartBeatWarning", "classCThostFtdcMdSpi.html#a7951d545b933f66dd7e45f0067ad045f", null ],
+    [ "OnHeartBeatWarning", "classCThostFtdcMdSpi.html#a7951d545b933f66dd7e45f0067ad045f", null ],
+    [ "OnRspError", "classCThostFtdcMdSpi.html#a47d250448c7acad3d65a8eecc54d738c", null ],
+    [ "OnRspError", "classCThostFtdcMdSpi.html#a47d250448c7acad3d65a8eecc54d738c", null ],
+    [ "OnRspSubForQuoteRsp", "classCThostFtdcMdSpi.html#aab756d4123ef2c016c903c75ab1c0e62", null ],
+    [ "OnRspSubForQuoteRsp", "classCThostFtdcMdSpi.html#aab756d4123ef2c016c903c75ab1c0e62", null ],
+    [ "OnRspSubMarketData", "classCThostFtdcMdSpi.html#a523b2d7a149e70dbe0a479e90f2ec436", null ],
+    [ "OnRspSubMarketData", "classCThostFtdcMdSpi.html#a523b2d7a149e70dbe0a479e90f2ec436", null ],
+    [ "OnRspUnSubForQuoteRsp", "classCThostFtdcMdSpi.html#a0cd13e5600c132c63e5d4fc565200d88", null ],
+    [ "OnRspUnSubForQuoteRsp", "classCThostFtdcMdSpi.html#a0cd13e5600c132c63e5d4fc565200d88", null ],
+    [ "OnRspUnSubMarketData", "classCThostFtdcMdSpi.html#abf3171b22288654e4981518f844e3e84", null ],
+    [ "OnRspUnSubMarketData", "classCThostFtdcMdSpi.html#abf3171b22288654e4981518f844e3e84", null ],
+    [ "OnRspUserLogin", "classCThostFtdcMdSpi.html#acf78a12c4ed35d348b89383dc7bfff80", null ],
+    [ "OnRspUserLogin", "classCThostFtdcMdSpi.html#acf78a12c4ed35d348b89383dc7bfff80", null ],
+    [ "OnRspUserLogout", "classCThostFtdcMdSpi.html#a3266aceee7b069d558609e0c90988a0e", null ],
+    [ "OnRspUserLogout", "classCThostFtdcMdSpi.html#a3266aceee7b069d558609e0c90988a0e", null ],
+    [ "OnRtnDepthMarketData", "classCThostFtdcMdSpi.html#a4dd1dd6d9c40b7adbad1e7459c1c3962", null ],
+    [ "OnRtnDepthMarketData", "classCThostFtdcMdSpi.html#a4dd1dd6d9c40b7adbad1e7459c1c3962", null ],
+    [ "OnRtnForQuoteRsp", "classCThostFtdcMdSpi.html#a91d3fa6e749c07711903c47210182c8a", null ],
+    [ "OnRtnForQuoteRsp", "classCThostFtdcMdSpi.html#a91d3fa6e749c07711903c47210182c8a", null ],
+    [ "OnRtnMBLMarketData", "classCThostFtdcMdSpi.html#a706713bbc2150316c4b2e2a53a17201b", null ]
+];

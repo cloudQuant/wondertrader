@@ -1,0 +1,785 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/zstd_lazy.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('zstd__lazy_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">zstd_lazy.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;<a class="el" href="zstd__compress__internal_8h_source.html">zstd_compress_internal.h</a>&quot;</code><br />
+</div>
+<p><a href="zstd__lazy_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a9a00baee8f23222d59bbca727da89715" id="r_a9a00baee8f23222d59bbca727da89715"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__lazy_8h.html#a9a00baee8f23222d59bbca727da89715">ZSTD_insertAndFindFirstIndex</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *ip)</td></tr>
+<tr class="separator:a9a00baee8f23222d59bbca727da89715"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a138012f4948d5907886447b8423ed091" id="r_a138012f4948d5907886447b8423ed091"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__lazy_8h.html#a138012f4948d5907886447b8423ed091">ZSTD_preserveUnsortedMark</a> (<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> table, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> reducerValue)</td></tr>
+<tr class="separator:a138012f4948d5907886447b8423ed091"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1004a8fa21b601a523072b1be447baff" id="r_a1004a8fa21b601a523072b1be447baff"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__lazy_8h.html#a1004a8fa21b601a523072b1be447baff">ZSTD_compressBlock_btlazy2</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="structseqStore__t.html">seqStore_t</a> *seqStore, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> rep[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>], void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:a1004a8fa21b601a523072b1be447baff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b73199c4d248b44b15aefbca69a8fec" id="r_a9b73199c4d248b44b15aefbca69a8fec"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__lazy_8h.html#a9b73199c4d248b44b15aefbca69a8fec">ZSTD_compressBlock_lazy2</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="structseqStore__t.html">seqStore_t</a> *seqStore, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> rep[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>], void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:a9b73199c4d248b44b15aefbca69a8fec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7226cc938549773ad2d53d7fed9b374" id="r_ac7226cc938549773ad2d53d7fed9b374"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__lazy_8h.html#ac7226cc938549773ad2d53d7fed9b374">ZSTD_compressBlock_lazy</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="structseqStore__t.html">seqStore_t</a> *seqStore, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> rep[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>], void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:ac7226cc938549773ad2d53d7fed9b374"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e5dffbfb50ae28fe82d5212af1f1635" id="r_a7e5dffbfb50ae28fe82d5212af1f1635"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__lazy_8h.html#a7e5dffbfb50ae28fe82d5212af1f1635">ZSTD_compressBlock_greedy</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="structseqStore__t.html">seqStore_t</a> *seqStore, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> rep[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>], void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:a7e5dffbfb50ae28fe82d5212af1f1635"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af24f23298cb34694f44b43e1f8bc3943" id="r_af24f23298cb34694f44b43e1f8bc3943"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__lazy_8h.html#af24f23298cb34694f44b43e1f8bc3943">ZSTD_compressBlock_btlazy2_dictMatchState</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="structseqStore__t.html">seqStore_t</a> *seqStore, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> rep[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>], void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:af24f23298cb34694f44b43e1f8bc3943"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68d43e5661ebf6229b11fcc429d7680e" id="r_a68d43e5661ebf6229b11fcc429d7680e"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__lazy_8h.html#a68d43e5661ebf6229b11fcc429d7680e">ZSTD_compressBlock_lazy2_dictMatchState</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="structseqStore__t.html">seqStore_t</a> *seqStore, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> rep[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>], void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:a68d43e5661ebf6229b11fcc429d7680e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35563f58c59ea82381b681b809741669" id="r_a35563f58c59ea82381b681b809741669"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__lazy_8h.html#a35563f58c59ea82381b681b809741669">ZSTD_compressBlock_lazy_dictMatchState</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="structseqStore__t.html">seqStore_t</a> *seqStore, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> rep[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>], void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:a35563f58c59ea82381b681b809741669"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6340aa4a27c645a01f214d5e94a1ba0c" id="r_a6340aa4a27c645a01f214d5e94a1ba0c"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__lazy_8h.html#a6340aa4a27c645a01f214d5e94a1ba0c">ZSTD_compressBlock_greedy_dictMatchState</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="structseqStore__t.html">seqStore_t</a> *seqStore, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> rep[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>], void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:a6340aa4a27c645a01f214d5e94a1ba0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade62ceb1bd70826a37868f417edd0341" id="r_ade62ceb1bd70826a37868f417edd0341"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__lazy_8h.html#ade62ceb1bd70826a37868f417edd0341">ZSTD_compressBlock_greedy_extDict</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="structseqStore__t.html">seqStore_t</a> *seqStore, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> rep[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>], void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:ade62ceb1bd70826a37868f417edd0341"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17c0d5bc3e0b9e9bbbe88d33737e28bf" id="r_a17c0d5bc3e0b9e9bbbe88d33737e28bf"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__lazy_8h.html#a17c0d5bc3e0b9e9bbbe88d33737e28bf">ZSTD_compressBlock_lazy_extDict</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="structseqStore__t.html">seqStore_t</a> *seqStore, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> rep[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>], void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:a17c0d5bc3e0b9e9bbbe88d33737e28bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac527f5fbab004e1d702f9d7030266257" id="r_ac527f5fbab004e1d702f9d7030266257"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__lazy_8h.html#ac527f5fbab004e1d702f9d7030266257">ZSTD_compressBlock_lazy2_extDict</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="structseqStore__t.html">seqStore_t</a> *seqStore, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> rep[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>], void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:ac527f5fbab004e1d702f9d7030266257"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7972d9312e2fe85079280bc11e4b1ce5" id="r_a7972d9312e2fe85079280bc11e4b1ce5"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__lazy_8h.html#a7972d9312e2fe85079280bc11e4b1ce5">ZSTD_compressBlock_btlazy2_extDict</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="structseqStore__t.html">seqStore_t</a> *seqStore, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> rep[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>], void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:a7972d9312e2fe85079280bc11e4b1ce5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">函数说明</h2>
+<a id="a1004a8fa21b601a523072b1be447baff" name="a1004a8fa21b601a523072b1be447baff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1004a8fa21b601a523072b1be447baff">&#9670;&#160;</a></span>ZSTD_compressBlock_btlazy2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_compressBlock_btlazy2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>seqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>rep</em>[ZSTD_REP_NUM], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>used in <a class="el" href="zstd__compress_8c.html#a76bca8a963c4a9cf8c1755aaf6abd817">ZSTD_reduceIndex()</a>. preemptively increase value of ZSTD_DUBT_UNSORTED_MARK </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__lazy_8c_source.html">zstd_lazy.c</a> 第 <a class="el" href="zstd__lazy_8c_source.html#l00861">861</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af24f23298cb34694f44b43e1f8bc3943" name="af24f23298cb34694f44b43e1f8bc3943"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af24f23298cb34694f44b43e1f8bc3943">&#9670;&#160;</a></span>ZSTD_compressBlock_btlazy2_dictMatchState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_compressBlock_btlazy2_dictMatchState </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>seqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>rep</em>[ZSTD_REP_NUM], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__lazy_8c_source.html">zstd_lazy.c</a> 第 <a class="el" href="zstd__lazy_8c_source.html#l00889">889</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7972d9312e2fe85079280bc11e4b1ce5" name="a7972d9312e2fe85079280bc11e4b1ce5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7972d9312e2fe85079280bc11e4b1ce5">&#9670;&#160;</a></span>ZSTD_compressBlock_btlazy2_extDict()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_compressBlock_btlazy2_extDict </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>seqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>rep</em>[ZSTD_REP_NUM], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__lazy_8c_source.html">zstd_lazy.c</a> 第 <a class="el" href="zstd__lazy_8c_source.html#l01109">1109</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7e5dffbfb50ae28fe82d5212af1f1635" name="a7e5dffbfb50ae28fe82d5212af1f1635"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e5dffbfb50ae28fe82d5212af1f1635">&#9670;&#160;</a></span>ZSTD_compressBlock_greedy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_compressBlock_greedy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>seqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>rep</em>[ZSTD_REP_NUM], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__lazy_8c_source.html">zstd_lazy.c</a> 第 <a class="el" href="zstd__lazy_8c_source.html#l00882">882</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6340aa4a27c645a01f214d5e94a1ba0c" name="a6340aa4a27c645a01f214d5e94a1ba0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6340aa4a27c645a01f214d5e94a1ba0c">&#9670;&#160;</a></span>ZSTD_compressBlock_greedy_dictMatchState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_compressBlock_greedy_dictMatchState </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>seqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>rep</em>[ZSTD_REP_NUM], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__lazy_8c_source.html">zstd_lazy.c</a> 第 <a class="el" href="zstd__lazy_8c_source.html#l00910">910</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ade62ceb1bd70826a37868f417edd0341" name="ade62ceb1bd70826a37868f417edd0341"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade62ceb1bd70826a37868f417edd0341">&#9670;&#160;</a></span>ZSTD_compressBlock_greedy_extDict()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_compressBlock_greedy_extDict </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>seqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>rep</em>[ZSTD_REP_NUM], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__lazy_8c_source.html">zstd_lazy.c</a> 第 <a class="el" href="zstd__lazy_8c_source.html#l01086">1086</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac7226cc938549773ad2d53d7fed9b374" name="ac7226cc938549773ad2d53d7fed9b374"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7226cc938549773ad2d53d7fed9b374">&#9670;&#160;</a></span>ZSTD_compressBlock_lazy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_compressBlock_lazy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>seqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>rep</em>[ZSTD_REP_NUM], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__lazy_8c_source.html">zstd_lazy.c</a> 第 <a class="el" href="zstd__lazy_8c_source.html#l00875">875</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9b73199c4d248b44b15aefbca69a8fec" name="a9b73199c4d248b44b15aefbca69a8fec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b73199c4d248b44b15aefbca69a8fec">&#9670;&#160;</a></span>ZSTD_compressBlock_lazy2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_compressBlock_lazy2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>seqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>rep</em>[ZSTD_REP_NUM], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__lazy_8c_source.html">zstd_lazy.c</a> 第 <a class="el" href="zstd__lazy_8c_source.html#l00868">868</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a68d43e5661ebf6229b11fcc429d7680e" name="a68d43e5661ebf6229b11fcc429d7680e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a68d43e5661ebf6229b11fcc429d7680e">&#9670;&#160;</a></span>ZSTD_compressBlock_lazy2_dictMatchState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_compressBlock_lazy2_dictMatchState </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>seqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>rep</em>[ZSTD_REP_NUM], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__lazy_8c_source.html">zstd_lazy.c</a> 第 <a class="el" href="zstd__lazy_8c_source.html#l00896">896</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac527f5fbab004e1d702f9d7030266257" name="ac527f5fbab004e1d702f9d7030266257"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac527f5fbab004e1d702f9d7030266257">&#9670;&#160;</a></span>ZSTD_compressBlock_lazy2_extDict()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_compressBlock_lazy2_extDict </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>seqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>rep</em>[ZSTD_REP_NUM], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__lazy_8c_source.html">zstd_lazy.c</a> 第 <a class="el" href="zstd__lazy_8c_source.html#l01101">1101</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a35563f58c59ea82381b681b809741669" name="a35563f58c59ea82381b681b809741669"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35563f58c59ea82381b681b809741669">&#9670;&#160;</a></span>ZSTD_compressBlock_lazy_dictMatchState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_compressBlock_lazy_dictMatchState </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>seqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>rep</em>[ZSTD_REP_NUM], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__lazy_8c_source.html">zstd_lazy.c</a> 第 <a class="el" href="zstd__lazy_8c_source.html#l00903">903</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a17c0d5bc3e0b9e9bbbe88d33737e28bf" name="a17c0d5bc3e0b9e9bbbe88d33737e28bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17c0d5bc3e0b9e9bbbe88d33737e28bf">&#9670;&#160;</a></span>ZSTD_compressBlock_lazy_extDict()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_compressBlock_lazy_extDict </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>seqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>rep</em>[ZSTD_REP_NUM], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__lazy_8c_source.html">zstd_lazy.c</a> 第 <a class="el" href="zstd__lazy_8c_source.html#l01093">1093</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9a00baee8f23222d59bbca727da89715" name="a9a00baee8f23222d59bbca727da89715"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a00baee8f23222d59bbca727da89715">&#9670;&#160;</a></span>ZSTD_insertAndFindFirstIndex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ZSTD_insertAndFindFirstIndex </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>ip</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__lazy_8c_source.html">zstd_lazy.c</a> 第 <a class="el" href="zstd__lazy_8c_source.html#l00473">473</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a138012f4948d5907886447b8423ed091" name="a138012f4948d5907886447b8423ed091"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a138012f4948d5907886447b8423ed091">&#9670;&#160;</a></span>ZSTD_preserveUnsortedMark()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ZSTD_preserveUnsortedMark </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>table</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>reducerValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="zstd__lazy_8h.html">zstd_lazy.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

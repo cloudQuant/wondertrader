@@ -1,0 +1,25 @@
+var structctp__sopt_1_1CThostFtdcExchangeTradeField =
+[
+    [ "BusinessUnit", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#afc2d9a535b1358ccc17b4ac4dde8735d", null ],
+    [ "ClearingPartID", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#ab4b0213ce894f3fe7f659c35625dda9f", null ],
+    [ "ClientID", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a0d1f1a9e9ecc65c8e686aaf1ef8b1875", null ],
+    [ "Direction", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a09599149a43870b44b8b25d45356bd0c", null ],
+    [ "ExchangeID", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a9871b8f24504b32a419e11240823faf0", null ],
+    [ "ExchangeInstID", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a8ac27529c6b57aa13aedeecaa6ce533a", null ],
+    [ "HedgeFlag", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a11a6aab3ebf8f09edba444f81c6f7fea", null ],
+    [ "OffsetFlag", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#af743f2a5c59e1ce9ad32748f4698e38b", null ],
+    [ "OrderLocalID", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a07af0f45feab30f1c13fe43e42c7d07b", null ],
+    [ "OrderSysID", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a7b0c6e12d6ec3c82eb127959f29bb1bb", null ],
+    [ "ParticipantID", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a99a0f408c6e3138a02323cf6f04ba38f", null ],
+    [ "Price", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a53ec9d6fc548db73e535d3762b4691cb", null ],
+    [ "PriceSource", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#af44c638d15983a78fb7929ad7e417189", null ],
+    [ "SequenceNo", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#af2ff3664f7ed3e1d77aba4f09130d9b7", null ],
+    [ "TradeDate", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a9e2d6b664ccd958812489d42ed1080ad", null ],
+    [ "TradeID", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#aefd20a8a69f324cc67f22b695dbe4200", null ],
+    [ "TraderID", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a8c5840904553c4d9804f7400ba8ca3dd", null ],
+    [ "TradeSource", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#abc70c0f9be1e77ba6322ee7cb86b6cbc", null ],
+    [ "TradeTime", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a997ffe461aef717bf826dbe003ecc910", null ],
+    [ "TradeType", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a92d046ef99692d268b4d954682c994d8", null ],
+    [ "TradingRole", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a24644dbc2636f9b88a306c4304810d67", null ],
+    [ "Volume", "structctp__sopt_1_1CThostFtdcExchangeTradeField.html#a606676440c8c8ccd253482da4b2d7120", null ]
+];

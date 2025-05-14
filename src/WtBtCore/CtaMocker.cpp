@@ -13,6 +13,7 @@
  *          4. 记录回测过程中的交易、信号和资金数据
  *          5. 导出回测结果和图表数据
  */
+#include <iostream>
 #include "CtaMocker.h"
 #include "WtHelper.h"
 #include "EventNotifier.h"
@@ -511,6 +512,7 @@ void CtaMocker::log_close(const char* stdCode, bool isLong, uint64_t openTime, d
  */
 bool CtaMocker::init_cta_factory(WTSVariant* cfg)
 {
+	std::cout << "CtaMocker::init_cta_factory begins" << std::endl;
 	if (cfg == NULL)
 		return false;
 
@@ -544,7 +546,7 @@ bool CtaMocker::init_cta_factory(WTSVariant* cfg)
 		_strategy->init(cfgStra->get("params"));
 		_name = _strategy->id();
 	}
-
+	std::cout << "CtaMocker::init_cta_factory ends" << std::endl;
 	return true;
 }
 

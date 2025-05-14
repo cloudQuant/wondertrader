@@ -1,0 +1,418 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/Share/BoostFile.hpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('BoostFile_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">BoostFile.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="BoostFile_8hpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;boost/version.hpp&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;boost/shared_ptr.hpp&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;boost/filesystem.hpp&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;boost/interprocess/detail/os_file_functions.hpp&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#define WIN32_LEAN_AND_MEAN</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;windows.h&gt;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;unistd.h&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment">//struct OVERLAPPED;</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment">//extern &quot;C&quot; __declspec(dllimport) int __stdcall ReadFile(void *hnd, void *buffer, unsigned long bytes_to_write,unsigned long *bytes_written, OVERLAPPED* overlapped);</span></div>
+<div class="foldopen" id="foldopen00044" data-start="{" data-end="};">
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="classBoostFile.html">   44</a></span><span class="keyword">class </span><a class="code hl_class" href="classBoostFile.html">BoostFile</a></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>{</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00053" data-start="{" data-end="}">
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="classBoostFile.html#a8d63921be188123d2ba9eb94a1f2516a">   53</a></span>    <a class="code hl_function" href="classBoostFile.html#a8d63921be188123d2ba9eb94a1f2516a">BoostFile</a>()</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    {</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        <a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>=boost::interprocess::ipcdetail::invalid_file(); </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    }</div>
+</div>
+<div class="foldopen" id="foldopen00063" data-start="{" data-end="}">
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="classBoostFile.html#a54af2e681e144ef60705e9b4356e129f">   63</a></span>    <a class="code hl_function" href="classBoostFile.html#a54af2e681e144ef60705e9b4356e129f">~BoostFile</a>()</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    {</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <a class="code hl_function" href="classBoostFile.html#a5481db505f5c5d99c9aa9ba36806bff0">close_file</a>();</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    }</div>
+</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="foldopen" id="foldopen00080" data-start="{" data-end="}">
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="classBoostFile.html#a5eab32a7044d5e65fb18aca7fd90b864">   80</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#a5eab32a7044d5e65fb18aca7fd90b864">create_new_file</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *name, boost::interprocess::mode_t mode = boost::interprocess::read_write, <span class="keywordtype">bool</span> temporary = <span class="keyword">false</span>)</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    {</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>=boost::interprocess::ipcdetail::create_or_open_file(name,mode,boost::interprocess::permissions(),temporary);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="classBoostFile.html#ad56152ae9b1cea225f9e65207f7906a8">valid</a>())</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="classBoostFile.html#a0f2a2cd0d09d6ef067d3b600c8ce863d">truncate_file</a>(0);</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    }</div>
+</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="foldopen" id="foldopen00101" data-start="{" data-end="}">
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="classBoostFile.html#a8a83c17ff9c66d7bbcb32896062c656a">  101</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#a8a83c17ff9c66d7bbcb32896062c656a">create_or_open_file</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *name, boost::interprocess::mode_t mode = boost::interprocess::read_write, <span class="keywordtype">bool</span> temporary = <span class="keyword">false</span>)</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    {</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        <a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>=boost::interprocess::ipcdetail::create_or_open_file(name,mode,boost::interprocess::permissions(),temporary);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="classBoostFile.html#ad56152ae9b1cea225f9e65207f7906a8">valid</a>();</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    }</div>
+</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="foldopen" id="foldopen00120" data-start="{" data-end="}">
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno"><a class="line" href="classBoostFile.html#a1c5a0728e2a2f9f95ede282966424a4a">  120</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#a1c5a0728e2a2f9f95ede282966424a4a">open_existing_file</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *name, boost::interprocess::mode_t mode = boost::interprocess::read_write, <span class="keywordtype">bool</span> temporary = <span class="keyword">false</span>)</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    {</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        <a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>=boost::interprocess::ipcdetail::open_existing_file(name,mode,temporary);</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="classBoostFile.html#ad56152ae9b1cea225f9e65207f7906a8">valid</a>();</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    }</div>
+</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
+<div class="foldopen" id="foldopen00134" data-start="{" data-end="}">
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno"><a class="line" href="classBoostFile.html#a3a95d92d05f738947b61d7a416c92654">  134</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#a3a95d92d05f738947b61d7a416c92654">is_invalid_file</a>()</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    {  </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>==boost::interprocess::ipcdetail::invalid_file();  </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    }</div>
+</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="foldopen" id="foldopen00148" data-start="{" data-end="}">
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno"><a class="line" href="classBoostFile.html#ad56152ae9b1cea225f9e65207f7906a8">  148</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#ad56152ae9b1cea225f9e65207f7906a8">valid</a>()</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>    {</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>!=boost::interprocess::ipcdetail::invalid_file();</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    }</div>
+</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
+<div class="foldopen" id="foldopen00162" data-start="{" data-end="}">
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno"><a class="line" href="classBoostFile.html#a5481db505f5c5d99c9aa9ba36806bff0">  162</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classBoostFile.html#a5481db505f5c5d99c9aa9ba36806bff0">close_file</a>()</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    {</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>        <span class="keywordflow">if</span>(!<a class="code hl_function" href="classBoostFile.html#a3a95d92d05f738947b61d7a416c92654">is_invalid_file</a>())</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>        {</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>            boost::interprocess::ipcdetail::close_file(<a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>);</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>            <a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>=boost::interprocess::ipcdetail::invalid_file();</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>        }</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    }</div>
+</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
+<div class="foldopen" id="foldopen00181" data-start="{" data-end="}">
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno"><a class="line" href="classBoostFile.html#a0f2a2cd0d09d6ef067d3b600c8ce863d">  181</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#a0f2a2cd0d09d6ef067d3b600c8ce863d">truncate_file</a> (std::size_t size)</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    {</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>        <span class="keywordflow">return</span> boost::interprocess::ipcdetail::truncate_file(<a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>,size);</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>    }</div>
+</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
+<div class="foldopen" id="foldopen00196" data-start="{" data-end="}">
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno"><a class="line" href="classBoostFile.html#a98c1d64ab4ca5bfa2b1ffbe9b3dde27e">  196</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#a98c1d64ab4ca5bfa2b1ffbe9b3dde27e">get_file_size</a>(boost::interprocess::offset_t &amp;size)</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    {</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        <span class="keywordflow">return</span> boost::interprocess::ipcdetail::get_file_size(<a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>,size);</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    }</div>
+</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> </div>
+<div class="foldopen" id="foldopen00211" data-start="{" data-end="}">
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno"><a class="line" href="classBoostFile.html#ac7554f5f6e1f83ab4f1b4e113edca542">  211</a></span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <span class="keywordtype">long</span> <a class="code hl_function" href="classBoostFile.html#ac7554f5f6e1f83ab4f1b4e113edca542">get_file_size</a>()</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    {</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>        boost::interprocess::offset_t size=0;</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        <span class="keywordflow">if</span>(!<a class="code hl_function" href="classBoostFile.html#ac7554f5f6e1f83ab4f1b4e113edca542">get_file_size</a>(size))</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>            size=0;</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        <span class="keywordflow">return</span> size;</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>    }</div>
+</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
+<div class="foldopen" id="foldopen00230" data-start="{" data-end="}">
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno"><a class="line" href="classBoostFile.html#a5caeb46a200703d3464962962cd70abb">  230</a></span>    <span class="keyword">static</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <span class="keywordtype">long</span> <a class="code hl_function" href="classBoostFile.html#a5caeb46a200703d3464962962cd70abb">get_file_size</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *name)</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    {</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        <a class="code hl_class" href="classBoostFile.html">BoostFile</a> bf;</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        <span class="keywordflow">if</span> (!bf.<a class="code hl_function" href="classBoostFile.html#a1c5a0728e2a2f9f95ede282966424a4a">open_existing_file</a>(name))</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>            <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span> </div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <span class="keyword">auto</span> ret = bf.<a class="code hl_function" href="classBoostFile.html#a98c1d64ab4ca5bfa2b1ffbe9b3dde27e">get_file_size</a>();</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        bf.<a class="code hl_function" href="classBoostFile.html#a5481db505f5c5d99c9aa9ba36806bff0">close_file</a>();</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    }</div>
+</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span> </div>
+<div class="foldopen" id="foldopen00253" data-start="{" data-end="}">
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno"><a class="line" href="classBoostFile.html#a250a9eba00b03eb55dc3a76a4f0f0a23">  253</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#a250a9eba00b03eb55dc3a76a4f0f0a23">set_file_pointer</a>(boost::interprocess::offset_t off, boost::interprocess::file_pos_t pos)</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>    {</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="keywordflow">return</span> boost::interprocess::ipcdetail::set_file_pointer(<a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>,off,pos);</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>    }</div>
+</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
+<div class="foldopen" id="foldopen00268" data-start="{" data-end="}">
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno"><a class="line" href="classBoostFile.html#ae6dd971735a40b7008c18d0d9c686522">  268</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#ae6dd971735a40b7008c18d0d9c686522">seek_to_begin</a>(<span class="keywordtype">int</span> offsize=0)</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    {</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="classBoostFile.html#a250a9eba00b03eb55dc3a76a4f0f0a23">set_file_pointer</a>(offsize,boost::interprocess::file_begin);</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>    }</div>
+</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span> </div>
+<div class="foldopen" id="foldopen00284" data-start="{" data-end="}">
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno"><a class="line" href="classBoostFile.html#ae0ff0290c6126f8dc31ac0b991ac5421">  284</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#ae0ff0290c6126f8dc31ac0b991ac5421">seek_current</a>(<span class="keywordtype">int</span> offsize=0)</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>    {</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="classBoostFile.html#a250a9eba00b03eb55dc3a76a4f0f0a23">set_file_pointer</a>(offsize,boost::interprocess::file_current);</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>    }</div>
+</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span> </div>
+<div class="foldopen" id="foldopen00300" data-start="{" data-end="}">
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno"><a class="line" href="classBoostFile.html#a35d44b29939730066ab6d69f8477a24e">  300</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#a35d44b29939730066ab6d69f8477a24e">seek_to_end</a>(<span class="keywordtype">int</span> offsize=0)</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>    {</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="classBoostFile.html#a250a9eba00b03eb55dc3a76a4f0f0a23">set_file_pointer</a>(offsize,boost::interprocess::file_end);</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>    }</div>
+</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span> </div>
+<div class="foldopen" id="foldopen00315" data-start="{" data-end="}">
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno"><a class="line" href="classBoostFile.html#a186f0ea1321016ee613e18b1afbfd3f5">  315</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#a186f0ea1321016ee613e18b1afbfd3f5">get_file_pointer</a>(boost::interprocess::offset_t &amp;off)</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>    {</div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>        <span class="keywordflow">return</span> boost::interprocess::ipcdetail::get_file_pointer(<a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>,off);</div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>    }</div>
+</div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span> </div>
+<div class="foldopen" id="foldopen00330" data-start="{" data-end="}">
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno"><a class="line" href="classBoostFile.html#adc650dc2d5f9e4cbfa0d7a5472ea66bb">  330</a></span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <span class="keywordtype">long</span> <a class="code hl_function" href="classBoostFile.html#adc650dc2d5f9e4cbfa0d7a5472ea66bb">get_file_pointer</a>()</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>    {</div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>        boost::interprocess::offset_t off=0;</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>        <span class="keywordflow">if</span>(!<a class="code hl_function" href="classBoostFile.html#adc650dc2d5f9e4cbfa0d7a5472ea66bb">get_file_pointer</a>(off))</div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>            <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>        <span class="keywordflow">return</span> off;</div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>    }</div>
+</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span> </div>
+<div class="foldopen" id="foldopen00350" data-start="{" data-end="}">
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno"><a class="line" href="classBoostFile.html#aca29c4c4ed11acc16411e3fcc986f6e3">  350</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#aca29c4c4ed11acc16411e3fcc986f6e3">write_file</a>(<span class="keyword">const</span> <span class="keywordtype">void</span> *data, std::size_t numdata)</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>    {</div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>        <span class="keywordflow">return</span> boost::interprocess::ipcdetail::write_file(<a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>,data,numdata);</div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>    }</div>
+</div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span> </div>
+<div class="foldopen" id="foldopen00366" data-start="{" data-end="}">
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno"><a class="line" href="classBoostFile.html#a1543235872c0d2c9b0df16335c1e356d">  366</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#a1543235872c0d2c9b0df16335c1e356d">write_file</a>(<span class="keyword">const</span> std::string&amp; data)</div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>    {</div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>        <span class="keywordflow">return</span> boost::interprocess::ipcdetail::write_file(<a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>, data.data(), data.size());</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>    }</div>
+</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span> </div>
+<div class="foldopen" id="foldopen00384" data-start="{" data-end="}">
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno"><a class="line" href="classBoostFile.html#a8664402121aacfa3e8188031f950fb71">  384</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#a8664402121aacfa3e8188031f950fb71">read_file</a>(<span class="keywordtype">void</span> *data, std::size_t numdata)</div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>    {</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>        <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> readbytes = 0;</div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span><span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>        <span class="keywordtype">int</span> ret = ReadFile(<a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>, data, (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#ad342ac907eb044443153a22f964bf0af">DWORD</a>)numdata, &amp;readbytes, <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>);</div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>        readbytes = read(<a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>, data, (std::size_t)numdata);</div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>        <span class="keywordflow">return</span> numdata == readbytes;</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>    }</div>
+</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span> </div>
+<div class="foldopen" id="foldopen00408" data-start="{" data-end="}">
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno"><a class="line" href="classBoostFile.html#a215f5139fb99cde5a5ba9bf699e000fc">  408</a></span>    <span class="keywordtype">int</span> <a class="code hl_function" href="classBoostFile.html#a215f5139fb99cde5a5ba9bf699e000fc">read_file_length</a>(<span class="keywordtype">void</span> *data, std::size_t numdata)</div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>    {</div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>        <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> readbytes = 0;</div>
+<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span><span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>        <span class="keywordtype">int</span> ret = ReadFile(<a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>, data, (<a class="code hl_typedef" href="WTSExpressData_8hpp.html#ad342ac907eb044443153a22f964bf0af">DWORD</a>)numdata, &amp;readbytes, <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>);</div>
+<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>        readbytes = read(<a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>, data, (std::size_t)numdata);</div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>        <span class="keywordflow">return</span> readbytes;</div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>    }</div>
+</div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span> </div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno"><a class="line" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">  428</a></span>    boost::interprocess::file_handle_t <a class="code hl_variable" href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">_handle</a>;</div>
+<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span> </div>
+<div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00442" data-start="{" data-end="}">
+<div class="line"><a id="l00442" name="l00442"></a><span class="lineno"><a class="line" href="classBoostFile.html#ae0b964d9b718fedfb3bad81fd66c8e46">  442</a></span>    <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#ae0b964d9b718fedfb3bad81fd66c8e46">delete_file</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *name)</div>
+<div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span>    {</div>
+<div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span>        <span class="keywordflow">return</span> boost::interprocess::ipcdetail::delete_file(name);</div>
+<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span>    }</div>
+</div>
+<div class="line"><a id="l00446" name="l00446"></a><span class="lineno">  446</span> </div>
+<div class="foldopen" id="foldopen00460" data-start="{" data-end="}">
+<div class="line"><a id="l00460" name="l00460"></a><span class="lineno"><a class="line" href="classBoostFile.html#abdc1e870483d6cb55dbcfdafaa62be9a">  460</a></span>    <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#abdc1e870483d6cb55dbcfdafaa62be9a">read_file_contents</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *filename,std::string &amp;buffer)</div>
+<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span>    {</div>
+<div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span>        <a class="code hl_class" href="classBoostFile.html">BoostFile</a> bf;</div>
+<div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span>        <span class="keywordflow">if</span>(!bf.<a class="code hl_function" href="classBoostFile.html#a1c5a0728e2a2f9f95ede282966424a4a">open_existing_file</a>(filename,boost::interprocess::read_only))</div>
+<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00465" name="l00465"></a><span class="lineno">  465</span>        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> filesize=(<span class="keywordtype">unsigned</span> int)bf.<a class="code hl_function" href="classBoostFile.html#a98c1d64ab4ca5bfa2b1ffbe9b3dde27e">get_file_size</a>();</div>
+<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>        <span class="keywordflow">if</span>(filesize==0)</div>
+<div class="line"><a id="l00467" name="l00467"></a><span class="lineno">  467</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00468" name="l00468"></a><span class="lineno">  468</span>        buffer.resize(filesize);</div>
+<div class="line"><a id="l00469" name="l00469"></a><span class="lineno">  469</span>        <span class="keywordflow">return</span> bf.<a class="code hl_function" href="classBoostFile.html#a8664402121aacfa3e8188031f950fb71">read_file</a>((<span class="keywordtype">void</span> *)buffer.c_str(),filesize);</div>
+<div class="line"><a id="l00470" name="l00470"></a><span class="lineno">  470</span>    }</div>
+</div>
+<div class="line"><a id="l00471" name="l00471"></a><span class="lineno">  471</span> </div>
+<div class="foldopen" id="foldopen00486" data-start="{" data-end="}">
+<div class="line"><a id="l00486" name="l00486"></a><span class="lineno"><a class="line" href="classBoostFile.html#ae9e78b2445ae39b733883796bdde9225">  486</a></span>    <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#ae9e78b2445ae39b733883796bdde9225">write_file_contents</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *filename,<span class="keyword">const</span> <span class="keywordtype">void</span> *pdata,uint32_t datalen)</div>
+<div class="line"><a id="l00487" name="l00487"></a><span class="lineno">  487</span>    {</div>
+<div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span>        <a class="code hl_class" href="classBoostFile.html">BoostFile</a> bf;</div>
+<div class="line"><a id="l00489" name="l00489"></a><span class="lineno">  489</span>        <span class="keywordflow">if</span>(!bf.<a class="code hl_function" href="classBoostFile.html#a5eab32a7044d5e65fb18aca7fd90b864">create_new_file</a>(filename))</div>
+<div class="line"><a id="l00490" name="l00490"></a><span class="lineno">  490</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00491" name="l00491"></a><span class="lineno">  491</span>        <span class="keywordflow">return</span> bf.<a class="code hl_function" href="classBoostFile.html#aca29c4c4ed11acc16411e3fcc986f6e3">write_file</a>(pdata,datalen);</div>
+<div class="line"><a id="l00492" name="l00492"></a><span class="lineno">  492</span>    }</div>
+</div>
+<div class="line"><a id="l00493" name="l00493"></a><span class="lineno">  493</span> </div>
+<div class="foldopen" id="foldopen00506" data-start="{" data-end="}">
+<div class="line"><a id="l00506" name="l00506"></a><span class="lineno"><a class="line" href="classBoostFile.html#a1224c49e2baa9ca660fa32a78985ad5a">  506</a></span>    <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#a1224c49e2baa9ca660fa32a78985ad5a">create_directory</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *name)</div>
+<div class="line"><a id="l00507" name="l00507"></a><span class="lineno">  507</span>    {</div>
+<div class="line"><a id="l00508" name="l00508"></a><span class="lineno">  508</span>        <span class="keywordflow">if</span>(<a class="code hl_function" href="classBoostFile.html#aab642b9bcdfa02c81c2530110eb8a61e">exists</a>(name))</div>
+<div class="line"><a id="l00509" name="l00509"></a><span class="lineno">  509</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00510" name="l00510"></a><span class="lineno">  510</span> </div>
+<div class="line"><a id="l00511" name="l00511"></a><span class="lineno">  511</span>        <span class="keywordflow">return</span> boost::filesystem::create_directory(boost::filesystem::path(name));</div>
+<div class="line"><a id="l00512" name="l00512"></a><span class="lineno">  512</span>    }</div>
+</div>
+<div class="line"><a id="l00513" name="l00513"></a><span class="lineno">  513</span> </div>
+<div class="foldopen" id="foldopen00527" data-start="{" data-end="}">
+<div class="line"><a id="l00527" name="l00527"></a><span class="lineno"><a class="line" href="classBoostFile.html#a81da0853e01b03e97dad08b846a1177d">  527</a></span>    <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#a81da0853e01b03e97dad08b846a1177d">create_directories</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *name)</div>
+<div class="line"><a id="l00528" name="l00528"></a><span class="lineno">  528</span>    {</div>
+<div class="line"><a id="l00529" name="l00529"></a><span class="lineno">  529</span>        <span class="keywordflow">if</span>(<a class="code hl_function" href="classBoostFile.html#aab642b9bcdfa02c81c2530110eb8a61e">exists</a>(name))</div>
+<div class="line"><a id="l00530" name="l00530"></a><span class="lineno">  530</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00531" name="l00531"></a><span class="lineno">  531</span> </div>
+<div class="line"><a id="l00532" name="l00532"></a><span class="lineno">  532</span>        <span class="keywordflow">return</span> boost::filesystem::create_directories(boost::filesystem::path(name));</div>
+<div class="line"><a id="l00533" name="l00533"></a><span class="lineno">  533</span>    }</div>
+</div>
+<div class="line"><a id="l00534" name="l00534"></a><span class="lineno">  534</span> </div>
+<div class="foldopen" id="foldopen00546" data-start="{" data-end="}">
+<div class="line"><a id="l00546" name="l00546"></a><span class="lineno"><a class="line" href="classBoostFile.html#aab642b9bcdfa02c81c2530110eb8a61e">  546</a></span>    <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classBoostFile.html#aab642b9bcdfa02c81c2530110eb8a61e">exists</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* name)</div>
+<div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span>    {</div>
+<div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span>        <span class="keywordflow">return</span> boost::filesystem::exists(boost::filesystem::path(name));</div>
+<div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span>    }</div>
+</div>
+<div class="line"><a id="l00550" name="l00550"></a><span class="lineno">  550</span>};</div>
+</div>
+<div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span> </div>
+<div class="line"><a id="l00559" name="l00559"></a><span class="lineno"><a class="line" href="BoostFile_8hpp.html#a596e60eb12117122d44c36f261d58a04">  559</a></span><span class="keyword">typedef</span> boost::shared_ptr&lt;BoostFile&gt; <a class="code hl_typedef" href="BoostFile_8hpp.html#a596e60eb12117122d44c36f261d58a04">BoostFilePtr</a>;</div>
+<div class="ttc" id="aBoostFile_8hpp_html_a596e60eb12117122d44c36f261d58a04"><div class="ttname"><a href="BoostFile_8hpp.html#a596e60eb12117122d44c36f261d58a04">BoostFilePtr</a></div><div class="ttdeci">boost::shared_ptr&lt; BoostFile &gt; BoostFilePtr</div><div class="ttdoc">BoostFile类的智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00559">BoostFile.hpp:559</a></div></div>
+<div class="ttc" id="aWTSExpressData_8hpp_html_ad342ac907eb044443153a22f964bf0af"><div class="ttname"><a href="WTSExpressData_8hpp.html#ad342ac907eb044443153a22f964bf0af">DWORD</a></div><div class="ttdeci">unsigned long DWORD</div><div class="ttdef"><b>Definition</b> <a href="WTSExpressData_8hpp_source.html#l00021">WTSExpressData.hpp:21</a></div></div>
+<div class="ttc" id="aclassBoostFile_html"><div class="ttname"><a href="classBoostFile.html">BoostFile</a></div><div class="ttdoc">boost库文件操作的封装类</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00044">BoostFile.hpp:45</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a0f2a2cd0d09d6ef067d3b600c8ce863d"><div class="ttname"><a href="classBoostFile.html#a0f2a2cd0d09d6ef067d3b600c8ce863d">BoostFile::truncate_file</a></div><div class="ttdeci">bool truncate_file(std::size_t size)</div><div class="ttdoc">截断文件到指定大小</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00181">BoostFile.hpp:181</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a1224c49e2baa9ca660fa32a78985ad5a"><div class="ttname"><a href="classBoostFile.html#a1224c49e2baa9ca660fa32a78985ad5a">BoostFile::create_directory</a></div><div class="ttdeci">static bool create_directory(const char *name)</div><div class="ttdoc">创建目录（静态方法）</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00506">BoostFile.hpp:506</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a1543235872c0d2c9b0df16335c1e356d"><div class="ttname"><a href="classBoostFile.html#a1543235872c0d2c9b0df16335c1e356d">BoostFile::write_file</a></div><div class="ttdeci">bool write_file(const std::string &amp;data)</div><div class="ttdoc">写入字符串数据到文件</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00366">BoostFile.hpp:366</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a186f0ea1321016ee613e18b1afbfd3f5"><div class="ttname"><a href="classBoostFile.html#a186f0ea1321016ee613e18b1afbfd3f5">BoostFile::get_file_pointer</a></div><div class="ttdeci">bool get_file_pointer(boost::interprocess::offset_t &amp;off)</div><div class="ttdoc">获取当前文件指针位置</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00315">BoostFile.hpp:315</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a1c5a0728e2a2f9f95ede282966424a4a"><div class="ttname"><a href="classBoostFile.html#a1c5a0728e2a2f9f95ede282966424a4a">BoostFile::open_existing_file</a></div><div class="ttdeci">bool open_existing_file(const char *name, boost::interprocess::mode_t mode=boost::interprocess::read_write, bool temporary=false)</div><div class="ttdoc">打开现有文件</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00120">BoostFile.hpp:120</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a215f5139fb99cde5a5ba9bf699e000fc"><div class="ttname"><a href="classBoostFile.html#a215f5139fb99cde5a5ba9bf699e000fc">BoostFile::read_file_length</a></div><div class="ttdeci">int read_file_length(void *data, std::size_t numdata)</div><div class="ttdoc">从文件读取数据并返回实际读取到的字节数</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00408">BoostFile.hpp:408</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a250a9eba00b03eb55dc3a76a4f0f0a23"><div class="ttname"><a href="classBoostFile.html#a250a9eba00b03eb55dc3a76a4f0f0a23">BoostFile::set_file_pointer</a></div><div class="ttdeci">bool set_file_pointer(boost::interprocess::offset_t off, boost::interprocess::file_pos_t pos)</div><div class="ttdoc">设置文件指针位置</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00253">BoostFile.hpp:253</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a35d44b29939730066ab6d69f8477a24e"><div class="ttname"><a href="classBoostFile.html#a35d44b29939730066ab6d69f8477a24e">BoostFile::seek_to_end</a></div><div class="ttdeci">bool seek_to_end(int offsize=0)</div><div class="ttdoc">将文件指针移动到文件结尾</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00300">BoostFile.hpp:300</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a3a95d92d05f738947b61d7a416c92654"><div class="ttname"><a href="classBoostFile.html#a3a95d92d05f738947b61d7a416c92654">BoostFile::is_invalid_file</a></div><div class="ttdeci">bool is_invalid_file()</div><div class="ttdoc">检查文件句柄是否无效</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00134">BoostFile.hpp:134</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a5481db505f5c5d99c9aa9ba36806bff0"><div class="ttname"><a href="classBoostFile.html#a5481db505f5c5d99c9aa9ba36806bff0">BoostFile::close_file</a></div><div class="ttdeci">void close_file()</div><div class="ttdoc">关闭文件</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00162">BoostFile.hpp:162</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a54af2e681e144ef60705e9b4356e129f"><div class="ttname"><a href="classBoostFile.html#a54af2e681e144ef60705e9b4356e129f">BoostFile::~BoostFile</a></div><div class="ttdeci">~BoostFile()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00063">BoostFile.hpp:63</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a5caeb46a200703d3464962962cd70abb"><div class="ttname"><a href="classBoostFile.html#a5caeb46a200703d3464962962cd70abb">BoostFile::get_file_size</a></div><div class="ttdeci">static unsigned long long get_file_size(const char *name)</div><div class="ttdoc">获取指定文件的大小（静态方法）</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00230">BoostFile.hpp:230</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a5eab32a7044d5e65fb18aca7fd90b864"><div class="ttname"><a href="classBoostFile.html#a5eab32a7044d5e65fb18aca7fd90b864">BoostFile::create_new_file</a></div><div class="ttdeci">bool create_new_file(const char *name, boost::interprocess::mode_t mode=boost::interprocess::read_write, bool temporary=false)</div><div class="ttdoc">创建新文件</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00080">BoostFile.hpp:80</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a81da0853e01b03e97dad08b846a1177d"><div class="ttname"><a href="classBoostFile.html#a81da0853e01b03e97dad08b846a1177d">BoostFile::create_directories</a></div><div class="ttdeci">static bool create_directories(const char *name)</div><div class="ttdoc">创建多级目录（静态方法）</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00527">BoostFile.hpp:527</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a8664402121aacfa3e8188031f950fb71"><div class="ttname"><a href="classBoostFile.html#a8664402121aacfa3e8188031f950fb71">BoostFile::read_file</a></div><div class="ttdeci">bool read_file(void *data, std::size_t numdata)</div><div class="ttdoc">从文件读取数据</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00384">BoostFile.hpp:384</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a8a83c17ff9c66d7bbcb32896062c656a"><div class="ttname"><a href="classBoostFile.html#a8a83c17ff9c66d7bbcb32896062c656a">BoostFile::create_or_open_file</a></div><div class="ttdeci">bool create_or_open_file(const char *name, boost::interprocess::mode_t mode=boost::interprocess::read_write, bool temporary=false)</div><div class="ttdoc">创建或打开文件</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00101">BoostFile.hpp:101</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a8d63921be188123d2ba9eb94a1f2516a"><div class="ttname"><a href="classBoostFile.html#a8d63921be188123d2ba9eb94a1f2516a">BoostFile::BoostFile</a></div><div class="ttdeci">BoostFile()</div><div class="ttdoc">默认构造函数</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00053">BoostFile.hpp:53</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_a98c1d64ab4ca5bfa2b1ffbe9b3dde27e"><div class="ttname"><a href="classBoostFile.html#a98c1d64ab4ca5bfa2b1ffbe9b3dde27e">BoostFile::get_file_size</a></div><div class="ttdeci">bool get_file_size(boost::interprocess::offset_t &amp;size)</div><div class="ttdoc">获取文件大小</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00196">BoostFile.hpp:196</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_aab642b9bcdfa02c81c2530110eb8a61e"><div class="ttname"><a href="classBoostFile.html#aab642b9bcdfa02c81c2530110eb8a61e">BoostFile::exists</a></div><div class="ttdeci">static bool exists(const char *name)</div><div class="ttdoc">检查文件或目录是否存在（静态方法）</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00546">BoostFile.hpp:546</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_abdc1e870483d6cb55dbcfdafaa62be9a"><div class="ttname"><a href="classBoostFile.html#abdc1e870483d6cb55dbcfdafaa62be9a">BoostFile::read_file_contents</a></div><div class="ttdeci">static bool read_file_contents(const char *filename, std::string &amp;buffer)</div><div class="ttdoc">读取文件全部内容到字符串（静态方法）</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00460">BoostFile.hpp:460</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_ac7554f5f6e1f83ab4f1b4e113edca542"><div class="ttname"><a href="classBoostFile.html#ac7554f5f6e1f83ab4f1b4e113edca542">BoostFile::get_file_size</a></div><div class="ttdeci">unsigned long long get_file_size()</div><div class="ttdoc">获取文件大小</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00211">BoostFile.hpp:211</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_aca29c4c4ed11acc16411e3fcc986f6e3"><div class="ttname"><a href="classBoostFile.html#aca29c4c4ed11acc16411e3fcc986f6e3">BoostFile::write_file</a></div><div class="ttdeci">bool write_file(const void *data, std::size_t numdata)</div><div class="ttdoc">写入数据到文件</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00350">BoostFile.hpp:350</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_ad56152ae9b1cea225f9e65207f7906a8"><div class="ttname"><a href="classBoostFile.html#ad56152ae9b1cea225f9e65207f7906a8">BoostFile::valid</a></div><div class="ttdeci">bool valid()</div><div class="ttdoc">检查文件句柄是否有效</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00148">BoostFile.hpp:148</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_adc4459bbb8b27072ff1be0a4e8308f09"><div class="ttname"><a href="classBoostFile.html#adc4459bbb8b27072ff1be0a4e8308f09">BoostFile::_handle</a></div><div class="ttdeci">boost::interprocess::file_handle_t _handle</div><div class="ttdoc">文件句柄</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00428">BoostFile.hpp:428</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_adc650dc2d5f9e4cbfa0d7a5472ea66bb"><div class="ttname"><a href="classBoostFile.html#adc650dc2d5f9e4cbfa0d7a5472ea66bb">BoostFile::get_file_pointer</a></div><div class="ttdeci">unsigned long long get_file_pointer()</div><div class="ttdoc">获取当前文件指针位置</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00330">BoostFile.hpp:330</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_ae0b964d9b718fedfb3bad81fd66c8e46"><div class="ttname"><a href="classBoostFile.html#ae0b964d9b718fedfb3bad81fd66c8e46">BoostFile::delete_file</a></div><div class="ttdeci">static bool delete_file(const char *name)</div><div class="ttdoc">删除指定文件（静态方法）</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00442">BoostFile.hpp:442</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_ae0ff0290c6126f8dc31ac0b991ac5421"><div class="ttname"><a href="classBoostFile.html#ae0ff0290c6126f8dc31ac0b991ac5421">BoostFile::seek_current</a></div><div class="ttdeci">bool seek_current(int offsize=0)</div><div class="ttdoc">将文件指针相对于当前位置移动</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00284">BoostFile.hpp:284</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_ae6dd971735a40b7008c18d0d9c686522"><div class="ttname"><a href="classBoostFile.html#ae6dd971735a40b7008c18d0d9c686522">BoostFile::seek_to_begin</a></div><div class="ttdeci">bool seek_to_begin(int offsize=0)</div><div class="ttdoc">将文件指针移动到文件开头</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00268">BoostFile.hpp:268</a></div></div>
+<div class="ttc" id="aclassBoostFile_html_ae9e78b2445ae39b733883796bdde9225"><div class="ttname"><a href="classBoostFile.html#ae9e78b2445ae39b733883796bdde9225">BoostFile::write_file_contents</a></div><div class="ttdeci">static bool write_file_contents(const char *filename, const void *pdata, uint32_t datalen)</div><div class="ttdoc">写入数据到文件（静态方法）</div><div class="ttdef"><b>Definition</b> <a href="BoostFile_8hpp_source.html#l00486">BoostFile.hpp:486</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_b415f7b135736b475386968edd2cefde.html">Share</a></li><li class="navelem"><a class="el" href="BoostFile_8hpp.html">BoostFile.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

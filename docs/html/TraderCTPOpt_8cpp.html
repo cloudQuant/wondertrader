@@ -1,0 +1,714 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/TraderCTPOpt/TraderCTPOpt.cpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('TraderCTPOpt_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">TraderCTPOpt.cpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;<a class="el" href="TraderCTPOpt_8h_source.html">TraderCTPOpt.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSError_8hpp_source.html">../Includes/WTSError.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSContractInfo_8hpp_source.html">../Includes/WTSContractInfo.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSSessionInfo_8hpp_source.html">../Includes/WTSSessionInfo.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSTradeDef_8hpp_source.html">../Includes/WTSTradeDef.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSDataDef_8hpp_source.html">../Includes/WTSDataDef.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSVariant_8hpp_source.html">../Includes/WTSVariant.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="IBaseDataMgr_8h_source.html">../Includes/IBaseDataMgr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="ModuleHelper_8hpp_source.html">../Share/ModuleHelper.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="decimal_8h_source.html">../Share/decimal.h</a>&quot;</code><br />
+<code>#include &lt;boost/filesystem.hpp&gt;</code><br />
+<code>#include &quot;<a class="el" href="fmtlib_8h_source.html">../Share/fmtlib.h</a>&quot;</code><br />
+</div>
+<p><a href="TraderCTPOpt_8cpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:afcbbd620f8681b0cbd4c37c7b03b66a7" id="r_afcbbd620f8681b0cbd4c37c7b03b66a7"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:afcbbd620f8681b0cbd4c37c7b03b66a7"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#afcbbd620f8681b0cbd4c37c7b03b66a7">write_log</a> (<a class="el" href="classITraderSpi.html">ITraderSpi</a> *sink, <a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;... args)</td></tr>
+<tr class="separator:afcbbd620f8681b0cbd4c37c7b03b66a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb5509cab7c42b9be9dd4f18c19fd75a" id="r_afb5509cab7c42b9be9dd4f18c19fd75a"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#afb5509cab7c42b9be9dd4f18c19fd75a">strToTime</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *strTime)</td></tr>
+<tr class="separator:afb5509cab7c42b9be9dd4f18c19fd75a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a273861bf714fd9329b7130200e062b" id="r_a2a273861bf714fd9329b7130200e062b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a> <a class="el" href="classITraderApi.html">ITraderApi</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#a2a273861bf714fd9329b7130200e062b">createTrader</a> ()</td></tr>
+<tr class="separator:a2a273861bf714fd9329b7130200e062b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45a660acab3281d66581f45eb82ab3ae" id="r_a45a660acab3281d66581f45eb82ab3ae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#a45a660acab3281d66581f45eb82ab3ae">deleteTrader</a> (<a class="el" href="classITraderApi.html">ITraderApi</a> *&amp;trader)</td></tr>
+<tr class="separator:a45a660acab3281d66581f45eb82ab3ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada1bc5cac9b924d0fb9d180b9fc8dd2b" id="r_ada1bc5cac9b924d0fb9d180b9fc8dd2b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#ada1bc5cac9b924d0fb9d180b9fc8dd2b">wrapDirectionType</a> (<a class="el" href="WTSTypes_8h.html#a282f1bec986ddaefae5fea1851b338da">WTSDirectionType</a> dirType, <a class="el" href="WTSTypes_8h.html#a883c7555025e430348f663c1eb7f18ea">WTSOffsetType</a> offsetType)</td></tr>
+<tr class="separator:ada1bc5cac9b924d0fb9d180b9fc8dd2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2da2196b2dbcee75ab45a4f16aac77ca" id="r_a2da2196b2dbcee75ab45a4f16aac77ca"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#a2da2196b2dbcee75ab45a4f16aac77ca">wrapPosDirType</a> (<a class="el" href="WTSTypes_8h.html#a282f1bec986ddaefae5fea1851b338da">WTSDirectionType</a> dirType)</td></tr>
+<tr class="separator:a2da2196b2dbcee75ab45a4f16aac77ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dc8eda4e9ec5d433b2676d1d1519b72" id="r_a8dc8eda4e9ec5d433b2676d1d1519b72"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSTypes_8h.html#a282f1bec986ddaefae5fea1851b338da">WTSDirectionType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#a8dc8eda4e9ec5d433b2676d1d1519b72">wrapPosDirType</a> (<a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#a9827dff7eb704bc41750d1635c064bdd">TThostFtdcPosiDirectionType</a> dirType)</td></tr>
+<tr class="separator:a8dc8eda4e9ec5d433b2676d1d1519b72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae6c67eb3e2dfd21870ce6d8b939fd28" id="r_aae6c67eb3e2dfd21870ce6d8b939fd28"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSTypes_8h.html#a282f1bec986ddaefae5fea1851b338da">WTSDirectionType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#aae6c67eb3e2dfd21870ce6d8b939fd28">wrapDirectionType</a> (<a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#a561d91e2a6dbe99f5ff1efb669878058">TThostFtdcDirectionType</a> dirType, <a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#ad5fd977e8d974898973c6950ddcd26b0">TThostFtdcOffsetFlagType</a> offsetType)</td></tr>
+<tr class="separator:aae6c67eb3e2dfd21870ce6d8b939fd28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbc9a3c983f953f23fd6fa9dc65fe6b6" id="r_abbc9a3c983f953f23fd6fa9dc65fe6b6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSTypes_8h.html#a282f1bec986ddaefae5fea1851b338da">WTSDirectionType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#abbc9a3c983f953f23fd6fa9dc65fe6b6">wrapPosDirection</a> (<a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#a9827dff7eb704bc41750d1635c064bdd">TThostFtdcPosiDirectionType</a> dirType)</td></tr>
+<tr class="separator:abbc9a3c983f953f23fd6fa9dc65fe6b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb0f08b8e8c6dbc3f3675b975a7e9415" id="r_aeb0f08b8e8c6dbc3f3675b975a7e9415"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#aeb0f08b8e8c6dbc3f3675b975a7e9415">wrapOffsetType</a> (<a class="el" href="WTSTypes_8h.html#a883c7555025e430348f663c1eb7f18ea">WTSOffsetType</a> offType)</td></tr>
+<tr class="separator:aeb0f08b8e8c6dbc3f3675b975a7e9415"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52c717907aa79076e1173f0f339006d3" id="r_a52c717907aa79076e1173f0f339006d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSTypes_8h.html#a883c7555025e430348f663c1eb7f18ea">WTSOffsetType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#a52c717907aa79076e1173f0f339006d3">wrapOffsetType</a> (<a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#ad5fd977e8d974898973c6950ddcd26b0">TThostFtdcOffsetFlagType</a> offType)</td></tr>
+<tr class="separator:a52c717907aa79076e1173f0f339006d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac99c0608f3c8a84535b4bd3f2dfcc5a" id="r_aac99c0608f3c8a84535b4bd3f2dfcc5a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#aac99c0608f3c8a84535b4bd3f2dfcc5a">wrapPriceType</a> (<a class="el" href="WTSTypes_8h.html#ac48ead5170449f919c88f5793ae2e0fd">WTSPriceType</a> priceType, bool isCFFEX)</td></tr>
+<tr class="separator:aac99c0608f3c8a84535b4bd3f2dfcc5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48edeb6c3ed4e912ec9453847b9e3317" id="r_a48edeb6c3ed4e912ec9453847b9e3317"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSTypes_8h.html#ac48ead5170449f919c88f5793ae2e0fd">WTSPriceType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#a48edeb6c3ed4e912ec9453847b9e3317">wrapPriceType</a> (<a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#ab07ff92a0eb0550e8007e7d54e832d5d">TThostFtdcOrderPriceTypeType</a> priceType)</td></tr>
+<tr class="separator:a48edeb6c3ed4e912ec9453847b9e3317"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e2aea85a158de2dc2328fb1e63aeed7" id="r_a5e2aea85a158de2dc2328fb1e63aeed7"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#a5e2aea85a158de2dc2328fb1e63aeed7">wrapTimeCondition</a> (<a class="el" href="WTSTypes_8h.html#ad53b8af97a8646b2505f801724c06ae5">WTSTimeCondition</a> timeCond)</td></tr>
+<tr class="separator:a5e2aea85a158de2dc2328fb1e63aeed7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac60c15ee810370a608edf24656c9d46e" id="r_ac60c15ee810370a608edf24656c9d46e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSTypes_8h.html#ad53b8af97a8646b2505f801724c06ae5">WTSTimeCondition</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#ac60c15ee810370a608edf24656c9d46e">wrapTimeCondition</a> (<a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#a72553a48d3c88c51357c9c33cd85f760">TThostFtdcTimeConditionType</a> timeCond)</td></tr>
+<tr class="separator:ac60c15ee810370a608edf24656c9d46e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8413140dd78f495d0521410c3c7ba48c" id="r_a8413140dd78f495d0521410c3c7ba48c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSTypes_8h.html#a2f63e25f331db96231f7e89459dc20dd">WTSOrderState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#a8413140dd78f495d0521410c3c7ba48c">wrapOrderState</a> (<a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#afdda27978f328a12826a67f0902fda5c">TThostFtdcOrderStatusType</a> orderState)</td></tr>
+<tr class="separator:a8413140dd78f495d0521410c3c7ba48c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2efb42d7f32e8b2d780c80dcb21aea4" id="r_ac2efb42d7f32e8b2d780c80dcb21aea4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#ac2efb42d7f32e8b2d780c80dcb21aea4">wrapActionFlag</a> (<a class="el" href="WTSTypes_8h.html#a2a8b0fa1784b9d8cea421df79fea98c4">WTSActionFlag</a> actionFlag)</td></tr>
+<tr class="separator:ac2efb42d7f32e8b2d780c80dcb21aea4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a3d45fd776a951edf6bd68a116ee3c551" id="r_a3d45fd776a951edf6bd68a116ee3c551"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#a3d45fd776a951edf6bd68a116ee3c551">ENTRUST_SECTION</a> = &quot;entrusts&quot;</td></tr>
+<tr class="separator:a3d45fd776a951edf6bd68a116ee3c551"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98eef3749cce5a7578501cfbdcec0773" id="r_a98eef3749cce5a7578501cfbdcec0773"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="TraderCTPOpt_8cpp.html#a98eef3749cce5a7578501cfbdcec0773">ORDER_SECTION</a> = &quot;orders&quot;</td></tr>
+<tr class="separator:a98eef3749cce5a7578501cfbdcec0773"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>\project WonderTrader</p>
+<dl class="section author"><dt>作者</dt><dd>Wesley </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2020/03/30 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="a2a273861bf714fd9329b7130200e062b" name="a2a273861bf714fd9329b7130200e062b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a273861bf714fd9329b7130200e062b">&#9670;&#160;</a></span>createTrader()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a> <a class="el" href="classITraderApi.html">ITraderApi</a> * createTrader </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00059">59</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a45a660acab3281d66581f45eb82ab3ae" name="a45a660acab3281d66581f45eb82ab3ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45a660acab3281d66581f45eb82ab3ae">&#9670;&#160;</a></span>deleteTrader()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a> void deleteTrader </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classITraderApi.html">ITraderApi</a> *&amp;&#160;</td>
+          <td class="paramname"><em>trader</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00065">65</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afb5509cab7c42b9be9dd4f18c19fd75a" name="afb5509cab7c42b9be9dd4f18c19fd75a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb5509cab7c42b9be9dd4f18c19fd75a">&#9670;&#160;</a></span>strToTime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t strToTime </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>strTime</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00041">41</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac2efb42d7f32e8b2d780c80dcb21aea4" name="ac2efb42d7f32e8b2d780c80dcb21aea4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2efb42d7f32e8b2d780c80dcb21aea4">&#9670;&#160;</a></span>wrapActionFlag()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int wrapActionFlag </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a2a8b0fa1784b9d8cea421df79fea98c4">WTSActionFlag</a>&#160;</td>
+          <td class="paramname"><em>actionFlag</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00210">210</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aae6c67eb3e2dfd21870ce6d8b939fd28" name="aae6c67eb3e2dfd21870ce6d8b939fd28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae6c67eb3e2dfd21870ce6d8b939fd28">&#9670;&#160;</a></span>wrapDirectionType() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSTypes_8h.html#a282f1bec986ddaefae5fea1851b338da">WTSDirectionType</a> wrapDirectionType </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#a561d91e2a6dbe99f5ff1efb669878058">TThostFtdcDirectionType</a>&#160;</td>
+          <td class="paramname"><em>dirType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#ad5fd977e8d974898973c6950ddcd26b0">TThostFtdcOffsetFlagType</a>&#160;</td>
+          <td class="paramname"><em>offsetType</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00110">110</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ada1bc5cac9b924d0fb9d180b9fc8dd2b" name="ada1bc5cac9b924d0fb9d180b9fc8dd2b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada1bc5cac9b924d0fb9d180b9fc8dd2b">&#9670;&#160;</a></span>wrapDirectionType() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int wrapDirectionType </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a282f1bec986ddaefae5fea1851b338da">WTSDirectionType</a>&#160;</td>
+          <td class="paramname"><em>dirType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a883c7555025e430348f663c1eb7f18ea">WTSOffsetType</a>&#160;</td>
+          <td class="paramname"><em>offsetType</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00075">75</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a52c717907aa79076e1173f0f339006d3" name="a52c717907aa79076e1173f0f339006d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52c717907aa79076e1173f0f339006d3">&#9670;&#160;</a></span>wrapOffsetType() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSTypes_8h.html#a883c7555025e430348f663c1eb7f18ea">WTSOffsetType</a> wrapOffsetType </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#ad5fd977e8d974898973c6950ddcd26b0">TThostFtdcOffsetFlagType</a>&#160;</td>
+          <td class="paramname"><em>offType</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00146">146</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aeb0f08b8e8c6dbc3f3675b975a7e9415" name="aeb0f08b8e8c6dbc3f3675b975a7e9415"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb0f08b8e8c6dbc3f3675b975a7e9415">&#9670;&#160;</a></span>wrapOffsetType() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int wrapOffsetType </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a883c7555025e430348f663c1eb7f18ea">WTSOffsetType</a>&#160;</td>
+          <td class="paramname"><em>offType</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00132">132</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8413140dd78f495d0521410c3c7ba48c" name="a8413140dd78f495d0521410c3c7ba48c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8413140dd78f495d0521410c3c7ba48c">&#9670;&#160;</a></span>wrapOrderState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSTypes_8h.html#a2f63e25f331db96231f7e89459dc20dd">WTSOrderState</a> wrapOrderState </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#afdda27978f328a12826a67f0902fda5c">TThostFtdcOrderStatusType</a>&#160;</td>
+          <td class="paramname"><em>orderState</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00202">202</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abbc9a3c983f953f23fd6fa9dc65fe6b6" name="abbc9a3c983f953f23fd6fa9dc65fe6b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abbc9a3c983f953f23fd6fa9dc65fe6b6">&#9670;&#160;</a></span>wrapPosDirection()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSTypes_8h.html#a282f1bec986ddaefae5fea1851b338da">WTSDirectionType</a> wrapPosDirection </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#a9827dff7eb704bc41750d1635c064bdd">TThostFtdcPosiDirectionType</a>&#160;</td>
+          <td class="paramname"><em>dirType</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00124">124</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8dc8eda4e9ec5d433b2676d1d1519b72" name="a8dc8eda4e9ec5d433b2676d1d1519b72"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8dc8eda4e9ec5d433b2676d1d1519b72">&#9670;&#160;</a></span>wrapPosDirType() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSTypes_8h.html#a282f1bec986ddaefae5fea1851b338da">WTSDirectionType</a> wrapPosDirType </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#a9827dff7eb704bc41750d1635c064bdd">TThostFtdcPosiDirectionType</a>&#160;</td>
+          <td class="paramname"><em>dirType</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00099">99</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2da2196b2dbcee75ab45a4f16aac77ca" name="a2da2196b2dbcee75ab45a4f16aac77ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2da2196b2dbcee75ab45a4f16aac77ca">&#9670;&#160;</a></span>wrapPosDirType() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int wrapPosDirType </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a282f1bec986ddaefae5fea1851b338da">WTSDirectionType</a>&#160;</td>
+          <td class="paramname"><em>dirType</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00089">89</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a48edeb6c3ed4e912ec9453847b9e3317" name="a48edeb6c3ed4e912ec9453847b9e3317"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48edeb6c3ed4e912ec9453847b9e3317">&#9670;&#160;</a></span>wrapPriceType() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSTypes_8h.html#ac48ead5170449f919c88f5793ae2e0fd">WTSPriceType</a> wrapPriceType </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#ab07ff92a0eb0550e8007e7d54e832d5d">TThostFtdcOrderPriceTypeType</a>&#160;</td>
+          <td class="paramname"><em>priceType</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00170">170</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aac99c0608f3c8a84535b4bd3f2dfcc5a" name="aac99c0608f3c8a84535b4bd3f2dfcc5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac99c0608f3c8a84535b4bd3f2dfcc5a">&#9670;&#160;</a></span>wrapPriceType() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int wrapPriceType </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#ac48ead5170449f919c88f5793ae2e0fd">WTSPriceType</a>&#160;</td>
+          <td class="paramname"><em>priceType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isCFFEX</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00158">158</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac60c15ee810370a608edf24656c9d46e" name="ac60c15ee810370a608edf24656c9d46e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac60c15ee810370a608edf24656c9d46e">&#9670;&#160;</a></span>wrapTimeCondition() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSTypes_8h.html#ad53b8af97a8646b2505f801724c06ae5">WTSTimeCondition</a> wrapTimeCondition </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="CTP6_83_815_2ThostFtdcUserApiDataType_8h.html#a72553a48d3c88c51357c9c33cd85f760">TThostFtdcTimeConditionType</a>&#160;</td>
+          <td class="paramname"><em>timeCond</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00192">192</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5e2aea85a158de2dc2328fb1e63aeed7" name="a5e2aea85a158de2dc2328fb1e63aeed7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e2aea85a158de2dc2328fb1e63aeed7">&#9670;&#160;</a></span>wrapTimeCondition() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int wrapTimeCondition </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#ad53b8af97a8646b2505f801724c06ae5">WTSTimeCondition</a>&#160;</td>
+          <td class="paramname"><em>timeCond</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00182">182</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afcbbd620f8681b0cbd4c37c7b03b66a7" name="afcbbd620f8681b0cbd4c37c7b03b66a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afcbbd620f8681b0cbd4c37c7b03b66a7">&#9670;&#160;</a></span>write_log()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Args&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void write_log </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classITraderSpi.html">ITraderSpi</a> *&#160;</td>
+          <td class="paramname"><em>sink</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>&#160;</td>
+          <td class="paramname"><em>ll</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00031">31</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a3d45fd776a951edf6bd68a116ee3c551" name="a3d45fd776a951edf6bd68a116ee3c551"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d45fd776a951edf6bd68a116ee3c551">&#9670;&#160;</a></span>ENTRUST_SECTION</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char* ENTRUST_SECTION = &quot;entrusts&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00025">25</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a98eef3749cce5a7578501cfbdcec0773" name="a98eef3749cce5a7578501cfbdcec0773"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98eef3749cce5a7578501cfbdcec0773">&#9670;&#160;</a></span>ORDER_SECTION</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char* ORDER_SECTION = &quot;orders&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="TraderCTPOpt_8cpp_source.html">TraderCTPOpt.cpp</a> 第 <a class="el" href="TraderCTPOpt_8cpp_source.html#l00026">26</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_112d51bbada24c408eed51f9c64735e8.html">TraderCTPOpt</a></li><li class="navelem"><a class="el" href="TraderCTPOpt_8cpp.html">TraderCTPOpt.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

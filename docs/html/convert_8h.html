@@ -1,0 +1,293 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/yaml-cpp/node/convert.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('convert_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#namespaces">命名空间</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">convert.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;array&gt;</code><br />
+<code>#include &lt;cmath&gt;</code><br />
+<code>#include &lt;limits&gt;</code><br />
+<code>#include &lt;list&gt;</code><br />
+<code>#include &lt;map&gt;</code><br />
+<code>#include &lt;sstream&gt;</code><br />
+<code>#include &lt;type_traits&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+<code>#include &quot;<a class="el" href="binary_8h_source.html">yaml-cpp/binary.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="impl_8h_source.html">yaml-cpp/node/impl.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="iterator_8h_source.html">yaml-cpp/node/iterator.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="node_8h_source.html">yaml-cpp/node/node.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="type_8h_source.html">yaml-cpp/node/type.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="null_8h_source.html">yaml-cpp/null.h</a>&quot;</code><br />
+</div>
+<p><a href="convert_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_01Node_01_4.html">YAML::convert&lt; Node &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_01std_1_1string_01_4.html">YAML::convert&lt; std::string &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_01const_01char_01_5_01_4.html">YAML::convert&lt; const char * &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_01char_01_5_01_4.html">YAML::convert&lt; char * &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_01char_0fN_0e_4.html">YAML::convert&lt; char[N]&gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_01__Null_01_4.html">YAML::convert&lt; _Null &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_01bool_01_4.html">YAML::convert&lt; bool &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_01std_1_1map_3_01K_00_01V_00_01C_00_01A_01_4_01_4.html">YAML::convert&lt; std::map&lt; K, V, C, A &gt; &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_01std_1_1vector_3_01T_00_01A_01_4_01_4.html">YAML::convert&lt; std::vector&lt; T, A &gt; &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_01std_1_1list_3_01T_00_01A_01_4_01_4.html">YAML::convert&lt; std::list&lt; T, A &gt; &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_01std_1_1array_3_01T_00_01N_01_4_01_4.html">YAML::convert&lt; std::array&lt; T, N &gt; &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_01std_1_1pair_3_01T_00_01U_01_4_01_4.html">YAML::convert&lt; std::pair&lt; T, U &gt; &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_01Binary_01_4.html">YAML::convert&lt; Binary &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+命名空间</h2></td></tr>
+<tr class="memitem:namespaceYAML" id="r_namespaceYAML"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html">YAML</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespaceYAML_1_1conversion" id="r_namespaceYAML_1_1conversion"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1conversion.html">YAML::conversion</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a4f178fdf476b07d0d4647131f9f19701" id="r_a4f178fdf476b07d0d4647131f9f19701"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="convert_8h.html#a4f178fdf476b07d0d4647131f9f19701">YAML_DEFINE_CONVERT_STREAMABLE</a>(type,  negative_op)</td></tr>
+<tr class="separator:a4f178fdf476b07d0d4647131f9f19701"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afcc9bae739f7f375cdef090841d544cd" id="r_afcc9bae739f7f375cdef090841d544cd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="convert_8h.html#afcc9bae739f7f375cdef090841d544cd">YAML_DEFINE_CONVERT_STREAMABLE_SIGNED</a>(type)&#160;&#160;&#160;  <a class="el" href="convert_8h.html#a4f178fdf476b07d0d4647131f9f19701">YAML_DEFINE_CONVERT_STREAMABLE</a>(type, -)</td></tr>
+<tr class="separator:afcc9bae739f7f375cdef090841d544cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04f1a7657db1f282eda8eaad13cd61ca" id="r_a04f1a7657db1f282eda8eaad13cd61ca"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="convert_8h.html#a04f1a7657db1f282eda8eaad13cd61ca">YAML_DEFINE_CONVERT_STREAMABLE_UNSIGNED</a>(type)&#160;&#160;&#160;  <a class="el" href="convert_8h.html#a4f178fdf476b07d0d4647131f9f19701">YAML_DEFINE_CONVERT_STREAMABLE</a>(type, +)</td></tr>
+<tr class="separator:a04f1a7657db1f282eda8eaad13cd61ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:abdfeb83d63be37e4500bd46cc91886b4" id="r_abdfeb83d63be37e4500bd46cc91886b4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1conversion.html#abdfeb83d63be37e4500bd46cc91886b4">YAML::conversion::IsInfinity</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;input)</td></tr>
+<tr class="separator:abdfeb83d63be37e4500bd46cc91886b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeee2784a85a229fc7792b257fd8f6087" id="r_aeee2784a85a229fc7792b257fd8f6087"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1conversion.html#aeee2784a85a229fc7792b257fd8f6087">YAML::conversion::IsNegativeInfinity</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;input)</td></tr>
+<tr class="separator:aeee2784a85a229fc7792b257fd8f6087"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18c1203ebbec9aa7332b1c517e0986d3" id="r_a18c1203ebbec9aa7332b1c517e0986d3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1conversion.html#a18c1203ebbec9aa7332b1c517e0986d3">YAML::conversion::IsNaN</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;input)</td></tr>
+<tr class="separator:a18c1203ebbec9aa7332b1c517e0986d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace8eb895bae4999f7bde840c56f4e1e5" id="r_ace8eb895bae4999f7bde840c56f4e1e5"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ace8eb895bae4999f7bde840c56f4e1e5"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if&lt; std::is_floating_point&lt; T &gt;<a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">::value</a>, void &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1conversion.html#ace8eb895bae4999f7bde840c56f4e1e5">YAML::conversion::inner_encode</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> T &amp;rhs, std::stringstream &amp;stream)</td></tr>
+<tr class="separator:ace8eb895bae4999f7bde840c56f4e1e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add40f30587811ef283d6466c58081265" id="r_add40f30587811ef283d6466c58081265"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:add40f30587811ef283d6466c58081265"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if&lt;!std::is_floating_point&lt; T &gt;<a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">::value</a>, void &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1conversion.html#add40f30587811ef283d6466c58081265">YAML::conversion::inner_encode</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> T &amp;rhs, std::stringstream &amp;stream)</td></tr>
+<tr class="separator:add40f30587811ef283d6466c58081265"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a51f4695a033ea20ce2482668f1cdbe" id="r_a8a51f4695a033ea20ce2482668f1cdbe"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a8a51f4695a033ea20ce2482668f1cdbe"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if&lt;(std::is_same&lt; T, unsignedchar &gt;<a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">::value</a>||std::is_same&lt; T, signedchar &gt;<a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">::value</a>), bool &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1conversion.html#a8a51f4695a033ea20ce2482668f1cdbe">YAML::conversion::ConvertStreamTo</a> (std::stringstream &amp;stream, T &amp;rhs)</td></tr>
+<tr class="separator:a8a51f4695a033ea20ce2482668f1cdbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6255875ec150aa86acbf363692f01b13" id="r_a6255875ec150aa86acbf363692f01b13"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a6255875ec150aa86acbf363692f01b13"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if&lt;!(std::is_same&lt; T, unsignedchar &gt;<a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">::value</a>||std::is_same&lt; T, signedchar &gt;<a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">::value</a>), bool &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceYAML_1_1conversion.html#a6255875ec150aa86acbf363692f01b13">YAML::conversion::ConvertStreamTo</a> (std::stringstream &amp;stream, T &amp;rhs)</td></tr>
+<tr class="separator:a6255875ec150aa86acbf363692f01b13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2107fc2246ece5fe031db8f36cb7c292" id="r_a2107fc2246ece5fe031db8f36cb7c292"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html#a2107fc2246ece5fe031db8f36cb7c292">YAML::YAML_DEFINE_CONVERT_STREAMABLE_SIGNED</a> (int)</td></tr>
+<tr class="separator:a2107fc2246ece5fe031db8f36cb7c292"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e73e714546f78997780dac5eb2c0798" id="r_a0e73e714546f78997780dac5eb2c0798"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html#a0e73e714546f78997780dac5eb2c0798">YAML::YAML_DEFINE_CONVERT_STREAMABLE_SIGNED</a> (short)</td></tr>
+<tr class="separator:a0e73e714546f78997780dac5eb2c0798"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af57faf99be6cc3fd56f519a12132666b" id="r_af57faf99be6cc3fd56f519a12132666b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html#af57faf99be6cc3fd56f519a12132666b">YAML::YAML_DEFINE_CONVERT_STREAMABLE_SIGNED</a> (long)</td></tr>
+<tr class="separator:af57faf99be6cc3fd56f519a12132666b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a746a6583f314d0e9ded6777e58bd78cc" id="r_a746a6583f314d0e9ded6777e58bd78cc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html#a746a6583f314d0e9ded6777e58bd78cc">YAML::YAML_DEFINE_CONVERT_STREAMABLE_SIGNED</a> (long long)</td></tr>
+<tr class="separator:a746a6583f314d0e9ded6777e58bd78cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f1e377d3aaaac18b78afe3ae447eddc" id="r_a7f1e377d3aaaac18b78afe3ae447eddc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html#a7f1e377d3aaaac18b78afe3ae447eddc">YAML::YAML_DEFINE_CONVERT_STREAMABLE_UNSIGNED</a> (unsigned)</td></tr>
+<tr class="separator:a7f1e377d3aaaac18b78afe3ae447eddc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdcac0d3e390bcaa980178fee42ad214" id="r_afdcac0d3e390bcaa980178fee42ad214"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html#afdcac0d3e390bcaa980178fee42ad214">YAML::YAML_DEFINE_CONVERT_STREAMABLE_UNSIGNED</a> (unsigned short)</td></tr>
+<tr class="separator:afdcac0d3e390bcaa980178fee42ad214"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50a4d429ce5f8ad4a2b72fdc73e69297" id="r_a50a4d429ce5f8ad4a2b72fdc73e69297"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html#a50a4d429ce5f8ad4a2b72fdc73e69297">YAML::YAML_DEFINE_CONVERT_STREAMABLE_UNSIGNED</a> (unsigned long)</td></tr>
+<tr class="separator:a50a4d429ce5f8ad4a2b72fdc73e69297"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa79b3484e4ada6e6b59bd7a20994fea8" id="r_aa79b3484e4ada6e6b59bd7a20994fea8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html#aa79b3484e4ada6e6b59bd7a20994fea8">YAML::YAML_DEFINE_CONVERT_STREAMABLE_UNSIGNED</a> (unsigned long long)</td></tr>
+<tr class="separator:aa79b3484e4ada6e6b59bd7a20994fea8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61d33d69e34277e205cc9a2483f5e156" id="r_a61d33d69e34277e205cc9a2483f5e156"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html#a61d33d69e34277e205cc9a2483f5e156">YAML::YAML_DEFINE_CONVERT_STREAMABLE_SIGNED</a> (char)</td></tr>
+<tr class="separator:a61d33d69e34277e205cc9a2483f5e156"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a988ca78e757b17476ac3b02b04d83e3b" id="r_a988ca78e757b17476ac3b02b04d83e3b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html#a988ca78e757b17476ac3b02b04d83e3b">YAML::YAML_DEFINE_CONVERT_STREAMABLE_SIGNED</a> (<a class="el" href="stdc_8h.html#ae31516cd0c4adc3d52b93ef2e5c6117b">signed</a> char)</td></tr>
+<tr class="separator:a988ca78e757b17476ac3b02b04d83e3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1074b275dd770115a9976e4e421ba09" id="r_ab1074b275dd770115a9976e4e421ba09"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html#ab1074b275dd770115a9976e4e421ba09">YAML::YAML_DEFINE_CONVERT_STREAMABLE_UNSIGNED</a> (unsigned char)</td></tr>
+<tr class="separator:ab1074b275dd770115a9976e4e421ba09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c5f93e7570dd08ce0c59640316e179b" id="r_a0c5f93e7570dd08ce0c59640316e179b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html#a0c5f93e7570dd08ce0c59640316e179b">YAML::YAML_DEFINE_CONVERT_STREAMABLE_SIGNED</a> (float)</td></tr>
+<tr class="separator:a0c5f93e7570dd08ce0c59640316e179b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a014a313ea6c602c58917f833ed68e94b" id="r_a014a313ea6c602c58917f833ed68e94b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html#a014a313ea6c602c58917f833ed68e94b">YAML::YAML_DEFINE_CONVERT_STREAMABLE_SIGNED</a> (double)</td></tr>
+<tr class="separator:a014a313ea6c602c58917f833ed68e94b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1acc378fbd32c1f6f3511cbd3f2c6b5" id="r_aa1acc378fbd32c1f6f3511cbd3f2c6b5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceYAML.html#aa1acc378fbd32c1f6f3511cbd3f2c6b5">YAML::YAML_DEFINE_CONVERT_STREAMABLE_SIGNED</a> (long double)</td></tr>
+<tr class="separator:aa1acc378fbd32c1f6f3511cbd3f2c6b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a4f178fdf476b07d0d4647131f9f19701" name="a4f178fdf476b07d0d4647131f9f19701"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f178fdf476b07d0d4647131f9f19701">&#9670;&#160;</a></span>YAML_DEFINE_CONVERT_STREAMABLE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define YAML_DEFINE_CONVERT_STREAMABLE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">type, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">negative_op&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="convert_8h_source.html">convert.h</a> 第 <a class="el" href="convert_8h_source.html#l00148">148</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afcc9bae739f7f375cdef090841d544cd" name="afcc9bae739f7f375cdef090841d544cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afcc9bae739f7f375cdef090841d544cd">&#9670;&#160;</a></span>YAML_DEFINE_CONVERT_STREAMABLE_SIGNED</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define YAML_DEFINE_CONVERT_STREAMABLE_SIGNED</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">type</td><td>)</td>
+          <td>&#160;&#160;&#160;  <a class="el" href="convert_8h.html#a4f178fdf476b07d0d4647131f9f19701">YAML_DEFINE_CONVERT_STREAMABLE</a>(type, -)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="convert_8h_source.html">convert.h</a> 第 <a class="el" href="convert_8h_source.html#l00193">193</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a04f1a7657db1f282eda8eaad13cd61ca" name="a04f1a7657db1f282eda8eaad13cd61ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04f1a7657db1f282eda8eaad13cd61ca">&#9670;&#160;</a></span>YAML_DEFINE_CONVERT_STREAMABLE_UNSIGNED</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define YAML_DEFINE_CONVERT_STREAMABLE_UNSIGNED</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">type</td><td>)</td>
+          <td>&#160;&#160;&#160;  <a class="el" href="convert_8h.html#a4f178fdf476b07d0d4647131f9f19701">YAML_DEFINE_CONVERT_STREAMABLE</a>(type, +)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="convert_8h_source.html">convert.h</a> 第 <a class="el" href="convert_8h_source.html#l00196">196</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="dir_8ca95df02d0e181a4cddee9d3a76ea3e.html">yaml-cpp</a></li><li class="navelem"><a class="el" href="dir_1c3d3c700f913936d7412cf74dd7238d.html">node</a></li><li class="navelem"><a class="el" href="convert_8h.html">convert.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

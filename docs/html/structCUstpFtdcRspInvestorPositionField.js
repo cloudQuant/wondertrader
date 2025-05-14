@@ -1,0 +1,28 @@
+var structCUstpFtdcRspInvestorPositionField =
+[
+    [ "ArbitragePosition", "structCUstpFtdcRspInvestorPositionField.html#a276aa184b758100818be8fff977086ef", null ],
+    [ "BrokerID", "structCUstpFtdcRspInvestorPositionField.html#a396cc4ab2a09342312d854e5c7a2ccc3", null ],
+    [ "ClientID", "structCUstpFtdcRspInvestorPositionField.html#a04aa7c67ec3f100a1836ad50433bd261", null ],
+    [ "Currency", "structCUstpFtdcRspInvestorPositionField.html#a75257f34e5e73f41b450b7c3d18273ae", null ],
+    [ "Direction", "structCUstpFtdcRspInvestorPositionField.html#af462c362c6f04684f064e38a6e4328d1", null ],
+    [ "ExchangeID", "structCUstpFtdcRspInvestorPositionField.html#ad1ae661881524125f2271646d7ec1268", null ],
+    [ "FrozenClosing", "structCUstpFtdcRspInvestorPositionField.html#abe492e9b5899b266635163d05dbe1c9e", null ],
+    [ "FrozenMargin", "structCUstpFtdcRspInvestorPositionField.html#a366a056ff7a6db24ee5ebe55c8ee4057", null ],
+    [ "FrozenPosition", "structCUstpFtdcRspInvestorPositionField.html#a76b9e76e88792dfb3b38752893543e8d", null ],
+    [ "FrozenPremium", "structCUstpFtdcRspInvestorPositionField.html#ae5f4838c7f26690d6b9895b666954b6a", null ],
+    [ "HedgeFlag", "structCUstpFtdcRspInvestorPositionField.html#a017a411f8411a5ffe39855d7aba9863d", null ],
+    [ "HedgeFrozenClosing", "structCUstpFtdcRspInvestorPositionField.html#a6669027bbef017366f47fdda9322fffa", null ],
+    [ "HedgePosition", "structCUstpFtdcRspInvestorPositionField.html#a6e878081396bc98fa3296f17dc1112e9", null ],
+    [ "InstrumentID", "structCUstpFtdcRspInvestorPositionField.html#ad88d8aa31253dfee658e0d6c782e3b30", null ],
+    [ "InvestorID", "structCUstpFtdcRspInvestorPositionField.html#a2db8541af06bcc0e3478903858bda219", null ],
+    [ "LastOrderLocalID", "structCUstpFtdcRspInvestorPositionField.html#a3923cee2239ba97844f92e3cbb54e87e", null ],
+    [ "LastTradeID", "structCUstpFtdcRspInvestorPositionField.html#ae5fe1895d567654275c60889ced97a04", null ],
+    [ "Position", "structCUstpFtdcRspInvestorPositionField.html#a31f0e82fd87774bebdac622ba5c74ddc", null ],
+    [ "PositionCost", "structCUstpFtdcRspInvestorPositionField.html#ac205edfc9fbe04fb73c2890c620a5dd1", null ],
+    [ "SpecFrozenClosing", "structCUstpFtdcRspInvestorPositionField.html#aa82c8b7261a81f8bec90017c5f161b86", null ],
+    [ "SpeculationPosition", "structCUstpFtdcRspInvestorPositionField.html#a749f199ecf54342eb01baf882c58a134", null ],
+    [ "UsedMargin", "structCUstpFtdcRspInvestorPositionField.html#a4c5c2b3a17166055d74d2dc8fac903ae", null ],
+    [ "YdFrozenClosing", "structCUstpFtdcRspInvestorPositionField.html#a16e1642b2e8ba75ba99425d284765e18", null ],
+    [ "YdPosition", "structCUstpFtdcRspInvestorPositionField.html#a28f853103286afde808949c7dc0143e7", null ],
+    [ "YdPositionCost", "structCUstpFtdcRspInvestorPositionField.html#aa507aa0522dc8d55cf8b8b738e5b4500", null ]
+];

@@ -1,0 +1,655 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: IDataSink类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classIDataSink.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="classIDataSink-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">IDataSink类 参考<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>数据接收器接口  
+ <a href="classIDataSink.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a49f916a6431df8140564afd06bf20158" id="r_a49f916a6431df8140564afd06bf20158"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataSink.html#a49f916a6431df8140564afd06bf20158">handle_tick</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTickData.html">WTSTickData</a> *curTick, uint32_t pxType)=0</td></tr>
+<tr class="memdesc:a49f916a6431df8140564afd06bf20158"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理Tick数据  <br /></td></tr>
+<tr class="separator:a49f916a6431df8140564afd06bf20158"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0ac665e5f5e9330b4847393a8d5a253" id="r_ac0ac665e5f5e9330b4847393a8d5a253"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataSink.html#ac0ac665e5f5e9330b4847393a8d5a253">handle_order_queue</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrdQueData.html">WTSOrdQueData</a> *curOrdQue)</td></tr>
+<tr class="memdesc:ac0ac665e5f5e9330b4847393a8d5a253"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理委托队列数据  <br /></td></tr>
+<tr class="separator:ac0ac665e5f5e9330b4847393a8d5a253"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab181668bb73591a42e322dbc4a32ff8a" id="r_ab181668bb73591a42e322dbc4a32ff8a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataSink.html#ab181668bb73591a42e322dbc4a32ff8a">handle_order_detail</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrdDtlData.html">WTSOrdDtlData</a> *curOrdDtl)</td></tr>
+<tr class="memdesc:ab181668bb73591a42e322dbc4a32ff8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理委托明细数据  <br /></td></tr>
+<tr class="separator:ab181668bb73591a42e322dbc4a32ff8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bdeadd1cef35b1976dfb8dcb8b82aab" id="r_a1bdeadd1cef35b1976dfb8dcb8b82aab"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataSink.html#a1bdeadd1cef35b1976dfb8dcb8b82aab">handle_transaction</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTransData.html">WTSTransData</a> *curTrans)</td></tr>
+<tr class="memdesc:a1bdeadd1cef35b1976dfb8dcb8b82aab"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理逐笔成交数据  <br /></td></tr>
+<tr class="separator:a1bdeadd1cef35b1976dfb8dcb8b82aab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b32410de4629a8ea22ff8f9547f9f4d" id="r_a7b32410de4629a8ea22ff8f9547f9f4d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataSink.html#a7b32410de4629a8ea22ff8f9547f9f4d">handle_bar_close</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *period, uint32_t times, <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *newBar)=0</td></tr>
+<tr class="memdesc:a7b32410de4629a8ea22ff8f9547f9f4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理K线周期结束事件  <br /></td></tr>
+<tr class="separator:a7b32410de4629a8ea22ff8f9547f9f4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e95899a2f5e48dd47cdb89eef7af3d7" id="r_a2e95899a2f5e48dd47cdb89eef7af3d7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataSink.html#a2e95899a2f5e48dd47cdb89eef7af3d7">handle_schedule</a> (uint32_t uDate, uint32_t uTime)=0</td></tr>
+<tr class="memdesc:a2e95899a2f5e48dd47cdb89eef7af3d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理定时任务  <br /></td></tr>
+<tr class="separator:a2e95899a2f5e48dd47cdb89eef7af3d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad99745d3af1e228d167db17730e755c" id="r_aad99745d3af1e228d167db17730e755c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataSink.html#aad99745d3af1e228d167db17730e755c">handle_init</a> ()=0</td></tr>
+<tr class="memdesc:aad99745d3af1e228d167db17730e755c"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理初始化事件  <br /></td></tr>
+<tr class="separator:aad99745d3af1e228d167db17730e755c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7518e7f54d3c02334d5bf8039d998ea1" id="r_a7518e7f54d3c02334d5bf8039d998ea1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataSink.html#a7518e7f54d3c02334d5bf8039d998ea1">handle_session_begin</a> (uint32_t curTDate)=0</td></tr>
+<tr class="memdesc:a7518e7f54d3c02334d5bf8039d998ea1"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理交易日开始事件  <br /></td></tr>
+<tr class="separator:a7518e7f54d3c02334d5bf8039d998ea1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a8c562237bfa38cf0a789d2156e7f83" id="r_a3a8c562237bfa38cf0a789d2156e7f83"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataSink.html#a3a8c562237bfa38cf0a789d2156e7f83">handle_session_end</a> (uint32_t curTDate)=0</td></tr>
+<tr class="memdesc:a3a8c562237bfa38cf0a789d2156e7f83"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理交易日结束事件  <br /></td></tr>
+<tr class="separator:a3a8c562237bfa38cf0a789d2156e7f83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a449d6fee677ebdce5747ec8db2cb1afc" id="r_a449d6fee677ebdce5747ec8db2cb1afc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataSink.html#a449d6fee677ebdce5747ec8db2cb1afc">handle_replay_done</a> ()</td></tr>
+<tr class="memdesc:a449d6fee677ebdce5747ec8db2cb1afc"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理回放完成事件  <br /></td></tr>
+<tr class="separator:a449d6fee677ebdce5747ec8db2cb1afc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a484f5ab1b9ea855ddbc56cfedf324312" id="r_a484f5ab1b9ea855ddbc56cfedf324312"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataSink.html#a484f5ab1b9ea855ddbc56cfedf324312">handle_section_end</a> (uint32_t curTDate, uint32_t curTime)</td></tr>
+<tr class="memdesc:a484f5ab1b9ea855ddbc56cfedf324312"><td class="mdescLeft">&#160;</td><td class="mdescRight">处理交易时段结束事件  <br /></td></tr>
+<tr class="separator:a484f5ab1b9ea855ddbc56cfedf324312"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>数据接收器接口 </p>
+<p>定义了接收并处理回放器生成的各类行情数据的方法 </p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00049">49</a> 行定义.</p>
+</div><h2 class="groupheader">成员函数说明</h2>
+<a id="a7b32410de4629a8ea22ff8f9547f9f4d" name="a7b32410de4629a8ea22ff8f9547f9f4d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b32410de4629a8ea22ff8f9547f9f4d">&#9670;&#160;</a></span>handle_bar_close()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void IDataSink::handle_bar_close </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>times</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td>
+          <td class="paramname"><em>newBar</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理K线周期结束事件 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>周期标识符（如"m1"、"d1"等） </td></tr>
+    <tr><td class="paramname">times</td><td>周期倍数 </td></tr>
+    <tr><td class="paramname">newBar</td><td>新生成的K线数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>在 <a class="el" href="classCtaMocker.html#aaeecff95f38049ea695f93b637c968bf">CtaMocker</a>, <a class="el" href="classExecMocker.html#adbf0b0bb7cc84880f70dd9f1e820c23e">ExecMocker</a>, <a class="el" href="classHftMocker.html#a2cd2aa1d1ed4c2c499a12d0213072455">HftMocker</a>, <a class="el" href="classSelMocker.html#a71b9055230f770458a3412e960a2041f">SelMocker</a> , 以及 <a class="el" href="classUftMocker.html#a671e6ebc483bcead9afdc9ba5252ff61">UftMocker</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="aad99745d3af1e228d167db17730e755c" name="aad99745d3af1e228d167db17730e755c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad99745d3af1e228d167db17730e755c">&#9670;&#160;</a></span>handle_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void IDataSink::handle_init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理初始化事件 </p>
+<p>回测引擎初始化时调用，策略可以在这里进行初始化操作 </p>
+
+<p>在 <a class="el" href="classCtaMocker.html#a6e6da3819230342327805aa435ae69d7">CtaMocker</a>, <a class="el" href="classExecMocker.html#a2ad6062da600fe34c1cdd13129a45116">ExecMocker</a>, <a class="el" href="classHftMocker.html#a9daa29261940a5c85336f4a169817221">HftMocker</a>, <a class="el" href="classSelMocker.html#abe1b56ba24c49218d4c5b5b0c65485c9">SelMocker</a> , 以及 <a class="el" href="classUftMocker.html#a2eb6c21fa2f765e719b0344b54833d15">UftMocker</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="ab181668bb73591a42e322dbc4a32ff8a" name="ab181668bb73591a42e322dbc4a32ff8a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab181668bb73591a42e322dbc4a32ff8a">&#9670;&#160;</a></span>handle_order_detail()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void IDataSink::handle_order_detail </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSOrdDtlData.html">WTSOrdDtlData</a> *&#160;</td>
+          <td class="paramname"><em>curOrdDtl</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理委托明细数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">curOrdDtl</td><td>当前的委托明细数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>被 <a class="el" href="classHftMocker.html#a7354d2ace0eb3677b49d41cd5cc13d19">HftMocker</a> , 以及 <a class="el" href="classUftMocker.html#a72e899a1ed9ac09ce26a11c90cbb5cb1">UftMocker</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00070">70</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac0ac665e5f5e9330b4847393a8d5a253" name="ac0ac665e5f5e9330b4847393a8d5a253"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0ac665e5f5e9330b4847393a8d5a253">&#9670;&#160;</a></span>handle_order_queue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void IDataSink::handle_order_queue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSOrdQueData.html">WTSOrdQueData</a> *&#160;</td>
+          <td class="paramname"><em>curOrdQue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理委托队列数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">curOrdQue</td><td>当前的委托队列数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>被 <a class="el" href="classHftMocker.html#afac45105efbee0b89a0d06d7a38e6578">HftMocker</a> , 以及 <a class="el" href="classUftMocker.html#a44413fc9146e581a4ffafa1c6195613b">UftMocker</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00064">64</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a449d6fee677ebdce5747ec8db2cb1afc" name="a449d6fee677ebdce5747ec8db2cb1afc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a449d6fee677ebdce5747ec8db2cb1afc">&#9670;&#160;</a></span>handle_replay_done()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void IDataSink::handle_replay_done </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理回放完成事件 </p>
+<p>当所有回测数据全部回放完成时调用 </p>
+
+<p>被 <a class="el" href="classCtaMocker.html#a3378ca58a307aa37163f1e822902a159">CtaMocker</a>, <a class="el" href="classExecMocker.html#adaeffabab34cf22a0c78ac3e8db552ca">ExecMocker</a>, <a class="el" href="classHftMocker.html#a86669678becea177cf375cc579eaabc6">HftMocker</a>, <a class="el" href="classSelMocker.html#a7aaeae470625d77fa39b8065f46461ed">SelMocker</a> , 以及 <a class="el" href="classUftMocker.html#a96bcaf32225f45c8553d9a992caf3c82">UftMocker</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00113">113</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2e95899a2f5e48dd47cdb89eef7af3d7" name="a2e95899a2f5e48dd47cdb89eef7af3d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e95899a2f5e48dd47cdb89eef7af3d7">&#9670;&#160;</a></span>handle_schedule()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void IDataSink::handle_schedule </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uDate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uTime</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理定时任务 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">uDate</td><td>日期，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">uTime</td><td>时间，格式为HHMMSS </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>在 <a class="el" href="classCtaMocker.html#a1d4e4a7638b0239a861673e43a7a7038">CtaMocker</a>, <a class="el" href="classExecMocker.html#a0d79265620f6a4e803564fc66d01c616">ExecMocker</a>, <a class="el" href="classHftMocker.html#ae990a5c2e58cf5750eec3cf6943feb33">HftMocker</a>, <a class="el" href="classSelMocker.html#a2a6847bc3a91bea46e2bd49b7b6131ca">SelMocker</a> , 以及 <a class="el" href="classUftMocker.html#a80404593eb7d4a14500cd4e3a13458c8">UftMocker</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a484f5ab1b9ea855ddbc56cfedf324312" name="a484f5ab1b9ea855ddbc56cfedf324312"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a484f5ab1b9ea855ddbc56cfedf324312">&#9670;&#160;</a></span>handle_section_end()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void IDataSink::handle_section_end </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>curTDate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>curTime</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理交易时段结束事件 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curTDate</td><td>当前交易日，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">curTime</td><td>当前时间，格式为HHMMSS</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当交易时段结束时调用，一个交易日可能包含多个交易时段 </p>
+
+<p>被 <a class="el" href="classCtaMocker.html#aaaf3d36e182ec784cac99877f6d5f5c4">CtaMocker</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00121">121</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7518e7f54d3c02334d5bf8039d998ea1" name="a7518e7f54d3c02334d5bf8039d998ea1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7518e7f54d3c02334d5bf8039d998ea1">&#9670;&#160;</a></span>handle_session_begin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void IDataSink::handle_session_begin </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>curTDate</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理交易日开始事件 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curTDate</td><td>当前交易日，格式为YYYYMMDD</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>在每个新交易日开始时调用 </p>
+
+<p>在 <a class="el" href="classCtaMocker.html#a2b78d796d70c20b2c0609e6fa43bc708">CtaMocker</a>, <a class="el" href="classExecMocker.html#aeaef75a56ced4cfadc7fa02ce804b951">ExecMocker</a>, <a class="el" href="classHftMocker.html#aba14d271745db9601e66fcdd63c1d36e">HftMocker</a>, <a class="el" href="classUftMocker.html#abdc7f2fe277c08e0f82a8f857430148d">UftMocker</a> , 以及 <a class="el" href="classSelMocker.html#ad73377021a28ddd9e55e83316b16f000">SelMocker</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a3a8c562237bfa38cf0a789d2156e7f83" name="a3a8c562237bfa38cf0a789d2156e7f83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a8c562237bfa38cf0a789d2156e7f83">&#9670;&#160;</a></span>handle_session_end()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void IDataSink::handle_session_end </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>curTDate</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理交易日结束事件 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">curTDate</td><td>当前交易日，格式为YYYYMMDD</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>在每个交易日结束时调用 </p>
+
+<p>在 <a class="el" href="classCtaMocker.html#a69304e304883666400973a2f70c68455">CtaMocker</a>, <a class="el" href="classExecMocker.html#a9a0876beb1c96450af3eaa97892f1dc2">ExecMocker</a>, <a class="el" href="classHftMocker.html#ab79bb04408c2a7a68e9daf3e4edd0b16">HftMocker</a>, <a class="el" href="classUftMocker.html#aa4dae33dafe0108c778f8f0939dd22e5">UftMocker</a> , 以及 <a class="el" href="classSelMocker.html#a870f17332e635a04b50b43a35e3aaa54">SelMocker</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a49f916a6431df8140564afd06bf20158" name="a49f916a6431df8140564afd06bf20158"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49f916a6431df8140564afd06bf20158">&#9670;&#160;</a></span>handle_tick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void IDataSink::handle_tick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>curTick</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>pxType</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理Tick数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">curTick</td><td>当前的Tick数据 </td></tr>
+    <tr><td class="paramname">pxType</td><td>价格类型（0-开盘价，1-最高价，2-最低价，3-收盘价） </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>在 <a class="el" href="classExecMocker.html#a0edd764f06c86eda409b83a491530294">ExecMocker</a>, <a class="el" href="classHftMocker.html#a18e463735e0a29ff14f6e61a24052eaa">HftMocker</a>, <a class="el" href="classSelMocker.html#adbecf84f000a02ceb51a0566e1fce9ba">SelMocker</a>, <a class="el" href="classUftMocker.html#ab69fde97b863030a99ba736f46dd64a1">UftMocker</a> , 以及 <a class="el" href="classCtaMocker.html#a25d146399844e3a212623042682a66f0">CtaMocker</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a1bdeadd1cef35b1976dfb8dcb8b82aab" name="a1bdeadd1cef35b1976dfb8dcb8b82aab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bdeadd1cef35b1976dfb8dcb8b82aab">&#9670;&#160;</a></span>handle_transaction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void IDataSink::handle_transaction </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTransData.html">WTSTransData</a> *&#160;</td>
+          <td class="paramname"><em>curTrans</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>处理逐笔成交数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">curTrans</td><td>当前的逐笔成交数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>被 <a class="el" href="classHftMocker.html#a7b0a4809fa4b427c60a55b2e59cf50a6">HftMocker</a> , 以及 <a class="el" href="classUftMocker.html#ae091f6c4053a526d76df2a9bac52b1b5">UftMocker</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a> 第 <a class="el" href="HisDataReplayer_8h_source.html#l00076">76</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WtBtCore/<a class="el" href="HisDataReplayer_8h_source.html">HisDataReplayer.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classIDataSink.html">IDataSink</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

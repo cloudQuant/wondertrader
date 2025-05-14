@@ -1,0 +1,463 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtExecMon/WtExecPorter.cpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtExecPorter_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">WtExecPorter.cpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>执行监控系统对外接口实现  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="WtExecPorter_8h_source.html">WtExecPorter.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WtExecRunner_8h_source.html">WtExecRunner.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WtCore_2WtHelper_8h_source.html">../WtCore/WtHelper.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSLogger_8h_source.html">../WTSTools/WTSLogger.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSVersion_8h_source.html">../Includes/WTSVersion.h</a>&quot;</code><br />
+</div>
+<p><a href="WtExecPorter_8cpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:ad9119211815dd4c9e2974ebfdfa1c2a2" id="r_ad9119211815dd4c9e2974ebfdfa1c2a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtExecRunner.html">WtExecRunner</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtExecPorter_8cpp.html#ad9119211815dd4c9e2974ebfdfa1c2a2">getRunner</a> ()</td></tr>
+<tr class="memdesc:ad9119211815dd4c9e2974ebfdfa1c2a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取执行运行器单例  <br /></td></tr>
+<tr class="separator:ad9119211815dd4c9e2974ebfdfa1c2a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a037528ac8158d98e199656a258e83391" id="r_a037528ac8158d98e199656a258e83391"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtExecPorter_8cpp.html#a037528ac8158d98e199656a258e83391">init_exec</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> logCfg, bool isFile)</td></tr>
+<tr class="memdesc:a037528ac8158d98e199656a258e83391"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化执行监控系统  <br /></td></tr>
+<tr class="separator:a037528ac8158d98e199656a258e83391"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8112749e6f958b2c94a2dad94bb3461d" id="r_a8112749e6f958b2c94a2dad94bb3461d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtExecPorter_8cpp.html#a8112749e6f958b2c94a2dad94bb3461d">config_exec</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> cfgfile, bool isFile)</td></tr>
+<tr class="memdesc:a8112749e6f958b2c94a2dad94bb3461d"><td class="mdescLeft">&#160;</td><td class="mdescRight">配置执行监控系统  <br /></td></tr>
+<tr class="separator:a8112749e6f958b2c94a2dad94bb3461d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab40cd4106039318376e783facea281f4" id="r_ab40cd4106039318376e783facea281f4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtExecPorter_8cpp.html#ab40cd4106039318376e783facea281f4">run_exec</a> ()</td></tr>
+<tr class="memdesc:ab40cd4106039318376e783facea281f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">运行执行监控系统  <br /></td></tr>
+<tr class="separator:ab40cd4106039318376e783facea281f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ecaf79afcf06e126f935362359f7e38" id="r_a4ecaf79afcf06e126f935362359f7e38"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtExecPorter_8cpp.html#a4ecaf79afcf06e126f935362359f7e38">release_exec</a> ()</td></tr>
+<tr class="memdesc:a4ecaf79afcf06e126f935362359f7e38"><td class="mdescLeft">&#160;</td><td class="mdescRight">释放执行监控系统  <br /></td></tr>
+<tr class="separator:a4ecaf79afcf06e126f935362359f7e38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08b5c93add28e4acb608605cd8e95664" id="r_a08b5c93add28e4acb608605cd8e95664"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtExecPorter_8cpp.html#a08b5c93add28e4acb608605cd8e95664">get_version</a> ()</td></tr>
+<tr class="memdesc:a08b5c93add28e4acb608605cd8e95664"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取版本信息  <br /></td></tr>
+<tr class="separator:a08b5c93add28e4acb608605cd8e95664"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0decf9a326951799c314ab14f4d9ebc6" id="r_a0decf9a326951799c314ab14f4d9ebc6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtExecPorter_8cpp.html#a0decf9a326951799c314ab14f4d9ebc6">write_log</a> (unsigned int level, <a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> message, <a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> catName)</td></tr>
+<tr class="memdesc:a0decf9a326951799c314ab14f4d9ebc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">写入日志  <br /></td></tr>
+<tr class="separator:a0decf9a326951799c314ab14f4d9ebc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2aa2a5b2f4d69328e1766f04df5bb0b2" id="r_a2aa2a5b2f4d69328e1766f04df5bb0b2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtExecPorter_8cpp.html#a2aa2a5b2f4d69328e1766f04df5bb0b2">set_position</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> stdCode, double targetPos)</td></tr>
+<tr class="memdesc:a2aa2a5b2f4d69328e1766f04df5bb0b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置目标仓位  <br /></td></tr>
+<tr class="separator:a2aa2a5b2f4d69328e1766f04df5bb0b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fe067e1e16fd3983f183e448c5d4f9d" id="r_a0fe067e1e16fd3983f183e448c5d4f9d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtExecPorter_8cpp.html#a0fe067e1e16fd3983f183e448c5d4f9d">commit_positions</a> ()</td></tr>
+<tr class="memdesc:a0fe067e1e16fd3983f183e448c5d4f9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">提交目标仓位  <br /></td></tr>
+<tr class="separator:a0fe067e1e16fd3983f183e448c5d4f9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a1c00b66b793e799ab324e7092d25e54f" id="r_a1c00b66b793e799ab324e7092d25e54f"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtExecPorter_8cpp.html#a1c00b66b793e799ab324e7092d25e54f">PLATFORM_NAME</a> [] = &quot;UNIX&quot;</td></tr>
+<tr class="memdesc:a1c00b66b793e799ab324e7092d25e54f"><td class="mdescLeft">&#160;</td><td class="mdescRight">平台名称定义  <br /></td></tr>
+<tr class="separator:a1c00b66b793e799ab324e7092d25e54f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>执行监控系统对外接口实现 </p>
+<dl class="section author"><dt>作者</dt><dd>wondertrader </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2022/05/01</dd></dl>
+<p>实现了执行监控系统的C接口，包括初始化、配置、运行、仓位管理等功能 </p>
+
+<p class="definition">在文件 <a class="el" href="WtExecPorter_8cpp_source.html">WtExecPorter.cpp</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="a0fe067e1e16fd3983f183e448c5d4f9d" name="a0fe067e1e16fd3983f183e448c5d4f9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0fe067e1e16fd3983f183e448c5d4f9d">&#9670;&#160;</a></span>commit_positions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void commit_positions </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>提交目标仓位 </p>
+<p>提交缓存中的所有目标仓位，触发实际交易执行 </p>
+
+<p class="definition">在文件 <a class="el" href="WtExecPorter_8cpp_source.html">WtExecPorter.cpp</a> 第 <a class="el" href="WtExecPorter_8cpp_source.html#l00157">157</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8112749e6f958b2c94a2dad94bb3461d" name="a8112749e6f958b2c94a2dad94bb3461d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8112749e6f958b2c94a2dad94bb3461d">&#9670;&#160;</a></span>config_exec()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void config_exec </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>cfgfile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isFile</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>配置执行监控系统 </p>
+<p>加载执行监控系统的配置，如果没有指定配置文件，则使用默认的"cfgexec.json" </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfgfile</td><td>配置文件路径或者配置内容字符串 </td></tr>
+    <tr><td class="paramname">isFile</td><td>是否为文件路径，默认为true </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtExecPorter_8cpp_source.html">WtExecPorter.cpp</a> 第 <a class="el" href="WtExecPorter_8cpp_source.html#l00068">68</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a08b5c93add28e4acb608605cd8e95664" name="a08b5c93add28e4acb608605cd8e95664"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08b5c93add28e4acb608605cd8e95664">&#9670;&#160;</a></span>get_version()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> get_version </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取版本信息 </p>
+<p>获取数据服务模块版本号</p>
+<p>获取模块版本信息</p>
+<p>获取执行监控系统的版本信息，包括平台、版本号和编译时间 </p><dl class="section return"><dt>返回</dt><dd>版本信息字符串 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtExecPorter_8cpp_source.html">WtExecPorter.cpp</a> 第 <a class="el" href="WtExecPorter_8cpp_source.html#l00102">102</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad9119211815dd4c9e2974ebfdfa1c2a2" name="ad9119211815dd4c9e2974ebfdfa1c2a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9119211815dd4c9e2974ebfdfa1c2a2">&#9670;&#160;</a></span>getRunner()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtExecRunner.html">WtExecRunner</a> &amp; getRunner </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取执行运行器单例 </p>
+<p>获取运行器实例的外部函数声明</p>
+<p>获取全局运行器实例</p>
+<p>获取WtDtRunner全局实例的外部函数声明</p>
+<p>获取全局回测引擎实例</p>
+<p>使用单例模式获取WtExecRunner对象，确保整个程序中只有一个运行器实例 </p><dl class="section return"><dt>返回</dt><dd>WtExecRunner对象的引用 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtExecPorter_8cpp_source.html">WtExecPorter.cpp</a> 第 <a class="el" href="WtExecPorter_8cpp_source.html#l00036">36</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a037528ac8158d98e199656a258e83391" name="a037528ac8158d98e199656a258e83391"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a037528ac8158d98e199656a258e83391">&#9670;&#160;</a></span>init_exec()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void init_exec </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>logCfg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isFile</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化执行监控系统 </p>
+<p>初始化执行监控系统，加载日志配置，确保只初始化一次 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">logCfg</td><td>日志配置，可以是配置文件路径或者配置内容字符串 </td></tr>
+    <tr><td class="paramname">isFile</td><td>是否为文件路径，默认为true </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtExecPorter_8cpp_source.html">WtExecPorter.cpp</a> 第 <a class="el" href="WtExecPorter_8cpp_source.html#l00048">48</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4ecaf79afcf06e126f935362359f7e38" name="a4ecaf79afcf06e126f935362359f7e38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ecaf79afcf06e126f935362359f7e38">&#9670;&#160;</a></span>release_exec()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void release_exec </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>释放执行监控系统 </p>
+<p>释放执行监控系统的资源，在程序结束前调用 </p>
+
+<p class="definition">在文件 <a class="el" href="WtExecPorter_8cpp_source.html">WtExecPorter.cpp</a> 第 <a class="el" href="WtExecPorter_8cpp_source.html#l00091">91</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab40cd4106039318376e783facea281f4" name="ab40cd4106039318376e783facea281f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab40cd4106039318376e783facea281f4">&#9670;&#160;</a></span>run_exec()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void run_exec </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>运行执行监控系统 </p>
+<p>启动执行监控系统，开始监控和管理交易执行 </p>
+
+<p class="definition">在文件 <a class="el" href="WtExecPorter_8cpp_source.html">WtExecPorter.cpp</a> 第 <a class="el" href="WtExecPorter_8cpp_source.html#l00081">81</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2aa2a5b2f4d69328e1766f04df5bb0b2" name="a2aa2a5b2f4d69328e1766f04df5bb0b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2aa2a5b2f4d69328e1766f04df5bb0b2">&#9670;&#160;</a></span>set_position()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void set_position </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>targetPos</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>设置目标仓位 </p>
+<p>设置单个合约的目标仓位，添加到缓存中 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码 </td></tr>
+    <tr><td class="paramname">targetPos</td><td>目标仓位 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtExecPorter_8cpp_source.html">WtExecPorter.cpp</a> 第 <a class="el" href="WtExecPorter_8cpp_source.html#l00147">147</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0decf9a326951799c314ab14f4d9ebc6" name="a0decf9a326951799c314ab14f4d9ebc6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0decf9a326951799c314ab14f4d9ebc6">&#9670;&#160;</a></span>write_log()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void write_log </td>
+          <td>(</td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>message</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>catName</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>写入日志 </p>
+<p>向执行监控系统的日志系统写入日志，可以指定日志分类 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">level</td><td>日志级别 </td></tr>
+    <tr><td class="paramname">message</td><td>日志内容 </td></tr>
+    <tr><td class="paramname">catName</td><td>日志分类名称 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtExecPorter_8cpp_source.html">WtExecPorter.cpp</a> 第 <a class="el" href="WtExecPorter_8cpp_source.html#l00127">127</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a1c00b66b793e799ab324e7092d25e54f" name="a1c00b66b793e799ab324e7092d25e54f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c00b66b793e799ab324e7092d25e54f">&#9670;&#160;</a></span>PLATFORM_NAME</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char PLATFORM_NAME[] = &quot;UNIX&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>平台名称定义 </p>
+<p>根据编译平台定义不同的平台名称，用于版本信息显示 </p>
+
+<p class="definition">在文件 <a class="el" href="WtExecPorter_8cpp_source.html">WtExecPorter.cpp</a> 第 <a class="el" href="WtExecPorter_8cpp_source.html#l00028">28</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_c9dc40a95976ffbb9491829d9dfe1963.html">WtExecMon</a></li><li class="navelem"><a class="el" href="WtExecPorter_8cpp.html">WtExecPorter.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

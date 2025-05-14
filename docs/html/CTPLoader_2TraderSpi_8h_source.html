@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/CTPLoader/TraderSpi.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('CTPLoader_2TraderSpi_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">TraderSpi.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="CTPLoader_2TraderSpi_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//v6.3.15</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../API/CTP6.3.15/ThostFtdcTraderApi.h&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="foldopen" id="foldopen00022" data-start="{" data-end="};">
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classCTraderSpi.html">   22</a></span><span class="keyword">class </span><a class="code hl_class" href="classCTraderSpi.html">CTraderSpi</a> : <span class="keyword">public</span> <a class="code hl_class" href="classctp__sopt_1_1CThostFtdcTraderSpi.html">CThostFtdcTraderSpi</a></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>{</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classCTraderSpi.html#af7fc89c85124ebc1b3fa162ed31b7d4a">OnFrontConnected</a>();</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classCTraderSpi.html#adbdcbc063843fab2acc13996a1044013">OnRspAuthenticate</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspAuthenticateField.html">CThostFtdcRspAuthenticateField</a> *pRspAuthenticateField, <a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classCTraderSpi.html#a0db444c0e6033fa3654997375ed590c4">OnRspUserLogin</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspUserLoginField.html">CThostFtdcRspUserLoginField</a> *pRspUserLogin, <a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classCTraderSpi.html#ade2a40c23dc654e084a67378326f8295">OnRspQryInstrument</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcInstrumentField.html">CThostFtdcInstrumentField</a> *pInstrument, <a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast);</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classCTraderSpi.html#a1ec5341d15db827eeb753efa429c6d9c">OnRspError</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast);</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classCTraderSpi.html#a6397c61c8e1a45893ede144594ff07de">OnFrontDisconnected</a>(<span class="keywordtype">int</span> nReason);</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classCTraderSpi.html#af5d3a009886e2cbe422f21cd301211a6">ReqAuth</a>();</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classCTraderSpi.html#a3da95d30605d4f4750852c3b2cee1ed4">ReqUserLogin</a>();</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classCTraderSpi.html#aed78a6742508052138a8f56fd8a2a098">ReqQryInstrument</a>();</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classCTraderSpi.html#ac708112e0b675bf706e5364216749324">IsErrorRspInfo</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo);</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classCTraderSpi.html#a2a3a12b7945fc7ae8673739b416411eb">DumpToJson</a>();</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classCTraderSpi.html#a6b5566c5a3cacc5bd4b8ccf4e2958c76">LoadFromJson</a>();</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="classCTraderSpi.html#a65404c2d059b4684ae4fe4eb0c6de5da">  139</a></span>    <span class="keywordtype">int</span> <a class="code hl_variable" href="classCTraderSpi.html#a65404c2d059b4684ae4fe4eb0c6de5da">m_lTradingDate</a>;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="classCTraderSpi.html#a063d6f2443e67ae68a43d6993424c69d">  141</a></span>    <span class="keywordtype">int</span> <a class="code hl_variable" href="classCTraderSpi.html#a063d6f2443e67ae68a43d6993424c69d">m_ReqCount</a>;</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>};</div>
+</div>
+<div class="ttc" id="aclassCTraderSpi_html"><div class="ttname"><a href="classCTraderSpi.html">CTraderSpi</a></div><div class="ttdoc">CTP交易接口回调实现类</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8h_source.html#l00022">TraderSpi.h:23</a></div></div>
+<div class="ttc" id="aclassCTraderSpi_html_a063d6f2443e67ae68a43d6993424c69d"><div class="ttname"><a href="classCTraderSpi.html#a063d6f2443e67ae68a43d6993424c69d">CTraderSpi::m_ReqCount</a></div><div class="ttdeci">int m_ReqCount</div><div class="ttdoc">请求计数器</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8h_source.html#l00141">TraderSpi.h:141</a></div></div>
+<div class="ttc" id="aclassCTraderSpi_html_a0db444c0e6033fa3654997375ed590c4"><div class="ttname"><a href="classCTraderSpi.html#a0db444c0e6033fa3654997375ed590c4">CTraderSpi::OnRspUserLogin</a></div><div class="ttdeci">virtual void OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">登录请求响应</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8cpp_source.html#l00247">TraderSpi.cpp:247</a></div></div>
+<div class="ttc" id="aclassCTraderSpi_html_a1ec5341d15db827eeb753efa429c6d9c"><div class="ttname"><a href="classCTraderSpi.html#a1ec5341d15db827eeb753efa429c6d9c">CTraderSpi::OnRspError</a></div><div class="ttdeci">virtual void OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">错误应答</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8cpp_source.html#l00767">TraderSpi.cpp:767</a></div></div>
+<div class="ttc" id="aclassCTraderSpi_html_a2a3a12b7945fc7ae8673739b416411eb"><div class="ttname"><a href="classCTraderSpi.html#a2a3a12b7945fc7ae8673739b416411eb">CTraderSpi::DumpToJson</a></div><div class="ttdeci">void DumpToJson()</div><div class="ttdoc">将合约信息转储为JSON格式</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8cpp_source.html#l00630">TraderSpi.cpp:630</a></div></div>
+<div class="ttc" id="aclassCTraderSpi_html_a3da95d30605d4f4750852c3b2cee1ed4"><div class="ttname"><a href="classCTraderSpi.html#a3da95d30605d4f4750852c3b2cee1ed4">CTraderSpi::ReqUserLogin</a></div><div class="ttdeci">void ReqUserLogin()</div><div class="ttdoc">发送用户登录请求</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8cpp_source.html#l00222">TraderSpi.cpp:222</a></div></div>
+<div class="ttc" id="aclassCTraderSpi_html_a6397c61c8e1a45893ede144594ff07de"><div class="ttname"><a href="classCTraderSpi.html#a6397c61c8e1a45893ede144594ff07de">CTraderSpi::OnFrontDisconnected</a></div><div class="ttdeci">virtual void OnFrontDisconnected(int nReason)</div><div class="ttdoc">前置断开连接回调</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8cpp_source.html#l00750">TraderSpi.cpp:750</a></div></div>
+<div class="ttc" id="aclassCTraderSpi_html_a65404c2d059b4684ae4fe4eb0c6de5da"><div class="ttname"><a href="classCTraderSpi.html#a65404c2d059b4684ae4fe4eb0c6de5da">CTraderSpi::m_lTradingDate</a></div><div class="ttdeci">int m_lTradingDate</div><div class="ttdoc">交易日期</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8h_source.html#l00139">TraderSpi.h:139</a></div></div>
+<div class="ttc" id="aclassCTraderSpi_html_a6b5566c5a3cacc5bd4b8ccf4e2958c76"><div class="ttname"><a href="classCTraderSpi.html#a6b5566c5a3cacc5bd4b8ccf4e2958c76">CTraderSpi::LoadFromJson</a></div><div class="ttdeci">void LoadFromJson()</div><div class="ttdoc">从本地JSON文件加载合约信息</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8cpp_source.html#l00536">TraderSpi.cpp:536</a></div></div>
+<div class="ttc" id="aclassCTraderSpi_html_ac708112e0b675bf706e5364216749324"><div class="ttname"><a href="classCTraderSpi.html#ac708112e0b675bf706e5364216749324">CTraderSpi::IsErrorRspInfo</a></div><div class="ttdeci">bool IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo)</div><div class="ttdoc">检查响应是否有错误</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8cpp_source.html#l00782">TraderSpi.cpp:782</a></div></div>
+<div class="ttc" id="aclassCTraderSpi_html_adbdcbc063843fab2acc13996a1044013"><div class="ttname"><a href="classCTraderSpi.html#adbdcbc063843fab2acc13996a1044013">CTraderSpi::OnRspAuthenticate</a></div><div class="ttdeci">virtual void OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">认证响应回调</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8cpp_source.html#l00207">TraderSpi.cpp:207</a></div></div>
+<div class="ttc" id="aclassCTraderSpi_html_ade2a40c23dc654e084a67378326f8295"><div class="ttname"><a href="classCTraderSpi.html#ade2a40c23dc654e084a67378326f8295">CTraderSpi::OnRspQryInstrument</a></div><div class="ttdeci">virtual void OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">查询合约响应</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8cpp_source.html#l00353">TraderSpi.cpp:353</a></div></div>
+<div class="ttc" id="aclassCTraderSpi_html_aed78a6742508052138a8f56fd8a2a098"><div class="ttname"><a href="classCTraderSpi.html#aed78a6742508052138a8f56fd8a2a098">CTraderSpi::ReqQryInstrument</a></div><div class="ttdeci">void ReqQryInstrument()</div><div class="ttdoc">发送查询合约请求</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8cpp_source.html#l00276">TraderSpi.cpp:276</a></div></div>
+<div class="ttc" id="aclassCTraderSpi_html_af5d3a009886e2cbe422f21cd301211a6"><div class="ttname"><a href="classCTraderSpi.html#af5d3a009886e2cbe422f21cd301211a6">CTraderSpi::ReqAuth</a></div><div class="ttdeci">void ReqAuth()</div><div class="ttdoc">发送认证请求</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8cpp_source.html#l00180">TraderSpi.cpp:180</a></div></div>
+<div class="ttc" id="aclassCTraderSpi_html_af7fc89c85124ebc1b3fa162ed31b7d4a"><div class="ttname"><a href="classCTraderSpi.html#af7fc89c85124ebc1b3fa162ed31b7d4a">CTraderSpi::OnFrontConnected</a></div><div class="ttdeci">virtual void OnFrontConnected()</div><div class="ttdoc">前置连接回调</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_2TraderSpi_8cpp_source.html#l00167">TraderSpi.cpp:167</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcTraderSpi_html"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcTraderSpi.html">ctp_sopt::CThostFtdcTraderSpi</a></div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcTraderApi_8h_source.html#l00031">ThostFtdcTraderApi.h:32</a></div></div>
+<div class="ttc" id="astructctp__sopt_1_1CThostFtdcInstrumentField_html"><div class="ttname"><a href="structctp__sopt_1_1CThostFtdcInstrumentField.html">ctp_sopt::CThostFtdcInstrumentField</a></div><div class="ttdoc">��Լ</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcUserApiStruct_8h_source.html#l00422">ThostFtdcUserApiStruct.h:423</a></div></div>
+<div class="ttc" id="astructctp__sopt_1_1CThostFtdcRspAuthenticateField_html"><div class="ttname"><a href="structctp__sopt_1_1CThostFtdcRspAuthenticateField.html">ctp_sopt::CThostFtdcRspAuthenticateField</a></div><div class="ttdoc">�ͻ�����֤��Ӧ</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcUserApiStruct_8h_source.html#l00125">ThostFtdcUserApiStruct.h:126</a></div></div>
+<div class="ttc" id="astructctp__sopt_1_1CThostFtdcRspInfoField_html"><div class="ttname"><a href="structctp__sopt_1_1CThostFtdcRspInfoField.html">ctp_sopt::CThostFtdcRspInfoField</a></div><div class="ttdoc">��Ӧ��Ϣ</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcUserApiStruct_8h_source.html#l00363">ThostFtdcUserApiStruct.h:364</a></div></div>
+<div class="ttc" id="astructctp__sopt_1_1CThostFtdcRspUserLoginField_html"><div class="ttname"><a href="structctp__sopt_1_1CThostFtdcRspUserLoginField.html">ctp_sopt::CThostFtdcRspUserLoginField</a></div><div class="ttdoc">�û���¼Ӧ��</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcUserApiStruct_8h_source.html#l00061">ThostFtdcUserApiStruct.h:62</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_1499a92f6901f635bba5cb245e178d9a.html">CTPLoader</a></li><li class="navelem"><a class="el" href="CTPLoader_2TraderSpi_8h.html">TraderSpi.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

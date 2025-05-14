@@ -1,0 +1,27 @@
+var structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField =
+[
+    [ "AccountID", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#a2da0b6826152280978117450ace6914d", null ],
+    [ "Amount", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#a16c01576aeb053c7aa391e1f56cf776a", null ],
+    [ "ApplySerial", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#ab9cd416692a7607f0550ba788b10b61a", null ],
+    [ "BankAccountID", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#a9f7400ff5a095b678c244fcf35b7f4f0", null ],
+    [ "BankID", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#afa930e2d8306be7a5826792a1b34cf8b", null ],
+    [ "CreditDebtID", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#a08e45de6701823fdcd5a106abfd22f5f", null ],
+    [ "CurrencyID", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#afa96aa87261f3a035c03768b1ebbc635", null ],
+    [ "DepartmentID", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#ae0d0d4e60a21c073bb27857fffeb49ff", null ],
+    [ "ExternalNodeID", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#aebed6ae8c6024d66f5536a6c8f959e3a", null ],
+    [ "ExternalSerial", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#a3a00600c16cf391a5ada96eaa069f920", null ],
+    [ "ForceCloseReason", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#aca44cfa532d56260d539a36df3851d89", null ],
+    [ "FrontID", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#add2da24154d9ca3f734af2c5f1a6d458", null ],
+    [ "FundSerial", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#a3edf322e941dab7fc344b6d0afd80959", null ],
+    [ "InvestorID", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#ae5a53fbbae6155dc7932dde9aa9d91bd", null ],
+    [ "IPAddress", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#a8a6e86d74674102e515106742147d98d", null ],
+    [ "MacAddress", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#a40cd261aada5de33b4260ce7c00eac71", null ],
+    [ "OperateDate", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#a8cfc3e9c7d1c64366c135b8d2aa27916", null ],
+    [ "OperateSource", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#aac3d2ab6176add532958061aedaaa87c", null ],
+    [ "OperateTime", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#a9b9457ec9a32853f49d721fe77df464c", null ],
+    [ "OperatorID", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#a40b4bc279acb9f1e03b45ca3d17b1311", null ],
+    [ "SessionID", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#accdd95b8ad0b45bb8967de70a3cdb555", null ],
+    [ "StatusMsg", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#a8d92dcbad26cff54f41115d46d531d60", null ],
+    [ "TransferDirection", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#ac8285c8057bbe99c8ebc694250bc3103", null ],
+    [ "TransferStatus", "structTORASTOCKAPI_1_1CTORATstpFundTransferDetailField.html#afda5ceda232725c52fa87a3e6688de4a", null ]
+];

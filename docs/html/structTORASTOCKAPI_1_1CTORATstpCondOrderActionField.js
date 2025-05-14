@@ -1,0 +1,26 @@
+var structTORASTOCKAPI_1_1CTORATstpCondOrderActionField =
+[
+    [ "ActionDate", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#ab6e537f69f8b9033faebf7fc85471045", null ],
+    [ "ActionFlag", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a549a0d5c3e15f40869c6283e265f5e20", null ],
+    [ "ActionFrontID", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a9b3779d3be1b7086d3cc944d8c2968ea", null ],
+    [ "ActionSessionID", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#aeeb616b0ecc88ccd4c8236dc085e5d94", null ],
+    [ "ActionTime", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a96a9b1ae1e0161c52e4fa93e8c585269", null ],
+    [ "ActionUser", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#aeff02178bd489df81724dd75f42cb7f9", null ],
+    [ "BusinessUnitID", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a79aefb8864bbc3fdcffde99a77690a66", null ],
+    [ "CancelCondOrderID", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a23b7e3725037056eca632524636239e6", null ],
+    [ "CondOrderActionRef", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a9c2ba4535b66c99bc193f5c00c576b91", null ],
+    [ "CondOrderID", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#af431a0f6fbfb05f695db72006fdabd7d", null ],
+    [ "CondOrderRef", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a195d3818d76f8f4ccfc8bf5bec42c35b", null ],
+    [ "DepartmentID", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a47b8a925a7d6efaf51e276ce6ba7b47e", null ],
+    [ "ExchangeID", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a9779344d1767566814e4815c1d9fc691", null ],
+    [ "FrontID", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#abf8a27bb95b2d0b9b6a3610bb871ee70", null ],
+    [ "IInfo", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#ae7bf17e7f80278d9834abf92405be207", null ],
+    [ "InvestorID", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#afdd4df2a322ce5e0c65fd91a8929c767", null ],
+    [ "IPAddress", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#afb74a71183806f3cf26f4e2a3457cb91", null ],
+    [ "MacAddress", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a686e344c760e1e522ef45d7bc19d3373", null ],
+    [ "Operway", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a358dc1ff6c5319518dccd31315aacc27", null ],
+    [ "RequestID", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a8aa237a77849e5702e11c922ec7fb0fe", null ],
+    [ "SessionID", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a75a158c81fff1f4b87ce0cb0316e764a", null ],
+    [ "ShareholderID", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a85b6fe84cb0b041062e77e01ed3d6015", null ],
+    [ "SInfo", "structTORASTOCKAPI_1_1CTORATstpCondOrderActionField.html#a32138c6cd3a882507199aa906d37eacb", null ]
+];

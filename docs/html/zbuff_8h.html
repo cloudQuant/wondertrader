@@ -1,0 +1,695 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/zbuff.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('zbuff_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#define-members">宏定义</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">zbuff.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;stddef.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="zstd_8h_source.html">zstd.h</a>&quot;</code><br />
+</div>
+<p><a href="zbuff_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:aa3197438800981529b11560df334a9cd" id="r_aa3197438800981529b11560df334a9cd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#aa3197438800981529b11560df334a9cd">ZSTD_BUFFERED_H_23987</a></td></tr>
+<tr class="separator:aa3197438800981529b11560df334a9cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30695f54bb488754ee3a0667ad084528" id="r_a30695f54bb488754ee3a0667ad084528"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a30695f54bb488754ee3a0667ad084528">ZBUFF_DEPRECATED</a>(message)&#160;&#160;&#160;<a class="el" href="zstd_8h.html#a9dbac0fbe1cd466cb2b82c5401e2ec49">ZSTDLIB_API</a></td></tr>
+<tr class="separator:a30695f54bb488754ee3a0667ad084528"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:ac837dae3b3006fc6bce4bce80570ed51" id="r_ac837dae3b3006fc6bce4bce80570ed51"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="zstd_8h.html#a7591551effb218c2750f0f57ba62809a">ZSTD_CStream</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#ac837dae3b3006fc6bce4bce80570ed51">ZBUFF_CCtx</a></td></tr>
+<tr class="separator:ac837dae3b3006fc6bce4bce80570ed51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a142f7b94e177147b403037b6798c611d" id="r_a142f7b94e177147b403037b6798c611d"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="zstd_8h.html#abc6473440df4dc8a7ce82443825c47df">ZSTD_DStream</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a142f7b94e177147b403037b6798c611d">ZBUFF_DCtx</a></td></tr>
+<tr class="separator:a142f7b94e177147b403037b6798c611d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a709ea34585cada5482037c64ea6b2ca1" id="r_a709ea34585cada5482037c64ea6b2ca1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a709ea34585cada5482037c64ea6b2ca1">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_createCStream&quot;) <a class="el" href="zbuff_8h.html#ac837dae3b3006fc6bce4bce80570ed51">ZBUFF_CCtx</a> *<a class="el" href="zbuff__compress_8c.html#a9d25f19239843db0565ade125eb5fb50">ZBUFF_createCCtx</a>(void)</td></tr>
+<tr class="separator:a709ea34585cada5482037c64ea6b2ca1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15100433ad842542e52070be9052c8af" id="r_a15100433ad842542e52070be9052c8af"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a15100433ad842542e52070be9052c8af">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_freeCStream&quot;) size_t <a class="el" href="zbuff__compress_8c.html#a0cd6179013bc22a4a816357234c14622">ZBUFF_freeCCtx</a>(<a class="el" href="zbuff_8h.html#ac837dae3b3006fc6bce4bce80570ed51">ZBUFF_CCtx</a> *cctx)</td></tr>
+<tr class="separator:a15100433ad842542e52070be9052c8af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add726f1b830e273d4a6577f09be0408a" id="r_add726f1b830e273d4a6577f09be0408a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#add726f1b830e273d4a6577f09be0408a">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_initCStream&quot;) size_t <a class="el" href="zbuff__compress_8c.html#a6b756283235d1cd151513a300d1eebaf">ZBUFF_compressInit</a>(<a class="el" href="zbuff_8h.html#ac837dae3b3006fc6bce4bce80570ed51">ZBUFF_CCtx</a> *cctx</td></tr>
+<tr class="separator:add726f1b830e273d4a6577f09be0408a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6243e8e6f06d99ba3deefa48c7aec596" id="r_a6243e8e6f06d99ba3deefa48c7aec596"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a6243e8e6f06d99ba3deefa48c7aec596">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_initCStream_usingDict&quot;) size_t <a class="el" href="zbuff__compress_8c.html#afd4d10e2f8d30e92a8a5862297d8ab3c">ZBUFF_compressInitDictionary</a>(<a class="el" href="zbuff_8h.html#ac837dae3b3006fc6bce4bce80570ed51">ZBUFF_CCtx</a> *cctx</td></tr>
+<tr class="separator:a6243e8e6f06d99ba3deefa48c7aec596"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d7066688dad7e3001621ea8243de2b6" id="r_a1d7066688dad7e3001621ea8243de2b6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a1d7066688dad7e3001621ea8243de2b6">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_compressStream&quot;) size_t <a class="el" href="zbuff__compress_8c.html#ad26c5e51ddc699b36bfbf45925e1ff7e">ZBUFF_compressContinue</a>(<a class="el" href="zbuff_8h.html#ac837dae3b3006fc6bce4bce80570ed51">ZBUFF_CCtx</a> *cctx</td></tr>
+<tr class="separator:a1d7066688dad7e3001621ea8243de2b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69de44db1e471838e0d6d4282a384ffd" id="r_a69de44db1e471838e0d6d4282a384ffd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a69de44db1e471838e0d6d4282a384ffd">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_flushStream&quot;) size_t <a class="el" href="zbuff__compress_8c.html#aa94d00c8fd54e55b22ee29ce27efa7f2">ZBUFF_compressFlush</a>(<a class="el" href="zbuff_8h.html#ac837dae3b3006fc6bce4bce80570ed51">ZBUFF_CCtx</a> *cctx</td></tr>
+<tr class="separator:a69de44db1e471838e0d6d4282a384ffd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77caab6e518ee1c7b55773ba405b8421" id="r_a77caab6e518ee1c7b55773ba405b8421"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a77caab6e518ee1c7b55773ba405b8421">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_endStream&quot;) size_t <a class="el" href="zbuff__compress_8c.html#a82327168988a35ceaa2f52bf7327a398">ZBUFF_compressEnd</a>(<a class="el" href="zbuff_8h.html#ac837dae3b3006fc6bce4bce80570ed51">ZBUFF_CCtx</a> *cctx</td></tr>
+<tr class="separator:a77caab6e518ee1c7b55773ba405b8421"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d3bc332042ad9acd1c63bfffcd1be71" id="r_a2d3bc332042ad9acd1c63bfffcd1be71"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a2d3bc332042ad9acd1c63bfffcd1be71">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_createDStream&quot;) <a class="el" href="zbuff_8h.html#a142f7b94e177147b403037b6798c611d">ZBUFF_DCtx</a> *<a class="el" href="zbuff__decompress_8c.html#a42bd92f319642254b89b8e20262e557f">ZBUFF_createDCtx</a>(void)</td></tr>
+<tr class="separator:a2d3bc332042ad9acd1c63bfffcd1be71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acae8244c0d25dd702307f16d8e56f978" id="r_acae8244c0d25dd702307f16d8e56f978"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#acae8244c0d25dd702307f16d8e56f978">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_freeDStream&quot;) size_t <a class="el" href="zbuff__decompress_8c.html#ad636a345451e7d3add11f0081601ab7c">ZBUFF_freeDCtx</a>(<a class="el" href="zbuff_8h.html#a142f7b94e177147b403037b6798c611d">ZBUFF_DCtx</a> *dctx)</td></tr>
+<tr class="separator:acae8244c0d25dd702307f16d8e56f978"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88b52d0ea3d307bd245264660650e412" id="r_a88b52d0ea3d307bd245264660650e412"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a88b52d0ea3d307bd245264660650e412">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_initDStream&quot;) size_t <a class="el" href="zbuff__decompress_8c.html#a1dee3749dccf920402ca77afc79c4564">ZBUFF_decompressInit</a>(<a class="el" href="zbuff_8h.html#a142f7b94e177147b403037b6798c611d">ZBUFF_DCtx</a> *dctx)</td></tr>
+<tr class="separator:a88b52d0ea3d307bd245264660650e412"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4327b43e833b765381d791dea1e0c48" id="r_ac4327b43e833b765381d791dea1e0c48"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#ac4327b43e833b765381d791dea1e0c48">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_initDStream_usingDict&quot;) size_t <a class="el" href="zbuff__decompress_8c.html#a9a9ccad88f5bcb8b15b191823fa8a9e3">ZBUFF_decompressInitDictionary</a>(<a class="el" href="zbuff_8h.html#a142f7b94e177147b403037b6798c611d">ZBUFF_DCtx</a> *dctx</td></tr>
+<tr class="separator:ac4327b43e833b765381d791dea1e0c48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5ff99313d46dba5b4849bb124dc7056" id="r_ab5ff99313d46dba5b4849bb124dc7056"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#ab5ff99313d46dba5b4849bb124dc7056">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_decompressStream&quot;) size_t <a class="el" href="zbuff__decompress_8c.html#ad25b267dfa4143da87201d3706ebc815">ZBUFF_decompressContinue</a>(<a class="el" href="zbuff_8h.html#a142f7b94e177147b403037b6798c611d">ZBUFF_DCtx</a> *dctx</td></tr>
+<tr class="separator:ab5ff99313d46dba5b4849bb124dc7056"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad34f59ca383e661f11f81f442598c100" id="r_ad34f59ca383e661f11f81f442598c100"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#ad34f59ca383e661f11f81f442598c100">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_isError&quot;) unsigned <a class="el" href="zbuff__common_8c.html#a770c1ff3f82dde34101da0acfcee4923">ZBUFF_isError</a>(size_t errorCode)</td></tr>
+<tr class="separator:ad34f59ca383e661f11f81f442598c100"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39832ae3c5980b86569d8d4411b4f5d4" id="r_a39832ae3c5980b86569d8d4411b4f5d4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a39832ae3c5980b86569d8d4411b4f5d4">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_getErrorName&quot;) <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="zbuff__common_8c.html#ae0ffad8a95af696dcb9ed4e0d1c8bf83">ZBUFF_getErrorName</a>(size_t errorCode)</td></tr>
+<tr class="separator:a39832ae3c5980b86569d8d4411b4f5d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1e289a135e925220237b9cae560d7cf" id="r_ae1e289a135e925220237b9cae560d7cf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#ae1e289a135e925220237b9cae560d7cf">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_CStreamInSize&quot;) size_t <a class="el" href="zbuff__compress_8c.html#ae785f6e8d20fe111184ba3977fafb95d">ZBUFF_recommendedCInSize</a>(void)</td></tr>
+<tr class="separator:ae1e289a135e925220237b9cae560d7cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a94bb95c334ed674b114f396d4e9b92" id="r_a2a94bb95c334ed674b114f396d4e9b92"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a2a94bb95c334ed674b114f396d4e9b92">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_CStreamOutSize&quot;) size_t <a class="el" href="zbuff__compress_8c.html#ad546b3c91d54df1bf95d0721c8a1d44e">ZBUFF_recommendedCOutSize</a>(void)</td></tr>
+<tr class="separator:a2a94bb95c334ed674b114f396d4e9b92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa962de6a9f752004eda8fc29b75dacd5" id="r_aa962de6a9f752004eda8fc29b75dacd5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#aa962de6a9f752004eda8fc29b75dacd5">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_DStreamInSize&quot;) size_t <a class="el" href="zbuff__decompress_8c.html#aa4d8147afefedb63bf09863f1afd3078">ZBUFF_recommendedDInSize</a>(void)</td></tr>
+<tr class="separator:aa962de6a9f752004eda8fc29b75dacd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa73bdaddc94b461aa3b5573637f67bbb" id="r_aa73bdaddc94b461aa3b5573637f67bbb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#aa73bdaddc94b461aa3b5573637f67bbb">ZBUFF_DEPRECATED</a> (&quot;use ZSTD_DStreamOutSize&quot;) size_t <a class="el" href="zbuff__decompress_8c.html#aa93b00c11a11e5e7183c5184b4ecd2ed">ZBUFF_recommendedDOutSize</a>(void)</td></tr>
+<tr class="separator:aa73bdaddc94b461aa3b5573637f67bbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:ade711b19285bdf476a4f753670ca3489" id="r_ade711b19285bdf476a4f753670ca3489"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#ade711b19285bdf476a4f753670ca3489">compressionLevel</a></td></tr>
+<tr class="separator:ade711b19285bdf476a4f753670ca3489"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f73e10b74b7581a0d17ebd274ae6c7b" id="r_a2f73e10b74b7581a0d17ebd274ae6c7b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a2f73e10b74b7581a0d17ebd274ae6c7b">dict</a></td></tr>
+<tr class="separator:a2f73e10b74b7581a0d17ebd274ae6c7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b276dd54a215af14d59cd30ff88a5ff" id="r_a7b276dd54a215af14d59cd30ff88a5ff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a></td></tr>
+<tr class="separator:a7b276dd54a215af14d59cd30ff88a5ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08f683b5840d86269fccb0ca7609598c" id="r_a08f683b5840d86269fccb0ca7609598c"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a></td></tr>
+<tr class="separator:a08f683b5840d86269fccb0ca7609598c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78f89efde0c2032ae72b7ca1abd8b207" id="r_a78f89efde0c2032ae72b7ca1abd8b207"><td class="memItemLeft" align="right" valign="top">void size_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a78f89efde0c2032ae72b7ca1abd8b207">dstCapacityPtr</a></td></tr>
+<tr class="separator:a78f89efde0c2032ae72b7ca1abd8b207"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49286b6a0dd3728961b8ff1f1730a982" id="r_a49286b6a0dd3728961b8ff1f1730a982"><td class="memItemLeft" align="right" valign="top">void size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a></td></tr>
+<tr class="separator:a49286b6a0dd3728961b8ff1f1730a982"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae13af344c53947e930e4397f405dc007" id="r_ae13af344c53947e930e4397f405dc007"><td class="memItemLeft" align="right" valign="top">void size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void size_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zbuff_8h.html#ae13af344c53947e930e4397f405dc007">srcSizePtr</a></td></tr>
+<tr class="separator:ae13af344c53947e930e4397f405dc007"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a30695f54bb488754ee3a0667ad084528" name="a30695f54bb488754ee3a0667ad084528"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30695f54bb488754ee3a0667ad084528">&#9670;&#160;</a></span>ZBUFF_DEPRECATED</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZBUFF_DEPRECATED</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">message</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="zstd_8h.html#a9dbac0fbe1cd466cb2b82c5401e2ec49">ZSTDLIB_API</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zbuff_8h_source.html">zbuff.h</a> 第 <a class="el" href="zbuff_8h_source.html#l00057">57</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa3197438800981529b11560df334a9cd" name="aa3197438800981529b11560df334a9cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3197438800981529b11560df334a9cd">&#9670;&#160;</a></span>ZSTD_BUFFERED_H_23987</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZSTD_BUFFERED_H_23987</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zbuff_8h_source.html">zbuff.h</a> 第 <a class="el" href="zbuff_8h_source.html#l00025">25</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类型定义说明</h2>
+<a id="ac837dae3b3006fc6bce4bce80570ed51" name="ac837dae3b3006fc6bce4bce80570ed51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac837dae3b3006fc6bce4bce80570ed51">&#9670;&#160;</a></span>ZBUFF_CCtx</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="zstd_8h.html#a7591551effb218c2750f0f57ba62809a">ZSTD_CStream</a> <a class="el" href="zbuff_8h.html#ac837dae3b3006fc6bce4bce80570ed51">ZBUFF_CCtx</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zbuff_8h_source.html">zbuff.h</a> 第 <a class="el" href="zbuff_8h_source.html#l00071">71</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a142f7b94e177147b403037b6798c611d" name="a142f7b94e177147b403037b6798c611d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a142f7b94e177147b403037b6798c611d">&#9670;&#160;</a></span>ZBUFF_DCtx</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="zstd_8h.html#abc6473440df4dc8a7ce82443825c47df">ZSTD_DStream</a> <a class="el" href="zbuff_8h.html#a142f7b94e177147b403037b6798c611d">ZBUFF_DCtx</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zbuff_8h_source.html">zbuff.h</a> 第 <a class="el" href="zbuff_8h_source.html#l00123">123</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a1d7066688dad7e3001621ea8243de2b6" name="a1d7066688dad7e3001621ea8243de2b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d7066688dad7e3001621ea8243de2b6">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[1/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_compressStream&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a709ea34585cada5482037c64ea6b2ca1" name="a709ea34585cada5482037c64ea6b2ca1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a709ea34585cada5482037c64ea6b2ca1">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[2/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_createCStream&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2d3bc332042ad9acd1c63bfffcd1be71" name="a2d3bc332042ad9acd1c63bfffcd1be71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d3bc332042ad9acd1c63bfffcd1be71">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[3/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_createDStream&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae1e289a135e925220237b9cae560d7cf" name="ae1e289a135e925220237b9cae560d7cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1e289a135e925220237b9cae560d7cf">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[4/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_CStreamInSize&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Functions below provide recommended buffer sizes for Compression or Decompression operations. These sizes are just hints, they tend to offer better latency </p>
+
+</div>
+</div>
+<a id="a2a94bb95c334ed674b114f396d4e9b92" name="a2a94bb95c334ed674b114f396d4e9b92"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a94bb95c334ed674b114f396d4e9b92">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[5/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_CStreamOutSize&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab5ff99313d46dba5b4849bb124dc7056" name="ab5ff99313d46dba5b4849bb124dc7056"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5ff99313d46dba5b4849bb124dc7056">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[6/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_decompressStream&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa962de6a9f752004eda8fc29b75dacd5" name="aa962de6a9f752004eda8fc29b75dacd5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa962de6a9f752004eda8fc29b75dacd5">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[7/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_DStreamInSize&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa73bdaddc94b461aa3b5573637f67bbb" name="aa73bdaddc94b461aa3b5573637f67bbb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa73bdaddc94b461aa3b5573637f67bbb">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[8/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_DStreamOutSize&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a77caab6e518ee1c7b55773ba405b8421" name="a77caab6e518ee1c7b55773ba405b8421"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77caab6e518ee1c7b55773ba405b8421">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[9/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_endStream&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a69de44db1e471838e0d6d4282a384ffd" name="a69de44db1e471838e0d6d4282a384ffd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69de44db1e471838e0d6d4282a384ffd">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[10/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_flushStream&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a15100433ad842542e52070be9052c8af" name="a15100433ad842542e52070be9052c8af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15100433ad842542e52070be9052c8af">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[11/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_freeCStream&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acae8244c0d25dd702307f16d8e56f978" name="acae8244c0d25dd702307f16d8e56f978"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acae8244c0d25dd702307f16d8e56f978">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[12/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_freeDStream&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a39832ae3c5980b86569d8d4411b4f5d4" name="a39832ae3c5980b86569d8d4411b4f5d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39832ae3c5980b86569d8d4411b4f5d4">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[13/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_getErrorName&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="add726f1b830e273d4a6577f09be0408a" name="add726f1b830e273d4a6577f09be0408a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add726f1b830e273d4a6577f09be0408a">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[14/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_initCStream&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6243e8e6f06d99ba3deefa48c7aec596" name="a6243e8e6f06d99ba3deefa48c7aec596"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6243e8e6f06d99ba3deefa48c7aec596">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[15/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_initCStream_usingDict&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a88b52d0ea3d307bd245264660650e412" name="a88b52d0ea3d307bd245264660650e412"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88b52d0ea3d307bd245264660650e412">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[16/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_initDStream&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac4327b43e833b765381d791dea1e0c48" name="ac4327b43e833b765381d791dea1e0c48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4327b43e833b765381d791dea1e0c48">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[17/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_initDStream_usingDict&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad34f59ca383e661f11f81f442598c100" name="ad34f59ca383e661f11f81f442598c100"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad34f59ca383e661f11f81f442598c100">&#9670;&#160;</a></span>ZBUFF_DEPRECATED() <span class="overload">[18/18]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ZBUFF_DEPRECATED </td>
+          <td>(</td>
+          <td class="paramtype">&quot;use ZSTD_isError&quot;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="ade711b19285bdf476a4f753670ca3489" name="ade711b19285bdf476a4f753670ca3489"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade711b19285bdf476a4f753670ca3489">&#9670;&#160;</a></span>compressionLevel</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void size_t int compressionLevel</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zbuff_8h_source.html">zbuff.h</a> 第 <a class="el" href="zbuff_8h_source.html#l00075">75</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2f73e10b74b7581a0d17ebd274ae6c7b" name="a2f73e10b74b7581a0d17ebd274ae6c7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f73e10b74b7581a0d17ebd274ae6c7b">&#9670;&#160;</a></span>dict</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void * dict</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zbuff_8h_source.html">zbuff.h</a> 第 <a class="el" href="zbuff_8h_source.html#l00076">76</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7b276dd54a215af14d59cd30ff88a5ff" name="a7b276dd54a215af14d59cd30ff88a5ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b276dd54a215af14d59cd30ff88a5ff">&#9670;&#160;</a></span>dictSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void size_t dictSize</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zbuff_8h_source.html">zbuff.h</a> 第 <a class="el" href="zbuff_8h_source.html#l00076">76</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a08f683b5840d86269fccb0ca7609598c" name="a08f683b5840d86269fccb0ca7609598c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08f683b5840d86269fccb0ca7609598c">&#9670;&#160;</a></span>dst</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * dst</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zbuff_8h_source.html">zbuff.h</a> 第 <a class="el" href="zbuff_8h_source.html#l00078">78</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a78f89efde0c2032ae72b7ca1abd8b207" name="a78f89efde0c2032ae72b7ca1abd8b207"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78f89efde0c2032ae72b7ca1abd8b207">&#9670;&#160;</a></span>dstCapacityPtr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void size_t * dstCapacityPtr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zbuff_8h_source.html">zbuff.h</a> 第 <a class="el" href="zbuff_8h_source.html#l00078">78</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a49286b6a0dd3728961b8ff1f1730a982" name="a49286b6a0dd3728961b8ff1f1730a982"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49286b6a0dd3728961b8ff1f1730a982">&#9670;&#160;</a></span>src</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void * src</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zbuff_8h_source.html">zbuff.h</a> 第 <a class="el" href="zbuff_8h_source.html#l00078">78</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae13af344c53947e930e4397f405dc007" name="ae13af344c53947e930e4397f405dc007"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae13af344c53947e930e4397f405dc007">&#9670;&#160;</a></span>srcSizePtr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void size_t * srcSizePtr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zbuff_8h_source.html">zbuff.h</a> 第 <a class="el" href="zbuff_8h_source.html#l00078">78</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="zbuff_8h.html">zbuff.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

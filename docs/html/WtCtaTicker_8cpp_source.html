@@ -1,0 +1,540 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtCore/WtCtaTicker.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtCtaTicker_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtCtaTicker.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtCtaTicker_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="WtCtaTicker_8h.html">WtCtaTicker.h</a>&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="WtCtaEngine_8h.html">WtCtaEngine.h</a>&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;../Includes/IDataReader.h&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;../Share/CodeHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;../Share/TimeUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;../Includes/WTSSessionInfo.hpp&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;../Includes/WTSDataDef.hpp&quot;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;../Includes/IBaseDataMgr.h&quot;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;../Includes/IHotMgr.h&quot;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;../Includes/WTSContractInfo.hpp&quot;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;../WTSTools/WTSLogger.h&quot;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="WtCtaTicker_8cpp.html#a17226795848decb565e90624584e5c0f">   28</a></span><a class="code hl_variable" href="WtCtaTicker_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">// WtCtaRtTicker</span></div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="}">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="classWtCtaRtTicker.html#ab81db6cfa7b5a8ead67f917c48f91cd4">   39</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtCtaRtTicker.html#ab81db6cfa7b5a8ead67f917c48f91cd4">WtCtaRtTicker::init</a>(<a class="code hl_class" href="classIDataReader.html">IDataReader</a>* store, <span class="keyword">const</span> <span class="keywordtype">char</span>* sessionID)</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>{</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="comment">// 设置数据读取器</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <a class="code hl_variable" href="classWtCtaRtTicker.html#a2d1ed0c2cd7690fadbad43712980b2a9">_store</a> = store;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="comment">// 从引擎中获取指定的交易时间段信息</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a> = <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a6c51ead2f0c35c0ae075bc55e91ea828">get_session_info</a>(sessionID);</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="comment">// 检查交易时间段是否有效</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        <a class="code hl_function" href="classWTSLogger.html#a8c480a7fbe8d2753e0075ecfd5e4af17">WTSLogger::fatal</a>(<span class="stringliteral">&quot;Session {} is invalid, CtaTicker cannot run correctly&quot;</span>, sessionID);</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <a class="code hl_function" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a>(<span class="stringliteral">&quot;CtaTicker will drive engine with session {}&quot;</span>, sessionID);</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="comment">// 获取当前系统日期和时间</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <a class="code hl_function" href="classTimeUtils.html#ac04a739040d6a0d39400c2a74b96583b">TimeUtils::getDateTime</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>, <a class="code hl_variable" href="classWtCtaRtTicker.html#a85ecf2b5474aefdfa3b0e99cd727b071">_time</a>);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>}</div>
+</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="foldopen" id="foldopen00061" data-start="{" data-end="}">
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classWtCtaRtTicker.html#ac2954161628da1fcdec9d33655bb3095">   61</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtCtaRtTicker.html#ac2954161628da1fcdec9d33655bb3095">WtCtaRtTicker::trigger_price</a>(<a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* curTick)</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>{</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a> )</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    {</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <span class="comment">// 获取合约信息</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <a class="code hl_class" href="classWTSContractInfo.html">WTSContractInfo</a>* cInfo = curTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a3bf709056260520001ce36105cad50ed">getContractInfo</a>();</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <span class="comment">// 获取标准化的合约代码</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        std::string stdCode = curTick-&gt;<a class="code hl_function" href="classWTSTickData.html#ae40aac80fd30843224b6e88d007b1d05">code</a>();</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="comment">// 将行情传递给策略引擎处理</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtCtaEngine.html#a6fe1807c04a4cf84a9ba95a95269f7f4">on_tick</a>(stdCode.c_str(), curTick);</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="comment">// 如果不是平价合约，还需要处理主力合约的行情</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        <span class="keywordflow">if</span> (!cInfo-&gt;<a class="code hl_function" href="classWTSContractInfo.html#af034e65b2bdf76e1737b36759e43ee0c">isFlat</a>())</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        {</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>            <span class="comment">// 创建一个新的行情数据对象，用于主力合约</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>            <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* hotTick = <a class="code hl_function" href="classWTSTickData.html#a4b56adfd1cd4e6b95833653ca987ce43">WTSTickData::create</a>(curTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a6a81212366831e7afe3eeac41b42e7b0">getTickStruct</a>());</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>            <span class="comment">// 获取主力合约代码</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>            <span class="keyword">const</span> <span class="keywordtype">char</span>* hotCode = cInfo-&gt;<a class="code hl_function" href="classWTSContractInfo.html#a0c356989f33d9acf090117960bbfa605">getHotCode</a>();</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>            <span class="comment">// 设置主力合约代码</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>            hotTick-&gt;<a class="code hl_function" href="classWTSTickData.html#af8df9fb130bea4ca8470a0ccef56b690">setCode</a>(hotCode);</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>            <span class="comment">// 将主力合约行情传递给策略引擎</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>            <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtCtaEngine.html#a6fe1807c04a4cf84a9ba95a95269f7f4">on_tick</a>(hotCode, hotTick);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>            <span class="comment">// 释放临时创建的行情数据对象</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>            hotTick-&gt;<a class="code hl_function" href="classWTSPoolObject.html#a868f127b3ccc31cba6b077803cb00951">release</a>();</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        }</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    }</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>}</div>
+</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="foldopen" id="foldopen00095" data-start="{" data-end="}">
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="classWtCtaRtTicker.html#a062499e421c3c50358886015c32eda49">   95</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtCtaRtTicker.html#a062499e421c3c50358886015c32eda49">WtCtaRtTicker::on_tick</a>(<a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* curTick)</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>{</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="comment">// 如果定时器线程未启动，直接触发价格事件</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#ad1fad819a0399c3256dbe8a2dbad44ee">_thrd</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    {</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        <a class="code hl_function" href="classWtCtaRtTicker.html#ac2954161628da1fcdec9d33655bb3095">trigger_price</a>(curTick);</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    }</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="comment">// 获取行情的日期和时间</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    uint32_t uDate = curTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a9f8dfcc3630181284346338f2049cfb3">actiondate</a>();</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    uint32_t uTime = curTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a12aa24165f23c4dacd1e4f686a2f5879">actiontime</a>();</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="comment">// 如果行情时间早于当前时间，只触发价格事件而不更新时间</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a> != 0 &amp;&amp; (uDate &lt; <a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a> || (uDate == <a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a> &amp;&amp; uTime &lt; <a class="code hl_variable" href="classWtCtaRtTicker.html#a85ecf2b5474aefdfa3b0e99cd727b071">_time</a>)))</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    {</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>        <span class="comment">//WTSLogger::info(&quot;行情时间{}小于本地时间{}&quot;, uTime, _time);</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        <a class="code hl_function" href="classWtCtaRtTicker.html#ac2954161628da1fcdec9d33655bb3095">trigger_price</a>(curTick);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    }</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <span class="comment">// 更新当前日期和时间</span></div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a> = uDate;</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <a class="code hl_variable" href="classWtCtaRtTicker.html#a85ecf2b5474aefdfa3b0e99cd727b071">_time</a> = uTime;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="comment">// 将时间分解为分钟和秒</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    uint32_t curMin = <a class="code hl_variable" href="classWtCtaRtTicker.html#a85ecf2b5474aefdfa3b0e99cd727b071">_time</a> / 100000;  <span class="comment">// 当前分钟，格式为HHMM</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    uint32_t curSec = <a class="code hl_variable" href="classWtCtaRtTicker.html#a85ecf2b5474aefdfa3b0e99cd727b071">_time</a> % 100000;  <span class="comment">// 当前秒数，格式为SS000</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    <span class="comment">// 静态变量用于记录上一次处理的分钟和相关信息</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="keyword">static</span> uint32_t prevMin = UINT_MAX;  <span class="comment">// 上一次处理的分钟</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="keyword">static</span> uint32_t minutes = UINT_MAX;   <span class="comment">// 转换后的分钟数</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="keyword">static</span> <span class="keywordtype">bool</span> isSecEnd = <span class="keyword">false</span>;         <span class="comment">// 是否是交易时段的最后一分钟</span></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="keyword">static</span> uint32_t wrapMin = UINT_MAX;   <span class="comment">// 包装后的分钟时间</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="comment">//By Wesley @ 2023.11.01</span></div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="comment">//如果新的分钟和上一次处理的分钟数不同，才进行处理</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="comment">//否则就不用处理，减少一些开销</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="keywordflow">if</span>(prevMin != curMin)</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    {</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>        <span class="comment">// 将时间转换为从交易日开始的分钟数</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        minutes = <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#af110bb2aadbd7243ff21ae4250fc29cc">timeToMinutes</a>(curMin);</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>        <span class="comment">// 检查是否是交易时段的最后一分钟</span></div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>        isSecEnd = <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#a8f462275507f9cd0046565b2b7c0e1ce">isLastOfSection</a>(curMin);</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>        prevMin = curMin;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span> </div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        <span class="comment">// 如果是交易时段的最后一分钟，需要特殊处理</span></div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        <span class="keywordflow">if</span> (isSecEnd)</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>        {</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>            minutes--;</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>        }</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>        minutes++;</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        <span class="comment">// 将分钟数转换回时间格式</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        wrapMin = <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#a703bc067f034ac4a3fef0f4efa3690a1">minuteToTime</a>(minutes);</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    }</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    <span class="comment">// 如果当前位置是0，说明是第一次收到行情</span></div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#a9b328d13a434b7c89a2bd6a4b05c7e24">_cur_pos</a> == 0)</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    {</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>        <span class="comment">// 如果当前时间是0, 则直接赋值即可</span></div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>        <a class="code hl_variable" href="classWtCtaRtTicker.html#a9b328d13a434b7c89a2bd6a4b05c7e24">_cur_pos</a> = minutes;</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    }</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="comment">// 如果当前位置小于新的分钟数，说明分钟已经前进</span></div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#a9b328d13a434b7c89a2bd6a4b05c7e24">_cur_pos</a> &lt; minutes)</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    {</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        <span class="comment">// 如果已记录的分钟小于新的分钟, 则需要触发闭合事件</span></div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        <span class="comment">// 这个时候要先触发闭合, 再修改平台时间和价格</span></div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#af2042e09fad6ca2bd6ba99ff4d985536">_last_emit_pos</a> &lt; <a class="code hl_variable" href="classWtCtaRtTicker.html#a9b328d13a434b7c89a2bd6a4b05c7e24">_cur_pos</a>)</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>        {</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>            <span class="comment">// 触发数据回放模块</span></div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>            <a class="code hl_typedef" href="group__MutexUtils.html#ga20a94e05f8d16ed0be0999b2b4b5ea2f">StdUniqueLock</a> lock(<a class="code hl_variable" href="classWtCtaRtTicker.html#a07bd958bc34023bb61e9952be9f235e0">_mtx</a>);</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>            <span class="comment">// 优先修改时间标记</span></div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>            <a class="code hl_variable" href="classWtCtaRtTicker.html#af2042e09fad6ca2bd6ba99ff4d985536">_last_emit_pos</a> = <a class="code hl_variable" href="classWtCtaRtTicker.html#a9b328d13a434b7c89a2bd6a4b05c7e24">_cur_pos</a>;</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>            <span class="comment">// 将当前位置转换为时间格式</span></div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>            uint32_t thisMin = <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#a703bc067f034ac4a3fef0f4efa3690a1">minuteToTime</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a9b328d13a434b7c89a2bd6a4b05c7e24">_cur_pos</a>);</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>            </div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>            <span class="comment">// 检查是否是交易日结束</span></div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>            <span class="keywordtype">bool</span> bEndingTDate = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>            uint32_t offMin = <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#a13b7006be2a0c3c39e477286f84021e8">offsetTime</a>(thisMin, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>            <span class="keywordflow">if</span> (offMin == <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#acbbbb4fddd57e9c41104f237ee7e1d72">getCloseTime</a>(<span class="keyword">true</span>))</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>                bEndingTDate = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>            <span class="comment">// 记录分钟线关闭信息</span></div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>            <a class="code hl_function" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a>(<span class="stringliteral">&quot;Minute Bar {}.{:04d} Closed by data&quot;</span>, <a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>, thisMin);</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>            <span class="comment">// 如果有数据存储器，通知分钟结束</span></div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#a2d1ed0c2cd7690fadbad43712980b2a9">_store</a>)</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>                <a class="code hl_variable" href="classWtCtaRtTicker.html#a2d1ed0c2cd7690fadbad43712980b2a9">_store</a>-&gt;<a class="code hl_function" href="classIDataReader.html#afa12b79743b7a86388ef1067babb6925">onMinuteEnd</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>, thisMin, bEndingTDate ? <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a4796a8db9c86d12ac396503a33a2d5f2">getTradingDate</a>() : 0);</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span> </div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>            <span class="comment">// 触发引擎的定时任务调度</span></div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>            <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtCtaEngine.html#a4f2bef19218acb900a18701e142fbb9f">on_schedule</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>, thisMin);</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span> </div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>            <span class="comment">// 如果是交易日结束，触发交易日结束事件</span></div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>            <span class="keywordflow">if</span>(bEndingTDate)</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>                <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtCtaEngine.html#a3b8a5293c9ee3befee742bbe8c7adb8e">on_session_end</a>();</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>        }</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        <span class="comment">//By Wesley @ 2022.02.09</span></div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        <span class="comment">//这里先修改时间，再调用trigger_price</span></div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        <span class="comment">//无论分钟线是否切换，先修改时间都是对的</span></div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>)</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        {</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>            <span class="comment">// 设置引擎的当前日期和时间</span></div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>            <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a1a83817fd43cdf080c6f5428c798b419">set_date_time</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>, wrapMin, curSec, prevMin);</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>            <span class="comment">// 设置引擎的交易日期</span></div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>            <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a12c3726337001fb1f6058c97ee637c09">set_trading_date</a>(curTick-&gt;<a class="code hl_function" href="classWTSTickData.html#a5928e1b4018629598f5f69f418967c0f">tradingdate</a>());</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        }</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>        <span class="comment">// 触发价格事件</span></div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>        <a class="code hl_function" href="classWtCtaRtTicker.html#ac2954161628da1fcdec9d33655bb3095">trigger_price</a>(curTick);</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span> </div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        <span class="comment">// 更新当前位置</span></div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>        <a class="code hl_variable" href="classWtCtaRtTicker.html#a9b328d13a434b7c89a2bd6a4b05c7e24">_cur_pos</a> = minutes;</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>    }</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    {</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>        <span class="comment">// 如果分钟数还是一致的, 则直接触发行情和时间即可</span></div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        <a class="code hl_function" href="classWtCtaRtTicker.html#ac2954161628da1fcdec9d33655bb3095">trigger_price</a>(curTick);</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>)</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>            <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a1a83817fd43cdf080c6f5428c798b419">set_date_time</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>, wrapMin, curSec, prevMin);</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>    }</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>    <span class="comment">// 计算下一次检查的时间</span></div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>    uint32_t sec = curSec / 1000;    <span class="comment">// 当前秒数</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>    uint32_t msec = curSec % 1000;   <span class="comment">// 当前毫秒数</span></div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    <span class="comment">// 计算到下一分钟的剩余毫秒数</span></div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>    uint32_t left_ticks = (60 - sec) * 1000 - msec;</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    <span class="comment">// 设置下一次检查时间</span></div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    <a class="code hl_variable" href="classWtCtaRtTicker.html#a9152d135bab285ceb6d14f84da828b60">_next_check_time</a> = <a class="code hl_function" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">TimeUtils::getLocalTimeNow</a>() + left_ticks;</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>}</div>
+</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span> </div>
+<div class="foldopen" id="foldopen00232" data-start="{" data-end="}">
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno"><a class="line" href="classWtCtaRtTicker.html#a67928a0128227a85dd1db1e4bd590583">  232</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtCtaRtTicker.html#a67928a0128227a85dd1db1e4bd590583">WtCtaRtTicker::run</a>()</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>{</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    <span class="comment">// 如果线程已经存在，直接返回</span></div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#ad1fad819a0399c3256dbe8a2dbad44ee">_thrd</a>)</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span> </div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    <span class="comment">// 计算当前的交易日期</span></div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    uint32_t curTDate = <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a48ca1d0982f8362b0c00c004411ae34b">get_basedata_mgr</a>()-&gt;<a class="code hl_function" href="classIBaseDataMgr.html#a981fbaa0343a14325cb8ff3b1f70075a">calcTradingDate</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#a0e3a3e2e47b05de83f7b300862bbc9ce">id</a>(), <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a6d4697459f99aeaf394f277fc7000500">get_date</a>(), <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a3fafa118edfedd8abe7ef1474a78d7f5">get_min_time</a>(), <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    <span class="comment">// 设置引擎的交易日期</span></div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a12c3726337001fb1f6058c97ee637c09">set_trading_date</a>(curTDate);</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    <a class="code hl_function" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a>(<span class="stringliteral">&quot;Trading date confirmed: {}&quot;</span>, curTDate);</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    <span class="comment">// 触发引擎的初始化事件</span></div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>    <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtCtaEngine.html#ab48969ddcc3a0d7f1a3db416dd0bf0ba">on_init</a>();</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    <span class="comment">// 触发交易日开始事件</span></div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>    <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtCtaEngine.html#ae3f99eb5d11b05131dc697ef7b1695f3">on_session_begin</a>();</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>    <span class="comment">// 先检查当前时间, 如果大于</span></div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span> </div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>    <span class="comment">// 创建并启动定时器线程</span></div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>    <a class="code hl_variable" href="classWtCtaRtTicker.html#ad1fad819a0399c3256dbe8a2dbad44ee">_thrd</a>.reset(<span class="keyword">new</span> <a class="code hl_typedef" href="group__ThreadUtils.html#gad58209190954450c6ef8c8d66f422e61">StdThread</a>([<span class="keyword">this</span>](){</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        <span class="keywordflow">while</span>(!<a class="code hl_variable" href="classWtCtaRtTicker.html#a782ea5dc91512cc6ba2feaae47662de7">_stopped</a>)</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>        {</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>            <span class="comment">// 获取当前时间在交易时间段中的偏移</span></div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>            uint32_t offTime = <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#a13b7006be2a0c3c39e477286f84021e8">offsetTime</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a3fafa118edfedd8abe7ef1474a78d7f5">get_min_time</a>(), <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span> </div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>            <span class="comment">// 如果当前时间在交易时间内</span></div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#a85ecf2b5474aefdfa3b0e99cd727b071">_time</a> != UINT_MAX &amp;&amp; <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#ac80489cf435cb91c5305c201a5a7072c">isInTradingTime</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a85ecf2b5474aefdfa3b0e99cd727b071">_time</a> / 100000, <span class="keyword">true</span>))</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>            {</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>                <span class="comment">// 在交易时间内，短暂停以减少CPU占用</span></div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>                std::this_thread::sleep_for(std::chrono::milliseconds(10));</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>                <span class="comment">// 获取当前时间</span></div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>                uint64_t now = <a class="code hl_function" href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">TimeUtils::getLocalTimeNow</a>();</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span> </div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>                <span class="comment">// 如果到了下一次检查时间且有未处理的分钟线</span></div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>                <span class="keywordflow">if</span> (now &gt;= <a class="code hl_variable" href="classWtCtaRtTicker.html#a9152d135bab285ceb6d14f84da828b60">_next_check_time</a> &amp;&amp; <a class="code hl_variable" href="classWtCtaRtTicker.html#af2042e09fad6ca2bd6ba99ff4d985536">_last_emit_pos</a> &lt; <a class="code hl_variable" href="classWtCtaRtTicker.html#a9b328d13a434b7c89a2bd6a4b05c7e24">_cur_pos</a>)</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>                {</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>                    <span class="comment">// 触发数据回放模块</span></div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>                    <a class="code hl_typedef" href="group__MutexUtils.html#ga20a94e05f8d16ed0be0999b2b4b5ea2f">StdUniqueLock</a> lock(<a class="code hl_variable" href="classWtCtaRtTicker.html#a07bd958bc34023bb61e9952be9f235e0">_mtx</a>);</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span> </div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>                    <span class="comment">// 优先修改时间标记</span></div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>                    <a class="code hl_variable" href="classWtCtaRtTicker.html#af2042e09fad6ca2bd6ba99ff4d985536">_last_emit_pos</a> = <a class="code hl_variable" href="classWtCtaRtTicker.html#a9b328d13a434b7c89a2bd6a4b05c7e24">_cur_pos</a>;</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span> </div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>                    <span class="comment">// 将当前位置转换为时间格式</span></div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>                    uint32_t thisMin = <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#a703bc067f034ac4a3fef0f4efa3690a1">minuteToTime</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a9b328d13a434b7c89a2bd6a4b05c7e24">_cur_pos</a>);</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>                    <a class="code hl_variable" href="classWtCtaRtTicker.html#a85ecf2b5474aefdfa3b0e99cd727b071">_time</a> = thisMin*100000;  <span class="comment">// 这里要还原成毫秒为单位</span></div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span> </div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>                    <span class="comment">// 如果thisMin是0, 说明换日了</span></div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>                    <span class="comment">// 这里是本地计时导致的换日, 说明日期其实还是老日期, 要自动+1</span></div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>                    <span class="comment">// 同时因为时间是235959xxx, 所以也要手动置为0</span></div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>                    <span class="keywordflow">if</span> (thisMin == 0)</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>                    {</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>                        <span class="comment">// 记录旧日期并更新为新日期</span></div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>                        uint32_t lastDate = <a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>;</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>                        <a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a> = <a class="code hl_function" href="classTimeUtils.html#a28a7ae8e5b4e7b2b4ff88b36fe7e1ff2">TimeUtils::getNextDate</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>);</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>                        <a class="code hl_variable" href="classWtCtaRtTicker.html#a85ecf2b5474aefdfa3b0e99cd727b071">_time</a> = 0;</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>                        <a class="code hl_function" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a>(<span class="stringliteral">&quot;Data automatically changed at time 00:00: {} -&gt; {}&quot;</span>, lastDate, <a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>);</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>                    }</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span> </div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>                    <span class="comment">// 检查是否是交易日结束</span></div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>                    <span class="keywordtype">bool</span> bEndingTDate = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>                    uint32_t offMin = <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#a13b7006be2a0c3c39e477286f84021e8">offsetTime</a>(thisMin, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>                    <span class="keywordflow">if</span> (offMin == <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#acbbbb4fddd57e9c41104f237ee7e1d72">getCloseTime</a>(<span class="keyword">true</span>))</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>                        bEndingTDate = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span> </div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>                    <span class="comment">// 记录分钟线自动关闭信息</span></div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>                    <a class="code hl_function" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a>(<span class="stringliteral">&quot;Minute bar {}.{:04d} closed automatically&quot;</span>, <a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>, thisMin);</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>                    <span class="comment">// 如果有数据存储器，通知分钟结束</span></div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>                    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#a2d1ed0c2cd7690fadbad43712980b2a9">_store</a>)</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>                        <a class="code hl_variable" href="classWtCtaRtTicker.html#a2d1ed0c2cd7690fadbad43712980b2a9">_store</a>-&gt;<a class="code hl_function" href="classIDataReader.html#afa12b79743b7a86388ef1067babb6925">onMinuteEnd</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>, thisMin, bEndingTDate ? <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a4796a8db9c86d12ac396503a33a2d5f2">getTradingDate</a>() : 0);</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>                    <span class="comment">// 触发引擎的定时任务调度</span></div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>                    <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtCtaEngine.html#a4f2bef19218acb900a18701e142fbb9f">on_schedule</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>, thisMin);</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span> </div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>                    <span class="comment">// 如果是交易日结束，触发交易日结束事件</span></div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>                    <span class="keywordflow">if</span> (bEndingTDate)</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>                        <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtCtaEngine.html#a3b8a5293c9ee3befee742bbe8c7adb8e">on_session_end</a>();</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span> </div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>                    <span class="comment">// 设置引擎的当前日期和时间</span></div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>                    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>)</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>                        <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a1a83817fd43cdf080c6f5428c798b419">set_date_time</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>, thisMin, 0);</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>                }</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>            }</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>            <span class="keywordflow">else</span> <span class="comment">//if(offTime &gt;= _s_info-&gt;getOpenTime(true) &amp;&amp; offTime &lt;= _s_info-&gt;getCloseTime(true))</span></div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>            {</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>                <span class="comment">// 收盘以后，如果发现上次触发的位置不等于总的分钟数，说明少了最后一分钟的闭合逻辑</span></div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>                uint32_t total_mins = <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#a5ed86a3920ddc7ecf2dbf81e984a60eb">getTradingMins</a>();</div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>                <span class="keywordflow">if</span>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a85ecf2b5474aefdfa3b0e99cd727b071">_time</a> != UINT_MAX &amp;&amp; <a class="code hl_variable" href="classWtCtaRtTicker.html#af2042e09fad6ca2bd6ba99ff4d985536">_last_emit_pos</a> != 0 &amp;&amp; _last_emit_pos &lt; total_mins &amp;&amp; offTime &gt;= <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#acbbbb4fddd57e9c41104f237ee7e1d72">getCloseTime</a>(<span class="keyword">true</span>))</div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>                {</div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>                    <span class="comment">// 记录强制结束交易日的警告信息</span></div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>                    <a class="code hl_function" href="classWTSLogger.html#a147defb6e1fb287cc8d95bfb753f6f11">WTSLogger::warn</a>(<span class="stringliteral">&quot;Tradingday {} will be ended forcely, last_emit_pos: {}, time: {}&quot;</span>, <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a4796a8db9c86d12ac396503a33a2d5f2">getTradingDate</a>(), <a class="code hl_variable" href="classWtCtaRtTicker.html#af2042e09fad6ca2bd6ba99ff4d985536">_last_emit_pos</a>.fetch_add(0), <a class="code hl_variable" href="classWtCtaRtTicker.html#a85ecf2b5474aefdfa3b0e99cd727b071">_time</a>);</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span> </div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>                    <span class="comment">// 触发数据回放模块</span></div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>                    <a class="code hl_typedef" href="group__MutexUtils.html#ga20a94e05f8d16ed0be0999b2b4b5ea2f">StdUniqueLock</a> lock(<a class="code hl_variable" href="classWtCtaRtTicker.html#a07bd958bc34023bb61e9952be9f235e0">_mtx</a>);</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span> </div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>                    <span class="comment">// 优先修改时间标记为总分钟数</span></div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>                    <a class="code hl_variable" href="classWtCtaRtTicker.html#af2042e09fad6ca2bd6ba99ff4d985536">_last_emit_pos</a> = total_mins;</div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span> </div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>                    <span class="comment">// 设置交易日结束标志</span></div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>                    <span class="keywordtype">bool</span> bEndingTDate = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>                    <span class="comment">// 获取收盘时间</span></div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>                    uint32_t thisMin = <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#acbbbb4fddd57e9c41104f237ee7e1d72">getCloseTime</a>(<span class="keyword">false</span>);</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>                    uint32_t offMin = <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#acbbbb4fddd57e9c41104f237ee7e1d72">getCloseTime</a>(<span class="keyword">true</span>);</div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span> </div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>                    <span class="comment">// 记录分钟线自动关闭信息</span></div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>                    <a class="code hl_function" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a>(<span class="stringliteral">&quot;Minute bar {}.{:04d} closed automatically&quot;</span>, <a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>, thisMin);</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>                    <span class="comment">// 如果有数据存储器，通知分钟结束</span></div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>                    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#a2d1ed0c2cd7690fadbad43712980b2a9">_store</a>)</div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>                        <a class="code hl_variable" href="classWtCtaRtTicker.html#a2d1ed0c2cd7690fadbad43712980b2a9">_store</a>-&gt;<a class="code hl_function" href="classIDataReader.html#afa12b79743b7a86388ef1067babb6925">onMinuteEnd</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>, thisMin, <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtEngine.html#a4796a8db9c86d12ac396503a33a2d5f2">getTradingDate</a>());</div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span> </div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>                    <span class="comment">// 触发引擎的定时任务调度</span></div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>                    <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtCtaEngine.html#a4f2bef19218acb900a18701e142fbb9f">on_schedule</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">_date</a>, thisMin);</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span> </div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>                    <span class="comment">// 触发交易日结束事件</span></div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>                    <a class="code hl_variable" href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">_engine</a>-&gt;<a class="code hl_function" href="classWtCtaEngine.html#a3b8a5293c9ee3befee742bbe8c7adb8e">on_session_end</a>();</div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span> </div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>                }</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>                <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>                {</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>                    <span class="comment">// 如果不在交易时间内且不需要强制结束，则较长时间暂停</span></div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>                    std::this_thread::sleep_for(std::chrono::seconds(10));</div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>                }</div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>            }</div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>        }</div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>    }));</div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>}</div>
+</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span> </div>
+<div class="foldopen" id="foldopen00362" data-start="{" data-end="}">
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno"><a class="line" href="classWtCtaRtTicker.html#a65c178b0a197fc7b5d390169a10b02a1">  362</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classWtCtaRtTicker.html#a65c178b0a197fc7b5d390169a10b02a1">WtCtaRtTicker::stop</a>()</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>{</div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>    <span class="comment">// 设置停止标志，通知线程退出</span></div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>    <a class="code hl_variable" href="classWtCtaRtTicker.html#a782ea5dc91512cc6ba2feaae47662de7">_stopped</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>    <span class="comment">// 如果线程存在，等待其结束</span></div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#ad1fad819a0399c3256dbe8a2dbad44ee">_thrd</a>)</div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>        <a class="code hl_variable" href="classWtCtaRtTicker.html#ad1fad819a0399c3256dbe8a2dbad44ee">_thrd</a>-&gt;join();</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>}</div>
+</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span> </div>
+<div class="foldopen" id="foldopen00378" data-start="{" data-end="}">
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno"><a class="line" href="classWtCtaRtTicker.html#a39768c17f41e0dcf045be3a0d0053430">  378</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classWtCtaRtTicker.html#a39768c17f41e0dcf045be3a0d0053430">WtCtaRtTicker::is_in_trading</a>()<span class="keyword"> const </span></div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>    <span class="comment">// 如果交易时间段信息不存在，返回false</span></div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span> </div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>    <span class="comment">// 调用交易时间段对象的方法检查当前时间是否在交易时间内</span></div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#ac80489cf435cb91c5305c201a5a7072c">isInTradingTime</a>(<a class="code hl_variable" href="classWtCtaRtTicker.html#a85ecf2b5474aefdfa3b0e99cd727b071">_time</a>/100000, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>}</div>
+</div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span> </div>
+<div class="foldopen" id="foldopen00395" data-start="{" data-end="}">
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno"><a class="line" href="classWtCtaRtTicker.html#a829334b8a14015a9284bbefd3377de21">  395</a></span>uint32_t <a class="code hl_function" href="classWtCtaRtTicker.html#a829334b8a14015a9284bbefd3377de21">WtCtaRtTicker::time_to_mins</a>(uint32_t uTime)<span class="keyword"> const</span></div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>    <span class="comment">// 如果交易时间段信息不存在，直接返回原始时间</span></div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>        <span class="keywordflow">return</span> uTime;</div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span> </div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>    <span class="comment">// 调用交易时间段对象的方法将时间转换为分钟数</span></div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">_s_info</a>-&gt;<a class="code hl_function" href="classWTSSessionInfo.html#af110bb2aadbd7243ff21ae4250fc29cc">timeToMinutes</a>(uTime, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>}</div>
+</div>
+<div class="ttc" id="aWtCtaEngine_8h_html"><div class="ttname"><a href="WtCtaEngine_8h.html">WtCtaEngine.h</a></div><div class="ttdoc">WtCtaEngine是WonderTrader框架中的CTA策略引擎类 继承自WtEngine基类，实现了CTA策略的运行、管理和交易执行 CTA（Commodity Trading Advisor）...</div></div>
+<div class="ttc" id="aWtCtaTicker_8cpp_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="WtCtaTicker_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8cpp_source.html#l00028">WtCtaTicker.cpp:28</a></div></div>
+<div class="ttc" id="aWtCtaTicker_8h_html"><div class="ttname"><a href="WtCtaTicker_8h.html">WtCtaTicker.h</a></div><div class="ttdoc">WtCtaTicker类的头文件，定义了CTA策略引擎的定时器 负责策略的定时触发和实时行情处理 是CTA策略引擎的核心组件之一</div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html_a981fbaa0343a14325cb8ff3b1f70075a"><div class="ttname"><a href="classIBaseDataMgr.html#a981fbaa0343a14325cb8ff3b1f70075a">IBaseDataMgr::calcTradingDate</a></div><div class="ttdeci">virtual uint32_t calcTradingDate(const char *stdPID, uint32_t uDate, uint32_t uTime, bool isSession=false)=0</div><div class="ttdoc">计算交易日期</div></div>
+<div class="ttc" id="aclassIDataReader_html"><div class="ttname"><a href="classIDataReader.html">IDataReader</a></div><div class="ttdoc">数据读取接口</div><div class="ttdef"><b>Definition</b> <a href="IDataReader_8h_source.html#l00182">IDataReader.h:183</a></div></div>
+<div class="ttc" id="aclassIDataReader_html_afa12b79743b7a86388ef1067babb6925"><div class="ttname"><a href="classIDataReader.html#afa12b79743b7a86388ef1067babb6925">IDataReader::onMinuteEnd</a></div><div class="ttdeci">virtual void onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate=0)=0</div><div class="ttdoc">分钟线闭合事件处理接口</div></div>
+<div class="ttc" id="aclassTimeUtils_html_a28a7ae8e5b4e7b2b4ff88b36fe7e1ff2"><div class="ttname"><a href="classTimeUtils.html#a28a7ae8e5b4e7b2b4ff88b36fe7e1ff2">TimeUtils::getNextDate</a></div><div class="ttdeci">static uint32_t getNextDate(uint32_t curDate, int days=1)</div><div class="ttdoc">获取指定日期后的第 N 天日期</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00407">TimeUtils.hpp:407</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_a48644704dd42fbb708a3e8b88b9611a8"><div class="ttname"><a href="classTimeUtils.html#a48644704dd42fbb708a3e8b88b9611a8">TimeUtils::getLocalTimeNow</a></div><div class="ttdeci">static int64_t getLocalTimeNow(void)</div><div class="ttdoc">获取当前本地时间，精确到毫秒</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00123">TimeUtils.hpp:123</a></div></div>
+<div class="ttc" id="aclassTimeUtils_html_ac04a739040d6a0d39400c2a74b96583b"><div class="ttname"><a href="classTimeUtils.html#ac04a739040d6a0d39400c2a74b96583b">TimeUtils::getDateTime</a></div><div class="ttdeci">static void getDateTime(uint32_t &amp;date, uint32_t &amp;time)</div><div class="ttdoc">获取当前日期和时间，分别存储到两个参数中</div><div class="ttdef"><b>Definition</b> <a href="TimeUtils_8hpp_source.html#l00216">TimeUtils.hpp:216</a></div></div>
+<div class="ttc" id="aclassWTSContractInfo_html"><div class="ttname"><a href="classWTSContractInfo.html">WTSContractInfo</a></div><div class="ttdoc">合约信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00171">WTSContractInfo.hpp:172</a></div></div>
+<div class="ttc" id="aclassWTSContractInfo_html_a0c356989f33d9acf090117960bbfa605"><div class="ttname"><a href="classWTSContractInfo.html#a0c356989f33d9acf090117960bbfa605">WTSContractInfo::getHotCode</a></div><div class="ttdeci">const char * getHotCode() const</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00299">WTSContractInfo.hpp:299</a></div></div>
+<div class="ttc" id="aclassWTSContractInfo_html_af034e65b2bdf76e1737b36759e43ee0c"><div class="ttname"><a href="classWTSContractInfo.html#af034e65b2bdf76e1737b36759e43ee0c">WTSContractInfo::isFlat</a></div><div class="ttdeci">bool isFlat() const</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00296">WTSContractInfo.hpp:296</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a147defb6e1fb287cc8d95bfb753f6f11"><div class="ttname"><a href="classWTSLogger.html#a147defb6e1fb287cc8d95bfb753f6f11">WTSLogger::warn</a></div><div class="ttdeci">static void warn(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出警告级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00213">WTSLogger.h:213</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a20d65255542e3ed5d694b529892a0f57"><div class="ttname"><a href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a></div><div class="ttdeci">static void info(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出信息级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00187">WTSLogger.h:187</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a8c480a7fbe8d2753e0075ecfd5e4af17"><div class="ttname"><a href="classWTSLogger.html#a8c480a7fbe8d2753e0075ecfd5e4af17">WTSLogger::fatal</a></div><div class="ttdeci">static void fatal(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出致命错误级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00265">WTSLogger.h:265</a></div></div>
+<div class="ttc" id="aclassWTSPoolObject_html_a868f127b3ccc31cba6b077803cb00951"><div class="ttname"><a href="classWTSPoolObject.html#a868f127b3ccc31cba6b077803cb00951">WTSPoolObject::release</a></div><div class="ttdeci">virtual void release() override</div><div class="ttdef"><b>Definition</b> <a href="WTSObject_8hpp_source.html#l00092">WTSObject.hpp:92</a></div></div>
+<div class="ttc" id="aclassWTSSessionInfo_html_a0e3a3e2e47b05de83f7b300862bbc9ce"><div class="ttname"><a href="classWTSSessionInfo.html#a0e3a3e2e47b05de83f7b300862bbc9ce">WTSSessionInfo::id</a></div><div class="ttdeci">const char * id() const</div><div class="ttdef"><b>Definition</b> <a href="WTSSessionInfo_8hpp_source.html#l00062">WTSSessionInfo.hpp:62</a></div></div>
+<div class="ttc" id="aclassWTSSessionInfo_html_a13b7006be2a0c3c39e477286f84021e8"><div class="ttname"><a href="classWTSSessionInfo.html#a13b7006be2a0c3c39e477286f84021e8">WTSSessionInfo::offsetTime</a></div><div class="ttdeci">uint32_t offsetTime(uint32_t uTime, bool bAlignLeft) const</div><div class="ttdef"><b>Definition</b> <a href="WTSSessionInfo_8hpp_source.html#l00505">WTSSessionInfo.hpp:505</a></div></div>
+<div class="ttc" id="aclassWTSSessionInfo_html_a5ed86a3920ddc7ecf2dbf81e984a60eb"><div class="ttname"><a href="classWTSSessionInfo.html#a5ed86a3920ddc7ecf2dbf81e984a60eb">WTSSessionInfo::getTradingMins</a></div><div class="ttdeci">uint32_t getTradingMins()</div><div class="ttdef"><b>Definition</b> <a href="WTSSessionInfo_8hpp_source.html#l00385">WTSSessionInfo.hpp:385</a></div></div>
+<div class="ttc" id="aclassWTSSessionInfo_html_a703bc067f034ac4a3fef0f4efa3690a1"><div class="ttname"><a href="classWTSSessionInfo.html#a703bc067f034ac4a3fef0f4efa3690a1">WTSSessionInfo::minuteToTime</a></div><div class="ttdeci">uint32_t minuteToTime(uint32_t uMinutes, bool bHeadFirst=false)</div><div class="ttdef"><b>Definition</b> <a href="WTSSessionInfo_8hpp_source.html#l00189">WTSSessionInfo.hpp:189</a></div></div>
+<div class="ttc" id="aclassWTSSessionInfo_html_a8f462275507f9cd0046565b2b7c0e1ce"><div class="ttname"><a href="classWTSSessionInfo.html#a8f462275507f9cd0046565b2b7c0e1ce">WTSSessionInfo::isLastOfSection</a></div><div class="ttdeci">bool isLastOfSection(uint32_t uTime)</div><div class="ttdef"><b>Definition</b> <a href="WTSSessionInfo_8hpp_source.html#l00453">WTSSessionInfo.hpp:453</a></div></div>
+<div class="ttc" id="aclassWTSSessionInfo_html_ac80489cf435cb91c5305c201a5a7072c"><div class="ttname"><a href="classWTSSessionInfo.html#ac80489cf435cb91c5305c201a5a7072c">WTSSessionInfo::isInTradingTime</a></div><div class="ttdeci">bool isInTradingTime(uint32_t uTime, bool bStrict=false)</div><div class="ttdef"><b>Definition</b> <a href="WTSSessionInfo_8hpp_source.html#l00441">WTSSessionInfo.hpp:441</a></div></div>
+<div class="ttc" id="aclassWTSSessionInfo_html_acbbbb4fddd57e9c41104f237ee7e1d72"><div class="ttname"><a href="classWTSSessionInfo.html#acbbbb4fddd57e9c41104f237ee7e1d72">WTSSessionInfo::getCloseTime</a></div><div class="ttdeci">uint32_t getCloseTime(bool bOffseted=false) const</div><div class="ttdef"><b>Definition</b> <a href="WTSSessionInfo_8hpp_source.html#l00346">WTSSessionInfo.hpp:346</a></div></div>
+<div class="ttc" id="aclassWTSSessionInfo_html_af110bb2aadbd7243ff21ae4250fc29cc"><div class="ttname"><a href="classWTSSessionInfo.html#af110bb2aadbd7243ff21ae4250fc29cc">WTSSessionInfo::timeToMinutes</a></div><div class="ttdeci">uint32_t timeToMinutes(uint32_t uTime, bool autoAdjust=false)</div><div class="ttdef"><b>Definition</b> <a href="WTSSessionInfo_8hpp_source.html#l00142">WTSSessionInfo.hpp:142</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a12aa24165f23c4dacd1e4f686a2f5879"><div class="ttname"><a href="classWTSTickData.html#a12aa24165f23c4dacd1e4f686a2f5879">WTSTickData::actiontime</a></div><div class="ttdeci">uint32_t actiontime() const</div><div class="ttdoc">获取数据发生时间</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01506">WTSDataDef.hpp:1506</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a3bf709056260520001ce36105cad50ed"><div class="ttname"><a href="classWTSTickData.html#a3bf709056260520001ce36105cad50ed">WTSTickData::getContractInfo</a></div><div class="ttdeci">WTSContractInfo * getContractInfo() const</div><div class="ttdoc">获取Tick数据对应的合约信息</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01599">WTSDataDef.hpp:1599</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a4b56adfd1cd4e6b95833653ca987ce43"><div class="ttname"><a href="classWTSTickData.html#a4b56adfd1cd4e6b95833653ca987ce43">WTSTickData::create</a></div><div class="ttdeci">static WTSTickData * create(const char *stdCode)</div><div class="ttdoc">创建一个Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01270">WTSDataDef.hpp:1270</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a5928e1b4018629598f5f69f418967c0f"><div class="ttname"><a href="classWTSTickData.html#a5928e1b4018629598f5f69f418967c0f">WTSTickData::tradingdate</a></div><div class="ttdeci">uint32_t tradingdate() const</div><div class="ttdoc">获取交易日期</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01486">WTSDataDef.hpp:1486</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a6a81212366831e7afe3eeac41b42e7b0"><div class="ttname"><a href="classWTSTickData.html#a6a81212366831e7afe3eeac41b42e7b0">WTSTickData::getTickStruct</a></div><div class="ttdeci">WTSTickStruct &amp; getTickStruct()</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01580">WTSDataDef.hpp:1580</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a9f8dfcc3630181284346338f2049cfb3"><div class="ttname"><a href="classWTSTickData.html#a9f8dfcc3630181284346338f2049cfb3">WTSTickData::actiondate</a></div><div class="ttdeci">uint32_t actiondate() const</div><div class="ttdoc">获取数据发生日期</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01496">WTSDataDef.hpp:1496</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_ae40aac80fd30843224b6e88d007b1d05"><div class="ttname"><a href="classWTSTickData.html#ae40aac80fd30843224b6e88d007b1d05">WTSTickData::code</a></div><div class="ttdeci">const char * code() const</div><div class="ttdoc">获取Tick数据的合约代码</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01320">WTSDataDef.hpp:1320</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_af8df9fb130bea4ca8470a0ccef56b690"><div class="ttname"><a href="classWTSTickData.html#af8df9fb130bea4ca8470a0ccef56b690">WTSTickData::setCode</a></div><div class="ttdeci">void setCode(const char *code, std::size_t len=0)</div><div class="ttdoc">设置Tick数据的合约代码</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01305">WTSDataDef.hpp:1305</a></div></div>
+<div class="ttc" id="aclassWtCtaEngine_html_a3b8a5293c9ee3befee742bbe8c7adb8e"><div class="ttname"><a href="classWtCtaEngine.html#a3b8a5293c9ee3befee742bbe8c7adb8e">WtCtaEngine::on_session_end</a></div><div class="ttdeci">virtual void on_session_end() override</div><div class="ttdoc">交易日结束回调</div><div class="ttdef"><b>Definition</b> <a href="WtCtaEngine_8cpp_source.html#l00307">WtCtaEngine.cpp:307</a></div></div>
+<div class="ttc" id="aclassWtCtaEngine_html_a4f2bef19218acb900a18701e142fbb9f"><div class="ttname"><a href="classWtCtaEngine.html#a4f2bef19218acb900a18701e142fbb9f">WtCtaEngine::on_schedule</a></div><div class="ttdeci">void on_schedule(uint32_t curDate, uint32_t curTime)</div><div class="ttdoc">定时器回调函数</div><div class="ttdef"><b>Definition</b> <a href="WtCtaEngine_8cpp_source.html#l00335">WtCtaEngine.cpp:335</a></div></div>
+<div class="ttc" id="aclassWtCtaEngine_html_a6fe1807c04a4cf84a9ba95a95269f7f4"><div class="ttname"><a href="classWtCtaEngine.html#a6fe1807c04a4cf84a9ba95a95269f7f4">WtCtaEngine::on_tick</a></div><div class="ttdeci">virtual void on_tick(const char *stdCode, WTSTickData *curTick) override</div><div class="ttdoc">处理Tick数据回调</div><div class="ttdef"><b>Definition</b> <a href="WtCtaEngine_8cpp_source.html#l00603">WtCtaEngine.cpp:603</a></div></div>
+<div class="ttc" id="aclassWtCtaEngine_html_ab48969ddcc3a0d7f1a3db416dd0bf0ba"><div class="ttname"><a href="classWtCtaEngine.html#ab48969ddcc3a0d7f1a3db416dd0bf0ba">WtCtaEngine::on_init</a></div><div class="ttdeci">virtual void on_init() override</div><div class="ttdoc">引擎初始化回调</div><div class="ttdef"><b>Definition</b> <a href="WtCtaEngine_8cpp_source.html#l00203">WtCtaEngine.cpp:203</a></div></div>
+<div class="ttc" id="aclassWtCtaEngine_html_ae3f99eb5d11b05131dc697ef7b1695f3"><div class="ttname"><a href="classWtCtaEngine.html#ae3f99eb5d11b05131dc697ef7b1695f3">WtCtaEngine::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin() override</div><div class="ttdoc">交易日开始回调</div><div class="ttdef"><b>Definition</b> <a href="WtCtaEngine_8cpp_source.html#l00283">WtCtaEngine.cpp:283</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_a062499e421c3c50358886015c32eda49"><div class="ttname"><a href="classWtCtaRtTicker.html#a062499e421c3c50358886015c32eda49">WtCtaRtTicker::on_tick</a></div><div class="ttdeci">void on_tick(WTSTickData *curTick)</div><div class="ttdoc">处理实时行情</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8cpp_source.html#l00095">WtCtaTicker.cpp:95</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_a07bd958bc34023bb61e9952be9f235e0"><div class="ttname"><a href="classWtCtaRtTicker.html#a07bd958bc34023bb61e9952be9f235e0">WtCtaRtTicker::_mtx</a></div><div class="ttdeci">StdUniqueMutex _mtx</div><div class="ttdoc">互斥锁，用于线程同步</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8h_source.html#l00125">WtCtaTicker.h:125</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_a2d1ed0c2cd7690fadbad43712980b2a9"><div class="ttname"><a href="classWtCtaRtTicker.html#a2d1ed0c2cd7690fadbad43712980b2a9">WtCtaRtTicker::_store</a></div><div class="ttdeci">IDataReader * _store</div><div class="ttdoc">数据读取器指针</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8h_source.html#l00118">WtCtaTicker.h:118</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_a39768c17f41e0dcf045be3a0d0053430"><div class="ttname"><a href="classWtCtaRtTicker.html#a39768c17f41e0dcf045be3a0d0053430">WtCtaRtTicker::is_in_trading</a></div><div class="ttdeci">bool is_in_trading() const</div><div class="ttdoc">检查是否在交易时间内</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8cpp_source.html#l00378">WtCtaTicker.cpp:378</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_a3d2c8bded3ee6c02b19488add0ef6517"><div class="ttname"><a href="classWtCtaRtTicker.html#a3d2c8bded3ee6c02b19488add0ef6517">WtCtaRtTicker::_s_info</a></div><div class="ttdeci">WTSSessionInfo * _s_info</div><div class="ttdoc">交易时间段信息对象</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8h_source.html#l00116">WtCtaTicker.h:116</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_a65c178b0a197fc7b5d390169a10b02a1"><div class="ttname"><a href="classWtCtaRtTicker.html#a65c178b0a197fc7b5d390169a10b02a1">WtCtaRtTicker::stop</a></div><div class="ttdeci">void stop()</div><div class="ttdoc">停止定时器</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8cpp_source.html#l00362">WtCtaTicker.cpp:362</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_a67928a0128227a85dd1db1e4bd590583"><div class="ttname"><a href="classWtCtaRtTicker.html#a67928a0128227a85dd1db1e4bd590583">WtCtaRtTicker::run</a></div><div class="ttdeci">void run()</div><div class="ttdoc">启动定时器</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8cpp_source.html#l00232">WtCtaTicker.cpp:232</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_a782ea5dc91512cc6ba2feaae47662de7"><div class="ttname"><a href="classWtCtaRtTicker.html#a782ea5dc91512cc6ba2feaae47662de7">WtCtaRtTicker::_stopped</a></div><div class="ttdeci">bool _stopped</div><div class="ttdoc">停止标志，用于控制定时器线程</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8h_source.html#l00129">WtCtaTicker.h:129</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_a829334b8a14015a9284bbefd3377de21"><div class="ttname"><a href="classWtCtaRtTicker.html#a829334b8a14015a9284bbefd3377de21">WtCtaRtTicker::time_to_mins</a></div><div class="ttdeci">uint32_t time_to_mins(uint32_t uTime) const</div><div class="ttdoc">将时间转换为分钟数</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8cpp_source.html#l00395">WtCtaTicker.cpp:395</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_a859d06211932a842097fb4d4d373b08c"><div class="ttname"><a href="classWtCtaRtTicker.html#a859d06211932a842097fb4d4d373b08c">WtCtaRtTicker::_date</a></div><div class="ttdeci">uint32_t _date</div><div class="ttdoc">当前日期，格式为YYYYMMDD</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8h_source.html#l00120">WtCtaTicker.h:120</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_a85ecf2b5474aefdfa3b0e99cd727b071"><div class="ttname"><a href="classWtCtaRtTicker.html#a85ecf2b5474aefdfa3b0e99cd727b071">WtCtaRtTicker::_time</a></div><div class="ttdeci">uint32_t _time</div><div class="ttdoc">当前时间，格式为HHMMSS</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8h_source.html#l00121">WtCtaTicker.h:121</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_a9152d135bab285ceb6d14f84da828b60"><div class="ttname"><a href="classWtCtaRtTicker.html#a9152d135bab285ceb6d14f84da828b60">WtCtaRtTicker::_next_check_time</a></div><div class="ttdeci">std::atomic&lt; uint64_t &gt; _next_check_time</div><div class="ttdoc">下次检查时间，原子变量</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8h_source.html#l00126">WtCtaTicker.h:126</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_a9b328d13a434b7c89a2bd6a4b05c7e24"><div class="ttname"><a href="classWtCtaRtTicker.html#a9b328d13a434b7c89a2bd6a4b05c7e24">WtCtaRtTicker::_cur_pos</a></div><div class="ttdeci">uint32_t _cur_pos</div><div class="ttdoc">当前定时器位置</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8h_source.html#l00123">WtCtaTicker.h:123</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_ab81db6cfa7b5a8ead67f917c48f91cd4"><div class="ttname"><a href="classWtCtaRtTicker.html#ab81db6cfa7b5a8ead67f917c48f91cd4">WtCtaRtTicker::init</a></div><div class="ttdeci">void init(IDataReader *store, const char *sessionID)</div><div class="ttdoc">初始化定时器</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8cpp_source.html#l00039">WtCtaTicker.cpp:39</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_abfdf8f574ddeabb72bad4850778487d8"><div class="ttname"><a href="classWtCtaRtTicker.html#abfdf8f574ddeabb72bad4850778487d8">WtCtaRtTicker::_engine</a></div><div class="ttdeci">WtCtaEngine * _engine</div><div class="ttdoc">CTA策略引擎指针</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8h_source.html#l00117">WtCtaTicker.h:117</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_ac2954161628da1fcdec9d33655bb3095"><div class="ttname"><a href="classWtCtaRtTicker.html#ac2954161628da1fcdec9d33655bb3095">WtCtaRtTicker::trigger_price</a></div><div class="ttdeci">void trigger_price(WTSTickData *curTick)</div><div class="ttdoc">触发价格事件</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8cpp_source.html#l00061">WtCtaTicker.cpp:61</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_ad1fad819a0399c3256dbe8a2dbad44ee"><div class="ttname"><a href="classWtCtaRtTicker.html#ad1fad819a0399c3256dbe8a2dbad44ee">WtCtaRtTicker::_thrd</a></div><div class="ttdeci">StdThreadPtr _thrd</div><div class="ttdoc">定时器线程指针</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8h_source.html#l00130">WtCtaTicker.h:130</a></div></div>
+<div class="ttc" id="aclassWtCtaRtTicker_html_af2042e09fad6ca2bd6ba99ff4d985536"><div class="ttname"><a href="classWtCtaRtTicker.html#af2042e09fad6ca2bd6ba99ff4d985536">WtCtaRtTicker::_last_emit_pos</a></div><div class="ttdeci">std::atomic&lt; uint32_t &gt; _last_emit_pos</div><div class="ttdoc">上次发布位置，原子变量</div><div class="ttdef"><b>Definition</b> <a href="WtCtaTicker_8h_source.html#l00127">WtCtaTicker.h:127</a></div></div>
+<div class="ttc" id="aclassWtEngine_html_a12c3726337001fb1f6058c97ee637c09"><div class="ttname"><a href="classWtEngine.html#a12c3726337001fb1f6058c97ee637c09">WtEngine::set_trading_date</a></div><div class="ttdeci">void set_trading_date(uint32_t curTDate)</div><div class="ttdoc">设置交易日期</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8cpp_source.html#l00113">WtEngine.cpp:113</a></div></div>
+<div class="ttc" id="aclassWtEngine_html_a1a83817fd43cdf080c6f5428c798b419"><div class="ttname"><a href="classWtEngine.html#a1a83817fd43cdf080c6f5428c798b419">WtEngine::set_date_time</a></div><div class="ttdeci">void set_date_time(uint32_t curDate, uint32_t curTime, uint32_t curSecs=0, uint32_t rawTime=0)</div><div class="ttdoc">设置当前日期时间</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8cpp_source.html#l00085">WtEngine.cpp:85</a></div></div>
+<div class="ttc" id="aclassWtEngine_html_a3fafa118edfedd8abe7ef1474a78d7f5"><div class="ttname"><a href="classWtEngine.html#a3fafa118edfedd8abe7ef1474a78d7f5">WtEngine::get_min_time</a></div><div class="ttdeci">uint32_t get_min_time()</div><div class="ttdoc">获取当前分钟时间</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8h_source.html#l00229">WtEngine.h:229</a></div></div>
+<div class="ttc" id="aclassWtEngine_html_a4796a8db9c86d12ac396503a33a2d5f2"><div class="ttname"><a href="classWtEngine.html#a4796a8db9c86d12ac396503a33a2d5f2">WtEngine::getTradingDate</a></div><div class="ttdeci">virtual uint32_t getTradingDate() override</div><div class="ttdoc">获取交易日期</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8cpp_source.html#l00424">WtEngine.cpp:424</a></div></div>
+<div class="ttc" id="aclassWtEngine_html_a48ca1d0982f8362b0c00c004411ae34b"><div class="ttname"><a href="classWtEngine.html#a48ca1d0982f8362b0c00c004411ae34b">WtEngine::get_basedata_mgr</a></div><div class="ttdeci">IBaseDataMgr * get_basedata_mgr()</div><div class="ttdoc">获取基础数据管理器</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8h_source.html#l00253">WtEngine.h:253</a></div></div>
+<div class="ttc" id="aclassWtEngine_html_a6c51ead2f0c35c0ae075bc55e91ea828"><div class="ttname"><a href="classWtEngine.html#a6c51ead2f0c35c0ae075bc55e91ea828">WtEngine::get_session_info</a></div><div class="ttdeci">WTSSessionInfo * get_session_info(const char *sid, bool isCode=false)</div><div class="ttdoc">获取交易时段信息</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8cpp_source.html#l00192">WtEngine.cpp:192</a></div></div>
+<div class="ttc" id="aclassWtEngine_html_a6d4697459f99aeaf394f277fc7000500"><div class="ttname"><a href="classWtEngine.html#a6d4697459f99aeaf394f277fc7000500">WtEngine::get_date</a></div><div class="ttdeci">uint32_t get_date()</div><div class="ttdoc">获取当前日期</div><div class="ttdef"><b>Definition</b> <a href="WtEngine_8h_source.html#l00223">WtEngine.h:223</a></div></div>
+<div class="ttc" id="agroup__MutexUtils_html_ga20a94e05f8d16ed0be0999b2b4b5ea2f"><div class="ttname"><a href="group__MutexUtils.html#ga20a94e05f8d16ed0be0999b2b4b5ea2f">StdUniqueLock</a></div><div class="ttdeci">std::unique_lock&lt; StdUniqueMutex &gt; StdUniqueLock</div><div class="ttdoc">唯一锁类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00073">StdUtils.hpp:73</a></div></div>
+<div class="ttc" id="agroup__ThreadUtils_html_gad58209190954450c6ef8c8d66f422e61"><div class="ttname"><a href="group__ThreadUtils.html#gad58209190954450c6ef8c8d66f422e61">StdThread</a></div><div class="ttdeci">std::thread StdThread</div><div class="ttdoc">std::thread的别名</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00036">StdUtils.hpp:36</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3ce996bf6400c0a215df0636043a382c.html">WtCore</a></li><li class="navelem"><a class="el" href="WtCtaTicker_8cpp.html">WtCtaTicker.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

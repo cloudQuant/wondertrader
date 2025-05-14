@@ -1,0 +1,28 @@
+var structCRspOptQryRpcExeDetailField =
+[
+    [ "chCurrency", "structCRspOptQryRpcExeDetailField.html#ac657ac9c1145b5672da19e5bdc48a41f", null ],
+    [ "chExecSide", "structCRspOptQryRpcExeDetailField.html#a8159252176c78ae001130d9953c61567", null ],
+    [ "chOptCvdFlag", "structCRspOptQryRpcExeDetailField.html#aaf048c7a5ec3eca697c6e0cf32a7fa85", null ],
+    [ "chOptType", "structCRspOptQryRpcExeDetailField.html#a69db10ef5e156f291b4e781a366ddf03", null ],
+    [ "iComeInDate", "structCRspOptQryRpcExeDetailField.html#a54e00d830ec9c9689a5c6fe333949af9", null ],
+    [ "iIntOrg", "structCRspOptQryRpcExeDetailField.html#a45353e31a2449c2695b7c10decb9f61a", null ],
+    [ "llCombQty", "structCRspOptQryRpcExeDetailField.html#aefc7c8433c8784ae752b05dd582b02d3", null ],
+    [ "llCuacctCode", "structCRspOptQryRpcExeDetailField.html#af6c6bc3aabf37254934f596210385a90", null ],
+    [ "llCustCode", "structCRspOptQryRpcExeDetailField.html#a8b48f72730c71cbb65cdddc6b4294e10", null ],
+    [ "llOptEffect", "structCRspOptQryRpcExeDetailField.html#a921d4eeecb2c8bc65d8113cdfcb4d6ae", null ],
+    [ "llQryPos", "structCRspOptQryRpcExeDetailField.html#a0bd0479a9ce9925860dac9d46f1db87a", null ],
+    [ "llStkEffect", "structCRspOptQryRpcExeDetailField.html#a059211e35289b035ed761f1fc03121ad", null ],
+    [ "szClearingFee", "structCRspOptQryRpcExeDetailField.html#aaf6117dfafcb15c61b4436ca694705e3", null ],
+    [ "szCommision", "structCRspOptQryRpcExeDetailField.html#a7a43c4f52142409442835bf50aac0596", null ],
+    [ "szExecPrice", "structCRspOptQryRpcExeDetailField.html#a8b44f06d5e686b7cbbb73d69030c3d5f", null ],
+    [ "szFundCombExeUfz", "structCRspOptQryRpcExeDetailField.html#ad7a051f96213d5ecc598d1b214b4aedb", null ],
+    [ "szFundEffect", "structCRspOptQryRpcExeDetailField.html#a101ee02c49d1bb5eacff1a22873e8a76", null ],
+    [ "szFundExeMargin", "structCRspOptQryRpcExeDetailField.html#accad7d2f6fdc789135212b51f40b4c66", null ],
+    [ "szOptName", "structCRspOptQryRpcExeDetailField.html#a33f3268a2d4d7968002cf1117d1887d7", null ],
+    [ "szOptNum", "structCRspOptQryRpcExeDetailField.html#af5b9c7534b464323daac6e9eee70d841", null ],
+    [ "szOptTrdacct", "structCRspOptQryRpcExeDetailField.html#a085f8fbc65a456f6a3f9b13a2489e69e", null ],
+    [ "szOptUndlCode", "structCRspOptQryRpcExeDetailField.html#a5a9a9e3768660e035fe68f2f9e1925d7", null ],
+    [ "szSubacctCode", "structCRspOptQryRpcExeDetailField.html#a9ab9a28d667deb90a92bc3c3e02fa390", null ],
+    [ "szTrdacct", "structCRspOptQryRpcExeDetailField.html#a60c43cc412ac0bead24edc5e15dea79f", null ],
+    [ "szUserName", "structCRspOptQryRpcExeDetailField.html#aedb6b4e242147ab1a20f4d7a5017dc59", null ]
+];

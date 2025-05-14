@@ -1,0 +1,1748 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/sutil/platform/spk_platforms.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('spk__platforms_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">spk_platforms.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;<a class="el" href="types_8h_source.html">sutil/types.h</a>&gt;</code><br />
+<code>#include &lt;stdio.h&gt;</code><br />
+<code>#include &lt;stdlib.h&gt;</code><br />
+<code>#include &lt;stddef.h&gt;</code><br />
+<code>#include &lt;ctype.h&gt;</code><br />
+<code>#include &lt;limits.h&gt;</code><br />
+<code>#include &lt;signal.h&gt;</code><br />
+<code>#include &lt;errno.h&gt;</code><br />
+<code>#include &lt;assert.h&gt;</code><br />
+<code>#include &lt;fcntl.h&gt;</code><br />
+<code>#include &lt;time.h&gt;</code><br />
+<code>#include &lt;stdarg.h&gt;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;<a class="el" href="memory_8h_source.html">memory.h</a>&gt;</code><br />
+<code>#include &lt;setjmp.h&gt;</code><br />
+<code>#include &lt;sys/types.h&gt;</code><br />
+<code>#include &lt;sys/stat.h&gt;</code><br />
+<code>#include &lt;unistd.h&gt;</code><br />
+<code>#include &lt;sys/file.h&gt;</code><br />
+<code>#include &lt;sys/time.h&gt;</code><br />
+<code>#include &lt;sys/socket.h&gt;</code><br />
+<code>#include &lt;sys/select.h&gt;</code><br />
+<code>#include &lt;sys/ioctl.h&gt;</code><br />
+<code>#include &lt;sys/wait.h&gt;</code><br />
+<code>#include &lt;netinet/in.h&gt;</code><br />
+<code>#include &lt;arpa/inet.h&gt;</code><br />
+<code>#include &lt;netdb.h&gt;</code><br />
+<code>#include &lt;pthread.h&gt;</code><br />
+<code>#include &lt;sys/un.h&gt;</code><br />
+<code>#include &lt;sys/ipc.h&gt;</code><br />
+<code>#include &lt;sys/sem.h&gt;</code><br />
+<code>#include &lt;sys/shm.h&gt;</code><br />
+<code>#include &lt;sys/mman.h&gt;</code><br />
+<code>#include &lt;netinet/tcp.h&gt;</code><br />
+<code>#include &lt;poll.h&gt;</code><br />
+</div>
+<p><a href="spk__platforms_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:ae9f2f4c9ef5d99802e603a37449b860b" id="r_ae9f2f4c9ef5d99802e603a37449b860b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#ae9f2f4c9ef5d99802e603a37449b860b">__SPK_FMT_LL__</a>&#160;&#160;&#160;&quot;ll&quot;</td></tr>
+<tr class="separator:ae9f2f4c9ef5d99802e603a37449b860b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b9bda10c0f6b206595e7e1f1b1982ee" id="r_a3b9bda10c0f6b206595e7e1f1b1982ee"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a3b9bda10c0f6b206595e7e1f1b1982ee">__SPK_FMT_HH__</a>&#160;&#160;&#160;&quot;hh&quot;</td></tr>
+<tr class="separator:a3b9bda10c0f6b206595e7e1f1b1982ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d39d384a08d0c3855c03ae0df67abf8" id="r_a9d39d384a08d0c3855c03ae0df67abf8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a9d39d384a08d0c3855c03ae0df67abf8">__SPK_FMT_SHORT__</a>&#160;&#160;&#160;&quot;h&quot;</td></tr>
+<tr class="separator:a9d39d384a08d0c3855c03ae0df67abf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1d7f89256001c100cbe9793079b2c2b" id="r_ad1d7f89256001c100cbe9793079b2c2b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#ad1d7f89256001c100cbe9793079b2c2b">_SPK_IS_ERRNO_ECONNABORTED</a>(e)&#160;&#160;&#160;(0)</td></tr>
+<tr class="separator:ad1d7f89256001c100cbe9793079b2c2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4a5df7f1e18a061735bb93883e65e7e" id="r_ab4a5df7f1e18a061735bb93883e65e7e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#ab4a5df7f1e18a061735bb93883e65e7e">_SPK_IS_ERRNO_EPROTO</a>(e)&#160;&#160;&#160;(0)</td></tr>
+<tr class="separator:ab4a5df7f1e18a061735bb93883e65e7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa40ea1a2d2c5240ad430e50333e9d301" id="r_aa40ea1a2d2c5240ad430e50333e9d301"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()&#160;&#160;&#160;(errno)</td></tr>
+<tr class="separator:aa40ea1a2d2c5240ad430e50333e9d301"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a278c85f5bced6ae2233b250d6d3721ab" id="r_a278c85f5bced6ae2233b250d6d3721ab"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a278c85f5bced6ae2233b250d6d3721ab">SPK_GET_NEG_ERRNO</a>()&#160;&#160;&#160;((errno) &gt; 0 ? -(errno) : -1)</td></tr>
+<tr class="separator:a278c85f5bced6ae2233b250d6d3721ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff874845f15f04e42cadbaf944d53378" id="r_aff874845f15f04e42cadbaf944d53378"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#aff874845f15f04e42cadbaf944d53378">SPK_SET_ERRNO</a>(e)&#160;&#160;&#160;(errno = (e))</td></tr>
+<tr class="separator:aff874845f15f04e42cadbaf944d53378"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab039951043c3fe4df323690ee60d975c" id="r_ab039951043c3fe4df323690ee60d975c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#ab039951043c3fe4df323690ee60d975c">SPK_IS_EAGAIN</a>(e)&#160;&#160;&#160;(_SPK_IS_ERRNO_EAGAIN(e))</td></tr>
+<tr class="separator:ab039951043c3fe4df323690ee60d975c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b8676746e3d4a66639339297a4b0903" id="r_a2b8676746e3d4a66639339297a4b0903"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a2b8676746e3d4a66639339297a4b0903">SPK_IS_ECONNABORTED</a>(e)&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#ad1d7f89256001c100cbe9793079b2c2b">_SPK_IS_ERRNO_ECONNABORTED</a>(e))</td></tr>
+<tr class="separator:a2b8676746e3d4a66639339297a4b0903"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0413633c30f0448bd03060c96971f73" id="r_aa0413633c30f0448bd03060c96971f73"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#aa0413633c30f0448bd03060c96971f73">SPK_IS_EPROTO</a>(e)&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#ab4a5df7f1e18a061735bb93883e65e7e">_SPK_IS_ERRNO_EPROTO</a>(e))</td></tr>
+<tr class="separator:aa0413633c30f0448bd03060c96971f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a056eff3ab7b0d56627594d873435ac2c" id="r_a056eff3ab7b0d56627594d873435ac2c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a056eff3ab7b0d56627594d873435ac2c">SPK_IS_ETIMEDOUT</a>(e)&#160;&#160;&#160;((e) == <a class="el" href="types_8h.html#a597718e59a8fc9c4d4ab63f5a34e28b1">ETIMEDOUT</a>)</td></tr>
+<tr class="separator:a056eff3ab7b0d56627594d873435ac2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f5db3af5ce3a0fb5c2a890345fdfbea" id="r_a5f5db3af5ce3a0fb5c2a890345fdfbea"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a5f5db3af5ce3a0fb5c2a890345fdfbea">SPK_IS_EPIPE</a>(e)&#160;&#160;&#160;((e) == EPIPE)</td></tr>
+<tr class="separator:a5f5db3af5ce3a0fb5c2a890345fdfbea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cd9959594b6776f40e4320a149daba5" id="r_a0cd9959594b6776f40e4320a149daba5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a0cd9959594b6776f40e4320a149daba5">SPK_IS_EINTR</a>(e)&#160;&#160;&#160;((e) == EINTR)</td></tr>
+<tr class="separator:a0cd9959594b6776f40e4320a149daba5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca770722b58289c23ec7c048bec838dc" id="r_aca770722b58289c23ec7c048bec838dc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#aca770722b58289c23ec7c048bec838dc">SPK_IS_EBADMSG</a>(e)&#160;&#160;&#160;((e) == <a class="el" href="types_8h.html#a251e9b536ed96ccb16aa28ca2d5bd656">EBADMSG</a>)</td></tr>
+<tr class="separator:aca770722b58289c23ec7c048bec838dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12987a97e763fa869f1129c4ed5aa188" id="r_a12987a97e763fa869f1129c4ed5aa188"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a12987a97e763fa869f1129c4ed5aa188">SPK_IS_EINVAL</a>(e)&#160;&#160;&#160;((e) == EINVAL)</td></tr>
+<tr class="separator:a12987a97e763fa869f1129c4ed5aa188"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a552c7651cdc7436fe381e061d34d431e" id="r_a552c7651cdc7436fe381e061d34d431e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a552c7651cdc7436fe381e061d34d431e">SPK_IS_ERANGE</a>(e)&#160;&#160;&#160;((e) == ERANGE)</td></tr>
+<tr class="separator:a552c7651cdc7436fe381e061d34d431e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a148e97be5af79340cae89bdd9e2433" id="r_a2a148e97be5af79340cae89bdd9e2433"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a2a148e97be5af79340cae89bdd9e2433">SPK_IS_ENOSPC</a>(e)&#160;&#160;&#160;((e) == ENOSPC)</td></tr>
+<tr class="separator:a2a148e97be5af79340cae89bdd9e2433"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af31b3aaed12696ae52f424f178d4040a" id="r_af31b3aaed12696ae52f424f178d4040a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#af31b3aaed12696ae52f424f178d4040a">SPK_IS_ENOENT</a>(e)&#160;&#160;&#160;((e) == ENOENT)</td></tr>
+<tr class="separator:af31b3aaed12696ae52f424f178d4040a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac25068b959b9f57cd99a46f2d06ae691" id="r_ac25068b959b9f57cd99a46f2d06ae691"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#ac25068b959b9f57cd99a46f2d06ae691">SPK_IS_ENODATA</a>(e)&#160;&#160;&#160;((e) == <a class="el" href="types_8h.html#a0030614bc864d1b24eaedd71585acc27">ENODATA</a>)</td></tr>
+<tr class="separator:ac25068b959b9f57cd99a46f2d06ae691"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30948369649372ff51d8557d413ee681" id="r_a30948369649372ff51d8557d413ee681"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a30948369649372ff51d8557d413ee681">SPK_IS_EEXIST</a>(e)&#160;&#160;&#160;((e) == EEXIST)</td></tr>
+<tr class="separator:a30948369649372ff51d8557d413ee681"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63f0fcce548ffc12392a8cbe78c92ff2" id="r_a63f0fcce548ffc12392a8cbe78c92ff2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a63f0fcce548ffc12392a8cbe78c92ff2">SPK_IS_NEG_EAGAIN</a>(e)&#160;&#160;&#160;(_SPK_IS_ERRNO_EAGAIN(-(e)))</td></tr>
+<tr class="separator:a63f0fcce548ffc12392a8cbe78c92ff2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7476db66d02e74ccefc8d4e7e9977c9c" id="r_a7476db66d02e74ccefc8d4e7e9977c9c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a7476db66d02e74ccefc8d4e7e9977c9c">SPK_IS_NEG_ECONNABORTED</a>(e)&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#ad1d7f89256001c100cbe9793079b2c2b">_SPK_IS_ERRNO_ECONNABORTED</a>(-(e)))</td></tr>
+<tr class="separator:a7476db66d02e74ccefc8d4e7e9977c9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7eaee368955006246a9b95ab862e1544" id="r_a7eaee368955006246a9b95ab862e1544"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a7eaee368955006246a9b95ab862e1544">SPK_IS_NEG_EPROTO</a>(e)&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#ab4a5df7f1e18a061735bb93883e65e7e">_SPK_IS_ERRNO_EPROTO</a>(-(e)))</td></tr>
+<tr class="separator:a7eaee368955006246a9b95ab862e1544"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b14d755d2d5dd449f599a0c0dadf04e" id="r_a9b14d755d2d5dd449f599a0c0dadf04e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a9b14d755d2d5dd449f599a0c0dadf04e">SPK_IS_NEG_ETIMEDOUT</a>(e)&#160;&#160;&#160;((e) == -(<a class="el" href="types_8h.html#a597718e59a8fc9c4d4ab63f5a34e28b1">ETIMEDOUT</a>))</td></tr>
+<tr class="separator:a9b14d755d2d5dd449f599a0c0dadf04e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d206a18e9da707a72887ae05f8c5ac6" id="r_a6d206a18e9da707a72887ae05f8c5ac6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a6d206a18e9da707a72887ae05f8c5ac6">SPK_IS_NEG_EPIPE</a>(e)&#160;&#160;&#160;((e) == -(EPIPE))</td></tr>
+<tr class="separator:a6d206a18e9da707a72887ae05f8c5ac6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab759f05e94948f8d4481bd34251d3d3c" id="r_ab759f05e94948f8d4481bd34251d3d3c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#ab759f05e94948f8d4481bd34251d3d3c">SPK_IS_NEG_EINTR</a>(e)&#160;&#160;&#160;((e) == -(EINTR))</td></tr>
+<tr class="separator:ab759f05e94948f8d4481bd34251d3d3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a851ffa9ec47aff1660467acf91f3bf04" id="r_a851ffa9ec47aff1660467acf91f3bf04"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a851ffa9ec47aff1660467acf91f3bf04">SPK_IS_NEG_EBADMSG</a>(e)&#160;&#160;&#160;((e) == -(<a class="el" href="types_8h.html#a251e9b536ed96ccb16aa28ca2d5bd656">EBADMSG</a>))</td></tr>
+<tr class="separator:a851ffa9ec47aff1660467acf91f3bf04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a770b110ff67c02b15c558207ca22fd5c" id="r_a770b110ff67c02b15c558207ca22fd5c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a770b110ff67c02b15c558207ca22fd5c">SPK_IS_NEG_EINVAL</a>(e)&#160;&#160;&#160;((e) == -(EINVAL))</td></tr>
+<tr class="separator:a770b110ff67c02b15c558207ca22fd5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4161314f812ba69b5974b1ad621d9763" id="r_a4161314f812ba69b5974b1ad621d9763"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a4161314f812ba69b5974b1ad621d9763">SPK_IS_NEG_ERANGE</a>(e)&#160;&#160;&#160;((e) == -(ERANGE))</td></tr>
+<tr class="separator:a4161314f812ba69b5974b1ad621d9763"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d53c9937e6dc31f7f5dcd410382a2c5" id="r_a9d53c9937e6dc31f7f5dcd410382a2c5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a9d53c9937e6dc31f7f5dcd410382a2c5">SPK_IS_NEG_ENOSPC</a>(e)&#160;&#160;&#160;((e) == -(ENOSPC))</td></tr>
+<tr class="separator:a9d53c9937e6dc31f7f5dcd410382a2c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f441f3bfef39e1a9e8334801b73993e" id="r_a2f441f3bfef39e1a9e8334801b73993e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a2f441f3bfef39e1a9e8334801b73993e">SPK_IS_NEG_ENOENT</a>(e)&#160;&#160;&#160;((e) == -(ENOENT))</td></tr>
+<tr class="separator:a2f441f3bfef39e1a9e8334801b73993e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4156ba6d685dcff9ef38a0784fe99c91" id="r_a4156ba6d685dcff9ef38a0784fe99c91"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a4156ba6d685dcff9ef38a0784fe99c91">SPK_IS_NEG_ENODATA</a>(e)&#160;&#160;&#160;((e) == -(<a class="el" href="types_8h.html#a0030614bc864d1b24eaedd71585acc27">ENODATA</a>))</td></tr>
+<tr class="separator:a4156ba6d685dcff9ef38a0784fe99c91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05716b7fb0059a1d4f926a178294e275" id="r_a05716b7fb0059a1d4f926a178294e275"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a05716b7fb0059a1d4f926a178294e275">SPK_IS_NEG_EEXIST</a>(e)&#160;&#160;&#160;((e) == -(EEXIST))</td></tr>
+<tr class="separator:a05716b7fb0059a1d4f926a178294e275"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af8d084ddc89cf4e61153da8ceb0724b3" id="r_af8d084ddc89cf4e61153da8ceb0724b3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#af8d084ddc89cf4e61153da8ceb0724b3">SPK_IS_ERRNO_EAGAIN</a>()&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#ab039951043c3fe4df323690ee60d975c">SPK_IS_EAGAIN</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td></tr>
+<tr class="separator:af8d084ddc89cf4e61153da8ceb0724b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a924d540fb7b3c590e3e20971c9e58c59" id="r_a924d540fb7b3c590e3e20971c9e58c59"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a924d540fb7b3c590e3e20971c9e58c59">SPK_IS_ERRNO_ECONNABORTED</a>()&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a2b8676746e3d4a66639339297a4b0903">SPK_IS_ECONNABORTED</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td></tr>
+<tr class="separator:a924d540fb7b3c590e3e20971c9e58c59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab578e303ec925f4d14d55adeaa676ff8" id="r_ab578e303ec925f4d14d55adeaa676ff8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#ab578e303ec925f4d14d55adeaa676ff8">SPK_IS_ERRNO_EPROTO</a>()&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#aa0413633c30f0448bd03060c96971f73">SPK_IS_EPROTO</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td></tr>
+<tr class="separator:ab578e303ec925f4d14d55adeaa676ff8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20e1b8f8eaad8183a5ec4ab84b8eb03d" id="r_a20e1b8f8eaad8183a5ec4ab84b8eb03d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a20e1b8f8eaad8183a5ec4ab84b8eb03d">SPK_IS_ERRNO_ETIMEDOUT</a>()&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a056eff3ab7b0d56627594d873435ac2c">SPK_IS_ETIMEDOUT</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td></tr>
+<tr class="separator:a20e1b8f8eaad8183a5ec4ab84b8eb03d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43fcaba74a164008d38a0d39f1e87b03" id="r_a43fcaba74a164008d38a0d39f1e87b03"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a43fcaba74a164008d38a0d39f1e87b03">SPK_IS_ERRNO_EPIPE</a>()&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a5f5db3af5ce3a0fb5c2a890345fdfbea">SPK_IS_EPIPE</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td></tr>
+<tr class="separator:a43fcaba74a164008d38a0d39f1e87b03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab66bfeaa101122fe5f944c417ff133a8" id="r_ab66bfeaa101122fe5f944c417ff133a8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#ab66bfeaa101122fe5f944c417ff133a8">SPK_IS_ERRNO_EINTR</a>()&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a0cd9959594b6776f40e4320a149daba5">SPK_IS_EINTR</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td></tr>
+<tr class="separator:ab66bfeaa101122fe5f944c417ff133a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a017472380f6d3f09129f364399def5da" id="r_a017472380f6d3f09129f364399def5da"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a017472380f6d3f09129f364399def5da">SPK_IS_ERRNO_EBADMSG</a>()&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#aca770722b58289c23ec7c048bec838dc">SPK_IS_EBADMSG</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td></tr>
+<tr class="separator:a017472380f6d3f09129f364399def5da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a573f903be84c377df7908dc78e61e15b" id="r_a573f903be84c377df7908dc78e61e15b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a573f903be84c377df7908dc78e61e15b">SPK_IS_ERRNO_EINVAL</a>()&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a12987a97e763fa869f1129c4ed5aa188">SPK_IS_EINVAL</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td></tr>
+<tr class="separator:a573f903be84c377df7908dc78e61e15b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54b03125607c2c137af633382723f53d" id="r_a54b03125607c2c137af633382723f53d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a54b03125607c2c137af633382723f53d">SPK_IS_ERRNO_ERANGE</a>()&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a552c7651cdc7436fe381e061d34d431e">SPK_IS_ERANGE</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td></tr>
+<tr class="separator:a54b03125607c2c137af633382723f53d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dd35dc8a760f3c7a454dbd05635888a" id="r_a8dd35dc8a760f3c7a454dbd05635888a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a8dd35dc8a760f3c7a454dbd05635888a">SPK_IS_ERRNO_ENOSPC</a>()&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a2a148e97be5af79340cae89bdd9e2433">SPK_IS_ENOSPC</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td></tr>
+<tr class="separator:a8dd35dc8a760f3c7a454dbd05635888a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c099e95e794e11039c86c5bda128fc2" id="r_a6c099e95e794e11039c86c5bda128fc2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a6c099e95e794e11039c86c5bda128fc2">SPK_IS_ERRNO_ENOENT</a>()&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#af31b3aaed12696ae52f424f178d4040a">SPK_IS_ENOENT</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td></tr>
+<tr class="separator:a6c099e95e794e11039c86c5bda128fc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89e4317001834eeafe696f39b5b7219e" id="r_a89e4317001834eeafe696f39b5b7219e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a89e4317001834eeafe696f39b5b7219e">SPK_IS_ERRNO_ENODATA</a>()&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#ac25068b959b9f57cd99a46f2d06ae691">SPK_IS_ENODATA</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td></tr>
+<tr class="separator:a89e4317001834eeafe696f39b5b7219e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d05e93b26c03840286e2e09dce744be" id="r_a2d05e93b26c03840286e2e09dce744be"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a2d05e93b26c03840286e2e09dce744be">SPK_IS_ERRNO_EEXIST</a>()&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a30948369649372ff51d8557d413ee681">SPK_IS_EEXIST</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td></tr>
+<tr class="separator:a2d05e93b26c03840286e2e09dce744be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:aca810dc80a391722df44b7b759e53fd4" id="r_aca810dc80a391722df44b7b759e53fd4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#aca810dc80a391722df44b7b759e53fd4">__SPlatform_GetErrno</a> (void)</td></tr>
+<tr class="separator:aca810dc80a391722df44b7b759e53fd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3075772be1fe6a3744dd3e0bc24fbf80" id="r_a3075772be1fe6a3744dd3e0bc24fbf80"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a3075772be1fe6a3744dd3e0bc24fbf80">__SPlatform_GetNegErrno</a> (void)</td></tr>
+<tr class="separator:a3075772be1fe6a3744dd3e0bc24fbf80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c7d4a8dbfed37d9add9511f521f1356" id="r_a4c7d4a8dbfed37d9add9511f521f1356"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a4c7d4a8dbfed37d9add9511f521f1356">__SPlatform_SetErrno</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a4c7d4a8dbfed37d9add9511f521f1356"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c897e0347c9daf99450cd4d0083f27e" id="r_a0c897e0347c9daf99450cd4d0083f27e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a0c897e0347c9daf99450cd4d0083f27e">__SPlatform_IsErrEagain</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a0c897e0347c9daf99450cd4d0083f27e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d1c2a7fc8901f4c273ef0454b1d4035" id="r_a3d1c2a7fc8901f4c273ef0454b1d4035"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a3d1c2a7fc8901f4c273ef0454b1d4035">__SPlatform_IsErrEconnaborted</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a3d1c2a7fc8901f4c273ef0454b1d4035"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af90f9a07dc4a165609e7d8b11638df40" id="r_af90f9a07dc4a165609e7d8b11638df40"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#af90f9a07dc4a165609e7d8b11638df40">__SPlatform_IsErrEproto</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:af90f9a07dc4a165609e7d8b11638df40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7baffe84830698d5c350baf2dfd9dce2" id="r_a7baffe84830698d5c350baf2dfd9dce2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a7baffe84830698d5c350baf2dfd9dce2">__SPlatform_IsErrEtimeout</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a7baffe84830698d5c350baf2dfd9dce2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ffe668d0d05fefff8541519328852c1" id="r_a1ffe668d0d05fefff8541519328852c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a1ffe668d0d05fefff8541519328852c1">__SPlatform_IsErrEpipe</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a1ffe668d0d05fefff8541519328852c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a403ebee3d3b87e0b0a625bf57fffa140" id="r_a403ebee3d3b87e0b0a625bf57fffa140"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a403ebee3d3b87e0b0a625bf57fffa140">__SPlatform_IsErrEintr</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a403ebee3d3b87e0b0a625bf57fffa140"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ff623c53504aa6a7f4af473dbcc5129" id="r_a3ff623c53504aa6a7f4af473dbcc5129"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a3ff623c53504aa6a7f4af473dbcc5129">__SPlatform_IsErrEbadmsg</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a3ff623c53504aa6a7f4af473dbcc5129"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff273ec8ae5772b19405cb4e3db29504" id="r_aff273ec8ae5772b19405cb4e3db29504"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#aff273ec8ae5772b19405cb4e3db29504">__SPlatform_IsErrEinval</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:aff273ec8ae5772b19405cb4e3db29504"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a105e52eedf0761e53ff8185279d2b756" id="r_a105e52eedf0761e53ff8185279d2b756"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a105e52eedf0761e53ff8185279d2b756">__SPlatform_IsErrErange</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a105e52eedf0761e53ff8185279d2b756"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c349253fe084a2f28aaaa9468229806" id="r_a5c349253fe084a2f28aaaa9468229806"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a5c349253fe084a2f28aaaa9468229806">__SPlatform_IsErrEnospc</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a5c349253fe084a2f28aaaa9468229806"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2721e1627411094cd4a135af3e806b12" id="r_a2721e1627411094cd4a135af3e806b12"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a2721e1627411094cd4a135af3e806b12">__SPlatform_IsErrEnoent</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a2721e1627411094cd4a135af3e806b12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade961b5164fc4fd57a6e4dd4d869632c" id="r_ade961b5164fc4fd57a6e4dd4d869632c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#ade961b5164fc4fd57a6e4dd4d869632c">__SPlatform_IsErrEnodata</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:ade961b5164fc4fd57a6e4dd4d869632c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f716fe39dc28bdd6564187b3d069842" id="r_a5f716fe39dc28bdd6564187b3d069842"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a5f716fe39dc28bdd6564187b3d069842">__SPlatform_IsErrEexist</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a5f716fe39dc28bdd6564187b3d069842"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37fa5cca53fd380b80f9f5d6457f88a3" id="r_a37fa5cca53fd380b80f9f5d6457f88a3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a37fa5cca53fd380b80f9f5d6457f88a3">__SPlatform_IsNegEagain</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a37fa5cca53fd380b80f9f5d6457f88a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb8cd59878686f3367f935496039a0ae" id="r_adb8cd59878686f3367f935496039a0ae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#adb8cd59878686f3367f935496039a0ae">__SPlatform_IsNegEconnaborted</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:adb8cd59878686f3367f935496039a0ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0bb83b258d7defa4c811e71ee0abc24" id="r_ac0bb83b258d7defa4c811e71ee0abc24"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#ac0bb83b258d7defa4c811e71ee0abc24">__SPlatform_IsNegEproto</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:ac0bb83b258d7defa4c811e71ee0abc24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80031b258523239a6b142dfb9648826d" id="r_a80031b258523239a6b142dfb9648826d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a80031b258523239a6b142dfb9648826d">__SPlatform_IsNegEtimeout</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a80031b258523239a6b142dfb9648826d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2fab948495b08c561be342cbe108e5d6" id="r_a2fab948495b08c561be342cbe108e5d6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a2fab948495b08c561be342cbe108e5d6">__SPlatform_IsNegEpipe</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a2fab948495b08c561be342cbe108e5d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41243fdedabd7822096feb14bd4c4d6a" id="r_a41243fdedabd7822096feb14bd4c4d6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a41243fdedabd7822096feb14bd4c4d6a">__SPlatform_IsNegEintr</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a41243fdedabd7822096feb14bd4c4d6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adedb572ac578f94516644f795597b49b" id="r_adedb572ac578f94516644f795597b49b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#adedb572ac578f94516644f795597b49b">__SPlatform_IsNegEbadmsg</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:adedb572ac578f94516644f795597b49b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6683b6745123400680cbe21b5a52412" id="r_ae6683b6745123400680cbe21b5a52412"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#ae6683b6745123400680cbe21b5a52412">__SPlatform_IsNegEinval</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:ae6683b6745123400680cbe21b5a52412"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0828994c79ff3e10a13a460c663ca65b" id="r_a0828994c79ff3e10a13a460c663ca65b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a0828994c79ff3e10a13a460c663ca65b">__SPlatform_IsNegErange</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a0828994c79ff3e10a13a460c663ca65b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a911af1305a556889714d0093bc649e89" id="r_a911af1305a556889714d0093bc649e89"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a911af1305a556889714d0093bc649e89">__SPlatform_IsNegEnospc</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a911af1305a556889714d0093bc649e89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44dcc94102d1b5475da9e8891978b8f9" id="r_a44dcc94102d1b5475da9e8891978b8f9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a44dcc94102d1b5475da9e8891978b8f9">__SPlatform_IsNegEnoent</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a44dcc94102d1b5475da9e8891978b8f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a539fca4bc82c99025751b41692283a53" id="r_a539fca4bc82c99025751b41692283a53"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a539fca4bc82c99025751b41692283a53">__SPlatform_IsNegEnodata</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a539fca4bc82c99025751b41692283a53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b29a10a7f81e997330ccf2187591b62" id="r_a4b29a10a7f81e997330ccf2187591b62"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spk__platforms_8h.html#a4b29a10a7f81e997330ccf2187591b62">__SPlatform_IsNegEexist</a> (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> err)</td></tr>
+<tr class="separator:a4b29a10a7f81e997330ccf2187591b62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>涉及跨平台兼容处理的函数定义</p>
+<dl class="section version"><dt>版本</dt><dd>1.0 2017/08/10 </dd></dl>
+<dl class="section since"><dt>自从</dt><dd>2017/08/10 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 中定义.</p>
+</div><h2 class="groupheader">宏定义说明</h2>
+<a id="a3b9bda10c0f6b206595e7e1f1b1982ee" name="a3b9bda10c0f6b206595e7e1f1b1982ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b9bda10c0f6b206595e7e1f1b1982ee">&#9670;&#160;</a></span>__SPK_FMT_HH__</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __SPK_FMT_HH__&#160;&#160;&#160;&quot;hh&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00141">141</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae9f2f4c9ef5d99802e603a37449b860b" name="ae9f2f4c9ef5d99802e603a37449b860b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9f2f4c9ef5d99802e603a37449b860b">&#9670;&#160;</a></span>__SPK_FMT_LL__</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __SPK_FMT_LL__&#160;&#160;&#160;&quot;ll&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00140">140</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9d39d384a08d0c3855c03ae0df67abf8" name="a9d39d384a08d0c3855c03ae0df67abf8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d39d384a08d0c3855c03ae0df67abf8">&#9670;&#160;</a></span>__SPK_FMT_SHORT__</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __SPK_FMT_SHORT__&#160;&#160;&#160;&quot;h&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00142">142</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad1d7f89256001c100cbe9793079b2c2b" name="ad1d7f89256001c100cbe9793079b2c2b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1d7f89256001c100cbe9793079b2c2b">&#9670;&#160;</a></span>_SPK_IS_ERRNO_ECONNABORTED</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define _SPK_IS_ERRNO_ECONNABORTED</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;(0)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00175">175</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab4a5df7f1e18a061735bb93883e65e7e" name="ab4a5df7f1e18a061735bb93883e65e7e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4a5df7f1e18a061735bb93883e65e7e">&#9670;&#160;</a></span>_SPK_IS_ERRNO_EPROTO</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define _SPK_IS_ERRNO_EPROTO</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;(0)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00187">187</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa40ea1a2d2c5240ad430e50333e9d301" name="aa40ea1a2d2c5240ad430e50333e9d301"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa40ea1a2d2c5240ad430e50333e9d301">&#9670;&#160;</a></span>SPK_GET_ERRNO</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_GET_ERRNO</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;(errno)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00228">228</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a278c85f5bced6ae2233b250d6d3721ab" name="a278c85f5bced6ae2233b250d6d3721ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a278c85f5bced6ae2233b250d6d3721ab">&#9670;&#160;</a></span>SPK_GET_NEG_ERRNO</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_GET_NEG_ERRNO</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;((errno) &gt; 0 ? -(errno) : -1)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00229">229</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab039951043c3fe4df323690ee60d975c" name="ab039951043c3fe4df323690ee60d975c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab039951043c3fe4df323690ee60d975c">&#9670;&#160;</a></span>SPK_IS_EAGAIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_EAGAIN</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;(_SPK_IS_ERRNO_EAGAIN(e))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00232">232</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aca770722b58289c23ec7c048bec838dc" name="aca770722b58289c23ec7c048bec838dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca770722b58289c23ec7c048bec838dc">&#9670;&#160;</a></span>SPK_IS_EBADMSG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_EBADMSG</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == <a class="el" href="types_8h.html#a251e9b536ed96ccb16aa28ca2d5bd656">EBADMSG</a>)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00238">238</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2b8676746e3d4a66639339297a4b0903" name="a2b8676746e3d4a66639339297a4b0903"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b8676746e3d4a66639339297a4b0903">&#9670;&#160;</a></span>SPK_IS_ECONNABORTED</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ECONNABORTED</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#ad1d7f89256001c100cbe9793079b2c2b">_SPK_IS_ERRNO_ECONNABORTED</a>(e))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00233">233</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a30948369649372ff51d8557d413ee681" name="a30948369649372ff51d8557d413ee681"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30948369649372ff51d8557d413ee681">&#9670;&#160;</a></span>SPK_IS_EEXIST</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_EEXIST</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == EEXIST)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00244">244</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0cd9959594b6776f40e4320a149daba5" name="a0cd9959594b6776f40e4320a149daba5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cd9959594b6776f40e4320a149daba5">&#9670;&#160;</a></span>SPK_IS_EINTR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_EINTR</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == EINTR)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00237">237</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a12987a97e763fa869f1129c4ed5aa188" name="a12987a97e763fa869f1129c4ed5aa188"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12987a97e763fa869f1129c4ed5aa188">&#9670;&#160;</a></span>SPK_IS_EINVAL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_EINVAL</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == EINVAL)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00239">239</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac25068b959b9f57cd99a46f2d06ae691" name="ac25068b959b9f57cd99a46f2d06ae691"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac25068b959b9f57cd99a46f2d06ae691">&#9670;&#160;</a></span>SPK_IS_ENODATA</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ENODATA</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == <a class="el" href="types_8h.html#a0030614bc864d1b24eaedd71585acc27">ENODATA</a>)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00243">243</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af31b3aaed12696ae52f424f178d4040a" name="af31b3aaed12696ae52f424f178d4040a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af31b3aaed12696ae52f424f178d4040a">&#9670;&#160;</a></span>SPK_IS_ENOENT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ENOENT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == ENOENT)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00242">242</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2a148e97be5af79340cae89bdd9e2433" name="a2a148e97be5af79340cae89bdd9e2433"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a148e97be5af79340cae89bdd9e2433">&#9670;&#160;</a></span>SPK_IS_ENOSPC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ENOSPC</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == ENOSPC)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00241">241</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5f5db3af5ce3a0fb5c2a890345fdfbea" name="a5f5db3af5ce3a0fb5c2a890345fdfbea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f5db3af5ce3a0fb5c2a890345fdfbea">&#9670;&#160;</a></span>SPK_IS_EPIPE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_EPIPE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == EPIPE)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00236">236</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa0413633c30f0448bd03060c96971f73" name="aa0413633c30f0448bd03060c96971f73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0413633c30f0448bd03060c96971f73">&#9670;&#160;</a></span>SPK_IS_EPROTO</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_EPROTO</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#ab4a5df7f1e18a061735bb93883e65e7e">_SPK_IS_ERRNO_EPROTO</a>(e))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00234">234</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a552c7651cdc7436fe381e061d34d431e" name="a552c7651cdc7436fe381e061d34d431e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a552c7651cdc7436fe381e061d34d431e">&#9670;&#160;</a></span>SPK_IS_ERANGE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ERANGE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == ERANGE)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00240">240</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af8d084ddc89cf4e61153da8ceb0724b3" name="af8d084ddc89cf4e61153da8ceb0724b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af8d084ddc89cf4e61153da8ceb0724b3">&#9670;&#160;</a></span>SPK_IS_ERRNO_EAGAIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ERRNO_EAGAIN</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#ab039951043c3fe4df323690ee60d975c">SPK_IS_EAGAIN</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00263">263</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a017472380f6d3f09129f364399def5da" name="a017472380f6d3f09129f364399def5da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a017472380f6d3f09129f364399def5da">&#9670;&#160;</a></span>SPK_IS_ERRNO_EBADMSG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ERRNO_EBADMSG</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#aca770722b58289c23ec7c048bec838dc">SPK_IS_EBADMSG</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00269">269</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a924d540fb7b3c590e3e20971c9e58c59" name="a924d540fb7b3c590e3e20971c9e58c59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a924d540fb7b3c590e3e20971c9e58c59">&#9670;&#160;</a></span>SPK_IS_ERRNO_ECONNABORTED</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ERRNO_ECONNABORTED</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a2b8676746e3d4a66639339297a4b0903">SPK_IS_ECONNABORTED</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00264">264</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2d05e93b26c03840286e2e09dce744be" name="a2d05e93b26c03840286e2e09dce744be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d05e93b26c03840286e2e09dce744be">&#9670;&#160;</a></span>SPK_IS_ERRNO_EEXIST</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ERRNO_EEXIST</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a30948369649372ff51d8557d413ee681">SPK_IS_EEXIST</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00275">275</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab66bfeaa101122fe5f944c417ff133a8" name="ab66bfeaa101122fe5f944c417ff133a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab66bfeaa101122fe5f944c417ff133a8">&#9670;&#160;</a></span>SPK_IS_ERRNO_EINTR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ERRNO_EINTR</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a0cd9959594b6776f40e4320a149daba5">SPK_IS_EINTR</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00268">268</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a573f903be84c377df7908dc78e61e15b" name="a573f903be84c377df7908dc78e61e15b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a573f903be84c377df7908dc78e61e15b">&#9670;&#160;</a></span>SPK_IS_ERRNO_EINVAL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ERRNO_EINVAL</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a12987a97e763fa869f1129c4ed5aa188">SPK_IS_EINVAL</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00270">270</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a89e4317001834eeafe696f39b5b7219e" name="a89e4317001834eeafe696f39b5b7219e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89e4317001834eeafe696f39b5b7219e">&#9670;&#160;</a></span>SPK_IS_ERRNO_ENODATA</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ERRNO_ENODATA</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#ac25068b959b9f57cd99a46f2d06ae691">SPK_IS_ENODATA</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00274">274</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6c099e95e794e11039c86c5bda128fc2" name="a6c099e95e794e11039c86c5bda128fc2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c099e95e794e11039c86c5bda128fc2">&#9670;&#160;</a></span>SPK_IS_ERRNO_ENOENT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ERRNO_ENOENT</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#af31b3aaed12696ae52f424f178d4040a">SPK_IS_ENOENT</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00273">273</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8dd35dc8a760f3c7a454dbd05635888a" name="a8dd35dc8a760f3c7a454dbd05635888a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8dd35dc8a760f3c7a454dbd05635888a">&#9670;&#160;</a></span>SPK_IS_ERRNO_ENOSPC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ERRNO_ENOSPC</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a2a148e97be5af79340cae89bdd9e2433">SPK_IS_ENOSPC</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00272">272</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a43fcaba74a164008d38a0d39f1e87b03" name="a43fcaba74a164008d38a0d39f1e87b03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43fcaba74a164008d38a0d39f1e87b03">&#9670;&#160;</a></span>SPK_IS_ERRNO_EPIPE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ERRNO_EPIPE</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a5f5db3af5ce3a0fb5c2a890345fdfbea">SPK_IS_EPIPE</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00267">267</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab578e303ec925f4d14d55adeaa676ff8" name="ab578e303ec925f4d14d55adeaa676ff8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab578e303ec925f4d14d55adeaa676ff8">&#9670;&#160;</a></span>SPK_IS_ERRNO_EPROTO</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ERRNO_EPROTO</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#aa0413633c30f0448bd03060c96971f73">SPK_IS_EPROTO</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00265">265</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a54b03125607c2c137af633382723f53d" name="a54b03125607c2c137af633382723f53d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54b03125607c2c137af633382723f53d">&#9670;&#160;</a></span>SPK_IS_ERRNO_ERANGE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ERRNO_ERANGE</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a552c7651cdc7436fe381e061d34d431e">SPK_IS_ERANGE</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00271">271</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a20e1b8f8eaad8183a5ec4ab84b8eb03d" name="a20e1b8f8eaad8183a5ec4ab84b8eb03d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20e1b8f8eaad8183a5ec4ab84b8eb03d">&#9670;&#160;</a></span>SPK_IS_ERRNO_ETIMEDOUT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ERRNO_ETIMEDOUT</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#a056eff3ab7b0d56627594d873435ac2c">SPK_IS_ETIMEDOUT</a>(<a class="el" href="spk__platforms_8h.html#aa40ea1a2d2c5240ad430e50333e9d301">SPK_GET_ERRNO</a>()))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00266">266</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a056eff3ab7b0d56627594d873435ac2c" name="a056eff3ab7b0d56627594d873435ac2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a056eff3ab7b0d56627594d873435ac2c">&#9670;&#160;</a></span>SPK_IS_ETIMEDOUT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_ETIMEDOUT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == <a class="el" href="types_8h.html#a597718e59a8fc9c4d4ab63f5a34e28b1">ETIMEDOUT</a>)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00235">235</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a63f0fcce548ffc12392a8cbe78c92ff2" name="a63f0fcce548ffc12392a8cbe78c92ff2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a63f0fcce548ffc12392a8cbe78c92ff2">&#9670;&#160;</a></span>SPK_IS_NEG_EAGAIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_NEG_EAGAIN</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;(_SPK_IS_ERRNO_EAGAIN(-(e)))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00246">246</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a851ffa9ec47aff1660467acf91f3bf04" name="a851ffa9ec47aff1660467acf91f3bf04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a851ffa9ec47aff1660467acf91f3bf04">&#9670;&#160;</a></span>SPK_IS_NEG_EBADMSG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_NEG_EBADMSG</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == -(<a class="el" href="types_8h.html#a251e9b536ed96ccb16aa28ca2d5bd656">EBADMSG</a>))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00252">252</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7476db66d02e74ccefc8d4e7e9977c9c" name="a7476db66d02e74ccefc8d4e7e9977c9c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7476db66d02e74ccefc8d4e7e9977c9c">&#9670;&#160;</a></span>SPK_IS_NEG_ECONNABORTED</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_NEG_ECONNABORTED</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#ad1d7f89256001c100cbe9793079b2c2b">_SPK_IS_ERRNO_ECONNABORTED</a>(-(e)))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00247">247</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a05716b7fb0059a1d4f926a178294e275" name="a05716b7fb0059a1d4f926a178294e275"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a05716b7fb0059a1d4f926a178294e275">&#9670;&#160;</a></span>SPK_IS_NEG_EEXIST</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_NEG_EEXIST</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == -(EEXIST))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00258">258</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab759f05e94948f8d4481bd34251d3d3c" name="ab759f05e94948f8d4481bd34251d3d3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab759f05e94948f8d4481bd34251d3d3c">&#9670;&#160;</a></span>SPK_IS_NEG_EINTR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_NEG_EINTR</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == -(EINTR))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00251">251</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a770b110ff67c02b15c558207ca22fd5c" name="a770b110ff67c02b15c558207ca22fd5c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a770b110ff67c02b15c558207ca22fd5c">&#9670;&#160;</a></span>SPK_IS_NEG_EINVAL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_NEG_EINVAL</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == -(EINVAL))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00253">253</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4156ba6d685dcff9ef38a0784fe99c91" name="a4156ba6d685dcff9ef38a0784fe99c91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4156ba6d685dcff9ef38a0784fe99c91">&#9670;&#160;</a></span>SPK_IS_NEG_ENODATA</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_NEG_ENODATA</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == -(<a class="el" href="types_8h.html#a0030614bc864d1b24eaedd71585acc27">ENODATA</a>))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00257">257</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2f441f3bfef39e1a9e8334801b73993e" name="a2f441f3bfef39e1a9e8334801b73993e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f441f3bfef39e1a9e8334801b73993e">&#9670;&#160;</a></span>SPK_IS_NEG_ENOENT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_NEG_ENOENT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == -(ENOENT))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00256">256</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9d53c9937e6dc31f7f5dcd410382a2c5" name="a9d53c9937e6dc31f7f5dcd410382a2c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d53c9937e6dc31f7f5dcd410382a2c5">&#9670;&#160;</a></span>SPK_IS_NEG_ENOSPC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_NEG_ENOSPC</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == -(ENOSPC))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00255">255</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6d206a18e9da707a72887ae05f8c5ac6" name="a6d206a18e9da707a72887ae05f8c5ac6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d206a18e9da707a72887ae05f8c5ac6">&#9670;&#160;</a></span>SPK_IS_NEG_EPIPE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_NEG_EPIPE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == -(EPIPE))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00250">250</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7eaee368955006246a9b95ab862e1544" name="a7eaee368955006246a9b95ab862e1544"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7eaee368955006246a9b95ab862e1544">&#9670;&#160;</a></span>SPK_IS_NEG_EPROTO</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_NEG_EPROTO</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;(<a class="el" href="spk__platforms_8h.html#ab4a5df7f1e18a061735bb93883e65e7e">_SPK_IS_ERRNO_EPROTO</a>(-(e)))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00248">248</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4161314f812ba69b5974b1ad621d9763" name="a4161314f812ba69b5974b1ad621d9763"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4161314f812ba69b5974b1ad621d9763">&#9670;&#160;</a></span>SPK_IS_NEG_ERANGE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_NEG_ERANGE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == -(ERANGE))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00254">254</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9b14d755d2d5dd449f599a0c0dadf04e" name="a9b14d755d2d5dd449f599a0c0dadf04e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b14d755d2d5dd449f599a0c0dadf04e">&#9670;&#160;</a></span>SPK_IS_NEG_ETIMEDOUT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_IS_NEG_ETIMEDOUT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;((e) == -(<a class="el" href="types_8h.html#a597718e59a8fc9c4d4ab63f5a34e28b1">ETIMEDOUT</a>))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00249">249</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aff874845f15f04e42cadbaf944d53378" name="aff874845f15f04e42cadbaf944d53378"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff874845f15f04e42cadbaf944d53378">&#9670;&#160;</a></span>SPK_SET_ERRNO</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_SET_ERRNO</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e</td><td>)</td>
+          <td>&#160;&#160;&#160;(errno = (e))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="spk__platforms_8h_source.html">spk_platforms.h</a> 第 <a class="el" href="spk__platforms_8h_source.html#l00230">230</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="aca810dc80a391722df44b7b759e53fd4" name="aca810dc80a391722df44b7b759e53fd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca810dc80a391722df44b7b759e53fd4">&#9670;&#160;</a></span>__SPlatform_GetErrno()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> __SPlatform_GetErrno </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3075772be1fe6a3744dd3e0bc24fbf80" name="a3075772be1fe6a3744dd3e0bc24fbf80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3075772be1fe6a3744dd3e0bc24fbf80">&#9670;&#160;</a></span>__SPlatform_GetNegErrno()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a> __SPlatform_GetNegErrno </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0c897e0347c9daf99450cd4d0083f27e" name="a0c897e0347c9daf99450cd4d0083f27e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c897e0347c9daf99450cd4d0083f27e">&#9670;&#160;</a></span>__SPlatform_IsErrEagain()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsErrEagain </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3ff623c53504aa6a7f4af473dbcc5129" name="a3ff623c53504aa6a7f4af473dbcc5129"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ff623c53504aa6a7f4af473dbcc5129">&#9670;&#160;</a></span>__SPlatform_IsErrEbadmsg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsErrEbadmsg </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3d1c2a7fc8901f4c273ef0454b1d4035" name="a3d1c2a7fc8901f4c273ef0454b1d4035"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d1c2a7fc8901f4c273ef0454b1d4035">&#9670;&#160;</a></span>__SPlatform_IsErrEconnaborted()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsErrEconnaborted </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5f716fe39dc28bdd6564187b3d069842" name="a5f716fe39dc28bdd6564187b3d069842"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f716fe39dc28bdd6564187b3d069842">&#9670;&#160;</a></span>__SPlatform_IsErrEexist()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsErrEexist </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a403ebee3d3b87e0b0a625bf57fffa140" name="a403ebee3d3b87e0b0a625bf57fffa140"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a403ebee3d3b87e0b0a625bf57fffa140">&#9670;&#160;</a></span>__SPlatform_IsErrEintr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsErrEintr </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aff273ec8ae5772b19405cb4e3db29504" name="aff273ec8ae5772b19405cb4e3db29504"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff273ec8ae5772b19405cb4e3db29504">&#9670;&#160;</a></span>__SPlatform_IsErrEinval()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsErrEinval </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ade961b5164fc4fd57a6e4dd4d869632c" name="ade961b5164fc4fd57a6e4dd4d869632c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade961b5164fc4fd57a6e4dd4d869632c">&#9670;&#160;</a></span>__SPlatform_IsErrEnodata()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsErrEnodata </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2721e1627411094cd4a135af3e806b12" name="a2721e1627411094cd4a135af3e806b12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2721e1627411094cd4a135af3e806b12">&#9670;&#160;</a></span>__SPlatform_IsErrEnoent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsErrEnoent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5c349253fe084a2f28aaaa9468229806" name="a5c349253fe084a2f28aaaa9468229806"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c349253fe084a2f28aaaa9468229806">&#9670;&#160;</a></span>__SPlatform_IsErrEnospc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsErrEnospc </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1ffe668d0d05fefff8541519328852c1" name="a1ffe668d0d05fefff8541519328852c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ffe668d0d05fefff8541519328852c1">&#9670;&#160;</a></span>__SPlatform_IsErrEpipe()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsErrEpipe </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af90f9a07dc4a165609e7d8b11638df40" name="af90f9a07dc4a165609e7d8b11638df40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af90f9a07dc4a165609e7d8b11638df40">&#9670;&#160;</a></span>__SPlatform_IsErrEproto()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsErrEproto </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a105e52eedf0761e53ff8185279d2b756" name="a105e52eedf0761e53ff8185279d2b756"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a105e52eedf0761e53ff8185279d2b756">&#9670;&#160;</a></span>__SPlatform_IsErrErange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsErrErange </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7baffe84830698d5c350baf2dfd9dce2" name="a7baffe84830698d5c350baf2dfd9dce2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7baffe84830698d5c350baf2dfd9dce2">&#9670;&#160;</a></span>__SPlatform_IsErrEtimeout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsErrEtimeout </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a37fa5cca53fd380b80f9f5d6457f88a3" name="a37fa5cca53fd380b80f9f5d6457f88a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37fa5cca53fd380b80f9f5d6457f88a3">&#9670;&#160;</a></span>__SPlatform_IsNegEagain()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsNegEagain </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adedb572ac578f94516644f795597b49b" name="adedb572ac578f94516644f795597b49b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adedb572ac578f94516644f795597b49b">&#9670;&#160;</a></span>__SPlatform_IsNegEbadmsg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsNegEbadmsg </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adb8cd59878686f3367f935496039a0ae" name="adb8cd59878686f3367f935496039a0ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb8cd59878686f3367f935496039a0ae">&#9670;&#160;</a></span>__SPlatform_IsNegEconnaborted()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsNegEconnaborted </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4b29a10a7f81e997330ccf2187591b62" name="a4b29a10a7f81e997330ccf2187591b62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b29a10a7f81e997330ccf2187591b62">&#9670;&#160;</a></span>__SPlatform_IsNegEexist()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsNegEexist </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a41243fdedabd7822096feb14bd4c4d6a" name="a41243fdedabd7822096feb14bd4c4d6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41243fdedabd7822096feb14bd4c4d6a">&#9670;&#160;</a></span>__SPlatform_IsNegEintr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsNegEintr </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae6683b6745123400680cbe21b5a52412" name="ae6683b6745123400680cbe21b5a52412"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6683b6745123400680cbe21b5a52412">&#9670;&#160;</a></span>__SPlatform_IsNegEinval()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsNegEinval </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a539fca4bc82c99025751b41692283a53" name="a539fca4bc82c99025751b41692283a53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a539fca4bc82c99025751b41692283a53">&#9670;&#160;</a></span>__SPlatform_IsNegEnodata()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsNegEnodata </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a44dcc94102d1b5475da9e8891978b8f9" name="a44dcc94102d1b5475da9e8891978b8f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44dcc94102d1b5475da9e8891978b8f9">&#9670;&#160;</a></span>__SPlatform_IsNegEnoent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsNegEnoent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a911af1305a556889714d0093bc649e89" name="a911af1305a556889714d0093bc649e89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a911af1305a556889714d0093bc649e89">&#9670;&#160;</a></span>__SPlatform_IsNegEnospc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsNegEnospc </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2fab948495b08c561be342cbe108e5d6" name="a2fab948495b08c561be342cbe108e5d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2fab948495b08c561be342cbe108e5d6">&#9670;&#160;</a></span>__SPlatform_IsNegEpipe()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsNegEpipe </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac0bb83b258d7defa4c811e71ee0abc24" name="ac0bb83b258d7defa4c811e71ee0abc24"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0bb83b258d7defa4c811e71ee0abc24">&#9670;&#160;</a></span>__SPlatform_IsNegEproto()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsNegEproto </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0828994c79ff3e10a13a460c663ca65b" name="a0828994c79ff3e10a13a460c663ca65b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0828994c79ff3e10a13a460c663ca65b">&#9670;&#160;</a></span>__SPlatform_IsNegErange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsNegErange </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a80031b258523239a6b142dfb9648826d" name="a80031b258523239a6b142dfb9648826d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80031b258523239a6b142dfb9648826d">&#9670;&#160;</a></span>__SPlatform_IsNegEtimeout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8h.html#ae4cc35dcc70810fa972cc8a5185a28fa">BOOL</a> __SPlatform_IsNegEtimeout </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4c7d4a8dbfed37d9add9511f521f1356" name="a4c7d4a8dbfed37d9add9511f521f1356"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c7d4a8dbfed37d9add9511f521f1356">&#9670;&#160;</a></span>__SPlatform_SetErrno()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void __SPlatform_SetErrno </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>&#160;</td>
+          <td class="paramname"><em>err</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_248d918e0c46523948aef7b06f6106c0.html">sutil</a></li><li class="navelem"><a class="el" href="dir_3c03f0dc5fcf24f56901870d4d53fda7.html">platform</a></li><li class="navelem"><a class="el" href="spk__platforms_8h.html">spk_platforms.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

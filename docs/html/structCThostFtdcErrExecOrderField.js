@@ -1,0 +1,26 @@
+var structCThostFtdcErrExecOrderField =
+[
+    [ "AccountID", "structCThostFtdcErrExecOrderField.html#ad83175fac866549a0f3466ca1a030ee8", null ],
+    [ "ActionType", "structCThostFtdcErrExecOrderField.html#afb5b55dac110aa66edeac9cd4eab51f9", null ],
+    [ "BrokerID", "structCThostFtdcErrExecOrderField.html#ab46e7dd81f80db163a876ccfc7eac550", null ],
+    [ "BusinessUnit", "structCThostFtdcErrExecOrderField.html#ad285195931c324f948fead2a7aebe607", null ],
+    [ "ClientID", "structCThostFtdcErrExecOrderField.html#ab34a1fb1e8871af7606ed50e3928d69f", null ],
+    [ "CloseFlag", "structCThostFtdcErrExecOrderField.html#aab8f4484e33c27d2c6889ec288a702e5", null ],
+    [ "CurrencyID", "structCThostFtdcErrExecOrderField.html#a53c1feeebb0b317ff488a1365d126ef0", null ],
+    [ "ErrorID", "structCThostFtdcErrExecOrderField.html#a66055eecf9bc988f914b6a796c859c9e", null ],
+    [ "ErrorMsg", "structCThostFtdcErrExecOrderField.html#a9834a45aad27ab7b99e0fd92948b6a4a", null ],
+    [ "ExchangeID", "structCThostFtdcErrExecOrderField.html#a46fdce5a1bb36f6b87817b82f805c073", null ],
+    [ "ExecOrderRef", "structCThostFtdcErrExecOrderField.html#abcf6587d90bf9a056b555f2b6286316c", null ],
+    [ "HedgeFlag", "structCThostFtdcErrExecOrderField.html#a7f4743807f423852c970672cb12bad6b", null ],
+    [ "InstrumentID", "structCThostFtdcErrExecOrderField.html#a9a1713efbd7fcb58ab89a796a155c806", null ],
+    [ "InvestorID", "structCThostFtdcErrExecOrderField.html#a95fac7de0edd3de4a06659916f19d183", null ],
+    [ "InvestUnitID", "structCThostFtdcErrExecOrderField.html#a51a0023949239febd3f632b085da7778", null ],
+    [ "IPAddress", "structCThostFtdcErrExecOrderField.html#ae4cb440d24a7293244d47e44beb3b212", null ],
+    [ "MacAddress", "structCThostFtdcErrExecOrderField.html#a1924b38a9df78d7dd8cccdc1f05c8868", null ],
+    [ "OffsetFlag", "structCThostFtdcErrExecOrderField.html#a412706b528b39e48ccff0e760334c3e2", null ],
+    [ "PosiDirection", "structCThostFtdcErrExecOrderField.html#af0b01784443f36fada1392721ee23f1a", null ],
+    [ "RequestID", "structCThostFtdcErrExecOrderField.html#a3daa219ba87fb58b88ac619123626a78", null ],
+    [ "ReservePositionFlag", "structCThostFtdcErrExecOrderField.html#a60e4142247e4c3aa1f99ec8e038b0116", null ],
+    [ "UserID", "structCThostFtdcErrExecOrderField.html#a0fe7f53c8e5a4db8c5a73fcf6f9475b5", null ],
+    [ "Volume", "structCThostFtdcErrExecOrderField.html#a308491ae07fbf0878af337a7aebae687", null ]
+];

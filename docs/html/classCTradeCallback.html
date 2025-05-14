@@ -1,0 +1,2111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: CTradeCallback类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classCTradeCallback.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="classCTradeCallback-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">CTradeCallback类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="tradeApi_8h_source.html">tradeApi.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a72a34f4845b210947a0af90619ccc560" id="r_a72a34f4845b210947a0af90619ccc560"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a72a34f4845b210947a0af90619ccc560">OnOrder</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspOrder.html">STRspOrder</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a72a34f4845b210947a0af90619ccc560"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabece312d26c3b18fb4f72364a0703d6" id="r_aabece312d26c3b18fb4f72364a0703d6"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#aabece312d26c3b18fb4f72364a0703d6">OnCancelOrder</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspCancelOrder.html">STRspCancelOrder</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:aabece312d26c3b18fb4f72364a0703d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1e0c3763a06b3fabab2c921918e3dbd" id="r_af1e0c3763a06b3fabab2c921918e3dbd"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#af1e0c3763a06b3fabab2c921918e3dbd">OnMaxTradeQty</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspMaxTradeQty.html">STRspMaxTradeQty</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:af1e0c3763a06b3fabab2c921918e3dbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b445a427e5d0a7fc9dfb519e8e2e425" id="r_a0b445a427e5d0a7fc9dfb519e8e2e425"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a0b445a427e5d0a7fc9dfb519e8e2e425">OnQryHolding</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryHolding.html">STRspQryHolding</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a0b445a427e5d0a7fc9dfb519e8e2e425"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7bb7dc63d4c362e5d86e2db9b1758787" id="r_a7bb7dc63d4c362e5d86e2db9b1758787"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a7bb7dc63d4c362e5d86e2db9b1758787">OnQryFill</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryFill.html">STRspQryFill</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a7bb7dc63d4c362e5d86e2db9b1758787"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67be9cf5bf051967f7da47d1a1e63618" id="r_a67be9cf5bf051967f7da47d1a1e63618"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a67be9cf5bf051967f7da47d1a1e63618">OnQryMoney</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryMoney.html">STRspQryMoney</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a67be9cf5bf051967f7da47d1a1e63618"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81709dd180549d025d0501d9cbee1be2" id="r_a81709dd180549d025d0501d9cbee1be2"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a81709dd180549d025d0501d9cbee1be2">OnQryOrder</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryOrder.html">STRspQryOrder</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a81709dd180549d025d0501d9cbee1be2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9765fd91b62eabf7926a453fc0f86afa" id="r_a9765fd91b62eabf7926a453fc0f86afa"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a9765fd91b62eabf7926a453fc0f86afa">OnQryHolder</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryHolder.html">STRspQryHolder</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a9765fd91b62eabf7926a453fc0f86afa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e8e48d0b32bcb2e0e7dfc4b724bbac1" id="r_a7e8e48d0b32bcb2e0e7dfc4b724bbac1"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a7e8e48d0b32bcb2e0e7dfc4b724bbac1">OnQryWithdrawableOrder</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryWithdrawableOrder.html">STRspQryWithdrawableOrder</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a7e8e48d0b32bcb2e0e7dfc4b724bbac1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33dc62c86e1d12864f716120cded3466" id="r_a33dc62c86e1d12864f716120cded3466"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a33dc62c86e1d12864f716120cded3466">OnAcctRegister</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspAcctRegister.html">STRspAcctRegister</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a33dc62c86e1d12864f716120cded3466"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69471067746e5cc08d0be3f374ab8977" id="r_a69471067746e5cc08d0be3f374ab8977"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a69471067746e5cc08d0be3f374ab8977">OnTradeLogin</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspTradeLogin.html">STRspTradeLogin</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a69471067746e5cc08d0be3f374ab8977"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adce4b891b27ca1d6750d3186b70a33b2" id="r_adce4b891b27ca1d6750d3186b70a33b2"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#adce4b891b27ca1d6750d3186b70a33b2">OnLogin</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspLogin.html">STRspLogin</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:adce4b891b27ca1d6750d3186b70a33b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58aeb1796ce022967fc5da3c67e8052c" id="r_a58aeb1796ce022967fc5da3c67e8052c"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a58aeb1796ce022967fc5da3c67e8052c">OnRtnOrderConfirm</a> (<a class="el" href="structSTRtnOrderConfirm.html">STRtnOrderConfirm</a> *p_pRtnOrderConfirm)</td></tr>
+<tr class="separator:a58aeb1796ce022967fc5da3c67e8052c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeccdc821d0ba0d47935caed866931f6a" id="r_aeccdc821d0ba0d47935caed866931f6a"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#aeccdc821d0ba0d47935caed866931f6a">OnRtnOrderFill</a> (<a class="el" href="structSTRtnOrderFill.html">STRtnOrderFill</a> *p_pRtnOrderFill)</td></tr>
+<tr class="separator:aeccdc821d0ba0d47935caed866931f6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9959817d1712b1625e1e763f0ee9a10d" id="r_a9959817d1712b1625e1e763f0ee9a10d"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a9959817d1712b1625e1e763f0ee9a10d">OnOrderCredit</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspOrderCredit.html">STRspOrderCredit</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a9959817d1712b1625e1e763f0ee9a10d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ee6ef136ab2620d57906fe80b643f44" id="r_a3ee6ef136ab2620d57906fe80b643f44"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a3ee6ef136ab2620d57906fe80b643f44">OnRepay</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspRepay.html">STRspRepay</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a3ee6ef136ab2620d57906fe80b643f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1ae45235d5ad6111356fd19d4f2ef0f" id="r_ae1ae45235d5ad6111356fd19d4f2ef0f"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#ae1ae45235d5ad6111356fd19d4f2ef0f">OnQryHoldingCredit</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryHoldingCredit.html">STRspQryHoldingCredit</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:ae1ae45235d5ad6111356fd19d4f2ef0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e8a8af3acfda5b8fc7501bae551efb6" id="r_a2e8a8af3acfda5b8fc7501bae551efb6"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a2e8a8af3acfda5b8fc7501bae551efb6">OnQryUndlStkInfo</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryUndlStkInfo.html">STRspQryUndlStkInfo</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a2e8a8af3acfda5b8fc7501bae551efb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bf5625a6d339c096841d09ccda27330" id="r_a2bf5625a6d339c096841d09ccda27330"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a2bf5625a6d339c096841d09ccda27330">OnQryColStkInfo</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryColStkInfo.html">STRspQryColStkInfo</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a2bf5625a6d339c096841d09ccda27330"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80c5057628920be48f3e5681f5aec1d6" id="r_a80c5057628920be48f3e5681f5aec1d6"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a80c5057628920be48f3e5681f5aec1d6">OnQryContract</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryContract.html">STRspQryContract</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a80c5057628920be48f3e5681f5aec1d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fbd3536ebc45713e9b779cd1977f227" id="r_a4fbd3536ebc45713e9b779cd1977f227"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a4fbd3536ebc45713e9b779cd1977f227">OnQryCustDebts</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryCustDebts.html">STRspQryCustDebts</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a4fbd3536ebc45713e9b779cd1977f227"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac937b7aea87d6ce8890fa99a0f74a416" id="r_ac937b7aea87d6ce8890fa99a0f74a416"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#ac937b7aea87d6ce8890fa99a0f74a416">OnQryMktQuota</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryMktQuota.html">STRspQryMktQuota</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:ac937b7aea87d6ce8890fa99a0f74a416"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa237d67975b63e0204161f9ec9cc6049" id="r_aa237d67975b63e0204161f9ec9cc6049"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#aa237d67975b63e0204161f9ec9cc6049">OnQryIpoInfo</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryIpoInfo.html">STRspQryIpoInfo</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:aa237d67975b63e0204161f9ec9cc6049"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af16952845b0045b6359bbd501ae4c473" id="r_af16952845b0045b6359bbd501ae4c473"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#af16952845b0045b6359bbd501ae4c473">OnQryBankInfo</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryBankInfo.html">STRspQryBankInfo</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:af16952845b0045b6359bbd501ae4c473"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b8419c53127e0b0887c461569baf95c" id="r_a8b8419c53127e0b0887c461569baf95c"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a8b8419c53127e0b0887c461569baf95c">OnBankStkTrans</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspBankStkTrans.html">STRspBankStkTrans</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a8b8419c53127e0b0887c461569baf95c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac15df866b0fcb9640a5cd6ebefc4e0b" id="r_aac15df866b0fcb9640a5cd6ebefc4e0b"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#aac15df866b0fcb9640a5cd6ebefc4e0b">OnQryBankBalance</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryBankBalance.html">STRspQryBankBalance</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:aac15df866b0fcb9640a5cd6ebefc4e0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b5ccfb71117e3733ff2292b46e785c1" id="r_a8b5ccfb71117e3733ff2292b46e785c1"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a8b5ccfb71117e3733ff2292b46e785c1">OnQryBankStkTransInfo</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryBankStkTransInfo.html">STRspQryBankStkTransInfo</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a8b5ccfb71117e3733ff2292b46e785c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a782d21ba6caa428ca2de6ec2cd055a08" id="r_a782d21ba6caa428ca2de6ec2cd055a08"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a782d21ba6caa428ca2de6ec2cd055a08">OnModifyTradePwd</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspModifyTradePwd.html">STRspModifyTradePwd</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a782d21ba6caa428ca2de6ec2cd055a08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af20d5b82602ab4cac496cc307b23f567" id="r_af20d5b82602ab4cac496cc307b23f567"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#af20d5b82602ab4cac496cc307b23f567">OnModifyFundPwd</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspModifyFundPwd.html">STRspModifyFundPwd</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:af20d5b82602ab4cac496cc307b23f567"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8c4d9200a6f0730692700fa76a94871" id="r_ac8c4d9200a6f0730692700fa76a94871"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#ac8c4d9200a6f0730692700fa76a94871">OnQryRpcFund</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryRpcFund.html">STRspQryRpcFund</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:ac8c4d9200a6f0730692700fa76a94871"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7d6a177bf9ccafd0d0a656b342ee4c4" id="r_ac7d6a177bf9ccafd0d0a656b342ee4c4"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#ac7d6a177bf9ccafd0d0a656b342ee4c4">OnFundTransfer</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspFundTransfer.html">STRspFundTransfer</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:ac7d6a177bf9ccafd0d0a656b342ee4c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae274636e7ea30cd3b815e926fbe2aa62" id="r_ae274636e7ea30cd3b815e926fbe2aa62"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#ae274636e7ea30cd3b815e926fbe2aa62">OnQryBankAcct</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspQryBankAcct.html">STRspQryBankAcct</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:ae274636e7ea30cd3b815e926fbe2aa62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90cba5241c973f3b3b63083db95f3c89" id="r_a90cba5241c973f3b3b63083db95f3c89"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a90cba5241c973f3b3b63083db95f3c89">OnOrderOpt</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspOrderOpt.html">STRspOrderOpt</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a90cba5241c973f3b3b63083db95f3c89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a065c984d6a2c8b33b4071c15f1dc3f6f" id="r_a065c984d6a2c8b33b4071c15f1dc3f6f"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a065c984d6a2c8b33b4071c15f1dc3f6f">OnOptCancelOrder</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspOptCancelOrder.html">STRspOptCancelOrder</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a065c984d6a2c8b33b4071c15f1dc3f6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36f81a370cfda2fed4a0034e33086b7b" id="r_a36f81a370cfda2fed4a0034e33086b7b"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a36f81a370cfda2fed4a0034e33086b7b">OnOptQryMoney</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspOptQryMoney.html">STRspOptQryMoney</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a36f81a370cfda2fed4a0034e33086b7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0d77061b9e1e6ac70106f761cbe5867" id="r_af0d77061b9e1e6ac70106f761cbe5867"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#af0d77061b9e1e6ac70106f761cbe5867">OnOptQryHolding</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspOptQryHolding.html">STRspOptQryHolding</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:af0d77061b9e1e6ac70106f761cbe5867"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b72a0c508e172455600f9fe1e50cce6" id="r_a5b72a0c508e172455600f9fe1e50cce6"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a5b72a0c508e172455600f9fe1e50cce6">OnOptQryOrder</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspOptQryOrder.html">STRspOptQryOrder</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a5b72a0c508e172455600f9fe1e50cce6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37271260b8c8e6b656aec1d234a7c5e5" id="r_a37271260b8c8e6b656aec1d234a7c5e5"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#a37271260b8c8e6b656aec1d234a7c5e5">OnOptQryFill</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspOptQryFill.html">STRspOptQryFill</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:a37271260b8c8e6b656aec1d234a7c5e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab382429d20238e95fa4d5dfaa49609d2" id="r_ab382429d20238e95fa4d5dfaa49609d2"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCTradeCallback.html#ab382429d20238e95fa4d5dfaa49609d2">OnOptQryWithdrawableOrder</a> (<a class="el" href="structSTFirstSet.html">STFirstSet</a> *p_pFirstSet, <a class="el" href="structSTRspOptQryWithdrawableOrder.html">STRspOptQryWithdrawableOrder</a> *p_pRsp, <a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a> p_llReqId, int p_iNum)</td></tr>
+<tr class="separator:ab382429d20238e95fa4d5dfaa49609d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classCBaseCallback"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classCBaseCallback')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classCBaseCallback.html">CBaseCallback</a></td></tr>
+<tr class="memitem:a71e21bfa102331762ef997dd1e555e8f inherit pub_methods_classCBaseCallback" id="r_a71e21bfa102331762ef997dd1e555e8f"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCBaseCallback.html#a71e21bfa102331762ef997dd1e555e8f">OnConnected</a> (void)=0</td></tr>
+<tr class="separator:a71e21bfa102331762ef997dd1e555e8f inherit pub_methods_classCBaseCallback"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30b6f58d5c2111a9308317b5a5c3a733 inherit pub_methods_classCBaseCallback" id="r_a30b6f58d5c2111a9308317b5a5c3a733"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCBaseCallback.html#a30b6f58d5c2111a9308317b5a5c3a733">OnDisconnected</a> (int p_nReason, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *p_pszErrInfo)=0</td></tr>
+<tr class="separator:a30b6f58d5c2111a9308317b5a5c3a733 inherit pub_methods_classCBaseCallback"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock">
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00008">8</a> 行定义.</p>
+</div><h2 class="groupheader">成员函数说明</h2>
+<a id="a33dc62c86e1d12864f716120cded3466" name="a33dc62c86e1d12864f716120cded3466"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33dc62c86e1d12864f716120cded3466">&#9670;&#160;</a></span>OnAcctRegister()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnAcctRegister </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspAcctRegister.html">STRspAcctRegister</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00039">39</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8b8419c53127e0b0887c461569baf95c" name="a8b8419c53127e0b0887c461569baf95c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b8419c53127e0b0887c461569baf95c">&#9670;&#160;</a></span>OnBankStkTrans()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnBankStkTrans </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspBankStkTrans.html">STRspBankStkTrans</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00086">86</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aabece312d26c3b18fb4f72364a0703d6" name="aabece312d26c3b18fb4f72364a0703d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aabece312d26c3b18fb4f72364a0703d6">&#9670;&#160;</a></span>OnCancelOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnCancelOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspCancelOrder.html">STRspCancelOrder</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00015">15</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac7d6a177bf9ccafd0d0a656b342ee4c4" name="ac7d6a177bf9ccafd0d0a656b342ee4c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7d6a177bf9ccafd0d0a656b342ee4c4">&#9670;&#160;</a></span>OnFundTransfer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnFundTransfer </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspFundTransfer.html">STRspFundTransfer</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00104">104</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adce4b891b27ca1d6750d3186b70a33b2" name="adce4b891b27ca1d6750d3186b70a33b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adce4b891b27ca1d6750d3186b70a33b2">&#9670;&#160;</a></span>OnLogin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnLogin </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspLogin.html">STRspLogin</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00045">45</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af1e0c3763a06b3fabab2c921918e3dbd" name="af1e0c3763a06b3fabab2c921918e3dbd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1e0c3763a06b3fabab2c921918e3dbd">&#9670;&#160;</a></span>OnMaxTradeQty()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnMaxTradeQty </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspMaxTradeQty.html">STRspMaxTradeQty</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00018">18</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af20d5b82602ab4cac496cc307b23f567" name="af20d5b82602ab4cac496cc307b23f567"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af20d5b82602ab4cac496cc307b23f567">&#9670;&#160;</a></span>OnModifyFundPwd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnModifyFundPwd </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspModifyFundPwd.html">STRspModifyFundPwd</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00098">98</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a782d21ba6caa428ca2de6ec2cd055a08" name="a782d21ba6caa428ca2de6ec2cd055a08"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a782d21ba6caa428ca2de6ec2cd055a08">&#9670;&#160;</a></span>OnModifyTradePwd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnModifyTradePwd </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspModifyTradePwd.html">STRspModifyTradePwd</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00095">95</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a065c984d6a2c8b33b4071c15f1dc3f6f" name="a065c984d6a2c8b33b4071c15f1dc3f6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a065c984d6a2c8b33b4071c15f1dc3f6f">&#9670;&#160;</a></span>OnOptCancelOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnOptCancelOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspOptCancelOrder.html">STRspOptCancelOrder</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00114">114</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a37271260b8c8e6b656aec1d234a7c5e5" name="a37271260b8c8e6b656aec1d234a7c5e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37271260b8c8e6b656aec1d234a7c5e5">&#9670;&#160;</a></span>OnOptQryFill()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnOptQryFill </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspOptQryFill.html">STRspOptQryFill</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00126">126</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af0d77061b9e1e6ac70106f761cbe5867" name="af0d77061b9e1e6ac70106f761cbe5867"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0d77061b9e1e6ac70106f761cbe5867">&#9670;&#160;</a></span>OnOptQryHolding()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnOptQryHolding </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspOptQryHolding.html">STRspOptQryHolding</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00120">120</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a36f81a370cfda2fed4a0034e33086b7b" name="a36f81a370cfda2fed4a0034e33086b7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36f81a370cfda2fed4a0034e33086b7b">&#9670;&#160;</a></span>OnOptQryMoney()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnOptQryMoney </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspOptQryMoney.html">STRspOptQryMoney</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00117">117</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5b72a0c508e172455600f9fe1e50cce6" name="a5b72a0c508e172455600f9fe1e50cce6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b72a0c508e172455600f9fe1e50cce6">&#9670;&#160;</a></span>OnOptQryOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnOptQryOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspOptQryOrder.html">STRspOptQryOrder</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00123">123</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab382429d20238e95fa4d5dfaa49609d2" name="ab382429d20238e95fa4d5dfaa49609d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab382429d20238e95fa4d5dfaa49609d2">&#9670;&#160;</a></span>OnOptQryWithdrawableOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnOptQryWithdrawableOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspOptQryWithdrawableOrder.html">STRspOptQryWithdrawableOrder</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00129">129</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a72a34f4845b210947a0af90619ccc560" name="a72a34f4845b210947a0af90619ccc560"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72a34f4845b210947a0af90619ccc560">&#9670;&#160;</a></span>OnOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspOrder.html">STRspOrder</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00012">12</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9959817d1712b1625e1e763f0ee9a10d" name="a9959817d1712b1625e1e763f0ee9a10d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9959817d1712b1625e1e763f0ee9a10d">&#9670;&#160;</a></span>OnOrderCredit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnOrderCredit </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspOrderCredit.html">STRspOrderCredit</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00055">55</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a90cba5241c973f3b3b63083db95f3c89" name="a90cba5241c973f3b3b63083db95f3c89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90cba5241c973f3b3b63083db95f3c89">&#9670;&#160;</a></span>OnOrderOpt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnOrderOpt </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspOrderOpt.html">STRspOrderOpt</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00111">111</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae274636e7ea30cd3b815e926fbe2aa62" name="ae274636e7ea30cd3b815e926fbe2aa62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae274636e7ea30cd3b815e926fbe2aa62">&#9670;&#160;</a></span>OnQryBankAcct()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryBankAcct </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryBankAcct.html">STRspQryBankAcct</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00107">107</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aac15df866b0fcb9640a5cd6ebefc4e0b" name="aac15df866b0fcb9640a5cd6ebefc4e0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac15df866b0fcb9640a5cd6ebefc4e0b">&#9670;&#160;</a></span>OnQryBankBalance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryBankBalance </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryBankBalance.html">STRspQryBankBalance</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00089">89</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af16952845b0045b6359bbd501ae4c473" name="af16952845b0045b6359bbd501ae4c473"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af16952845b0045b6359bbd501ae4c473">&#9670;&#160;</a></span>OnQryBankInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryBankInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryBankInfo.html">STRspQryBankInfo</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00083">83</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8b5ccfb71117e3733ff2292b46e785c1" name="a8b5ccfb71117e3733ff2292b46e785c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b5ccfb71117e3733ff2292b46e785c1">&#9670;&#160;</a></span>OnQryBankStkTransInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryBankStkTransInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryBankStkTransInfo.html">STRspQryBankStkTransInfo</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00092">92</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2bf5625a6d339c096841d09ccda27330" name="a2bf5625a6d339c096841d09ccda27330"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2bf5625a6d339c096841d09ccda27330">&#9670;&#160;</a></span>OnQryColStkInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryColStkInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryColStkInfo.html">STRspQryColStkInfo</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00067">67</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a80c5057628920be48f3e5681f5aec1d6" name="a80c5057628920be48f3e5681f5aec1d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80c5057628920be48f3e5681f5aec1d6">&#9670;&#160;</a></span>OnQryContract()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryContract </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryContract.html">STRspQryContract</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00070">70</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4fbd3536ebc45713e9b779cd1977f227" name="a4fbd3536ebc45713e9b779cd1977f227"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4fbd3536ebc45713e9b779cd1977f227">&#9670;&#160;</a></span>OnQryCustDebts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryCustDebts </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryCustDebts.html">STRspQryCustDebts</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00073">73</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7bb7dc63d4c362e5d86e2db9b1758787" name="a7bb7dc63d4c362e5d86e2db9b1758787"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7bb7dc63d4c362e5d86e2db9b1758787">&#9670;&#160;</a></span>OnQryFill()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryFill </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryFill.html">STRspQryFill</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00024">24</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9765fd91b62eabf7926a453fc0f86afa" name="a9765fd91b62eabf7926a453fc0f86afa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9765fd91b62eabf7926a453fc0f86afa">&#9670;&#160;</a></span>OnQryHolder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryHolder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryHolder.html">STRspQryHolder</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00033">33</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0b445a427e5d0a7fc9dfb519e8e2e425" name="a0b445a427e5d0a7fc9dfb519e8e2e425"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b445a427e5d0a7fc9dfb519e8e2e425">&#9670;&#160;</a></span>OnQryHolding()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryHolding </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryHolding.html">STRspQryHolding</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00021">21</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae1ae45235d5ad6111356fd19d4f2ef0f" name="ae1ae45235d5ad6111356fd19d4f2ef0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1ae45235d5ad6111356fd19d4f2ef0f">&#9670;&#160;</a></span>OnQryHoldingCredit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryHoldingCredit </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryHoldingCredit.html">STRspQryHoldingCredit</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00061">61</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa237d67975b63e0204161f9ec9cc6049" name="aa237d67975b63e0204161f9ec9cc6049"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa237d67975b63e0204161f9ec9cc6049">&#9670;&#160;</a></span>OnQryIpoInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryIpoInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryIpoInfo.html">STRspQryIpoInfo</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00080">80</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac937b7aea87d6ce8890fa99a0f74a416" name="ac937b7aea87d6ce8890fa99a0f74a416"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac937b7aea87d6ce8890fa99a0f74a416">&#9670;&#160;</a></span>OnQryMktQuota()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryMktQuota </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryMktQuota.html">STRspQryMktQuota</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00077">77</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a67be9cf5bf051967f7da47d1a1e63618" name="a67be9cf5bf051967f7da47d1a1e63618"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67be9cf5bf051967f7da47d1a1e63618">&#9670;&#160;</a></span>OnQryMoney()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryMoney </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryMoney.html">STRspQryMoney</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00027">27</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a81709dd180549d025d0501d9cbee1be2" name="a81709dd180549d025d0501d9cbee1be2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81709dd180549d025d0501d9cbee1be2">&#9670;&#160;</a></span>OnQryOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryOrder.html">STRspQryOrder</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00030">30</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac8c4d9200a6f0730692700fa76a94871" name="ac8c4d9200a6f0730692700fa76a94871"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8c4d9200a6f0730692700fa76a94871">&#9670;&#160;</a></span>OnQryRpcFund()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryRpcFund </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryRpcFund.html">STRspQryRpcFund</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00101">101</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2e8a8af3acfda5b8fc7501bae551efb6" name="a2e8a8af3acfda5b8fc7501bae551efb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e8a8af3acfda5b8fc7501bae551efb6">&#9670;&#160;</a></span>OnQryUndlStkInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryUndlStkInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryUndlStkInfo.html">STRspQryUndlStkInfo</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00064">64</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7e8e48d0b32bcb2e0e7dfc4b724bbac1" name="a7e8e48d0b32bcb2e0e7dfc4b724bbac1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e8e48d0b32bcb2e0e7dfc4b724bbac1">&#9670;&#160;</a></span>OnQryWithdrawableOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnQryWithdrawableOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspQryWithdrawableOrder.html">STRspQryWithdrawableOrder</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00036">36</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3ee6ef136ab2620d57906fe80b643f44" name="a3ee6ef136ab2620d57906fe80b643f44"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ee6ef136ab2620d57906fe80b643f44">&#9670;&#160;</a></span>OnRepay()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnRepay </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspRepay.html">STRspRepay</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00058">58</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a58aeb1796ce022967fc5da3c67e8052c" name="a58aeb1796ce022967fc5da3c67e8052c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58aeb1796ce022967fc5da3c67e8052c">&#9670;&#160;</a></span>OnRtnOrderConfirm()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnRtnOrderConfirm </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTRtnOrderConfirm.html">STRtnOrderConfirm</a> *&#160;</td>
+          <td class="paramname"><em>p_pRtnOrderConfirm</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00048">48</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aeccdc821d0ba0d47935caed866931f6a" name="aeccdc821d0ba0d47935caed866931f6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeccdc821d0ba0d47935caed866931f6a">&#9670;&#160;</a></span>OnRtnOrderFill()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnRtnOrderFill </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTRtnOrderFill.html">STRtnOrderFill</a> *&#160;</td>
+          <td class="paramname"><em>p_pRtnOrderFill</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00051">51</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a69471067746e5cc08d0be3f374ab8977" name="a69471067746e5cc08d0be3f374ab8977"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69471067746e5cc08d0be3f374ab8977">&#9670;&#160;</a></span>OnTradeLogin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int CTradeCallback::OnTradeLogin </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structSTFirstSet.html">STFirstSet</a> *&#160;</td>
+          <td class="paramname"><em>p_pFirstSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structSTRspTradeLogin.html">STRspTradeLogin</a> *&#160;</td>
+          <td class="paramname"><em>p_pRsp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="maCliTradeApi_8h.html#af559a7ae68520d96f21d0655d6792508">LONGLONG</a>&#160;</td>
+          <td class="paramname"><em>p_llReqId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>p_iNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="tradeApi_8h_source.html">tradeApi.h</a> 第 <a class="el" href="tradeApi_8h_source.html#l00042">42</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/API/zsTradeApi1.6.0/include/<a class="el" href="tradeApi_8h_source.html">tradeApi.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classCTradeCallback.html">CTradeCallback</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

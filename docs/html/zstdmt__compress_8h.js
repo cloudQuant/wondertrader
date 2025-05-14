@@ -1,0 +1,38 @@
+var zstdmt__compress_8h =
+[
+    [ "ZSTD_STATIC_LINKING_ONLY", "zstdmt__compress_8h.html#ad88034c8350c3d479ce0db09fd8ee0c8", null ],
+    [ "ZSTDMT_API", "zstdmt__compress_8h.html#aa83aab62586ce114e6d59a8e3ce3ddcb", null ],
+    [ "ZSTDMT_JOBLOG_MAX", "zstdmt__compress_8h.html#a73b95d412674fc28c09614a65dd5d235", null ],
+    [ "ZSTDMT_JOBSIZE_MAX", "zstdmt__compress_8h.html#a0921c36729f41f35f3d5418dfcb7f813", null ],
+    [ "ZSTDMT_JOBSIZE_MIN", "zstdmt__compress_8h.html#a37af7fecd05e763718e0e3088871e68c", null ],
+    [ "ZSTDMT_NBWORKERS_MAX", "zstdmt__compress_8h.html#acb964b940e15f616ee51c8be7580af5e", null ],
+    [ "ZSTDMT_CCtx", "zstdmt__compress_8h.html#a619f9290ef97378708f798836ee7399e", null ],
+    [ "ZSTDMT_parameter", "zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292", [
+      [ "ZSTDMT_p_jobSize", "zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292a0df4dc819edfaa7417f5753f525d9c5f", null ],
+      [ "ZSTDMT_p_overlapLog", "zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292ae4adc3c2a8789d2253436c9a95a1b926", null ],
+      [ "ZSTDMT_p_rsyncable", "zstdmt__compress_8h.html#acdbfb6a061ef26d5ed5b7464018ac292af0fa6ce22b922da2b689e611b6eda030", null ]
+    ] ],
+    [ "ZSTDMT_CCtxParam_setMTCtxParameter", "zstdmt__compress_8h.html#a8145b29a95f86ea0ff1339828aa0af79", null ],
+    [ "ZSTDMT_CCtxParam_setNbWorkers", "zstdmt__compress_8h.html#a0c85d0dbbec85b437b17c99f05ba7305", null ],
+    [ "ZSTDMT_compress_advanced", "zstdmt__compress_8h.html#af0a69ac896a16e0067d13795d24eef51", null ],
+    [ "ZSTDMT_compressCCtx", "zstdmt__compress_8h.html#a57c817805b238376808633d7a82239a7", null ],
+    [ "ZSTDMT_compressStream", "zstdmt__compress_8h.html#ae726d7f3f8f256725fc9cb39fd7fbf3e", null ],
+    [ "ZSTDMT_compressStream_generic", "zstdmt__compress_8h.html#a4d1371f4622b793fe908110db6f0570e", null ],
+    [ "ZSTDMT_createCCtx", "zstdmt__compress_8h.html#ae18242a55eba4c064568fc1870b238ef", null ],
+    [ "ZSTDMT_createCCtx_advanced", "zstdmt__compress_8h.html#a48d6036ab97516bc9b43b61ee98e9a04", null ],
+    [ "ZSTDMT_endStream", "zstdmt__compress_8h.html#a7a8bc34ab46cf96f3e99e285d78f64c5", null ],
+    [ "ZSTDMT_flushStream", "zstdmt__compress_8h.html#aae6ce3d8e55c2381970882557796cc5c", null ],
+    [ "ZSTDMT_freeCCtx", "zstdmt__compress_8h.html#af0beb81dbf97eb2ae20099d7c6c42490", null ],
+    [ "ZSTDMT_getFrameProgression", "zstdmt__compress_8h.html#a3c822c10aa6f503cebf7e35746b7c206", null ],
+    [ "ZSTDMT_getMTCtxParameter", "zstdmt__compress_8h.html#a9312cb77a08205f0eb32e1520728af3e", null ],
+    [ "ZSTDMT_initCStream", "zstdmt__compress_8h.html#ab06c65c1d4221b3bd615580cf89f116d", null ],
+    [ "ZSTDMT_initCStream_advanced", "zstdmt__compress_8h.html#aa6a29ccb53d84380f115d4a40d7b63fa", null ],
+    [ "ZSTDMT_initCStream_internal", "zstdmt__compress_8h.html#af2842d56cf98c331f0a34193ffad05c9", null ],
+    [ "ZSTDMT_initCStream_usingCDict", "zstdmt__compress_8h.html#a5ac8e2749245e955438710e69f6808b0", null ],
+    [ "ZSTDMT_nextInputSizeHint", "zstdmt__compress_8h.html#a403e08428d4166af7856caf153696b33", null ],
+    [ "ZSTDMT_resetCStream", "zstdmt__compress_8h.html#afc7dd9131444278b60a3dfbb3a37c3ee", null ],
+    [ "ZSTDMT_setMTCtxParameter", "zstdmt__compress_8h.html#a20d2126232a4b6c4d1e760843b0432af", null ],
+    [ "ZSTDMT_sizeof_CCtx", "zstdmt__compress_8h.html#aec9f7b7029733b36190bd93fece111c5", null ],
+    [ "ZSTDMT_toFlushNow", "zstdmt__compress_8h.html#a0d200c4c6b7a3c7a045a181dfa29c322", null ],
+    [ "ZSTDMT_updateCParams_whileCompressing", "zstdmt__compress_8h.html#a3f5723a37881527037ffcdfbc157c121", null ]
+];

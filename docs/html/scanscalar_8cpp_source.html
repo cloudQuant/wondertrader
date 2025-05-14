@@ -1,0 +1,409 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/scanscalar.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('scanscalar_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">scanscalar.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="scanscalar_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#include &quot;<a class="code" href="scanscalar_8h.html">scanscalar.h</a>&quot;</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;<a class="code" href="exp_8h.html">exp.h</a>&quot;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;<a class="code" href="regeximpl_8h.html">regeximpl.h</a>&quot;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="stream_8h.html">stream.h</a>&quot;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;<a class="code" href="exceptions_8h.html">yaml-cpp/exceptions.h</a>&quot;</span>  <span class="comment">// IWYU pragma: keep</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceYAML.html">YAML</a> {</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// ScanScalar</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// . This is where the scalar magic happens.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">// . We do the scanning in three phases:</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">//   1. Scan until newline</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">//   2. Eat newline</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">//   3. Scan leading blanks.</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">//</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">// . Depending on the parameters given, we store or stop</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">//   and different places in the above flow.</span></div>
+<div class="foldopen" id="foldopen00021" data-start="{" data-end="}">
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="namespaceYAML.html#a7379ec57fc0e2d7647f1dd7a0dc7ba1e">   21</a></span>std::string <a class="code hl_function" href="namespaceYAML.html#a7379ec57fc0e2d7647f1dd7a0dc7ba1e">ScanScalar</a>(<a class="code hl_class" href="classYAML_1_1Stream.html">Stream</a>&amp; INPUT, <a class="code hl_struct" href="structYAML_1_1ScanScalarParams.html">ScanScalarParams</a>&amp; params) {</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>  <span class="keywordtype">bool</span> foundNonEmptyLine = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  <span class="keywordtype">bool</span> pastOpeningBreak = (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a708a9b04a78a52165a89f42559554dba">fold</a> == <a class="code hl_enumvalue" href="namespaceYAML.html#a3660a77a9a6a5d6e4286899fb2ea5745a0948fb35a37ca78b929b706b4c811c59">FOLD_FLOW</a>);</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>  <span class="keywordtype">bool</span> emptyLine = <span class="keyword">false</span>, moreIndented = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  <span class="keywordtype">int</span> foldedNewlineCount = 0;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <span class="keywordtype">bool</span> foldedNewlineStartedMoreIndented = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>  std::size_t lastEscapedChar = std::string::npos;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  std::string scalar;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a7961b5d274ce8d94e49b63c68f03cebc">leadingSpaces</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  <span class="keywordflow">if</span> (!params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a5d2356c55f632fadf69b26a15580f02f">end</a>) {</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a5d2356c55f632fadf69b26a15580f02f">end</a> = &amp;<a class="code hl_function" href="namespaceYAML_1_1Exp.html#aade8b9d3bb19689aae8a5f753e9ccac1">Exp::Empty</a>();</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  }</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  <span class="keywordflow">while</span> (INPUT) {</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="comment">// ********************************</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="comment">// Phase #1: scan until line ending</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    std::size_t lastNonWhitespaceChar = scalar.size();</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordtype">bool</span> escapedNewline = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordflow">while</span> (!params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a5d2356c55f632fadf69b26a15580f02f">end</a>-&gt;<a class="code hl_function" href="classYAML_1_1RegEx.html#a7a09aef4713985c80b4d1a1f17d57feb">Matches</a>(INPUT) &amp;&amp; !<a class="code hl_function" href="namespaceYAML_1_1Exp.html#ab1e6157d2a1614c1e01d55534e04bd27">Exp::Break</a>().<a class="code hl_function" href="classYAML_1_1RegEx.html#a7a09aef4713985c80b4d1a1f17d57feb">Matches</a>(INPUT)) {</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>      <span class="keywordflow">if</span> (!INPUT) {</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>      }</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>      <span class="comment">// document indicator?</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>      <span class="keywordflow">if</span> (INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#a5bf908c973c4ca1969e69c051ba8a33f">column</a>() == 0 &amp;&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a522f525a7c9c4233a4e8281141aa5f5d">Exp::DocIndicator</a>().<a class="code hl_function" href="classYAML_1_1RegEx.html#a7a09aef4713985c80b4d1a1f17d57feb">Matches</a>(INPUT)) {</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keywordflow">if</span> (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#abdd28911284a2e3bdd3192f2f631b1a5">onDocIndicator</a> == <a class="code hl_enumvalue" href="namespaceYAML.html#afebe2c8ae8d2681a7fe8a4a74793758ba1bd8e71d5e7f9dfa3c5b0900ee4324e8">BREAK</a>) {</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>          <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        }</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        <span class="keywordflow">if</span> (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#abdd28911284a2e3bdd3192f2f631b1a5">onDocIndicator</a> == <a class="code hl_enumvalue" href="namespaceYAML.html#afebe2c8ae8d2681a7fe8a4a74793758bad47bfbba4bed9c574c4c1c036ada4cd3">THROW</a>) {</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>          <span class="keywordflow">throw</span> <a class="code hl_class" href="classYAML_1_1ParserException.html">ParserException</a>(INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#a1984b6def1e7f09e8be1e2ded43e7c22">mark</a>(), <a class="code hl_variable" href="namespaceYAML_1_1ErrorMsg.html#aa443defd689a9a069efdd44392253d13">ErrorMsg::DOC_IN_SCALAR</a>);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        }</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>      }</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>      foundNonEmptyLine = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>      pastOpeningBreak = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>      <span class="comment">// escaped newline? (only if we&#39;re escaping on slash)</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>      <span class="keywordflow">if</span> (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#aebdfc73fd5936c75cb19c7d7116857ac">escape</a> == <span class="charliteral">&#39;\\&#39;</span> &amp;&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a8d600528e1015584916dc6593f62545a">Exp::EscBreak</a>().<a class="code hl_function" href="classYAML_1_1RegEx.html#a7a09aef4713985c80b4d1a1f17d57feb">Matches</a>(INPUT)) {</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        <span class="comment">// eat escape character and get out (but preserve trailing whitespace!)</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#a98a6753995450fd1af5b9069da66e3a5">get</a>();</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        lastNonWhitespaceChar = scalar.size();</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        lastEscapedChar = scalar.size();</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        escapedNewline = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>      }</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>      <span class="comment">// escape this?</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>      <span class="keywordflow">if</span> (INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#ab131746d2a9bb7bf8ab8765d16445fbc">peek</a>() == params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#aebdfc73fd5936c75cb19c7d7116857ac">escape</a>) {</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        scalar += <a class="code hl_function" href="namespaceYAML_1_1Exp.html#aa0420fb20a465d5981e56a271e16b58e">Exp::Escape</a>(INPUT);</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        lastNonWhitespaceChar = scalar.size();</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        lastEscapedChar = scalar.size();</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>      }</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>      <span class="comment">// otherwise, just add the damn character</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>      <span class="keywordtype">char</span> ch = INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#a98a6753995450fd1af5b9069da66e3a5">get</a>();</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>      scalar += ch;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>      <span class="keywordflow">if</span> (ch != <span class="charliteral">&#39; &#39;</span> &amp;&amp; ch != <span class="charliteral">&#39;\t&#39;</span>) {</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        lastNonWhitespaceChar = scalar.size();</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>      }</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    }</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="comment">// eof? if we&#39;re looking to eat something, then we throw</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keywordflow">if</span> (!INPUT) {</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>      <span class="keywordflow">if</span> (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a792aec4ff6d8e3552bfb9f6a7003d877">eatEnd</a>) {</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        <span class="keywordflow">throw</span> <a class="code hl_class" href="classYAML_1_1ParserException.html">ParserException</a>(INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#a1984b6def1e7f09e8be1e2ded43e7c22">mark</a>(), <a class="code hl_variable" href="namespaceYAML_1_1ErrorMsg.html#ad034e48a4f09b9dfef55b0a6ff319074">ErrorMsg::EOF_IN_SCALAR</a>);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>      }</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    }</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="comment">// doc indicator?</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keywordflow">if</span> (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#abdd28911284a2e3bdd3192f2f631b1a5">onDocIndicator</a> == <a class="code hl_enumvalue" href="namespaceYAML.html#afebe2c8ae8d2681a7fe8a4a74793758ba1bd8e71d5e7f9dfa3c5b0900ee4324e8">BREAK</a> &amp;&amp; INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#a5bf908c973c4ca1969e69c051ba8a33f">column</a>() == 0 &amp;&amp;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a522f525a7c9c4233a4e8281141aa5f5d">Exp::DocIndicator</a>().<a class="code hl_function" href="classYAML_1_1RegEx.html#a7a09aef4713985c80b4d1a1f17d57feb">Matches</a>(INPUT)) {</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    }</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <span class="comment">// are we done via character match?</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="keywordtype">int</span> n = params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a5d2356c55f632fadf69b26a15580f02f">end</a>-&gt;<a class="code hl_function" href="classYAML_1_1RegEx.html#aec5a2989ce40d29a7ff9041943a957cf">Match</a>(INPUT);</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <span class="keywordflow">if</span> (n &gt;= 0) {</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>      <span class="keywordflow">if</span> (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a792aec4ff6d8e3552bfb9f6a7003d877">eatEnd</a>) {</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#ac79171e6d96a34e9edde03edbc6c3e2e">eat</a>(n);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>      }</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    }</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="comment">// do we remove trailing whitespace?</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keywordflow">if</span> (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a708a9b04a78a52165a89f42559554dba">fold</a> == <a class="code hl_enumvalue" href="namespaceYAML.html#a3660a77a9a6a5d6e4286899fb2ea5745a0948fb35a37ca78b929b706b4c811c59">FOLD_FLOW</a>)</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>      scalar.erase(lastNonWhitespaceChar);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <span class="comment">// ********************************</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <span class="comment">// Phase #2: eat line ending</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    n = <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ab1e6157d2a1614c1e01d55534e04bd27">Exp::Break</a>().<a class="code hl_function" href="classYAML_1_1RegEx.html#aec5a2989ce40d29a7ff9041943a957cf">Match</a>(INPUT);</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#ac79171e6d96a34e9edde03edbc6c3e2e">eat</a>(n);</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="comment">// ********************************</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="comment">// Phase #3: scan initial spaces</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="comment">// first the required indentation</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="keywordflow">while</span> (INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#ab131746d2a9bb7bf8ab8765d16445fbc">peek</a>() == <span class="charliteral">&#39; &#39;</span> &amp;&amp;</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>           (INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#a5bf908c973c4ca1969e69c051ba8a33f">column</a>() &lt; params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a3167ea3f80a79b765ade4de111c1ed2b">indent</a> ||</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>            (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a601811289f94ffbb9a625a09218ad5d6">detectIndent</a> &amp;&amp; !foundNonEmptyLine)) &amp;&amp;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>           !params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a5d2356c55f632fadf69b26a15580f02f">end</a>-&gt;<a class="code hl_function" href="classYAML_1_1RegEx.html#a7a09aef4713985c80b4d1a1f17d57feb">Matches</a>(INPUT)) {</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>      INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#ac79171e6d96a34e9edde03edbc6c3e2e">eat</a>(1);</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    }</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="comment">// update indent if we&#39;re auto-detecting</span></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="keywordflow">if</span> (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a601811289f94ffbb9a625a09218ad5d6">detectIndent</a> &amp;&amp; !foundNonEmptyLine) {</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>      params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a3167ea3f80a79b765ade4de111c1ed2b">indent</a> = std::max(params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a3167ea3f80a79b765ade4de111c1ed2b">indent</a>, INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#a5bf908c973c4ca1969e69c051ba8a33f">column</a>());</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    }</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="comment">// and then the rest of the whitespace</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="keywordflow">while</span> (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#ac45c26954df2218a5b38e3f2a9e230a7">Exp::Blank</a>().Matches(INPUT)) {</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>      <span class="comment">// we check for tabs that masquerade as indentation</span></div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>      <span class="keywordflow">if</span> (INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#ab131746d2a9bb7bf8ab8765d16445fbc">peek</a>() == <span class="charliteral">&#39;\t&#39;</span> &amp;&amp; INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#a5bf908c973c4ca1969e69c051ba8a33f">column</a>() &lt; params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a3167ea3f80a79b765ade4de111c1ed2b">indent</a> &amp;&amp;</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>          params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a48efaf7868fbd6661cf3490705b9e91b">onTabInIndentation</a> == <a class="code hl_enumvalue" href="namespaceYAML.html#afebe2c8ae8d2681a7fe8a4a74793758bad47bfbba4bed9c574c4c1c036ada4cd3">THROW</a>) {</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>        <span class="keywordflow">throw</span> <a class="code hl_class" href="classYAML_1_1ParserException.html">ParserException</a>(INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#a1984b6def1e7f09e8be1e2ded43e7c22">mark</a>(), <a class="code hl_variable" href="namespaceYAML_1_1ErrorMsg.html#a4a1f80e85526488a47d0aec400985ba1">ErrorMsg::TAB_IN_INDENTATION</a>);</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>      }</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>      <span class="keywordflow">if</span> (!params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#acc6f018805bcd7698f346b1201274c32">eatLeadingWhitespace</a>) {</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>      }</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>      <span class="keywordflow">if</span> (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a5d2356c55f632fadf69b26a15580f02f">end</a>-&gt;<a class="code hl_function" href="classYAML_1_1RegEx.html#a7a09aef4713985c80b4d1a1f17d57feb">Matches</a>(INPUT)) {</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>      }</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>      INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#ac79171e6d96a34e9edde03edbc6c3e2e">eat</a>(1);</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    }</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    <span class="comment">// was this an empty line?</span></div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    <span class="keywordtype">bool</span> nextEmptyLine = <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ab1e6157d2a1614c1e01d55534e04bd27">Exp::Break</a>().<a class="code hl_function" href="classYAML_1_1RegEx.html#a7a09aef4713985c80b4d1a1f17d57feb">Matches</a>(INPUT);</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <span class="keywordtype">bool</span> nextMoreIndented = <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ac45c26954df2218a5b38e3f2a9e230a7">Exp::Blank</a>().<a class="code hl_function" href="classYAML_1_1RegEx.html#a7a09aef4713985c80b4d1a1f17d57feb">Matches</a>(INPUT);</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    <span class="keywordflow">if</span> (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a708a9b04a78a52165a89f42559554dba">fold</a> == <a class="code hl_enumvalue" href="namespaceYAML.html#a3660a77a9a6a5d6e4286899fb2ea5745a8fc350077651ea88912a5eaba4f44409">FOLD_BLOCK</a> &amp;&amp; foldedNewlineCount == 0 &amp;&amp; nextEmptyLine)</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>      foldedNewlineStartedMoreIndented = moreIndented;</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    <span class="comment">// for block scalars, we always start with a newline, so we should ignore it</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="comment">// (not fold or keep)</span></div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    <span class="keywordflow">if</span> (pastOpeningBreak) {</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>      <span class="keywordflow">switch</span> (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a708a9b04a78a52165a89f42559554dba">fold</a>) {</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="namespaceYAML.html#a3660a77a9a6a5d6e4286899fb2ea5745a7df96b2695b9b2ba6795e44336c8b18e">DONT_FOLD</a>:</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>          scalar += <span class="stringliteral">&quot;\n&quot;</span>;</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>          <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="namespaceYAML.html#a3660a77a9a6a5d6e4286899fb2ea5745a8fc350077651ea88912a5eaba4f44409">FOLD_BLOCK</a>:</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>          <span class="keywordflow">if</span> (!emptyLine &amp;&amp; !nextEmptyLine &amp;&amp; !moreIndented &amp;&amp;</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>              !nextMoreIndented &amp;&amp; INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#a5bf908c973c4ca1969e69c051ba8a33f">column</a>() &gt;= params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a3167ea3f80a79b765ade4de111c1ed2b">indent</a>) {</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>            scalar += <span class="stringliteral">&quot; &quot;</span>;</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>          } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (nextEmptyLine) {</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>            foldedNewlineCount++;</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>          } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>            scalar += <span class="stringliteral">&quot;\n&quot;</span>;</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>          }</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>          <span class="keywordflow">if</span> (!nextEmptyLine &amp;&amp; foldedNewlineCount &gt; 0) {</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>            scalar += std::string(foldedNewlineCount - 1, <span class="charliteral">&#39;\n&#39;</span>);</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>            <span class="keywordflow">if</span> (foldedNewlineStartedMoreIndented ||</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>                nextMoreIndented | !foundNonEmptyLine) {</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>              scalar += <span class="stringliteral">&quot;\n&quot;</span>;</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>            }</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>            foldedNewlineCount = 0;</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>          }</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>          <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="namespaceYAML.html#a3660a77a9a6a5d6e4286899fb2ea5745a0948fb35a37ca78b929b706b4c811c59">FOLD_FLOW</a>:</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>          <span class="keywordflow">if</span> (nextEmptyLine) {</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>            scalar += <span class="stringliteral">&quot;\n&quot;</span>;</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>          } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!emptyLine &amp;&amp; !escapedNewline) {</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>            scalar += <span class="stringliteral">&quot; &quot;</span>;</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>          }</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>          <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>      }</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    }</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    emptyLine = nextEmptyLine;</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    moreIndented = nextMoreIndented;</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    pastOpeningBreak = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span> </div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    <span class="comment">// are we done via indentation?</span></div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    <span class="keywordflow">if</span> (!emptyLine &amp;&amp; INPUT.<a class="code hl_function" href="classYAML_1_1Stream.html#a5bf908c973c4ca1969e69c051ba8a33f">column</a>() &lt; params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a3167ea3f80a79b765ade4de111c1ed2b">indent</a>) {</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>      params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#a7961b5d274ce8d94e49b63c68f03cebc">leadingSpaces</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>    }</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>  }</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>  <span class="comment">// post-processing</span></div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>  <span class="keywordflow">if</span> (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#ad48fca62e46d2f1cefa11cb7f4490939">trimTrailingSpaces</a>) {</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    std::size_t pos = scalar.find_last_not_of(<span class="stringliteral">&quot; \t&quot;</span>);</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>    <span class="keywordflow">if</span> (lastEscapedChar != std::string::npos) {</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>      <span class="keywordflow">if</span> (pos &lt; lastEscapedChar || pos == std::string::npos) {</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        pos = lastEscapedChar;</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>      }</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    }</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    <span class="keywordflow">if</span> (pos &lt; scalar.size()) {</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>      scalar.erase(pos + 1);</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    }</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>  }</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span> </div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>  <span class="keywordflow">switch</span> (params.<a class="code hl_variable" href="structYAML_1_1ScanScalarParams.html#adc66f6393010976d6e2848ffd22844b6">chomp</a>) {</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="namespaceYAML.html#ac13b04be586f671c9575454e6db6e843a1680c7b8260ae681e1b57aa93f2ab116">CLIP</a>: {</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>      std::size_t pos = scalar.find_last_not_of(<span class="charliteral">&#39;\n&#39;</span>);</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>      <span class="keywordflow">if</span> (lastEscapedChar != std::string::npos) {</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>        <span class="keywordflow">if</span> (pos &lt; lastEscapedChar || pos == std::string::npos) {</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>          pos = lastEscapedChar;</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        }</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>      }</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>      <span class="keywordflow">if</span> (pos == std::string::npos) {</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        scalar.erase();</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>      } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (pos + 1 &lt; scalar.size()) {</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        scalar.erase(pos + 2);</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>      }</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    } <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="namespaceYAML.html#ac13b04be586f671c9575454e6db6e843aa6ed0465027fccce21d21cccd4063fb3">STRIP</a>: {</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>      std::size_t pos = scalar.find_last_not_of(<span class="charliteral">&#39;\n&#39;</span>);</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>      <span class="keywordflow">if</span> (lastEscapedChar != std::string::npos) {</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <span class="keywordflow">if</span> (pos &lt; lastEscapedChar || pos == std::string::npos) {</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>          pos = lastEscapedChar;</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        }</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>      }</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>      <span class="keywordflow">if</span> (pos == std::string::npos) {</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        scalar.erase();</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>      } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (pos &lt; scalar.size()) {</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>        scalar.erase(pos + 1);</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>      }</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>    } <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    <span class="keywordflow">default</span>:</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>  }</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>  <span class="keywordflow">return</span> scalar;</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>}</div>
+</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>}  <span class="comment">// namespace YAML</span></div>
+<div class="ttc" id="aclassYAML_1_1ParserException_html"><div class="ttname"><a href="classYAML_1_1ParserException.html">YAML::ParserException</a></div><div class="ttdef"><b>Definition</b> <a href="exceptions_8h_source.html#l00178">exceptions.h:178</a></div></div>
+<div class="ttc" id="aclassYAML_1_1RegEx_html_a7a09aef4713985c80b4d1a1f17d57feb"><div class="ttname"><a href="classYAML_1_1RegEx.html#a7a09aef4713985c80b4d1a1f17d57feb">YAML::RegEx::Matches</a></div><div class="ttdeci">bool Matches(char ch) const</div><div class="ttdef"><b>Definition</b> <a href="regeximpl_8h_source.html#l00016">regeximpl.h:16</a></div></div>
+<div class="ttc" id="aclassYAML_1_1RegEx_html_aec5a2989ce40d29a7ff9041943a957cf"><div class="ttname"><a href="classYAML_1_1RegEx.html#aec5a2989ce40d29a7ff9041943a957cf">YAML::RegEx::Match</a></div><div class="ttdeci">int Match(const std::string &amp;str) const</div><div class="ttdef"><b>Definition</b> <a href="regeximpl_8h_source.html#l00040">regeximpl.h:40</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html"><div class="ttname"><a href="classYAML_1_1Stream.html">YAML::Stream</a></div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00022">stream.h:22</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a1984b6def1e7f09e8be1e2ded43e7c22"><div class="ttname"><a href="classYAML_1_1Stream.html#a1984b6def1e7f09e8be1e2ded43e7c22">YAML::Stream::mark</a></div><div class="ttdeci">const Mark mark() const</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00043">stream.h:43</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a5bf908c973c4ca1969e69c051ba8a33f"><div class="ttname"><a href="classYAML_1_1Stream.html#a5bf908c973c4ca1969e69c051ba8a33f">YAML::Stream::column</a></div><div class="ttdeci">int column() const</div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00046">stream.h:46</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_a98a6753995450fd1af5b9069da66e3a5"><div class="ttname"><a href="classYAML_1_1Stream.html#a98a6753995450fd1af5b9069da66e3a5">YAML::Stream::get</a></div><div class="ttdeci">char get()</div><div class="ttdef"><b>Definition</b> <a href="stream_8cpp_source.html#l00260">stream.cpp:260</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_ab131746d2a9bb7bf8ab8765d16445fbc"><div class="ttname"><a href="classYAML_1_1Stream.html#ab131746d2a9bb7bf8ab8765d16445fbc">YAML::Stream::peek</a></div><div class="ttdeci">char peek() const</div><div class="ttdef"><b>Definition</b> <a href="stream_8cpp_source.html#l00245">stream.cpp:245</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html_ac79171e6d96a34e9edde03edbc6c3e2e"><div class="ttname"><a href="classYAML_1_1Stream.html#ac79171e6d96a34e9edde03edbc6c3e2e">YAML::Stream::eat</a></div><div class="ttdeci">void eat(int n=1)</div><div class="ttdef"><b>Definition</b> <a href="stream_8cpp_source.html#l00287">stream.cpp:287</a></div></div>
+<div class="ttc" id="aexceptions_8h_html"><div class="ttname"><a href="exceptions_8h.html">exceptions.h</a></div></div>
+<div class="ttc" id="aexp_8h_html"><div class="ttname"><a href="exp_8h.html">exp.h</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1ErrorMsg_html_a4a1f80e85526488a47d0aec400985ba1"><div class="ttname"><a href="namespaceYAML_1_1ErrorMsg.html#a4a1f80e85526488a47d0aec400985ba1">YAML::ErrorMsg::TAB_IN_INDENTATION</a></div><div class="ttdeci">const char *const TAB_IN_INDENTATION</div><div class="ttdef"><b>Definition</b> <a href="exceptions_8h_source.html#l00051">exceptions.h:51</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1ErrorMsg_html_aa443defd689a9a069efdd44392253d13"><div class="ttname"><a href="namespaceYAML_1_1ErrorMsg.html#aa443defd689a9a069efdd44392253d13">YAML::ErrorMsg::DOC_IN_SCALAR</a></div><div class="ttdeci">const char *const DOC_IN_SCALAR</div><div class="ttdef"><b>Definition</b> <a href="exceptions_8h_source.html#l00048">exceptions.h:48</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1ErrorMsg_html_ad034e48a4f09b9dfef55b0a6ff319074"><div class="ttname"><a href="namespaceYAML_1_1ErrorMsg.html#ad034e48a4f09b9dfef55b0a6ff319074">YAML::ErrorMsg::EOF_IN_SCALAR</a></div><div class="ttdeci">const char *const EOF_IN_SCALAR</div><div class="ttdef"><b>Definition</b> <a href="exceptions_8h_source.html#l00049">exceptions.h:49</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a522f525a7c9c4233a4e8281141aa5f5d"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a522f525a7c9c4233a4e8281141aa5f5d">YAML::Exp::DocIndicator</a></div><div class="ttdeci">const RegEx &amp; DocIndicator()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00092">exp.h:92</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a8d600528e1015584916dc6593f62545a"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a8d600528e1015584916dc6593f62545a">YAML::Exp::EscBreak</a></div><div class="ttdeci">const RegEx &amp; EscBreak()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00185">exp.h:185</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_aa0420fb20a465d5981e56a271e16b58e"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#aa0420fb20a465d5981e56a271e16b58e">YAML::Exp::Escape</a></div><div class="ttdeci">std::string Escape(Stream &amp;in, int codeLength)</div><div class="ttdef"><b>Definition</b> <a href="exp_8cpp_source.html#l00038">exp.cpp:38</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_aade8b9d3bb19689aae8a5f753e9ccac1"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#aade8b9d3bb19689aae8a5f753e9ccac1">YAML::Exp::Empty</a></div><div class="ttdeci">const RegEx &amp; Empty()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00023">exp.h:23</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_ab1e6157d2a1614c1e01d55534e04bd27"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#ab1e6157d2a1614c1e01d55534e04bd27">YAML::Exp::Break</a></div><div class="ttdeci">const RegEx &amp; Break()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00039">exp.h:39</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_ac45c26954df2218a5b38e3f2a9e230a7"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#ac45c26954df2218a5b38e3f2a9e230a7">YAML::Exp::Blank</a></div><div class="ttdeci">const RegEx &amp; Blank()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00035">exp.h:35</a></div></div>
+<div class="ttc" id="anamespaceYAML_html"><div class="ttname"><a href="namespaceYAML.html">YAML</a></div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00005">binary.cpp:5</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_a3660a77a9a6a5d6e4286899fb2ea5745a0948fb35a37ca78b929b706b4c811c59"><div class="ttname"><a href="namespaceYAML.html#a3660a77a9a6a5d6e4286899fb2ea5745a0948fb35a37ca78b929b706b4c811c59">YAML::FOLD_FLOW</a></div><div class="ttdeci">@ FOLD_FLOW</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00018">scanscalar.h:18</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_a3660a77a9a6a5d6e4286899fb2ea5745a7df96b2695b9b2ba6795e44336c8b18e"><div class="ttname"><a href="namespaceYAML.html#a3660a77a9a6a5d6e4286899fb2ea5745a7df96b2695b9b2ba6795e44336c8b18e">YAML::DONT_FOLD</a></div><div class="ttdeci">@ DONT_FOLD</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00018">scanscalar.h:18</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_a3660a77a9a6a5d6e4286899fb2ea5745a8fc350077651ea88912a5eaba4f44409"><div class="ttname"><a href="namespaceYAML.html#a3660a77a9a6a5d6e4286899fb2ea5745a8fc350077651ea88912a5eaba4f44409">YAML::FOLD_BLOCK</a></div><div class="ttdeci">@ FOLD_BLOCK</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00018">scanscalar.h:18</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_a7379ec57fc0e2d7647f1dd7a0dc7ba1e"><div class="ttname"><a href="namespaceYAML.html#a7379ec57fc0e2d7647f1dd7a0dc7ba1e">YAML::ScanScalar</a></div><div class="ttdeci">std::string ScanScalar(Stream &amp;INPUT, ScanScalarParams &amp;params)</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8cpp_source.html#l00021">scanscalar.cpp:21</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_ac13b04be586f671c9575454e6db6e843a1680c7b8260ae681e1b57aa93f2ab116"><div class="ttname"><a href="namespaceYAML.html#ac13b04be586f671c9575454e6db6e843a1680c7b8260ae681e1b57aa93f2ab116">YAML::CLIP</a></div><div class="ttdeci">@ CLIP</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00016">scanscalar.h:16</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_ac13b04be586f671c9575454e6db6e843aa6ed0465027fccce21d21cccd4063fb3"><div class="ttname"><a href="namespaceYAML.html#ac13b04be586f671c9575454e6db6e843aa6ed0465027fccce21d21cccd4063fb3">YAML::STRIP</a></div><div class="ttdeci">@ STRIP</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00016">scanscalar.h:16</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_afebe2c8ae8d2681a7fe8a4a74793758ba1bd8e71d5e7f9dfa3c5b0900ee4324e8"><div class="ttname"><a href="namespaceYAML.html#afebe2c8ae8d2681a7fe8a4a74793758ba1bd8e71d5e7f9dfa3c5b0900ee4324e8">YAML::BREAK</a></div><div class="ttdeci">@ BREAK</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00017">scanscalar.h:17</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_afebe2c8ae8d2681a7fe8a4a74793758bad47bfbba4bed9c574c4c1c036ada4cd3"><div class="ttname"><a href="namespaceYAML.html#afebe2c8ae8d2681a7fe8a4a74793758bad47bfbba4bed9c574c4c1c036ada4cd3">YAML::THROW</a></div><div class="ttdeci">@ THROW</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00017">scanscalar.h:17</a></div></div>
+<div class="ttc" id="aregeximpl_8h_html"><div class="ttname"><a href="regeximpl_8h.html">regeximpl.h</a></div></div>
+<div class="ttc" id="ascanscalar_8h_html"><div class="ttname"><a href="scanscalar_8h.html">scanscalar.h</a></div></div>
+<div class="ttc" id="astream_8h_html"><div class="ttname"><a href="stream_8h.html">stream.h</a></div></div>
+<div class="ttc" id="astructYAML_1_1ScanScalarParams_html"><div class="ttname"><a href="structYAML_1_1ScanScalarParams.html">YAML::ScanScalarParams</a></div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00020">scanscalar.h:20</a></div></div>
+<div class="ttc" id="astructYAML_1_1ScanScalarParams_html_a3167ea3f80a79b765ade4de111c1ed2b"><div class="ttname"><a href="structYAML_1_1ScanScalarParams.html#a3167ea3f80a79b765ade4de111c1ed2b">YAML::ScanScalarParams::indent</a></div><div class="ttdeci">int indent</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00039">scanscalar.h:39</a></div></div>
+<div class="ttc" id="astructYAML_1_1ScanScalarParams_html_a48efaf7868fbd6661cf3490705b9e91b"><div class="ttname"><a href="structYAML_1_1ScanScalarParams.html#a48efaf7868fbd6661cf3490705b9e91b">YAML::ScanScalarParams::onTabInIndentation</a></div><div class="ttdeci">ACTION onTabInIndentation</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00053">scanscalar.h:53</a></div></div>
+<div class="ttc" id="astructYAML_1_1ScanScalarParams_html_a5d2356c55f632fadf69b26a15580f02f"><div class="ttname"><a href="structYAML_1_1ScanScalarParams.html#a5d2356c55f632fadf69b26a15580f02f">YAML::ScanScalarParams::end</a></div><div class="ttdeci">const RegEx * end</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00036">scanscalar.h:36</a></div></div>
+<div class="ttc" id="astructYAML_1_1ScanScalarParams_html_a601811289f94ffbb9a625a09218ad5d6"><div class="ttname"><a href="structYAML_1_1ScanScalarParams.html#a601811289f94ffbb9a625a09218ad5d6">YAML::ScanScalarParams::detectIndent</a></div><div class="ttdeci">bool detectIndent</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00040">scanscalar.h:40</a></div></div>
+<div class="ttc" id="astructYAML_1_1ScanScalarParams_html_a708a9b04a78a52165a89f42559554dba"><div class="ttname"><a href="structYAML_1_1ScanScalarParams.html#a708a9b04a78a52165a89f42559554dba">YAML::ScanScalarParams::fold</a></div><div class="ttdeci">FOLD fold</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00045">scanscalar.h:45</a></div></div>
+<div class="ttc" id="astructYAML_1_1ScanScalarParams_html_a792aec4ff6d8e3552bfb9f6a7003d877"><div class="ttname"><a href="structYAML_1_1ScanScalarParams.html#a792aec4ff6d8e3552bfb9f6a7003d877">YAML::ScanScalarParams::eatEnd</a></div><div class="ttdeci">bool eatEnd</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00038">scanscalar.h:38</a></div></div>
+<div class="ttc" id="astructYAML_1_1ScanScalarParams_html_a7961b5d274ce8d94e49b63c68f03cebc"><div class="ttname"><a href="structYAML_1_1ScanScalarParams.html#a7961b5d274ce8d94e49b63c68f03cebc">YAML::ScanScalarParams::leadingSpaces</a></div><div class="ttdeci">bool leadingSpaces</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00057">scanscalar.h:57</a></div></div>
+<div class="ttc" id="astructYAML_1_1ScanScalarParams_html_abdd28911284a2e3bdd3192f2f631b1a5"><div class="ttname"><a href="structYAML_1_1ScanScalarParams.html#abdd28911284a2e3bdd3192f2f631b1a5">YAML::ScanScalarParams::onDocIndicator</a></div><div class="ttdeci">ACTION onDocIndicator</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00052">scanscalar.h:52</a></div></div>
+<div class="ttc" id="astructYAML_1_1ScanScalarParams_html_acc6f018805bcd7698f346b1201274c32"><div class="ttname"><a href="structYAML_1_1ScanScalarParams.html#acc6f018805bcd7698f346b1201274c32">YAML::ScanScalarParams::eatLeadingWhitespace</a></div><div class="ttdeci">bool eatLeadingWhitespace</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00041">scanscalar.h:41</a></div></div>
+<div class="ttc" id="astructYAML_1_1ScanScalarParams_html_ad48fca62e46d2f1cefa11cb7f4490939"><div class="ttname"><a href="structYAML_1_1ScanScalarParams.html#ad48fca62e46d2f1cefa11cb7f4490939">YAML::ScanScalarParams::trimTrailingSpaces</a></div><div class="ttdeci">bool trimTrailingSpaces</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00046">scanscalar.h:46</a></div></div>
+<div class="ttc" id="astructYAML_1_1ScanScalarParams_html_adc66f6393010976d6e2848ffd22844b6"><div class="ttname"><a href="structYAML_1_1ScanScalarParams.html#adc66f6393010976d6e2848ffd22844b6">YAML::ScanScalarParams::chomp</a></div><div class="ttdeci">CHOMP chomp</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00048">scanscalar.h:48</a></div></div>
+<div class="ttc" id="astructYAML_1_1ScanScalarParams_html_aebdfc73fd5936c75cb19c7d7116857ac"><div class="ttname"><a href="structYAML_1_1ScanScalarParams.html#aebdfc73fd5936c75cb19c7d7116857ac">YAML::ScanScalarParams::escape</a></div><div class="ttdeci">char escape</div><div class="ttdef"><b>Definition</b> <a href="scanscalar_8h_source.html#l00043">scanscalar.h:43</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="scanscalar_8cpp.html">scanscalar.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

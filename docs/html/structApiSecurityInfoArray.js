@@ -1,0 +1,26 @@
+var structApiSecurityInfoArray =
+[
+    [ "buy_qty_lower_limit", "structApiSecurityInfoArray.html#aa21fd07068031f5e3b229d5f79733c72", null ],
+    [ "buy_qty_unit", "structApiSecurityInfoArray.html#a6150060f44fdc6204cf7b1ebef1f2c2a", null ],
+    [ "buy_qty_upper_limit", "structApiSecurityInfoArray.html#a312249ffb4f32735c98f71e672516269", null ],
+    [ "day_trading", "structApiSecurityInfoArray.html#a54c83d6b6abfba482c980ba9d742d796", null ],
+    [ "has_price_limit", "structApiSecurityInfoArray.html#a6b47fec55fecc16c6cfcfe3c4b0296e0", null ],
+    [ "market_buy_qty_lower_limit", "structApiSecurityInfoArray.html#a9deeb0c665b85ad67aab2c8495963f37", null ],
+    [ "market_buy_qty_unit", "structApiSecurityInfoArray.html#a7f089dd0b2a9460aceaf5a13885ce710", null ],
+    [ "market_buy_qty_upper_limit", "structApiSecurityInfoArray.html#af2160fa934d8d8c83ca12b1a1ba37be5", null ],
+    [ "market_id", "structApiSecurityInfoArray.html#aaecef527cf388070b01e5f3f218c1bdc", null ],
+    [ "market_sell_qty_lower_limit", "structApiSecurityInfoArray.html#a374fc524e332e095d7be5930706a40c3", null ],
+    [ "market_sell_qty_unit", "structApiSecurityInfoArray.html#a3fcaea4267de26b104e8662ad4f38892", null ],
+    [ "market_sell_qty_upper_limit", "structApiSecurityInfoArray.html#ab5f5a5f4c25031d8111539e05560b887", null ],
+    [ "prev_close_price", "structApiSecurityInfoArray.html#a348be622037ccbee8e91d6b4c4dc4ba1", null ],
+    [ "price_lower_limit", "structApiSecurityInfoArray.html#a96cc2c383055223db7d9c4d636abb692", null ],
+    [ "price_tick", "structApiSecurityInfoArray.html#a14025ee90a30e0746afcd82070c04813", null ],
+    [ "price_upper_limit", "structApiSecurityInfoArray.html#a52cf22a2d45936d9682fb3edb40bf364", null ],
+    [ "security_id", "structApiSecurityInfoArray.html#a2e10c1ec0c7bfbaf5d7ac0be36921978", null ],
+    [ "security_status", "structApiSecurityInfoArray.html#a58ef21a3979a0b0c503fb5a42b33dd49", null ],
+    [ "security_symbol", "structApiSecurityInfoArray.html#a09fb3fc575413134c6ae11676817dea0", null ],
+    [ "security_type", "structApiSecurityInfoArray.html#a7ad4d470ccd62254faebce3164e100b2", null ],
+    [ "sell_qty_lower_limit", "structApiSecurityInfoArray.html#aa439dccb47ad36a72d2248397cb247e5", null ],
+    [ "sell_qty_unit", "structApiSecurityInfoArray.html#ad897b60e600d7a5d7739adbccec03074", null ],
+    [ "sell_qty_upper_limit", "structApiSecurityInfoArray.html#a07014c07783fb685476693317a5e0592", null ]
+];

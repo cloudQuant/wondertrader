@@ -1,0 +1,28 @@
+var structZSTDMT__CCtx__s =
+[
+    [ "allJobsCompleted", "structZSTDMT__CCtx__s.html#adcbce775ef28c1c9abf9c78a667428b7", null ],
+    [ "bufPool", "structZSTDMT__CCtx__s.html#af003decbfdc94dbee8364ccb813d12e1", null ],
+    [ "cctxPool", "structZSTDMT__CCtx__s.html#a31508df6632a54b98a80de5f83925fdb", null ],
+    [ "cdict", "structZSTDMT__CCtx__s.html#aa7aaa1edaaa4a438accd0082c75bf98c", null ],
+    [ "cdictLocal", "structZSTDMT__CCtx__s.html#a31b00f882a7ecfb17bfc92c4e936488e", null ],
+    [ "cMem", "structZSTDMT__CCtx__s.html#a7b6692c023f13cf647140848d2c37e36", null ],
+    [ "consumed", "structZSTDMT__CCtx__s.html#a6f2b993c1a5d1e50dbe4fc28dcbeec0f", null ],
+    [ "doneJobID", "structZSTDMT__CCtx__s.html#a9c8ae2642a77ed354c943b9dcd9d3ca7", null ],
+    [ "factory", "structZSTDMT__CCtx__s.html#a82de83b49ef55eff3bdafcc7799aa8a0", null ],
+    [ "frameContentSize", "structZSTDMT__CCtx__s.html#a43a320ec826a784ec847d137b7d6543a", null ],
+    [ "frameEnded", "structZSTDMT__CCtx__s.html#a71ce65f40381595712540d4ef8588d27", null ],
+    [ "inBuff", "structZSTDMT__CCtx__s.html#a83a2b3fc244bd832acf985acf6f3bf4b", null ],
+    [ "jobIDMask", "structZSTDMT__CCtx__s.html#a32b9f218523e038ba211f04b46ce1a83", null ],
+    [ "jobReady", "structZSTDMT__CCtx__s.html#a28ef91ae79d60c62d34f650e1212ed83", null ],
+    [ "jobs", "structZSTDMT__CCtx__s.html#afd97e0da7ce2df1d97836837e48999e3", null ],
+    [ "nextJobID", "structZSTDMT__CCtx__s.html#a3ca58ef1bdd8da7a6606fd98781da16b", null ],
+    [ "params", "structZSTDMT__CCtx__s.html#af2016c4b733b86613efc83a3c1e8a648", null ],
+    [ "produced", "structZSTDMT__CCtx__s.html#aeb0e343af4240379b2f514043f140bde", null ],
+    [ "roundBuff", "structZSTDMT__CCtx__s.html#a535ee1dedc983269c97c37bc465eddef", null ],
+    [ "rsync", "structZSTDMT__CCtx__s.html#a13c357aa568f2b98bcf36a6f58839bcd", null ],
+    [ "seqPool", "structZSTDMT__CCtx__s.html#a058e346909220d37009d1fd2ba4078f8", null ],
+    [ "serial", "structZSTDMT__CCtx__s.html#afa11df4856344c5cf8c3f3db80324d25", null ],
+    [ "singleBlockingThread", "structZSTDMT__CCtx__s.html#a88d21ae383003274f3a930f00c06bc1f", null ],
+    [ "targetPrefixSize", "structZSTDMT__CCtx__s.html#a8507486e4770b5f5bb8d21c135e763a5", null ],
+    [ "targetSectionSize", "structZSTDMT__CCtx__s.html#a7a2d34ffaca68443552759d7ccc8c05d", null ]
+];

@@ -232,6 +232,11 @@ ADD_SUBDIRECTORY(TraderDumper)
 link_iconv_to_target(TraderDumper)
 ADD_SUBDIRECTORY(WtShareHelper)
 link_iconv_to_target(WtShareHelper)
+#CTA
+ADD_SUBDIRECTORY(WtCtaStraFact)
+link_iconv_to_target(WtCtaStraFact)
+ADD_SUBDIRECTORY(WtCtaTwoMaFact)
+link_iconv_to_target(WtCtaTwoMaFact)
 #uft
 ADD_SUBDIRECTORY(WtUftCore)
 link_iconv_to_target(WtUftCore)

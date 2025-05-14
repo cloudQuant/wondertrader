@@ -1,0 +1,27 @@
+var structST__MACLI__CONNECT__OPTION =
+[
+    [ "nAnsId", "structST__MACLI__CONNECT__OPTION.html#a1a244b8cbc382f141b19c8ee60dc1ed0", null ],
+    [ "nAnsMaxDepth", "structST__MACLI__CONNECT__OPTION.html#af3ae69a27ecea5f6d2ded824114522c7", null ],
+    [ "nCommType", "structST__MACLI__CONNECT__OPTION.html#a700e4a8a3923115b5f6f2634fbb6cd77", null ],
+    [ "nLocalPort", "structST__MACLI__CONNECT__OPTION.html#a2c5cb754816923b46c7f3ce343228567", null ],
+    [ "nProtocal", "structST__MACLI__CONNECT__OPTION.html#a1680d80f280b31db4af22a026e310546", null ],
+    [ "nReqId", "structST__MACLI__CONNECT__OPTION.html#aaecb86b46fdb7f0cd7e2379f98d9d839", null ],
+    [ "nReqMaxDepth", "structST__MACLI__CONNECT__OPTION.html#a4d78548731538b100eb8ecea4e212b58", null ],
+    [ "nSvrPort", "structST__MACLI__CONNECT__OPTION.html#a8c21f8bdb29bfd050a1aa430309fb637", null ],
+    [ "szAnsConnstr", "structST__MACLI__CONNECT__OPTION.html#a9df75d3b08647b9e8fdb32264e979887", null ],
+    [ "szAnsName", "structST__MACLI__CONNECT__OPTION.html#af6c688f82134e15740aa948cfdde79ca", null ],
+    [ "szLocalAddress", "structST__MACLI__CONNECT__OPTION.html#a0371af31d908a6ad90a01f3c70ba9eef", null ],
+    [ "szMonitorAnsConnstr", "structST__MACLI__CONNECT__OPTION.html#a207938b840123287dee0e5b92fd83b0b", null ],
+    [ "szMonitorAnsName", "structST__MACLI__CONNECT__OPTION.html#af35b517573b7446eca6f63d203d344e8", null ],
+    [ "szMonitorReqConnstr", "structST__MACLI__CONNECT__OPTION.html#a9f00e39c159f74dd2e0e115f18d025d0", null ],
+    [ "szMonitorReqName", "structST__MACLI__CONNECT__OPTION.html#a830744534b7f1b2b0b0061c478eae781", null ],
+    [ "szProxy", "structST__MACLI__CONNECT__OPTION.html#af5158927242f869043ce2c35ecde2989", null ],
+    [ "szReqConnstr", "structST__MACLI__CONNECT__OPTION.html#a044d51a9dccf2b9e89b564da3740b217", null ],
+    [ "szReqName", "structST__MACLI__CONNECT__OPTION.html#a5752c3427e5bc58280e5b718441cf3e3", null ],
+    [ "szServerName", "structST__MACLI__CONNECT__OPTION.html#a5eb59773d25c6161c486c5c1bcb84235", null ],
+    [ "szSocketSubConnstr", "structST__MACLI__CONNECT__OPTION.html#aee73d8edabe41efc195025c2cf8df9bf", null ],
+    [ "szSSL", "structST__MACLI__CONNECT__OPTION.html#ad9a6382f734686c8f7ad8c1996d3aee9", null ],
+    [ "szSubId", "structST__MACLI__CONNECT__OPTION.html#ac012c869668a0881bcf803968bb72f1c", null ],
+    [ "szSvrAddress", "structST__MACLI__CONNECT__OPTION.html#a7ce56cc650f035a994295aed1d0a5d66", null ],
+    [ "szTermCode", "structST__MACLI__CONNECT__OPTION.html#abf29e24511c5e4a8f1f1a08dffaeaeb7", null ]
+];

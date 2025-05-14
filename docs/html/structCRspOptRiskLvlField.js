@@ -1,0 +1,25 @@
+var structCRspOptRiskLvlField =
+[
+    [ "chCurrency", "structCRspOptRiskLvlField.html#aa03ea841de102c30788656006b60c460", null ],
+    [ "iIntOrg", "structCRspOptRiskLvlField.html#a9920b124c8f620ee92264532604ce9d3", null ],
+    [ "llCuacctCode", "structCRspOptRiskLvlField.html#a823ef7069e6908742608219b81ac722f", null ],
+    [ "llCustCode", "structCRspOptRiskLvlField.html#a9919965545464a9801310724cad545b8", null ],
+    [ "szDueAddAmt", "structCRspOptRiskLvlField.html#a81f5b12e1b7de9373de2e09d52f5f894", null ],
+    [ "szFundAvl", "structCRspOptRiskLvlField.html#af1836cfa4cdeb15f3ea336aaceafa138", null ],
+    [ "szFundAvlRlt", "structCRspOptRiskLvlField.html#a5d8351ac32a5cf53c959f04eebccffe6", null ],
+    [ "szFundBln", "structCRspOptRiskLvlField.html#a391c03f0342876b2224db410b48edb38", null ],
+    [ "szHedgedMargin", "structCRspOptRiskLvlField.html#a94c892e7d1047d58ea33dc1ca8a06e1f", null ],
+    [ "szHedgedMarginRlt", "structCRspOptRiskLvlField.html#a27a92478e28a9f28837ea4f7d7207115", null ],
+    [ "szMarginUsed", "structCRspOptRiskLvlField.html#a992020760f017ea6d89fd825b79a86ba", null ],
+    [ "szMarginUsedRlt", "structCRspOptRiskLvlField.html#a4fa0e45ece291b9adc6e78665b8524f4", null ],
+    [ "szRiskValue", "structCRspOptRiskLvlField.html#a442c86a3dd33e8840124a45218e49345", null ],
+    [ "szRiskValueRlt", "structCRspOptRiskLvlField.html#ae7e3b27d42037cb268b7c86afdaf9dac", null ],
+    [ "szStkexFundAvl", "structCRspOptRiskLvlField.html#a4d607d6185c7e0ae69a14c24fe8fa895", null ],
+    [ "szStkexFundAvlRlt", "structCRspOptRiskLvlField.html#a4c29d59e4ad870a3e403a75fafce2862", null ],
+    [ "szStkexHedgedMag", "structCRspOptRiskLvlField.html#a3e5e1587f36b1ad63b3e2dc508bee991", null ],
+    [ "szStkexHedgedMagRlt", "structCRspOptRiskLvlField.html#ab25eefc6976dd2d78e8674d3a6b7172b", null ],
+    [ "szStkexMagUsed", "structCRspOptRiskLvlField.html#a3cd44e332cefedd44c9b21d4e232917f", null ],
+    [ "szStkexMagUsedRlt", "structCRspOptRiskLvlField.html#a85ed9ebb9b0d878aca954062b5cefc8d", null ],
+    [ "szStkexRiskValue", "structCRspOptRiskLvlField.html#af4d75b1163524a99eb539d9721b604f6", null ],
+    [ "szStkexRiskValueRlt", "structCRspOptRiskLvlField.html#a82e5a3225d39ac733f778e590f68103a", null ]
+];

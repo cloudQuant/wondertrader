@@ -1,0 +1,26 @@
+var structTORALEV1API_1_1CTORATstpSecurityStatusField =
+[
+    [ "ExchangeID", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a0fe000b1f9a48eb6e02980170b802f33", null ],
+    [ "IsBreak", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a3adc5439f3ad5a9ac2f13903d7689f00", null ],
+    [ "IsCircuitBreak", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#acaa80184af64b3710a9ce0bb58e4db57", null ],
+    [ "IsLimitBuy", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#aca8912950d0f5e396f6eee70188d9896", null ],
+    [ "IsLimitCover", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a24723d6ae1ee642ad80380e9df4ab782", null ],
+    [ "IsLimitMarketMaker", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#abd4c858f9fe12b250e419f168f74f935", null ],
+    [ "IsLimitSell", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a04102a380c38fb4e2652b89563f6a521", null ],
+    [ "IsLongSuspend", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a6483682c517edf71acd97675405cf363", null ],
+    [ "IsSupportExercise", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#acf5695ca0c0a9abcc4b737748ee28794", null ],
+    [ "IsSupportMarginBuy", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a3d52cf64854127b1c554eaf0fb159fd7", null ],
+    [ "IsSupportMerge", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a20ace268ef30c7cb35c266ef8cbc82dc", null ],
+    [ "IsSupportOddLotBuy", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a4b28a92d47ce62ef3a16eaa4ed4f6d29", null ],
+    [ "IsSupportOddLotSell", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a0fd050e7c36df4603933390ba5ff1016", null ],
+    [ "IsSupportPleadgeIn", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a50c786eb3e5ad672523e9aabaed492b3", null ],
+    [ "IsSupportPleadgeOut", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#af0fe401da138b6b85ad5e2d738566db6", null ],
+    [ "IsSupportPur", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#aaa6eed5c90563565431403c586a8d77f", null ],
+    [ "IsSupportRed", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#afb267be63b421ce10f8684997cfd5735", null ],
+    [ "IsSupportRoundLotBuy", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a1966e5fc7da6dd95dc7366088e8d5a87", null ],
+    [ "IsSupportRoundLotSell", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a21ff764df4ad4c5771bd461d690eb5f6", null ],
+    [ "IsSupportShortSell", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#add14df474c87da7b9ac47cc3aeb39d2d", null ],
+    [ "IsSupportSplit", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a09b9b0033a0e9503f08188879331e9ef", null ],
+    [ "IsSuspend", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a6f3ac7e86c2f53f7311962954945c153", null ],
+    [ "SecurityID", "structTORALEV1API_1_1CTORATstpSecurityStatusField.html#a6e4d2e11b0164d9a5d47506b98257424", null ]
+];

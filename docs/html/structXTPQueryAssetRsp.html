@@ -1,0 +1,694 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: XTPQueryAssetRsp结构体 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('structXTPQueryAssetRsp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-attribs">Public 属性</a> &#124;
+<a href="structXTPQueryAssetRsp-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">XTPQueryAssetRsp结构体 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>账户资金查询响应结构体  
+ <a href="structXTPQueryAssetRsp.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public 属性</h2></td></tr>
+<tr class="memitem:ab3059f4057275465e55b763e60d685b3" id="r_ab3059f4057275465e55b763e60d685b3"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#ab3059f4057275465e55b763e60d685b3">total_asset</a></td></tr>
+<tr class="memdesc:ab3059f4057275465e55b763e60d685b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">总资产（现货账户/期权账户参考公式：总资产 = 可用资金 + 证券资产（目前为0）+ 预扣的资金），（信用账户参考公式：总资产 = 可用资金 + 融券卖出所得资金余额 + 证券资产+ 预扣的资金）  <br /></td></tr>
+<tr class="separator:ab3059f4057275465e55b763e60d685b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85fdcb73ffe7dc7f19ceaa091475c0ca" id="r_a85fdcb73ffe7dc7f19ceaa091475c0ca"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a85fdcb73ffe7dc7f19ceaa091475c0ca">buying_power</a></td></tr>
+<tr class="memdesc:a85fdcb73ffe7dc7f19ceaa091475c0ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">可用资金  <br /></td></tr>
+<tr class="separator:a85fdcb73ffe7dc7f19ceaa091475c0ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f52bda5af2a09c82db0fd9b2d30e577" id="r_a6f52bda5af2a09c82db0fd9b2d30e577"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a6f52bda5af2a09c82db0fd9b2d30e577">security_asset</a></td></tr>
+<tr class="memdesc:a6f52bda5af2a09c82db0fd9b2d30e577"><td class="mdescLeft">&#160;</td><td class="mdescRight">证券资产（保留字段，目前为0）  <br /></td></tr>
+<tr class="separator:a6f52bda5af2a09c82db0fd9b2d30e577"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1b04db0ecb8858667fee5121966b0c1" id="r_ac1b04db0ecb8858667fee5121966b0c1"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#ac1b04db0ecb8858667fee5121966b0c1">fund_buy_amount</a></td></tr>
+<tr class="memdesc:ac1b04db0ecb8858667fee5121966b0c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">累计买入成交证券占用资金（仅限现货账户/期权账户，信用账户暂不可用）  <br /></td></tr>
+<tr class="separator:ac1b04db0ecb8858667fee5121966b0c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1897e0778be52e48b1ab843dd378fb13" id="r_a1897e0778be52e48b1ab843dd378fb13"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a1897e0778be52e48b1ab843dd378fb13">fund_buy_fee</a></td></tr>
+<tr class="memdesc:a1897e0778be52e48b1ab843dd378fb13"><td class="mdescLeft">&#160;</td><td class="mdescRight">累计买入成交交易费用（仅限现货账户/期权账户，信用账户暂不可用）  <br /></td></tr>
+<tr class="separator:a1897e0778be52e48b1ab843dd378fb13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7baf9d7b0b49242d154df49e94a00ce4" id="r_a7baf9d7b0b49242d154df49e94a00ce4"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a7baf9d7b0b49242d154df49e94a00ce4">fund_sell_amount</a></td></tr>
+<tr class="memdesc:a7baf9d7b0b49242d154df49e94a00ce4"><td class="mdescLeft">&#160;</td><td class="mdescRight">累计卖出成交证券所得资金（仅限现货账户/期权账户，信用账户暂不可用）  <br /></td></tr>
+<tr class="separator:a7baf9d7b0b49242d154df49e94a00ce4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5224766946cb01ca03ce8080e101c047" id="r_a5224766946cb01ca03ce8080e101c047"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a5224766946cb01ca03ce8080e101c047">fund_sell_fee</a></td></tr>
+<tr class="memdesc:a5224766946cb01ca03ce8080e101c047"><td class="mdescLeft">&#160;</td><td class="mdescRight">累计卖出成交交易费用（仅限现货账户/期权账户，信用账户暂不可用）  <br /></td></tr>
+<tr class="separator:a5224766946cb01ca03ce8080e101c047"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0de7f3c9a8950fc4341776fb92571a82" id="r_a0de7f3c9a8950fc4341776fb92571a82"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a0de7f3c9a8950fc4341776fb92571a82">withholding_amount</a></td></tr>
+<tr class="memdesc:a0de7f3c9a8950fc4341776fb92571a82"><td class="mdescLeft">&#160;</td><td class="mdescRight">XTP系统预扣的资金（包括买卖股票时预扣的交易资金+预扣手续费）  <br /></td></tr>
+<tr class="separator:a0de7f3c9a8950fc4341776fb92571a82"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e984ead0073ad2bcb69b2c34deb40dc" id="r_a9e984ead0073ad2bcb69b2c34deb40dc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#af3ba1683bf1ca36dcbd2b08977c0876b">XTP_ACCOUNT_TYPE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a9e984ead0073ad2bcb69b2c34deb40dc">account_type</a></td></tr>
+<tr class="memdesc:a9e984ead0073ad2bcb69b2c34deb40dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">账户类型  <br /></td></tr>
+<tr class="separator:a9e984ead0073ad2bcb69b2c34deb40dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b5162fbd1ee7e7305ffd05e7ce59b03" id="r_a7b5162fbd1ee7e7305ffd05e7ce59b03"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a7b5162fbd1ee7e7305ffd05e7ce59b03">frozen_margin</a></td></tr>
+<tr class="memdesc:a7b5162fbd1ee7e7305ffd05e7ce59b03"><td class="mdescLeft">&#160;</td><td class="mdescRight">冻结的保证金（仅限期权账户）  <br /></td></tr>
+<tr class="separator:a7b5162fbd1ee7e7305ffd05e7ce59b03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f65aeb68399f72127cf30da1f6dcb00" id="r_a4f65aeb68399f72127cf30da1f6dcb00"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a4f65aeb68399f72127cf30da1f6dcb00">frozen_exec_cash</a></td></tr>
+<tr class="memdesc:a4f65aeb68399f72127cf30da1f6dcb00"><td class="mdescLeft">&#160;</td><td class="mdescRight">行权冻结资金（仅限期权账户）  <br /></td></tr>
+<tr class="separator:a4f65aeb68399f72127cf30da1f6dcb00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c01bc596fe412a3d40d3ee919c538f5" id="r_a2c01bc596fe412a3d40d3ee919c538f5"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a2c01bc596fe412a3d40d3ee919c538f5">frozen_exec_fee</a></td></tr>
+<tr class="memdesc:a2c01bc596fe412a3d40d3ee919c538f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">行权费用（仅限期权账户）  <br /></td></tr>
+<tr class="separator:a2c01bc596fe412a3d40d3ee919c538f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b603de5031fc158cf108e596903bcde" id="r_a4b603de5031fc158cf108e596903bcde"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a4b603de5031fc158cf108e596903bcde">pay_later</a></td></tr>
+<tr class="memdesc:a4b603de5031fc158cf108e596903bcde"><td class="mdescLeft">&#160;</td><td class="mdescRight">垫付资金（仅限期权账户）  <br /></td></tr>
+<tr class="separator:a4b603de5031fc158cf108e596903bcde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a71a9aba81ab56dd45460bb978fdd04" id="r_a9a71a9aba81ab56dd45460bb978fdd04"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a9a71a9aba81ab56dd45460bb978fdd04">preadva_pay</a></td></tr>
+<tr class="memdesc:a9a71a9aba81ab56dd45460bb978fdd04"><td class="mdescLeft">&#160;</td><td class="mdescRight">预垫付资金（仅限期权账户）  <br /></td></tr>
+<tr class="separator:a9a71a9aba81ab56dd45460bb978fdd04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a713b8295f601d3255f40aa1f425e2dbb" id="r_a713b8295f601d3255f40aa1f425e2dbb"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a713b8295f601d3255f40aa1f425e2dbb">orig_banlance</a></td></tr>
+<tr class="memdesc:a713b8295f601d3255f40aa1f425e2dbb"><td class="mdescLeft">&#160;</td><td class="mdescRight">昨日余额（仅限期权账户）  <br /></td></tr>
+<tr class="separator:a713b8295f601d3255f40aa1f425e2dbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed6da27d7d2efc7f0fbdbb20c052cf86" id="r_aed6da27d7d2efc7f0fbdbb20c052cf86"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#aed6da27d7d2efc7f0fbdbb20c052cf86">banlance</a></td></tr>
+<tr class="memdesc:aed6da27d7d2efc7f0fbdbb20c052cf86"><td class="mdescLeft">&#160;</td><td class="mdescRight">当前余额（仅限期权账户）  <br /></td></tr>
+<tr class="separator:aed6da27d7d2efc7f0fbdbb20c052cf86"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24c11acb987c909dc3def0c4bd6edf22" id="r_a24c11acb987c909dc3def0c4bd6edf22"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a24c11acb987c909dc3def0c4bd6edf22">deposit_withdraw</a></td></tr>
+<tr class="memdesc:a24c11acb987c909dc3def0c4bd6edf22"><td class="mdescLeft">&#160;</td><td class="mdescRight">当天出入金（仅限期权账户）  <br /></td></tr>
+<tr class="separator:a24c11acb987c909dc3def0c4bd6edf22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa9791c671821413974989f8ae12810e" id="r_afa9791c671821413974989f8ae12810e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#afa9791c671821413974989f8ae12810e">trade_netting</a></td></tr>
+<tr class="memdesc:afa9791c671821413974989f8ae12810e"><td class="mdescLeft">&#160;</td><td class="mdescRight">当日交易资金轧差（仅限期权账户）  <br /></td></tr>
+<tr class="separator:afa9791c671821413974989f8ae12810e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbf4281127384a94114f9037e30388d8" id="r_abbf4281127384a94114f9037e30388d8"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#abbf4281127384a94114f9037e30388d8">captial_asset</a></td></tr>
+<tr class="memdesc:abbf4281127384a94114f9037e30388d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">资金资产（仅限期权账户）  <br /></td></tr>
+<tr class="separator:abbf4281127384a94114f9037e30388d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb2d85cb8f26974945ee412a00833b50" id="r_afb2d85cb8f26974945ee412a00833b50"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#afb2d85cb8f26974945ee412a00833b50">force_freeze_amount</a></td></tr>
+<tr class="memdesc:afb2d85cb8f26974945ee412a00833b50"><td class="mdescLeft">&#160;</td><td class="mdescRight">强锁资金（仅限期权账户）  <br /></td></tr>
+<tr class="separator:afb2d85cb8f26974945ee412a00833b50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08137d809e1b20ec69f1c200adb2764e" id="r_a08137d809e1b20ec69f1c200adb2764e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a08137d809e1b20ec69f1c200adb2764e">preferred_amount</a></td></tr>
+<tr class="memdesc:a08137d809e1b20ec69f1c200adb2764e"><td class="mdescLeft">&#160;</td><td class="mdescRight">可取资金（仅限期权账户）  <br /></td></tr>
+<tr class="separator:a08137d809e1b20ec69f1c200adb2764e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a472e66636764dab8f87c30c30684c75f" id="r_a472e66636764dab8f87c30c30684c75f"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a472e66636764dab8f87c30c30684c75f">repay_stock_aval_banlance</a></td></tr>
+<tr class="memdesc:a472e66636764dab8f87c30c30684c75f"><td class="mdescLeft">&#160;</td><td class="mdescRight">融券卖出所得资金余额（仅限信用账户，只能用于买券还券）  <br /></td></tr>
+<tr class="separator:a472e66636764dab8f87c30c30684c75f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2793d8d9f6876a225dda4f132fc566fa" id="r_a2793d8d9f6876a225dda4f132fc566fa"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a2793d8d9f6876a225dda4f132fc566fa">fund_order_data_charges</a></td></tr>
+<tr class="memdesc:a2793d8d9f6876a225dda4f132fc566fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">累计订单流量费  <br /></td></tr>
+<tr class="separator:a2793d8d9f6876a225dda4f132fc566fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a49ad583c316380417ebedd495f1fce" id="r_a5a49ad583c316380417ebedd495f1fce"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a5a49ad583c316380417ebedd495f1fce">fund_cancel_data_charges</a></td></tr>
+<tr class="memdesc:a5a49ad583c316380417ebedd495f1fce"><td class="mdescLeft">&#160;</td><td class="mdescRight">累计撤单流量费  <br /></td></tr>
+<tr class="separator:a5a49ad583c316380417ebedd495f1fce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0b8b24a253c4976aa501130d38f0bc5" id="r_ab0b8b24a253c4976aa501130d38f0bc5"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#ab0b8b24a253c4976aa501130d38f0bc5">exchange_cur_risk_degree</a></td></tr>
+<tr class="memdesc:ab0b8b24a253c4976aa501130d38f0bc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易所实时风险度（仅限期权账户,后续服务器版本支持，目前为0）  <br /></td></tr>
+<tr class="separator:ab0b8b24a253c4976aa501130d38f0bc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79424f69858a3cd7b6c998aed5e60a91" id="r_a79424f69858a3cd7b6c998aed5e60a91"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a79424f69858a3cd7b6c998aed5e60a91">company_cur_risk_degree</a></td></tr>
+<tr class="memdesc:a79424f69858a3cd7b6c998aed5e60a91"><td class="mdescLeft">&#160;</td><td class="mdescRight">公司实时风险度（仅限期权账户,后续服务器版本支持，目前为0）  <br /></td></tr>
+<tr class="separator:a79424f69858a3cd7b6c998aed5e60a91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5da9df541d6945433b325610dd2e63db" id="r_a5da9df541d6945433b325610dd2e63db"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structXTPQueryAssetRsp.html#a5da9df541d6945433b325610dd2e63db">unknown</a> [43 - 12 - 1 - 2 - 2]</td></tr>
+<tr class="memdesc:a5da9df541d6945433b325610dd2e63db"><td class="mdescLeft">&#160;</td><td class="mdescRight">(保留字段)  <br /></td></tr>
+<tr class="separator:a5da9df541d6945433b325610dd2e63db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>账户资金查询响应结构体 </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00310">310</a> 行定义.</p>
+</div><h2 class="groupheader">类成员变量说明</h2>
+<a id="a9e984ead0073ad2bcb69b2c34deb40dc" name="a9e984ead0073ad2bcb69b2c34deb40dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e984ead0073ad2bcb69b2c34deb40dc">&#9670;&#160;</a></span>account_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="XTP2_82_832_82_2xtp__api__data__type_8h.html#af3ba1683bf1ca36dcbd2b08977c0876b">XTP_ACCOUNT_TYPE</a> XTPQueryAssetRsp::account_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>账户类型 </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00329">329</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aed6da27d7d2efc7f0fbdbb20c052cf86" name="aed6da27d7d2efc7f0fbdbb20c052cf86"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed6da27d7d2efc7f0fbdbb20c052cf86">&#9670;&#160;</a></span>banlance</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::banlance</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>当前余额（仅限期权账户） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00344">344</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a85fdcb73ffe7dc7f19ceaa091475c0ca" name="a85fdcb73ffe7dc7f19ceaa091475c0ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85fdcb73ffe7dc7f19ceaa091475c0ca">&#9670;&#160;</a></span>buying_power</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::buying_power</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>可用资金 </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00315">315</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abbf4281127384a94114f9037e30388d8" name="abbf4281127384a94114f9037e30388d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abbf4281127384a94114f9037e30388d8">&#9670;&#160;</a></span>captial_asset</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::captial_asset</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>资金资产（仅限期权账户） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00350">350</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a79424f69858a3cd7b6c998aed5e60a91" name="a79424f69858a3cd7b6c998aed5e60a91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79424f69858a3cd7b6c998aed5e60a91">&#9670;&#160;</a></span>company_cur_risk_degree</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::company_cur_risk_degree</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>公司实时风险度（仅限期权账户,后续服务器版本支持，目前为0） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00372">372</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a24c11acb987c909dc3def0c4bd6edf22" name="a24c11acb987c909dc3def0c4bd6edf22"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24c11acb987c909dc3def0c4bd6edf22">&#9670;&#160;</a></span>deposit_withdraw</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::deposit_withdraw</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>当天出入金（仅限期权账户） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00346">346</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab0b8b24a253c4976aa501130d38f0bc5" name="ab0b8b24a253c4976aa501130d38f0bc5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0b8b24a253c4976aa501130d38f0bc5">&#9670;&#160;</a></span>exchange_cur_risk_degree</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::exchange_cur_risk_degree</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>交易所实时风险度（仅限期权账户,后续服务器版本支持，目前为0） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00370">370</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afb2d85cb8f26974945ee412a00833b50" name="afb2d85cb8f26974945ee412a00833b50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb2d85cb8f26974945ee412a00833b50">&#9670;&#160;</a></span>force_freeze_amount</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::force_freeze_amount</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>强锁资金（仅限期权账户） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00353">353</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4f65aeb68399f72127cf30da1f6dcb00" name="a4f65aeb68399f72127cf30da1f6dcb00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f65aeb68399f72127cf30da1f6dcb00">&#9670;&#160;</a></span>frozen_exec_cash</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::frozen_exec_cash</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>行权冻结资金（仅限期权账户） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00334">334</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2c01bc596fe412a3d40d3ee919c538f5" name="a2c01bc596fe412a3d40d3ee919c538f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c01bc596fe412a3d40d3ee919c538f5">&#9670;&#160;</a></span>frozen_exec_fee</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::frozen_exec_fee</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>行权费用（仅限期权账户） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00336">336</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7b5162fbd1ee7e7305ffd05e7ce59b03" name="a7b5162fbd1ee7e7305ffd05e7ce59b03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b5162fbd1ee7e7305ffd05e7ce59b03">&#9670;&#160;</a></span>frozen_margin</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::frozen_margin</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>冻结的保证金（仅限期权账户） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00332">332</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac1b04db0ecb8858667fee5121966b0c1" name="ac1b04db0ecb8858667fee5121966b0c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1b04db0ecb8858667fee5121966b0c1">&#9670;&#160;</a></span>fund_buy_amount</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::fund_buy_amount</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>累计买入成交证券占用资金（仅限现货账户/期权账户，信用账户暂不可用） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00319">319</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1897e0778be52e48b1ab843dd378fb13" name="a1897e0778be52e48b1ab843dd378fb13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1897e0778be52e48b1ab843dd378fb13">&#9670;&#160;</a></span>fund_buy_fee</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::fund_buy_fee</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>累计买入成交交易费用（仅限现货账户/期权账户，信用账户暂不可用） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00321">321</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5a49ad583c316380417ebedd495f1fce" name="a5a49ad583c316380417ebedd495f1fce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a49ad583c316380417ebedd495f1fce">&#9670;&#160;</a></span>fund_cancel_data_charges</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::fund_cancel_data_charges</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>累计撤单流量费 </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00366">366</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2793d8d9f6876a225dda4f132fc566fa" name="a2793d8d9f6876a225dda4f132fc566fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2793d8d9f6876a225dda4f132fc566fa">&#9670;&#160;</a></span>fund_order_data_charges</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::fund_order_data_charges</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>累计订单流量费 </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00364">364</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7baf9d7b0b49242d154df49e94a00ce4" name="a7baf9d7b0b49242d154df49e94a00ce4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7baf9d7b0b49242d154df49e94a00ce4">&#9670;&#160;</a></span>fund_sell_amount</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::fund_sell_amount</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>累计卖出成交证券所得资金（仅限现货账户/期权账户，信用账户暂不可用） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00323">323</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5224766946cb01ca03ce8080e101c047" name="a5224766946cb01ca03ce8080e101c047"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5224766946cb01ca03ce8080e101c047">&#9670;&#160;</a></span>fund_sell_fee</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::fund_sell_fee</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>累计卖出成交交易费用（仅限现货账户/期权账户，信用账户暂不可用） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00325">325</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a713b8295f601d3255f40aa1f425e2dbb" name="a713b8295f601d3255f40aa1f425e2dbb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a713b8295f601d3255f40aa1f425e2dbb">&#9670;&#160;</a></span>orig_banlance</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::orig_banlance</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>昨日余额（仅限期权账户） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00342">342</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4b603de5031fc158cf108e596903bcde" name="a4b603de5031fc158cf108e596903bcde"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b603de5031fc158cf108e596903bcde">&#9670;&#160;</a></span>pay_later</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::pay_later</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>垫付资金（仅限期权账户） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00338">338</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9a71a9aba81ab56dd45460bb978fdd04" name="a9a71a9aba81ab56dd45460bb978fdd04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a71a9aba81ab56dd45460bb978fdd04">&#9670;&#160;</a></span>preadva_pay</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::preadva_pay</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>预垫付资金（仅限期权账户） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00340">340</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a08137d809e1b20ec69f1c200adb2764e" name="a08137d809e1b20ec69f1c200adb2764e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08137d809e1b20ec69f1c200adb2764e">&#9670;&#160;</a></span>preferred_amount</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::preferred_amount</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>可取资金（仅限期权账户） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00355">355</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a472e66636764dab8f87c30c30684c75f" name="a472e66636764dab8f87c30c30684c75f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a472e66636764dab8f87c30c30684c75f">&#9670;&#160;</a></span>repay_stock_aval_banlance</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::repay_stock_aval_banlance</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>融券卖出所得资金余额（仅限信用账户，只能用于买券还券） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00359">359</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6f52bda5af2a09c82db0fd9b2d30e577" name="a6f52bda5af2a09c82db0fd9b2d30e577"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f52bda5af2a09c82db0fd9b2d30e577">&#9670;&#160;</a></span>security_asset</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::security_asset</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>证券资产（保留字段，目前为0） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00317">317</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab3059f4057275465e55b763e60d685b3" name="ab3059f4057275465e55b763e60d685b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3059f4057275465e55b763e60d685b3">&#9670;&#160;</a></span>total_asset</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::total_asset</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>总资产（现货账户/期权账户参考公式：总资产 = 可用资金 + 证券资产（目前为0）+ 预扣的资金），（信用账户参考公式：总资产 = 可用资金 + 融券卖出所得资金余额 + 证券资产+ 预扣的资金） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00313">313</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afa9791c671821413974989f8ae12810e" name="afa9791c671821413974989f8ae12810e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa9791c671821413974989f8ae12810e">&#9670;&#160;</a></span>trade_netting</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::trade_netting</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>当日交易资金轧差（仅限期权账户） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00348">348</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5da9df541d6945433b325610dd2e63db" name="a5da9df541d6945433b325610dd2e63db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5da9df541d6945433b325610dd2e63db">&#9670;&#160;</a></span>unknown</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t XTPQueryAssetRsp::unknown</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>(保留字段) </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00376">376</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0de7f3c9a8950fc4341776fb92571a82" name="a0de7f3c9a8950fc4341776fb92571a82"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0de7f3c9a8950fc4341776fb92571a82">&#9670;&#160;</a></span>withholding_amount</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double XTPQueryAssetRsp::withholding_amount</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>XTP系统预扣的资金（包括买卖股票时预扣的交易资金+预扣手续费） </p>
+
+<p class="definition">在文件 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a> 第 <a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html#l00327">327</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该结构体的文档由以下文件生成:<ul>
+<li>src/API/XTP2.2.32.2/<a class="el" href="XTP2_82_832_82_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a></li>
+<li>src/API/XTPXAlgo/include/<a class="el" href="XTPXAlgo_2include_2xoms__api__struct_8h_source.html">xoms_api_struct.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="structXTPQueryAssetRsp.html">XTPQueryAssetRsp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

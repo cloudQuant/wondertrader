@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtUftStraFact/WtUftStraDemo.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtUftStraDemo_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtUftStraDemo.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtUftStraDemo_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;unordered_set&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;thread&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;mutex&gt;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../Includes/UftStrategyDefs.h&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;../Share/SpinMutex.hpp&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="foldopen" id="foldopen00025" data-start="{" data-end="};">
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html">   25</a></span><span class="keyword">class </span><a class="code hl_class" href="classWtUftStraDemo.html">WtUftStraDemo</a> : <span class="keyword">public</span> <a class="code hl_class" href="classUftStrategy.html">UftStrategy</a></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>{</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <a class="code hl_class" href="classWtUftStraDemo.html">WtUftStraDemo</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <a class="code hl_function" href="classWtUftStraDemo.html#ad0c112e569a877afad19d641d2370f7e">~WtUftStraDemo</a>();</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classWtUftStraDemo.html#ac90451d5eb720af565dcfe4288461107">check_orders</a>();</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtUftStraDemo.html#a311e2c1aa3100dd79a93fc1727cfc59a">getName</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtUftStraDemo.html#a599af78fec17ad150919688dd13f8f27">getFactName</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtUftStraDemo.html#abca72abef22c2cc39c21f47c1dd79d3a">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a9b3b99a159e85492fbb5617868fe474f">on_init</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a30a9fc1378e1f186fb26213e896f4641">on_tick</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a66583d927b2c79aa075aaf3d15dbf3d4">on_bar</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, uint32_t times, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* newBar) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a634baaf5aa64017c1fed9771a3ee59e0">on_trade</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx, uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isLong, uint32_t offset, <span class="keywordtype">double</span> qty, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a9a6f5e5f5987f7467bea2f4f2901d5b0">on_position</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isLong, <span class="keywordtype">double</span> prevol, <span class="keywordtype">double</span> preavail, <span class="keywordtype">double</span> newvol, <span class="keywordtype">double</span> newavail) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a33550cdaa29931a1d89023a9243d9fa5">on_order</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx, uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isLong, uint32_t offset, <span class="keywordtype">double</span> totalQty, <span class="keywordtype">double</span> leftQty, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <span class="keywordtype">bool</span> isCanceled) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a0102d1c22b4902a480694ecd0926b96d">on_channel_ready</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span> </div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#ae13982f8659316fb2aad3b35bbc1c975">on_channel_lost</a>(<a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>* ctx) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#adae01dee054d86f6280f43d468e9dbb2">on_params_updated</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span> </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtUftStraDemo.html#a83bc3c7a65424769f2c2aa3de2ff5281">on_entrust</a>(uint32_t localid, <span class="keywordtype">bool</span> bSuccess, <span class="keyword">const</span> <span class="keywordtype">char</span>* message) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a073dfebdb8073387ded52caf77e01ae8">  170</a></span>    <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>*    <a class="code hl_variable" href="classWtUftStraDemo.html#a073dfebdb8073387ded52caf77e01ae8">_last_tick</a>;</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">  172</a></span>    <a class="code hl_class" href="classIUftStraCtx.html">IUftStraCtx</a>*    <a class="code hl_variable" href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">_ctx</a>;</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a9bdf226a36e0f034c31c57e44ac8af8c">  174</a></span>    std::string     <a class="code hl_variable" href="classWtUftStraDemo.html#a9bdf226a36e0f034c31c57e44ac8af8c">_code</a>;</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a5254ae4adb8418066ee6b0fd9c452568">  176</a></span>    uint32_t        <a class="code hl_variable" href="classWtUftStraDemo.html#a5254ae4adb8418066ee6b0fd9c452568">_secs</a>;</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a333d9231796c0d0de8b747a368ee247e">  178</a></span>    uint32_t        <a class="code hl_variable" href="classWtUftStraDemo.html#a333d9231796c0d0de8b747a368ee247e">_freq</a>;</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#abde399df409bb7014a419520d9695337">  180</a></span>    int32_t         <a class="code hl_variable" href="classWtUftStraDemo.html#abde399df409bb7014a419520d9695337">_offset</a>;</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#ac6d67fe9ab777ead707cf441d7679b32">  182</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classWtUftStraDemo.html#ac6d67fe9ab777ead707cf441d7679b32">_lots</a>;</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#afc9273b9acd37e94bc8e6f149b99cb1c">  184</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classWtUftStraDemo.html#afc9273b9acd37e94bc8e6f149b99cb1c">_prev</a>;</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a49165b5e539f35d32a7d7b2cf0b06387">  187</a></span>    <span class="keyword">typedef</span> std::unordered_set&lt;uint32_t&gt; <a class="code hl_typedef" href="classWtUftStraDemo.html#a49165b5e539f35d32a7d7b2cf0b06387">IDSet</a>;</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">  189</a></span>    <a class="code hl_typedef" href="classWtUftStraDemo.html#a49165b5e539f35d32a7d7b2cf0b06387">IDSet</a>           <a class="code hl_variable" href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">_orders</a>;</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a9a14b0eb4ec60566a395bcd6955530e6">  191</a></span>    <a class="code hl_class" href="classSpinMutex.html">SpinMutex</a>       <a class="code hl_variable" href="classWtUftStraDemo.html#a9a14b0eb4ec60566a395bcd6955530e6">_mtx_ords</a>;</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span> </div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#aaa311b8ee47a030ddc7bb9576c21724d">  194</a></span>    uint64_t        <a class="code hl_variable" href="classWtUftStraDemo.html#aaa311b8ee47a030ddc7bb9576c21724d">_last_entry_time</a>;</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a283154f51a05bda19108ee15f5fa28ea">  197</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classWtUftStraDemo.html#a283154f51a05bda19108ee15f5fa28ea">_channel_ready</a>;</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#a2bc91850e2fec69fd7abe34e43617c98">  199</a></span>    uint32_t        <a class="code hl_variable" href="classWtUftStraDemo.html#a2bc91850e2fec69fd7abe34e43617c98">_last_calc_time</a>;</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno"><a class="line" href="classWtUftStraDemo.html#ad4d4e3b871e7a164ec2d2e7a88c1aa23">  201</a></span>    uint32_t        <a class="code hl_variable" href="classWtUftStraDemo.html#ad4d4e3b871e7a164ec2d2e7a88c1aa23">_cancel_cnt</a>;</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>};</div>
+</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span> </div>
+<div class="ttc" id="aclassIUftStraCtx_html"><div class="ttname"><a href="classIUftStraCtx.html">IUftStraCtx</a></div><div class="ttdef"><b>Definition</b> <a href="IUftStraCtx_8h_source.html#l00031">IUftStraCtx.h:32</a></div></div>
+<div class="ttc" id="aclassSpinMutex_html"><div class="ttname"><a href="classSpinMutex.html">SpinMutex</a></div><div class="ttdoc">自旋互斥锁类</div><div class="ttdef"><b>Definition</b> <a href="SpinMutex_8hpp_source.html#l00024">SpinMutex.hpp:25</a></div></div>
+<div class="ttc" id="aclassUftStrategy_html"><div class="ttname"><a href="classUftStrategy.html">UftStrategy</a></div><div class="ttdef"><b>Definition</b> <a href="UftStrategyDefs_8h_source.html#l00028">UftStrategyDefs.h:29</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html"><div class="ttname"><a href="classWtUftStraDemo.html">WtUftStraDemo</a></div><div class="ttdoc">UFT策略演示类</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00025">WtUftStraDemo.h:26</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a0102d1c22b4902a480694ecd0926b96d"><div class="ttname"><a href="classWtUftStraDemo.html#a0102d1c22b4902a480694ecd0926b96d">WtUftStraDemo::on_channel_ready</a></div><div class="ttdeci">virtual void on_channel_ready(IUftStraCtx *ctx) override</div><div class="ttdoc">交易通道就绪回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00382">WtUftStraDemo.cpp:382</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a02cf7e06345d25024ff00b5a576bb921"><div class="ttname"><a href="classWtUftStraDemo.html#a02cf7e06345d25024ff00b5a576bb921">WtUftStraDemo::_orders</a></div><div class="ttdeci">IDSet _orders</div><div class="ttdoc">当前活跃订单ID集合</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00189">WtUftStraDemo.h:189</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a073dfebdb8073387ded52caf77e01ae8"><div class="ttname"><a href="classWtUftStraDemo.html#a073dfebdb8073387ded52caf77e01ae8">WtUftStraDemo::_last_tick</a></div><div class="ttdeci">WTSTickData * _last_tick</div><div class="ttdoc">最后一个Tick数据</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00170">WtUftStraDemo.h:170</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a283154f51a05bda19108ee15f5fa28ea"><div class="ttname"><a href="classWtUftStraDemo.html#a283154f51a05bda19108ee15f5fa28ea">WtUftStraDemo::_channel_ready</a></div><div class="ttdeci">bool _channel_ready</div><div class="ttdoc">交易通道是否就绪</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00197">WtUftStraDemo.h:197</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a2bc91850e2fec69fd7abe34e43617c98"><div class="ttname"><a href="classWtUftStraDemo.html#a2bc91850e2fec69fd7abe34e43617c98">WtUftStraDemo::_last_calc_time</a></div><div class="ttdeci">uint32_t _last_calc_time</div><div class="ttdoc">最后一次计算时间（分钟）</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00199">WtUftStraDemo.h:199</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a30a9fc1378e1f186fb26213e896f4641"><div class="ttname"><a href="classWtUftStraDemo.html#a30a9fc1378e1f186fb26213e896f4641">WtUftStraDemo::on_tick</a></div><div class="ttdeci">virtual void on_tick(IUftStraCtx *ctx, const char *code, WTSTickData *newTick) override</div><div class="ttdoc">Tick数据回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00144">WtUftStraDemo.cpp:144</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a311e2c1aa3100dd79a93fc1727cfc59a"><div class="ttname"><a href="classWtUftStraDemo.html#a311e2c1aa3100dd79a93fc1727cfc59a">WtUftStraDemo::getName</a></div><div class="ttdeci">virtual const char * getName() override</div><div class="ttdoc">获取策略名称</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00057">WtUftStraDemo.cpp:57</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a333d9231796c0d0de8b747a368ee247e"><div class="ttname"><a href="classWtUftStraDemo.html#a333d9231796c0d0de8b747a368ee247e">WtUftStraDemo::_freq</a></div><div class="ttdeci">uint32_t _freq</div><div class="ttdoc">交易频率控制，以毫秒为单位</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00178">WtUftStraDemo.h:178</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a33550cdaa29931a1d89023a9243d9fa5"><div class="ttname"><a href="classWtUftStraDemo.html#a33550cdaa29931a1d89023a9243d9fa5">WtUftStraDemo::on_order</a></div><div class="ttdeci">virtual void on_order(IUftStraCtx *ctx, uint32_t localid, const char *stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled) override</div><div class="ttdoc">订单状态回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00352">WtUftStraDemo.cpp:352</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a49165b5e539f35d32a7d7b2cf0b06387"><div class="ttname"><a href="classWtUftStraDemo.html#a49165b5e539f35d32a7d7b2cf0b06387">WtUftStraDemo::IDSet</a></div><div class="ttdeci">std::unordered_set&lt; uint32_t &gt; IDSet</div><div class="ttdoc">订单ID集合类型定义</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00187">WtUftStraDemo.h:187</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a5254ae4adb8418066ee6b0fd9c452568"><div class="ttname"><a href="classWtUftStraDemo.html#a5254ae4adb8418066ee6b0fd9c452568">WtUftStraDemo::_secs</a></div><div class="ttdeci">uint32_t _secs</div><div class="ttdoc">检查订单超时的秒数</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00176">WtUftStraDemo.h:176</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a599af78fec17ad150919688dd13f8f27"><div class="ttname"><a href="classWtUftStraDemo.html#a599af78fec17ad150919688dd13f8f27">WtUftStraDemo::getFactName</a></div><div class="ttdeci">virtual const char * getFactName() override</div><div class="ttdoc">获取策略所属工厂名称</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00067">WtUftStraDemo.cpp:67</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a634baaf5aa64017c1fed9771a3ee59e0"><div class="ttname"><a href="classWtUftStraDemo.html#a634baaf5aa64017c1fed9771a3ee59e0">WtUftStraDemo::on_trade</a></div><div class="ttdeci">virtual void on_trade(IUftStraCtx *ctx, uint32_t localid, const char *stdCode, bool isLong, uint32_t offset, double qty, double price) override</div><div class="ttdoc">成交回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00311">WtUftStraDemo.cpp:311</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a66583d927b2c79aa075aaf3d15dbf3d4"><div class="ttname"><a href="classWtUftStraDemo.html#a66583d927b2c79aa075aaf3d15dbf3d4">WtUftStraDemo::on_bar</a></div><div class="ttdeci">virtual void on_bar(IUftStraCtx *ctx, const char *code, const char *period, uint32_t times, WTSBarStruct *newBar) override</div><div class="ttdoc">K线数据回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00295">WtUftStraDemo.cpp:295</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a6b9587bcf3f355a0f52373fc69a96244"><div class="ttname"><a href="classWtUftStraDemo.html#a6b9587bcf3f355a0f52373fc69a96244">WtUftStraDemo::_ctx</a></div><div class="ttdeci">IUftStraCtx * _ctx</div><div class="ttdoc">策略上下文指针</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00172">WtUftStraDemo.h:172</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a83bc3c7a65424769f2c2aa3de2ff5281"><div class="ttname"><a href="classWtUftStraDemo.html#a83bc3c7a65424769f2c2aa3de2ff5281">WtUftStraDemo::on_entrust</a></div><div class="ttdeci">virtual void on_entrust(uint32_t localid, bool bSuccess, const char *message) override</div><div class="ttdoc">委托回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00098">WtUftStraDemo.cpp:98</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a9a14b0eb4ec60566a395bcd6955530e6"><div class="ttname"><a href="classWtUftStraDemo.html#a9a14b0eb4ec60566a395bcd6955530e6">WtUftStraDemo::_mtx_ords</a></div><div class="ttdeci">SpinMutex _mtx_ords</div><div class="ttdoc">订单集合访问互斥锁</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00191">WtUftStraDemo.h:191</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a9a6f5e5f5987f7467bea2f4f2901d5b0"><div class="ttname"><a href="classWtUftStraDemo.html#a9a6f5e5f5987f7467bea2f4f2901d5b0">WtUftStraDemo::on_position</a></div><div class="ttdeci">virtual void on_position(IUftStraCtx *ctx, const char *stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail) override</div><div class="ttdoc">持仓变更回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00327">WtUftStraDemo.cpp:327</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a9b3b99a159e85492fbb5617868fe474f"><div class="ttname"><a href="classWtUftStraDemo.html#a9b3b99a159e85492fbb5617868fe474f">WtUftStraDemo::on_init</a></div><div class="ttdeci">virtual void on_init(IUftStraCtx *ctx) override</div><div class="ttdoc">策略初始化回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00116">WtUftStraDemo.cpp:116</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_a9bdf226a36e0f034c31c57e44ac8af8c"><div class="ttname"><a href="classWtUftStraDemo.html#a9bdf226a36e0f034c31c57e44ac8af8c">WtUftStraDemo::_code</a></div><div class="ttdeci">std::string _code</div><div class="ttdoc">交易品种代码</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00174">WtUftStraDemo.h:174</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_aaa311b8ee47a030ddc7bb9576c21724d"><div class="ttname"><a href="classWtUftStraDemo.html#aaa311b8ee47a030ddc7bb9576c21724d">WtUftStraDemo::_last_entry_time</a></div><div class="ttdeci">uint64_t _last_entry_time</div><div class="ttdoc">最后一次入场时间</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00194">WtUftStraDemo.h:194</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_abca72abef22c2cc39c21f47c1dd79d3a"><div class="ttname"><a href="classWtUftStraDemo.html#abca72abef22c2cc39c21f47c1dd79d3a">WtUftStraDemo::init</a></div><div class="ttdeci">virtual bool init(WTSVariant *cfg) override</div><div class="ttdoc">初始化策略</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00078">WtUftStraDemo.cpp:78</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_abde399df409bb7014a419520d9695337"><div class="ttname"><a href="classWtUftStraDemo.html#abde399df409bb7014a419520d9695337">WtUftStraDemo::_offset</a></div><div class="ttdeci">int32_t _offset</div><div class="ttdoc">下单价格偏移跳数</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00180">WtUftStraDemo.h:180</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_ac6d67fe9ab777ead707cf441d7679b32"><div class="ttname"><a href="classWtUftStraDemo.html#ac6d67fe9ab777ead707cf441d7679b32">WtUftStraDemo::_lots</a></div><div class="ttdeci">double _lots</div><div class="ttdoc">交易手数</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00182">WtUftStraDemo.h:182</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_ac90451d5eb720af565dcfe4288461107"><div class="ttname"><a href="classWtUftStraDemo.html#ac90451d5eb720af565dcfe4288461107">WtUftStraDemo::check_orders</a></div><div class="ttdeci">void check_orders()</div><div class="ttdoc">检查订单状态</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00260">WtUftStraDemo.cpp:260</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_ad0c112e569a877afad19d641d2370f7e"><div class="ttname"><a href="classWtUftStraDemo.html#ad0c112e569a877afad19d641d2370f7e">WtUftStraDemo::~WtUftStraDemo</a></div><div class="ttdeci">~WtUftStraDemo()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00045">WtUftStraDemo.cpp:45</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_ad4d4e3b871e7a164ec2d2e7a88c1aa23"><div class="ttname"><a href="classWtUftStraDemo.html#ad4d4e3b871e7a164ec2d2e7a88c1aa23">WtUftStraDemo::_cancel_cnt</a></div><div class="ttdeci">uint32_t _cancel_cnt</div><div class="ttdoc">撤单计数器</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00201">WtUftStraDemo.h:201</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_adae01dee054d86f6280f43d468e9dbb2"><div class="ttname"><a href="classWtUftStraDemo.html#adae01dee054d86f6280f43d468e9dbb2">WtUftStraDemo::on_params_updated</a></div><div class="ttdeci">virtual void on_params_updated() override</div><div class="ttdoc">策略参数更新回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00425">WtUftStraDemo.cpp:425</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_ae13982f8659316fb2aad3b35bbc1c975"><div class="ttname"><a href="classWtUftStraDemo.html#ae13982f8659316fb2aad3b35bbc1c975">WtUftStraDemo::on_channel_lost</a></div><div class="ttdeci">virtual void on_channel_lost(IUftStraCtx *ctx) override</div><div class="ttdoc">交易通道中断回调</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8cpp_source.html#l00415">WtUftStraDemo.cpp:415</a></div></div>
+<div class="ttc" id="aclassWtUftStraDemo_html_afc9273b9acd37e94bc8e6f149b99cb1c"><div class="ttname"><a href="classWtUftStraDemo.html#afc9273b9acd37e94bc8e6f149b99cb1c">WtUftStraDemo::_prev</a></div><div class="ttdeci">double _prev</div><div class="ttdoc">前一交易日持仓</div><div class="ttdef"><b>Definition</b> <a href="WtUftStraDemo_8h_source.html#l00184">WtUftStraDemo.h:184</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_a04f887fc8800d4727971dbb8eb550132"><div class="ttname"><a href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a></div><div class="ttdeci">ATPPriceType price</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00040">main.cpp:40</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_b83e7b1a28fa0ddd43e819a050ea4044.html">WtUftStraFact</a></li><li class="navelem"><a class="el" href="WtUftStraDemo_8h.html">WtUftStraDemo.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

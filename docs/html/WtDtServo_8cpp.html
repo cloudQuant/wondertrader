@@ -1,0 +1,857 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtDtServo/WtDtServo.cpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtDtServo_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">WtDtServo.cpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>数据服务对外接口实现  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="WtDtServo_8h_source.html">WtDtServo.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WtDtServo_2WtDtRunner_8h_source.html">WtDtRunner.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WtDtCore_2WtHelper_8h_source.html">../WtDtCore/WtHelper.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSLogger_8h_source.html">../WTSTools/WTSLogger.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="ModuleHelper_8hpp_source.html">../Share/ModuleHelper.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSVersion_8h_source.html">../Includes/WTSVersion.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSDataDef_8hpp_source.html">../Includes/WTSDataDef.hpp</a>&quot;</code><br />
+<code>#include &lt;boost/filesystem.hpp&gt;</code><br />
+</div>
+<p><a href="WtDtServo_8cpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a046d496fdc3bf2de86bcdbcb276f592d" id="r_a046d496fdc3bf2de86bcdbcb276f592d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtDtRunner.html">WtDtRunner</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtServo_8cpp.html#a046d496fdc3bf2de86bcdbcb276f592d">getRunner</a> ()</td></tr>
+<tr class="memdesc:a046d496fdc3bf2de86bcdbcb276f592d"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取数据服务运行器单例  <br /></td></tr>
+<tr class="separator:a046d496fdc3bf2de86bcdbcb276f592d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc9f222d428fe36931581c0c1cfa4e1a" id="r_abc9f222d428fe36931581c0c1cfa4e1a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtServo_8cpp.html#abc9f222d428fe36931581c0c1cfa4e1a">initialize</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> cfgFile, bool isFile, <a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> logCfg, <a class="el" href="WtDtServo_2PorterDefs_8h.html#a010d19afcaf8e2100837ee253c2888f4">FuncOnTickCallback</a> cbTick, <a class="el" href="WtDtServo_2PorterDefs_8h.html#a86124df75199b879fccd96d387ea3864">FuncOnBarCallback</a> cbBar)</td></tr>
+<tr class="memdesc:abc9f222d428fe36931581c0c1cfa4e1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化数据服务模块  <br /></td></tr>
+<tr class="separator:abc9f222d428fe36931581c0c1cfa4e1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada199ed63f32eb9f9d6ce141d5d820ec" id="r_ada199ed63f32eb9f9d6ce141d5d820ec"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtServo_8cpp.html#ada199ed63f32eb9f9d6ce141d5d820ec">get_version</a> ()</td></tr>
+<tr class="memdesc:ada199ed63f32eb9f9d6ce141d5d820ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取数据服务模块版本号  <br /></td></tr>
+<tr class="separator:ada199ed63f32eb9f9d6ce141d5d820ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08d5ca0dcdb7df4f1122bb833f9c97e7" id="r_a08d5ca0dcdb7df4f1122bb833f9c97e7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtServo_8cpp.html#a08d5ca0dcdb7df4f1122bb833f9c97e7">get_bars_by_range</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *period, <a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a> beginTime, <a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a> endTime, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#aa50d30d10ed7c19942ff7c599313947e">FuncGetBarsCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt)</td></tr>
+<tr class="memdesc:a08d5ca0dcdb7df4f1122bb833f9c97e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据时间范围获取K线数据  <br /></td></tr>
+<tr class="separator:a08d5ca0dcdb7df4f1122bb833f9c97e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa4387cabe6b0f762ffda77662b24ed4" id="r_afa4387cabe6b0f762ffda77662b24ed4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtServo_8cpp.html#afa4387cabe6b0f762ffda77662b24ed4">get_bars_by_date</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *period, <a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> uDate, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#aa50d30d10ed7c19942ff7c599313947e">FuncGetBarsCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt)</td></tr>
+<tr class="memdesc:afa4387cabe6b0f762ffda77662b24ed4"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据日期获取K线数据  <br /></td></tr>
+<tr class="separator:afa4387cabe6b0f762ffda77662b24ed4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a876e329ef457e9473039ff488f937f2b" id="r_a876e329ef457e9473039ff488f937f2b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtServo_8cpp.html#a876e329ef457e9473039ff488f937f2b">get_ticks_by_range</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a> beginTime, <a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a> endTime, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#a8b92e6a2486fb919bc36cdf65da1a33e">FuncGetTicksCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt)</td></tr>
+<tr class="memdesc:a876e329ef457e9473039ff488f937f2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据时间范围获取Tick数据  <br /></td></tr>
+<tr class="separator:a876e329ef457e9473039ff488f937f2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3056b4580cbc2d62369e6f84f450b64" id="r_ae3056b4580cbc2d62369e6f84f450b64"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtServo_8cpp.html#ae3056b4580cbc2d62369e6f84f450b64">get_bars_by_count</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *period, <a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> count, <a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a> endTime, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#aa50d30d10ed7c19942ff7c599313947e">FuncGetBarsCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt)</td></tr>
+<tr class="memdesc:ae3056b4580cbc2d62369e6f84f450b64"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据数量和结束时间获取K线数据  <br /></td></tr>
+<tr class="separator:ae3056b4580cbc2d62369e6f84f450b64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21866743cc5a5528ff18f0ab0ac57737" id="r_a21866743cc5a5528ff18f0ab0ac57737"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtServo_8cpp.html#a21866743cc5a5528ff18f0ab0ac57737">get_ticks_by_count</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> count, <a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a> endTime, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#a8b92e6a2486fb919bc36cdf65da1a33e">FuncGetTicksCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt)</td></tr>
+<tr class="memdesc:a21866743cc5a5528ff18f0ab0ac57737"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据数量和结束时间获取Tick数据  <br /></td></tr>
+<tr class="separator:a21866743cc5a5528ff18f0ab0ac57737"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85236b6e675ac097ad7094568e7cae69" id="r_a85236b6e675ac097ad7094568e7cae69"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtServo_8cpp.html#a85236b6e675ac097ad7094568e7cae69">get_ticks_by_date</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> uDate, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#a8b92e6a2486fb919bc36cdf65da1a33e">FuncGetTicksCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt)</td></tr>
+<tr class="memdesc:a85236b6e675ac097ad7094568e7cae69"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据日期获取Tick数据  <br /></td></tr>
+<tr class="separator:a85236b6e675ac097ad7094568e7cae69"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68c9125fe327146e3c23232fe232d5aa" id="r_a68c9125fe327146e3c23232fe232d5aa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtServo_8cpp.html#a68c9125fe327146e3c23232fe232d5aa">get_sbars_by_date</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> secs, <a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> uDate, <a class="el" href="WtBtPorter_2PorterDefs_8h.html#aa50d30d10ed7c19942ff7c599313947e">FuncGetBarsCallback</a> cb, <a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a> cbCnt)</td></tr>
+<tr class="memdesc:a68c9125fe327146e3c23232fe232d5aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">根据日期获取秒线K线数据  <br /></td></tr>
+<tr class="separator:a68c9125fe327146e3c23232fe232d5aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a45842e1061c2055c99119b383468c6" id="r_a9a45842e1061c2055c99119b383468c6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtServo_8cpp.html#a9a45842e1061c2055c99119b383468c6">subscribe_tick</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool bReplace)</td></tr>
+<tr class="memdesc:a9a45842e1061c2055c99119b383468c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅实时Tick数据  <br /></td></tr>
+<tr class="separator:a9a45842e1061c2055c99119b383468c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae24838b7f40072d9b569a7b3958b74e5" id="r_ae24838b7f40072d9b569a7b3958b74e5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtServo_8cpp.html#ae24838b7f40072d9b569a7b3958b74e5">subscribe_bar</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *period)</td></tr>
+<tr class="memdesc:ae24838b7f40072d9b569a7b3958b74e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅实时K线数据  <br /></td></tr>
+<tr class="separator:ae24838b7f40072d9b569a7b3958b74e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1b24bf0a745283c3348b2367e82c01a" id="r_ac1b24bf0a745283c3348b2367e82c01a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtServo_8cpp.html#ac1b24bf0a745283c3348b2367e82c01a">clear_cache</a> ()</td></tr>
+<tr class="memdesc:ac1b24bf0a745283c3348b2367e82c01a"><td class="mdescLeft">&#160;</td><td class="mdescRight">清理数据缓存  <br /></td></tr>
+<tr class="separator:ac1b24bf0a745283c3348b2367e82c01a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a1c00b66b793e799ab324e7092d25e54f" id="r_a1c00b66b793e799ab324e7092d25e54f"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtServo_8cpp.html#a1c00b66b793e799ab324e7092d25e54f">PLATFORM_NAME</a> [] = &quot;UNIX&quot;</td></tr>
+<tr class="separator:a1c00b66b793e799ab324e7092d25e54f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>数据服务对外接口实现 </p>
+<p>\project WonderTrader</p>
+<dl class="section author"><dt>作者</dt><dd>Wesley </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2020/03/30</dd></dl>
+<p>本文件实现了WtDtServo模块对外提供的C接口函数， 包括模块初始化、数据查询、数据订阅等功能。 这些接口封装了WtDtRunner类的功能，使其可以被其他语言调用。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="ac1b24bf0a745283c3348b2367e82c01a" name="ac1b24bf0a745283c3348b2367e82c01a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1b24bf0a745283c3348b2367e82c01a">&#9670;&#160;</a></span>clear_cache()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void clear_cache </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>清理数据缓存 </p>
+<p>清理缓存</p>
+<p>该函数调用WtDtRunner的clear_cache方法清理内存中的数据缓存。 在需要释放内存或重新加载数据时调用该函数。 清理缓存后，再次查询数据时会重新从存储中加载。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 第 <a class="el" href="WtDtServo_8cpp_source.html#l00402">402</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae3056b4580cbc2d62369e6f84f450b64" name="ae3056b4580cbc2d62369e6f84f450b64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3056b4580cbc2d62369e6f84f450b64">&#9670;&#160;</a></span>get_bars_by_count()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> get_bars_by_count </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a>&#160;</td>
+          <td class="paramname"><em>endTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#aa50d30d10ed7c19942ff7c599313947e">FuncGetBarsCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>根据数量和结束时间获取K线数据 </p>
+<p>根据数量获取K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码，格式如"SHFE.rb.HOT" </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期，如"m1"/"d1" </td></tr>
+    <tr><td class="paramname">count</td><td>要获取的K线数量 </td></tr>
+    <tr><td class="paramname">endTime</td><td>结束时间，格式为YYYYMMDDHHmmss，如果为0则表示当前时间 </td></tr>
+    <tr><td class="paramname">cb</td><td>K线数据获取回调函数，用于接收查询结果 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数，用于接收数据总数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 返回查询到的数据数量</dd></dl>
+<p>该函数调用WtDtRunner的get_bars_by_count方法获取指定数量的K线数据。 从结束时间往前查询指定数量的K线数据。 获取到数据后，首先通过cbCnt回调函数返回数据总数， 然后分块通过cb回调函数返回数据内容。 最后释放数据切片并返回数据数量。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 第 <a class="el" href="WtDtServo_8cpp_source.html#l00236">236</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afa4387cabe6b0f762ffda77662b24ed4" name="afa4387cabe6b0f762ffda77662b24ed4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa4387cabe6b0f762ffda77662b24ed4">&#9670;&#160;</a></span>get_bars_by_date()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> get_bars_by_date </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td>
+          <td class="paramname"><em>uDate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#aa50d30d10ed7c19942ff7c599313947e">FuncGetBarsCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>根据日期获取K线数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码，格式如"SHFE.rb.HOT" </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期，如"m1"/"d1" </td></tr>
+    <tr><td class="paramname">uDate</td><td>交易日期，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">cb</td><td>K线数据获取回调函数，用于接收查询结果 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数，用于接收数据总数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 返回查询到的数据数量</dd></dl>
+<p>该函数调用WtDtRunner的get_bars_by_date方法获取指定日期的K线数据。 获取到数据后，首先通过cbCnt回调函数返回数据总数， 然后分块通过cb回调函数返回数据内容。 最后释放数据切片并返回数据数量。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 第 <a class="el" href="WtDtServo_8cpp_source.html#l00162">162</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a08d5ca0dcdb7df4f1122bb833f9c97e7" name="a08d5ca0dcdb7df4f1122bb833f9c97e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08d5ca0dcdb7df4f1122bb833f9c97e7">&#9670;&#160;</a></span>get_bars_by_range()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> get_bars_by_range </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a>&#160;</td>
+          <td class="paramname"><em>beginTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a>&#160;</td>
+          <td class="paramname"><em>endTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#aa50d30d10ed7c19942ff7c599313947e">FuncGetBarsCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>根据时间范围获取K线数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码，格式如"SHFE.rb.HOT" </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期，如"m1"/"d1" </td></tr>
+    <tr><td class="paramname">beginTime</td><td>开始时间，格式为YYYYMMDDHHmmss </td></tr>
+    <tr><td class="paramname">endTime</td><td>结束时间，格式为YYYYMMDDHHmmss </td></tr>
+    <tr><td class="paramname">cb</td><td>K线数据获取回调函数，用于接收查询结果 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数，用于接收数据总数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 返回查询到的数据数量</dd></dl>
+<p>该函数调用WtDtRunner的get_bars_by_range方法获取指定时间范围的K线数据。 获取到数据后，首先通过cbCnt回调函数返回数据总数， 然后分块通过cb回调函数返回数据内容。 最后释放数据切片并返回数据数量。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 第 <a class="el" href="WtDtServo_8cpp_source.html#l00128">128</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a68c9125fe327146e3c23232fe232d5aa" name="a68c9125fe327146e3c23232fe232d5aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a68c9125fe327146e3c23232fe232d5aa">&#9670;&#160;</a></span>get_sbars_by_date()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> get_sbars_by_date </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td>
+          <td class="paramname"><em>secs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td>
+          <td class="paramname"><em>uDate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#aa50d30d10ed7c19942ff7c599313947e">FuncGetBarsCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>根据日期获取秒线K线数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码，格式如"SHFE.rb.HOT" </td></tr>
+    <tr><td class="paramname">secs</td><td>秒线周期，如常见的30秒成60秒 </td></tr>
+    <tr><td class="paramname">uDate</td><td>交易日期，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">cb</td><td>K线数据获取回调函数，用于接收查询结果 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数，用于接收数据总数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 返回查询到的数据数量</dd></dl>
+<p>该函数调用WtDtRunner的get_sbars_by_date方法获取指定日期的秒线K线数据。 秒线K线是指周期小于1分钟的K线，如30秒成60秒K线。 获取到数据后，首先通过cbCnt回调函数返回数据总数， 然后分块通过cb回调函数返回数据内容。 最后释放数据切片并返回数据数量。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 第 <a class="el" href="WtDtServo_8cpp_source.html#l00347">347</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a21866743cc5a5528ff18f0ab0ac57737" name="a21866743cc5a5528ff18f0ab0ac57737"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21866743cc5a5528ff18f0ab0ac57737">&#9670;&#160;</a></span>get_ticks_by_count()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> get_ticks_by_count </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a>&#160;</td>
+          <td class="paramname"><em>endTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#a8b92e6a2486fb919bc36cdf65da1a33e">FuncGetTicksCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>根据数量和结束时间获取Tick数据 </p>
+<p>根据数量获取Tick数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码，格式如"SHFE.rb.HOT" </td></tr>
+    <tr><td class="paramname">count</td><td>要获取的Tick数量 </td></tr>
+    <tr><td class="paramname">endTime</td><td>结束时间，格式为YYYYMMDDHHmmss，如果为0则表示当前时间 </td></tr>
+    <tr><td class="paramname">cb</td><td>Tick数据获取回调函数，用于接收查询结果 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数，用于接收数据总数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 返回查询到的数据数量</dd></dl>
+<p>该函数调用WtDtRunner的get_ticks_by_count方法获取指定数量的Tick数据。 从结束时间往前查询指定数量的Tick数据。 获取到数据后，首先通过cbCnt回调函数返回数据总数， 然后分块通过cb回调函数返回数据内容，并累计返回的数据数量。 最后释放数据切片并返回数据数量。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 第 <a class="el" href="WtDtServo_8cpp_source.html#l00271">271</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a85236b6e675ac097ad7094568e7cae69" name="a85236b6e675ac097ad7094568e7cae69"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85236b6e675ac097ad7094568e7cae69">&#9670;&#160;</a></span>get_ticks_by_date()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> get_ticks_by_date </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td>
+          <td class="paramname"><em>uDate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#a8b92e6a2486fb919bc36cdf65da1a33e">FuncGetTicksCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>根据日期获取Tick数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码，格式如"SHFE.rb.HOT" </td></tr>
+    <tr><td class="paramname">uDate</td><td>交易日期，格式为YYYYMMDD </td></tr>
+    <tr><td class="paramname">cb</td><td>Tick数据获取回调函数，用于接收查询结果 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数，用于接收数据总数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 返回查询到的数据数量</dd></dl>
+<p>该函数调用WtDtRunner的get_ticks_by_date方法获取指定日期的Tick数据。 获取到数据后，首先通过cbCnt回调函数返回数据总数， 然后分块通过cb回调函数返回数据内容，并累计返回的数据数量。 最后释放数据切片并返回数据数量。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 第 <a class="el" href="WtDtServo_8cpp_source.html#l00308">308</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a876e329ef457e9473039ff488f937f2b" name="a876e329ef457e9473039ff488f937f2b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a876e329ef457e9473039ff488f937f2b">&#9670;&#160;</a></span>get_ticks_by_range()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> get_ticks_by_range </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a>&#160;</td>
+          <td class="paramname"><em>beginTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a22e9f586e6dc9b793483da4daa24ef8d">WtUInt64</a>&#160;</td>
+          <td class="paramname"><em>endTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtBtPorter_2PorterDefs_8h.html#a8b92e6a2486fb919bc36cdf65da1a33e">FuncGetTicksCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtHelper_8h.html#a59a923c5c49ee3b94c4cc9c0a6f43a21">FuncCountDataCallback</a>&#160;</td>
+          <td class="paramname"><em>cbCnt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>根据时间范围获取Tick数据 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码，格式如"SHFE.rb.HOT" </td></tr>
+    <tr><td class="paramname">beginTime</td><td>开始时间，格式为YYYYMMDDHHmmss </td></tr>
+    <tr><td class="paramname">endTime</td><td>结束时间，格式为YYYYMMDDHHmmss </td></tr>
+    <tr><td class="paramname">cb</td><td>Tick数据获取回调函数，用于接收查询结果 </td></tr>
+    <tr><td class="paramname">cbCnt</td><td>数据计数回调函数，用于接收数据总数 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>WtUInt32 返回查询到的数据数量</dd></dl>
+<p>该函数调用WtDtRunner的get_ticks_by_range方法获取指定时间范围的Tick数据。 获取到数据后，首先通过cbCnt回调函数返回数据总数， 然后分块通过cb回调函数返回数据内容，并累计返回的数据数量。 最后释放数据切片并返回数据数量。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 第 <a class="el" href="WtDtServo_8cpp_source.html#l00196">196</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ada199ed63f32eb9f9d6ce141d5d820ec" name="ada199ed63f32eb9f9d6ce141d5d820ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada199ed63f32eb9f9d6ce141d5d820ec">&#9670;&#160;</a></span>get_version()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * get_version </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取数据服务模块版本号 </p>
+<p>获取模块版本信息</p>
+<p>获取版本信息</p>
+<dl class="section return"><dt>返回</dt><dd>const char* 版本号字符串</dd></dl>
+<p>该函数返回数据服务模块的版本号字符串，包含平台名称、版本号和编译时间。 使用静态字符串缓存版本信息，避免重复生成。 返回的字符串格式例如："X64 1.0.0 Build@Mar 30 2020 10:00:00" </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 第 <a class="el" href="WtDtServo_8cpp_source.html#l00097">97</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a046d496fdc3bf2de86bcdbcb276f592d" name="a046d496fdc3bf2de86bcdbcb276f592d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a046d496fdc3bf2de86bcdbcb276f592d">&#9670;&#160;</a></span>getRunner()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtDtRunner.html">WtDtRunner</a> &amp; getRunner </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取数据服务运行器单例 </p>
+<p>获取运行器实例的外部函数声明</p>
+<p>获取全局运行器实例</p>
+<p>获取WtDtRunner全局实例的外部函数声明</p>
+<p>获取全局回测引擎实例</p>
+<dl class="section return"><dt>返回</dt><dd><a class="el" href="classWtDtRunner.html" title="WonderTrader数据处理模块的运行器类">WtDtRunner</a>&amp; 数据服务运行器引用</dd></dl>
+<p>该函数使用单例模式创建并返回数据服务运行器实例。 所有对外接口函数都通过这个单例来调用WtDtRunner类的相应方法。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 第 <a class="el" href="WtDtServo_8cpp_source.html#l00066">66</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abc9f222d428fe36931581c0c1cfa4e1a" name="abc9f222d428fe36931581c0c1cfa4e1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc9f222d428fe36931581c0c1cfa4e1a">&#9670;&#160;</a></span>initialize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void initialize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>cfgFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>logCfg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtServo_2PorterDefs_8h.html#a010d19afcaf8e2100837ee253c2888f4">FuncOnTickCallback</a>&#160;</td>
+          <td class="paramname"><em>cbTick</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtServo_2PorterDefs_8h.html#a86124df75199b879fccd96d387ea3864">FuncOnBarCallback</a>&#160;</td>
+          <td class="paramname"><em>cbBar</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化数据服务模块 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfgFile</td><td>配置文件路径或配置内容字符串 </td></tr>
+    <tr><td class="paramname">isFile</td><td>是否为文件路径，如果为true则cfgFile为文件路径，否则为配置内容字符串 </td></tr>
+    <tr><td class="paramname">logCfg</td><td>日志配置文件路径 </td></tr>
+    <tr><td class="paramname">cbTick</td><td>Tick数据回调函数，用于接收实时Tick数据 </td></tr>
+    <tr><td class="paramname">cbBar</td><td>K线数据回调函数，用于接收实时K线数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>该函数调用WtDtRunner的initialize方法初始化数据服务模块， 加载配置文件，初始化日志系统，并设置实时数据的回调函数。 这个函数必须在使用其他接口前调用。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 第 <a class="el" href="WtDtServo_8cpp_source.html#l00084">84</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae24838b7f40072d9b569a7b3958b74e5" name="ae24838b7f40072d9b569a7b3958b74e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae24838b7f40072d9b569a7b3958b74e5">&#9670;&#160;</a></span>subscribe_bar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void subscribe_bar </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>period</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>订阅实时K线数据 </p>
+<p>订阅K线数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码，格式如"SHFE.rb.HOT" </td></tr>
+    <tr><td class="paramname">period</td><td>K线周期，如"m1"/"d1"</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>该函数调用WtDtRunner的sub_bar方法订阅实时K线数据。 订阅成功后，当有新的K线数据到达时，会通过初始化时设置的回调函数通知调用者。 不同于Tick订阅，该方法不会清空已有订阅，而是累加订阅。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 第 <a class="el" href="WtDtServo_8cpp_source.html#l00390">390</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9a45842e1061c2055c99119b383468c6" name="a9a45842e1061c2055c99119b383468c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a45842e1061c2055c99119b383468c6">&#9670;&#160;</a></span>subscribe_tick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void subscribe_tick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bReplace</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>订阅实时Tick数据 </p>
+<p>订阅Tick数据</p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准化合约代码，格式如"SHFE.rb.HOT" </td></tr>
+    <tr><td class="paramname">bReplace</td><td>是否替换已有订阅，如果为true则清空已有订阅后再订阅新的合约</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>该函数调用WtDtRunner的sub_tick方法订阅实时Tick数据。 订阅成功后，当有新的Tick数据到达时，会通过初始化时设置的回调函数通知调用者。 如果bReplace为true，则会清空已有的所有订阅，只保留新订阅的合约。 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 第 <a class="el" href="WtDtServo_8cpp_source.html#l00376">376</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a1c00b66b793e799ab324e7092d25e54f" name="a1c00b66b793e799ab324e7092d25e54f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c00b66b793e799ab324e7092d25e54f">&#9670;&#160;</a></span>PLATFORM_NAME</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char PLATFORM_NAME[] = &quot;UNIX&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtDtServo_8cpp_source.html">WtDtServo.cpp</a> 第 <a class="el" href="WtDtServo_8cpp_source.html#l00033">33</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_b4984f7cf42649023c5612cbf62480e0.html">WtDtServo</a></li><li class="navelem"><a class="el" href="WtDtServo_8cpp.html">WtDtServo.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

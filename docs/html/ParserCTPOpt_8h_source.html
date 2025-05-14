@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/ParserCTPOpt/ParserCTPOpt.h Ê∫êÊñá‰ª∂</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">È´òÊÄßËÉΩÈáèÂåñ‰∫§ÊòìÂπ≥Âè∞</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Âà∂‰ΩúËÄÖ Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','ÊêúÁ¥¢');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('ParserCTPOpt_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">ËΩΩÂÖ•‰∏≠...</div>
+<div class="SRStatus" id="Searching">ÊêúÁ¥¢‰∏≠...</div>
+<div class="SRStatus" id="NoMatches">Êú™ÊâæÂà∞</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ParserCTPOpt.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="ParserCTPOpt_8h.html">ÊµèËßàËØ•Êñá‰ª∂ÁöÑÊñáÊ°£.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;../Includes/IParserApi.h&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;../Share/DLLHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;../API/CTPOpt3.5.8/ThostFtdcMdApi.h&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;map&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">class </span><a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>;</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="ParserCTPOpt_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">   20</a></span><a class="code hl_variable" href="ParserCTPOpt_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="foldopen" id="foldopen00022" data-start="{" data-end="};">
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html">   22</a></span><span class="keyword">class </span><a class="code hl_class" href="classParserCTPOpt.html">ParserCTPOpt</a> :    <span class="keyword">public</span> <a class="code hl_class" href="classIParserApi.html">IParserApi</a>, <span class="keyword">public</span> <a class="code hl_class" href="classctp__sopt_1_1CThostFtdcMdSpi.html">CThostFtdcMdSpi</a></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>{</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <a class="code hl_function" href="classParserCTPOpt.html#a5734c50e64443f69ed1b0257eed7131a">ParserCTPOpt</a>();</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keyword">virtual</span> <a class="code hl_function" href="classParserCTPOpt.html#a6316cd266c55a74037f8317354ab81dd">~ParserCTPOpt</a>();</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="};">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#a9456466bcbdf7ccd519b5d3bd879b220">   29</a></span>    <span class="keyword">enum</span> <a class="code hl_enumeration" href="classParserCTPOpt.html#a9456466bcbdf7ccd519b5d3bd879b220">LoginStatus</a></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    {</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#a9456466bcbdf7ccd519b5d3bd879b220aa9c5d5dbcc1b01a3c9038c1cb4a899cd">   31</a></span>        <a class="code hl_enumvalue" href="classParserCTPOpt.html#a9456466bcbdf7ccd519b5d3bd879b220aa9c5d5dbcc1b01a3c9038c1cb4a899cd">LS_NOTLOGIN</a>,</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#a9456466bcbdf7ccd519b5d3bd879b220a844633b7fc4d66e97a6d11d502a60662">   32</a></span>        <a class="code hl_enumvalue" href="classParserCTPOpt.html#a9456466bcbdf7ccd519b5d3bd879b220a844633b7fc4d66e97a6d11d502a60662">LS_LOGINING</a>,</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <a class="code hl_enumvalue" href="classParserCTPOpt.html#a9456466bcbdf7ccd519b5d3bd879b220a2b12aa367072b1568a1f4def454f51f2">LS_LOGINED</a></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#a9456466bcbdf7ccd519b5d3bd879b220a2b12aa367072b1568a1f4def454f51f2">   34</a></span>    };</div>
+</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment">//IQuoteParser Êé•Âè£</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserCTPOpt.html#a1f9cea16f990e4add93c3fa041aed406">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* <a class="code hl_function" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#a6d3dbce054559f27a0c012361ce7662a">release</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserCTPOpt.html#a929e0c3ef2a5e1ac3aada3ce69d413a5">connect</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserCTPOpt.html#aedab1e1b73a33ad6164e3b26e06b01b4">disconnect</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserCTPOpt.html#a3389e8fa88680274a441de80497fd6c7">isConnected</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#ad55ac9c91a91fc11e92419b28a30833b">subscribe</a>(<span class="keyword">const</span> <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a> &amp;vecSymbols) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#aadc9ccb4ac29d6eae813b37d222b51af">unsubscribe</a>(<span class="keyword">const</span> <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a> &amp;vecSymbols) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#a2b5611394f345ee47ae88e54bbca42ad">registerSpi</a>(<a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>* listener) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="comment">//CThostFtdcMdSpi Êé•Âè£</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#ae21b9484b87e711bddc32f522130630f">OnRspError</a>( <a class="code hl_struct" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast );</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#a8f6fdc1ba627a9ec389a984c1200660c">OnFrontConnected</a>();</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#ab4733067f64e90f6e30c89c0bb8d2600">OnRspUserLogin</a>( <a class="code hl_struct" href="structCThostFtdcRspUserLoginField.html">CThostFtdcRspUserLoginField</a> *pRspUserLogin, <a class="code hl_struct" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast );</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#acaade3adda0b7469b1286bb8335f26b1">OnRspUserLogout</a>(<a class="code hl_struct" href="structCThostFtdcUserLogoutField.html">CThostFtdcUserLogoutField</a> *pUserLogout, <a class="code hl_struct" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#a38facc811d9fbe80523390740061a50e">OnFrontDisconnected</a>( <span class="keywordtype">int</span> nReason );</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#aaa7bddc439a1cbbc263afed008f3050e">OnRspUnSubMarketData</a>( <a class="code hl_struct" href="structCThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a> *pSpecificInstrument, <a class="code hl_struct" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast );</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#ae40f8b429346777d7a41a9d0aa34101b">OnRtnDepthMarketData</a>( <a class="code hl_struct" href="structCThostFtdcDepthMarketDataField.html">CThostFtdcDepthMarketDataField</a> *pDepthMarketData );</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#aee48fb2a91c888cd650f20388ba06912">OnRspSubMarketData</a>( <a class="code hl_struct" href="structCThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a> *pSpecificInstrument, <a class="code hl_struct" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast );</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#acf2baeb309227d919b9e16f8dd58708d">OnHeartBeatWarning</a>( <span class="keywordtype">int</span> nTimeLapse );</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="comment">     *  ÂèëÈÄÅÁôªÂΩïËØ∑Ê±Ç</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#a433496ee7c2663ef7dd988f423a551b3">ReqUserLogin</a>();</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="comment">     *  ËÆ¢ÈòÖÂìÅÁßçË°åÊÉÖ</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classParserCTPOpt.html#aed43f43febd11d91b3e7afa97f0df93e">SubscribeMarketData</a>();</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="comment">     *  Ê£ÄÊü•ÈîôËØØ‰ø°ÊÅØ</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserCTPOpt.html#a478c53efe44619fde04c0424f49228fa">IsErrorRspInfo</a>(<a class="code hl_struct" href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#af803e2f81ff68ee9bef46524156d53c8">   91</a></span>    uint32_t            <a class="code hl_variable" href="classParserCTPOpt.html#af803e2f81ff68ee9bef46524156d53c8">m_uTradingDate</a>;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#aba79f7a5cd64ce9f14aa63b97267fbdf">   92</a></span>    <a class="code hl_enumeration" href="classParserCTPOpt.html#a9456466bcbdf7ccd519b5d3bd879b220">LoginStatus</a>         <a class="code hl_variable" href="classParserCTPOpt.html#aba79f7a5cd64ce9f14aa63b97267fbdf">m_loginState</a>;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#a766ca9a8d7947defd2548ea1ee1f138a">   93</a></span>    <a class="code hl_class" href="classctp__sopt_1_1CThostFtdcMdApi.html">CThostFtdcMdApi</a>*    <a class="code hl_variable" href="classParserCTPOpt.html#a766ca9a8d7947defd2548ea1ee1f138a">m_pUserAPI</a>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#a6e7a246ae5a763b4214564ebf38278b8">   95</a></span>    std::string         <a class="code hl_variable" href="classParserCTPOpt.html#a6e7a246ae5a763b4214564ebf38278b8">m_strFrontAddr</a>;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#a1904539fed2a7d70df9c639d872de31e">   96</a></span>    std::string         <a class="code hl_variable" href="classParserCTPOpt.html#a1904539fed2a7d70df9c639d872de31e">m_strBroker</a>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#af05c8beee72a62a44916afa23e24b8fd">   97</a></span>    std::string         <a class="code hl_variable" href="classParserCTPOpt.html#af05c8beee72a62a44916afa23e24b8fd">m_strUserID</a>;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#a94ebb7dc60285add1925eb22aad2c748">   98</a></span>    std::string         <a class="code hl_variable" href="classParserCTPOpt.html#a94ebb7dc60285add1925eb22aad2c748">m_strPassword</a>;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#a634ff9d4058a96493083f683da744c72">   99</a></span>    <span class="keywordtype">bool</span>                <a class="code hl_variable" href="classParserCTPOpt.html#a634ff9d4058a96493083f683da744c72">m_bLocalTime</a>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#a52b784b22c9b7102e2063f89bc8bbc77">  100</a></span>    std::string         <a class="code hl_variable" href="classParserCTPOpt.html#a52b784b22c9b7102e2063f89bc8bbc77">m_strFlowDir</a>;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#afe2bf369b9c7208b82dda737e939c614">  102</a></span>    <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a>             <a class="code hl_variable" href="classParserCTPOpt.html#afe2bf369b9c7208b82dda737e939c614">m_filterSubs</a>;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#a0c5835716ec741a401926adbccfd3087">  104</a></span>    <span class="keywordtype">int</span>                 <a class="code hl_variable" href="classParserCTPOpt.html#a0c5835716ec741a401926adbccfd3087">m_iRequestID</a>;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#a81b77f31ae36dc173c32625c80bc0770">  106</a></span>    <a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>* <a class="code hl_variable" href="classParserCTPOpt.html#a81b77f31ae36dc173c32625c80bc0770">m_sink</a>;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#aade54965f9b23b777d45d87e62898df1">  107</a></span>    <a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>*       <a class="code hl_variable" href="classParserCTPOpt.html#aade54965f9b23b777d45d87e62898df1">m_pBaseDataMgr</a>;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#a4fca24043541a3d235f521a41499ec0d">  109</a></span>    <a class="code hl_typedef" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a>       <a class="code hl_variable" href="classParserCTPOpt.html#a4fca24043541a3d235f521a41499ec0d">m_hInstCTP</a>;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#a3c74168160a25ddfb2aa08a48f28d134">  110</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classctp__sopt_1_1CThostFtdcMdApi.html">CThostFtdcMdApi</a>* (*CTPCreator)(<span class="keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">const</span> bool, <span class="keyword">const</span> bool);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="classParserCTPOpt.html#ab801eaba6a04e66fd1e628470691702e">  111</a></span>    <a class="code hl_typedef" href="classParserCTPOpt.html#a3c74168160a25ddfb2aa08a48f28d134">CTPCreator</a>      <a class="code hl_variable" href="classParserCTPOpt.html#ab801eaba6a04e66fd1e628470691702e">m_funcCreator</a>;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>};</div>
+</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="ttc" id="aDLLHelper_8hpp_html_a40972742af38c16d3ab2f521abf0ca8a"><div class="ttname"><a href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a></div><div class="ttdeci">void * DllHandle</div><div class="ttdoc">Âä®ÊÄÅÂ∫ìÂè•ÊüÑÁ±ªÂûãÔºàÈùûWindowsÂπ≥Âè∞Ôºâ</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00032">DLLHelper.hpp:32</a></div></div>
+<div class="ttc" id="aParserCTPOpt_8h_html_a9e1fc31194100ab43bbad77a2f5c12b3"><div class="ttname"><a href="ParserCTPOpt_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a></div><div class="ttdeci">NS_WTP_END USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00020">ParserCTPOpt.h:20</a></div></div>
+<div class="ttc" id="aTraderDumper_8cpp_html_abc68ad0fe9293fb2709e004ffe3fa333"><div class="ttname"><a href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a></div><div class="ttdeci">bool config(const char *cfgfile, bool isFile)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_8cpp_source.html#l00022">TraderDumper.cpp:22</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">ÂëΩÂêçÁ©∫Èó¥ÂÆö‰πâÂÆè</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html"><div class="ttname"><a href="classIBaseDataMgr.html">IBaseDataMgr</a></div><div class="ttdoc">Âü∫Á°ÄÊï∞ÊçÆÁÆ°ÁêÜÂô®Êé•Âè£</div><div class="ttdef"><b>Definition</b> <a href="IBaseDataMgr_8h_source.html#l00075">IBaseDataMgr.h:76</a></div></div>
+<div class="ttc" id="aclassIParserApi_html"><div class="ttname"><a href="classIParserApi.html">IParserApi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00083">IParserApi.h:84</a></div></div>
+<div class="ttc" id="aclassIParserSpi_html"><div class="ttname"><a href="classIParserSpi.html">IParserSpi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00028">IParserApi.h:29</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html"><div class="ttname"><a href="classParserCTPOpt.html">ParserCTPOpt</a></div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00022">ParserCTPOpt.h:23</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a0c5835716ec741a401926adbccfd3087"><div class="ttname"><a href="classParserCTPOpt.html#a0c5835716ec741a401926adbccfd3087">ParserCTPOpt::m_iRequestID</a></div><div class="ttdeci">int m_iRequestID</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00104">ParserCTPOpt.h:104</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a1904539fed2a7d70df9c639d872de31e"><div class="ttname"><a href="classParserCTPOpt.html#a1904539fed2a7d70df9c639d872de31e">ParserCTPOpt::m_strBroker</a></div><div class="ttdeci">std::string m_strBroker</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00096">ParserCTPOpt.h:96</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a1f9cea16f990e4add93c3fa041aed406"><div class="ttname"><a href="classParserCTPOpt.html#a1f9cea16f990e4add93c3fa041aed406">ParserCTPOpt::init</a></div><div class="ttdeci">virtual bool init(WTSVariant *config) override</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00095">ParserCTPOpt.cpp:95</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a2b5611394f345ee47ae88e54bbca42ad"><div class="ttname"><a href="classParserCTPOpt.html#a2b5611394f345ee47ae88e54bbca42ad">ParserCTPOpt::registerSpi</a></div><div class="ttdeci">virtual void registerSpi(IParserSpi *listener) override</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00470">ParserCTPOpt.cpp:470</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a3389e8fa88680274a441de80497fd6c7"><div class="ttname"><a href="classParserCTPOpt.html#a3389e8fa88680274a441de80497fd6c7">ParserCTPOpt::isConnected</a></div><div class="ttdeci">virtual bool isConnected() override</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00465">ParserCTPOpt.cpp:465</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a38facc811d9fbe80523390740061a50e"><div class="ttname"><a href="classParserCTPOpt.html#a38facc811d9fbe80523390740061a50e">ParserCTPOpt::OnFrontDisconnected</a></div><div class="ttdeci">virtual void OnFrontDisconnected(int nReason)</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00203">ParserCTPOpt.cpp:203</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a3c74168160a25ddfb2aa08a48f28d134"><div class="ttname"><a href="classParserCTPOpt.html#a3c74168160a25ddfb2aa08a48f28d134">ParserCTPOpt::CTPCreator</a></div><div class="ttdeci">CThostFtdcMdApi *(* CTPCreator)(const char *, const bool, const bool)</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00110">ParserCTPOpt.h:110</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a433496ee7c2663ef7dd988f423a551b3"><div class="ttname"><a href="classParserCTPOpt.html#a433496ee7c2663ef7dd988f423a551b3">ParserCTPOpt::ReqUserLogin</a></div><div class="ttdeci">void ReqUserLogin()</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00361">ParserCTPOpt.cpp:361</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a478c53efe44619fde04c0424f49228fa"><div class="ttname"><a href="classParserCTPOpt.html#a478c53efe44619fde04c0424f49228fa">ParserCTPOpt::IsErrorRspInfo</a></div><div class="ttdeci">bool IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo)</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00419">ParserCTPOpt.cpp:419</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a4fca24043541a3d235f521a41499ec0d"><div class="ttname"><a href="classParserCTPOpt.html#a4fca24043541a3d235f521a41499ec0d">ParserCTPOpt::m_hInstCTP</a></div><div class="ttdeci">DllHandle m_hInstCTP</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00109">ParserCTPOpt.h:109</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a52b784b22c9b7102e2063f89bc8bbc77"><div class="ttname"><a href="classParserCTPOpt.html#a52b784b22c9b7102e2063f89bc8bbc77">ParserCTPOpt::m_strFlowDir</a></div><div class="ttdeci">std::string m_strFlowDir</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00100">ParserCTPOpt.h:100</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a5734c50e64443f69ed1b0257eed7131a"><div class="ttname"><a href="classParserCTPOpt.html#a5734c50e64443f69ed1b0257eed7131a">ParserCTPOpt::ParserCTPOpt</a></div><div class="ttdeci">ParserCTPOpt()</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00081">ParserCTPOpt.cpp:81</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a6316cd266c55a74037f8317354ab81dd"><div class="ttname"><a href="classParserCTPOpt.html#a6316cd266c55a74037f8317354ab81dd">ParserCTPOpt::~ParserCTPOpt</a></div><div class="ttdeci">virtual ~ParserCTPOpt()</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00090">ParserCTPOpt.cpp:90</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a634ff9d4058a96493083f683da744c72"><div class="ttname"><a href="classParserCTPOpt.html#a634ff9d4058a96493083f683da744c72">ParserCTPOpt::m_bLocalTime</a></div><div class="ttdeci">bool m_bLocalTime</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00099">ParserCTPOpt.h:99</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a6d3dbce054559f27a0c012361ce7662a"><div class="ttname"><a href="classParserCTPOpt.html#a6d3dbce054559f27a0c012361ce7662a">ParserCTPOpt::release</a></div><div class="ttdeci">virtual void release() override</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00136">ParserCTPOpt.cpp:136</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a6e7a246ae5a763b4214564ebf38278b8"><div class="ttname"><a href="classParserCTPOpt.html#a6e7a246ae5a763b4214564ebf38278b8">ParserCTPOpt::m_strFrontAddr</a></div><div class="ttdeci">std::string m_strFrontAddr</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00095">ParserCTPOpt.h:95</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a766ca9a8d7947defd2548ea1ee1f138a"><div class="ttname"><a href="classParserCTPOpt.html#a766ca9a8d7947defd2548ea1ee1f138a">ParserCTPOpt::m_pUserAPI</a></div><div class="ttdeci">CThostFtdcMdApi * m_pUserAPI</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00093">ParserCTPOpt.h:93</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a81b77f31ae36dc173c32625c80bc0770"><div class="ttname"><a href="classParserCTPOpt.html#a81b77f31ae36dc173c32625c80bc0770">ParserCTPOpt::m_sink</a></div><div class="ttdeci">IParserSpi * m_sink</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00106">ParserCTPOpt.h:106</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a8f6fdc1ba627a9ec389a984c1200660c"><div class="ttname"><a href="classParserCTPOpt.html#a8f6fdc1ba627a9ec389a984c1200660c">ParserCTPOpt::OnFrontConnected</a></div><div class="ttdeci">virtual void OnFrontConnected()</div><div class="ttdoc">µ±øÕªß∂À”ÎΩª“◊∫ÛÃ®Ω®¡¢∆Õ®–≈¡¨Ω” ±£®ªπŒ¥µ«¬º«∞£©£¨∏√∑Ω∑®±ªµ˜”√°£</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00168">ParserCTPOpt.cpp:168</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a929e0c3ef2a5e1ac3aada3ce69d413a5"><div class="ttname"><a href="classParserCTPOpt.html#a929e0c3ef2a5e1ac3aada3ce69d413a5">ParserCTPOpt::connect</a></div><div class="ttdeci">virtual bool connect() override</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00141">ParserCTPOpt.cpp:141</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a9456466bcbdf7ccd519b5d3bd879b220"><div class="ttname"><a href="classParserCTPOpt.html#a9456466bcbdf7ccd519b5d3bd879b220">ParserCTPOpt::LoginStatus</a></div><div class="ttdeci">LoginStatus</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00029">ParserCTPOpt.h:30</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a9456466bcbdf7ccd519b5d3bd879b220a2b12aa367072b1568a1f4def454f51f2"><div class="ttname"><a href="classParserCTPOpt.html#a9456466bcbdf7ccd519b5d3bd879b220a2b12aa367072b1568a1f4def454f51f2">ParserCTPOpt::LS_LOGINED</a></div><div class="ttdeci">@ LS_LOGINED</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00034">ParserCTPOpt.h:33</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a9456466bcbdf7ccd519b5d3bd879b220a844633b7fc4d66e97a6d11d502a60662"><div class="ttname"><a href="classParserCTPOpt.html#a9456466bcbdf7ccd519b5d3bd879b220a844633b7fc4d66e97a6d11d502a60662">ParserCTPOpt::LS_LOGINING</a></div><div class="ttdeci">@ LS_LOGINING</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00032">ParserCTPOpt.h:32</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a9456466bcbdf7ccd519b5d3bd879b220aa9c5d5dbcc1b01a3c9038c1cb4a899cd"><div class="ttname"><a href="classParserCTPOpt.html#a9456466bcbdf7ccd519b5d3bd879b220aa9c5d5dbcc1b01a3c9038c1cb4a899cd">ParserCTPOpt::LS_NOTLOGIN</a></div><div class="ttdeci">@ LS_NOTLOGIN</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00031">ParserCTPOpt.h:31</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_a94ebb7dc60285add1925eb22aad2c748"><div class="ttname"><a href="classParserCTPOpt.html#a94ebb7dc60285add1925eb22aad2c748">ParserCTPOpt::m_strPassword</a></div><div class="ttdeci">std::string m_strPassword</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00098">ParserCTPOpt.h:98</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_aaa7bddc439a1cbbc263afed008f3050e"><div class="ttname"><a href="classParserCTPOpt.html#aaa7bddc439a1cbbc263afed008f3050e">ParserCTPOpt::OnRspUnSubMarketData</a></div><div class="ttdeci">virtual void OnRspUnSubMarketData(CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">»°œ˚∂©‘ƒ––«È”¶¥</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00212">ParserCTPOpt.cpp:212</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_aadc9ccb4ac29d6eae813b37d222b51af"><div class="ttname"><a href="classParserCTPOpt.html#aadc9ccb4ac29d6eae813b37d222b51af">ParserCTPOpt::unsubscribe</a></div><div class="ttdeci">virtual void unsubscribe(const CodeSet &amp;vecSymbols) override</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00461">ParserCTPOpt.cpp:461</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_aade54965f9b23b777d45d87e62898df1"><div class="ttname"><a href="classParserCTPOpt.html#aade54965f9b23b777d45d87e62898df1">ParserCTPOpt::m_pBaseDataMgr</a></div><div class="ttdeci">IBaseDataMgr * m_pBaseDataMgr</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00107">ParserCTPOpt.h:107</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_ab4733067f64e90f6e30c89c0bb8d2600"><div class="ttname"><a href="classParserCTPOpt.html#ab4733067f64e90f6e30c89c0bb8d2600">ParserCTPOpt::OnRspUserLogin</a></div><div class="ttdeci">virtual void OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">µ«¬º«Î«ÛœÏ”¶</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00179">ParserCTPOpt.cpp:179</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_ab801eaba6a04e66fd1e628470691702e"><div class="ttname"><a href="classParserCTPOpt.html#ab801eaba6a04e66fd1e628470691702e">ParserCTPOpt::m_funcCreator</a></div><div class="ttdeci">CTPCreator m_funcCreator</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00111">ParserCTPOpt.h:111</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_aba79f7a5cd64ce9f14aa63b97267fbdf"><div class="ttname"><a href="classParserCTPOpt.html#aba79f7a5cd64ce9f14aa63b97267fbdf">ParserCTPOpt::m_loginState</a></div><div class="ttdeci">LoginStatus m_loginState</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00092">ParserCTPOpt.h:92</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_acaade3adda0b7469b1286bb8335f26b1"><div class="ttname"><a href="classParserCTPOpt.html#acaade3adda0b7469b1286bb8335f26b1">ParserCTPOpt::OnRspUserLogout</a></div><div class="ttdeci">virtual void OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">ÁôªÂá∫ËØ∑Ê±ÇÂìçÂ∫î</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00195">ParserCTPOpt.cpp:195</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_acf2baeb309227d919b9e16f8dd58708d"><div class="ttname"><a href="classParserCTPOpt.html#acf2baeb309227d919b9e16f8dd58708d">ParserCTPOpt::OnHeartBeatWarning</a></div><div class="ttdeci">virtual void OnHeartBeatWarning(int nTimeLapse)</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00355">ParserCTPOpt.cpp:355</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_ad55ac9c91a91fc11e92419b28a30833b"><div class="ttname"><a href="classParserCTPOpt.html#ad55ac9c91a91fc11e92419b28a30833b">ParserCTPOpt::subscribe</a></div><div class="ttdeci">virtual void subscribe(const CodeSet &amp;vecSymbols) override</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00424">ParserCTPOpt.cpp:424</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_ae21b9484b87e711bddc32f522130630f"><div class="ttname"><a href="classParserCTPOpt.html#ae21b9484b87e711bddc32f522130630f">ParserCTPOpt::OnRspError</a></div><div class="ttdeci">virtual void OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">¥ÌŒÛ”¶¥</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00163">ParserCTPOpt.cpp:163</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_ae40f8b429346777d7a41a9d0aa34101b"><div class="ttname"><a href="classParserCTPOpt.html#ae40f8b429346777d7a41a9d0aa34101b">ParserCTPOpt::OnRtnDepthMarketData</a></div><div class="ttdeci">virtual void OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *pDepthMarketData)</div><div class="ttdoc">…Ó∂»––«ÈÕ®÷™</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00217">ParserCTPOpt.cpp:217</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_aed43f43febd11d91b3e7afa97f0df93e"><div class="ttname"><a href="classParserCTPOpt.html#aed43f43febd11d91b3e7afa97f0df93e">ParserCTPOpt::SubscribeMarketData</a></div><div class="ttdeci">void SubscribeMarketData()</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00382">ParserCTPOpt.cpp:382</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_aedab1e1b73a33ad6164e3b26e06b01b4"><div class="ttname"><a href="classParserCTPOpt.html#aedab1e1b73a33ad6164e3b26e06b01b4">ParserCTPOpt::disconnect</a></div><div class="ttdeci">virtual bool disconnect() override</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00151">ParserCTPOpt.cpp:151</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_aee48fb2a91c888cd650f20388ba06912"><div class="ttname"><a href="classParserCTPOpt.html#aee48fb2a91c888cd650f20388ba06912">ParserCTPOpt::OnRspSubMarketData</a></div><div class="ttdeci">virtual void OnRspSubMarketData(CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">∂©‘ƒ––«È”¶¥</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8cpp_source.html#l00343">ParserCTPOpt.cpp:343</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_af05c8beee72a62a44916afa23e24b8fd"><div class="ttname"><a href="classParserCTPOpt.html#af05c8beee72a62a44916afa23e24b8fd">ParserCTPOpt::m_strUserID</a></div><div class="ttdeci">std::string m_strUserID</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00097">ParserCTPOpt.h:97</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_af803e2f81ff68ee9bef46524156d53c8"><div class="ttname"><a href="classParserCTPOpt.html#af803e2f81ff68ee9bef46524156d53c8">ParserCTPOpt::m_uTradingDate</a></div><div class="ttdeci">uint32_t m_uTradingDate</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00091">ParserCTPOpt.h:91</a></div></div>
+<div class="ttc" id="aclassParserCTPOpt_html_afe2bf369b9c7208b82dda737e939c614"><div class="ttname"><a href="classParserCTPOpt.html#afe2bf369b9c7208b82dda737e939c614">ParserCTPOpt::m_filterSubs</a></div><div class="ttdeci">CodeSet m_filterSubs</div><div class="ttdef"><b>Definition</b> <a href="ParserCTPOpt_8h_source.html#l00102">ParserCTPOpt.h:102</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">TickÊï∞ÊçÆÂØπË±°</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">ÂèòÈáèÁ±ª</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html">ctp_sopt::CThostFtdcMdApi</a></div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00079">ThostFtdcMdApi.h:80</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdSpi_html"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdSpi.html">ctp_sopt::CThostFtdcMdSpi</a></div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00031">ThostFtdcMdApi.h:32</a></div></div>
+<div class="ttc" id="aclassfastest__hashset_3_01std_1_1string_01_4_html"><div class="ttname"><a href="classfastest__hashset_3_01std_1_1string_01_4.html">fastest_hashset&lt; std::string &gt;</a></div><div class="ttdoc">Â≠óÁ¨¶‰∏≤ÂÖÉÁ¥†ÁöÑÈ´òÊÄßËÉΩÂìàÂ∏åÈõÜÂêàÁ±ª</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00134">FasterDefs.h:135</a></div></div>
+<div class="ttc" id="astructCThostFtdcDepthMarketDataField_html"><div class="ttname"><a href="structCThostFtdcDepthMarketDataField.html">CThostFtdcDepthMarketDataField</a></div><div class="ttdoc">…Ó∂»––«È</div><div class="ttdef"><b>Definition</b> <a href="CTP6_83_815_2ThostFtdcUserApiStruct_8h_source.html#l00878">ThostFtdcUserApiStruct.h:879</a></div></div>
+<div class="ttc" id="astructCThostFtdcRspInfoField_html"><div class="ttname"><a href="structCThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a></div><div class="ttdoc">œÏ”¶–≈œ¢</div><div class="ttdef"><b>Definition</b> <a href="CTP6_83_815_2ThostFtdcUserApiStruct_8h_source.html#l00360">ThostFtdcUserApiStruct.h:361</a></div></div>
+<div class="ttc" id="astructCThostFtdcRspUserLoginField_html"><div class="ttname"><a href="structCThostFtdcRspUserLoginField.html">CThostFtdcRspUserLoginField</a></div><div class="ttdoc">”√ªßµ«¬º”¶¥</div><div class="ttdef"><b>Definition</b> <a href="CTP6_83_815_2ThostFtdcUserApiStruct_8h_source.html#l00058">ThostFtdcUserApiStruct.h:59</a></div></div>
+<div class="ttc" id="astructCThostFtdcSpecificInstrumentField_html"><div class="ttname"><a href="structCThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a></div><div class="ttdoc">÷∏∂®µƒ∫œ‘º</div><div class="ttdef"><b>Definition</b> <a href="CTP6_83_815_2ThostFtdcUserApiStruct_8h_source.html#l05239">ThostFtdcUserApiStruct.h:5240</a></div></div>
+<div class="ttc" id="astructCThostFtdcUserLogoutField_html"><div class="ttname"><a href="structCThostFtdcUserLogoutField.html">CThostFtdcUserLogoutField</a></div><div class="ttdoc">”√ªßµ«≥ˆ«Î«Û</div><div class="ttdef"><b>Definition</b> <a href="CTP6_83_815_2ThostFtdcUserApiStruct_8h_source.html#l00089">ThostFtdcUserApiStruct.h:90</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_74ee83b9b90d020e2ef39e88b7a51004.html">ParserCTPOpt</a></li><li class="navelem"><a class="el" href="ParserCTPOpt_8h.html">ParserCTPOpt.h</a></li>
+    <li class="footer">Âà∂‰ΩúËÄÖ <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

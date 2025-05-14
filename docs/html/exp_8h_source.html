@@ -1,0 +1,465 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/yamlcpp/exp.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('exp_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">exp.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="exp_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef EXP_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define EXP_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#if defined(_MSC_VER) ||                                            \</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">    (defined(__GNUC__) &amp;&amp; (__GNUC__ == 3 &amp;&amp; __GNUC_MINOR__ &gt;= 4) || \</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">     (__GNUC__ &gt;= 4))  </span><span class="comment">// GCC supports &quot;pragma once&quot; correctly since 3.4</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;ios&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="regex__yaml_8h.html">regex_yaml.h</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="stream_8h.html">stream.h</a>&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceYAML.html">YAML</a> {</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">// Here we store a bunch of expressions for matching different parts of the</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">// file.</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">namespace </span>Exp {</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">// misc</span></div>
+<div class="foldopen" id="foldopen00023" data-start="{" data-end="}">
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#aade8b9d3bb19689aae8a5f753e9ccac1">   23</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#aade8b9d3bb19689aae8a5f753e9ccac1">Empty</a>() {</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00027" data-start="{" data-end="}">
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a3828a08b77b3a9b7edd1a6b62c515467">   27</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a3828a08b77b3a9b7edd1a6b62c515467">Space</a>() {</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39; &#39;</span>);</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00031" data-start="{" data-end="}">
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a944e98afde5aa6f94590c3e7a2fdb0ce">   31</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a944e98afde5aa6f94590c3e7a2fdb0ce">Tab</a>() {</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;\t&#39;</span>);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00035" data-start="{" data-end="}">
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#ac45c26954df2218a5b38e3f2a9e230a7">   35</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ac45c26954df2218a5b38e3f2a9e230a7">Blank</a>() {</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a3828a08b77b3a9b7edd1a6b62c515467">Space</a>() | <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a944e98afde5aa6f94590c3e7a2fdb0ce">Tab</a>();</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="}">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#ab1e6157d2a1614c1e01d55534e04bd27">   39</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ab1e6157d2a1614c1e01d55534e04bd27">Break</a>() {</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;\n&#39;</span>) | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;\r\n&quot;</span>);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00043" data-start="{" data-end="}">
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">   43</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>() {</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ac45c26954df2218a5b38e3f2a9e230a7">Blank</a>() | <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ab1e6157d2a1614c1e01d55534e04bd27">Break</a>();</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00047" data-start="{" data-end="}">
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a18f35c42453267da0ee4bd6d3693d746">   47</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a18f35c42453267da0ee4bd6d3693d746">Digit</a>() {</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;0&#39;</span>, <span class="charliteral">&#39;9&#39;</span>);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00051" data-start="{" data-end="}">
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#ac74853629036a9f41208768d1360af78">   51</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ac74853629036a9f41208768d1360af78">Alpha</a>() {</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;a&#39;</span>, <span class="charliteral">&#39;z&#39;</span>) | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;A&#39;</span>, <span class="charliteral">&#39;Z&#39;</span>);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00055" data-start="{" data-end="}">
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#ad4d8abbc8f80a7dc248e30d60672584f">   55</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ad4d8abbc8f80a7dc248e30d60672584f">AlphaNumeric</a>() {</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ac74853629036a9f41208768d1360af78">Alpha</a>() | <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a18f35c42453267da0ee4bd6d3693d746">Digit</a>();</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00059" data-start="{" data-end="}">
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a2b4828326476e8d96ef615882aedd818">   59</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a2b4828326476e8d96ef615882aedd818">Word</a>() {</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ad4d8abbc8f80a7dc248e30d60672584f">AlphaNumeric</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;-&#39;</span>);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00063" data-start="{" data-end="}">
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a48c34338995c7729b611d719bc433a74">   63</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a48c34338995c7729b611d719bc433a74">Hex</a>() {</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a18f35c42453267da0ee4bd6d3693d746">Digit</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;A&#39;</span>, <span class="charliteral">&#39;F&#39;</span>) | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;a&#39;</span>, <span class="charliteral">&#39;f&#39;</span>);</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>}</div>
+</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="comment">// Valid Unicode code points that are not part of c-printable (YAML 1.2, sec.</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="comment">// 5.1)</span></div>
+<div class="foldopen" id="foldopen00069" data-start="{" data-end="}">
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#acda8dfd75d32606ee59b56fde8d2728c">   69</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#acda8dfd75d32606ee59b56fde8d2728c">NotPrintable</a>() {</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e =</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>      <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(0) |</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>      <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;\x01\x02\x03\x04\x05\x06\x07\x08\x0B\x0C\x7F&quot;</span>, <a class="code hl_enumvalue" href="namespaceYAML.html#a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602">REGEX_OR</a>) |</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>      <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(0x0E, 0x1F) |</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>      (<a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&#39;\xC2&#39;</span>) + (<a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&#39;\x80&#39;</span>, <span class="stringliteral">&#39;\x84&#39;</span>) | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&#39;\x86&#39;</span>, <span class="stringliteral">&#39;\x9F&#39;</span>)));</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00077" data-start="{" data-end="}">
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a6bcc1525861267669fd2e5813dc34e57">   77</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a6bcc1525861267669fd2e5813dc34e57">Utf8_ByteOrderMark</a>() {</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;\xEF\xBB\xBF&quot;</span>);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>}</div>
+</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="comment">// actual tags</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+<div class="foldopen" id="foldopen00084" data-start="{" data-end="}">
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#aa7fc4d26a120a3c993f5b4ac5284df8f">   84</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#aa7fc4d26a120a3c993f5b4ac5284df8f">DocStart</a>() {</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;---&quot;</span>) + (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>());</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00088" data-start="{" data-end="}">
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#aed4decd7aa347dfeacfb12179638bc62">   88</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#aed4decd7aa347dfeacfb12179638bc62">DocEnd</a>() {</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;...&quot;</span>) + (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>());</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00092" data-start="{" data-end="}">
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a522f525a7c9c4233a4e8281141aa5f5d">   92</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a522f525a7c9c4233a4e8281141aa5f5d">DocIndicator</a>() {</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_function" href="namespaceYAML_1_1Exp.html#aa7fc4d26a120a3c993f5b4ac5284df8f">DocStart</a>() | <a class="code hl_function" href="namespaceYAML_1_1Exp.html#aed4decd7aa347dfeacfb12179638bc62">DocEnd</a>();</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00096" data-start="{" data-end="}">
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#acc66a3af6a69f7ee4a8b754bac5fd92f">   96</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#acc66a3af6a69f7ee4a8b754bac5fd92f">BlockEntry</a>() {</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;-&#39;</span>) + (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>());</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00100" data-start="{" data-end="}">
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a2309ea3e5cbb5ecd3bc7f69dc3b09873">  100</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a2309ea3e5cbb5ecd3bc7f69dc3b09873">Key</a>() {</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;?&#39;</span>) + <a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>();</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00104" data-start="{" data-end="}">
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#ad7f8ce69dbd6bf863ad80d41e2808888">  104</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ad7f8ce69dbd6bf863ad80d41e2808888">KeyInFlow</a>() {</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;?&#39;</span>) + <a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>();</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00108" data-start="{" data-end="}">
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a04a1e48e12158f0b39d70e839df90eda">  108</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a04a1e48e12158f0b39d70e839df90eda">Value</a>() {</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;:&#39;</span>) + (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>());</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00112" data-start="{" data-end="}">
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#aed9c3a41179681692ad56182f44abe3c">  112</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#aed9c3a41179681692ad56182f44abe3c">ValueInFlow</a>() {</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;:&#39;</span>) + (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;,]}&quot;</span>, <a class="code hl_enumvalue" href="namespaceYAML.html#a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602">REGEX_OR</a>));</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00116" data-start="{" data-end="}">
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a13792312214ed6893a8c4a0803188438">  116</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a13792312214ed6893a8c4a0803188438">ValueInJSONFlow</a>() {</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;:&#39;</span>);</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00120" data-start="{" data-end="}">
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a039d4627f63ee8bb7b73f3fe268f67d3">  120</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a039d4627f63ee8bb7b73f3fe268f67d3">Comment</a>() {</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;#&#39;</span>);</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00124" data-start="{" data-end="}">
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a6aafdcdbafd2b4d23df6dfa4c920faec">  124</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a6aafdcdbafd2b4d23df6dfa4c920faec">Anchor</a>() {</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = !(<a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;[]{},&quot;</span>, <a class="code hl_enumvalue" href="namespaceYAML.html#a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602">REGEX_OR</a>) | <a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>());</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00128" data-start="{" data-end="}">
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a938e4e579508a690296b6968766b3107">  128</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a938e4e579508a690296b6968766b3107">AnchorEnd</a>() {</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;?:,]}%@`&quot;</span>, <a class="code hl_enumvalue" href="namespaceYAML.html#a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602">REGEX_OR</a>) | <a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>();</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00132" data-start="{" data-end="}">
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#ade68328020f631ebe2830965581ac8da">  132</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ade68328020f631ebe2830965581ac8da">URI</a>() {</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a2b4828326476e8d96ef615882aedd818">Word</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;#;/?:@&amp;=+$,_.!~*&#39;()[]&quot;</span>, <a class="code hl_enumvalue" href="namespaceYAML.html#a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602">REGEX_OR</a>) |</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>                         (<a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;%&#39;</span>) + <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a48c34338995c7729b611d719bc433a74">Hex</a>() + <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a48c34338995c7729b611d719bc433a74">Hex</a>());</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00137" data-start="{" data-end="}">
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a43c0bc872bef519a4fd88ebffc94e203">  137</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a43c0bc872bef519a4fd88ebffc94e203">Tag</a>() {</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a2b4828326476e8d96ef615882aedd818">Word</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;#;/?:@&amp;=+$_.~*&#39;()&quot;</span>, <a class="code hl_enumvalue" href="namespaceYAML.html#a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602">REGEX_OR</a>) |</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>                         (<a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;%&#39;</span>) + <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a48c34338995c7729b611d719bc433a74">Hex</a>() + <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a48c34338995c7729b611d719bc433a74">Hex</a>());</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>}</div>
+</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span><span class="comment">// Plain scalar rules:</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="comment">// . Cannot start with a blank.</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="comment">// . Can never start with any of , [ ] { } # &amp; * ! | &gt; \&#39; \&quot; % @ `</span></div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="comment">// . In the block context - ? : must be not be followed with a space.</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="comment">// . In the flow context ? is illegal and : and - must not be followed with a</span></div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span><span class="comment">// space.</span></div>
+<div class="foldopen" id="foldopen00149" data-start="{" data-end="}">
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a99a3cac2eeea184d25f67071ab1c0f20">  149</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a99a3cac2eeea184d25f67071ab1c0f20">PlainScalar</a>() {</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e =</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>      !(<a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;,[]{}#&amp;*!|&gt;\&#39;\&quot;%@`&quot;</span>, <a class="code hl_enumvalue" href="namespaceYAML.html#a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602">REGEX_OR</a>) |</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>        (<a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;-?:&quot;</span>, <a class="code hl_enumvalue" href="namespaceYAML.html#a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602">REGEX_OR</a>) + (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>())));</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00155" data-start="{" data-end="}">
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a37f1a85316470d765db273e0196695ba">  155</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a37f1a85316470d765db273e0196695ba">PlainScalarInFlow</a>() {</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e =</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>      !(<a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;?,[]{}#&amp;*!|&gt;\&#39;\&quot;%@`&quot;</span>, <a class="code hl_enumvalue" href="namespaceYAML.html#a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602">REGEX_OR</a>) |</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>        (<a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;-:&quot;</span>, <a class="code hl_enumvalue" href="namespaceYAML.html#a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602">REGEX_OR</a>) + (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#ac45c26954df2218a5b38e3f2a9e230a7">Blank</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>())));</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00161" data-start="{" data-end="}">
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a6a5a2f69ac5102725831482cd6856fae">  161</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a6a5a2f69ac5102725831482cd6856fae">EndScalar</a>() {</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;:&#39;</span>) + (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>());</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00165" data-start="{" data-end="}">
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a4d198fe1eb098f85866cb0f3b838bb04">  165</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a4d198fe1eb098f85866cb0f3b838bb04">EndScalarInFlow</a>() {</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e =</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>      (<a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;:&#39;</span>) + (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>() | <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;,]}&quot;</span>, <a class="code hl_enumvalue" href="namespaceYAML.html#a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602">REGEX_OR</a>))) |</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>      <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;,?[]{}&quot;</span>, <a class="code hl_enumvalue" href="namespaceYAML.html#a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602">REGEX_OR</a>);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>}</div>
+</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
+<div class="foldopen" id="foldopen00172" data-start="{" data-end="}">
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#aed069de77b3dc13f38e6da029e32a832">  172</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#aed069de77b3dc13f38e6da029e32a832">ScanScalarEndInFlow</a>() {</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#a4d198fe1eb098f85866cb0f3b838bb04">EndScalarInFlow</a>() | (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>() + <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a039d4627f63ee8bb7b73f3fe268f67d3">Comment</a>()));</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>}</div>
+</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
+<div class="foldopen" id="foldopen00177" data-start="{" data-end="}">
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a5a19a456b847a85a32809bfaf6de6f67">  177</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a5a19a456b847a85a32809bfaf6de6f67">ScanScalarEnd</a>() {</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a6a5a2f69ac5102725831482cd6856fae">EndScalar</a>() | (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">BlankOrBreak</a>() + <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a039d4627f63ee8bb7b73f3fe268f67d3">Comment</a>());</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00181" data-start="{" data-end="}">
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#ab1a0e761fdfba13f016f7ba15b47a11e">  181</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ab1a0e761fdfba13f016f7ba15b47a11e">EscSingleQuote</a>() {</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;\&#39;\&#39;&quot;</span>);</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00185" data-start="{" data-end="}">
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a8d600528e1015584916dc6593f62545a">  185</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a8d600528e1015584916dc6593f62545a">EscBreak</a>() {</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="charliteral">&#39;\\&#39;</span>) + <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ab1e6157d2a1614c1e01d55534e04bd27">Break</a>();</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>}</div>
+</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span> </div>
+<div class="foldopen" id="foldopen00190" data-start="{" data-end="}">
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#ad2561f37acb4bda77163198b5dae4c33">  190</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ad2561f37acb4bda77163198b5dae4c33">ChompIndicator</a>() {</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>(<span class="stringliteral">&quot;+-&quot;</span>, <a class="code hl_enumvalue" href="namespaceYAML.html#a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602">REGEX_OR</a>);</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>}</div>
+</div>
+<div class="foldopen" id="foldopen00194" data-start="{" data-end="}">
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Exp.html#a9644b8dbb783354b0d1bb6e2dacedcd6">  194</a></span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a>&amp; <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a9644b8dbb783354b0d1bb6e2dacedcd6">Chomp</a>() {</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>  <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classYAML_1_1RegEx.html">RegEx</a> e = (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#ad2561f37acb4bda77163198b5dae4c33">ChompIndicator</a>() + <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a18f35c42453267da0ee4bd6d3693d746">Digit</a>()) |</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>                         (<a class="code hl_function" href="namespaceYAML_1_1Exp.html#a18f35c42453267da0ee4bd6d3693d746">Digit</a>() + <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ad2561f37acb4bda77163198b5dae4c33">ChompIndicator</a>()) | <a class="code hl_function" href="namespaceYAML_1_1Exp.html#ad2561f37acb4bda77163198b5dae4c33">ChompIndicator</a>() |</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>                         <a class="code hl_function" href="namespaceYAML_1_1Exp.html#a18f35c42453267da0ee4bd6d3693d746">Digit</a>();</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>  <span class="keywordflow">return</span> e;</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>}</div>
+</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> </div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span><span class="comment">// and some functions</span></div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>std::string <a class="code hl_function" href="namespaceYAML_1_1Exp.html#aa0420fb20a465d5981e56a271e16b58e">Escape</a>(<a class="code hl_class" href="classYAML_1_1Stream.html">Stream</a>&amp; in);</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>}  <span class="comment">// namespace Exp</span></div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
+<div class="foldopen" id="foldopen00205" data-start="{" data-end="}">
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Keys.html">  205</a></span><span class="keyword">namespace </span>Keys {</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Keys.html#aadb88bc7209efec974dcea99a42012b9">  206</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="namespaceYAML_1_1Keys.html#aadb88bc7209efec974dcea99a42012b9">Directive</a> = <span class="charliteral">&#39;%&#39;</span>;</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Keys.html#ae0e293478bcc900fe92ad4d02c2bdad0">  207</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="namespaceYAML_1_1Keys.html#ae0e293478bcc900fe92ad4d02c2bdad0">FlowSeqStart</a> = <span class="charliteral">&#39;[&#39;</span>;</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Keys.html#a8a5d049c80da848b12083290a700a1ea">  208</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="namespaceYAML_1_1Keys.html#a8a5d049c80da848b12083290a700a1ea">FlowSeqEnd</a> = <span class="charliteral">&#39;]&#39;</span>;</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Keys.html#a0bb61fe31d7890d9801eab02edb407c2">  209</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="namespaceYAML_1_1Keys.html#a0bb61fe31d7890d9801eab02edb407c2">FlowMapStart</a> = <span class="charliteral">&#39;{&#39;</span>;</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Keys.html#a4522cc6d65a0d481b4ffb93a8885a621">  210</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="namespaceYAML_1_1Keys.html#a4522cc6d65a0d481b4ffb93a8885a621">FlowMapEnd</a> = <span class="charliteral">&#39;}&#39;</span>;</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Keys.html#af7a63123923b6459be3e9485cfbf58de">  211</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="namespaceYAML_1_1Keys.html#af7a63123923b6459be3e9485cfbf58de">FlowEntry</a> = <span class="charliteral">&#39;,&#39;</span>;</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Keys.html#a722a0d7747e07a8c3c4bc73d50d2464b">  212</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="namespaceYAML_1_1Keys.html#a722a0d7747e07a8c3c4bc73d50d2464b">Alias</a> = <span class="charliteral">&#39;*&#39;</span>;</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Keys.html#a87048f1f7c3c9a86a5764d76f77b052d">  213</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="namespaceYAML_1_1Keys.html#a87048f1f7c3c9a86a5764d76f77b052d">Anchor</a> = <span class="charliteral">&#39;&amp;&#39;</span>;</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Keys.html#a11104f29a4bb388df4a7a9ee6a725d01">  214</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code hl_struct" href="structYAML_1_1Tag.html">Tag</a> = <span class="charliteral">&#39;!&#39;</span>;</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Keys.html#aaed1a54ca8c22edfb6bcba44d8208f0e">  215</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="namespaceYAML_1_1Keys.html#aaed1a54ca8c22edfb6bcba44d8208f0e">LiteralScalar</a> = <span class="charliteral">&#39;|&#39;</span>;</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Keys.html#ad24b631271e4356afb2608e814a442f2">  216</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="namespaceYAML_1_1Keys.html#ad24b631271e4356afb2608e814a442f2">FoldedScalar</a> = <span class="charliteral">&#39;&gt;&#39;</span>;</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Keys.html#a631df87c258dbfe94949a4e21904440f">  217</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="namespaceYAML_1_1Keys.html#a631df87c258dbfe94949a4e21904440f">VerbatimTagStart</a> = <span class="charliteral">&#39;&lt;&#39;</span>;</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno"><a class="line" href="namespaceYAML_1_1Keys.html#a15bf1be5f6170a1c1672b4f6aaa59098">  218</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="namespaceYAML_1_1Keys.html#a15bf1be5f6170a1c1672b4f6aaa59098">VerbatimTagEnd</a> = <span class="charliteral">&#39;&gt;&#39;</span>;</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>}  <span class="comment">// namespace Keys</span></div>
+</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>}  <span class="comment">// namespace YAML</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span> </div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span><span class="preprocessor">#endif  </span><span class="comment">// EXP_H_62B23520_7C8E_11DE_8A39_0800200C9A66</span></div>
+<div class="ttc" id="aclassYAML_1_1RegEx_html"><div class="ttname"><a href="classYAML_1_1RegEx.html">YAML::RegEx</a></div><div class="ttdef"><b>Definition</b> <a href="regex__yaml_8h_source.html#l00031">regex_yaml.h:31</a></div></div>
+<div class="ttc" id="aclassYAML_1_1Stream_html"><div class="ttname"><a href="classYAML_1_1Stream.html">YAML::Stream</a></div><div class="ttdef"><b>Definition</b> <a href="stream_8h_source.html#l00022">stream.h:22</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a039d4627f63ee8bb7b73f3fe268f67d3"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a039d4627f63ee8bb7b73f3fe268f67d3">YAML::Exp::Comment</a></div><div class="ttdeci">const RegEx Comment()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00120">exp.h:120</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a04a1e48e12158f0b39d70e839df90eda"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a04a1e48e12158f0b39d70e839df90eda">YAML::Exp::Value</a></div><div class="ttdeci">const RegEx &amp; Value()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00108">exp.h:108</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a13792312214ed6893a8c4a0803188438"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a13792312214ed6893a8c4a0803188438">YAML::Exp::ValueInJSONFlow</a></div><div class="ttdeci">const RegEx &amp; ValueInJSONFlow()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00116">exp.h:116</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a18f35c42453267da0ee4bd6d3693d746"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a18f35c42453267da0ee4bd6d3693d746">YAML::Exp::Digit</a></div><div class="ttdeci">const RegEx &amp; Digit()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00047">exp.h:47</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a2309ea3e5cbb5ecd3bc7f69dc3b09873"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a2309ea3e5cbb5ecd3bc7f69dc3b09873">YAML::Exp::Key</a></div><div class="ttdeci">const RegEx &amp; Key()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00100">exp.h:100</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a2b4828326476e8d96ef615882aedd818"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a2b4828326476e8d96ef615882aedd818">YAML::Exp::Word</a></div><div class="ttdeci">const RegEx &amp; Word()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00059">exp.h:59</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a37f1a85316470d765db273e0196695ba"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a37f1a85316470d765db273e0196695ba">YAML::Exp::PlainScalarInFlow</a></div><div class="ttdeci">const RegEx &amp; PlainScalarInFlow()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00155">exp.h:155</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a3828a08b77b3a9b7edd1a6b62c515467"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a3828a08b77b3a9b7edd1a6b62c515467">YAML::Exp::Space</a></div><div class="ttdeci">const RegEx &amp; Space()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00027">exp.h:27</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a43c0bc872bef519a4fd88ebffc94e203"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a43c0bc872bef519a4fd88ebffc94e203">YAML::Exp::Tag</a></div><div class="ttdeci">const RegEx &amp; Tag()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00137">exp.h:137</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a48c34338995c7729b611d719bc433a74"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a48c34338995c7729b611d719bc433a74">YAML::Exp::Hex</a></div><div class="ttdeci">const RegEx &amp; Hex()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00063">exp.h:63</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a4d198fe1eb098f85866cb0f3b838bb04"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a4d198fe1eb098f85866cb0f3b838bb04">YAML::Exp::EndScalarInFlow</a></div><div class="ttdeci">const RegEx &amp; EndScalarInFlow()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00165">exp.h:165</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a522f525a7c9c4233a4e8281141aa5f5d"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a522f525a7c9c4233a4e8281141aa5f5d">YAML::Exp::DocIndicator</a></div><div class="ttdeci">const RegEx &amp; DocIndicator()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00092">exp.h:92</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a5a19a456b847a85a32809bfaf6de6f67"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a5a19a456b847a85a32809bfaf6de6f67">YAML::Exp::ScanScalarEnd</a></div><div class="ttdeci">const RegEx &amp; ScanScalarEnd()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00177">exp.h:177</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a6a5a2f69ac5102725831482cd6856fae"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a6a5a2f69ac5102725831482cd6856fae">YAML::Exp::EndScalar</a></div><div class="ttdeci">const RegEx &amp; EndScalar()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00161">exp.h:161</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a6aafdcdbafd2b4d23df6dfa4c920faec"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a6aafdcdbafd2b4d23df6dfa4c920faec">YAML::Exp::Anchor</a></div><div class="ttdeci">const RegEx &amp; Anchor()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00124">exp.h:124</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a6bcc1525861267669fd2e5813dc34e57"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a6bcc1525861267669fd2e5813dc34e57">YAML::Exp::Utf8_ByteOrderMark</a></div><div class="ttdeci">const RegEx &amp; Utf8_ByteOrderMark()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00077">exp.h:77</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a8d600528e1015584916dc6593f62545a"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a8d600528e1015584916dc6593f62545a">YAML::Exp::EscBreak</a></div><div class="ttdeci">const RegEx &amp; EscBreak()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00185">exp.h:185</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a938e4e579508a690296b6968766b3107"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a938e4e579508a690296b6968766b3107">YAML::Exp::AnchorEnd</a></div><div class="ttdeci">const RegEx &amp; AnchorEnd()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00128">exp.h:128</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a944e98afde5aa6f94590c3e7a2fdb0ce"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a944e98afde5aa6f94590c3e7a2fdb0ce">YAML::Exp::Tab</a></div><div class="ttdeci">const RegEx &amp; Tab()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00031">exp.h:31</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a9644b8dbb783354b0d1bb6e2dacedcd6"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a9644b8dbb783354b0d1bb6e2dacedcd6">YAML::Exp::Chomp</a></div><div class="ttdeci">const RegEx &amp; Chomp()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00194">exp.h:194</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_a99a3cac2eeea184d25f67071ab1c0f20"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#a99a3cac2eeea184d25f67071ab1c0f20">YAML::Exp::PlainScalar</a></div><div class="ttdeci">const RegEx &amp; PlainScalar()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00149">exp.h:149</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_aa0420fb20a465d5981e56a271e16b58e"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#aa0420fb20a465d5981e56a271e16b58e">YAML::Exp::Escape</a></div><div class="ttdeci">std::string Escape(Stream &amp;in, int codeLength)</div><div class="ttdef"><b>Definition</b> <a href="exp_8cpp_source.html#l00038">exp.cpp:38</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_aa7fc4d26a120a3c993f5b4ac5284df8f"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#aa7fc4d26a120a3c993f5b4ac5284df8f">YAML::Exp::DocStart</a></div><div class="ttdeci">const RegEx &amp; DocStart()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00084">exp.h:84</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_aade8b9d3bb19689aae8a5f753e9ccac1"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#aade8b9d3bb19689aae8a5f753e9ccac1">YAML::Exp::Empty</a></div><div class="ttdeci">const RegEx &amp; Empty()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00023">exp.h:23</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_ab1a0e761fdfba13f016f7ba15b47a11e"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#ab1a0e761fdfba13f016f7ba15b47a11e">YAML::Exp::EscSingleQuote</a></div><div class="ttdeci">const RegEx &amp; EscSingleQuote()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00181">exp.h:181</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_ab1e6157d2a1614c1e01d55534e04bd27"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#ab1e6157d2a1614c1e01d55534e04bd27">YAML::Exp::Break</a></div><div class="ttdeci">const RegEx &amp; Break()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00039">exp.h:39</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_ac45c26954df2218a5b38e3f2a9e230a7"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#ac45c26954df2218a5b38e3f2a9e230a7">YAML::Exp::Blank</a></div><div class="ttdeci">const RegEx &amp; Blank()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00035">exp.h:35</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_ac74853629036a9f41208768d1360af78"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#ac74853629036a9f41208768d1360af78">YAML::Exp::Alpha</a></div><div class="ttdeci">const RegEx &amp; Alpha()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00051">exp.h:51</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_acc66a3af6a69f7ee4a8b754bac5fd92f"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#acc66a3af6a69f7ee4a8b754bac5fd92f">YAML::Exp::BlockEntry</a></div><div class="ttdeci">const RegEx &amp; BlockEntry()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00096">exp.h:96</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_acda8dfd75d32606ee59b56fde8d2728c"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#acda8dfd75d32606ee59b56fde8d2728c">YAML::Exp::NotPrintable</a></div><div class="ttdeci">const RegEx &amp; NotPrintable()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00069">exp.h:69</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_ad2561f37acb4bda77163198b5dae4c33"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#ad2561f37acb4bda77163198b5dae4c33">YAML::Exp::ChompIndicator</a></div><div class="ttdeci">const RegEx &amp; ChompIndicator()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00190">exp.h:190</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_ad4d8abbc8f80a7dc248e30d60672584f"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#ad4d8abbc8f80a7dc248e30d60672584f">YAML::Exp::AlphaNumeric</a></div><div class="ttdeci">const RegEx &amp; AlphaNumeric()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00055">exp.h:55</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_ad7f8ce69dbd6bf863ad80d41e2808888"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#ad7f8ce69dbd6bf863ad80d41e2808888">YAML::Exp::KeyInFlow</a></div><div class="ttdeci">const RegEx &amp; KeyInFlow()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00104">exp.h:104</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_ade68328020f631ebe2830965581ac8da"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#ade68328020f631ebe2830965581ac8da">YAML::Exp::URI</a></div><div class="ttdeci">const RegEx &amp; URI()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00132">exp.h:132</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_aed069de77b3dc13f38e6da029e32a832"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#aed069de77b3dc13f38e6da029e32a832">YAML::Exp::ScanScalarEndInFlow</a></div><div class="ttdeci">const RegEx &amp; ScanScalarEndInFlow()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00172">exp.h:172</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_aed4decd7aa347dfeacfb12179638bc62"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#aed4decd7aa347dfeacfb12179638bc62">YAML::Exp::DocEnd</a></div><div class="ttdeci">const RegEx &amp; DocEnd()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00088">exp.h:88</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_aed9c3a41179681692ad56182f44abe3c"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#aed9c3a41179681692ad56182f44abe3c">YAML::Exp::ValueInFlow</a></div><div class="ttdeci">const RegEx &amp; ValueInFlow()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00112">exp.h:112</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Exp_html_af5a27bec65ec8492af449823afd0baaa"><div class="ttname"><a href="namespaceYAML_1_1Exp.html#af5a27bec65ec8492af449823afd0baaa">YAML::Exp::BlankOrBreak</a></div><div class="ttdeci">const RegEx &amp; BlankOrBreak()</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00043">exp.h:43</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Keys_html_a0bb61fe31d7890d9801eab02edb407c2"><div class="ttname"><a href="namespaceYAML_1_1Keys.html#a0bb61fe31d7890d9801eab02edb407c2">YAML::Keys::FlowMapStart</a></div><div class="ttdeci">const char FlowMapStart</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00209">exp.h:209</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Keys_html_a15bf1be5f6170a1c1672b4f6aaa59098"><div class="ttname"><a href="namespaceYAML_1_1Keys.html#a15bf1be5f6170a1c1672b4f6aaa59098">YAML::Keys::VerbatimTagEnd</a></div><div class="ttdeci">const char VerbatimTagEnd</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00218">exp.h:218</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Keys_html_a4522cc6d65a0d481b4ffb93a8885a621"><div class="ttname"><a href="namespaceYAML_1_1Keys.html#a4522cc6d65a0d481b4ffb93a8885a621">YAML::Keys::FlowMapEnd</a></div><div class="ttdeci">const char FlowMapEnd</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00210">exp.h:210</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Keys_html_a631df87c258dbfe94949a4e21904440f"><div class="ttname"><a href="namespaceYAML_1_1Keys.html#a631df87c258dbfe94949a4e21904440f">YAML::Keys::VerbatimTagStart</a></div><div class="ttdeci">const char VerbatimTagStart</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00217">exp.h:217</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Keys_html_a722a0d7747e07a8c3c4bc73d50d2464b"><div class="ttname"><a href="namespaceYAML_1_1Keys.html#a722a0d7747e07a8c3c4bc73d50d2464b">YAML::Keys::Alias</a></div><div class="ttdeci">const char Alias</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00212">exp.h:212</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Keys_html_a87048f1f7c3c9a86a5764d76f77b052d"><div class="ttname"><a href="namespaceYAML_1_1Keys.html#a87048f1f7c3c9a86a5764d76f77b052d">YAML::Keys::Anchor</a></div><div class="ttdeci">const char Anchor</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00213">exp.h:213</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Keys_html_a8a5d049c80da848b12083290a700a1ea"><div class="ttname"><a href="namespaceYAML_1_1Keys.html#a8a5d049c80da848b12083290a700a1ea">YAML::Keys::FlowSeqEnd</a></div><div class="ttdeci">const char FlowSeqEnd</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00208">exp.h:208</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Keys_html_aadb88bc7209efec974dcea99a42012b9"><div class="ttname"><a href="namespaceYAML_1_1Keys.html#aadb88bc7209efec974dcea99a42012b9">YAML::Keys::Directive</a></div><div class="ttdeci">const char Directive</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00206">exp.h:206</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Keys_html_aaed1a54ca8c22edfb6bcba44d8208f0e"><div class="ttname"><a href="namespaceYAML_1_1Keys.html#aaed1a54ca8c22edfb6bcba44d8208f0e">YAML::Keys::LiteralScalar</a></div><div class="ttdeci">const char LiteralScalar</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00215">exp.h:215</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Keys_html_ad24b631271e4356afb2608e814a442f2"><div class="ttname"><a href="namespaceYAML_1_1Keys.html#ad24b631271e4356afb2608e814a442f2">YAML::Keys::FoldedScalar</a></div><div class="ttdeci">const char FoldedScalar</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00216">exp.h:216</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Keys_html_ae0e293478bcc900fe92ad4d02c2bdad0"><div class="ttname"><a href="namespaceYAML_1_1Keys.html#ae0e293478bcc900fe92ad4d02c2bdad0">YAML::Keys::FlowSeqStart</a></div><div class="ttdeci">const char FlowSeqStart</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00207">exp.h:207</a></div></div>
+<div class="ttc" id="anamespaceYAML_1_1Keys_html_af7a63123923b6459be3e9485cfbf58de"><div class="ttname"><a href="namespaceYAML_1_1Keys.html#af7a63123923b6459be3e9485cfbf58de">YAML::Keys::FlowEntry</a></div><div class="ttdeci">const char FlowEntry</div><div class="ttdef"><b>Definition</b> <a href="exp_8h_source.html#l00211">exp.h:211</a></div></div>
+<div class="ttc" id="anamespaceYAML_html"><div class="ttname"><a href="namespaceYAML.html">YAML</a></div><div class="ttdef"><b>Definition</b> <a href="binary_8cpp_source.html#l00005">binary.cpp:5</a></div></div>
+<div class="ttc" id="anamespaceYAML_html_a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602"><div class="ttname"><a href="namespaceYAML.html#a7bdf8e8bf393f2547c682451e088023ca08c0eaa673d6bac0bc06695e103ad602">YAML::REGEX_OR</a></div><div class="ttdeci">@ REGEX_OR</div><div class="ttdef"><b>Definition</b> <a href="regex__yaml_8h_source.html#l00022">regex_yaml.h:22</a></div></div>
+<div class="ttc" id="aregex__yaml_8h_html"><div class="ttname"><a href="regex__yaml_8h.html">regex_yaml.h</a></div></div>
+<div class="ttc" id="astream_8h_html"><div class="ttname"><a href="stream_8h.html">stream.h</a></div></div>
+<div class="ttc" id="astructYAML_1_1Tag_html"><div class="ttname"><a href="structYAML_1_1Tag.html">YAML::Tag</a></div><div class="ttdef"><b>Definition</b> <a href="tag_8h_source.html#l00016">tag.h:16</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_ba597284842d33624e3f5e66f0e747b6.html">yamlcpp</a></li><li class="navelem"><a class="el" href="exp_8h.html">exp.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

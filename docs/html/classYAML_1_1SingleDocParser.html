@@ -1,0 +1,969 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: YAML::SingleDocParser类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classYAML_1_1SingleDocParser.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-types">Private 类型</a> &#124;
+<a href="#pri-methods">Private 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classYAML_1_1SingleDocParser-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">YAML::SingleDocParser类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="singledocparser_8h_source.html">singledocparser.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a114cc1fd77d12561496de09e742958dc" id="r_a114cc1fd77d12561496de09e742958dc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a114cc1fd77d12561496de09e742958dc">SingleDocParser</a> (<a class="el" href="classYAML_1_1Scanner.html">Scanner</a> &amp;scanner, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structYAML_1_1Directives.html">Directives</a> &amp;directives)</td></tr>
+<tr class="separator:a114cc1fd77d12561496de09e742958dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4ff96c5ae000df0bfa1eae72cdfc6e9" id="r_ab4ff96c5ae000df0bfa1eae72cdfc6e9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#ab4ff96c5ae000df0bfa1eae72cdfc6e9">SingleDocParser</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a> &amp;)=delete</td></tr>
+<tr class="separator:ab4ff96c5ae000df0bfa1eae72cdfc6e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0076f4801ccdf57b97a56d238c33ce46" id="r_a0076f4801ccdf57b97a56d238c33ce46"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a0076f4801ccdf57b97a56d238c33ce46">SingleDocParser</a> (<a class="el" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a> &amp;&amp;)=delete</td></tr>
+<tr class="separator:a0076f4801ccdf57b97a56d238c33ce46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ac53e3f3a1f63fcaced936d451ca225" id="r_a5ac53e3f3a1f63fcaced936d451ca225"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a5ac53e3f3a1f63fcaced936d451ca225">operator=</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a> &amp;)=delete</td></tr>
+<tr class="separator:a5ac53e3f3a1f63fcaced936d451ca225"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31fd8041fe99859476b204942133cecd" id="r_a31fd8041fe99859476b204942133cecd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a31fd8041fe99859476b204942133cecd">operator=</a> (<a class="el" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a> &amp;&amp;)=delete</td></tr>
+<tr class="separator:a31fd8041fe99859476b204942133cecd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3cb841ba024f59aee663aa3e260c4ed4" id="r_a3cb841ba024f59aee663aa3e260c4ed4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a3cb841ba024f59aee663aa3e260c4ed4">~SingleDocParser</a> ()</td></tr>
+<tr class="separator:a3cb841ba024f59aee663aa3e260c4ed4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f5d60caf212161d978be553e803d615" id="r_a7f5d60caf212161d978be553e803d615"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a7f5d60caf212161d978be553e803d615">HandleDocument</a> (<a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;eventHandler)</td></tr>
+<tr class="separator:a7f5d60caf212161d978be553e803d615"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 类型</h2></td></tr>
+<tr class="memitem:a61e5114292ff648f70d5d4834269970b" id="r_a61e5114292ff648f70d5d4834269970b"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a61e5114292ff648f70d5d4834269970b">Anchors</a> = std::map&lt; std::string, <a class="el" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> &gt;</td></tr>
+<tr class="separator:a61e5114292ff648f70d5d4834269970b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 成员函数</h2></td></tr>
+<tr class="memitem:a39a10304c10ea81d765960bcc1f19dd4" id="r_a39a10304c10ea81d765960bcc1f19dd4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a39a10304c10ea81d765960bcc1f19dd4">HandleNode</a> (<a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;eventHandler)</td></tr>
+<tr class="separator:a39a10304c10ea81d765960bcc1f19dd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47b86177653a2dda91d5ea048056cae1" id="r_a47b86177653a2dda91d5ea048056cae1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a47b86177653a2dda91d5ea048056cae1">HandleSequence</a> (<a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;eventHandler)</td></tr>
+<tr class="separator:a47b86177653a2dda91d5ea048056cae1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae91d52320ec176023f85e61d92fd975c" id="r_ae91d52320ec176023f85e61d92fd975c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#ae91d52320ec176023f85e61d92fd975c">HandleBlockSequence</a> (<a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;eventHandler)</td></tr>
+<tr class="separator:ae91d52320ec176023f85e61d92fd975c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae254cbf79e97719026b88c10fd2eef7a" id="r_ae254cbf79e97719026b88c10fd2eef7a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#ae254cbf79e97719026b88c10fd2eef7a">HandleFlowSequence</a> (<a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;eventHandler)</td></tr>
+<tr class="separator:ae254cbf79e97719026b88c10fd2eef7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada3312a9f70ab32e7c222fbffcf4be1f" id="r_ada3312a9f70ab32e7c222fbffcf4be1f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#ada3312a9f70ab32e7c222fbffcf4be1f">HandleMap</a> (<a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;eventHandler)</td></tr>
+<tr class="separator:ada3312a9f70ab32e7c222fbffcf4be1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b75da5626894e7ae188349adfd73e01" id="r_a3b75da5626894e7ae188349adfd73e01"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a3b75da5626894e7ae188349adfd73e01">HandleBlockMap</a> (<a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;eventHandler)</td></tr>
+<tr class="separator:a3b75da5626894e7ae188349adfd73e01"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae48a7acad9ff9c507c227caf577cdd3f" id="r_ae48a7acad9ff9c507c227caf577cdd3f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#ae48a7acad9ff9c507c227caf577cdd3f">HandleFlowMap</a> (<a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;eventHandler)</td></tr>
+<tr class="separator:ae48a7acad9ff9c507c227caf577cdd3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52baa6e3302bd04a8a444776041b9bec" id="r_a52baa6e3302bd04a8a444776041b9bec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a52baa6e3302bd04a8a444776041b9bec">HandleCompactMap</a> (<a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;eventHandler)</td></tr>
+<tr class="separator:a52baa6e3302bd04a8a444776041b9bec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a79abd9566c395252f17592b3bbabe5" id="r_a6a79abd9566c395252f17592b3bbabe5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a6a79abd9566c395252f17592b3bbabe5">HandleCompactMapWithNoKey</a> (<a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;eventHandler)</td></tr>
+<tr class="separator:a6a79abd9566c395252f17592b3bbabe5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89a3787f282de8907168919e357a7c56" id="r_a89a3787f282de8907168919e357a7c56"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a89a3787f282de8907168919e357a7c56">ParseProperties</a> (std::string &amp;tag, <a class="el" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> &amp;anchor, std::string &amp;anchor_name)</td></tr>
+<tr class="separator:a89a3787f282de8907168919e357a7c56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7589242b328cd5f33a7e8b010ca0e4b4" id="r_a7589242b328cd5f33a7e8b010ca0e4b4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a7589242b328cd5f33a7e8b010ca0e4b4">ParseTag</a> (std::string &amp;tag)</td></tr>
+<tr class="separator:a7589242b328cd5f33a7e8b010ca0e4b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af22166ab27b55f88e91e97060df64b9c" id="r_af22166ab27b55f88e91e97060df64b9c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#af22166ab27b55f88e91e97060df64b9c">ParseAnchor</a> (<a class="el" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> &amp;anchor, std::string &amp;anchor_name)</td></tr>
+<tr class="separator:af22166ab27b55f88e91e97060df64b9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67a5b37dd64968b3c9439f92019d3d84" id="r_a67a5b37dd64968b3c9439f92019d3d84"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a67a5b37dd64968b3c9439f92019d3d84">RegisterAnchor</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;name)</td></tr>
+<tr class="separator:a67a5b37dd64968b3c9439f92019d3d84"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af8c99ee7dcfc9e328a60c6e09da820f0" id="r_af8c99ee7dcfc9e328a60c6e09da820f0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#af8c99ee7dcfc9e328a60c6e09da820f0">LookupAnchor</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structYAML_1_1Mark.html">Mark</a> &amp;mark, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;name) <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="separator:af8c99ee7dcfc9e328a60c6e09da820f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:aa738023830de9231fdb908ea2f633eda" id="r_aa738023830de9231fdb908ea2f633eda"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#aa738023830de9231fdb908ea2f633eda">depth</a> = 0</td></tr>
+<tr class="separator:aa738023830de9231fdb908ea2f633eda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae48f92157c43d59bef0a51e813bd09ea" id="r_ae48f92157c43d59bef0a51e813bd09ea"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classYAML_1_1Scanner.html">Scanner</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#ae48f92157c43d59bef0a51e813bd09ea">m_scanner</a></td></tr>
+<tr class="separator:ae48f92157c43d59bef0a51e813bd09ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaee10ea57bf3cda0a258bf02e6b59d08" id="r_aaee10ea57bf3cda0a258bf02e6b59d08"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structYAML_1_1Directives.html">Directives</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#aaee10ea57bf3cda0a258bf02e6b59d08">m_directives</a></td></tr>
+<tr class="separator:aaee10ea57bf3cda0a258bf02e6b59d08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53a93a64dd5d4ad8f846f90e2c802159" id="r_a53a93a64dd5d4ad8f846f90e2c802159"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classYAML_1_1CollectionStack.html">CollectionStack</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a53a93a64dd5d4ad8f846f90e2c802159">m_pCollectionStack</a></td></tr>
+<tr class="separator:a53a93a64dd5d4ad8f846f90e2c802159"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2cf5f514cdbd44292b7ed6f938d0d06" id="r_ad2cf5f514cdbd44292b7ed6f938d0d06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classYAML_1_1SingleDocParser.html#a61e5114292ff648f70d5d4834269970b">Anchors</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#ad2cf5f514cdbd44292b7ed6f938d0d06">m_anchors</a></td></tr>
+<tr class="separator:ad2cf5f514cdbd44292b7ed6f938d0d06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4453c39d37c035fa3f5d761240055bb6" id="r_a4453c39d37c035fa3f5d761240055bb6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classYAML_1_1SingleDocParser.html#a4453c39d37c035fa3f5d761240055bb6">m_curAnchor</a></td></tr>
+<tr class="separator:a4453c39d37c035fa3f5d761240055bb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock">
+<p class="definition">在文件 <a class="el" href="singledocparser_8h_source.html">singledocparser.h</a> 第 <a class="el" href="singledocparser_8h_source.html#l00026">26</a> 行定义.</p>
+</div><h2 class="groupheader">成员类型定义说明</h2>
+<a id="a61e5114292ff648f70d5d4834269970b" name="a61e5114292ff648f70d5d4834269970b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61e5114292ff648f70d5d4834269970b">&#9670;&#160;</a></span>Anchors</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="classYAML_1_1SingleDocParser.html#a61e5114292ff648f70d5d4834269970b">YAML::SingleDocParser::Anchors</a> =  std::map&lt;std::string, <a class="el" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a>&gt;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8h_source.html">singledocparser.h</a> 第 <a class="el" href="singledocparser_8h_source.html#l00064">64</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a114cc1fd77d12561496de09e742958dc" name="a114cc1fd77d12561496de09e742958dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a114cc1fd77d12561496de09e742958dc">&#9670;&#160;</a></span>SingleDocParser() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">YAML::SingleDocParser::SingleDocParser </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1Scanner.html">Scanner</a> &amp;&#160;</td>
+          <td class="paramname"><em>scanner</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structYAML_1_1Directives.html">Directives</a> &amp;&#160;</td>
+          <td class="paramname"><em>directives</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00018">18</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab4ff96c5ae000df0bfa1eae72cdfc6e9" name="ab4ff96c5ae000df0bfa1eae72cdfc6e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4ff96c5ae000df0bfa1eae72cdfc6e9">&#9670;&#160;</a></span>SingleDocParser() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">YAML::SingleDocParser::SingleDocParser </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a> &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0076f4801ccdf57b97a56d238c33ce46" name="a0076f4801ccdf57b97a56d238c33ce46"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0076f4801ccdf57b97a56d238c33ce46">&#9670;&#160;</a></span>SingleDocParser() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">YAML::SingleDocParser::SingleDocParser </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a> &amp;&amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3cb841ba024f59aee663aa3e260c4ed4" name="a3cb841ba024f59aee663aa3e260c4ed4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3cb841ba024f59aee663aa3e260c4ed4">&#9670;&#160;</a></span>~SingleDocParser()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">YAML::SingleDocParser::~SingleDocParser </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a3b75da5626894e7ae188349adfd73e01" name="a3b75da5626894e7ae188349adfd73e01"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b75da5626894e7ae188349adfd73e01">&#9670;&#160;</a></span>HandleBlockMap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::SingleDocParser::HandleBlockMap </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;&#160;</td>
+          <td class="paramname"><em>eventHandler</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00251">251</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae91d52320ec176023f85e61d92fd975c" name="ae91d52320ec176023f85e61d92fd975c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae91d52320ec176023f85e61d92fd975c">&#9670;&#160;</a></span>HandleBlockSequence()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::SingleDocParser::HandleBlockSequence </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;&#160;</td>
+          <td class="paramname"><em>eventHandler</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00165">165</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a52baa6e3302bd04a8a444776041b9bec" name="a52baa6e3302bd04a8a444776041b9bec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52baa6e3302bd04a8a444776041b9bec">&#9670;&#160;</a></span>HandleCompactMap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::SingleDocParser::HandleCompactMap </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;&#160;</td>
+          <td class="paramname"><em>eventHandler</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00339">339</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6a79abd9566c395252f17592b3bbabe5" name="a6a79abd9566c395252f17592b3bbabe5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a79abd9566c395252f17592b3bbabe5">&#9670;&#160;</a></span>HandleCompactMapWithNoKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::SingleDocParser::HandleCompactMapWithNoKey </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;&#160;</td>
+          <td class="paramname"><em>eventHandler</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00359">359</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7f5d60caf212161d978be553e803d615" name="a7f5d60caf212161d978be553e803d615"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f5d60caf212161d978be553e803d615">&#9670;&#160;</a></span>HandleDocument()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::SingleDocParser::HandleDocument </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;&#160;</td>
+          <td class="paramname"><em>eventHandler</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00030">30</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae48a7acad9ff9c507c227caf577cdd3f" name="ae48a7acad9ff9c507c227caf577cdd3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae48a7acad9ff9c507c227caf577cdd3f">&#9670;&#160;</a></span>HandleFlowMap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::SingleDocParser::HandleFlowMap </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;&#160;</td>
+          <td class="paramname"><em>eventHandler</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00290">290</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae254cbf79e97719026b88c10fd2eef7a" name="ae254cbf79e97719026b88c10fd2eef7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae254cbf79e97719026b88c10fd2eef7a">&#9670;&#160;</a></span>HandleFlowSequence()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::SingleDocParser::HandleFlowSequence </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;&#160;</td>
+          <td class="paramname"><em>eventHandler</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00198">198</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ada3312a9f70ab32e7c222fbffcf4be1f" name="ada3312a9f70ab32e7c222fbffcf4be1f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada3312a9f70ab32e7c222fbffcf4be1f">&#9670;&#160;</a></span>HandleMap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::SingleDocParser::HandleMap </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;&#160;</td>
+          <td class="paramname"><em>eventHandler</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00231">231</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a39a10304c10ea81d765960bcc1f19dd4" name="a39a10304c10ea81d765960bcc1f19dd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39a10304c10ea81d765960bcc1f19dd4">&#9670;&#160;</a></span>HandleNode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::SingleDocParser::HandleNode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;&#160;</td>
+          <td class="paramname"><em>eventHandler</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00050">50</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a47b86177653a2dda91d5ea048056cae1" name="a47b86177653a2dda91d5ea048056cae1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47b86177653a2dda91d5ea048056cae1">&#9670;&#160;</a></span>HandleSequence()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::SingleDocParser::HandleSequence </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1EventHandler.html">EventHandler</a> &amp;&#160;</td>
+          <td class="paramname"><em>eventHandler</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00151">151</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af8c99ee7dcfc9e328a60c6e09da820f0" name="af8c99ee7dcfc9e328a60c6e09da820f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af8c99ee7dcfc9e328a60c6e09da820f0">&#9670;&#160;</a></span>LookupAnchor()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> YAML::SingleDocParser::LookupAnchor </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structYAML_1_1Mark.html">Mark</a> &amp;&#160;</td>
+          <td class="paramname"><em>mark</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00424">424</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5ac53e3f3a1f63fcaced936d451ca225" name="a5ac53e3f3a1f63fcaced936d451ca225"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ac53e3f3a1f63fcaced936d451ca225">&#9670;&#160;</a></span>operator=() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a> &amp; YAML::SingleDocParser::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a> &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a31fd8041fe99859476b204942133cecd" name="a31fd8041fe99859476b204942133cecd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31fd8041fe99859476b204942133cecd">&#9670;&#160;</a></span>operator=() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a> &amp; YAML::SingleDocParser::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a> &amp;&amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af22166ab27b55f88e91e97060df64b9c" name="af22166ab27b55f88e91e97060df64b9c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af22166ab27b55f88e91e97060df64b9c">&#9670;&#160;</a></span>ParseAnchor()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::SingleDocParser::ParseAnchor </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>anchor</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>anchor_name</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00407">407</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a89a3787f282de8907168919e357a7c56" name="a89a3787f282de8907168919e357a7c56"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89a3787f282de8907168919e357a7c56">&#9670;&#160;</a></span>ParseProperties()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::SingleDocParser::ParseProperties </td>
+          <td>(</td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>tag</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>anchor</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>anchor_name</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00374">374</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7589242b328cd5f33a7e8b010ca0e4b4" name="a7589242b328cd5f33a7e8b010ca0e4b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7589242b328cd5f33a7e8b010ca0e4b4">&#9670;&#160;</a></span>ParseTag()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void YAML::SingleDocParser::ParseTag </td>
+          <td>(</td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>tag</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00397">397</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a67a5b37dd64968b3c9439f92019d3d84" name="a67a5b37dd64968b3c9439f92019d3d84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67a5b37dd64968b3c9439f92019d3d84">&#9670;&#160;</a></span>RegisterAnchor()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> YAML::SingleDocParser::RegisterAnchor </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a> 第 <a class="el" href="singledocparser_8cpp_source.html#l00417">417</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="aa738023830de9231fdb908ea2f633eda" name="aa738023830de9231fdb908ea2f633eda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa738023830de9231fdb908ea2f633eda">&#9670;&#160;</a></span>depth</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int YAML::SingleDocParser::depth = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8h_source.html">singledocparser.h</a> 第 <a class="el" href="singledocparser_8h_source.html#l00059">59</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad2cf5f514cdbd44292b7ed6f938d0d06" name="ad2cf5f514cdbd44292b7ed6f938d0d06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2cf5f514cdbd44292b7ed6f938d0d06">&#9670;&#160;</a></span>m_anchors</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1SingleDocParser.html#a61e5114292ff648f70d5d4834269970b">Anchors</a> YAML::SingleDocParser::m_anchors</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8h_source.html">singledocparser.h</a> 第 <a class="el" href="singledocparser_8h_source.html#l00065">65</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4453c39d37c035fa3f5d761240055bb6" name="a4453c39d37c035fa3f5d761240055bb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4453c39d37c035fa3f5d761240055bb6">&#9670;&#160;</a></span>m_curAnchor</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespaceYAML.html#ab5748184c36c2ff7b8229010c7259a0f">anchor_t</a> YAML::SingleDocParser::m_curAnchor</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8h_source.html">singledocparser.h</a> 第 <a class="el" href="singledocparser_8h_source.html#l00067">67</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaee10ea57bf3cda0a258bf02e6b59d08" name="aaee10ea57bf3cda0a258bf02e6b59d08"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaee10ea57bf3cda0a258bf02e6b59d08">&#9670;&#160;</a></span>m_directives</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structYAML_1_1Directives.html">Directives</a>&amp; YAML::SingleDocParser::m_directives</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8h_source.html">singledocparser.h</a> 第 <a class="el" href="singledocparser_8h_source.html#l00061">61</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a53a93a64dd5d4ad8f846f90e2c802159" name="a53a93a64dd5d4ad8f846f90e2c802159"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53a93a64dd5d4ad8f846f90e2c802159">&#9670;&#160;</a></span>m_pCollectionStack</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::unique_ptr&lt;<a class="el" href="classYAML_1_1CollectionStack.html">CollectionStack</a>&gt; YAML::SingleDocParser::m_pCollectionStack</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8h_source.html">singledocparser.h</a> 第 <a class="el" href="singledocparser_8h_source.html#l00062">62</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae48f92157c43d59bef0a51e813bd09ea" name="ae48f92157c43d59bef0a51e813bd09ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae48f92157c43d59bef0a51e813bd09ea">&#9670;&#160;</a></span>m_scanner</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classYAML_1_1Scanner.html">Scanner</a>&amp; YAML::SingleDocParser::m_scanner</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="singledocparser_8h_source.html">singledocparser.h</a> 第 <a class="el" href="singledocparser_8h_source.html#l00060">60</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WTSUtils/yamlcpp/<a class="el" href="singledocparser_8h_source.html">singledocparser.h</a></li>
+<li>src/WTSUtils/yamlcpp/<a class="el" href="singledocparser_8cpp_source.html">singledocparser.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespaceYAML.html">YAML</a></li><li class="navelem"><a class="el" href="classYAML_1_1SingleDocParser.html">SingleDocParser</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

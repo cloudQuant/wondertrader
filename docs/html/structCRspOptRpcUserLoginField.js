@@ -1,0 +1,26 @@
+var structCRspOptRpcUserLoginField =
+[
+    [ "chFlashFlag", "structCRspOptRpcUserLoginField.html#a8195d4c686c843db3fbde0c728c5d32d", null ],
+    [ "chLastLoginChnl", "structCRspOptRpcUserLoginField.html#a8ae71239359f8290b9836ed4396a0fff", null ],
+    [ "chPwdMdfFlag", "structCRspOptRpcUserLoginField.html#a37e06938b9228e8c0f921ac01fc46495", null ],
+    [ "chStkex", "structCRspOptRpcUserLoginField.html#adf9084f82e5e26e11e49f3caf5e981b3", null ],
+    [ "chTrdacctExcls", "structCRspOptRpcUserLoginField.html#a0a287400f499320d9c537ac64d3e4bdf", null ],
+    [ "chTrdacctStatus", "structCRspOptRpcUserLoginField.html#a8f67b4860783fc6bb6f3a4610543e30f", null ],
+    [ "iFlashPort", "structCRspOptRpcUserLoginField.html#a7c8357c4865894718ff72bb1b620cf6f", null ],
+    [ "iIntOrg", "structCRspOptRpcUserLoginField.html#aaa8e05605aa6846a371294b031b9585e", null ],
+    [ "iSubsysSn", "structCRspOptRpcUserLoginField.html#afdeda285271a92d9cdbad1f0ae168a5c", null ],
+    [ "llCuacctCode", "structCRspOptRpcUserLoginField.html#a0a0c060b256b19efa6eb8f61e7ed6908", null ],
+    [ "llCustCode", "structCRspOptRpcUserLoginField.html#aa78b6086f6cc77732ef1fda552c6e4a0", null ],
+    [ "szAcctId", "structCRspOptRpcUserLoginField.html#a0a6927212c35a8aa617e46097619f1f1", null ],
+    [ "szAcctType", "structCRspOptRpcUserLoginField.html#a76faabd75f99372d81be43f390bb7462", null ],
+    [ "szFlashStkBizes", "structCRspOptRpcUserLoginField.html#a92abddb1f3e2f31db3a795090d450c91", null ],
+    [ "szLastLoginSite", "structCRspOptRpcUserLoginField.html#aa5939d978b65466c21b4bfbc6936e141", null ],
+    [ "szLastLoginTime", "structCRspOptRpcUserLoginField.html#ad84450807d8f2a040ec830d021223896", null ],
+    [ "szOptTrdacct", "structCRspOptRpcUserLoginField.html#a7ec4b492468892589bf5c0099b9d1b2b", null ],
+    [ "szSessionId", "structCRspOptRpcUserLoginField.html#a4206021b9f96464d79fff1dd3624e49b", null ],
+    [ "szStkbd", "structCRspOptRpcUserLoginField.html#a8b514ba7f97b7f9adcf47afee36dcf05", null ],
+    [ "szStkpbu", "structCRspOptRpcUserLoginField.html#a96fefc681c8aeeff3a2557380c5f3d77", null ],
+    [ "szSubacctCode", "structCRspOptRpcUserLoginField.html#a58858463611cc0565d53e54a60aaf37e", null ],
+    [ "szTrdacct", "structCRspOptRpcUserLoginField.html#a644fc2f5800fc0a2a7b7d53ab41e4778", null ],
+    [ "szTrdacctName", "structCRspOptRpcUserLoginField.html#acd3ec524a458b1cec046161e79213554", null ]
+];

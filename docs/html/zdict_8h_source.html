@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/zdict.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('zdict_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">zdict.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="zdict_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (c) 2016-present, Yann Collet, Facebook, Inc.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * This source code is licensed under both the BSD-style license (found in the</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * LICENSE file in the root directory of this source tree) and the GPLv2 (found</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * in the COPYING file in the root directory of this source tree).</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * You may select, at your option, one of the above-listed licenses.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#ifndef DICTBUILDER_H_001</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#define DICTBUILDER_H_001</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#if defined (__cplusplus)</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">/*======  Dependencies  ======*/</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;stddef.h&gt;</span>  <span class="comment">/* size_t */</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">/* =====   ZDICTLIB_API : control library symbols visibility   ===== */</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#ifndef ZDICTLIB_VISIBILITY</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#  if defined(__GNUC__) &amp;&amp; (__GNUC__ &gt;= 4)</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#    define ZDICTLIB_VISIBILITY __attribute__ ((visibility (&quot;default&quot;)))</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#  else</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="zdict_8h.html#aacae8129cf0122cd4e1b918245b08440">   28</a></span><span class="preprocessor">#    define ZDICTLIB_VISIBILITY</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#  endif</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#if defined(ZSTD_DLL_EXPORT) &amp;&amp; (ZSTD_DLL_EXPORT==1)</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#  define ZDICTLIB_API __declspec(dllexport) ZDICTLIB_VISIBILITY</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#elif defined(ZSTD_DLL_IMPORT) &amp;&amp; (ZSTD_DLL_IMPORT==1)</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#  define ZDICTLIB_API __declspec(dllimport) ZDICTLIB_VISIBILITY </span><span class="comment">/* It isn&#39;t required but allows to generate better code, saving a function pointer load from the IAT and an indirect jump.*/</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">   36</a></span><span class="preprocessor">#  define ZDICTLIB_API ZDICTLIB_VISIBILITY</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><a class="code hl_define" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zdict_8h.html#a453e142373fcc36b68db245a2f6e2ade">ZDICT_trainFromBuffer</a>(<span class="keywordtype">void</span>* dictBuffer, <span class="keywordtype">size_t</span> dictBufferCapacity,</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>                                    <span class="keyword">const</span> <span class="keywordtype">void</span>* samplesBuffer,</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>                                    <span class="keyword">const</span> <span class="keywordtype">size_t</span>* samplesSizes, <span class="keywordtype">unsigned</span> nbSamples);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="comment">/*======   Helper functions   ======*/</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><a class="code hl_define" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> <span class="keywordtype">unsigned</span> <a class="code hl_function" href="zdict_8h.html#af589234f984d66e343c4e09203086555">ZDICT_getDictID</a>(<span class="keyword">const</span> <span class="keywordtype">void</span>* dictBuffer, <span class="keywordtype">size_t</span> <a class="code hl_variable" href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a>);  </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><a class="code hl_define" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> <span class="keywordtype">unsigned</span> <a class="code hl_function" href="zdict_8h.html#acf6c9520a2331666e87c7db1b68fae2e">ZDICT_isError</a>(<span class="keywordtype">size_t</span> errorCode);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><a class="code hl_define" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="zdict_8h.html#aed8765f49c8ebb32b96fcd8ea3502a46">ZDICT_getErrorName</a>(<span class="keywordtype">size_t</span> errorCode);</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">#ifdef ZDICT_STATIC_LINKING_ONLY</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="comment">/* ====================================================================================</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="comment"> * The definitions in this section are considered experimental.</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="comment"> * They should never be used with a dynamic library, as they may change in the future.</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="comment"> * They are provided for advanced usages.</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="comment"> * Use them only in association with static linking.</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="comment"> * ==================================================================================== */</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="keywordtype">int</span>      <a class="code hl_variable" href="zbuff_8h.html#ade711b19285bdf476a4f753670ca3489">compressionLevel</a>;   <span class="comment">/* optimize for a specific zstd compression level; 0 means default */</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keywordtype">unsigned</span> notificationLevel;  <span class="comment">/* Write log to stderr; 0 = none (default); 1 = errors; 2 = progression; 3 = details; 4 = debug; */</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keywordtype">unsigned</span> dictID;             <span class="comment">/* force dictID value; 0 means auto mode (32-bits random value) */</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>} ZDICT_params_t;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keywordtype">unsigned</span> k;                  <span class="comment">/* Segment size : constraint: 0 &lt; k : Reasonable range [16, 2048+] */</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keywordtype">unsigned</span> d;                  <span class="comment">/* dmer size : constraint: 0 &lt; d &lt;= k : Reasonable range [6, 16] */</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keywordtype">unsigned</span> steps;              <span class="comment">/* Number of steps : Only used for optimization : 0 means default (40) : Higher means more parameters checked */</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordtype">unsigned</span> nbThreads;          <span class="comment">/* Number of threads : constraint: 0 &lt; nbThreads : 1 means single-threaded : Only used for optimization : Ignored if ZSTD_MULTITHREAD is not defined */</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keywordtype">double</span> splitPoint;           <span class="comment">/* Percentage of samples used for training: Only used for optimization : the first nbSamples * splitPoint samples will be used to training, the last nbSamples * (1 - splitPoint) samples will be used for testing, 0 means default (1.0), 1.0 when all samples are used for both training and testing */</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="keywordtype">unsigned</span> shrinkDict;         <span class="comment">/* Train dictionaries to shrink in size starting from the minimum size and selects the smallest dictionary that is shrinkDictMaxRegression% worse than the largest dictionary. 0 means no shrinking and 1 means shrinking  */</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="keywordtype">unsigned</span> shrinkDictMaxRegression; <span class="comment">/* Sets shrinkDictMaxRegression so that a smaller dictionary can be at worse shrinkDictMaxRegression% worse than the max dict size dictionary. */</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    ZDICT_params_t zParams;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>} ZDICT_cover_params_t;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    <span class="keywordtype">unsigned</span> k;                  <span class="comment">/* Segment size : constraint: 0 &lt; k : Reasonable range [16, 2048+] */</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="keywordtype">unsigned</span> d;                  <span class="comment">/* dmer size : constraint: 0 &lt; d &lt;= k : Reasonable range [6, 16] */</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="keywordtype">unsigned</span> f;                  <span class="comment">/* log of size of frequency array : constraint: 0 &lt; f &lt;= 31 : 1 means default(20)*/</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <span class="keywordtype">unsigned</span> steps;              <span class="comment">/* Number of steps : Only used for optimization : 0 means default (40) : Higher means more parameters checked */</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="keywordtype">unsigned</span> nbThreads;          <span class="comment">/* Number of threads : constraint: 0 &lt; nbThreads : 1 means single-threaded : Only used for optimization : Ignored if ZSTD_MULTITHREAD is not defined */</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keywordtype">double</span> splitPoint;           <span class="comment">/* Percentage of samples used for training: Only used for optimization : the first nbSamples * splitPoint samples will be used to training, the last nbSamples * (1 - splitPoint) samples will be used for testing, 0 means default (0.75), 1.0 when all samples are used for both training and testing */</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keywordtype">unsigned</span> accel;              <span class="comment">/* Acceleration level: constraint: 0 &lt; accel &lt;= 10, higher means faster and less accurate, 0 means default(1) */</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keywordtype">unsigned</span> shrinkDict;         <span class="comment">/* Train dictionaries to shrink in size starting from the minimum size and selects the smallest dictionary that is shrinkDictMaxRegression% worse than the largest dictionary. 0 means no shrinking and 1 means shrinking  */</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <span class="keywordtype">unsigned</span> shrinkDictMaxRegression; <span class="comment">/* Sets shrinkDictMaxRegression so that a smaller dictionary can be at worse shrinkDictMaxRegression% worse than the max dict size dictionary. */</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    ZDICT_params_t zParams;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>} ZDICT_fastCover_params_t;</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><a class="code hl_define" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="cover_8c.html#a1feb77811ee14d7b5ef0510551e3e399">ZDICT_trainFromBuffer_cover</a>(</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>          <span class="keywordtype">void</span> *dictBuffer, <span class="keywordtype">size_t</span> dictBufferCapacity,</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="keyword">const</span> <span class="keywordtype">void</span> *samplesBuffer, <span class="keyword">const</span> <span class="keywordtype">size_t</span> *samplesSizes, <span class="keywordtype">unsigned</span> nbSamples,</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>          ZDICT_cover_params_t parameters);</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span><a class="code hl_define" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="cover_8c.html#aaac7e74c4d23c193ea1ec5a44de6672c">ZDICT_optimizeTrainFromBuffer_cover</a>(</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>          <span class="keywordtype">void</span>* dictBuffer, <span class="keywordtype">size_t</span> dictBufferCapacity,</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <span class="keyword">const</span> <span class="keywordtype">void</span>* samplesBuffer, <span class="keyword">const</span> <span class="keywordtype">size_t</span>* samplesSizes, <span class="keywordtype">unsigned</span> nbSamples,</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>          ZDICT_cover_params_t* parameters);</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span><a class="code hl_define" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="fastcover_8c.html#a2d44130fccc4101fcc8f13488c9ce3e2">ZDICT_trainFromBuffer_fastCover</a>(<span class="keywordtype">void</span> *dictBuffer,</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>                    <span class="keywordtype">size_t</span> dictBufferCapacity, <span class="keyword">const</span> <span class="keywordtype">void</span> *samplesBuffer,</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>                    <span class="keyword">const</span> <span class="keywordtype">size_t</span> *samplesSizes, <span class="keywordtype">unsigned</span> nbSamples,</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>                    ZDICT_fastCover_params_t parameters);</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span><a class="code hl_define" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="fastcover_8c.html#a56745742202f55abaece58a70f587a58">ZDICT_optimizeTrainFromBuffer_fastCover</a>(<span class="keywordtype">void</span>* dictBuffer,</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>                    <span class="keywordtype">size_t</span> dictBufferCapacity, <span class="keyword">const</span> <span class="keywordtype">void</span>* samplesBuffer,</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>                    <span class="keyword">const</span> <span class="keywordtype">size_t</span>* samplesSizes, <span class="keywordtype">unsigned</span> nbSamples,</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>                    ZDICT_fastCover_params_t* parameters);</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> </div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span><span class="preprocessor">#define ZDICT_CONTENTSIZE_MIN 128</span></div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span><span class="preprocessor">#define ZDICT_DICTSIZE_MIN    256</span></div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span><a class="code hl_define" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zdict_8c.html#aa093aab5b825f7d4a3a1a3cdffcb8269">ZDICT_finalizeDictionary</a>(<span class="keywordtype">void</span>* dictBuffer, <span class="keywordtype">size_t</span> dictBufferCapacity,</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>                                <span class="keyword">const</span> <span class="keywordtype">void</span>* dictContent, <span class="keywordtype">size_t</span> dictContentSize,</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>                                <span class="keyword">const</span> <span class="keywordtype">void</span>* samplesBuffer, <span class="keyword">const</span> <span class="keywordtype">size_t</span>* samplesSizes, <span class="keywordtype">unsigned</span> nbSamples,</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>                                ZDICT_params_t parameters);</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span> </div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    <span class="keywordtype">unsigned</span> selectivityLevel;   <span class="comment">/* 0 means default; larger =&gt; select more =&gt; larger dictionary */</span></div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    ZDICT_params_t zParams;</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>} ZDICT_legacy_params_t;</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span> </div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span><a class="code hl_define" href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a> <span class="keywordtype">size_t</span> <a class="code hl_function" href="zdict_8c.html#a06e0c0fd408e2a9781f339641947ed50">ZDICT_trainFromBuffer_legacy</a>(</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>    <span class="keywordtype">void</span> *dictBuffer, <span class="keywordtype">size_t</span> dictBufferCapacity,</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    <span class="keyword">const</span> <span class="keywordtype">void</span> *samplesBuffer, <span class="keyword">const</span> <span class="keywordtype">size_t</span> *samplesSizes, <span class="keywordtype">unsigned</span> nbSamples,</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>    ZDICT_legacy_params_t parameters);</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span><span class="comment">/* Deprecation warnings */</span></div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span><span class="comment">/* It is generally possible to disable deprecation warnings from compiler,</span></div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span><span class="comment">   for example with -Wno-deprecated-declarations for gcc</span></div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span><span class="comment">   or _CRT_SECURE_NO_WARNINGS in Visual.</span></div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span><span class="comment">   Otherwise, it&#39;s also possible to manually define ZDICT_DISABLE_DEPRECATE_WARNINGS */</span></div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span><span class="preprocessor">#ifdef ZDICT_DISABLE_DEPRECATE_WARNINGS</span></div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span><span class="preprocessor">#  define ZDICT_DEPRECATED(message) ZDICTLIB_API   </span><span class="comment">/* disable deprecation warnings */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span><span class="preprocessor">#  define ZDICT_GCC_VERSION (__GNUC__ * 100 + __GNUC_MINOR__)</span></div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span><span class="preprocessor">#  if defined (__cplusplus) &amp;&amp; (__cplusplus &gt;= 201402) </span><span class="comment">/* C++14 or greater */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span><span class="preprocessor">#    define ZDICT_DEPRECATED(message) [[deprecated(message)]] ZDICTLIB_API</span></div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span><span class="preprocessor">#  elif (ZDICT_GCC_VERSION &gt;= 405) || defined(__clang__)</span></div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span><span class="preprocessor">#    define ZDICT_DEPRECATED(message) ZDICTLIB_API __attribute__((deprecated(message)))</span></div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span><span class="preprocessor">#  elif (ZDICT_GCC_VERSION &gt;= 301)</span></div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span><span class="preprocessor">#    define ZDICT_DEPRECATED(message) ZDICTLIB_API __attribute__((deprecated))</span></div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span><span class="preprocessor">#  elif defined(_MSC_VER)</span></div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span><span class="preprocessor">#    define ZDICT_DEPRECATED(message) ZDICTLIB_API __declspec(deprecated(message))</span></div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span><span class="preprocessor">#  else</span></div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span><span class="preprocessor">#    pragma message(&quot;WARNING: You need to implement ZDICT_DEPRECATED for this compiler&quot;)</span></div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span><span class="preprocessor">#    define ZDICT_DEPRECATED(message) ZDICTLIB_API</span></div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span><span class="preprocessor">#  endif</span></div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span><span class="preprocessor">#endif </span><span class="comment">/* ZDICT_DISABLE_DEPRECATE_WARNINGS */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span> </div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>ZDICT_DEPRECATED(<span class="stringliteral">&quot;use ZDICT_finalizeDictionary() instead&quot;</span>)</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>size_t <a class="code hl_function" href="zdict_8c.html#add1110679aae05b9611674bc827497e1">ZDICT_addEntropyTablesFromBuffer</a>(<span class="keywordtype">void</span>* dictBuffer, <span class="keywordtype">size_t</span> dictContentSize, <span class="keywordtype">size_t</span> dictBufferCapacity,</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>                                  <a class="code hl_define" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <span class="keywordtype">void</span>* samplesBuffer, <a class="code hl_define" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <span class="keywordtype">size_t</span>* samplesSizes, <span class="keywordtype">unsigned</span> nbSamples);</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span> </div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span> </div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span><span class="preprocessor">#endif   </span><span class="comment">/* ZDICT_STATIC_LINKING_ONLY */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span> </div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span><span class="preprocessor">#if defined (__cplusplus)</span></div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>}</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span> </div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span><span class="preprocessor">#endif   </span><span class="comment">/* DICTBUILDER_H_001 */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="acover_8c_html_a1feb77811ee14d7b5ef0510551e3e399"><div class="ttname"><a href="cover_8c.html#a1feb77811ee14d7b5ef0510551e3e399">ZDICT_trainFromBuffer_cover</a></div><div class="ttdeci">ZDICTLIB_API size_t ZDICT_trainFromBuffer_cover(void *dictBuffer, size_t dictBufferCapacity, const void *samplesBuffer, const size_t *samplesSizes, unsigned nbSamples, ZDICT_cover_params_t parameters)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l00718">cover.c:718</a></div></div>
+<div class="ttc" id="acover_8c_html_aaac7e74c4d23c193ea1ec5a44de6672c"><div class="ttname"><a href="cover_8c.html#aaac7e74c4d23c193ea1ec5a44de6672c">ZDICT_optimizeTrainFromBuffer_cover</a></div><div class="ttdeci">ZDICTLIB_API size_t ZDICT_optimizeTrainFromBuffer_cover(void *dictBuffer, size_t dictBufferCapacity, const void *samplesBuffer, const size_t *samplesSizes, unsigned nbSamples, ZDICT_cover_params_t *parameters)</div><div class="ttdef"><b>Definition</b> <a href="cover_8c_source.html#l01102">cover.c:1102</a></div></div>
+<div class="ttc" id="afastcover_8c_html_a2d44130fccc4101fcc8f13488c9ce3e2"><div class="ttname"><a href="fastcover_8c.html#a2d44130fccc4101fcc8f13488c9ce3e2">ZDICT_trainFromBuffer_fastCover</a></div><div class="ttdeci">ZDICTLIB_API size_t ZDICT_trainFromBuffer_fastCover(void *dictBuffer, size_t dictBufferCapacity, const void *samplesBuffer, const size_t *samplesSizes, unsigned nbSamples, ZDICT_fastCover_params_t parameters)</div><div class="ttdef"><b>Definition</b> <a href="fastcover_8c_source.html#l00530">fastcover.c:530</a></div></div>
+<div class="ttc" id="afastcover_8c_html_a56745742202f55abaece58a70f587a58"><div class="ttname"><a href="fastcover_8c.html#a56745742202f55abaece58a70f587a58">ZDICT_optimizeTrainFromBuffer_fastCover</a></div><div class="ttdeci">ZDICTLIB_API size_t ZDICT_optimizeTrainFromBuffer_fastCover(void *dictBuffer, size_t dictBufferCapacity, const void *samplesBuffer, const size_t *samplesSizes, unsigned nbSamples, ZDICT_fastCover_params_t *parameters)</div><div class="ttdef"><b>Definition</b> <a href="fastcover_8c_source.html#l00599">fastcover.c:599</a></div></div>
+<div class="ttc" id="astdc_8h_html_a2c212835823e3c54a8ab6d95c652660e"><div class="ttname"><a href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></div><div class="ttdeci">#define const</div><div class="ttdef"><b>Definition</b> <a href="stdc_8h_source.html#l00092">stdc.h:92</a></div></div>
+<div class="ttc" id="azbuff_8h_html_a7b276dd54a215af14d59cd30ff88a5ff"><div class="ttname"><a href="zbuff_8h.html#a7b276dd54a215af14d59cd30ff88a5ff">dictSize</a></div><div class="ttdeci">const void size_t dictSize</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00076">zbuff.h:76</a></div></div>
+<div class="ttc" id="azbuff_8h_html_ade711b19285bdf476a4f753670ca3489"><div class="ttname"><a href="zbuff_8h.html#ade711b19285bdf476a4f753670ca3489">compressionLevel</a></div><div class="ttdeci">int compressionLevel</div><div class="ttdef"><b>Definition</b> <a href="zbuff_8h_source.html#l00075">zbuff.h:75</a></div></div>
+<div class="ttc" id="azdict_8c_html_a06e0c0fd408e2a9781f339641947ed50"><div class="ttname"><a href="zdict_8c.html#a06e0c0fd408e2a9781f339641947ed50">ZDICT_trainFromBuffer_legacy</a></div><div class="ttdeci">size_t ZDICT_trainFromBuffer_legacy(void *dictBuffer, size_t dictBufferCapacity, const void *samplesBuffer, const size_t *samplesSizes, unsigned nbSamples, ZDICT_legacy_params_t params)</div><div class="ttdef"><b>Definition</b> <a href="zdict_8c_source.html#l01062">zdict.c:1062</a></div></div>
+<div class="ttc" id="azdict_8c_html_aa093aab5b825f7d4a3a1a3cdffcb8269"><div class="ttname"><a href="zdict_8c.html#aa093aab5b825f7d4a3a1a3cdffcb8269">ZDICT_finalizeDictionary</a></div><div class="ttdeci">size_t ZDICT_finalizeDictionary(void *dictBuffer, size_t dictBufferCapacity, const void *customDictContent, size_t dictContentSize, const void *samplesBuffer, const size_t *samplesSizes, unsigned nbSamples, ZDICT_params_t params)</div><div class="ttdef"><b>Definition</b> <a href="zdict_8c_source.html#l00864">zdict.c:864</a></div></div>
+<div class="ttc" id="azdict_8c_html_add1110679aae05b9611674bc827497e1"><div class="ttname"><a href="zdict_8c.html#add1110679aae05b9611674bc827497e1">ZDICT_addEntropyTablesFromBuffer</a></div><div class="ttdeci">size_t ZDICT_addEntropyTablesFromBuffer(void *dictBuffer, size_t dictContentSize, size_t dictBufferCapacity, const void *samplesBuffer, const size_t *samplesSizes, unsigned nbSamples)</div><div class="ttdef"><b>Definition</b> <a href="zdict_8c_source.html#l01103">zdict.c:1103</a></div></div>
+<div class="ttc" id="azdict_8h_html_a31d66f6fa869d547a12ef20ecc247d11"><div class="ttname"><a href="zdict_8h.html#a31d66f6fa869d547a12ef20ecc247d11">ZDICTLIB_API</a></div><div class="ttdeci">#define ZDICTLIB_API</div><div class="ttdef"><b>Definition</b> <a href="zdict_8h_source.html#l00036">zdict.h:36</a></div></div>
+<div class="ttc" id="azdict_8h_html_a453e142373fcc36b68db245a2f6e2ade"><div class="ttname"><a href="zdict_8h.html#a453e142373fcc36b68db245a2f6e2ade">ZDICT_trainFromBuffer</a></div><div class="ttdeci">ZDICTLIB_API size_t ZDICT_trainFromBuffer(void *dictBuffer, size_t dictBufferCapacity, const void *samplesBuffer, const size_t *samplesSizes, unsigned nbSamples)</div><div class="ttdef"><b>Definition</b> <a href="zdict_8c_source.html#l01085">zdict.c:1085</a></div></div>
+<div class="ttc" id="azdict_8h_html_acf6c9520a2331666e87c7db1b68fae2e"><div class="ttname"><a href="zdict_8h.html#acf6c9520a2331666e87c7db1b68fae2e">ZDICT_isError</a></div><div class="ttdeci">ZDICTLIB_API unsigned ZDICT_isError(size_t errorCode)</div><div class="ttdef"><b>Definition</b> <a href="zdict_8c_source.html#l00091">zdict.c:91</a></div></div>
+<div class="ttc" id="azdict_8h_html_aed8765f49c8ebb32b96fcd8ea3502a46"><div class="ttname"><a href="zdict_8h.html#aed8765f49c8ebb32b96fcd8ea3502a46">ZDICT_getErrorName</a></div><div class="ttdeci">ZDICTLIB_API const char * ZDICT_getErrorName(size_t errorCode)</div><div class="ttdef"><b>Definition</b> <a href="zdict_8c_source.html#l00093">zdict.c:93</a></div></div>
+<div class="ttc" id="azdict_8h_html_af589234f984d66e343c4e09203086555"><div class="ttname"><a href="zdict_8h.html#af589234f984d66e343c4e09203086555">ZDICT_getDictID</a></div><div class="ttdeci">ZDICTLIB_API unsigned ZDICT_getDictID(const void *dictBuffer, size_t dictSize)</div><div class="ttdef"><b>Definition</b> <a href="zdict_8c_source.html#l00095">zdict.c:95</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="zdict_8h.html">zdict.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+var structTORASTOCKAPI_1_1CTORATstpTransferPositionField =
+[
+    [ "ApplySerial", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#a908acca8c9cdd445f0d360f8d5d8aa6c", null ],
+    [ "BusinessUnitID", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#a08e5dd3b3a4c9ee59782a245bd527e3f", null ],
+    [ "ExchangeID", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#a1fef43369e3ecd36ae3c28b8f8b85c7e", null ],
+    [ "ExternalNodeID", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#a606d5120898e432bfcbd42ac43f1a2ef", null ],
+    [ "FrontID", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#ab2d9d0088fbc6f6422adaeb590d9ab53", null ],
+    [ "HistoryVolume", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#ad430c92307b65d3a49a85ab9300e8c1f", null ],
+    [ "InvestorID", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#a7db20a56ea8862f78b4fdc474188012e", null ],
+    [ "IPAddress", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#af9725fc1907e70db5ba7611c4bda2475", null ],
+    [ "MacAddress", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#a1152c026b648f5590d78774ffb980193", null ],
+    [ "MarketID", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#a64b95d8dbbb600a803d2a3b39d2c9286", null ],
+    [ "OperateDate", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#a01b53fbcab8033c6f887aed4c2a0c1e4", null ],
+    [ "OperateTime", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#af6f2768eed31b33ef9bf47a2186a7a8c", null ],
+    [ "OperatorID", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#a66d57fe14da8fcaccb7e1acaa18479ac", null ],
+    [ "PositionSerial", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#adb8222f4c3bc39b7d590e799dbaebc7d", null ],
+    [ "SecurityID", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#aa683ccd05c7ae6f11b699f0942f14a63", null ],
+    [ "SessionID", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#af4111879b3a5d0a764c97793a3447753", null ],
+    [ "ShareholderID", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#ae107ef3df7a227b6e9fc6798e639328c", null ],
+    [ "TodayBSVolume", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#aef1ee5b5f8444e841d16d58df3f9e43e", null ],
+    [ "TodayPRVolume", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#ad7c02ead8c778a36ffe0e0ecf1c69bd3", null ],
+    [ "TodaySMVolume", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#a3a4372d1c330510a4ec881d58c4c51ca", null ],
+    [ "TradingDay", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#a0e5b67d773e4a7d712dd83690f050aec", null ],
+    [ "TransferDirection", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#a0a26739c5f61f6dab5605ae9c2997ed7", null ],
+    [ "TransferPositionType", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#a3e9afdbcb950079d450f1ae76bf32243", null ],
+    [ "TransferStatus", "structTORASTOCKAPI_1_1CTORATstpTransferPositionField.html#ae06caf1efaac73b92db45be61360f367", null ]
+];

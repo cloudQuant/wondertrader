@@ -1,0 +1,26 @@
+var structCThostFtdcRspFutureSignOutField =
+[
+    [ "BankBranchID", "structCThostFtdcRspFutureSignOutField.html#a19222ff866790935881ed768c9966dac", null ],
+    [ "BankID", "structCThostFtdcRspFutureSignOutField.html#a01a0d5e2cdc2c21cc702a4edc82c6db8", null ],
+    [ "BankSerial", "structCThostFtdcRspFutureSignOutField.html#a8d166c1c589345a69423eda2748b17eb", null ],
+    [ "BrokerBranchID", "structCThostFtdcRspFutureSignOutField.html#a239c532623ec7bf60955a07373fd4197", null ],
+    [ "BrokerID", "structCThostFtdcRspFutureSignOutField.html#ad8f1e1cfe7c253f6d3e9c4293f1d40c4", null ],
+    [ "BrokerIDByBank", "structCThostFtdcRspFutureSignOutField.html#a640915c4f04f2c493007f5c650a12d08", null ],
+    [ "CurrencyID", "structCThostFtdcRspFutureSignOutField.html#a1e8fa86e289395ea0aacbcae049a8e19", null ],
+    [ "DeviceID", "structCThostFtdcRspFutureSignOutField.html#a496fedd28a2046466932d1f3b332346b", null ],
+    [ "Digest", "structCThostFtdcRspFutureSignOutField.html#a7425d57af73b81bb82280b47cfff284e", null ],
+    [ "ErrorID", "structCThostFtdcRspFutureSignOutField.html#a7ee6317338e45b05cde184b91820b7ce", null ],
+    [ "ErrorMsg", "structCThostFtdcRspFutureSignOutField.html#aae7ab27334d788219d6b7a0da3c5d58d", null ],
+    [ "InstallID", "structCThostFtdcRspFutureSignOutField.html#a92de3e27c074d1312eacdacc05c44c20", null ],
+    [ "LastFragment", "structCThostFtdcRspFutureSignOutField.html#a113db9ede0c4a117094d2c8e53b06bdb", null ],
+    [ "OperNo", "structCThostFtdcRspFutureSignOutField.html#a4adc6cf2811b9ef6898a67bee16792e3", null ],
+    [ "PlateSerial", "structCThostFtdcRspFutureSignOutField.html#a50425775787f4d24c6114a14edf122fa", null ],
+    [ "RequestID", "structCThostFtdcRspFutureSignOutField.html#ade765c6a84ac50911256d57aefc4d318", null ],
+    [ "SessionID", "structCThostFtdcRspFutureSignOutField.html#a0c808adc55be6cc33d7226642b9144ee", null ],
+    [ "TID", "structCThostFtdcRspFutureSignOutField.html#ad753083f199d248011702e231b8845fb", null ],
+    [ "TradeCode", "structCThostFtdcRspFutureSignOutField.html#aceae02598688a0e19efe637927022dca", null ],
+    [ "TradeDate", "structCThostFtdcRspFutureSignOutField.html#ab664460f2ebe78deb5cd1defdfb52f29", null ],
+    [ "TradeTime", "structCThostFtdcRspFutureSignOutField.html#a12309c5943871ae3974b55579dffd6cc", null ],
+    [ "TradingDay", "structCThostFtdcRspFutureSignOutField.html#a9c9835cb5b10c3ed46eeeaba7f505802", null ],
+    [ "UserID", "structCThostFtdcRspFutureSignOutField.html#a74cf82f37b8118e610cfbf1aa5ca21b8", null ]
+];

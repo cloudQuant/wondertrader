@@ -1,0 +1,732 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: ITraderSpi类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classITraderSpi.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="classITraderSpi-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">ITraderSpi类 参考<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:aa2f768a879b1064b3e5f7418dd679ac0" id="r_aa2f768a879b1064b3e5f7418dd679ac0"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#aa2f768a879b1064b3e5f7418dd679ac0">getBaseDataMgr</a> ()=0</td></tr>
+<tr class="separator:aa2f768a879b1064b3e5f7418dd679ac0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b0cb278d44b0b2fba3291fe8cce83d6" id="r_a3b0cb278d44b0b2fba3291fe8cce83d6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#a3b0cb278d44b0b2fba3291fe8cce83d6">handleTraderLog</a> (<a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message)</td></tr>
+<tr class="separator:a3b0cb278d44b0b2fba3291fe8cce83d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08836386951afec5e8fd735bba28ae38" id="r_a08836386951afec5e8fd735bba28ae38"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classIStkTraderSpi.html">IStkTraderSpi</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#a08836386951afec5e8fd735bba28ae38">getStkSpi</a> ()</td></tr>
+<tr class="separator:a08836386951afec5e8fd735bba28ae38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a043aa9b25d50da20d2512161b0ec84b4" id="r_a043aa9b25d50da20d2512161b0ec84b4"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classIOptTraderSpi.html">IOptTraderSpi</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#a043aa9b25d50da20d2512161b0ec84b4">getOptSpi</a> ()</td></tr>
+<tr class="separator:a043aa9b25d50da20d2512161b0ec84b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc42e8491babdcff36bd3c974c2061a7" id="r_abc42e8491babdcff36bd3c974c2061a7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#abc42e8491babdcff36bd3c974c2061a7">handleEvent</a> (<a class="el" href="WTSTypes_8h.html#a7179e66efb00dde86885670a06fd8303">WTSTraderEvent</a> e, int32_t ec)=0</td></tr>
+<tr class="separator:abc42e8491babdcff36bd3c974c2061a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aedca46c6e9f68352b977c149c91617d5" id="r_aedca46c6e9f68352b977c149c91617d5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#aedca46c6e9f68352b977c149c91617d5">onLoginResult</a> (bool bSucc, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *msg, uint32_t tradingdate)=0</td></tr>
+<tr class="separator:aedca46c6e9f68352b977c149c91617d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44aca19bcb3ef1651385ae112c5c73e4" id="r_a44aca19bcb3ef1651385ae112c5c73e4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#a44aca19bcb3ef1651385ae112c5c73e4">onLogout</a> ()</td></tr>
+<tr class="separator:a44aca19bcb3ef1651385ae112c5c73e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ab077801621dfdc85031103e39cba1c" id="r_a0ab077801621dfdc85031103e39cba1c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#a0ab077801621dfdc85031103e39cba1c">onRspEntrust</a> (<a class="el" href="classWTSEntrust.html">WTSEntrust</a> *entrust, <a class="el" href="classWTSError.html">WTSError</a> *err)</td></tr>
+<tr class="separator:a0ab077801621dfdc85031103e39cba1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b7eb42ff28ed4277703a6062f82a6cc" id="r_a1b7eb42ff28ed4277703a6062f82a6cc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#a1b7eb42ff28ed4277703a6062f82a6cc">onRspAccount</a> (<a class="el" href="classWTSArray.html">WTSArray</a> *ayAccounts)</td></tr>
+<tr class="separator:a1b7eb42ff28ed4277703a6062f82a6cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a500055e501aab60093b34a7ce6a6e50c" id="r_a500055e501aab60093b34a7ce6a6e50c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#a500055e501aab60093b34a7ce6a6e50c">onRspPosition</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classWTSArray.html">WTSArray</a> *ayPositions)</td></tr>
+<tr class="separator:a500055e501aab60093b34a7ce6a6e50c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac25add76934edc8f5db8882527bc5e7f" id="r_ac25add76934edc8f5db8882527bc5e7f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#ac25add76934edc8f5db8882527bc5e7f">onRspOrders</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classWTSArray.html">WTSArray</a> *ayOrders)</td></tr>
+<tr class="separator:ac25add76934edc8f5db8882527bc5e7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add98ebac7f4798758ca3a0eb01851d93" id="r_add98ebac7f4798758ca3a0eb01851d93"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#add98ebac7f4798758ca3a0eb01851d93">onRspTrades</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classWTSArray.html">WTSArray</a> *ayTrades)</td></tr>
+<tr class="separator:add98ebac7f4798758ca3a0eb01851d93"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ede4d186168dc476b9e6f10d867cc12" id="r_a8ede4d186168dc476b9e6f10d867cc12"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#a8ede4d186168dc476b9e6f10d867cc12">onRspSettlementInfo</a> (uint32_t uDate, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *content)</td></tr>
+<tr class="separator:a8ede4d186168dc476b9e6f10d867cc12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29697983ccfe84699e0027e6a3bc39b0" id="r_a29697983ccfe84699e0027e6a3bc39b0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#a29697983ccfe84699e0027e6a3bc39b0">onPushOrder</a> (<a class="el" href="classWTSOrderInfo.html">WTSOrderInfo</a> *orderInfo)</td></tr>
+<tr class="separator:a29697983ccfe84699e0027e6a3bc39b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a613865a6f7a7292a475c803bed7cfa4e" id="r_a613865a6f7a7292a475c803bed7cfa4e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#a613865a6f7a7292a475c803bed7cfa4e">onPushTrade</a> (<a class="el" href="classWTSTradeInfo.html">WTSTradeInfo</a> *tradeRecord)</td></tr>
+<tr class="separator:a613865a6f7a7292a475c803bed7cfa4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8651103031533a7c0f5b4971433858b4" id="r_a8651103031533a7c0f5b4971433858b4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#a8651103031533a7c0f5b4971433858b4">onTraderError</a> (<a class="el" href="classWTSError.html">WTSError</a> *err, void *pData=<a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</td></tr>
+<tr class="separator:a8651103031533a7c0f5b4971433858b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae51fddf11a7ef4c08cd6e2191e08da20" id="r_ae51fddf11a7ef4c08cd6e2191e08da20"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITraderSpi.html#ae51fddf11a7ef4c08cd6e2191e08da20">onPushInstrumentStatus</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exchg, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code, <a class="el" href="WTSTypes_8h.html#a0af8a7c4f4bd4a7321a486c6de66e858">WTSTradeStatus</a> state)</td></tr>
+<tr class="separator:ae51fddf11a7ef4c08cd6e2191e08da20"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock">
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00098">98</a> 行定义.</p>
+</div><h2 class="groupheader">成员函数说明</h2>
+<a id="aa2f768a879b1064b3e5f7418dd679ac0" name="aa2f768a879b1064b3e5f7418dd679ac0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2f768a879b1064b3e5f7418dd679ac0">&#9670;&#160;</a></span>getBaseDataMgr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classIBaseDataMgr.html">IBaseDataMgr</a> * ITraderSpi::getBaseDataMgr </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>在 <a class="el" href="classTraderSpi.html#acfd09fec591854a4309b921a9e71d73b">TraderSpi</a>, <a class="el" href="classTraderAdapter.html#af36c057011a4a2bd307e7a21c4983db1">TraderAdapter</a>, <a class="el" href="classTraderAdapter.html#a549f612c92127e7382a32dc250111433">TraderAdapter</a> , 以及 <a class="el" href="classTraderAdapter.html#a549f612c92127e7382a32dc250111433">TraderAdapter</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a043aa9b25d50da20d2512161b0ec84b4" name="a043aa9b25d50da20d2512161b0ec84b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a043aa9b25d50da20d2512161b0ec84b4">&#9670;&#160;</a></span>getOptSpi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classIOptTraderSpi.html">IOptTraderSpi</a> * ITraderSpi::getOptSpi </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00119">119</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a08836386951afec5e8fd735bba28ae38" name="a08836386951afec5e8fd735bba28ae38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08836386951afec5e8fd735bba28ae38">&#9670;&#160;</a></span>getStkSpi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classIStkTraderSpi.html">IStkTraderSpi</a> * ITraderSpi::getStkSpi </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00114">114</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abc42e8491babdcff36bd3c974c2061a7" name="abc42e8491babdcff36bd3c974c2061a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc42e8491babdcff36bd3c974c2061a7">&#9670;&#160;</a></span>handleEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITraderSpi::handleEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a7179e66efb00dde86885670a06fd8303">WTSTraderEvent</a>&#160;</td>
+          <td class="paramname"><em>e</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>ec</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>在 <a class="el" href="classTraderSpi.html#a2886ea6eb8b330b30c9a62e82a544a1d">TraderSpi</a>, <a class="el" href="classTraderAdapter.html#a4b6846ef3dcd89060095eaf89a3805d9">TraderAdapter</a>, <a class="el" href="classTraderAdapter.html#a42f00e22d16654ca3279c3be5b49c4d3">TraderAdapter</a> , 以及 <a class="el" href="classTraderAdapter.html#a42f00e22d16654ca3279c3be5b49c4d3">TraderAdapter</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a3b0cb278d44b0b2fba3291fe8cce83d6" name="a3b0cb278d44b0b2fba3291fe8cce83d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b0cb278d44b0b2fba3291fe8cce83d6">&#9670;&#160;</a></span>handleTraderLog()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITraderSpi::handleTraderLog </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a>&#160;</td>
+          <td class="paramname"><em>ll</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classTraderSpi.html#ad7e151a8eeebe43b8af9e760fcf08ecf">TraderSpi</a>, <a class="el" href="classTraderAdapter.html#a90b22e0373c641b3b70a44620b9a64d5">TraderAdapter</a>, <a class="el" href="classTraderAdapter.html#acf00b697995c99083382f25aaf64125d">TraderAdapter</a> , 以及 <a class="el" href="classTraderAdapter.html#acf00b697995c99083382f25aaf64125d">TraderAdapter</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00109">109</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aedca46c6e9f68352b977c149c91617d5" name="aedca46c6e9f68352b977c149c91617d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aedca46c6e9f68352b977c149c91617d5">&#9670;&#160;</a></span>onLoginResult()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITraderSpi::onLoginResult </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bSucc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>msg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>tradingdate</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>在 <a class="el" href="classTraderSpi.html#a7ef3c03a9b3b249c2c6a56a3b3a54778">TraderSpi</a>, <a class="el" href="classTraderAdapter.html#a64c27afc22490b96ac2d846c468802de">TraderAdapter</a>, <a class="el" href="classTraderAdapter.html#a0452beb80033de56be123f7743a2384b">TraderAdapter</a> , 以及 <a class="el" href="classTraderAdapter.html#a0452beb80033de56be123f7743a2384b">TraderAdapter</a> 内被实现.</p>
+
+</div>
+</div>
+<a id="a44aca19bcb3ef1651385ae112c5c73e4" name="a44aca19bcb3ef1651385ae112c5c73e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44aca19bcb3ef1651385ae112c5c73e4">&#9670;&#160;</a></span>onLogout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITraderSpi::onLogout </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classTraderAdapter.html#a0f1b3a8d652134fbac2a805d5ae51f27">TraderAdapter</a>, <a class="el" href="classTraderAdapter.html#acfd9fa4adfdcaf73997749512873be83">TraderAdapter</a> , 以及 <a class="el" href="classTraderAdapter.html#acfd9fa4adfdcaf73997749512873be83">TraderAdapter</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00135">135</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae51fddf11a7ef4c08cd6e2191e08da20" name="ae51fddf11a7ef4c08cd6e2191e08da20"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae51fddf11a7ef4c08cd6e2191e08da20">&#9670;&#160;</a></span>onPushInstrumentStatus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITraderSpi::onPushInstrumentStatus </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>exchg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a0af8a7c4f4bd4a7321a486c6de66e858">WTSTradeStatus</a>&#160;</td>
+          <td class="paramname"><em>state</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00185">185</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a29697983ccfe84699e0027e6a3bc39b0" name="a29697983ccfe84699e0027e6a3bc39b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29697983ccfe84699e0027e6a3bc39b0">&#9670;&#160;</a></span>onPushOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITraderSpi::onPushOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSOrderInfo.html">WTSOrderInfo</a> *&#160;</td>
+          <td class="paramname"><em>orderInfo</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classTraderSpi.html#a930db925291c753b856eb67458fea79b">TraderSpi</a>, <a class="el" href="classTraderAdapter.html#af6892b38b932fdd80d3e183560e91b02">TraderAdapter</a>, <a class="el" href="classTraderAdapter.html#aa9cc8ea7269336cceecdc2e6a58c5da6">TraderAdapter</a> , 以及 <a class="el" href="classTraderAdapter.html#aa9cc8ea7269336cceecdc2e6a58c5da6">TraderAdapter</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00170">170</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a613865a6f7a7292a475c803bed7cfa4e" name="a613865a6f7a7292a475c803bed7cfa4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a613865a6f7a7292a475c803bed7cfa4e">&#9670;&#160;</a></span>onPushTrade()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITraderSpi::onPushTrade </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSTradeInfo.html">WTSTradeInfo</a> *&#160;</td>
+          <td class="paramname"><em>tradeRecord</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classTraderSpi.html#ae5837c7414c9e8f3bb29cf51c2abb6cc">TraderSpi</a>, <a class="el" href="classTraderAdapter.html#a2f1adec1772d4bad9142f48894e2c6ef">TraderAdapter</a>, <a class="el" href="classTraderAdapter.html#a109e0f6f9de66e72a2e59b661ecd4d1c">TraderAdapter</a> , 以及 <a class="el" href="classTraderAdapter.html#a109e0f6f9de66e72a2e59b661ecd4d1c">TraderAdapter</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00175">175</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1b7eb42ff28ed4277703a6062f82a6cc" name="a1b7eb42ff28ed4277703a6062f82a6cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b7eb42ff28ed4277703a6062f82a6cc">&#9670;&#160;</a></span>onRspAccount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITraderSpi::onRspAccount </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSArray.html">WTSArray</a> *&#160;</td>
+          <td class="paramname"><em>ayAccounts</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classTraderSpi.html#a5c2558e270e96eebef613f9d3c7675b5">TraderSpi</a>, <a class="el" href="classTraderAdapter.html#a260b11892406acc9fdcff8ff8c45e274">TraderAdapter</a>, <a class="el" href="classTraderAdapter.html#a0097ee8d6936b47471ee0ae86c60e9ff">TraderAdapter</a> , 以及 <a class="el" href="classTraderAdapter.html#a0097ee8d6936b47471ee0ae86c60e9ff">TraderAdapter</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00145">145</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0ab077801621dfdc85031103e39cba1c" name="a0ab077801621dfdc85031103e39cba1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ab077801621dfdc85031103e39cba1c">&#9670;&#160;</a></span>onRspEntrust()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITraderSpi::onRspEntrust </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSEntrust.html">WTSEntrust</a> *&#160;</td>
+          <td class="paramname"><em>entrust</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSError.html">WTSError</a> *&#160;</td>
+          <td class="paramname"><em>err</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classTraderSpi.html#a94657498a3af5a42d6f2df55a5f2ce31">TraderSpi</a>, <a class="el" href="classTraderAdapter.html#a793165df6b0da7f4d6f1c57ca7b54ca0">TraderAdapter</a> , 以及 <a class="el" href="classTraderAdapter.html#a18e1b06a75eecdf0da9199e532f50dd6">TraderAdapter</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00140">140</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac25add76934edc8f5db8882527bc5e7f" name="ac25add76934edc8f5db8882527bc5e7f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac25add76934edc8f5db8882527bc5e7f">&#9670;&#160;</a></span>onRspOrders()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITraderSpi::onRspOrders </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classWTSArray.html">WTSArray</a> *&#160;</td>
+          <td class="paramname"><em>ayOrders</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classTraderSpi.html#acfbca8d7778b07ea1a07140118e0c522">TraderSpi</a>, <a class="el" href="classTraderAdapter.html#acb3a5adbef8fbbbcb6b886ffbc6d4706">TraderAdapter</a>, <a class="el" href="classTraderAdapter.html#a2814a3c8886283369bb6153c7326d3c5">TraderAdapter</a> , 以及 <a class="el" href="classTraderAdapter.html#a2814a3c8886283369bb6153c7326d3c5">TraderAdapter</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00155">155</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a500055e501aab60093b34a7ce6a6e50c" name="a500055e501aab60093b34a7ce6a6e50c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a500055e501aab60093b34a7ce6a6e50c">&#9670;&#160;</a></span>onRspPosition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITraderSpi::onRspPosition </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classWTSArray.html">WTSArray</a> *&#160;</td>
+          <td class="paramname"><em>ayPositions</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classTraderSpi.html#a2d654229a969d28b3b3a10889fa8d52f">TraderSpi</a>, <a class="el" href="classTraderAdapter.html#a7a85e00a6bb208dfc68e57256dbc35b5">TraderAdapter</a>, <a class="el" href="classTraderAdapter.html#a47898094b1a2ad3b9a1fdf82ca043d3c">TraderAdapter</a> , 以及 <a class="el" href="classTraderAdapter.html#a47898094b1a2ad3b9a1fdf82ca043d3c">TraderAdapter</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00150">150</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8ede4d186168dc476b9e6f10d867cc12" name="a8ede4d186168dc476b9e6f10d867cc12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ede4d186168dc476b9e6f10d867cc12">&#9670;&#160;</a></span>onRspSettlementInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITraderSpi::onRspSettlementInfo </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uDate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>content</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classTraderSpi.html#a5e1ed19156aa347dccea499e2bdb2a59">TraderSpi</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00165">165</a> 行定义.</p>
+
+</div>
+</div>
+<a id="add98ebac7f4798758ca3a0eb01851d93" name="add98ebac7f4798758ca3a0eb01851d93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add98ebac7f4798758ca3a0eb01851d93">&#9670;&#160;</a></span>onRspTrades()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITraderSpi::onRspTrades </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="classWTSArray.html">WTSArray</a> *&#160;</td>
+          <td class="paramname"><em>ayTrades</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classTraderSpi.html#a732bbb341c5619895434707b3d8c1cc3">TraderSpi</a>, <a class="el" href="classTraderAdapter.html#a8f2a210b19de3571834c06b71d01dc89">TraderAdapter</a>, <a class="el" href="classTraderAdapter.html#aa7882d09bce951d851d1cf5ca853ffaa">TraderAdapter</a> , 以及 <a class="el" href="classTraderAdapter.html#aa7882d09bce951d851d1cf5ca853ffaa">TraderAdapter</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00160">160</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8651103031533a7c0f5b4971433858b4" name="a8651103031533a7c0f5b4971433858b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8651103031533a7c0f5b4971433858b4">&#9670;&#160;</a></span>onTraderError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void ITraderSpi::onTraderError </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWTSError.html">WTSError</a> *&#160;</td>
+          <td class="paramname"><em>err</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>pData</em> = <code><a class="el" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classTraderAdapter.html#a453f57f944279c055fb4b4280b3e4cf3">TraderAdapter</a>, <a class="el" href="classTraderAdapter.html#ab514a6bab2049cc10223cde33030d93a">TraderAdapter</a> , 以及 <a class="el" href="classTraderAdapter.html#ab514a6bab2049cc10223cde33030d93a">TraderAdapter</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a> 第 <a class="el" href="ITraderApi_8h_source.html#l00180">180</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/Includes/<a class="el" href="ITraderApi_8h_source.html">ITraderApi.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classITraderSpi.html">ITraderSpi</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

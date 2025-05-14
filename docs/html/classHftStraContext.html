@@ -1,0 +1,1439 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: HftStraContext类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classHftStraContext.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pri-attribs">Private 属性</a> &#124;
+<a href="classHftStraContext-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">HftStraContext类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>高频交易策略上下文类  
+ <a href="classHftStraContext.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="HftStraContext_8h_source.html">HftStraContext.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a2f3f839f3f57d69722cb514a6f887a9d" id="r_a2f3f839f3f57d69722cb514a6f887a9d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#a2f3f839f3f57d69722cb514a6f887a9d">HftStraContext</a> (<a class="el" href="classWtHftEngine.html">WtHftEngine</a> *engine, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="classIHftStraCtx.html#a83f0f0ed8878ced941cf9eab83320273">name</a>, bool bAgent, int32_t slippage)</td></tr>
+<tr class="memdesc:a2f3f839f3f57d69722cb514a6f887a9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a2f3f839f3f57d69722cb514a6f887a9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab468860accef32b871c71e888a008300" id="r_ab468860accef32b871c71e888a008300"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#ab468860accef32b871c71e888a008300">~HftStraContext</a> ()</td></tr>
+<tr class="memdesc:ab468860accef32b871c71e888a008300"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:ab468860accef32b871c71e888a008300"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7996575fd29b439e93a2fdcca7612532" id="r_a7996575fd29b439e93a2fdcca7612532"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#a7996575fd29b439e93a2fdcca7612532">set_strategy</a> (<a class="el" href="classHftStrategy.html">HftStrategy</a> *stra)</td></tr>
+<tr class="memdesc:a7996575fd29b439e93a2fdcca7612532"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置策略实例  <br /></td></tr>
+<tr class="separator:a7996575fd29b439e93a2fdcca7612532"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af959e1eb895bba0a70a9f8f548ef7c19" id="r_af959e1eb895bba0a70a9f8f548ef7c19"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classHftStrategy.html">HftStrategy</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#af959e1eb895bba0a70a9f8f548ef7c19">get_stragety</a> ()</td></tr>
+<tr class="memdesc:af959e1eb895bba0a70a9f8f548ef7c19"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取策略实例  <br /></td></tr>
+<tr class="separator:af959e1eb895bba0a70a9f8f548ef7c19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67f98a295ccc2ea2d1cf7317bf807b6d" id="r_a67f98a295ccc2ea2d1cf7317bf807b6d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#a67f98a295ccc2ea2d1cf7317bf807b6d">on_init</a> () override</td></tr>
+<tr class="memdesc:a67f98a295ccc2ea2d1cf7317bf807b6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">策略初始化  <br /></td></tr>
+<tr class="separator:a67f98a295ccc2ea2d1cf7317bf807b6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace05b3c851fa7390f47a7bfd6236edc3" id="r_ace05b3c851fa7390f47a7bfd6236edc3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#ace05b3c851fa7390f47a7bfd6236edc3">on_session_begin</a> (uint32_t uTDate) override</td></tr>
+<tr class="memdesc:ace05b3c851fa7390f47a7bfd6236edc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易会话开始回调  <br /></td></tr>
+<tr class="separator:ace05b3c851fa7390f47a7bfd6236edc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13e718178901a124cb0409922b445357" id="r_a13e718178901a124cb0409922b445357"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#a13e718178901a124cb0409922b445357">on_session_end</a> (uint32_t uTDate) override</td></tr>
+<tr class="memdesc:a13e718178901a124cb0409922b445357"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易会话结束回调  <br /></td></tr>
+<tr class="separator:a13e718178901a124cb0409922b445357"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8337af0b5e55e505c1a1237657a90709" id="r_a8337af0b5e55e505c1a1237657a90709"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#a8337af0b5e55e505c1a1237657a90709">on_tick</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code, <a class="el" href="classWTSTickData.html">WTSTickData</a> *newTick) override</td></tr>
+<tr class="memdesc:a8337af0b5e55e505c1a1237657a90709"><td class="mdescLeft">&#160;</td><td class="mdescRight">行情Tick数据回调  <br /></td></tr>
+<tr class="separator:a8337af0b5e55e505c1a1237657a90709"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf612fbb426138b697eeb68af63a3272" id="r_abf612fbb426138b697eeb68af63a3272"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#abf612fbb426138b697eeb68af63a3272">on_order_queue</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrdQueData.html">WTSOrdQueData</a> *newOrdQue) override</td></tr>
+<tr class="memdesc:abf612fbb426138b697eeb68af63a3272"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托队列数据回调  <br /></td></tr>
+<tr class="separator:abf612fbb426138b697eeb68af63a3272"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea930c249ee6e14e1eb6e0403fd5b61f" id="r_aea930c249ee6e14e1eb6e0403fd5b61f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#aea930c249ee6e14e1eb6e0403fd5b61f">on_order_detail</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrdDtlData.html">WTSOrdDtlData</a> *newOrdDtl) override</td></tr>
+<tr class="memdesc:aea930c249ee6e14e1eb6e0403fd5b61f"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托明细数据回调  <br /></td></tr>
+<tr class="separator:aea930c249ee6e14e1eb6e0403fd5b61f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68d9f7c131d0ae8c4549fb6885b3c90e" id="r_a68d9f7c131d0ae8c4549fb6885b3c90e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#a68d9f7c131d0ae8c4549fb6885b3c90e">on_transaction</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTransData.html">WTSTransData</a> *newTrans) override</td></tr>
+<tr class="memdesc:a68d9f7c131d0ae8c4549fb6885b3c90e"><td class="mdescLeft">&#160;</td><td class="mdescRight">逐笔成交数据回调  <br /></td></tr>
+<tr class="separator:a68d9f7c131d0ae8c4549fb6885b3c90e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af509053571c0e622741db88db977b7fa" id="r_af509053571c0e622741db88db977b7fa"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#af509053571c0e622741db88db977b7fa">on_bar</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *code, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *period, uint32_t times, <a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *newBar) override</td></tr>
+<tr class="memdesc:af509053571c0e622741db88db977b7fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">K线数据回调  <br /></td></tr>
+<tr class="separator:af509053571c0e622741db88db977b7fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a41b983dd77ab54b99221648bbc9303" id="r_a4a41b983dd77ab54b99221648bbc9303"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#a4a41b983dd77ab54b99221648bbc9303">on_trade</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isBuy, double vol, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>) override</td></tr>
+<tr class="memdesc:a4a41b983dd77ab54b99221648bbc9303"><td class="mdescLeft">&#160;</td><td class="mdescRight">成交回报回调  <br /></td></tr>
+<tr class="separator:a4a41b983dd77ab54b99221648bbc9303"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9becb94e918625f10516b6fc30f17db" id="r_ad9becb94e918625f10516b6fc30f17db"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#ad9becb94e918625f10516b6fc30f17db">on_order</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isBuy, double totalQty, double leftQty, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, bool isCanceled=false) override</td></tr>
+<tr class="memdesc:ad9becb94e918625f10516b6fc30f17db"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托回报回调  <br /></td></tr>
+<tr class="separator:ad9becb94e918625f10516b6fc30f17db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a438298726264da7be3aa1175ceb4d7" id="r_a0a438298726264da7be3aa1175ceb4d7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#a0a438298726264da7be3aa1175ceb4d7">on_channel_ready</a> () override</td></tr>
+<tr class="memdesc:a0a438298726264da7be3aa1175ceb4d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易通道就绪回调  <br /></td></tr>
+<tr class="separator:a0a438298726264da7be3aa1175ceb4d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59eb6c5074b05129425868582a94c61f" id="r_a59eb6c5074b05129425868582a94c61f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#a59eb6c5074b05129425868582a94c61f">on_channel_lost</a> () override</td></tr>
+<tr class="memdesc:a59eb6c5074b05129425868582a94c61f"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易通道断开回调  <br /></td></tr>
+<tr class="separator:a59eb6c5074b05129425868582a94c61f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c8f11190394f8c0ca831b31cc531700" id="r_a6c8f11190394f8c0ca831b31cc531700"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#a6c8f11190394f8c0ca831b31cc531700">on_entrust</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool bSuccess, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message) override</td></tr>
+<tr class="memdesc:a6c8f11190394f8c0ca831b31cc531700"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托提交回报回调  <br /></td></tr>
+<tr class="separator:a6c8f11190394f8c0ca831b31cc531700"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0bd98becaf62dec278e678a689bf8eea" id="r_a0bd98becaf62dec278e678a689bf8eea"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#a0bd98becaf62dec278e678a689bf8eea">on_position</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday) override</td></tr>
+<tr class="memdesc:a0bd98becaf62dec278e678a689bf8eea"><td class="mdescLeft">&#160;</td><td class="mdescRight">持仓回报回调  <br /></td></tr>
+<tr class="separator:a0bd98becaf62dec278e678a689bf8eea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classHftStraBaseCtx"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classHftStraBaseCtx')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classHftStraBaseCtx.html">HftStraBaseCtx</a></td></tr>
+<tr class="memitem:a9873b97f3cb9a61507af4fde5a800ec8 inherit pub_methods_classHftStraBaseCtx" id="r_a9873b97f3cb9a61507af4fde5a800ec8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a9873b97f3cb9a61507af4fde5a800ec8">HftStraBaseCtx</a> (<a class="el" href="classWtHftEngine.html">WtHftEngine</a> *engine, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="classIHftStraCtx.html#a83f0f0ed8878ced941cf9eab83320273">name</a>, bool bAgent, int32_t slippage)</td></tr>
+<tr class="memdesc:a9873b97f3cb9a61507af4fde5a800ec8 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">高频交易策略基础上下文构造函数  <br /></td></tr>
+<tr class="separator:a9873b97f3cb9a61507af4fde5a800ec8 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab04ba8b94438a1dd4abfded1e81177b8 inherit pub_methods_classHftStraBaseCtx" id="r_ab04ba8b94438a1dd4abfded1e81177b8"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#ab04ba8b94438a1dd4abfded1e81177b8">~HftStraBaseCtx</a> ()</td></tr>
+<tr class="memdesc:ab04ba8b94438a1dd4abfded1e81177b8 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">高频交易策略基础上下文析构函数  <br /></td></tr>
+<tr class="separator:ab04ba8b94438a1dd4abfded1e81177b8 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc09570a67bb39d457afd872640f9b3f inherit pub_methods_classHftStraBaseCtx" id="r_abc09570a67bb39d457afd872640f9b3f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#abc09570a67bb39d457afd872640f9b3f">setTrader</a> (<a class="el" href="classTraderAdapter.html">TraderAdapter</a> *trader)</td></tr>
+<tr class="memdesc:abc09570a67bb39d457afd872640f9b3f inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置交易适配器  <br /></td></tr>
+<tr class="separator:abc09570a67bb39d457afd872640f9b3f inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefb17090c0ee86afe0cd9c88573209b3 inherit pub_methods_classHftStraBaseCtx" id="r_aefb17090c0ee86afe0cd9c88573209b3"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#aefb17090c0ee86afe0cd9c88573209b3">id</a> () override</td></tr>
+<tr class="memdesc:aefb17090c0ee86afe0cd9c88573209b3 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取策略上下文ID  <br /></td></tr>
+<tr class="separator:aefb17090c0ee86afe0cd9c88573209b3 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abda1ab452b4bb71711d8bb1afb0d1e6d inherit pub_methods_classHftStraBaseCtx" id="r_abda1ab452b4bb71711d8bb1afb0d1e6d"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#abda1ab452b4bb71711d8bb1afb0d1e6d">stra_cancel</a> (uint32_t localid) override</td></tr>
+<tr class="memdesc:abda1ab452b4bb71711d8bb1afb0d1e6d inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">撤单接口  <br /></td></tr>
+<tr class="separator:abda1ab452b4bb71711d8bb1afb0d1e6d inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad5f6c79a0d435a0176a28676ff1ffac inherit pub_methods_classHftStraBaseCtx" id="r_aad5f6c79a0d435a0176a28676ff1ffac"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#aad5f6c79a0d435a0176a28676ff1ffac">stra_cancel</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isBuy, double qty) override</td></tr>
+<tr class="memdesc:aad5f6c79a0d435a0176a28676ff1ffac inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">批量撤单接口  <br /></td></tr>
+<tr class="separator:aad5f6c79a0d435a0176a28676ff1ffac inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3355075c31dbf541036895dc23a89ecc inherit pub_methods_classHftStraBaseCtx" id="r_a3355075c31dbf541036895dc23a89ecc"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a3355075c31dbf541036895dc23a89ecc">stra_buy</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag, int flag=0, bool bForceClose=false) override</td></tr>
+<tr class="memdesc:a3355075c31dbf541036895dc23a89ecc inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">下单接口: 买入  <br /></td></tr>
+<tr class="separator:a3355075c31dbf541036895dc23a89ecc inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f26decbc8fc342ec01d28df7429dbf8 inherit pub_methods_classHftStraBaseCtx" id="r_a7f26decbc8fc342ec01d28df7429dbf8"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="ExecuteDefs_8h.html#a5956353808ff4eea2def6475db30bc0d">OrderIDs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a7f26decbc8fc342ec01d28df7429dbf8">stra_sell</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag, int flag=0, bool bForceClose=false) override</td></tr>
+<tr class="memdesc:a7f26decbc8fc342ec01d28df7429dbf8 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">下单接口: 卖出  <br /></td></tr>
+<tr class="separator:a7f26decbc8fc342ec01d28df7429dbf8 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59738a3a6ee016b5c950ca2864d58984 inherit pub_methods_classHftStraBaseCtx" id="r_a59738a3a6ee016b5c950ca2864d58984"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a59738a3a6ee016b5c950ca2864d58984">stra_enter_long</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag, int flag=0) override</td></tr>
+<tr class="memdesc:a59738a3a6ee016b5c950ca2864d58984 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">下单接口: 开多  <br /></td></tr>
+<tr class="separator:a59738a3a6ee016b5c950ca2864d58984 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4dc9b9b885d165ea2229753b7d112cf inherit pub_methods_classHftStraBaseCtx" id="r_aa4dc9b9b885d165ea2229753b7d112cf"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#aa4dc9b9b885d165ea2229753b7d112cf">stra_enter_short</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag, int flag=0) override</td></tr>
+<tr class="memdesc:aa4dc9b9b885d165ea2229753b7d112cf inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">下单接口: 开空  <br /></td></tr>
+<tr class="separator:aa4dc9b9b885d165ea2229753b7d112cf inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5eeed055e4d9a0fa630ace4c29a6928 inherit pub_methods_classHftStraBaseCtx" id="r_af5eeed055e4d9a0fa630ace4c29a6928"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#af5eeed055e4d9a0fa630ace4c29a6928">stra_exit_long</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag, bool isToday=false, int flag=0) override</td></tr>
+<tr class="memdesc:af5eeed055e4d9a0fa630ace4c29a6928 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">下单接口: 平多  <br /></td></tr>
+<tr class="separator:af5eeed055e4d9a0fa630ace4c29a6928 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9695eb892898303cc360368c3055924 inherit pub_methods_classHftStraBaseCtx" id="r_ac9695eb892898303cc360368c3055924"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#ac9695eb892898303cc360368c3055924">stra_exit_short</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag, bool isToday=false, int flag=0) override</td></tr>
+<tr class="memdesc:ac9695eb892898303cc360368c3055924 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">下单接口: 平空  <br /></td></tr>
+<tr class="separator:ac9695eb892898303cc360368c3055924 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8cdf21048848adb6595a729ae1e59c02 inherit pub_methods_classHftStraBaseCtx" id="r_a8cdf21048848adb6595a729ae1e59c02"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSCommodityInfo.html">WTSCommodityInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a8cdf21048848adb6595a729ae1e59c02">stra_get_comminfo</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a8cdf21048848adb6595a729ae1e59c02 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取合约信息  <br /></td></tr>
+<tr class="separator:a8cdf21048848adb6595a729ae1e59c02 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8aceee6886ce7f87eb5a59a5211ab770 inherit pub_methods_classHftStraBaseCtx" id="r_a8aceee6886ce7f87eb5a59a5211ab770"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a8aceee6886ce7f87eb5a59a5211ab770">stra_get_bars</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *period, uint32_t count) override</td></tr>
+<tr class="memdesc:a8aceee6886ce7f87eb5a59a5211ab770 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取K线数据  <br /></td></tr>
+<tr class="separator:a8aceee6886ce7f87eb5a59a5211ab770 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8b95f42b9e4072f478badc586ffb056 inherit pub_methods_classHftStraBaseCtx" id="r_aa8b95f42b9e4072f478badc586ffb056"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#aa8b95f42b9e4072f478badc586ffb056">stra_get_ticks</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t count) override</td></tr>
+<tr class="memdesc:aa8b95f42b9e4072f478badc586ffb056 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取Tick数据  <br /></td></tr>
+<tr class="separator:aa8b95f42b9e4072f478badc586ffb056 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a769ef8ceb271cca21cd18b78533ae6c3 inherit pub_methods_classHftStraBaseCtx" id="r_a769ef8ceb271cca21cd18b78533ae6c3"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSOrdDtlSlice.html">WTSOrdDtlSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a769ef8ceb271cca21cd18b78533ae6c3">stra_get_order_detail</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t count) override</td></tr>
+<tr class="memdesc:a769ef8ceb271cca21cd18b78533ae6c3 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取委托明细数据  <br /></td></tr>
+<tr class="separator:a769ef8ceb271cca21cd18b78533ae6c3 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95886184af5c4893eec9f15383beeff7 inherit pub_methods_classHftStraBaseCtx" id="r_a95886184af5c4893eec9f15383beeff7"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSOrdQueSlice.html">WTSOrdQueSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a95886184af5c4893eec9f15383beeff7">stra_get_order_queue</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t count) override</td></tr>
+<tr class="memdesc:a95886184af5c4893eec9f15383beeff7 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取委托队列数据  <br /></td></tr>
+<tr class="separator:a95886184af5c4893eec9f15383beeff7 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70451f2aa4da33c64f6fbcd4ddc1e25c inherit pub_methods_classHftStraBaseCtx" id="r_a70451f2aa4da33c64f6fbcd4ddc1e25c"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTransSlice.html">WTSTransSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a70451f2aa4da33c64f6fbcd4ddc1e25c">stra_get_transaction</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t count) override</td></tr>
+<tr class="memdesc:a70451f2aa4da33c64f6fbcd4ddc1e25c inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取成交明细数据  <br /></td></tr>
+<tr class="separator:a70451f2aa4da33c64f6fbcd4ddc1e25c inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae75d3bdfbb5128516d7c8b0b20e45a30 inherit pub_methods_classHftStraBaseCtx" id="r_ae75d3bdfbb5128516d7c8b0b20e45a30"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#ae75d3bdfbb5128516d7c8b0b20e45a30">stra_get_last_tick</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:ae75d3bdfbb5128516d7c8b0b20e45a30 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取最新Tick数据  <br /></td></tr>
+<tr class="separator:ae75d3bdfbb5128516d7c8b0b20e45a30 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9a3e3f8aebc674d9f9eff8362a18e87 inherit pub_methods_classHftStraBaseCtx" id="r_ae9a3e3f8aebc674d9f9eff8362a18e87"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#ae9a3e3f8aebc674d9f9eff8362a18e87">stra_get_rawcode</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:ae9a3e3f8aebc674d9f9eff8362a18e87 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取分月合约代码  <br /></td></tr>
+<tr class="separator:ae9a3e3f8aebc674d9f9eff8362a18e87 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39a9905e8c68d850b8b8bbad6f80e49d inherit pub_methods_classHftStraBaseCtx" id="r_a39a9905e8c68d850b8b8bbad6f80e49d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a39a9905e8c68d850b8b8bbad6f80e49d">stra_log_info</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message) override</td></tr>
+<tr class="memdesc:a39a9905e8c68d850b8b8bbad6f80e49d inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">记录信息级别日志  <br /></td></tr>
+<tr class="separator:a39a9905e8c68d850b8b8bbad6f80e49d inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7dfb1a375e6188d07b55d5578bd73e58 inherit pub_methods_classHftStraBaseCtx" id="r_a7dfb1a375e6188d07b55d5578bd73e58"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a7dfb1a375e6188d07b55d5578bd73e58">stra_log_debug</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message) override</td></tr>
+<tr class="memdesc:a7dfb1a375e6188d07b55d5578bd73e58 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">记录调试级别日志  <br /></td></tr>
+<tr class="separator:a7dfb1a375e6188d07b55d5578bd73e58 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8349ba9622832177a6727ff0912ac62f inherit pub_methods_classHftStraBaseCtx" id="r_a8349ba9622832177a6727ff0912ac62f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a8349ba9622832177a6727ff0912ac62f">stra_log_warn</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message) override</td></tr>
+<tr class="memdesc:a8349ba9622832177a6727ff0912ac62f inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">记录警告级别日志  <br /></td></tr>
+<tr class="separator:a8349ba9622832177a6727ff0912ac62f inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86519e0c51f3017f692ad5c35c3486db inherit pub_methods_classHftStraBaseCtx" id="r_a86519e0c51f3017f692ad5c35c3486db"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a86519e0c51f3017f692ad5c35c3486db">stra_log_error</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message) override</td></tr>
+<tr class="memdesc:a86519e0c51f3017f692ad5c35c3486db inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">记录错误级别日志  <br /></td></tr>
+<tr class="separator:a86519e0c51f3017f692ad5c35c3486db inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfa8a4417b9750968c102016422cba3b inherit pub_methods_classHftStraBaseCtx" id="r_adfa8a4417b9750968c102016422cba3b"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#adfa8a4417b9750968c102016422cba3b">stra_get_position</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool bOnlyValid=false, int flag=3) override</td></tr>
+<tr class="memdesc:adfa8a4417b9750968c102016422cba3b inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取持仓量  <br /></td></tr>
+<tr class="separator:adfa8a4417b9750968c102016422cba3b inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac11b07e219cef333212668bf3f44669d inherit pub_methods_classHftStraBaseCtx" id="r_ac11b07e219cef333212668bf3f44669d"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#ac11b07e219cef333212668bf3f44669d">stra_get_position_avgpx</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:ac11b07e219cef333212668bf3f44669d inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取持仓均价  <br /></td></tr>
+<tr class="separator:ac11b07e219cef333212668bf3f44669d inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ab9564e45761e148adecf4231dc07ab inherit pub_methods_classHftStraBaseCtx" id="r_a3ab9564e45761e148adecf4231dc07ab"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a3ab9564e45761e148adecf4231dc07ab">stra_get_position_profit</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a3ab9564e45761e148adecf4231dc07ab inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取持仓盈亏  <br /></td></tr>
+<tr class="separator:a3ab9564e45761e148adecf4231dc07ab inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63110141006408f5082336423d536e4d inherit pub_methods_classHftStraBaseCtx" id="r_a63110141006408f5082336423d536e4d"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a63110141006408f5082336423d536e4d">stra_get_price</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a63110141006408f5082336423d536e4d inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取合约最新价格  <br /></td></tr>
+<tr class="separator:a63110141006408f5082336423d536e4d inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a221406f484bd6c4b472165689cdffa7c inherit pub_methods_classHftStraBaseCtx" id="r_a221406f484bd6c4b472165689cdffa7c"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a221406f484bd6c4b472165689cdffa7c">stra_get_undone</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a221406f484bd6c4b472165689cdffa7c inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取未完成委托数量  <br /></td></tr>
+<tr class="separator:a221406f484bd6c4b472165689cdffa7c inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d5a34dff819f013e5532f66424c6133 inherit pub_methods_classHftStraBaseCtx" id="r_a6d5a34dff819f013e5532f66424c6133"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a6d5a34dff819f013e5532f66424c6133">stra_get_date</a> () override</td></tr>
+<tr class="memdesc:a6d5a34dff819f013e5532f66424c6133 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取当前交易日期  <br /></td></tr>
+<tr class="separator:a6d5a34dff819f013e5532f66424c6133 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e3097d561573fa7ef6ebb5feb6a6e5d inherit pub_methods_classHftStraBaseCtx" id="r_a3e3097d561573fa7ef6ebb5feb6a6e5d"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a3e3097d561573fa7ef6ebb5feb6a6e5d">stra_get_time</a> () override</td></tr>
+<tr class="memdesc:a3e3097d561573fa7ef6ebb5feb6a6e5d inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取当前交易时间  <br /></td></tr>
+<tr class="separator:a3e3097d561573fa7ef6ebb5feb6a6e5d inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a766d027ded7ddd5ee31a0733cb0b15dd inherit pub_methods_classHftStraBaseCtx" id="r_a766d027ded7ddd5ee31a0733cb0b15dd"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a766d027ded7ddd5ee31a0733cb0b15dd">stra_get_secs</a> () override</td></tr>
+<tr class="memdesc:a766d027ded7ddd5ee31a0733cb0b15dd inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取当前交易秒数  <br /></td></tr>
+<tr class="separator:a766d027ded7ddd5ee31a0733cb0b15dd inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71ff774c5b95d7189708ae6a24016370 inherit pub_methods_classHftStraBaseCtx" id="r_a71ff774c5b95d7189708ae6a24016370"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a71ff774c5b95d7189708ae6a24016370">stra_sub_ticks</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a71ff774c5b95d7189708ae6a24016370 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅Tick数据  <br /></td></tr>
+<tr class="separator:a71ff774c5b95d7189708ae6a24016370 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6fd18af722f42308f762861be85019a inherit pub_methods_classHftStraBaseCtx" id="r_af6fd18af722f42308f762861be85019a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#af6fd18af722f42308f762861be85019a">stra_sub_order_details</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:af6fd18af722f42308f762861be85019a inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅委托明细数据  <br /></td></tr>
+<tr class="separator:af6fd18af722f42308f762861be85019a inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a090027b7b87827f147176802ac24a12d inherit pub_methods_classHftStraBaseCtx" id="r_a090027b7b87827f147176802ac24a12d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a090027b7b87827f147176802ac24a12d">stra_sub_order_queues</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a090027b7b87827f147176802ac24a12d inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅委托队列数据  <br /></td></tr>
+<tr class="separator:a090027b7b87827f147176802ac24a12d inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7426393c1fd415e0e801c9f47e3e638b inherit pub_methods_classHftStraBaseCtx" id="r_a7426393c1fd415e0e801c9f47e3e638b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a7426393c1fd415e0e801c9f47e3e638b">stra_sub_transactions</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode) override</td></tr>
+<tr class="memdesc:a7426393c1fd415e0e801c9f47e3e638b inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅成交明细数据  <br /></td></tr>
+<tr class="separator:a7426393c1fd415e0e801c9f47e3e638b inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cb71d728871aef88894504937508144 inherit pub_methods_classHftStraBaseCtx" id="r_a4cb71d728871aef88894504937508144"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a4cb71d728871aef88894504937508144">stra_save_user_data</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *val) override</td></tr>
+<tr class="memdesc:a4cb71d728871aef88894504937508144 inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">保存用户数据  <br /></td></tr>
+<tr class="separator:a4cb71d728871aef88894504937508144 inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acba509d7c7fa8966256ca0accae7131f inherit pub_methods_classHftStraBaseCtx" id="r_acba509d7c7fa8966256ca0accae7131f"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#acba509d7c7fa8966256ca0accae7131f">stra_load_user_data</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *key, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *defVal=&quot;&quot;) override</td></tr>
+<tr class="memdesc:acba509d7c7fa8966256ca0accae7131f inherit pub_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">加载用户数据  <br /></td></tr>
+<tr class="separator:acba509d7c7fa8966256ca0accae7131f inherit pub_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classIHftStraCtx"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classIHftStraCtx')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classIHftStraCtx.html">IHftStraCtx</a></td></tr>
+<tr class="memitem:a83193fab005fe1bbfce6043da2d9b504 inherit pub_methods_classIHftStraCtx" id="r_a83193fab005fe1bbfce6043da2d9b504"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#a83193fab005fe1bbfce6043da2d9b504">IHftStraCtx</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="classIHftStraCtx.html#a83f0f0ed8878ced941cf9eab83320273">name</a>)</td></tr>
+<tr class="memdesc:a83193fab005fe1bbfce6043da2d9b504 inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">构造函数  <br /></td></tr>
+<tr class="separator:a83193fab005fe1bbfce6043da2d9b504 inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8acf8795877eb29dc265cca31267d99c inherit pub_methods_classIHftStraCtx" id="r_a8acf8795877eb29dc265cca31267d99c"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#a8acf8795877eb29dc265cca31267d99c">~IHftStraCtx</a> ()</td></tr>
+<tr class="memdesc:a8acf8795877eb29dc265cca31267d99c inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">析构函数  <br /></td></tr>
+<tr class="separator:a8acf8795877eb29dc265cca31267d99c inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83f0f0ed8878ced941cf9eab83320273 inherit pub_methods_classIHftStraCtx" id="r_a83f0f0ed8878ced941cf9eab83320273"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#a83f0f0ed8878ced941cf9eab83320273">name</a> () <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a></td></tr>
+<tr class="memdesc:a83f0f0ed8878ced941cf9eab83320273 inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取策略名称  <br /></td></tr>
+<tr class="separator:a83f0f0ed8878ced941cf9eab83320273 inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58a802daada69d3a7e615d52dc38e7ba inherit pub_methods_classIHftStraCtx" id="r_a58a802daada69d3a7e615d52dc38e7ba"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#a58a802daada69d3a7e615d52dc38e7ba">on_bactest_end</a> ()</td></tr>
+<tr class="memdesc:a58a802daada69d3a7e615d52dc38e7ba inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">回测结束事件回调  <br /></td></tr>
+<tr class="separator:a58a802daada69d3a7e615d52dc38e7ba inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad73fcab074f80eedd97519bf18a9c46e inherit pub_methods_classIHftStraCtx" id="r_ad73fcab074f80eedd97519bf18a9c46e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#ad73fcab074f80eedd97519bf18a9c46e">on_tick_updated</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTickData.html">WTSTickData</a> *newTick)</td></tr>
+<tr class="memdesc:ad73fcab074f80eedd97519bf18a9c46e inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick数据更新回调  <br /></td></tr>
+<tr class="separator:ad73fcab074f80eedd97519bf18a9c46e inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac02bbe0848db9aa11258b17881ebde88 inherit pub_methods_classIHftStraCtx" id="r_ac02bbe0848db9aa11258b17881ebde88"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#ac02bbe0848db9aa11258b17881ebde88">on_ordque_updated</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrdQueData.html">WTSOrdQueData</a> *newOrdQue)</td></tr>
+<tr class="memdesc:ac02bbe0848db9aa11258b17881ebde88 inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托队列数据更新回调  <br /></td></tr>
+<tr class="separator:ac02bbe0848db9aa11258b17881ebde88 inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63f0b7ca833e449ad42a1699f062045c inherit pub_methods_classIHftStraCtx" id="r_a63f0b7ca833e449ad42a1699f062045c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#a63f0b7ca833e449ad42a1699f062045c">on_orddtl_updated</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSOrdDtlData.html">WTSOrdDtlData</a> *newOrdDtl)</td></tr>
+<tr class="memdesc:a63f0b7ca833e449ad42a1699f062045c inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">逐笔委托数据更新回调  <br /></td></tr>
+<tr class="separator:a63f0b7ca833e449ad42a1699f062045c inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46e9d8138c75960742d2bdaaa517605f inherit pub_methods_classIHftStraCtx" id="r_a46e9d8138c75960742d2bdaaa517605f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#a46e9d8138c75960742d2bdaaa517605f">on_trans_updated</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTransData.html">WTSTransData</a> *newTrans)</td></tr>
+<tr class="memdesc:a46e9d8138c75960742d2bdaaa517605f inherit pub_methods_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">逐笔成交数据更新回调  <br /></td></tr>
+<tr class="separator:a46e9d8138c75960742d2bdaaa517605f inherit pub_methods_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classITrdNotifySink"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classITrdNotifySink')"><img src="closed.png" alt="-"/>&#160;Public 成员函数 继承自 <a class="el" href="classITrdNotifySink.html">ITrdNotifySink</a></td></tr>
+<tr class="memitem:a48aff2eda862be2f42b06bfeb7fe8966 inherit pub_methods_classITrdNotifySink" id="r_a48aff2eda862be2f42b06bfeb7fe8966"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#a48aff2eda862be2f42b06bfeb7fe8966">on_account</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *<a class="el" href="demo__send__order_8cpp.html#af75f83b1c7d27fcbd5fb60b382330d60">currency</a>, double prebalance, double balance, double dynbalance, double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw)</td></tr>
+<tr class="memdesc:a48aff2eda862be2f42b06bfeb7fe8966 inherit pub_methods_classITrdNotifySink"><td class="mdescLeft">&#160;</td><td class="mdescRight">资金账户更新回调  <br /></td></tr>
+<tr class="separator:a48aff2eda862be2f42b06bfeb7fe8966 inherit pub_methods_classITrdNotifySink"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7996c695e786e2b9b1422941061f0955 inherit pub_methods_classITrdNotifySink" id="r_a7996c695e786e2b9b1422941061f0955"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#a7996c695e786e2b9b1422941061f0955">on_trade</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isLong, uint32_t offset, double vol, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>)=0</td></tr>
+<tr class="memdesc:a7996c695e786e2b9b1422941061f0955 inherit pub_methods_classITrdNotifySink"><td class="mdescLeft">&#160;</td><td class="mdescRight">成交回报回调函数  <br /></td></tr>
+<tr class="separator:a7996c695e786e2b9b1422941061f0955 inherit pub_methods_classITrdNotifySink"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7857e8863c1c0e8833782e62a1784b5 inherit pub_methods_classITrdNotifySink" id="r_ad7857e8863c1c0e8833782e62a1784b5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#ad7857e8863c1c0e8833782e62a1784b5">on_order</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, bool isCanceled=false)=0</td></tr>
+<tr class="memdesc:ad7857e8863c1c0e8833782e62a1784b5 inherit pub_methods_classITrdNotifySink"><td class="mdescLeft">&#160;</td><td class="mdescRight">订单回报回调函数  <br /></td></tr>
+<tr class="separator:ad7857e8863c1c0e8833782e62a1784b5 inherit pub_methods_classITrdNotifySink"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa504f5dec57747a86c1d17a392cabb2 inherit pub_methods_classITrdNotifySink" id="r_afa504f5dec57747a86c1d17a392cabb2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classITrdNotifySink.html#afa504f5dec57747a86c1d17a392cabb2">on_channel_ready</a> (uint32_t tradingday)=0</td></tr>
+<tr class="memdesc:afa504f5dec57747a86c1d17a392cabb2 inherit pub_methods_classITrdNotifySink"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易通道就绪回调函数  <br /></td></tr>
+<tr class="separator:afa504f5dec57747a86c1d17a392cabb2 inherit pub_methods_classITrdNotifySink"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 属性</h2></td></tr>
+<tr class="memitem:a78c971b07b6365ef8a00c08f52b7b41e" id="r_a78c971b07b6365ef8a00c08f52b7b41e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classHftStrategy.html">HftStrategy</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraContext.html#a78c971b07b6365ef8a00c08f52b7b41e">_strategy</a></td></tr>
+<tr class="memdesc:a78c971b07b6365ef8a00c08f52b7b41e"><td class="mdescLeft">&#160;</td><td class="mdescRight">策略实例指针  <br /></td></tr>
+<tr class="separator:a78c971b07b6365ef8a00c08f52b7b41e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+额外继承的成员函数</h2></td></tr>
+<tr class="inherit_header pro_types_classHftStraBaseCtx"><td colspan="2" onclick="javascript:toggleInherit('pro_types_classHftStraBaseCtx')"><img src="closed.png" alt="-"/>&#160;Protected 类型 继承自 <a class="el" href="classHftStraBaseCtx.html">HftStraBaseCtx</a></td></tr>
+<tr class="memitem:a3426c25cccf6a46d3d5a7993b472dea5 inherit pro_types_classHftStraBaseCtx" id="r_a3426c25cccf6a46d3d5a7993b472dea5"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a3426c25cccf6a46d3d5a7993b472dea5">StringHashMap</a></td></tr>
+<tr class="separator:a3426c25cccf6a46d3d5a7993b472dea5 inherit pro_types_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_methods_classHftStraBaseCtx"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_classHftStraBaseCtx')"><img src="closed.png" alt="-"/>&#160;Protected 成员函数 继承自 <a class="el" href="classHftStraBaseCtx.html">HftStraBaseCtx</a></td></tr>
+<tr class="memitem:a5852bccf76a932448a4f788b3bbe2c09 inherit pro_methods_classHftStraBaseCtx" id="r_a5852bccf76a932448a4f788b3bbe2c09"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a5852bccf76a932448a4f788b3bbe2c09 inherit pro_methods_classHftStraBaseCtx"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a5852bccf76a932448a4f788b3bbe2c09">log_debug</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...args)</td></tr>
+<tr class="memdesc:a5852bccf76a932448a4f788b3bbe2c09 inherit pro_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">调试日志模板函数  <br /></td></tr>
+<tr class="separator:a5852bccf76a932448a4f788b3bbe2c09 inherit pro_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37728e431d93a688cc47ee581cecd589 inherit pro_methods_classHftStraBaseCtx" id="r_a37728e431d93a688cc47ee581cecd589"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a37728e431d93a688cc47ee581cecd589 inherit pro_methods_classHftStraBaseCtx"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a37728e431d93a688cc47ee581cecd589">log_info</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...args)</td></tr>
+<tr class="memdesc:a37728e431d93a688cc47ee581cecd589 inherit pro_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">信息日志模板函数  <br /></td></tr>
+<tr class="separator:a37728e431d93a688cc47ee581cecd589 inherit pro_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d16d082815092d5bba9a71e3e652996 inherit pro_methods_classHftStraBaseCtx" id="r_a1d16d082815092d5bba9a71e3e652996"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a1d16d082815092d5bba9a71e3e652996 inherit pro_methods_classHftStraBaseCtx"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a1d16d082815092d5bba9a71e3e652996">log_error</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *format, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> Args &amp;...args)</td></tr>
+<tr class="memdesc:a1d16d082815092d5bba9a71e3e652996 inherit pro_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">错误日志模板函数  <br /></td></tr>
+<tr class="separator:a1d16d082815092d5bba9a71e3e652996 inherit pro_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a969002afc5f1a1a91a373755907e8448 inherit pro_methods_classHftStraBaseCtx" id="r_a969002afc5f1a1a91a373755907e8448"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a969002afc5f1a1a91a373755907e8448">get_inner_code</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode)</td></tr>
+<tr class="memdesc:a969002afc5f1a1a91a373755907e8448 inherit pro_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取内部合约代码  <br /></td></tr>
+<tr class="separator:a969002afc5f1a1a91a373755907e8448 inherit pro_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac7d76a541367dbbae8561f01ebb2c74 inherit pro_methods_classHftStraBaseCtx" id="r_aac7d76a541367dbbae8561f01ebb2c74"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#aac7d76a541367dbbae8561f01ebb2c74">load_userdata</a> ()</td></tr>
+<tr class="memdesc:aac7d76a541367dbbae8561f01ebb2c74 inherit pro_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">加载用户数据  <br /></td></tr>
+<tr class="separator:aac7d76a541367dbbae8561f01ebb2c74 inherit pro_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a650adfad1966b1a10dad4e18f52140d0 inherit pro_methods_classHftStraBaseCtx" id="r_a650adfad1966b1a10dad4e18f52140d0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a650adfad1966b1a10dad4e18f52140d0">save_userdata</a> ()</td></tr>
+<tr class="memdesc:a650adfad1966b1a10dad4e18f52140d0 inherit pro_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">保存用户数据  <br /></td></tr>
+<tr class="separator:a650adfad1966b1a10dad4e18f52140d0 inherit pro_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac46bc39ce4aab2f4a657c8933ba2b497 inherit pro_methods_classHftStraBaseCtx" id="r_ac46bc39ce4aab2f4a657c8933ba2b497"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#ac46bc39ce4aab2f4a657c8933ba2b497">init_outputs</a> ()</td></tr>
+<tr class="memdesc:ac46bc39ce4aab2f4a657c8933ba2b497 inherit pro_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化输出日志  <br /></td></tr>
+<tr class="separator:ac46bc39ce4aab2f4a657c8933ba2b497 inherit pro_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4eb2d3481ce04602a7d658de9c1baf84 inherit pro_methods_classHftStraBaseCtx" id="r_a4eb2d3481ce04602a7d658de9c1baf84"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a4eb2d3481ce04602a7d658de9c1baf84">do_set_position</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, double qty, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>=0.0, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag=&quot;&quot;)</td></tr>
+<tr class="memdesc:a4eb2d3481ce04602a7d658de9c1baf84 inherit pro_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置持仓量  <br /></td></tr>
+<tr class="separator:a4eb2d3481ce04602a7d658de9c1baf84 inherit pro_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28fbbabc9d01a4055b9d0862031c14d0 inherit pro_methods_classHftStraBaseCtx" id="r_a28fbbabc9d01a4055b9d0862031c14d0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a28fbbabc9d01a4055b9d0862031c14d0">update_dyn_profit</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="classWTSTickData.html">WTSTickData</a> *newTick)</td></tr>
+<tr class="memdesc:a28fbbabc9d01a4055b9d0862031c14d0 inherit pro_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">更新动态盈亏  <br /></td></tr>
+<tr class="separator:a28fbbabc9d01a4055b9d0862031c14d0 inherit pro_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a039bd046b97e0f843c0d7be46772c994 inherit pro_methods_classHftStraBaseCtx" id="r_a039bd046b97e0f843c0d7be46772c994"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a039bd046b97e0f843c0d7be46772c994">log_trade</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isLong, bool isOpen, uint64_t curTime, double <a class="el" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, double qty, double fee, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *userTag)</td></tr>
+<tr class="memdesc:a039bd046b97e0f843c0d7be46772c994 inherit pro_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">记录交易日志  <br /></td></tr>
+<tr class="separator:a039bd046b97e0f843c0d7be46772c994 inherit pro_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f4007f98dbd7f33f18ab3d1c2a33312 inherit pro_methods_classHftStraBaseCtx" id="r_a9f4007f98dbd7f33f18ab3d1c2a33312"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a9f4007f98dbd7f33f18ab3d1c2a33312">log_close</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, bool isLong, uint64_t openTime, double openpx, uint64_t closeTime, double closepx, double qty, double profit, double maxprofit, double maxloss, double totalprofit, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *enterTag, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *exitTag)</td></tr>
+<tr class="memdesc:a9f4007f98dbd7f33f18ab3d1c2a33312 inherit pro_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">记录平仓日志  <br /></td></tr>
+<tr class="separator:a9f4007f98dbd7f33f18ab3d1c2a33312 inherit pro_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a669cedaedd59283946ee33503faa0f06 inherit pro_methods_classHftStraBaseCtx" id="r_a669cedaedd59283946ee33503faa0f06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a669cedaedd59283946ee33503faa0f06">getOrderTag</a> (uint32_t localid)</td></tr>
+<tr class="memdesc:a669cedaedd59283946ee33503faa0f06 inherit pro_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取订单标签  <br /></td></tr>
+<tr class="separator:a669cedaedd59283946ee33503faa0f06 inherit pro_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fc50d418a5d4bb5c02d6eca1fe7bc04 inherit pro_methods_classHftStraBaseCtx" id="r_a0fc50d418a5d4bb5c02d6eca1fe7bc04"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a0fc50d418a5d4bb5c02d6eca1fe7bc04">setUserTag</a> (uint32_t localid, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *usertag)</td></tr>
+<tr class="memdesc:a0fc50d418a5d4bb5c02d6eca1fe7bc04 inherit pro_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">设置订单用户标签  <br /></td></tr>
+<tr class="separator:a0fc50d418a5d4bb5c02d6eca1fe7bc04 inherit pro_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7290dafd790eb902699c2240f2328f1e inherit pro_methods_classHftStraBaseCtx" id="r_a7290dafd790eb902699c2240f2328f1e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a7290dafd790eb902699c2240f2328f1e">eraseOrderTag</a> (uint32_t localid)</td></tr>
+<tr class="memdesc:a7290dafd790eb902699c2240f2328f1e inherit pro_methods_classHftStraBaseCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">删除订单标签  <br /></td></tr>
+<tr class="separator:a7290dafd790eb902699c2240f2328f1e inherit pro_methods_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_attribs_classHftStraBaseCtx"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classHftStraBaseCtx')"><img src="closed.png" alt="-"/>&#160;Protected 属性 继承自 <a class="el" href="classHftStraBaseCtx.html">HftStraBaseCtx</a></td></tr>
+<tr class="memitem:a34792793ba5798c9b265ea695c3e4428 inherit pro_attribs_classHftStraBaseCtx" id="r_a34792793ba5798c9b265ea695c3e4428"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a34792793ba5798c9b265ea695c3e4428">_context_id</a></td></tr>
+<tr class="separator:a34792793ba5798c9b265ea695c3e4428 inherit pro_attribs_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa58d7793339bfcffa5f4332bfd18e019 inherit pro_attribs_classHftStraBaseCtx" id="r_aa58d7793339bfcffa5f4332bfd18e019"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtHftEngine.html">WtHftEngine</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#aa58d7793339bfcffa5f4332bfd18e019">_engine</a></td></tr>
+<tr class="separator:aa58d7793339bfcffa5f4332bfd18e019 inherit pro_attribs_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef49471db010049dd94c59c5a6eb4fd8 inherit pro_attribs_classHftStraBaseCtx" id="r_aef49471db010049dd94c59c5a6eb4fd8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTraderAdapter.html">TraderAdapter</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#aef49471db010049dd94c59c5a6eb4fd8">_trader</a></td></tr>
+<tr class="separator:aef49471db010049dd94c59c5a6eb4fd8 inherit pro_attribs_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a751ce6d07c97324f729cafdfd24b1dc7 inherit pro_attribs_classHftStraBaseCtx" id="r_a751ce6d07c97324f729cafdfd24b1dc7"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a751ce6d07c97324f729cafdfd24b1dc7">_slippage</a></td></tr>
+<tr class="separator:a751ce6d07c97324f729cafdfd24b1dc7 inherit pro_attribs_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae578e38a4700c6433d1205274bec742c inherit pro_attribs_classHftStraBaseCtx" id="r_ae578e38a4700c6433d1205274bec742c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classwt__hashmap.html">wt_hashmap</a>&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#ae578e38a4700c6433d1205274bec742c">_code_map</a></td></tr>
+<tr class="separator:ae578e38a4700c6433d1205274bec742c inherit pro_attribs_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1beb754ab46eae0b0f9b13f67ef1c90f inherit pro_attribs_classHftStraBaseCtx" id="r_a1beb754ab46eae0b0f9b13f67ef1c90f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="BoostFile_8hpp.html#a596e60eb12117122d44c36f261d58a04">BoostFilePtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a1beb754ab46eae0b0f9b13f67ef1c90f">_sig_logs</a></td></tr>
+<tr class="separator:a1beb754ab46eae0b0f9b13f67ef1c90f inherit pro_attribs_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a69ae7a176db22d2ea2ec4f07685a8d inherit pro_attribs_classHftStraBaseCtx" id="r_a6a69ae7a176db22d2ea2ec4f07685a8d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="BoostFile_8hpp.html#a596e60eb12117122d44c36f261d58a04">BoostFilePtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a6a69ae7a176db22d2ea2ec4f07685a8d">_close_logs</a></td></tr>
+<tr class="separator:a6a69ae7a176db22d2ea2ec4f07685a8d inherit pro_attribs_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06c76303108c42e4d027d665de020ed5 inherit pro_attribs_classHftStraBaseCtx" id="r_a06c76303108c42e4d027d665de020ed5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="BoostFile_8hpp.html#a596e60eb12117122d44c36f261d58a04">BoostFilePtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a06c76303108c42e4d027d665de020ed5">_trade_logs</a></td></tr>
+<tr class="separator:a06c76303108c42e4d027d665de020ed5 inherit pro_attribs_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72d00a839869edc3edd593bad08eaa5f inherit pro_attribs_classHftStraBaseCtx" id="r_a72d00a839869edc3edd593bad08eaa5f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="BoostFile_8hpp.html#a596e60eb12117122d44c36f261d58a04">BoostFilePtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#a72d00a839869edc3edd593bad08eaa5f">_fund_logs</a></td></tr>
+<tr class="separator:a72d00a839869edc3edd593bad08eaa5f inherit pro_attribs_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac23e1fefca1374c7d78282ae8af04b75 inherit pro_attribs_classHftStraBaseCtx" id="r_ac23e1fefca1374c7d78282ae8af04b75"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classHftStraBaseCtx.html#a3426c25cccf6a46d3d5a7993b472dea5">StringHashMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#ac23e1fefca1374c7d78282ae8af04b75">_user_datas</a></td></tr>
+<tr class="separator:ac23e1fefca1374c7d78282ae8af04b75 inherit pro_attribs_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5de5c71595ea4199931022709d99b91 inherit pro_attribs_classHftStraBaseCtx" id="r_ad5de5c71595ea4199931022709d99b91"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#ad5de5c71595ea4199931022709d99b91">_ud_modified</a></td></tr>
+<tr class="separator:ad5de5c71595ea4199931022709d99b91 inherit pro_attribs_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa877dc9079d68d92b596144d3d4f19a6 inherit pro_attribs_classHftStraBaseCtx" id="r_aa877dc9079d68d92b596144d3d4f19a6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#aa877dc9079d68d92b596144d3d4f19a6">_data_agent</a></td></tr>
+<tr class="separator:aa877dc9079d68d92b596144d3d4f19a6 inherit pro_attribs_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4573d70964b9e95bc548611cc19966d inherit pro_attribs_classHftStraBaseCtx" id="r_ac4573d70964b9e95bc548611cc19966d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classwt__hashset.html">wt_hashset</a>&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHftStraBaseCtx.html#ac4573d70964b9e95bc548611cc19966d">_tick_subs</a></td></tr>
+<tr class="separator:ac4573d70964b9e95bc548611cc19966d inherit pro_attribs_classHftStraBaseCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_attribs_classIHftStraCtx"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classIHftStraCtx')"><img src="closed.png" alt="-"/>&#160;Protected 属性 继承自 <a class="el" href="classIHftStraCtx.html">IHftStraCtx</a></td></tr>
+<tr class="memitem:ab918b4493ea1270cb1bfd81cf39f6c41 inherit pro_attribs_classIHftStraCtx" id="r_ab918b4493ea1270cb1bfd81cf39f6c41"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIHftStraCtx.html#ab918b4493ea1270cb1bfd81cf39f6c41">_name</a></td></tr>
+<tr class="memdesc:ab918b4493ea1270cb1bfd81cf39f6c41 inherit pro_attribs_classIHftStraCtx"><td class="mdescLeft">&#160;</td><td class="mdescRight">策略名称  <br /></td></tr>
+<tr class="separator:ab918b4493ea1270cb1bfd81cf39f6c41 inherit pro_attribs_classIHftStraCtx"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>高频交易策略上下文类 </p>
+<p>继承自HftStraBaseCtx基础类，负责连接交易引擎和具体的策略实现， 接收并处理各类行情和交易事件，将其转发到策略实例进行处理 </p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8h_source.html">HftStraContext.h</a> 第 <a class="el" href="HftStraContext_8h_source.html#l00025">25</a> 行定义.</p>
+</div><h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a2f3f839f3f57d69722cb514a6f887a9d" name="a2f3f839f3f57d69722cb514a6f887a9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f3f839f3f57d69722cb514a6f887a9d">&#9670;&#160;</a></span>HftStraContext()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">HftStraContext::HftStraContext </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classWtHftEngine.html">WtHftEngine</a> *&#160;</td>
+          <td class="paramname"><em>engine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAgent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>slippage</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>构造函数 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">engine</td><td>高频交易引擎指针 </td></tr>
+    <tr><td class="paramname">name</td><td>策略名称 </td></tr>
+    <tr><td class="paramname">bAgent</td><td>是否做代理 </td></tr>
+    <tr><td class="paramname">slippage</td><td>滑点设置</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>初始化高频交易策略上下文 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">engine</td><td>高频交易引擎指针 </td></tr>
+    <tr><td class="paramname">name</td><td>策略名称 </td></tr>
+    <tr><td class="paramname">bAgent</td><td>是否做代理 </td></tr>
+    <tr><td class="paramname">slippage</td><td>滑点设置 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00023">23</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab468860accef32b871c71e888a008300" name="ab468860accef32b871c71e888a008300"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab468860accef32b871c71e888a008300">&#9670;&#160;</a></span>~HftStraContext()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">HftStraContext::~HftStraContext </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>析构函数 </p>
+<p>清理高频交易策略上下文资源 </p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00035">35</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="af959e1eb895bba0a70a9f8f548ef7c19" name="af959e1eb895bba0a70a9f8f548ef7c19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af959e1eb895bba0a70a9f8f548ef7c19">&#9670;&#160;</a></span>get_stragety()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classHftStrategy.html">HftStrategy</a> * HftStraContext::get_stragety </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取策略实例 </p>
+<dl class="section return"><dt>返回</dt><dd>策略实例指针 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8h_source.html">HftStraContext.h</a> 第 <a class="el" href="HftStraContext_8h_source.html#l00052">52</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af509053571c0e622741db88db977b7fa" name="af509053571c0e622741db88db977b7fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af509053571c0e622741db88db977b7fa">&#9670;&#160;</a></span>on_bar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::on_bar </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>times</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWTSBarStruct.html">WTSBarStruct</a> *&#160;</td>
+          <td class="paramname"><em>newBar</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>K线数据回调 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>周期标识 </td></tr>
+    <tr><td class="paramname">times</td><td>周期倍数 </td></tr>
+    <tr><td class="paramname">newBar</td><td>K线数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当新的K线数据到来时被调用，转发给策略实例的K线回调函数 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">period</td><td>周期标识（如m1、m5等） </td></tr>
+    <tr><td class="paramname">times</td><td>周期倍数 </td></tr>
+    <tr><td class="paramname">newBar</td><td>新的K线数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classHftStraBaseCtx.html#a3648b3a7b748af47831556953b43ca46">HftStraBaseCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00164">164</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a59eb6c5074b05129425868582a94c61f" name="a59eb6c5074b05129425868582a94c61f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59eb6c5074b05129425868582a94c61f">&#9670;&#160;</a></span>on_channel_lost()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::on_channel_lost </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易通道断开回调 </p>
+<p>当交易通道断开时被触发</p>
+<p>当交易通道断开后被调用，转发给策略实例 </p>
+
+<p>重载 <a class="el" href="classHftStraBaseCtx.html#a4b30e29c5ad9bc93af4d06b855d28136">HftStraBaseCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00254">254</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0a438298726264da7be3aa1175ceb4d7" name="a0a438298726264da7be3aa1175ceb4d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a438298726264da7be3aa1175ceb4d7">&#9670;&#160;</a></span>on_channel_ready()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::on_channel_ready </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易通道就绪回调 </p>
+<p>当交易通道就绪时被触发</p>
+<p>当交易通道就绪后被调用，转发给策略实例 </p>
+
+<p>重载 <a class="el" href="classHftStraBaseCtx.html#a0ca1b6038f7e2df933044a0cd3c16e81">HftStraBaseCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00240">240</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6c8f11190394f8c0ca831b31cc531700" name="a6c8f11190394f8c0ca831b31cc531700"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c8f11190394f8c0ca831b31cc531700">&#9670;&#160;</a></span>on_entrust()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::on_entrust </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bSuccess</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>委托提交回报回调 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">bSuccess</td><td>是否成功 </td></tr>
+    <tr><td class="paramname">message</td><td>错误信息（当失败时）</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到委托提交结果回报时被调用，转发给策略实例 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">bSuccess</td><td>是否提交成功 </td></tr>
+    <tr><td class="paramname">message</td><td>提交回报消息，失败时为错误信息 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classHftStraBaseCtx.html#a15b0b37f4ca72bfc74e8cf99d46cffa0">HftStraBaseCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00272">272</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a67f98a295ccc2ea2d1cf7317bf807b6d" name="a67f98a295ccc2ea2d1cf7317bf807b6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67f98a295ccc2ea2d1cf7317bf807b6d">&#9670;&#160;</a></span>on_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::on_init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>策略初始化 </p>
+<p>策略初始化回调</p>
+<p>被引擎调用，直接转发到策略实例的初始化函数</p>
+<p>在策略实例初始化时被调用，首先调用基类的初始化函数，然后调用策略实例的初始化函数 </p>
+
+<p>重载 <a class="el" href="classHftStraBaseCtx.html#afe09a02ad15d61664ac9d288c71fdb65">HftStraBaseCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00044">44</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad9becb94e918625f10516b6fc30f17db" name="ad9becb94e918625f10516b6fc30f17db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9becb94e918625f10516b6fc30f17db">&#9670;&#160;</a></span>on_order()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::on_order </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isBuy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>totalQty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>leftQty</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isCanceled</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>委托回报回调 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否买入 </td></tr>
+    <tr><td class="paramname">totalQty</td><td>总委托量 </td></tr>
+    <tr><td class="paramname">leftQty</td><td>剩余委托量 </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">isCanceled</td><td>是否已撤销</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到委托状态变化回报时被调用，将标准合约代码转换为内部代码并转发给策略实例 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否买入 </td></tr>
+    <tr><td class="paramname">totalQty</td><td>总委托量 </td></tr>
+    <tr><td class="paramname">leftQty</td><td>剩余委托量 </td></tr>
+    <tr><td class="paramname">price</td><td>委托价格 </td></tr>
+    <tr><td class="paramname">isCanceled</td><td>是否已撤销 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classHftStraBaseCtx.html#a8218c4def0f463bd75b94dcb6547a46b">HftStraBaseCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00206">206</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aea930c249ee6e14e1eb6e0403fd5b61f" name="aea930c249ee6e14e1eb6e0403fd5b61f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea930c249ee6e14e1eb6e0403fd5b61f">&#9670;&#160;</a></span>on_order_detail()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::on_order_detail </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSOrdDtlData.html">WTSOrdDtlData</a> *&#160;</td>
+          <td class="paramname"><em>newOrdDtl</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>委托明细数据回调 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">newOrdDtl</td><td>委托明细数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当新的委托明细数据到来时被调用，转发给策略实例的委托明细回调函数 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">newOrdDtl</td><td>新的委托明细数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classHftStraBaseCtx.html#a0dd2373a5716d3c5923988a8e6e8bf83">HftStraBaseCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00130">130</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abf612fbb426138b697eeb68af63a3272" name="abf612fbb426138b697eeb68af63a3272"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf612fbb426138b697eeb68af63a3272">&#9670;&#160;</a></span>on_order_queue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::on_order_queue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSOrdQueData.html">WTSOrdQueData</a> *&#160;</td>
+          <td class="paramname"><em>newOrdQue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>委托队列数据回调 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">newOrdQue</td><td>委托队列数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当新的委托队列数据到来时被调用，转发给策略实例的委托队列回调函数 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">newOrdQue</td><td>新的委托队列数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classHftStraBaseCtx.html#a47ca7a85953d95788f049cd4c03ea804">HftStraBaseCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00114">114</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0bd98becaf62dec278e678a689bf8eea" name="a0bd98becaf62dec278e678a689bf8eea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0bd98becaf62dec278e678a689bf8eea">&#9670;&#160;</a></span>on_position()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::on_position </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isLong</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>prevol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>preavail</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>newvol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>newavail</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>tradingday</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>持仓回报回调 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isLong</td><td>是否多仓 </td></tr>
+    <tr><td class="paramname">prevol</td><td>前储持仓量 </td></tr>
+    <tr><td class="paramname">preavail</td><td>前储可用量 </td></tr>
+    <tr><td class="paramname">newvol</td><td>新持仓量 </td></tr>
+    <tr><td class="paramname">newavail</td><td>新可用量 </td></tr>
+    <tr><td class="paramname">tradingday</td><td>交易日</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到持仓变化通知时被调用，直接转发给策略实例 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isLong</td><td>是否多仓 </td></tr>
+    <tr><td class="paramname">prevol</td><td>前一日持仓量 </td></tr>
+    <tr><td class="paramname">preavail</td><td>前一日可用量 </td></tr>
+    <tr><td class="paramname">newvol</td><td>新的持仓量 </td></tr>
+    <tr><td class="paramname">newavail</td><td>新的可用量 </td></tr>
+    <tr><td class="paramname">tradingday</td><td>交易日期 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classHftStraBaseCtx.html#a0e93542d0f950dd6a9245628a3349b5d">HftStraBaseCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00229">229</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ace05b3c851fa7390f47a7bfd6236edc3" name="ace05b3c851fa7390f47a7bfd6236edc3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace05b3c851fa7390f47a7bfd6236edc3">&#9670;&#160;</a></span>on_session_begin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::on_session_begin </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uTDate</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易会话开始回调 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">uTDate</td><td>交易日期</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>在交易日开始时被调用，首先调用基类的会话开始函数，然后调用策略实例的会话开始函数 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">uTDate</td><td>交易日期，格式为YYYYMMDD </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classHftStraBaseCtx.html#a79ae2a815ebb9f20f68e091f4afa2744">HftStraBaseCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00059">59</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a13e718178901a124cb0409922b445357" name="a13e718178901a124cb0409922b445357"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13e718178901a124cb0409922b445357">&#9670;&#160;</a></span>on_session_end()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::on_session_end </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uTDate</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>交易会话结束回调 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">uTDate</td><td>交易日期</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>在交易日结束时被调用，首先调用策略实例的会话结束函数，然后调用基类的会话结束函数 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">uTDate</td><td>交易日期，格式为YYYYMMDD </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classHftStraBaseCtx.html#abe57f055fe8a91b88f08336c9d444386">HftStraBaseCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00074">74</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8337af0b5e55e505c1a1237657a90709" name="a8337af0b5e55e505c1a1237657a90709"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8337af0b5e55e505c1a1237657a90709">&#9670;&#160;</a></span>on_tick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::on_tick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td>
+          <td class="paramname"><em>newTick</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>行情Tick数据回调 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>合约代码 </td></tr>
+    <tr><td class="paramname">newTick</td><td>Tick数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当新的Tick数据到来时被调用，更新动态持仓盈亏并查找订阅记录，如果该合约订阅了Tick，则调用策略实例的Tick回调 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">newTick</td><td>新的Tick数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classHftStraBaseCtx.html#a2989da4ef76abbff5d4a324ed4478bba">HftStraBaseCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00090">90</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4a41b983dd77ab54b99221648bbc9303" name="a4a41b983dd77ab54b99221648bbc9303"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a41b983dd77ab54b99221648bbc9303">&#9670;&#160;</a></span>on_trade()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::on_trade </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>localid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isBuy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>vol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>price</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>成交回报回调 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否买入 </td></tr>
+    <tr><td class="paramname">vol</td><td>成交数量 </td></tr>
+    <tr><td class="paramname">price</td><td>成交价格</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当收到成交回报时被调用，将标准合约代码转换为内部代码并转发给策略实例 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">localid</td><td>本地委托ID </td></tr>
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">isBuy</td><td>是否买入 </td></tr>
+    <tr><td class="paramname">vol</td><td>成交数量 </td></tr>
+    <tr><td class="paramname">price</td><td>成交价格 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classHftStraBaseCtx.html#af0112009eddd57cfb0ad4387d073bc78">HftStraBaseCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00183">183</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a68d9f7c131d0ae8c4549fb6885b3c90e" name="a68d9f7c131d0ae8c4549fb6885b3c90e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a68d9f7c131d0ae8c4549fb6885b3c90e">&#9670;&#160;</a></span>on_transaction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::on_transaction </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classWTSTransData.html">WTSTransData</a> *&#160;</td>
+          <td class="paramname"><em>newTrans</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>逐笔成交数据回调 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">newTrans</td><td>逐笔成交数据</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>当新的逐笔成交数据到来时被调用，转发给策略实例的逐笔成交回调函数 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stdCode</td><td>标准合约代码 </td></tr>
+    <tr><td class="paramname">newTrans</td><td>新的逐笔成交数据 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>重载 <a class="el" href="classHftStraBaseCtx.html#aabec74c4c0697e28cbe581f0e1fbfa04">HftStraBaseCtx</a> .</p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a> 第 <a class="el" href="HftStraContext_8cpp_source.html#l00146">146</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7996575fd29b439e93a2fdcca7612532" name="a7996575fd29b439e93a2fdcca7612532"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7996575fd29b439e93a2fdcca7612532">&#9670;&#160;</a></span>set_strategy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HftStraContext::set_strategy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classHftStrategy.html">HftStrategy</a> *&#160;</td>
+          <td class="paramname"><em>stra</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>设置策略实例 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stra</td><td>策略实例指针 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8h_source.html">HftStraContext.h</a> 第 <a class="el" href="HftStraContext_8h_source.html#l00046">46</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a78c971b07b6365ef8a00c08f52b7b41e" name="a78c971b07b6365ef8a00c08f52b7b41e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78c971b07b6365ef8a00c08f52b7b41e">&#9670;&#160;</a></span>_strategy</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classHftStrategy.html">HftStrategy</a>* HftStraContext::_strategy</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>策略实例指针 </p>
+
+<p class="definition">在文件 <a class="el" href="HftStraContext_8h_source.html">HftStraContext.h</a> 第 <a class="el" href="HftStraContext_8h_source.html#l00167">167</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/WtCore/<a class="el" href="HftStraContext_8h_source.html">HftStraContext.h</a></li>
+<li>src/WtCore/<a class="el" href="HftStraContext_8cpp_source.html">HftStraContext.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classHftStraContext.html">HftStraContext</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

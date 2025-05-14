@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtCore/WtExecuterFactory.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtExecuterFactory_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtExecuterFactory.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtExecuterFactory_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="IExecCommand_8h.html">IExecCommand.h</a>&quot;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;../Includes/ExecuteDefs.h&quot;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;../Share/DLLHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;boost/core/noncopyable.hpp&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="foldopen" id="foldopen00021" data-start="{" data-end="};">
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="classExeUnitWrapper.html">   21</a></span><span class="keyword">class </span><a class="code hl_class" href="classExeUnitWrapper.html">ExeUnitWrapper</a></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>{</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classExeUnitWrapper.html#aeb887dc26fddd1c60d0d0a888ceced65">   29</a></span>    <a class="code hl_function" href="classExeUnitWrapper.html#aeb887dc26fddd1c60d0d0a888ceced65">ExeUnitWrapper</a>(<a class="code hl_class" href="classExecuteUnit.html">ExecuteUnit</a>* unitPtr, <a class="code hl_class" href="classIExecuterFact.html">IExecuterFact</a>* fact) :<a class="code hl_variable" href="classExeUnitWrapper.html#a47d8fd6a459eae4300d4a3e878dbbf99">_unit</a>(unitPtr), <a class="code hl_variable" href="classExeUnitWrapper.html#abb25eae44e2970c672976150e5660898">_fact</a>(fact) {}</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="foldopen" id="foldopen00035" data-start="{" data-end="}">
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classExeUnitWrapper.html#a9b48524d54d4047757152dae8d476235">   35</a></span>    <a class="code hl_function" href="classExeUnitWrapper.html#a9b48524d54d4047757152dae8d476235">~ExeUnitWrapper</a>()</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    {</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classExeUnitWrapper.html#a47d8fd6a459eae4300d4a3e878dbbf99">_unit</a>)</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        {</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>            <a class="code hl_variable" href="classExeUnitWrapper.html#abb25eae44e2970c672976150e5660898">_fact</a>-&gt;<a class="code hl_function" href="classIExecuterFact.html#a777b71b479d74c71be92754a0f344a98">deleteExeUnit</a>(<a class="code hl_variable" href="classExeUnitWrapper.html#a47d8fd6a459eae4300d4a3e878dbbf99">_unit</a>);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        }</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    }</div>
+</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="classExeUnitWrapper.html#a798fcc0d17ba9027676f498e88d630a9">   47</a></span>    <a class="code hl_class" href="classExecuteUnit.html">ExecuteUnit</a>* <a class="code hl_function" href="classExeUnitWrapper.html#a798fcc0d17ba9027676f498e88d630a9">self</a>() { <span class="keywordflow">return</span> <a class="code hl_variable" href="classExeUnitWrapper.html#a47d8fd6a459eae4300d4a3e878dbbf99">_unit</a>; }</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="classExeUnitWrapper.html#a47d8fd6a459eae4300d4a3e878dbbf99">   53</a></span>    <a class="code hl_class" href="classExecuteUnit.html">ExecuteUnit</a>*    <a class="code hl_variable" href="classExeUnitWrapper.html#a47d8fd6a459eae4300d4a3e878dbbf99">_unit</a>;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="classExeUnitWrapper.html#abb25eae44e2970c672976150e5660898">   58</a></span>    <a class="code hl_class" href="classIExecuterFact.html">IExecuterFact</a>*  <a class="code hl_variable" href="classExeUnitWrapper.html#abb25eae44e2970c672976150e5660898">_fact</a>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>};</div>
+</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="WtExecuterFactory_8h.html#a678dba302d5b187188bfd531f5db6963">   64</a></span><span class="keyword">typedef</span> std::shared_ptr&lt;ExeUnitWrapper&gt; <a class="code hl_typedef" href="WtExecuterFactory_8h.html#a678dba302d5b187188bfd531f5db6963">ExecuteUnitPtr</a>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="WtExecuterFactory_8h.html#a089ae60c07665a69a965819073af0eea">   70</a></span><span class="keyword">typedef</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, ExecuteUnitPtr&gt;</a> <a class="code hl_typedef" href="WtExecuterFactory_8h.html#a089ae60c07665a69a965819073af0eea">ExecuteUnitMap</a>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="foldopen" id="foldopen00077" data-start="{" data-end="};">
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="classWtExecuterFactory.html">   77</a></span><span class="keyword">class </span><a class="code hl_class" href="classWtExecuterFactory.html">WtExecuterFactory</a> : <span class="keyword">private</span> boost::noncopyable</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>{</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="classWtExecuterFactory.html#a376f5d80cad1d5c2cdad77acffb26537">   83</a></span>    <a class="code hl_function" href="classWtExecuterFactory.html#a376f5d80cad1d5c2cdad77acffb26537">~WtExecuterFactory</a>() {}</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtExecuterFactory.html#a841dce273803c7bfc761ca4d9e3b4eae">loadFactories</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* path);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <a class="code hl_typedef" href="WtExecuterFactory_8h.html#a678dba302d5b187188bfd531f5db6963">ExecuteUnitPtr</a> <a class="code hl_function" href="classWtExecuterFactory.html#a7b8df287e389f6d76a758b560c6f8bf4">createExeUnit</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* name);</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <a class="code hl_typedef" href="WtExecuterFactory_8h.html#a678dba302d5b187188bfd531f5db6963">ExecuteUnitPtr</a> <a class="code hl_function" href="classWtExecuterFactory.html#a6219f7979b9b46ac769fa09ea19adcb1">createDiffExeUnit</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* name);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <a class="code hl_typedef" href="WtExecuterFactory_8h.html#a678dba302d5b187188bfd531f5db6963">ExecuteUnitPtr</a> <a class="code hl_function" href="classWtExecuterFactory.html#a470b7d8c8703f26ac60cb1fcf7087644">createArbiExeUnit</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* name);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <a class="code hl_typedef" href="WtExecuterFactory_8h.html#a678dba302d5b187188bfd531f5db6963">ExecuteUnitPtr</a> <a class="code hl_function" href="classWtExecuterFactory.html#a7b8df287e389f6d76a758b560c6f8bf4">createExeUnit</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* factname, <span class="keyword">const</span> <span class="keywordtype">char</span>* unitname);</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <a class="code hl_typedef" href="WtExecuterFactory_8h.html#a678dba302d5b187188bfd531f5db6963">ExecuteUnitPtr</a> <a class="code hl_function" href="classWtExecuterFactory.html#a6219f7979b9b46ac769fa09ea19adcb1">createDiffExeUnit</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* factname, <span class="keyword">const</span> <span class="keywordtype">char</span>* unitname);</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <a class="code hl_typedef" href="WtExecuterFactory_8h.html#a678dba302d5b187188bfd531f5db6963">ExecuteUnitPtr</a> <a class="code hl_function" href="classWtExecuterFactory.html#a470b7d8c8703f26ac60cb1fcf7087644">createArbiExeUnit</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* factname, <span class="keyword">const</span> <span class="keywordtype">char</span>* unitname);</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span><span class="keyword">private</span>:</div>
+<div class="foldopen" id="foldopen00143" data-start="{" data-end="};">
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="structWtExecuterFactory_1_1__ExeFactInfo.html">  143</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structWtExecuterFactory_1_1__ExeFactInfo.html">_ExeFactInfo</a></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    {</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno"><a class="line" href="structWtExecuterFactory_1_1__ExeFactInfo.html#a75accc52f13318e7631c4d56bfd3700a">  148</a></span>        std::string     <a class="code hl_variable" href="structWtExecuterFactory_1_1__ExeFactInfo.html#a75accc52f13318e7631c4d56bfd3700a">_module_path</a>;</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno"><a class="line" href="structWtExecuterFactory_1_1__ExeFactInfo.html#a00b6d30d3ee651111781f10adba0102f">  153</a></span>        <a class="code hl_typedef" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a>       <a class="code hl_variable" href="structWtExecuterFactory_1_1__ExeFactInfo.html#a00b6d30d3ee651111781f10adba0102f">_module_inst</a>;</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno"><a class="line" href="structWtExecuterFactory_1_1__ExeFactInfo.html#a8c3bbdad854a3bb57f7f5a46f6120dac">  158</a></span>        <a class="code hl_class" href="classIExecuterFact.html">IExecuterFact</a>*  <a class="code hl_variable" href="structWtExecuterFactory_1_1__ExeFactInfo.html#a8c3bbdad854a3bb57f7f5a46f6120dac">_fact</a>;</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span> </div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno"><a class="line" href="structWtExecuterFactory_1_1__ExeFactInfo.html#ac5f38b98679a978ca8e65e6ce2932f3d">  163</a></span>        <a class="code hl_typedef" href="ExecuteDefs_8h.html#acce035fe6a310676c9aab6ecdf6385b2">FuncCreateExeFact</a>   <a class="code hl_variable" href="structWtExecuterFactory_1_1__ExeFactInfo.html#ac5f38b98679a978ca8e65e6ce2932f3d">_creator</a>;</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno"><a class="line" href="structWtExecuterFactory_1_1__ExeFactInfo.html#a11b681244e42601b27d4f10bbb2db05e">  168</a></span>        <a class="code hl_typedef" href="ExecuteDefs_8h.html#adb53217078a85f8b2699c957b70d5903">FuncDeleteExeFact</a>   <a class="code hl_variable" href="structWtExecuterFactory_1_1__ExeFactInfo.html#a11b681244e42601b27d4f10bbb2db05e">_remover</a>;</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno"><a class="line" href="classWtExecuterFactory.html#a3f449d029e332a61ab2d40a3b81adbf7">  169</a></span>    } <a class="code hl_typedef" href="classWtExecuterFactory.html#a3f449d029e332a61ab2d40a3b81adbf7">ExeFactInfo</a>;</div>
+</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno"><a class="line" href="classWtExecuterFactory.html#a028ca866a06b45225a8a424ee66642fb">  175</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, ExeFactInfo&gt;</a> <a class="code hl_typedef" href="classWtExecuterFactory.html#a028ca866a06b45225a8a424ee66642fb">ExeFactMap</a>;</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno"><a class="line" href="classWtExecuterFactory.html#a6c767fe603ba19682b46e6c857bebb1d">  181</a></span>    <a class="code hl_class" href="classwt__hashmap.html">ExeFactMap</a>  <a class="code hl_variable" href="classWtExecuterFactory.html#a6c767fe603ba19682b46e6c857bebb1d">_factories</a>;</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>};</div>
+</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span> </div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="ttc" id="aDLLHelper_8hpp_html_a40972742af38c16d3ab2f521abf0ca8a"><div class="ttname"><a href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a></div><div class="ttdeci">void * DllHandle</div><div class="ttdoc">动态库句柄类型（非Windows平台）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00032">DLLHelper.hpp:32</a></div></div>
+<div class="ttc" id="aExecuteDefs_8h_html_acce035fe6a310676c9aab6ecdf6385b2"><div class="ttname"><a href="ExecuteDefs_8h.html#acce035fe6a310676c9aab6ecdf6385b2">FuncCreateExeFact</a></div><div class="ttdeci">IExecuterFact *(* FuncCreateExeFact)()</div><div class="ttdef"><b>Definition</b> <a href="ExecuteDefs_8h_source.html#l00280">ExecuteDefs.h:280</a></div></div>
+<div class="ttc" id="aExecuteDefs_8h_html_adb53217078a85f8b2699c957b70d5903"><div class="ttname"><a href="ExecuteDefs_8h.html#adb53217078a85f8b2699c957b70d5903">FuncDeleteExeFact</a></div><div class="ttdeci">void(* FuncDeleteExeFact)(IExecuterFact *&amp;fact)</div><div class="ttdef"><b>Definition</b> <a href="ExecuteDefs_8h_source.html#l00282">ExecuteDefs.h:282</a></div></div>
+<div class="ttc" id="aIExecCommand_8h_html"><div class="ttname"><a href="IExecCommand_8h.html">IExecCommand.h</a></div><div class="ttdoc">执行命令接口定义</div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aWtExecuterFactory_8h_html_a089ae60c07665a69a965819073af0eea"><div class="ttname"><a href="WtExecuterFactory_8h.html#a089ae60c07665a69a965819073af0eea">ExecuteUnitMap</a></div><div class="ttdeci">wt_hashmap&lt; std::string, ExecuteUnitPtr &gt; ExecuteUnitMap</div><div class="ttdoc">执行单元映射表类型</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00070">WtExecuterFactory.h:70</a></div></div>
+<div class="ttc" id="aWtExecuterFactory_8h_html_a678dba302d5b187188bfd531f5db6963"><div class="ttname"><a href="WtExecuterFactory_8h.html#a678dba302d5b187188bfd531f5db6963">ExecuteUnitPtr</a></div><div class="ttdeci">std::shared_ptr&lt; ExeUnitWrapper &gt; ExecuteUnitPtr</div><div class="ttdoc">执行单元智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00064">WtExecuterFactory.h:64</a></div></div>
+<div class="ttc" id="aclassExeUnitWrapper_html"><div class="ttname"><a href="classExeUnitWrapper.html">ExeUnitWrapper</a></div><div class="ttdoc">执行单元封装类</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00021">WtExecuterFactory.h:22</a></div></div>
+<div class="ttc" id="aclassExeUnitWrapper_html_a47d8fd6a459eae4300d4a3e878dbbf99"><div class="ttname"><a href="classExeUnitWrapper.html#a47d8fd6a459eae4300d4a3e878dbbf99">ExeUnitWrapper::_unit</a></div><div class="ttdeci">ExecuteUnit * _unit</div><div class="ttdoc">执行单元指针</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00053">WtExecuterFactory.h:53</a></div></div>
+<div class="ttc" id="aclassExeUnitWrapper_html_a798fcc0d17ba9027676f498e88d630a9"><div class="ttname"><a href="classExeUnitWrapper.html#a798fcc0d17ba9027676f498e88d630a9">ExeUnitWrapper::self</a></div><div class="ttdeci">ExecuteUnit * self()</div><div class="ttdoc">获取执行单元指针</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00047">WtExecuterFactory.h:47</a></div></div>
+<div class="ttc" id="aclassExeUnitWrapper_html_a9b48524d54d4047757152dae8d476235"><div class="ttname"><a href="classExeUnitWrapper.html#a9b48524d54d4047757152dae8d476235">ExeUnitWrapper::~ExeUnitWrapper</a></div><div class="ttdeci">~ExeUnitWrapper()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00035">WtExecuterFactory.h:35</a></div></div>
+<div class="ttc" id="aclassExeUnitWrapper_html_abb25eae44e2970c672976150e5660898"><div class="ttname"><a href="classExeUnitWrapper.html#abb25eae44e2970c672976150e5660898">ExeUnitWrapper::_fact</a></div><div class="ttdeci">IExecuterFact * _fact</div><div class="ttdoc">执行器工厂指针</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00058">WtExecuterFactory.h:58</a></div></div>
+<div class="ttc" id="aclassExeUnitWrapper_html_aeb887dc26fddd1c60d0d0a888ceced65"><div class="ttname"><a href="classExeUnitWrapper.html#aeb887dc26fddd1c60d0d0a888ceced65">ExeUnitWrapper::ExeUnitWrapper</a></div><div class="ttdeci">ExeUnitWrapper(ExecuteUnit *unitPtr, IExecuterFact *fact)</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00029">WtExecuterFactory.h:29</a></div></div>
+<div class="ttc" id="aclassExecuteUnit_html"><div class="ttname"><a href="classExecuteUnit.html">ExecuteUnit</a></div><div class="ttdef"><b>Definition</b> <a href="ExecuteDefs_8h_source.html#l00148">ExecuteDefs.h:149</a></div></div>
+<div class="ttc" id="aclassIExecuterFact_html"><div class="ttname"><a href="classIExecuterFact.html">IExecuterFact</a></div><div class="ttdef"><b>Definition</b> <a href="ExecuteDefs_8h_source.html#l00241">ExecuteDefs.h:242</a></div></div>
+<div class="ttc" id="aclassIExecuterFact_html_a777b71b479d74c71be92754a0f344a98"><div class="ttname"><a href="classIExecuterFact.html#a777b71b479d74c71be92754a0f344a98">IExecuterFact::deleteExeUnit</a></div><div class="ttdeci">virtual bool deleteExeUnit(ExecuteUnit *unit)=0</div></div>
+<div class="ttc" id="aclassWtExecuterFactory_html"><div class="ttname"><a href="classWtExecuterFactory.html">WtExecuterFactory</a></div><div class="ttdoc">执行器工厂类</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00077">WtExecuterFactory.h:78</a></div></div>
+<div class="ttc" id="aclassWtExecuterFactory_html_a028ca866a06b45225a8a424ee66642fb"><div class="ttname"><a href="classWtExecuterFactory.html#a028ca866a06b45225a8a424ee66642fb">WtExecuterFactory::ExeFactMap</a></div><div class="ttdeci">wt_hashmap&lt; std::string, ExeFactInfo &gt; ExeFactMap</div><div class="ttdoc">执行器工厂映射表类型</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00175">WtExecuterFactory.h:175</a></div></div>
+<div class="ttc" id="aclassWtExecuterFactory_html_a376f5d80cad1d5c2cdad77acffb26537"><div class="ttname"><a href="classWtExecuterFactory.html#a376f5d80cad1d5c2cdad77acffb26537">WtExecuterFactory::~WtExecuterFactory</a></div><div class="ttdeci">~WtExecuterFactory()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00083">WtExecuterFactory.h:83</a></div></div>
+<div class="ttc" id="aclassWtExecuterFactory_html_a3f449d029e332a61ab2d40a3b81adbf7"><div class="ttname"><a href="classWtExecuterFactory.html#a3f449d029e332a61ab2d40a3b81adbf7">WtExecuterFactory::ExeFactInfo</a></div><div class="ttdeci">struct WtExecuterFactory::_ExeFactInfo ExeFactInfo</div><div class="ttdoc">执行器工厂信息结构体</div></div>
+<div class="ttc" id="aclassWtExecuterFactory_html_a470b7d8c8703f26ac60cb1fcf7087644"><div class="ttname"><a href="classWtExecuterFactory.html#a470b7d8c8703f26ac60cb1fcf7087644">WtExecuterFactory::createArbiExeUnit</a></div><div class="ttdeci">ExecuteUnitPtr createArbiExeUnit(const char *name)</div><div class="ttdoc">创建套利执行单元</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8cpp_source.html#l00222">WtExecuterFactory.cpp:222</a></div></div>
+<div class="ttc" id="aclassWtExecuterFactory_html_a6219f7979b9b46ac769fa09ea19adcb1"><div class="ttname"><a href="classWtExecuterFactory.html#a6219f7979b9b46ac769fa09ea19adcb1">WtExecuterFactory::createDiffExeUnit</a></div><div class="ttdeci">ExecuteUnitPtr createDiffExeUnit(const char *name)</div><div class="ttdoc">创建差价执行单元</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8cpp_source.html#l00190">WtExecuterFactory.cpp:190</a></div></div>
+<div class="ttc" id="aclassWtExecuterFactory_html_a6c767fe603ba19682b46e6c857bebb1d"><div class="ttname"><a href="classWtExecuterFactory.html#a6c767fe603ba19682b46e6c857bebb1d">WtExecuterFactory::_factories</a></div><div class="ttdeci">ExeFactMap _factories</div><div class="ttdoc">执行器工厂映射表</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00181">WtExecuterFactory.h:181</a></div></div>
+<div class="ttc" id="aclassWtExecuterFactory_html_a7b8df287e389f6d76a758b560c6f8bf4"><div class="ttname"><a href="classWtExecuterFactory.html#a7b8df287e389f6d76a758b560c6f8bf4">WtExecuterFactory::createExeUnit</a></div><div class="ttdeci">ExecuteUnitPtr createExeUnit(const char *name)</div><div class="ttdoc">创建普通执行单元</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8cpp_source.html#l00158">WtExecuterFactory.cpp:158</a></div></div>
+<div class="ttc" id="aclassWtExecuterFactory_html_a841dce273803c7bfc761ca4d9e3b4eae"><div class="ttname"><a href="classWtExecuterFactory.html#a841dce273803c7bfc761ca4d9e3b4eae">WtExecuterFactory::loadFactories</a></div><div class="ttdeci">bool loadFactories(const char *path)</div><div class="ttdoc">加载执行器工厂</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8cpp_source.html#l00025">WtExecuterFactory.cpp:25</a></div></div>
+<div class="ttc" id="aclasswt__hashmap_html"><div class="ttname"><a href="classwt__hashmap.html">wt_hashmap</a></div><div class="ttdoc">WonderTrader通用高性能哈希表模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00162">FasterDefs.h:163</a></div></div>
+<div class="ttc" id="astructWtExecuterFactory_1_1__ExeFactInfo_html"><div class="ttname"><a href="structWtExecuterFactory_1_1__ExeFactInfo.html">WtExecuterFactory::_ExeFactInfo</a></div><div class="ttdoc">执行器工厂信息结构体</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00143">WtExecuterFactory.h:144</a></div></div>
+<div class="ttc" id="astructWtExecuterFactory_1_1__ExeFactInfo_html_a00b6d30d3ee651111781f10adba0102f"><div class="ttname"><a href="structWtExecuterFactory_1_1__ExeFactInfo.html#a00b6d30d3ee651111781f10adba0102f">WtExecuterFactory::_ExeFactInfo::_module_inst</a></div><div class="ttdeci">DllHandle _module_inst</div><div class="ttdoc">动态库句柄</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00153">WtExecuterFactory.h:153</a></div></div>
+<div class="ttc" id="astructWtExecuterFactory_1_1__ExeFactInfo_html_a11b681244e42601b27d4f10bbb2db05e"><div class="ttname"><a href="structWtExecuterFactory_1_1__ExeFactInfo.html#a11b681244e42601b27d4f10bbb2db05e">WtExecuterFactory::_ExeFactInfo::_remover</a></div><div class="ttdeci">FuncDeleteExeFact _remover</div><div class="ttdoc">删除执行器工厂的函数指针</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00168">WtExecuterFactory.h:168</a></div></div>
+<div class="ttc" id="astructWtExecuterFactory_1_1__ExeFactInfo_html_a75accc52f13318e7631c4d56bfd3700a"><div class="ttname"><a href="structWtExecuterFactory_1_1__ExeFactInfo.html#a75accc52f13318e7631c4d56bfd3700a">WtExecuterFactory::_ExeFactInfo::_module_path</a></div><div class="ttdeci">std::string _module_path</div><div class="ttdoc">模块路径</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00148">WtExecuterFactory.h:148</a></div></div>
+<div class="ttc" id="astructWtExecuterFactory_1_1__ExeFactInfo_html_a8c3bbdad854a3bb57f7f5a46f6120dac"><div class="ttname"><a href="structWtExecuterFactory_1_1__ExeFactInfo.html#a8c3bbdad854a3bb57f7f5a46f6120dac">WtExecuterFactory::_ExeFactInfo::_fact</a></div><div class="ttdeci">IExecuterFact * _fact</div><div class="ttdoc">执行器工厂指针</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00158">WtExecuterFactory.h:158</a></div></div>
+<div class="ttc" id="astructWtExecuterFactory_1_1__ExeFactInfo_html_ac5f38b98679a978ca8e65e6ce2932f3d"><div class="ttname"><a href="structWtExecuterFactory_1_1__ExeFactInfo.html#ac5f38b98679a978ca8e65e6ce2932f3d">WtExecuterFactory::_ExeFactInfo::_creator</a></div><div class="ttdeci">FuncCreateExeFact _creator</div><div class="ttdoc">创建执行器工厂的函数指针</div><div class="ttdef"><b>Definition</b> <a href="WtExecuterFactory_8h_source.html#l00163">WtExecuterFactory.h:163</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3ce996bf6400c0a215df0636043a382c.html">WtCore</a></li><li class="navelem"><a class="el" href="WtExecuterFactory_8h.html">WtExecuterFactory.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

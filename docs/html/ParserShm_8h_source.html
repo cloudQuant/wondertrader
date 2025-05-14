@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/ParserShm/ParserShm.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('ParserShm_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ParserShm.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="ParserShm_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;../Includes/IParserApi.h&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;../Includes/WTSStruct.h&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Share/BoostMappingFile.hpp&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;boost/asio.hpp&gt;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;boost/asio/io_service.hpp&gt;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="ParserShm_8h.html#a17226795848decb565e90624584e5c0f">   19</a></span><a class="code hl_variable" href="ParserShm_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">using namespace </span>boost::asio;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="foldopen" id="foldopen00022" data-start="{" data-end="};">
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classParserShm.html">   22</a></span><span class="keyword">class </span><a class="code hl_class" href="classParserShm.html">ParserShm</a> : <span class="keyword">public</span> <a class="code hl_class" href="classIParserApi.html">IParserApi</a></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>{</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <a class="code hl_function" href="classParserShm.html#a34623badb2fe2d297bb819928a51f304">ParserShm</a>();</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <a class="code hl_function" href="classParserShm.html#a7d248d5a651fe0ed4fd815041f88c17f">~ParserShm</a>();</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#pragma pack(push, 8)</span></div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="};">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="structParserShm_1_1__DataItem.html">   29</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structParserShm_1_1__DataItem.html">_DataItem</a></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    {</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="structParserShm_1_1__DataItem.html#abda17692947ebd4e3767610385942402">   31</a></span>        uint32_t    <a class="code hl_variable" href="structParserShm_1_1__DataItem.html#abda17692947ebd4e3767610385942402">_type</a>;  <span class="comment">//数据类型， 0-tick,1-委托队列,2-逐笔委托,3-逐笔成交</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="keyword">union</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        {</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="structParserShm_1_1__DataItem.html#a1a3082114c381f62fcdc93a894573955">   34</a></span>            <a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>   <a class="code hl_variable" href="structParserShm_1_1__DataItem.html#a1a3082114c381f62fcdc93a894573955">_tick</a>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="structParserShm_1_1__DataItem.html#ae8526cb52abda5de986207975773f6b0">   35</a></span>            <a class="code hl_struct" href="structWTSOrdQueStruct.html">WTSOrdQueStruct</a> <a class="code hl_variable" href="structParserShm_1_1__DataItem.html#ae8526cb52abda5de986207975773f6b0">_queue</a>;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="structParserShm_1_1__DataItem.html#a745fd70f365f73662ae766ae77345cdf">   36</a></span>            <a class="code hl_struct" href="structWTSOrdDtlStruct.html">WTSOrdDtlStruct</a> <a class="code hl_variable" href="structParserShm_1_1__DataItem.html#a745fd70f365f73662ae766ae77345cdf">_order</a>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="structParserShm_1_1__DataItem.html#aaf1fc2d5a1267d9780f5d94097be6eb3">   37</a></span>            <a class="code hl_struct" href="structWTSTransStruct.html">WTSTransStruct</a>  <a class="code hl_variable" href="structParserShm_1_1__DataItem.html#aaf1fc2d5a1267d9780f5d94097be6eb3">_trans</a>;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        };</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="structParserShm_1_1__DataItem.html#ab51bca47d2c67d89d31b03f3c8cda2d7">   40</a></span>        <a class="code hl_function" href="structParserShm_1_1__DataItem.html#ab51bca47d2c67d89d31b03f3c8cda2d7">_DataItem</a>() { memset(<span class="keyword">this</span>, 0, <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structParserShm_1_1__DataItem.html">_DataItem</a>)); }</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="classParserShm.html#a6a3bf0a9e6a61eb9a4eedfd7a6648f64">   41</a></span>    } <a class="code hl_typedef" href="classParserShm.html#a6a3bf0a9e6a61eb9a4eedfd7a6648f64">DataItem</a>;</div>
+</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keyword">template</span> &lt;<span class="keywordtype">int</span> N = 8 * 1024&gt;</div>
+<div class="foldopen" id="foldopen00044" data-start="{" data-end="};">
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="structParserShm_1_1__DataQueue.html">   44</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="structParserShm_1_1__DataQueue.html">_DataQueue</a></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    {</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="structParserShm_1_1__DataQueue.html#a955c3c7e78491352a5b842c0aca3e65a">   46</a></span>        uint64_t    <a class="code hl_variable" href="structParserShm_1_1__DataQueue.html#a955c3c7e78491352a5b842c0aca3e65a">_capacity</a> = N;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="structParserShm_1_1__DataQueue.html#a7b4339514f0a8f2f6617fa731ed96f87">   47</a></span>        <span class="keyword">volatile</span> uint64_t   <a class="code hl_variable" href="structParserShm_1_1__DataQueue.html#a7b4339514f0a8f2f6617fa731ed96f87">_readable</a>;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="structParserShm_1_1__DataQueue.html#a04c43958603ae38866fddb2435475ebf">   48</a></span>        <span class="keyword">volatile</span> uint64_t   <a class="code hl_variable" href="structParserShm_1_1__DataQueue.html#a04c43958603ae38866fddb2435475ebf">_writable</a>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="structParserShm_1_1__DataQueue.html#a6a91dab55808df389ef0f05bf01d03af">   49</a></span>        uint32_t    <a class="code hl_variable" href="structParserShm_1_1__DataQueue.html#a6a91dab55808df389ef0f05bf01d03af">_pid</a>;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="structParserShm_1_1__DataQueue.html#adb25e1d180a4fc2290b41c41e61b903e">   50</a></span>        <a class="code hl_struct" href="structParserShm_1_1__DataItem.html">DataItem</a>    <a class="code hl_variable" href="structParserShm_1_1__DataQueue.html#adb25e1d180a4fc2290b41c41e61b903e">_items</a>[N];</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="structParserShm_1_1__DataQueue.html#ae3402b4fe6bdcde88541c6e7df37f4e3">   52</a></span>        <a class="code hl_function" href="structParserShm_1_1__DataQueue.html#ae3402b4fe6bdcde88541c6e7df37f4e3">_DataQueue</a>() :<a class="code hl_variable" href="structParserShm_1_1__DataQueue.html#a7b4339514f0a8f2f6617fa731ed96f87">_readable</a>(UINT64_MAX), <a class="code hl_variable" href="structParserShm_1_1__DataQueue.html#a04c43958603ae38866fddb2435475ebf">_writable</a>(0), <a class="code hl_variable" href="structParserShm_1_1__DataQueue.html#a6a91dab55808df389ef0f05bf01d03af">_pid</a>(0) {}</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    };</div>
+</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="classParserShm.html#ae4643cbc06cf3a39c5f386d2e2ed5d1c">   55</a></span>    <span class="keyword">typedef</span> <a class="code hl_struct" href="structParserShm_1_1__DataQueue.html">_DataQueue&lt;8 * 1024&gt;</a>    <a class="code hl_typedef" href="classParserShm.html#ae4643cbc06cf3a39c5f386d2e2ed5d1c">CastQueue</a>;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#pragma pack(pop)</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserShm.html#a3876c2658fe3e745233660ee5a83d15d">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* <a class="code hl_function" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserShm.html#a30862f7d675b520ecd94a14fea5cc19c">release</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserShm.html#a295c186172063642103851de5515298f">connect</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserShm.html#aadbe8eeb4d50e94c19c885e0ee710511">disconnect</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classParserShm.html#af092c9ee8569e6f159cdda08ca6c99e1">isConnected</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserShm.html#ac686013aec8ec6dddd417d92012e7be3">subscribe</a>(<span class="keyword">const</span> <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a> &amp;vecSymbols) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserShm.html#af9776ed5122fb63244cdc6e2e90ae3cc">unsubscribe</a>(<span class="keyword">const</span> <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a> &amp;vecSymbols) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classParserShm.html#ac3f44d82521397c431202cd3981fe65d">registerSpi</a>(<a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>* listener) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="classParserShm.html#aee97550db69f2b993ee513c82f759730">   76</a></span>    std::string     <a class="code hl_variable" href="classParserShm.html#aee97550db69f2b993ee513c82f759730">_path</a>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="classParserShm.html#ac654874edcc35921d89625be1750723c">   77</a></span>    <span class="keyword">typedef</span> std::shared_ptr&lt;BoostMappingFile&gt; <a class="code hl_typedef" href="classParserShm.html#ac654874edcc35921d89625be1750723c">MappedFilePtr</a>;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="classParserShm.html#add67170eb6f01f34e4f5cd6a1d67101f">   78</a></span>    <a class="code hl_typedef" href="classParserShm.html#ac654874edcc35921d89625be1750723c">MappedFilePtr</a>   <a class="code hl_variable" href="classParserShm.html#add67170eb6f01f34e4f5cd6a1d67101f">_mapfile</a>;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="classParserShm.html#a2eb4d7ad3d369045afed1127953d6e39">   79</a></span>    <a class="code hl_struct" href="structParserShm_1_1__DataQueue.html">CastQueue</a>*      <a class="code hl_variable" href="classParserShm.html#a2eb4d7ad3d369045afed1127953d6e39">_queue</a>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="classParserShm.html#a8a3ef96aef2a5aeaad290c46f6c0e994">   80</a></span>    uint32_t        <a class="code hl_variable" href="classParserShm.html#a8a3ef96aef2a5aeaad290c46f6c0e994">_gpsize</a>;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="classParserShm.html#a8f269146145df47d2fc68ded33df5caf">   81</a></span>    uint32_t        <a class="code hl_variable" href="classParserShm.html#a8f269146145df47d2fc68ded33df5caf">_check_span</a>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="classParserShm.html#a16443ee994bdb761f980570aa62cbe7d">   83</a></span>    <a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>*     <a class="code hl_variable" href="classParserShm.html#a16443ee994bdb761f980570aa62cbe7d">_sink</a>;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="classParserShm.html#aac2e9e6b872632c30e33cfa198a7b178">   84</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classParserShm.html#aac2e9e6b872632c30e33cfa198a7b178">_stopped</a>;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classParserShm.html#aecef663275877891d9032e1e118671c4">   86</a></span>    <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a>         <a class="code hl_variable" href="classParserShm.html#aecef663275877891d9032e1e118671c4">_set_subs</a>;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="classParserShm.html#a9ed5e0310b3c4f78c632a70bc389b5f5">   88</a></span>    <a class="code hl_typedef" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>    <a class="code hl_variable" href="classParserShm.html#a9ed5e0310b3c4f78c632a70bc389b5f5">_thrd_parser</a>;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>};</div>
+</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="ttc" id="aParserShm_8h_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="ParserShm_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00019">ParserShm.h:19</a></div></div>
+<div class="ttc" id="aTraderDumper_8cpp_html_abc68ad0fe9293fb2709e004ffe3fa333"><div class="ttname"><a href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a></div><div class="ttdeci">bool config(const char *cfgfile, bool isFile)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_8cpp_source.html#l00022">TraderDumper.cpp:22</a></div></div>
+<div class="ttc" id="aclassIParserApi_html"><div class="ttname"><a href="classIParserApi.html">IParserApi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00083">IParserApi.h:84</a></div></div>
+<div class="ttc" id="aclassIParserSpi_html"><div class="ttname"><a href="classIParserSpi.html">IParserSpi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00028">IParserApi.h:29</a></div></div>
+<div class="ttc" id="aclassParserShm_html"><div class="ttname"><a href="classParserShm.html">ParserShm</a></div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00022">ParserShm.h:23</a></div></div>
+<div class="ttc" id="aclassParserShm_html_a16443ee994bdb761f980570aa62cbe7d"><div class="ttname"><a href="classParserShm.html#a16443ee994bdb761f980570aa62cbe7d">ParserShm::_sink</a></div><div class="ttdeci">IParserSpi * _sink</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00083">ParserShm.h:83</a></div></div>
+<div class="ttc" id="aclassParserShm_html_a295c186172063642103851de5515298f"><div class="ttname"><a href="classParserShm.html#a295c186172063642103851de5515298f">ParserShm::connect</a></div><div class="ttdeci">virtual bool connect() override</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8cpp_source.html#l00088">ParserShm.cpp:88</a></div></div>
+<div class="ttc" id="aclassParserShm_html_a2eb4d7ad3d369045afed1127953d6e39"><div class="ttname"><a href="classParserShm.html#a2eb4d7ad3d369045afed1127953d6e39">ParserShm::_queue</a></div><div class="ttdeci">CastQueue * _queue</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00079">ParserShm.h:79</a></div></div>
+<div class="ttc" id="aclassParserShm_html_a30862f7d675b520ecd94a14fea5cc19c"><div class="ttname"><a href="classParserShm.html#a30862f7d675b520ecd94a14fea5cc19c">ParserShm::release</a></div><div class="ttdeci">virtual void release() override</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8cpp_source.html#l00083">ParserShm.cpp:83</a></div></div>
+<div class="ttc" id="aclassParserShm_html_a34623badb2fe2d297bb819928a51f304"><div class="ttname"><a href="classParserShm.html#a34623badb2fe2d297bb819928a51f304">ParserShm::ParserShm</a></div><div class="ttdeci">ParserShm()</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8cpp_source.html#l00059">ParserShm.cpp:59</a></div></div>
+<div class="ttc" id="aclassParserShm_html_a3876c2658fe3e745233660ee5a83d15d"><div class="ttname"><a href="classParserShm.html#a3876c2658fe3e745233660ee5a83d15d">ParserShm::init</a></div><div class="ttdeci">virtual bool init(WTSVariant *config) override</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8cpp_source.html#l00072">ParserShm.cpp:72</a></div></div>
+<div class="ttc" id="aclassParserShm_html_a6a3bf0a9e6a61eb9a4eedfd7a6648f64"><div class="ttname"><a href="classParserShm.html#a6a3bf0a9e6a61eb9a4eedfd7a6648f64">ParserShm::DataItem</a></div><div class="ttdeci">struct ParserShm::_DataItem DataItem</div></div>
+<div class="ttc" id="aclassParserShm_html_a7d248d5a651fe0ed4fd815041f88c17f"><div class="ttname"><a href="classParserShm.html#a7d248d5a651fe0ed4fd815041f88c17f">ParserShm::~ParserShm</a></div><div class="ttdeci">~ParserShm()</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8cpp_source.html#l00068">ParserShm.cpp:68</a></div></div>
+<div class="ttc" id="aclassParserShm_html_a8a3ef96aef2a5aeaad290c46f6c0e994"><div class="ttname"><a href="classParserShm.html#a8a3ef96aef2a5aeaad290c46f6c0e994">ParserShm::_gpsize</a></div><div class="ttdeci">uint32_t _gpsize</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00080">ParserShm.h:80</a></div></div>
+<div class="ttc" id="aclassParserShm_html_a8f269146145df47d2fc68ded33df5caf"><div class="ttname"><a href="classParserShm.html#a8f269146145df47d2fc68ded33df5caf">ParserShm::_check_span</a></div><div class="ttdeci">uint32_t _check_span</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00081">ParserShm.h:81</a></div></div>
+<div class="ttc" id="aclassParserShm_html_a9ed5e0310b3c4f78c632a70bc389b5f5"><div class="ttname"><a href="classParserShm.html#a9ed5e0310b3c4f78c632a70bc389b5f5">ParserShm::_thrd_parser</a></div><div class="ttdeci">StdThreadPtr _thrd_parser</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00088">ParserShm.h:88</a></div></div>
+<div class="ttc" id="aclassParserShm_html_aac2e9e6b872632c30e33cfa198a7b178"><div class="ttname"><a href="classParserShm.html#aac2e9e6b872632c30e33cfa198a7b178">ParserShm::_stopped</a></div><div class="ttdeci">bool _stopped</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00084">ParserShm.h:84</a></div></div>
+<div class="ttc" id="aclassParserShm_html_aadbe8eeb4d50e94c19c885e0ee710511"><div class="ttname"><a href="classParserShm.html#aadbe8eeb4d50e94c19c885e0ee710511">ParserShm::disconnect</a></div><div class="ttdeci">virtual bool disconnect() override</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8cpp_source.html#l00237">ParserShm.cpp:237</a></div></div>
+<div class="ttc" id="aclassParserShm_html_ac3f44d82521397c431202cd3981fe65d"><div class="ttname"><a href="classParserShm.html#ac3f44d82521397c431202cd3981fe65d">ParserShm::registerSpi</a></div><div class="ttdeci">virtual void registerSpi(IParserSpi *listener) override</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8cpp_source.html#l00268">ParserShm.cpp:268</a></div></div>
+<div class="ttc" id="aclassParserShm_html_ac654874edcc35921d89625be1750723c"><div class="ttname"><a href="classParserShm.html#ac654874edcc35921d89625be1750723c">ParserShm::MappedFilePtr</a></div><div class="ttdeci">std::shared_ptr&lt; BoostMappingFile &gt; MappedFilePtr</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00077">ParserShm.h:77</a></div></div>
+<div class="ttc" id="aclassParserShm_html_ac686013aec8ec6dddd417d92012e7be3"><div class="ttname"><a href="classParserShm.html#ac686013aec8ec6dddd417d92012e7be3">ParserShm::subscribe</a></div><div class="ttdeci">virtual void subscribe(const CodeSet &amp;vecSymbols) override</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8cpp_source.html#l00250">ParserShm.cpp:250</a></div></div>
+<div class="ttc" id="aclassParserShm_html_add67170eb6f01f34e4f5cd6a1d67101f"><div class="ttname"><a href="classParserShm.html#add67170eb6f01f34e4f5cd6a1d67101f">ParserShm::_mapfile</a></div><div class="ttdeci">MappedFilePtr _mapfile</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00078">ParserShm.h:78</a></div></div>
+<div class="ttc" id="aclassParserShm_html_ae4643cbc06cf3a39c5f386d2e2ed5d1c"><div class="ttname"><a href="classParserShm.html#ae4643cbc06cf3a39c5f386d2e2ed5d1c">ParserShm::CastQueue</a></div><div class="ttdeci">_DataQueue&lt; 8 *1024 &gt; CastQueue</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00055">ParserShm.h:55</a></div></div>
+<div class="ttc" id="aclassParserShm_html_aecef663275877891d9032e1e118671c4"><div class="ttname"><a href="classParserShm.html#aecef663275877891d9032e1e118671c4">ParserShm::_set_subs</a></div><div class="ttdeci">CodeSet _set_subs</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00086">ParserShm.h:86</a></div></div>
+<div class="ttc" id="aclassParserShm_html_aee97550db69f2b993ee513c82f759730"><div class="ttname"><a href="classParserShm.html#aee97550db69f2b993ee513c82f759730">ParserShm::_path</a></div><div class="ttdeci">std::string _path</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00076">ParserShm.h:76</a></div></div>
+<div class="ttc" id="aclassParserShm_html_af092c9ee8569e6f159cdda08ca6c99e1"><div class="ttname"><a href="classParserShm.html#af092c9ee8569e6f159cdda08ca6c99e1">ParserShm::isConnected</a></div><div class="ttdeci">virtual bool isConnected() override</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8cpp_source.html#l00244">ParserShm.cpp:244</a></div></div>
+<div class="ttc" id="aclassParserShm_html_af9776ed5122fb63244cdc6e2e90ae3cc"><div class="ttname"><a href="classParserShm.html#af9776ed5122fb63244cdc6e2e90ae3cc">ParserShm::unsubscribe</a></div><div class="ttdeci">virtual void unsubscribe(const CodeSet &amp;vecSymbols) override</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8cpp_source.html#l00263">ParserShm.cpp:263</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassfastest__hashset_3_01std_1_1string_01_4_html"><div class="ttname"><a href="classfastest__hashset_3_01std_1_1string_01_4.html">fastest_hashset&lt; std::string &gt;</a></div><div class="ttdoc">字符串元素的高性能哈希集合类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00134">FasterDefs.h:135</a></div></div>
+<div class="ttc" id="agroup__ThreadUtils_html_gaf9ea8e1e64d43ab034614d39d0b35776"><div class="ttname"><a href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a></div><div class="ttdeci">std::shared_ptr&lt; StdThread &gt; StdThreadPtr</div><div class="ttdoc">线程智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00042">StdUtils.hpp:42</a></div></div>
+<div class="ttc" id="astructParserShm_1_1__DataItem_html"><div class="ttname"><a href="structParserShm_1_1__DataItem.html">ParserShm::_DataItem</a></div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00029">ParserShm.h:30</a></div></div>
+<div class="ttc" id="astructParserShm_1_1__DataItem_html_a1a3082114c381f62fcdc93a894573955"><div class="ttname"><a href="structParserShm_1_1__DataItem.html#a1a3082114c381f62fcdc93a894573955">ParserShm::_DataItem::_tick</a></div><div class="ttdeci">WTSTickStruct _tick</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00034">ParserShm.h:34</a></div></div>
+<div class="ttc" id="astructParserShm_1_1__DataItem_html_a745fd70f365f73662ae766ae77345cdf"><div class="ttname"><a href="structParserShm_1_1__DataItem.html#a745fd70f365f73662ae766ae77345cdf">ParserShm::_DataItem::_order</a></div><div class="ttdeci">WTSOrdDtlStruct _order</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00036">ParserShm.h:36</a></div></div>
+<div class="ttc" id="astructParserShm_1_1__DataItem_html_aaf1fc2d5a1267d9780f5d94097be6eb3"><div class="ttname"><a href="structParserShm_1_1__DataItem.html#aaf1fc2d5a1267d9780f5d94097be6eb3">ParserShm::_DataItem::_trans</a></div><div class="ttdeci">WTSTransStruct _trans</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00037">ParserShm.h:37</a></div></div>
+<div class="ttc" id="astructParserShm_1_1__DataItem_html_ab51bca47d2c67d89d31b03f3c8cda2d7"><div class="ttname"><a href="structParserShm_1_1__DataItem.html#ab51bca47d2c67d89d31b03f3c8cda2d7">ParserShm::_DataItem::_DataItem</a></div><div class="ttdeci">_DataItem()</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00040">ParserShm.h:40</a></div></div>
+<div class="ttc" id="astructParserShm_1_1__DataItem_html_abda17692947ebd4e3767610385942402"><div class="ttname"><a href="structParserShm_1_1__DataItem.html#abda17692947ebd4e3767610385942402">ParserShm::_DataItem::_type</a></div><div class="ttdeci">uint32_t _type</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00031">ParserShm.h:31</a></div></div>
+<div class="ttc" id="astructParserShm_1_1__DataItem_html_ae8526cb52abda5de986207975773f6b0"><div class="ttname"><a href="structParserShm_1_1__DataItem.html#ae8526cb52abda5de986207975773f6b0">ParserShm::_DataItem::_queue</a></div><div class="ttdeci">WTSOrdQueStruct _queue</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00035">ParserShm.h:35</a></div></div>
+<div class="ttc" id="astructParserShm_1_1__DataQueue_html"><div class="ttname"><a href="structParserShm_1_1__DataQueue.html">ParserShm::_DataQueue</a></div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00044">ParserShm.h:45</a></div></div>
+<div class="ttc" id="astructParserShm_1_1__DataQueue_html_a04c43958603ae38866fddb2435475ebf"><div class="ttname"><a href="structParserShm_1_1__DataQueue.html#a04c43958603ae38866fddb2435475ebf">ParserShm::_DataQueue::_writable</a></div><div class="ttdeci">volatile uint64_t _writable</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00048">ParserShm.h:48</a></div></div>
+<div class="ttc" id="astructParserShm_1_1__DataQueue_html_a6a91dab55808df389ef0f05bf01d03af"><div class="ttname"><a href="structParserShm_1_1__DataQueue.html#a6a91dab55808df389ef0f05bf01d03af">ParserShm::_DataQueue::_pid</a></div><div class="ttdeci">uint32_t _pid</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00049">ParserShm.h:49</a></div></div>
+<div class="ttc" id="astructParserShm_1_1__DataQueue_html_a7b4339514f0a8f2f6617fa731ed96f87"><div class="ttname"><a href="structParserShm_1_1__DataQueue.html#a7b4339514f0a8f2f6617fa731ed96f87">ParserShm::_DataQueue::_readable</a></div><div class="ttdeci">volatile uint64_t _readable</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00047">ParserShm.h:47</a></div></div>
+<div class="ttc" id="astructParserShm_1_1__DataQueue_html_a955c3c7e78491352a5b842c0aca3e65a"><div class="ttname"><a href="structParserShm_1_1__DataQueue.html#a955c3c7e78491352a5b842c0aca3e65a">ParserShm::_DataQueue::_capacity</a></div><div class="ttdeci">uint64_t _capacity</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00046">ParserShm.h:46</a></div></div>
+<div class="ttc" id="astructParserShm_1_1__DataQueue_html_adb25e1d180a4fc2290b41c41e61b903e"><div class="ttname"><a href="structParserShm_1_1__DataQueue.html#adb25e1d180a4fc2290b41c41e61b903e">ParserShm::_DataQueue::_items</a></div><div class="ttdeci">DataItem _items[N]</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00050">ParserShm.h:50</a></div></div>
+<div class="ttc" id="astructParserShm_1_1__DataQueue_html_ae3402b4fe6bdcde88541c6e7df37f4e3"><div class="ttname"><a href="structParserShm_1_1__DataQueue.html#ae3402b4fe6bdcde88541c6e7df37f4e3">ParserShm::_DataQueue::_DataQueue</a></div><div class="ttdeci">_DataQueue()</div><div class="ttdef"><b>Definition</b> <a href="ParserShm_8h_source.html#l00052">ParserShm.h:52</a></div></div>
+<div class="ttc" id="astructWTSOrdDtlStruct_html"><div class="ttname"><a href="structWTSOrdDtlStruct.html">WTSOrdDtlStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00262">WTSStruct.h:263</a></div></div>
+<div class="ttc" id="astructWTSOrdQueStruct_html"><div class="ttname"><a href="structWTSOrdQueStruct.html">WTSOrdQueStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00240">WTSStruct.h:241</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html"><div class="ttname"><a href="structWTSTickStruct.html">WTSTickStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00158">WTSStruct.h:159</a></div></div>
+<div class="ttc" id="astructWTSTransStruct_html"><div class="ttname"><a href="structWTSTransStruct.html">WTSTransStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00284">WTSStruct.h:285</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_f0d6ec867b0720e4243ed24505399fd2.html">ParserShm</a></li><li class="navelem"><a class="el" href="ParserShm_8h.html">ParserShm.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

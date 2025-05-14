@@ -1,0 +1,26 @@
+var struct__MdsL2Order =
+[
+    [ "__collectedTime", "struct__MdsL2Order.html#afe5d3a587252b92bba91c50b903740c4", null ],
+    [ "__isRepeated", "struct__MdsL2Order.html#ac3ca75dfbdcc19cb95268575e940921b", null ],
+    [ "__origMdSource", "struct__MdsL2Order.html#a550e57cc1d69cfa8e7dfefd59b918a74", null ],
+    [ "__origNetTime", "struct__MdsL2Order.html#a9b6adeeb57b0a26b93032d20b58a862a", null ],
+    [ "__processedTime", "struct__MdsL2Order.html#a4cf104658e68a6a8fd16aa6c54f5f16f", null ],
+    [ "__pushingTime", "struct__MdsL2Order.html#aec3807ad2c3884c7ffa172f4c0683d19", null ],
+    [ "__recvTime", "struct__MdsL2Order.html#ae786071e6dfc05fb2dfd38a920ba406c", null ],
+    [ "__reserve", "struct__MdsL2Order.html#ab392ca22cc9514621c64e6601e09a931", null ],
+    [ "ApplSeqNum", "struct__MdsL2Order.html#aa69d3310f531e756fa2177d212be49bd", null ],
+    [ "ChannelNo", "struct__MdsL2Order.html#a2bc007a852adfe46df7a5276bed65c7e", null ],
+    [ "exchId", "struct__MdsL2Order.html#a65ae704766804e26fe0480547e7f8a9b", null ],
+    [ "instrId", "struct__MdsL2Order.html#a4e7e410e6d673bc4137a0bf28aeb67b9", null ],
+    [ "mdProductType", "struct__MdsL2Order.html#a44f882dfdc9699d7456d70100bee5bd1", null ],
+    [ "OrderQty", "struct__MdsL2Order.html#a0b9d4a4b8929bd96bb4c83e9aeb31568", null ],
+    [ "OrderType", "struct__MdsL2Order.html#a2b3a98c87526bd3fcf7a15d79595a561", null ],
+    [ "Price", "struct__MdsL2Order.html#a4358ccdd02e897ece4813fcff76b12e0", null ],
+    [ "SecurityID", "struct__MdsL2Order.html#a9108f12960cac74b116b2a982d1151ec", null ],
+    [ "Side", "struct__MdsL2Order.html#a2637c502936e4e1d3ce029ee98c59e05", null ],
+    [ "SseBizIndex", "struct__MdsL2Order.html#a8ee85a8d5be6af071655561ffbb1c0f9", null ],
+    [ "SseOrderNo", "struct__MdsL2Order.html#a539c6c01e86d4655b7c062e67adb3295", null ],
+    [ "subStreamType", "struct__MdsL2Order.html#a0c1c6f7e7e60f458ccfe87016fb5657e", null ],
+    [ "tradeDate", "struct__MdsL2Order.html#a1e2e03addabdb94f352260879e7febb9", null ],
+    [ "TransactTime", "struct__MdsL2Order.html#ad7d14f5d105847c4e59a28227be564cd", null ]
+];

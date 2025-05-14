@@ -1,0 +1,26 @@
+var structATPReqTradeOrderQueryMsg =
+[
+    [ "ATPReqTradeOrderQueryMsg", "structATPReqTradeOrderQueryMsg.html#ad60d020a4d372001b178fa1b527f7ac2", null ],
+    [ "ATPReqTradeOrderQueryMsg", "structATPReqTradeOrderQueryMsg.html#ad60d020a4d372001b178fa1b527f7ac2", null ],
+    [ "account_id", "structATPReqTradeOrderQueryMsg.html#a478b98276deb54a7c2a3d4f9c7d42d34", null ],
+    [ "batch_cl_ord_no", "structATPReqTradeOrderQueryMsg.html#a25122ce01637fd76d2d139d68af7fad1", null ],
+    [ "branch_id", "structATPReqTradeOrderQueryMsg.html#a8a8600455d273fc6427c349a27d917a1", null ],
+    [ "business_abstract_type", "structATPReqTradeOrderQueryMsg.html#af122ced3ac3ff0eec7331fb78403bbf1", null ],
+    [ "business_type", "structATPReqTradeOrderQueryMsg.html#a0a4bba7b824d48379a8d4895939c34f2", null ],
+    [ "cl_ord_id", "structATPReqTradeOrderQueryMsg.html#a8baffcacc8a0611eb5e73e001ada7ed3", null ],
+    [ "cl_ord_no", "structATPReqTradeOrderQueryMsg.html#a3540a8ee13ad7182ff908192a4c956b2", null ],
+    [ "client_feature_code", "structATPReqTradeOrderQueryMsg.html#ab5d8fecb60d844c24a1fe84ac703d9b1", null ],
+    [ "client_seq_id", "structATPReqTradeOrderQueryMsg.html#a99ee840cf86cfe080369fc5082a9da3d", null ],
+    [ "cust_id", "structATPReqTradeOrderQueryMsg.html#a958f886ae979a8df261d25efa5f98fdb", null ],
+    [ "etf_purchase_redemption_flag", "structATPReqTradeOrderQueryMsg.html#a78d9e51aa95dda9d10c82ed2ee1f53d4", null ],
+    [ "exec_id", "structATPReqTradeOrderQueryMsg.html#aa5e433bc905c93e485dc773cb44d423e", null ],
+    [ "extra_data", "structATPReqTradeOrderQueryMsg.html#a68b5197873d97030f893ecbd62e738df", null ],
+    [ "fund_account_id", "structATPReqTradeOrderQueryMsg.html#aeb6d97b4a863f3996f36c8c1f6a45f4f", null ],
+    [ "market_id", "structATPReqTradeOrderQueryMsg.html#aa8fb2a4b47fe3382313edc005ba85151", null ],
+    [ "password", "structATPReqTradeOrderQueryMsg.html#a6c31c115c91db882d1597a4bbd1174af", null ],
+    [ "query_index", "structATPReqTradeOrderQueryMsg.html#aa85040631fe71460ebd54790a8428577", null ],
+    [ "return_num", "structATPReqTradeOrderQueryMsg.html#ae348fbb335024fe9f4c881852cb7e3ab", null ],
+    [ "return_seq", "structATPReqTradeOrderQueryMsg.html#ad36f0b56434b99111021e2cce6c8f15d", null ],
+    [ "security_id", "structATPReqTradeOrderQueryMsg.html#a30686824c156c9431ff8fac632cc38b9", null ],
+    [ "user_info", "structATPReqTradeOrderQueryMsg.html#a9519a57a5b6d7981dd3e442c7152948d", null ]
+];

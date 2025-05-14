@@ -1,0 +1,25 @@
+var classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg =
+[
+    [ "ATPRspCashAuctionOrderMsg", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#a2f6fd806b6f91be81db7184ce5e2df97", null ],
+    [ "~ATPRspCashAuctionOrderMsg", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#a867cb83e728fa13940684c8baae893ba", null ],
+    [ "ATPRspCashAuctionOrderMsg", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#a2d0ee891bbcd5d098f24ba8134bea6d5", null ],
+    [ "Decode", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#aeb2ebfdda5c995d2168034862820cca7", null ],
+    [ "DeleteMessage", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#a166d17b9015fe8b349b74ea321a90d9f", null ],
+    [ "Encode", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#aa2d879ed923e2ce11e6beffe4b220354", null ],
+    [ "GetAccountId", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#a12a1f5c05d11f6cb0d83f04e6ef8da10", null ],
+    [ "GetBatchClOrdNo", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#a01082776cc4fd00661f1579d5c94a6eb", null ],
+    [ "GetBusinessType", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#ac457c26c23f0c21c063a5efeff2eb2b1", null ],
+    [ "GetClOrdNo", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#ad355e1d8ef9b22570ffa31926c3af705", null ],
+    [ "GetCustId", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#a1ab353fbb6f23fbc4d8b0dbc1ad77bbd", null ],
+    [ "GetFundAccountId", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#af7f0b021e707c754853dab034658c4ce", null ],
+    [ "GetMarketId", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#a2bbdda6919f7aed7e2ebe9ade67be253", null ],
+    [ "GetOrderQty", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#a6138349695c2ca58ad68452313c32e4f", null ],
+    [ "GetOrderType", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#a68c58b2a86f955fe55ccd71d4b12c51d", null ],
+    [ "GetPrice", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#a27b3f39cf83c90b6c3ede9419ca474fc", null ],
+    [ "GetSecurityId", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#a9bd179b7a63254b66c30f68ef3b37a06", null ],
+    [ "GetSecuritySymbol", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#a42d8af48a0bca0daaa44b1cf154f9c98", null ],
+    [ "GetSide", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#aeb79d9bad4edee6b0e0aab2c7ed4df59", null ],
+    [ "GetTransactTime", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#adff3ff18e9644b1c76b9d76c7b0f3784", null ],
+    [ "NewMessage", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#ad6d465438d9230c1b7dcc1bec73d0940", null ],
+    [ "operator=", "classatp_1_1quant__api_1_1ATPRspCashAuctionOrderMsg.html#a58bec09cd857141fede9f25ce03dfe8b", null ]
+];

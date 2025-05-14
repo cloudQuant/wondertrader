@@ -1,0 +1,833 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/bitstream.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('bitstream_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#enum-members">枚举</a> &#124;
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">bitstream.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;<a class="el" href="mem_8h_source.html">mem.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="debug_8h_source.html">debug.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="error__private_8h_source.html">error_private.h</a>&quot;</code><br />
+</div>
+<p><a href="bitstream_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:af3240ab50c3f9ef13130e9ab1581c819" id="r_af3240ab50c3f9ef13130e9ab1581c819"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#af3240ab50c3f9ef13130e9ab1581c819">STREAM_ACCUMULATOR_MIN_32</a>&#160;&#160;&#160;25</td></tr>
+<tr class="separator:af3240ab50c3f9ef13130e9ab1581c819"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1135fd5f07bb4a097952829cd86cddbf" id="r_a1135fd5f07bb4a097952829cd86cddbf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a1135fd5f07bb4a097952829cd86cddbf">STREAM_ACCUMULATOR_MIN_64</a>&#160;&#160;&#160;57</td></tr>
+<tr class="separator:a1135fd5f07bb4a097952829cd86cddbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8674f969501cfe0e0f8b46474d1397c" id="r_ae8674f969501cfe0e0f8b46474d1397c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#ae8674f969501cfe0e0f8b46474d1397c">STREAM_ACCUMULATOR_MIN</a>&#160;&#160;&#160;((<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)(<a class="el" href="mem_8h.html#a18e77a75ccecc21ae7bba184b9c15c98">MEM_32bits</a>() ? <a class="el" href="bitstream_8h.html#af3240ab50c3f9ef13130e9ab1581c819">STREAM_ACCUMULATOR_MIN_32</a> : <a class="el" href="bitstream_8h.html#a1135fd5f07bb4a097952829cd86cddbf">STREAM_ACCUMULATOR_MIN_64</a>))</td></tr>
+<tr class="separator:ae8674f969501cfe0e0f8b46474d1397c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f3cf8c5431e47edb91eb0f502c34207" id="r_a8f3cf8c5431e47edb91eb0f502c34207"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a8f3cf8c5431e47edb91eb0f502c34207">BIT_MASK_SIZE</a>&#160;&#160;&#160;(sizeof(<a class="el" href="bitstream_8h.html#a8cca4e440af689b90c00e9c97953f6f4">BIT_mask</a>) / sizeof(<a class="el" href="bitstream_8h.html#a8cca4e440af689b90c00e9c97953f6f4">BIT_mask</a>[0]))</td></tr>
+<tr class="separator:a8f3cf8c5431e47edb91eb0f502c34207"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+枚举</h2></td></tr>
+<tr class="memitem:a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6a" id="r_a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6a">BIT_DStream_status</a> { <a class="el" href="bitstream_8h.html#a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6aa56ba147f48b3892d23eff9db7e232df4">BIT_DStream_unfinished</a> = 0
+, <a class="el" href="bitstream_8h.html#a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6aa3d2a5b5240949b5e259aa3b0004c85f8">BIT_DStream_endOfBuffer</a> = 1
+, <a class="el" href="bitstream_8h.html#a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6aad896c12b38a229fcb2d497b9ef3236b5">BIT_DStream_completed</a> = 2
+, <a class="el" href="bitstream_8h.html#a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6aa412e56baa8b65d47a757cf8c7ebe4481">BIT_DStream_overflow</a> = 3
+ }</td></tr>
+<tr class="separator:a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a77907fae42615fa580281a1b5b80b629" id="r_a77907fae42615fa580281a1b5b80b629"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a77907fae42615fa580281a1b5b80b629">BIT_initCStream</a> (<a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a> *bitC, void *dstBuffer, size_t dstCapacity)</td></tr>
+<tr class="separator:a77907fae42615fa580281a1b5b80b629"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ad13761fa066633057e1e46f43e9f67" id="r_a8ad13761fa066633057e1e46f43e9f67"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a8ad13761fa066633057e1e46f43e9f67">BIT_addBits</a> (<a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a> *bitC, size_t <a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>, unsigned nbBits)</td></tr>
+<tr class="separator:a8ad13761fa066633057e1e46f43e9f67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c839965cf6a86f64d859153451ccab6" id="r_a4c839965cf6a86f64d859153451ccab6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a4c839965cf6a86f64d859153451ccab6">BIT_flushBits</a> (<a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a> *bitC)</td></tr>
+<tr class="separator:a4c839965cf6a86f64d859153451ccab6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06b24fd9264fb4cb14e5f9aecc26acbd" id="r_a06b24fd9264fb4cb14e5f9aecc26acbd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a06b24fd9264fb4cb14e5f9aecc26acbd">BIT_closeCStream</a> (<a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a> *bitC)</td></tr>
+<tr class="separator:a06b24fd9264fb4cb14e5f9aecc26acbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01bc56df5d3b4844fd5bf6bde7393bd3" id="r_a01bc56df5d3b4844fd5bf6bde7393bd3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a01bc56df5d3b4844fd5bf6bde7393bd3">BIT_initDStream</a> (<a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *bitD, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *srcBuffer, size_t srcSize)</td></tr>
+<tr class="separator:a01bc56df5d3b4844fd5bf6bde7393bd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a290134ce7b5c9b82c0425461a75631ee" id="r_a290134ce7b5c9b82c0425461a75631ee"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a290134ce7b5c9b82c0425461a75631ee">BIT_readBits</a> (<a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *bitD, unsigned nbBits)</td></tr>
+<tr class="separator:a290134ce7b5c9b82c0425461a75631ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17753ccd470bc391190e023401e2f795" id="r_a17753ccd470bc391190e023401e2f795"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="bitstream_8h.html#a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6a">BIT_DStream_status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a17753ccd470bc391190e023401e2f795">BIT_reloadDStream</a> (<a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *bitD)</td></tr>
+<tr class="separator:a17753ccd470bc391190e023401e2f795"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a1c18f5b36ba98fe0f9702bc74d86b1" id="r_a8a1c18f5b36ba98fe0f9702bc74d86b1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a8a1c18f5b36ba98fe0f9702bc74d86b1">BIT_endOfDStream</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *bitD)</td></tr>
+<tr class="separator:a8a1c18f5b36ba98fe0f9702bc74d86b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab07cca03c0cc8c6c74b90a180a477ffd" id="r_ab07cca03c0cc8c6c74b90a180a477ffd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#ab07cca03c0cc8c6c74b90a180a477ffd">BIT_addBitsFast</a> (<a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a> *bitC, size_t <a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>, unsigned nbBits)</td></tr>
+<tr class="separator:ab07cca03c0cc8c6c74b90a180a477ffd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeedf7cf3cceebe81e04d22fd42971bd3" id="r_aeedf7cf3cceebe81e04d22fd42971bd3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#aeedf7cf3cceebe81e04d22fd42971bd3">BIT_flushBitsFast</a> (<a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a> *bitC)</td></tr>
+<tr class="separator:aeedf7cf3cceebe81e04d22fd42971bd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a849084e406b9d3cd5aed35ed4bba7cda" id="r_a849084e406b9d3cd5aed35ed4bba7cda"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a849084e406b9d3cd5aed35ed4bba7cda">BIT_readBitsFast</a> (<a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *bitD, unsigned nbBits)</td></tr>
+<tr class="separator:a849084e406b9d3cd5aed35ed4bba7cda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a093beeb126444a982e92b58d069d62fe" id="r_a093beeb126444a982e92b58d069d62fe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a093beeb126444a982e92b58d069d62fe">BIT_highbit32</a> (<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> val)</td></tr>
+<tr class="separator:a093beeb126444a982e92b58d069d62fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ba8d678aba0aefeaf6b203b98e56849" id="r_a1ba8d678aba0aefeaf6b203b98e56849"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a1ba8d678aba0aefeaf6b203b98e56849">BIT_getUpperBits</a> (size_t bitContainer, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WtDtPorter_8cpp.html#a011cfecbf1cc7aea656da1554c8f0e7f">start</a>)</td></tr>
+<tr class="separator:a1ba8d678aba0aefeaf6b203b98e56849"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a584907c5060e40452217cafc2f97ed51" id="r_a584907c5060e40452217cafc2f97ed51"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a584907c5060e40452217cafc2f97ed51">BIT_getMiddleBits</a> (size_t bitContainer, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WtDtPorter_8cpp.html#a011cfecbf1cc7aea656da1554c8f0e7f">start</a>, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> nbBits)</td></tr>
+<tr class="separator:a584907c5060e40452217cafc2f97ed51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35bbc45061ac7e8e2d805a0fecf2d475" id="r_a35bbc45061ac7e8e2d805a0fecf2d475"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a35bbc45061ac7e8e2d805a0fecf2d475">BIT_getLowerBits</a> (size_t bitContainer, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> nbBits)</td></tr>
+<tr class="separator:a35bbc45061ac7e8e2d805a0fecf2d475"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3b5740b15375e4719f3839d99b611af" id="r_aa3b5740b15375e4719f3839d99b611af"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#aa3b5740b15375e4719f3839d99b611af">BIT_lookBits</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *bitD, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> nbBits)</td></tr>
+<tr class="separator:aa3b5740b15375e4719f3839d99b611af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0de79941451b1b41e4db5f9c425646c" id="r_ad0de79941451b1b41e4db5f9c425646c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#ad0de79941451b1b41e4db5f9c425646c">BIT_lookBitsFast</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *bitD, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> nbBits)</td></tr>
+<tr class="separator:ad0de79941451b1b41e4db5f9c425646c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e30e1c35bbd7038ae750b05ea2d8ab5" id="r_a0e30e1c35bbd7038ae750b05ea2d8ab5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a0e30e1c35bbd7038ae750b05ea2d8ab5">BIT_skipBits</a> (<a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *bitD, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> nbBits)</td></tr>
+<tr class="separator:a0e30e1c35bbd7038ae750b05ea2d8ab5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a8cca4e440af689b90c00e9c97953f6f4" id="r_a8cca4e440af689b90c00e9c97953f6f4"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="bitstream_8h.html#a8cca4e440af689b90c00e9c97953f6f4">BIT_mask</a> []</td></tr>
+<tr class="separator:a8cca4e440af689b90c00e9c97953f6f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a8f3cf8c5431e47edb91eb0f502c34207" name="a8f3cf8c5431e47edb91eb0f502c34207"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f3cf8c5431e47edb91eb0f502c34207">&#9670;&#160;</a></span>BIT_MASK_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BIT_MASK_SIZE&#160;&#160;&#160;(sizeof(<a class="el" href="bitstream_8h.html#a8cca4e440af689b90c00e9c97953f6f4">BIT_mask</a>) / sizeof(<a class="el" href="bitstream_8h.html#a8cca4e440af689b90c00e9c97953f6f4">BIT_mask</a>[0]))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00194">194</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae8674f969501cfe0e0f8b46474d1397c" name="ae8674f969501cfe0e0f8b46474d1397c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8674f969501cfe0e0f8b46474d1397c">&#9670;&#160;</a></span>STREAM_ACCUMULATOR_MIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STREAM_ACCUMULATOR_MIN&#160;&#160;&#160;((<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)(<a class="el" href="mem_8h.html#a18e77a75ccecc21ae7bba184b9c15c98">MEM_32bits</a>() ? <a class="el" href="bitstream_8h.html#af3240ab50c3f9ef13130e9ab1581c819">STREAM_ACCUMULATOR_MIN_32</a> : <a class="el" href="bitstream_8h.html#a1135fd5f07bb4a097952829cd86cddbf">STREAM_ACCUMULATOR_MIN_64</a>))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00066">66</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af3240ab50c3f9ef13130e9ab1581c819" name="af3240ab50c3f9ef13130e9ab1581c819"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af3240ab50c3f9ef13130e9ab1581c819">&#9670;&#160;</a></span>STREAM_ACCUMULATOR_MIN_32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STREAM_ACCUMULATOR_MIN_32&#160;&#160;&#160;25</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00064">64</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1135fd5f07bb4a097952829cd86cddbf" name="a1135fd5f07bb4a097952829cd86cddbf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1135fd5f07bb4a097952829cd86cddbf">&#9670;&#160;</a></span>STREAM_ACCUMULATOR_MIN_64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STREAM_ACCUMULATOR_MIN_64&#160;&#160;&#160;57</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00065">65</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">枚举类型说明</h2>
+<a id="a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6a" name="a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6a">&#9670;&#160;</a></span>BIT_DStream_status</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="bitstream_8h.html#a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6a">BIT_DStream_status</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6aa56ba147f48b3892d23eff9db7e232df4" name="a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6aa56ba147f48b3892d23eff9db7e232df4"></a>BIT_DStream_unfinished&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6aa3d2a5b5240949b5e259aa3b0004c85f8" name="a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6aa3d2a5b5240949b5e259aa3b0004c85f8"></a>BIT_DStream_endOfBuffer&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6aad896c12b38a229fcb2d497b9ef3236b5" name="a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6aad896c12b38a229fcb2d497b9ef3236b5"></a>BIT_DStream_completed&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6aa412e56baa8b65d47a757cf8c7ebe4481" name="a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6aa412e56baa8b65d47a757cf8c7ebe4481"></a>BIT_DStream_overflow&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00118">118</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a8ad13761fa066633057e1e46f43e9f67" name="a8ad13761fa066633057e1e46f43e9f67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ad13761fa066633057e1e46f43e9f67">&#9670;&#160;</a></span>BIT_addBits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void BIT_addBits </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a> *&#160;</td>
+          <td class="paramname"><em>bitC</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbBits</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="bitstream_8h.html#a8ad13761fa066633057e1e46f43e9f67">BIT_addBits()</a> : can add up to 31 bits into <code>bitC</code>. Note : does not check for register overflow ! </p>
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00218">218</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab07cca03c0cc8c6c74b90a180a477ffd" name="ab07cca03c0cc8c6c74b90a180a477ffd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab07cca03c0cc8c6c74b90a180a477ffd">&#9670;&#160;</a></span>BIT_addBitsFast()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void BIT_addBitsFast </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a> *&#160;</td>
+          <td class="paramname"><em>bitC</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbBits</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="bitstream_8h.html#ab07cca03c0cc8c6c74b90a180a477ffd">BIT_addBitsFast()</a> : works only if <code>value</code> is <em>clean</em>, meaning all high bits above nbBits are 0 </p>
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00231">231</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a06b24fd9264fb4cb14e5f9aecc26acbd" name="a06b24fd9264fb4cb14e5f9aecc26acbd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06b24fd9264fb4cb14e5f9aecc26acbd">&#9670;&#160;</a></span>BIT_closeCStream()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t BIT_closeCStream </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a> *&#160;</td>
+          <td class="paramname"><em>bitC</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="bitstream_8h.html#a06b24fd9264fb4cb14e5f9aecc26acbd">BIT_closeCStream()</a> : </p><dl class="section return"><dt>返回</dt><dd>: size of CStream, in bytes, or 0 if it could not fit into dstBuffer </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00274">274</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8a1c18f5b36ba98fe0f9702bc74d86b1" name="a8a1c18f5b36ba98fe0f9702bc74d86b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a1c18f5b36ba98fe0f9702bc74d86b1">&#9670;&#160;</a></span>BIT_endOfDStream()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> unsigned BIT_endOfDStream </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *&#160;</td>
+          <td class="paramname"><em>DStream</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="bitstream_8h.html#a8a1c18f5b36ba98fe0f9702bc74d86b1">BIT_endOfDStream()</a> : </p><dl class="section return"><dt>返回</dt><dd>: 1 if DStream has <em>exactly</em> reached its end (all bits consumed). </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00451">451</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4c839965cf6a86f64d859153451ccab6" name="a4c839965cf6a86f64d859153451ccab6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c839965cf6a86f64d859153451ccab6">&#9670;&#160;</a></span>BIT_flushBits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void BIT_flushBits </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a> *&#160;</td>
+          <td class="paramname"><em>bitC</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="bitstream_8h.html#a4c839965cf6a86f64d859153451ccab6">BIT_flushBits()</a> : assumption : bitContainer has not overflowed safe version; check for buffer overflow, and prevents it. note : does not signal buffer overflow. overflow will be revealed later on using <a class="el" href="bitstream_8h.html#a06b24fd9264fb4cb14e5f9aecc26acbd">BIT_closeCStream()</a> </p>
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00259">259</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aeedf7cf3cceebe81e04d22fd42971bd3" name="aeedf7cf3cceebe81e04d22fd42971bd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeedf7cf3cceebe81e04d22fd42971bd3">&#9670;&#160;</a></span>BIT_flushBitsFast()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void BIT_flushBitsFast </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a> *&#160;</td>
+          <td class="paramname"><em>bitC</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="bitstream_8h.html#aeedf7cf3cceebe81e04d22fd42971bd3">BIT_flushBitsFast()</a> : assumption : bitContainer has not overflowed unsafe version; does not check buffer overflow </p>
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00243">243</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a35bbc45061ac7e8e2d805a0fecf2d475" name="a35bbc45061ac7e8e2d805a0fecf2d475"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35bbc45061ac7e8e2d805a0fecf2d475">&#9670;&#160;</a></span>BIT_getLowerBits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t BIT_getLowerBits </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>bitContainer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>nbBits</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00353">353</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a584907c5060e40452217cafc2f97ed51" name="a584907c5060e40452217cafc2f97ed51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a584907c5060e40452217cafc2f97ed51">&#9670;&#160;</a></span>BIT_getMiddleBits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t BIT_getMiddleBits </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>bitContainer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>start</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>nbBits</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00345">345</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1ba8d678aba0aefeaf6b203b98e56849" name="a1ba8d678aba0aefeaf6b203b98e56849"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ba8d678aba0aefeaf6b203b98e56849">&#9670;&#160;</a></span>BIT_getUpperBits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t BIT_getUpperBits </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>bitContainer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>start</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00340">340</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a093beeb126444a982e92b58d069d62fe" name="a093beeb126444a982e92b58d069d62fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a093beeb126444a982e92b58d069d62fe">&#9670;&#160;</a></span>BIT_highbit32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> unsigned BIT_highbit32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>val</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00158">158</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a77907fae42615fa580281a1b5b80b629" name="a77907fae42615fa580281a1b5b80b629"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77907fae42615fa580281a1b5b80b629">&#9670;&#160;</a></span>BIT_initCStream()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t BIT_initCStream </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structBIT__CStream__t.html">BIT_CStream_t</a> *&#160;</td>
+          <td class="paramname"><em>bitC</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>startPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="bitstream_8h.html#a77907fae42615fa580281a1b5b80b629">BIT_initCStream()</a> : <code>dstCapacity</code> must be &gt; sizeof(size_t) </p><dl class="section return"><dt>返回</dt><dd>: 0 if success, otherwise an error code (can be tested using <a class="el" href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError()</a>) </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00203">203</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a01bc56df5d3b4844fd5bf6bde7393bd3" name="a01bc56df5d3b4844fd5bf6bde7393bd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01bc56df5d3b4844fd5bf6bde7393bd3">&#9670;&#160;</a></span>BIT_initDStream()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t BIT_initDStream </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *&#160;</td>
+          <td class="paramname"><em>bitD</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>srcBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="bitstream_8h.html#a01bc56df5d3b4844fd5bf6bde7393bd3">BIT_initDStream()</a> : Initialize a <a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a>. <code>bitD</code> : a pointer to an already allocated <a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> structure. <code>srcSize</code> must be the <em>exact</em> size of the bitStream, in bytes. </p><dl class="section return"><dt>返回</dt><dd>: size of stream (== srcSize), or an errorCode if a problem is detected </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00292">292</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa3b5740b15375e4719f3839d99b611af" name="aa3b5740b15375e4719f3839d99b611af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3b5740b15375e4719f3839d99b611af">&#9670;&#160;</a></span>BIT_lookBits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t BIT_lookBits </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *&#160;</td>
+          <td class="paramname"><em>bitD</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>nbBits</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="bitstream_8h.html#aa3b5740b15375e4719f3839d99b611af">BIT_lookBits()</a> : Provides next n bits from local register. local register is not modified. On 32-bits, maxNbBits==24. On 64-bits, maxNbBits==56. </p><dl class="section return"><dt>返回</dt><dd>: value extracted </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00365">365</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad0de79941451b1b41e4db5f9c425646c" name="ad0de79941451b1b41e4db5f9c425646c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0de79941451b1b41e4db5f9c425646c">&#9670;&#160;</a></span>BIT_lookBitsFast()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t BIT_lookBitsFast </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *&#160;</td>
+          <td class="paramname"><em>bitD</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>nbBits</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="bitstream_8h.html#ad0de79941451b1b41e4db5f9c425646c">BIT_lookBitsFast()</a> : unsafe version; only works if nbBits &gt;= 1 </p>
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00381">381</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a290134ce7b5c9b82c0425461a75631ee" name="a290134ce7b5c9b82c0425461a75631ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a290134ce7b5c9b82c0425461a75631ee">&#9670;&#160;</a></span>BIT_readBits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t BIT_readBits </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *&#160;</td>
+          <td class="paramname"><em>bitD</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbBits</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="bitstream_8h.html#a290134ce7b5c9b82c0425461a75631ee">BIT_readBits()</a> : Read (consume) next n bits from local register and update. Pay attention to not read more than nbBits contained into local register. </p><dl class="section return"><dt>返回</dt><dd>: extracted value. </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00397">397</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a849084e406b9d3cd5aed35ed4bba7cda" name="a849084e406b9d3cd5aed35ed4bba7cda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a849084e406b9d3cd5aed35ed4bba7cda">&#9670;&#160;</a></span>BIT_readBitsFast()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> size_t BIT_readBitsFast </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *&#160;</td>
+          <td class="paramname"><em>bitD</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>nbBits</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="bitstream_8h.html#a849084e406b9d3cd5aed35ed4bba7cda">BIT_readBitsFast()</a> : unsafe version; only works only if nbBits &gt;= 1 </p>
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00406">406</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a17753ccd470bc391190e023401e2f795" name="a17753ccd470bc391190e023401e2f795"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17753ccd470bc391190e023401e2f795">&#9670;&#160;</a></span>BIT_reloadDStream()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="bitstream_8h.html#a5bf8aaa2b95a3ddaf5d7d6b4cd99ce6a">BIT_DStream_status</a> BIT_reloadDStream </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *&#160;</td>
+          <td class="paramname"><em>bitD</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="bitstream_8h.html#a17753ccd470bc391190e023401e2f795">BIT_reloadDStream()</a> : Refill <code>bitD</code> from buffer previously set in <a class="el" href="bitstream_8h.html#a01bc56df5d3b4844fd5bf6bde7393bd3">BIT_initDStream()</a> . This function is safe, it guarantees it will not read beyond src buffer. </p><dl class="section return"><dt>返回</dt><dd>: status of <code><a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a></code> internal register. when status == BIT_DStream_unfinished, internal register is filled with at least 25 or 57 bits </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00419">419</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0e30e1c35bbd7038ae750b05ea2d8ab5" name="a0e30e1c35bbd7038ae750b05ea2d8ab5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e30e1c35bbd7038ae750b05ea2d8ab5">&#9670;&#160;</a></span>BIT_skipBits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> void BIT_skipBits </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structBIT__DStream__t.html">BIT_DStream_t</a> *&#160;</td>
+          <td class="paramname"><em>bitD</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>nbBits</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00388">388</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a8cca4e440af689b90c00e9c97953f6f4" name="a8cca4e440af689b90c00e9c97953f6f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8cca4e440af689b90c00e9c97953f6f4">&#9670;&#160;</a></span>BIT_mask</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned BIT_mask[]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>初始值:</b><div class="fragment"><div class="line">= {</div>
+<div class="line">    0,          1,         3,         7,         0xF,       0x1F,</div>
+<div class="line">    0x3F,       0x7F,      0xFF,      0x1FF,     0x3FF,     0x7FF,</div>
+<div class="line">    0xFFF,      0x1FFF,    0x3FFF,    0x7FFF,    0xFFFF,    0x1FFFF,</div>
+<div class="line">    0x3FFFF,    0x7FFFF,   0xFFFFF,   0x1FFFFF,  0x3FFFFF,  0x7FFFFF,</div>
+<div class="line">    0xFFFFFF,   0x1FFFFFF, 0x3FFFFFF, 0x7FFFFFF, 0xFFFFFFF, 0x1FFFFFFF,</div>
+<div class="line">    0x3FFFFFFF, 0x7FFFFFFF}</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="bitstream_8h_source.html">bitstream.h</a> 第 <a class="el" href="bitstream_8h_source.html#l00187">187</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="bitstream_8h.html">bitstream.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

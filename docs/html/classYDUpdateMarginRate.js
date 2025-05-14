@@ -1,0 +1,26 @@
+var classYDUpdateMarginRate =
+[
+    [ "AccountRef", "classYDUpdateMarginRate.html#aa8596518b28ebffc677ed892fc19f16a", null ],
+    [ "BaseMarginRate", "classYDUpdateMarginRate.html#a4dc798590b991a0f12c7f32a43afdbdf", null ],
+    [ "CallMarginRatioByMoney", "classYDUpdateMarginRate.html#a27b36871c7265c8f4bbfc386b528702a", null ],
+    [ "CallMarginRatioByVolume", "classYDUpdateMarginRate.html#ac8d148aacae4bfaf1c8cd64ec13c74f1", null ],
+    [ "ExpireDate", "classYDUpdateMarginRate.html#a97d539db94ee99e5e5c6627dd5f61e7f", null ],
+    [ "HedgeFlagSet", "classYDUpdateMarginRate.html#aec2369bc24ce35afc537672f6a77a16d", null ],
+    [ "InstrumentRef", "classYDUpdateMarginRate.html#a4e0a69a09cba190bda3d8c344b0f2164", null ],
+    [ "LinearFactor", "classYDUpdateMarginRate.html#aae857af58334cc0c7e5d39404c0f6c03", null ],
+    [ "LongMarginRatioByMoney", "classYDUpdateMarginRate.html#a8ba1b6eb489175e98be22d05f3d0e073", null ],
+    [ "LongMarginRatioByVolume", "classYDUpdateMarginRate.html#ad546e6b9781990d912808da25d358a61", null ],
+    [ "LowerBoundaryCoef", "classYDUpdateMarginRate.html#a25f052c55dcd575ea8b04ef70d773704", null ],
+    [ "Multiple", "classYDUpdateMarginRate.html#a8e6c544350ec26e3bae82e2c9baf7e4f", null ],
+    [ "OptionTypeSet", "classYDUpdateMarginRate.html#afc27564cfc05cd7473ff9022cdee1bb6", null ],
+    [ "ProductRef", "classYDUpdateMarginRate.html#a7cff45839ec91a285dd4b8448d4a7de3", null ],
+    [ "PutMarginRatioByMoney", "classYDUpdateMarginRate.html#a069f06f3a27a3fcf24ae911c5fc72f4e", null ],
+    [ "PutMarginRatioByVolume", "classYDUpdateMarginRate.html#a48484b25b0792c044a09f52d59aa44e0", null ],
+    [ "ShortMarginRatioByMoney", "classYDUpdateMarginRate.html#ae0ba4406fcea57eef8b3ec581ffbef56", null ],
+    [ "ShortMarginRatioByVolume", "classYDUpdateMarginRate.html#a91faf99dd7e8ed9c6e5f6ed0e4839c56", null ],
+    [ "SystemUse1", "classYDUpdateMarginRate.html#a658678d19d1fbf17e2f84572569da00d", null ],
+    [ "SystemUse2", "classYDUpdateMarginRate.html#a15fb44a0673c52d7b33a09a6a0710be0", null ],
+    [ "SystemUse3", "classYDUpdateMarginRate.html#a6606a8d190823955295519767b290436", null ],
+    [ "SystemUse4", "classYDUpdateMarginRate.html#a592b8b4df9a6fe1dd70f4ac0537b9229", null ],
+    [ "UnderlyingInstrumentRef", "classYDUpdateMarginRate.html#afa36ca2cc3f7ba3f5addac880edbf0de", null ]
+];

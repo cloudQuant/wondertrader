@@ -1,0 +1,339 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/cpu.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('cpu_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">cpu.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="cpu_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (c) 2018-present, Facebook, Inc.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * This source code is licensed under both the BSD-style license (found in the</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * LICENSE file in the root directory of this source tree) and the GPLv2 (found</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * in the COPYING file in the root directory of this source tree).</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * You may select, at your option, one of the above-listed licenses.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#ifndef ZSTD_COMMON_CPU_H</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#define ZSTD_COMMON_CPU_H</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;<a class="code" href="mem_8h.html">mem.h</a>&quot;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#ifdef _MSC_VER</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;intrin.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="foldopen" id="foldopen00027" data-start="{" data-end="};">
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="structZSTD__cpuid__t.html">   27</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="structZSTD__cpuid__t.html#a86828aed43709dd04374155d6b526fba">   28</a></span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="code hl_variable" href="structZSTD__cpuid__t.html#a86828aed43709dd04374155d6b526fba">f1c</a>;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="structZSTD__cpuid__t.html#a5eedae7bbb45847923f1d512d61316a1">   29</a></span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="code hl_variable" href="structZSTD__cpuid__t.html#a5eedae7bbb45847923f1d512d61316a1">f1d</a>;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="structZSTD__cpuid__t.html#af8528010ec2621e98f1340dcf97c5e37">   30</a></span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="code hl_variable" href="structZSTD__cpuid__t.html#af8528010ec2621e98f1340dcf97c5e37">f7b</a>;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="structZSTD__cpuid__t.html#aa5e3aca261f5fa959bcffb63b2d7ba50">   31</a></span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="code hl_variable" href="structZSTD__cpuid__t.html#aa5e3aca261f5fa959bcffb63b2d7ba50">f7c</a>;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>} <a class="code hl_struct" href="structZSTD__cpuid__t.html">ZSTD_cpuid_t</a>;</div>
+</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="foldopen" id="foldopen00034" data-start="{" data-end="}">
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="cpu_8h.html#a78a6773999ec058a68d305925239c0ae">   34</a></span><a class="code hl_define" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="code hl_struct" href="structZSTD__cpuid__t.html">ZSTD_cpuid_t</a> <a class="code hl_function" href="cpu_8h.html#a78a6773999ec058a68d305925239c0ae">ZSTD_cpuid</a>(<span class="keywordtype">void</span>) {</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> f1c = 0;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> f1d = 0;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> f7b = 0;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> f7c = 0;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#if defined(_MSC_VER) &amp;&amp; (defined(_M_X64) || defined(_M_IX86))</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordtype">int</span> reg[4];</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    __cpuid((<span class="keywordtype">int</span>*)reg, 0);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    {</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <span class="keywordtype">int</span> <span class="keyword">const</span> n = reg[0];</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        <span class="keywordflow">if</span> (n &gt;= 1) {</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>            __cpuid((<span class="keywordtype">int</span>*)reg, 1);</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>            f1c = (<a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)reg[2];</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>            f1d = (<a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)reg[3];</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        }</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="keywordflow">if</span> (n &gt;= 7) {</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>            __cpuidex((<span class="keywordtype">int</span>*)reg, 7, 0);</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>            f7b = (<a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)reg[1];</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>            f7c = (<a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>)reg[2];</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        }</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    }</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#elif defined(__i386__) &amp;&amp; defined(__PIC__) &amp;&amp; !defined(__clang__) &amp;&amp; defined(__GNUC__)</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="comment">/* The following block like the normal cpuid branch below, but gcc</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="comment">     * reserves ebx for use of its pic register so we must specially</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">     * handle the save and restore to avoid clobbering the register</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> n;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    __asm__(</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        <span class="stringliteral">&quot;pushl %%ebx\n\t&quot;</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="stringliteral">&quot;cpuid\n\t&quot;</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <span class="stringliteral">&quot;popl %%ebx\n\t&quot;</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        : <span class="stringliteral">&quot;=a&quot;</span>(n)</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        : <span class="stringliteral">&quot;a&quot;</span>(0)</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        : <span class="stringliteral">&quot;ecx&quot;</span>, <span class="stringliteral">&quot;edx&quot;</span>);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keywordflow">if</span> (n &gt;= 1) {</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>      <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> f1a;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>      __asm__(</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>          <span class="stringliteral">&quot;pushl %%ebx\n\t&quot;</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>          <span class="stringliteral">&quot;cpuid\n\t&quot;</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>          <span class="stringliteral">&quot;popl %%ebx\n\t&quot;</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>          : <span class="stringliteral">&quot;=a&quot;</span>(f1a), <span class="stringliteral">&quot;=c&quot;</span>(f1c), <span class="stringliteral">&quot;=d&quot;</span>(f1d)</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>          : <span class="stringliteral">&quot;a&quot;</span>(1));</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    }</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keywordflow">if</span> (n &gt;= 7) {</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>      __asm__(</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>          <span class="stringliteral">&quot;pushl %%ebx\n\t&quot;</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>          <span class="stringliteral">&quot;cpuid\n\t&quot;</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>          <span class="stringliteral">&quot;movl %%ebx, %%eax\n\t&quot;</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>          <span class="stringliteral">&quot;popl %%ebx&quot;</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>          : <span class="stringliteral">&quot;=a&quot;</span>(f7b), <span class="stringliteral">&quot;=c&quot;</span>(f7c)</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>          : <span class="stringliteral">&quot;a&quot;</span>(7), <span class="stringliteral">&quot;c&quot;</span>(0)</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>          : <span class="stringliteral">&quot;edx&quot;</span>);</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    }</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="preprocessor">#elif defined(__x86_64__) || defined(_M_X64) || defined(__i386__)</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> n;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    __asm__(<span class="stringliteral">&quot;cpuid&quot;</span> : <span class="stringliteral">&quot;=a&quot;</span>(n) : <span class="stringliteral">&quot;a&quot;</span>(0) : <span class="stringliteral">&quot;ebx&quot;</span>, <span class="stringliteral">&quot;ecx&quot;</span>, <span class="stringliteral">&quot;edx&quot;</span>);</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="keywordflow">if</span> (n &gt;= 1) {</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>      <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> f1a;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>      __asm__(<span class="stringliteral">&quot;cpuid&quot;</span> : <span class="stringliteral">&quot;=a&quot;</span>(f1a), <span class="stringliteral">&quot;=c&quot;</span>(f1c), <span class="stringliteral">&quot;=d&quot;</span>(f1d) : <span class="stringliteral">&quot;a&quot;</span>(1) : <span class="stringliteral">&quot;ebx&quot;</span>);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    }</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keywordflow">if</span> (n &gt;= 7) {</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>      <a class="code hl_typedef" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> f7a;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>      __asm__(<span class="stringliteral">&quot;cpuid&quot;</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>              : <span class="stringliteral">&quot;=a&quot;</span>(f7a), <span class="stringliteral">&quot;=b&quot;</span>(f7b), <span class="stringliteral">&quot;=c&quot;</span>(f7c)</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>              : <span class="stringliteral">&quot;a&quot;</span>(7), <span class="stringliteral">&quot;c&quot;</span>(0)</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>              : <span class="stringliteral">&quot;edx&quot;</span>);</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    }</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    {</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        <a class="code hl_struct" href="structZSTD__cpuid__t.html">ZSTD_cpuid_t</a> cpuid;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        cpuid.<a class="code hl_variable" href="structZSTD__cpuid__t.html#a86828aed43709dd04374155d6b526fba">f1c</a> = f1c;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        cpuid.<a class="code hl_variable" href="structZSTD__cpuid__t.html#a5eedae7bbb45847923f1d512d61316a1">f1d</a> = f1d;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        cpuid.<a class="code hl_variable" href="structZSTD__cpuid__t.html#af8528010ec2621e98f1340dcf97c5e37">f7b</a> = f7b;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        cpuid.<a class="code hl_variable" href="structZSTD__cpuid__t.html#aa5e3aca261f5fa959bcffb63b2d7ba50">f7c</a> = f7c;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        <span class="keywordflow">return</span> cpuid;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    }</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>}</div>
+</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="foldopen" id="foldopen00112" data-start="" data-end="">
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="cpu_8h.html#a7964be6e3a4fa10246caa18b5df4da34">  112</a></span><span class="preprocessor">#define X(name, r, bit)                                                        \</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="preprocessor">  MEM_STATIC int ZSTD_cpuid_##name(ZSTD_cpuid_t const cpuid) {                 \</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="preprocessor">    return ((cpuid.r) &amp; (1U &lt;&lt; bit)) != 0;                                     \</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="preprocessor">  }</span></div>
+</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="comment">/* cpuid(1): Processor Info and Feature Bits. */</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">  118</a></span><span class="preprocessor">#define C(name, bit) X(name, f1c, bit)</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno"><a class="line" href="cpu_8h.html#aacb0af2153609d8d5adb05ab94a1fddc">  119</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(sse3, 0)</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(pclmuldq, 1)</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno"><a class="line" href="cpu_8h.html#a867c4f3f2665363966f7ee21ba3b1c97">  121</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(dtes64, 2)</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(monitor, 3)</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="cpu_8h.html#a1ba24823c19cf96f2d76a5dba0437cc3">  123</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(dscpl, 4)</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(vmx, 5)</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="cpu_8h.html#a915644a23b9264c811b3b6e4cc75fb5e">  125</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(smx, 6)</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(eist, 7)</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="cpu_8h.html#a725a791e6eff0ce7faaa9541da969a36">  127</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(tm2, 8)</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(ssse3, 9)</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno"><a class="line" href="cpu_8h.html#aac42b0ab45acfbed6510e62085068be3">  129</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(cnxtid, 10)</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(fma, 12)</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="cpu_8h.html#a42e522a4bb68c7444112c30d846b1e19">  131</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(cx16, 13)</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(xtpr, 14)</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno"><a class="line" href="cpu_8h.html#aa6b6c5dec89197aedfc4e55c2de823f5">  133</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(pdcm, 15)</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(pcid, 17)</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno"><a class="line" href="cpu_8h.html#aca202d9d1d1f504d7c0857d7441fbce7">  135</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(dca, 18)</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(sse41, 19)</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno"><a class="line" href="cpu_8h.html#acb21e79b715466a1c8a227ae0f37f27a">  137</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(sse42, 20)</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(x2apic, 21)</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="cpu_8h.html#a3c3107b52e448ccecebc2de5d298d581">  139</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(movbe, 22)</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(popcnt, 23)</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="cpu_8h.html#a8f8c47772774217429c9094e152d7a6c">  141</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(tscdeadline, 24)</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(aes, 25)</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="cpu_8h.html#a0bcce7e6f60295c7638f6e4c9950c0be">  143</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(xsave, 26)</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(osxsave, 27)</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="cpu_8h.html#a5766adce6fd79a9600420a14a9e90edd">  145</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(avx, 28)</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(f16c, 29)</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno"><a class="line" href="cpu_8h.html#ae91b88d184dd84533bd5d4c78a8df450">  147</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(rdrand, 30)</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span><span class="preprocessor">#undef C</span></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="preprocessor">#define D(name, bit) X(name, f1d, bit)</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(fpu, 0)</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="cpu_8h.html#a391330389b792182ba7193c7748a7fa3">  151</a></span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(vme, 1)</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(de, 2)</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno"><a class="line" href="cpu_8h.html#ab8eb40cf192af788777447cdf75754bd">  153</a></span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(pse, 3)</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(tsc, 4)</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno"><a class="line" href="cpu_8h.html#a43192823573e03a7b980a4445028fb8f">  155</a></span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(msr, 5)</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(pae, 6)</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno"><a class="line" href="cpu_8h.html#ae3a52576b5b9e6e2ca07f9ca3596d372">  157</a></span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(mce, 7)</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(cx8, 8)</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno"><a class="line" href="cpu_8h.html#a3d5a486276795f2d5033e5561339c323">  159</a></span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(apic, 9)</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(sep, 11)</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno"><a class="line" href="cpu_8h.html#ac8717604dda543ab3df9774e4c8f022c">  161</a></span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(mtrr, 12)</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(pge, 13)</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno"><a class="line" href="cpu_8h.html#a0a11af459cb6d20758023b78f72cf2fe">  163</a></span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(mca, 14)</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(cmov, 15)</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno"><a class="line" href="cpu_8h.html#af839db1e1c0776c7dffaa82cdae3298a">  165</a></span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(pat, 16)</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(pse36, 17)</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno"><a class="line" href="cpu_8h.html#ac9920f7f37c1356eb8b7ceaa9fe03e2c">  167</a></span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(psn, 18)</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(clfsh, 19)</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno"><a class="line" href="cpu_8h.html#a26f33957ef67eefdb6ba134f8c61a9e9">  169</a></span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(ds, 21)</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(acpi, 22)</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno"><a class="line" href="cpu_8h.html#a18336cf554c68991a60f3d778f717e30">  171</a></span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(mmx, 23)</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(fxsr, 24)</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno"><a class="line" href="cpu_8h.html#aec4bab4fb69f584fd3a6e1864d2dfd7a">  173</a></span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(sse, 25)</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(sse2, 26)</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno"><a class="line" href="cpu_8h.html#a417e5734de62a144c591312639e491a2">  175</a></span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(ss, 27)</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(htt, 28)</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno"><a class="line" href="cpu_8h.html#a35fbe24d42e9964e6abec22de86a714d">  177</a></span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(tm, 29)</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>  <a class="code hl_define" href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a>(pbe, 31)</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span><span class="preprocessor">#undef D</span></div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span><span class="comment">/* cpuid(7): Extended Features. */</span></div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno"><a class="line" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">  182</a></span><span class="preprocessor">#define B(name, bit) X(name, f7b, bit)</span></div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno"><a class="line" href="cpu_8h.html#a93f27bff78a0e718dd106bea6c2d3b76">  183</a></span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(bmi1, 3)</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(hle, 4)</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno"><a class="line" href="cpu_8h.html#a236f76efd52076bd2d2817df0e6a0718">  185</a></span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(avx2, 5)</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(smep, 7)</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno"><a class="line" href="cpu_8h.html#a7848e8e833056784a7a609d9dd0cea2a">  187</a></span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(bmi2, 8)</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(erms, 9)</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno"><a class="line" href="cpu_8h.html#ac52bf563925c9993ecfb1a6747656ea4">  189</a></span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(invpcid, 10)</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(rtm, 11)</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno"><a class="line" href="cpu_8h.html#ad96b7da92a26e603f52b6bc603b3ec0e">  191</a></span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(mpx, 14)</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(avx512f, 16)</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno"><a class="line" href="cpu_8h.html#acd88d04eeea304718b2fe43b410e19d1">  193</a></span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(avx512dq, 17)</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(rdseed, 18)</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno"><a class="line" href="cpu_8h.html#a38d1d9f89a6bb9857a193c49be7fe861">  195</a></span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(adx, 19)</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(smap, 20)</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno"><a class="line" href="cpu_8h.html#a8613134bb2e3b9d704c320d555e34c60">  197</a></span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(avx512ifma, 21)</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(pcommit, 22)</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno"><a class="line" href="cpu_8h.html#a133068db3ec377aa3e103502d5a30e0c">  199</a></span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(clflushopt, 23)</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(clwb, 24)</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno"><a class="line" href="cpu_8h.html#ad77af2ee19d72c9df74b9d04935423b4">  201</a></span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(avx512pf, 26)</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(avx512er, 27)</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno"><a class="line" href="cpu_8h.html#aa8623c767ccb59872c04771ccb3ee4e6">  203</a></span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(avx512cd, 28)</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(sha, 29)</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno"><a class="line" href="cpu_8h.html#a8fd2a58ef2901726b571abd80a58a880">  205</a></span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(avx512bw, 30)</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>  <a class="code hl_define" href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a>(avx512vl, 31)</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span><span class="preprocessor">#undef B</span></div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span><span class="preprocessor">#define C(name, bit) X(name, f7c, bit)</span></div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno"><a class="line" href="cpu_8h.html#a1d89428e18507b512f024566f06adfa2">  209</a></span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(prefetchwt1, 0)</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>  <a class="code hl_define" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a>(avx512vbmi, 1)</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span><span class="preprocessor">#undef C</span></div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span> </div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span><span class="preprocessor">#undef X</span></div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span> </div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span><span class="preprocessor">#endif </span><span class="comment">/* ZSTD_COMMON_CPU_H */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="acpu_8h_html_a6cf6fb3d5954b7c743b07616f47166cd"><div class="ttname"><a href="cpu_8h.html#a6cf6fb3d5954b7c743b07616f47166cd">B</a></div><div class="ttdeci">#define B(name, bit)</div><div class="ttdef"><b>Definition</b> <a href="cpu_8h_source.html#l00182">cpu.h:182</a></div></div>
+<div class="ttc" id="acpu_8h_html_a78a6773999ec058a68d305925239c0ae"><div class="ttname"><a href="cpu_8h.html#a78a6773999ec058a68d305925239c0ae">ZSTD_cpuid</a></div><div class="ttdeci">MEM_STATIC ZSTD_cpuid_t ZSTD_cpuid(void)</div><div class="ttdef"><b>Definition</b> <a href="cpu_8h_source.html#l00034">cpu.h:34</a></div></div>
+<div class="ttc" id="acpu_8h_html_a88f7db79d90030b170014ca4939fd729"><div class="ttname"><a href="cpu_8h.html#a88f7db79d90030b170014ca4939fd729">D</a></div><div class="ttdeci">#define D(name, bit)</div></div>
+<div class="ttc" id="acpu_8h_html_ab4ea6500801cc6f149d5ea05a269e08d"><div class="ttname"><a href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a></div><div class="ttdeci">#define C(name, bit)</div><div class="ttdef"><b>Definition</b> <a href="cpu_8h_source.html#l00118">cpu.h:118</a></div></div>
+<div class="ttc" id="amem_8h_html"><div class="ttname"><a href="mem_8h.html">mem.h</a></div></div>
+<div class="ttc" id="amem_8h_html_ac3df7cf3c8cb172a588adec881447d68"><div class="ttname"><a href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a></div><div class="ttdeci">unsigned int U32</div><div class="ttdef"><b>Definition</b> <a href="mem_8h_source.html#l00150">mem.h:150</a></div></div>
+<div class="ttc" id="amem_8h_html_acf4d568511d5e964c3579616a28ab62b"><div class="ttname"><a href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a></div><div class="ttdeci">#define MEM_STATIC</div><div class="ttdef"><b>Definition</b> <a href="mem_8h_source.html#l00039">mem.h:39</a></div></div>
+<div class="ttc" id="astructZSTD__cpuid__t_html"><div class="ttname"><a href="structZSTD__cpuid__t.html">ZSTD_cpuid_t</a></div><div class="ttdef"><b>Definition</b> <a href="cpu_8h_source.html#l00027">cpu.h:27</a></div></div>
+<div class="ttc" id="astructZSTD__cpuid__t_html_a5eedae7bbb45847923f1d512d61316a1"><div class="ttname"><a href="structZSTD__cpuid__t.html#a5eedae7bbb45847923f1d512d61316a1">ZSTD_cpuid_t::f1d</a></div><div class="ttdeci">U32 f1d</div><div class="ttdef"><b>Definition</b> <a href="cpu_8h_source.html#l00029">cpu.h:29</a></div></div>
+<div class="ttc" id="astructZSTD__cpuid__t_html_a86828aed43709dd04374155d6b526fba"><div class="ttname"><a href="structZSTD__cpuid__t.html#a86828aed43709dd04374155d6b526fba">ZSTD_cpuid_t::f1c</a></div><div class="ttdeci">U32 f1c</div><div class="ttdef"><b>Definition</b> <a href="cpu_8h_source.html#l00028">cpu.h:28</a></div></div>
+<div class="ttc" id="astructZSTD__cpuid__t_html_aa5e3aca261f5fa959bcffb63b2d7ba50"><div class="ttname"><a href="structZSTD__cpuid__t.html#aa5e3aca261f5fa959bcffb63b2d7ba50">ZSTD_cpuid_t::f7c</a></div><div class="ttdeci">U32 f7c</div><div class="ttdef"><b>Definition</b> <a href="cpu_8h_source.html#l00031">cpu.h:31</a></div></div>
+<div class="ttc" id="astructZSTD__cpuid__t_html_af8528010ec2621e98f1340dcf97c5e37"><div class="ttname"><a href="structZSTD__cpuid__t.html#af8528010ec2621e98f1340dcf97c5e37">ZSTD_cpuid_t::f7b</a></div><div class="ttdeci">U32 f7b</div><div class="ttdef"><b>Definition</b> <a href="cpu_8h_source.html#l00030">cpu.h:30</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="cpu_8h.html">cpu.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

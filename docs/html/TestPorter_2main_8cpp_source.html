@@ -1,0 +1,288 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/TestPorter/main.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('TestPorter_2main_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">main.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="TestPorter_2main_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#af08ec37a8c99d747fb60fa15bc28678b">    1</a></span><span class="preprocessor">#define _CRT_SECURE_NO_WARNINGS</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &quot;../WtPorter/WtPorter.h&quot;</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">//#include &quot;../WtExecMon/WtExecPorter.h&quot;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;../Includes/WTSStruct.h&quot;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;../Share/DLLHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;../Share/CodeHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;../Share/fmtlib.h&quot;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="foldopen" id="foldopen00010" data-start="{" data-end="}">
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#a7a26a0c6bbd62c87337759b8bcba46e7">   10</a></span><span class="keywordtype">void</span> <a class="code hl_define" href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a> <a class="code hl_function" href="TestBtPorter_2main_8cpp.html#a5f50979b140fd5d22c10325adbf30313">on_init</a>(<a class="code hl_typedef" href="WtBtPorter_2PorterDefs_8h.html#a126d13bb3a5268b5a33846a169563316">CtxHandler</a> ctxid)</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>{</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    fmt::print(<span class="stringliteral">&quot;on_init\n&quot;</span>);</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    <a class="code hl_function" href="WtBtPorter_8cpp.html#ab2607e8b1e1cfc99339d077c5df8fd59">hft_sub_ticks</a>(ctxid, <span class="stringliteral">&quot;CFFEX.IF.HOT&quot;</span>);</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>}</div>
+</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="foldopen" id="foldopen00016" data-start="{" data-end="}">
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#a2d3df5f3d3df5c562c81f4433662965b">   16</a></span><span class="keywordtype">void</span> <a class="code hl_define" href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a> <a class="code hl_function" href="TestBtPorter_2main_8cpp.html#ae7745ab7331202e439e4fad8a55654f1">on_tick</a>(<a class="code hl_typedef" href="WtBtPorter_2PorterDefs_8h.html#a126d13bb3a5268b5a33846a169563316">CtxHandler</a> ctxid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>* newTick)</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>{</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    fmt::print(<span class="stringliteral">&quot;on_tick\n&quot;</span>);</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>}</div>
+</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="foldopen" id="foldopen00021" data-start="{" data-end="}">
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#ae38ccb4b0f97704d34ebf0a4a7ca4209">   21</a></span><span class="keywordtype">void</span> <a class="code hl_define" href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a> <a class="code hl_function" href="TestBtPorter_2main_8cpp.html#a18e9629dba27ccbb4c3fea1cf34ccafc">on_calc</a>(<a class="code hl_typedef" href="WtBtPorter_2PorterDefs_8h.html#a126d13bb3a5268b5a33846a169563316">CtxHandler</a> ctxid, <a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> uDate, <a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> uTime)</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>{</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    fmt::print(<span class="stringliteral">&quot;on_calc\n&quot;</span>);</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>}</div>
+</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="foldopen" id="foldopen00026" data-start="{" data-end="}">
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#a7c84fa3906597b17c67dd3bf88caa7a9">   26</a></span><span class="keywordtype">void</span> <a class="code hl_define" href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a> <a class="code hl_function" href="TestBtPorter_2main_8cpp.html#a6d9526d0010162df437dd53bf2a2b3e8">on_bar</a>(<a class="code hl_typedef" href="WtBtPorter_2PorterDefs_8h.html#a126d13bb3a5268b5a33846a169563316">CtxHandler</a> ctxid, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* newBar)</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>{</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    fmt::print(<span class="stringliteral">&quot;on_bar\n&quot;</span>);</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>}</div>
+</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="foldopen" id="foldopen00031" data-start="{" data-end="}">
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#aec8cb729e0a38bb776a519419e6db512">   31</a></span><span class="keywordtype">void</span> <a class="code hl_define" href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a> <a class="code hl_function" href="TestBtPorter_2main_8cpp.html#ab57d40b0f78e6c63cff752a1d5c0c5dc">on_getbar</a>(<a class="code hl_typedef" href="WtBtPorter_2PorterDefs_8h.html#a126d13bb3a5268b5a33846a169563316">CtxHandler</a> ctxid, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* bar, <span class="keywordtype">bool</span> isLast)</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>{</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keywordflow">if</span> (bar)</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        fmt::print(<span class="stringliteral">&quot;on_getbar: {}\n&quot;</span>, bar-&gt;<a class="code hl_variable" href="structWTSBarStruct.html#ad83e851fd7043b0484a2ba6bdf0588ca">time</a>);</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        <span class="keywordtype">int</span> x = 1;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>}</div>
+</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="}">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#a8b4a61cb55ada6158aab6b50becd2814">   39</a></span><span class="keywordtype">void</span> <a class="code hl_define" href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a> <a class="code hl_function" href="TestPorter_2main_8cpp.html#a8b4a61cb55ada6158aab6b50becd2814">on_getticks</a>(<a class="code hl_typedef" href="WtBtPorter_2PorterDefs_8h.html#a126d13bb3a5268b5a33846a169563316">CtxHandler</a> cHandle, <span class="keyword">const</span> <span class="keywordtype">char</span>* code, <a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>* tick, <span class="keywordtype">bool</span> isLast)</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>{</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    fmt::print(<span class="stringliteral">&quot;on_getticks\n&quot;</span>);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}</div>
+</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="foldopen" id="foldopen00044" data-start="{" data-end="}">
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#a61d46d0e29a015d11aa4c29f4dde2667">   44</a></span><span class="keywordtype">void</span> <a class="code hl_define" href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a> <a class="code hl_function" href="TestPorter_2main_8cpp.html#a61d46d0e29a015d11aa4c29f4dde2667">on_event</a>(<a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> evtId, <a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> curDate, <a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> curTime)</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>{</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    fmt::print(<span class="stringliteral">&quot;on_event\n&quot;</span>);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>}</div>
+</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="foldopen" id="foldopen00049" data-start="{" data-end="}">
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#a0c8ee8f083790571a36f9f84e56103fc">   49</a></span><span class="keywordtype">void</span> <a class="code hl_define" href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a> <a class="code hl_function" href="TestPorter_2main_8cpp.html#a0c8ee8f083790571a36f9f84e56103fc">on_channel_evt</a>(<a class="code hl_typedef" href="WtBtPorter_2PorterDefs_8h.html#a126d13bb3a5268b5a33846a169563316">CtxHandler</a> cHandle, <span class="keyword">const</span> <span class="keywordtype">char</span>* trader, <a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> evtid)</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>{</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    fmt::print(<span class="stringliteral">&quot;on_channel_evt\n&quot;</span>);</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordtype">double</span> undone = <a class="code hl_function" href="WtBtPorter_8cpp.html#ad3f39488e1b59aced738ea9fe757a999">hft_get_undone</a>(cHandle, <span class="stringliteral">&quot;CFFEX.IF.HOT&quot;</span>);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>}</div>
+</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="foldopen" id="foldopen00055" data-start="{" data-end="}">
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#a29eb84c8af7990e67d8ce9bc8114b1d7">   55</a></span><span class="keywordtype">void</span> <a class="code hl_define" href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a> <a class="code hl_function" href="TestPorter_2main_8cpp.html#a29eb84c8af7990e67d8ce9bc8114b1d7">on_order</a>(<a class="code hl_typedef" href="WtBtPorter_2PorterDefs_8h.html#a126d13bb3a5268b5a33846a169563316">CtxHandler</a> cHandle, <a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> totalQty, <span class="keywordtype">double</span> leftQty, <span class="keywordtype">double</span> <a class="code hl_variable" href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <span class="keywordtype">bool</span> isCanceled, <span class="keyword">const</span> <span class="keywordtype">char</span>* userTag)</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>{</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>}</div>
+</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="foldopen" id="foldopen00060" data-start="{" data-end="}">
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#a0b231d1c7190db85d4f3a33ef382d573">   60</a></span><span class="keywordtype">void</span> <a class="code hl_define" href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a> <a class="code hl_function" href="TestPorter_2main_8cpp.html#a0b231d1c7190db85d4f3a33ef382d573">on_trade</a>(<a class="code hl_typedef" href="WtBtPorter_2PorterDefs_8h.html#a126d13bb3a5268b5a33846a169563316">CtxHandler</a> cHandle, <a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> vol, <span class="keywordtype">double</span> <a class="code hl_variable" href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <span class="keyword">const</span> <span class="keywordtype">char</span>* userTag)</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>{</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>}</div>
+</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="foldopen" id="foldopen00065" data-start="{" data-end="}">
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#ad7a622ca0e54bb29a7b3896fdd23166e">   65</a></span><span class="keywordtype">void</span> <a class="code hl_define" href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a> <a class="code hl_function" href="TestPorter_2main_8cpp.html#ad7a622ca0e54bb29a7b3896fdd23166e">on_entrust</a>(<a class="code hl_typedef" href="WtBtPorter_2PorterDefs_8h.html#a126d13bb3a5268b5a33846a169563316">CtxHandler</a> cHandle, <a class="code hl_typedef" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> bSuccess, <span class="keyword">const</span> <span class="keywordtype">char</span>* message, <span class="keyword">const</span> <span class="keywordtype">char</span>* userTag)</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>{</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>}</div>
+</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="foldopen" id="foldopen00070" data-start="{" data-end="}">
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#aaf5dd3c1ce4d16298bc983d11156a356">   70</a></span><span class="keywordtype">void</span> <a class="code hl_define" href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a> <a class="code hl_function" href="TestPorter_2main_8cpp.html#aaf5dd3c1ce4d16298bc983d11156a356">on_order_queue</a>(<a class="code hl_typedef" href="WtBtPorter_2PorterDefs_8h.html#a126d13bb3a5268b5a33846a169563316">CtxHandler</a> cHandle, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_struct" href="structWTSOrdQueStruct.html">WTSOrdQueStruct</a>* ordQue)</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>{</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>}</div>
+</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="foldopen" id="foldopen00075" data-start="{" data-end="}">
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#af3bda26439058b27123fe15881997de1">   75</a></span><span class="keywordtype">void</span> <a class="code hl_define" href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a> <a class="code hl_function" href="TestPorter_2main_8cpp.html#af3bda26439058b27123fe15881997de1">on_order_detail</a>(<a class="code hl_typedef" href="WtBtPorter_2PorterDefs_8h.html#a126d13bb3a5268b5a33846a169563316">CtxHandler</a> cHandle, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_struct" href="structWTSOrdDtlStruct.html">WTSOrdDtlStruct</a>* ordDtl)</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>{</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>}</div>
+</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="foldopen" id="foldopen00080" data-start="{" data-end="}">
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#a2dbedeca179cbc9d253df3dba473b4e5">   80</a></span><span class="keywordtype">void</span> <a class="code hl_define" href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a> <a class="code hl_function" href="TestPorter_2main_8cpp.html#a2dbedeca179cbc9d253df3dba473b4e5">on_transaction</a>(<a class="code hl_typedef" href="WtBtPorter_2PorterDefs_8h.html#a126d13bb3a5268b5a33846a169563316">CtxHandler</a> cHandle, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_struct" href="structWTSTransStruct.html">WTSTransStruct</a>* trans)</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>{</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>}</div>
+</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="foldopen" id="foldopen00085" data-start="{" data-end="}">
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#acab788206f567d098fd5f7cba35d62fe">   85</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="TestPorter_2main_8cpp.html#acab788206f567d098fd5f7cba35d62fe">test_porter</a>()</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>{</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <a class="code hl_function" href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a>(<span class="stringliteral">&quot;WtPorter.dll&quot;</span>);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <a class="code hl_function" href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a>(<span class="stringliteral">&quot;libWtPorter.so&quot;</span>);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <a class="code hl_function" href="WtPorter_8cpp.html#ad18805907afdb4a64b8abf31299bfa54">init_porter</a>(<span class="stringliteral">&quot;logcfg.json&quot;</span>, <span class="keyword">true</span>, <span class="stringliteral">&quot;./generated&quot;</span>);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <a class="code hl_function" href="WtPorter_8cpp.html#a1ed91a15ecee85b6375b4c344e2cfde2">reg_hft_factories</a>(<span class="stringliteral">&quot;./hft&quot;</span>);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <a class="code hl_function" href="WtPorter_8cpp.html#a81a2e27cad572857c599b9e5c3df7557">config_porter</a>(<span class="stringliteral">&quot;config.json&quot;</span>, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <a class="code hl_function" href="WtPorter_8cpp.html#a95e3c9e6bff4cd2ee08cbb416f7a138d">run_porter</a>(<span class="keyword">true</span>);</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    fmt::print(<span class="stringliteral">&quot;press enter key to exit\n&quot;</span>);</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    getchar();</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    <a class="code hl_function" href="WtPorter_8cpp.html#a813c0dc7910b5d0ca560c9e8dd833a7d">release_porter</a>();</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>}</div>
+</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="foldopen" id="foldopen00106" data-start="{" data-end="}">
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno"><a class="line" href="TestPorter_2main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">  106</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="TestBtPorter_2main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main</a>()</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>{</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <a class="code hl_function" href="TestPorter_2main_8cpp.html#acab788206f567d098fd5f7cba35d62fe">test_porter</a>();</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    getchar();</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>}</div>
+</div>
+<div class="ttc" id="aAPI_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_html_a04f887fc8800d4727971dbb8eb550132"><div class="ttname"><a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a></div><div class="ttdeci">ATPPriceType price</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00040">main.cpp:40</a></div></div>
+<div class="ttc" id="aTestBtPorter_2main_8cpp_html_a18e9629dba27ccbb4c3fea1cf34ccafc"><div class="ttname"><a href="TestBtPorter_2main_8cpp.html#a18e9629dba27ccbb4c3fea1cf34ccafc">on_calc</a></div><div class="ttdeci">void on_calc(CtxHandler ctxid, WtUInt32 curDate, WtUInt32 curTime)</div><div class="ttdef"><b>Definition</b> <a href="TestBtPorter_2main_8cpp_source.html#l00037">main.cpp:37</a></div></div>
+<div class="ttc" id="aTestBtPorter_2main_8cpp_html_a5f50979b140fd5d22c10325adbf30313"><div class="ttname"><a href="TestBtPorter_2main_8cpp.html#a5f50979b140fd5d22c10325adbf30313">on_init</a></div><div class="ttdeci">void on_init(CtxHandler ctxid)</div><div class="ttdef"><b>Definition</b> <a href="TestBtPorter_2main_8cpp_source.html#l00025">main.cpp:25</a></div></div>
+<div class="ttc" id="aTestBtPorter_2main_8cpp_html_a6d9526d0010162df437dd53bf2a2b3e8"><div class="ttname"><a href="TestBtPorter_2main_8cpp.html#a6d9526d0010162df437dd53bf2a2b3e8">on_bar</a></div><div class="ttdeci">void on_bar(CtxHandler ctxid, const char *code, const char *period, WTSBarStruct *newBar)</div><div class="ttdef"><b>Definition</b> <a href="TestBtPorter_2main_8cpp_source.html#l00050">main.cpp:50</a></div></div>
+<div class="ttc" id="aTestBtPorter_2main_8cpp_html_ab57d40b0f78e6c63cff752a1d5c0c5dc"><div class="ttname"><a href="TestBtPorter_2main_8cpp.html#ab57d40b0f78e6c63cff752a1d5c0c5dc">on_getbar</a></div><div class="ttdeci">void on_getbar(CtxHandler ctxid, const char *code, const char *period, WTSBarStruct *bar, WtUInt32 count, bool isLast)</div><div class="ttdef"><b>Definition</b> <a href="TestBtPorter_2main_8cpp_source.html#l00011">main.cpp:11</a></div></div>
+<div class="ttc" id="aTestBtPorter_2main_8cpp_html_ae66f6b31b5ad750f1fe042a706a4e3d4"><div class="ttname"><a href="TestBtPorter_2main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main</a></div><div class="ttdeci">int main()</div><div class="ttdef"><b>Definition</b> <a href="TestBtPorter_2main_8cpp_source.html#l00101">main.cpp:101</a></div></div>
+<div class="ttc" id="aTestBtPorter_2main_8cpp_html_ae7745ab7331202e439e4fad8a55654f1"><div class="ttname"><a href="TestBtPorter_2main_8cpp.html#ae7745ab7331202e439e4fad8a55654f1">on_tick</a></div><div class="ttdeci">void on_tick(CtxHandler ctxid, const char *stdCode, WTSTickStruct *newTick)</div><div class="ttdef"><b>Definition</b> <a href="TestBtPorter_2main_8cpp_source.html#l00032">main.cpp:32</a></div></div>
+<div class="ttc" id="aTestPorter_2main_8cpp_html_a0b231d1c7190db85d4f3a33ef382d573"><div class="ttname"><a href="TestPorter_2main_8cpp.html#a0b231d1c7190db85d4f3a33ef382d573">on_trade</a></div><div class="ttdeci">void PORTER_FLAG on_trade(CtxHandler cHandle, WtUInt32 localid, const char *stdCode, bool isBuy, double vol, double price, const char *userTag)</div><div class="ttdef"><b>Definition</b> <a href="TestPorter_2main_8cpp_source.html#l00060">main.cpp:60</a></div></div>
+<div class="ttc" id="aTestPorter_2main_8cpp_html_a0c8ee8f083790571a36f9f84e56103fc"><div class="ttname"><a href="TestPorter_2main_8cpp.html#a0c8ee8f083790571a36f9f84e56103fc">on_channel_evt</a></div><div class="ttdeci">void PORTER_FLAG on_channel_evt(CtxHandler cHandle, const char *trader, WtUInt32 evtid)</div><div class="ttdef"><b>Definition</b> <a href="TestPorter_2main_8cpp_source.html#l00049">main.cpp:49</a></div></div>
+<div class="ttc" id="aTestPorter_2main_8cpp_html_a29eb84c8af7990e67d8ce9bc8114b1d7"><div class="ttname"><a href="TestPorter_2main_8cpp.html#a29eb84c8af7990e67d8ce9bc8114b1d7">on_order</a></div><div class="ttdeci">void PORTER_FLAG on_order(CtxHandler cHandle, WtUInt32 localid, const char *stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled, const char *userTag)</div><div class="ttdef"><b>Definition</b> <a href="TestPorter_2main_8cpp_source.html#l00055">main.cpp:55</a></div></div>
+<div class="ttc" id="aTestPorter_2main_8cpp_html_a2dbedeca179cbc9d253df3dba473b4e5"><div class="ttname"><a href="TestPorter_2main_8cpp.html#a2dbedeca179cbc9d253df3dba473b4e5">on_transaction</a></div><div class="ttdeci">void PORTER_FLAG on_transaction(CtxHandler cHandle, const char *stdCode, WTSTransStruct *trans)</div><div class="ttdef"><b>Definition</b> <a href="TestPorter_2main_8cpp_source.html#l00080">main.cpp:80</a></div></div>
+<div class="ttc" id="aTestPorter_2main_8cpp_html_a61d46d0e29a015d11aa4c29f4dde2667"><div class="ttname"><a href="TestPorter_2main_8cpp.html#a61d46d0e29a015d11aa4c29f4dde2667">on_event</a></div><div class="ttdeci">void PORTER_FLAG on_event(WtUInt32 evtId, WtUInt32 curDate, WtUInt32 curTime)</div><div class="ttdef"><b>Definition</b> <a href="TestPorter_2main_8cpp_source.html#l00044">main.cpp:44</a></div></div>
+<div class="ttc" id="aTestPorter_2main_8cpp_html_a8b4a61cb55ada6158aab6b50becd2814"><div class="ttname"><a href="TestPorter_2main_8cpp.html#a8b4a61cb55ada6158aab6b50becd2814">on_getticks</a></div><div class="ttdeci">void PORTER_FLAG on_getticks(CtxHandler cHandle, const char *code, WTSTickStruct *tick, bool isLast)</div><div class="ttdef"><b>Definition</b> <a href="TestPorter_2main_8cpp_source.html#l00039">main.cpp:39</a></div></div>
+<div class="ttc" id="aTestPorter_2main_8cpp_html_aaf5dd3c1ce4d16298bc983d11156a356"><div class="ttname"><a href="TestPorter_2main_8cpp.html#aaf5dd3c1ce4d16298bc983d11156a356">on_order_queue</a></div><div class="ttdeci">void PORTER_FLAG on_order_queue(CtxHandler cHandle, const char *stdCode, WTSOrdQueStruct *ordQue)</div><div class="ttdef"><b>Definition</b> <a href="TestPorter_2main_8cpp_source.html#l00070">main.cpp:70</a></div></div>
+<div class="ttc" id="aTestPorter_2main_8cpp_html_acab788206f567d098fd5f7cba35d62fe"><div class="ttname"><a href="TestPorter_2main_8cpp.html#acab788206f567d098fd5f7cba35d62fe">test_porter</a></div><div class="ttdeci">void test_porter()</div><div class="ttdef"><b>Definition</b> <a href="TestPorter_2main_8cpp_source.html#l00085">main.cpp:85</a></div></div>
+<div class="ttc" id="aTestPorter_2main_8cpp_html_ad7a622ca0e54bb29a7b3896fdd23166e"><div class="ttname"><a href="TestPorter_2main_8cpp.html#ad7a622ca0e54bb29a7b3896fdd23166e">on_entrust</a></div><div class="ttdeci">void PORTER_FLAG on_entrust(CtxHandler cHandle, WtUInt32 localid, const char *stdCode, bool bSuccess, const char *message, const char *userTag)</div><div class="ttdef"><b>Definition</b> <a href="TestPorter_2main_8cpp_source.html#l00065">main.cpp:65</a></div></div>
+<div class="ttc" id="aTestPorter_2main_8cpp_html_af3bda26439058b27123fe15881997de1"><div class="ttname"><a href="TestPorter_2main_8cpp.html#af3bda26439058b27123fe15881997de1">on_order_detail</a></div><div class="ttdeci">void PORTER_FLAG on_order_detail(CtxHandler cHandle, const char *stdCode, WTSOrdDtlStruct *ordDtl)</div><div class="ttdef"><b>Definition</b> <a href="TestPorter_2main_8cpp_source.html#l00075">main.cpp:75</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a137b118e8aaff7fc7ff0a17f2bd7141e"><div class="ttname"><a href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a></div><div class="ttdeci">unsigned int WtUInt32</div><div class="ttdoc">WonderTrader类型别名定义</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00121">WTSMarcos.h:121</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_af32d33371ded38b96726e5a2243cdecb"><div class="ttname"><a href="WTSMarcos_8h.html#af32d33371ded38b96726e5a2243cdecb">PORTER_FLAG</a></div><div class="ttdeci">#define PORTER_FLAG</div><div class="ttdoc">函数调用约定宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00113">WTSMarcos.h:113</a></div></div>
+<div class="ttc" id="aWtBtPorter_2PorterDefs_8h_html_a126d13bb3a5268b5a33846a169563316"><div class="ttname"><a href="WtBtPorter_2PorterDefs_8h.html#a126d13bb3a5268b5a33846a169563316">CtxHandler</a></div><div class="ttdeci">unsigned long CtxHandler</div><div class="ttdoc">策略上下文句柄类型</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_2PorterDefs_8h_source.html#l00031">PorterDefs.h:31</a></div></div>
+<div class="ttc" id="aWtBtPorter_8cpp_html_ab2607e8b1e1cfc99339d077c5df8fd59"><div class="ttname"><a href="WtBtPorter_8cpp.html#ab2607e8b1e1cfc99339d077c5df8fd59">hft_sub_ticks</a></div><div class="ttdeci">void hft_sub_ticks(CtxHandler cHandle, const char *stdCode)</div><div class="ttdoc">订阅HFT策略Tick数据</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_8cpp_source.html#l01790">WtBtPorter.cpp:1790</a></div></div>
+<div class="ttc" id="aWtBtPorter_8cpp_html_ad3f39488e1b59aced738ea9fe757a999"><div class="ttname"><a href="WtBtPorter_8cpp.html#ad3f39488e1b59aced738ea9fe757a999">hft_get_undone</a></div><div class="ttdeci">double hft_get_undone(CtxHandler cHandle, const char *stdCode)</div><div class="ttdoc">获取HFT策略未完成委托数量</div><div class="ttdef"><b>Definition</b> <a href="WtBtPorter_8cpp_source.html#l01519">WtBtPorter.cpp:1519</a></div></div>
+<div class="ttc" id="aWtPorter_8cpp_html_a1ed91a15ecee85b6375b4c344e2cfde2"><div class="ttname"><a href="WtPorter_8cpp.html#a1ed91a15ecee85b6375b4c344e2cfde2">reg_hft_factories</a></div><div class="ttdeci">bool reg_hft_factories(const char *factFolder)</div><div class="ttdoc">注册高频策略工厂</div><div class="ttdef"><b>Definition</b> <a href="WtPorter_8cpp_source.html#l00376">WtPorter.cpp:376</a></div></div>
+<div class="ttc" id="aWtPorter_8cpp_html_a813c0dc7910b5d0ca560c9e8dd833a7d"><div class="ttname"><a href="WtPorter_8cpp.html#a813c0dc7910b5d0ca560c9e8dd833a7d">release_porter</a></div><div class="ttdeci">void release_porter()</div><div class="ttdoc">释放交易引擎</div><div class="ttdef"><b>Definition</b> <a href="WtPorter_8cpp_source.html#l00286">WtPorter.cpp:286</a></div></div>
+<div class="ttc" id="aWtPorter_8cpp_html_a81a2e27cad572857c599b9e5c3df7557"><div class="ttname"><a href="WtPorter_8cpp.html#a81a2e27cad572857c599b9e5c3df7557">config_porter</a></div><div class="ttdeci">void config_porter(const char *cfgfile, bool isFile)</div><div class="ttdoc">配置交易引擎</div><div class="ttdef"><b>Definition</b> <a href="WtPorter_8cpp_source.html#l00260">WtPorter.cpp:260</a></div></div>
+<div class="ttc" id="aWtPorter_8cpp_html_a95e3c9e6bff4cd2ee08cbb416f7a138d"><div class="ttname"><a href="WtPorter_8cpp.html#a95e3c9e6bff4cd2ee08cbb416f7a138d">run_porter</a></div><div class="ttdeci">void run_porter(bool bAsync)</div><div class="ttdoc">运行交易引擎</div><div class="ttdef"><b>Definition</b> <a href="WtPorter_8cpp_source.html#l00276">WtPorter.cpp:276</a></div></div>
+<div class="ttc" id="aWtPorter_8cpp_html_ad18805907afdb4a64b8abf31299bfa54"><div class="ttname"><a href="WtPorter_8cpp.html#ad18805907afdb4a64b8abf31299bfa54">init_porter</a></div><div class="ttdeci">void init_porter(const char *logProfile, bool isFile, const char *genDir)</div><div class="ttdoc">初始化交易引擎</div><div class="ttdef"><b>Definition</b> <a href="WtPorter_8cpp_source.html#l00239">WtPorter.cpp:239</a></div></div>
+<div class="ttc" id="aclassDLLHelper_html_ac5d55450ea114206242d9ccbfd65ac82"><div class="ttname"><a href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a></div><div class="ttdeci">static DllHandle load_library(const char *filename)</div><div class="ttdoc">加载动态库</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00058">DLLHelper.hpp:58</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html_ad83e851fd7043b0484a2ba6bdf0588ca"><div class="ttname"><a href="structWTSBarStruct.html#ad83e851fd7043b0484a2ba6bdf0588ca">WTSBarStruct::time</a></div><div class="ttdeci">uint64_t time</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00112">WTSStruct.h:112</a></div></div>
+<div class="ttc" id="astructWTSOrdDtlStruct_html"><div class="ttname"><a href="structWTSOrdDtlStruct.html">WTSOrdDtlStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00262">WTSStruct.h:263</a></div></div>
+<div class="ttc" id="astructWTSOrdQueStruct_html"><div class="ttname"><a href="structWTSOrdQueStruct.html">WTSOrdQueStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00240">WTSStruct.h:241</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html"><div class="ttname"><a href="structWTSTickStruct.html">WTSTickStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00158">WTSStruct.h:159</a></div></div>
+<div class="ttc" id="astructWTSTransStruct_html"><div class="ttname"><a href="structWTSTransStruct.html">WTSTransStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00284">WTSStruct.h:285</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_03751cb57453f9fd0a58506eee2b9606.html">TestPorter</a></li><li class="navelem"><a class="el" href="TestPorter_2main_8cpp.html">main.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

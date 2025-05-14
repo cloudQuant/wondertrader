@@ -1,0 +1,28 @@
+var struct__TradeStatInfo =
+[
+    [ "_TradeStatInfo", "struct__TradeStatInfo.html#a63bc1ec5a9a508b305d3b7cc556406b1", null ],
+    [ "_code", "struct__TradeStatInfo.html#acf78af27c9a5d6f6c22ad13540a941d5", null ],
+    [ "_infos", "struct__TradeStatInfo.html#a1d4214290fec6d5a52c314ee8a2f99a1", null ],
+    [ "b_auto_cancels", "struct__TradeStatInfo.html#abefd789228faaf7517ee566b8c0266b6", null ],
+    [ "b_auto_canclqty", "struct__TradeStatInfo.html#a19ef8b04515d910adf72722941d38279", null ],
+    [ "b_cancels", "struct__TradeStatInfo.html#a7eeff2e3e942ad75ab8a938da7fcc491", null ],
+    [ "b_canclqty", "struct__TradeStatInfo.html#a4896653282fb9eab232d1a1b3d0a92b9", null ],
+    [ "b_orders", "struct__TradeStatInfo.html#a26cbb74686ad823ee5ae945a9644fd26", null ],
+    [ "b_ordqty", "struct__TradeStatInfo.html#addb7ff1cc4e144516ef25f31bd8721ec", null ],
+    [ "b_wrongqty", "struct__TradeStatInfo.html#a278eac1edd81ca4d81eec103caa4a8d3", null ],
+    [ "b_wrongs", "struct__TradeStatInfo.html#a3a329e27b5dab18fe34e52f6f0ccfd24", null ],
+    [ "l_closetvol", "struct__TradeStatInfo.html#ac844085be78f1dacf6b87ff131843eed", null ],
+    [ "l_closevol", "struct__TradeStatInfo.html#aa511a8de212fee01deaf4bf0774314f7", null ],
+    [ "l_openvol", "struct__TradeStatInfo.html#a220340b59d39a9d837c51dccdef04b2b", null ],
+    [ "s_auto_cancels", "struct__TradeStatInfo.html#a4f9b17e9b9afa20169d2f4c5be4640cb", null ],
+    [ "s_auto_canclqty", "struct__TradeStatInfo.html#a8c8f3acf5b4b4e402132f6837dd29eb0", null ],
+    [ "s_cancels", "struct__TradeStatInfo.html#a23ce28b0fd1a590318e62639ef59fc87", null ],
+    [ "s_canclqty", "struct__TradeStatInfo.html#a4af3e32fc7a81d40e7f62879a866abe9", null ],
+    [ "s_closetvol", "struct__TradeStatInfo.html#a3676b858e650431bda0a035fcc4d6c42", null ],
+    [ "s_closevol", "struct__TradeStatInfo.html#aeecb1e1d53b57bd5655e87a592d37ac2", null ],
+    [ "s_openvol", "struct__TradeStatInfo.html#a1ec86f4da5edfe388519b01085c0a78e", null ],
+    [ "s_orders", "struct__TradeStatInfo.html#a78285a0808f3061f89a2a4399ee60e29", null ],
+    [ "s_ordqty", "struct__TradeStatInfo.html#aad3ee6e7faaa616cdb9b9efebe8e04ee", null ],
+    [ "s_wrongqty", "struct__TradeStatInfo.html#a153a65a8fd2176521ae6bd18c011adab", null ],
+    [ "s_wrongs", "struct__TradeStatInfo.html#a14fade9b098379da8d39a7abaea93784", null ]
+];

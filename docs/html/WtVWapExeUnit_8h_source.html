@@ -1,0 +1,278 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtExeFact/WtVWapExeUnit.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtVWapExeUnit_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtVWapExeUnit.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtVWapExeUnit_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;<a class="code" href="WtOrdMon_8h.html">WtOrdMon.h</a>&quot;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;../Includes/ExecuteDefs.h&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;fstream&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;rapidjson/document.h&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="WtVWapExeUnit_8h.html#a17226795848decb565e90624584e5c0f">   14</a></span><a class="code hl_variable" href="WtVWapExeUnit_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="foldopen" id="foldopen00022" data-start="{" data-end="};">
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html">   22</a></span><span class="keyword">class </span><a class="code hl_class" href="classWtVWapExeUnit.html">WtVWapExeUnit</a> : <span class="keyword">public</span> <a class="code hl_class" href="classExecuteUnit.html">ExecuteUnit</a> {</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <a class="code hl_function" href="classWtVWapExeUnit.html#a9c8574a47eb0e48270074ce07ea92e06">WtVWapExeUnit</a>();</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keyword">virtual</span> <a class="code hl_function" href="classWtVWapExeUnit.html#ad09154ef2bf81dd1cb4059eddb7ba369">~WtVWapExeUnit</a>();</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classWtVWapExeUnit.html#a53f4fe335761105a0492f2ee3144efc3">do_calc</a>();</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classWtVWapExeUnit.html#a950d3c96692c83e09ff38c9866d63bc4">fire_at_once</a>(<span class="keywordtype">double</span> qty);</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtVWapExeUnit.html#a49a86bcdfc0c22b81ea8261244752ad5">getFactName</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtVWapExeUnit.html#a89449d92613d7deb964995ac221cad31">getName</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtVWapExeUnit.html#af1c8d49f8e86b1b1d8fc9436150228df">init</a>(<a class="code hl_class" href="classExecuteContext.html">ExecuteContext</a>* ctx, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtVWapExeUnit.html#a50301701cab854bd6cded8e7cc033c89">on_order</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> leftover, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <span class="keywordtype">bool</span> isCanceled) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtVWapExeUnit.html#a65c58f9d7e0321a46873bac2474078a1">on_tick</a>(<a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtVWapExeUnit.html#a27fc249ce9cbd2d868e156871d579712">on_trade</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> vol, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtVWapExeUnit.html#a8ba8b1549939d102fa29a873c445c487">on_entrust</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> bSuccess, <span class="keyword">const</span> <span class="keywordtype">char</span>* message) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtVWapExeUnit.html#ae03fb7b9d8d8ab001d1c4d96c43ea92e">set_position</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">double</span> newVol) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtVWapExeUnit.html#aa9c42fa4c9ea2bf982fdeb502c9a9784">on_channel_ready</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span> </div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtVWapExeUnit.html#af69f50786eaa648533b5d4674e496e89">on_channel_lost</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a5d52e0df5e4c394b51ace58deff27789">  151</a></span>    <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* <a class="code hl_variable" href="classWtVWapExeUnit.html#a5d52e0df5e4c394b51ace58deff27789">_last_tick</a>;</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a3f9df8fd465558261beb101826105453">  153</a></span>    <span class="keywordtype">double</span>      <a class="code hl_variable" href="classWtVWapExeUnit.html#a3f9df8fd465558261beb101826105453">_target_pos</a>;</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#abe8cc87b5b5d9cc542d308345154cc82">  155</a></span>    <span class="keywordtype">bool</span>        <a class="code hl_variable" href="classWtVWapExeUnit.html#abe8cc87b5b5d9cc542d308345154cc82">_channel_ready</a>;</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a6360692a98e8c7e1471be412a5838292">  157</a></span>    <a class="code hl_typedef" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a>  <a class="code hl_variable" href="classWtVWapExeUnit.html#a6360692a98e8c7e1471be412a5838292">_mtx_calc</a>;</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span> </div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#aec32109283560095bf8e489bb2cfc5bd">  160</a></span>    <a class="code hl_class" href="classWTSCommodityInfo.html">WTSCommodityInfo</a>* <a class="code hl_variable" href="classWtVWapExeUnit.html#aec32109283560095bf8e489bb2cfc5bd">_comm_info</a>;</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#aa8dc45314239812382fbb34f4149a7da">  162</a></span>    <a class="code hl_class" href="classWTSSessionInfo.html">WTSSessionInfo</a>* <a class="code hl_variable" href="classWtVWapExeUnit.html#aa8dc45314239812382fbb34f4149a7da">_sess_info</a>;</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a8fab1553f750a1f63d5cd3bcdd4a0a39">  164</a></span>    uint32_t    <a class="code hl_variable" href="classWtVWapExeUnit.html#a8fab1553f750a1f63d5cd3bcdd4a0a39">_cancel_times</a>;</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a6d36706c7d2ed93229128d5fafc231fd">  172</a></span>    <a class="code hl_class" href="classWtOrdMon.html">WtOrdMon</a>        <a class="code hl_variable" href="classWtVWapExeUnit.html#a6d36706c7d2ed93229128d5fafc231fd">_orders_mon</a>;</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a0413aaa18802bb8de5d6e1383054dbee">  174</a></span>    uint32_t        <a class="code hl_variable" href="classWtVWapExeUnit.html#a0413aaa18802bb8de5d6e1383054dbee">_cancel_cnt</a>;</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a0e8058cae8ece3d92d0008d78c37d2f7">  176</a></span>    vector&lt;double&gt;  <a class="code hl_variable" href="classWtVWapExeUnit.html#a0e8058cae8ece3d92d0008d78c37d2f7">VwapAim</a>;</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#ab5614b05b74029c522df78c04748ec32">  182</a></span>    uint32_t        <a class="code hl_variable" href="classWtVWapExeUnit.html#ab5614b05b74029c522df78c04748ec32">_total_secs</a>;</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a5f3f55c473d010a51dc5297cf5a1fd05">  184</a></span>    uint32_t        <a class="code hl_variable" href="classWtVWapExeUnit.html#a5f3f55c473d010a51dc5297cf5a1fd05">_total_times</a>;</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a29f984de19109cdf0124f3f211ed6319">  186</a></span>    uint32_t        <a class="code hl_variable" href="classWtVWapExeUnit.html#a29f984de19109cdf0124f3f211ed6319">_tail_secs</a>;</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#af30e9469b087da1c1695a130ecca9931">  188</a></span>    uint32_t        <a class="code hl_variable" href="classWtVWapExeUnit.html#af30e9469b087da1c1695a130ecca9931">_ord_sticky</a>;</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a8a525ca668e218f7bfc30314cd8f45b0">  190</a></span>    uint32_t        <a class="code hl_variable" href="classWtVWapExeUnit.html#a8a525ca668e218f7bfc30314cd8f45b0">_price_mode</a>;</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#afbec0d160bc4626aba92e43dea6044c4">  192</a></span>    uint32_t        <a class="code hl_variable" href="classWtVWapExeUnit.html#afbec0d160bc4626aba92e43dea6044c4">_price_offset</a>;</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a72cfb8512b0b9f6c83c99f1ec6fed44f">  194</a></span>    uint32_t        <a class="code hl_variable" href="classWtVWapExeUnit.html#a72cfb8512b0b9f6c83c99f1ec6fed44f">_begin_time</a>;</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#abb1ebe27f8684edc32504432f7d276aa">  196</a></span>    uint32_t        <a class="code hl_variable" href="classWtVWapExeUnit.html#abb1ebe27f8684edc32504432f7d276aa">_end_time</a>;</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a136dbb0ace61d6bd535cda0b830c410f">  198</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classWtVWapExeUnit.html#a136dbb0ace61d6bd535cda0b830c410f">_min_open_lots</a>;</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a5213f5da403656c3da1f81348a8302b5">  200</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classWtVWapExeUnit.html#a5213f5da403656c3da1f81348a8302b5">_order_lots</a>;</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#aeb9425b74af3d11e9f3d5e450b1bf793">  202</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classWtVWapExeUnit.html#aeb9425b74af3d11e9f3d5e450b1bf793">isCanCancel</a>;</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#acc4318591def78b030f50ac51bef36f5">  208</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classWtVWapExeUnit.html#acc4318591def78b030f50ac51bef36f5">_this_target</a>;</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a8f490b0aacd3ceab82a394f1561a87fd">  210</a></span>    uint32_t        <a class="code hl_variable" href="classWtVWapExeUnit.html#a8f490b0aacd3ceab82a394f1561a87fd">_fire_span</a>;</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a1e50d13131fdd843d0f789f259041de7">  212</a></span>    uint32_t        <a class="code hl_variable" href="classWtVWapExeUnit.html#a1e50d13131fdd843d0f789f259041de7">_fired_times</a>;</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a4fe71c8a342145f2457fa25daa8cc911">  214</a></span>    uint64_t        <a class="code hl_variable" href="classWtVWapExeUnit.html#a4fe71c8a342145f2457fa25daa8cc911">_last_fire_time</a>;</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a98422f6d53c94f327cd558d7769843a7">  216</a></span>    uint64_t        <a class="code hl_variable" href="classWtVWapExeUnit.html#a98422f6d53c94f327cd558d7769843a7">_last_place_time</a>;</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a598b256ea2875bd85cc5f55de12cba02">  218</a></span>    uint64_t        <a class="code hl_variable" href="classWtVWapExeUnit.html#a598b256ea2875bd85cc5f55de12cba02">_last_tick_time</a>;</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#afb2dff5ad73c0424a2abf3ba3f975ab5">  220</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classWtVWapExeUnit.html#afb2dff5ad73c0424a2abf3ba3f975ab5">_Vwap_vol</a>;</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a4e3350021f9122f512a8849f03263c9d">  222</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classWtVWapExeUnit.html#a4e3350021f9122f512a8849f03263c9d">_Vwap_prz</a>;</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#aa56f63346a0777e0a2cc1a6956abc0cd">  226</a></span>    std::atomic&lt;bool&gt; <a class="code hl_variable" href="classWtVWapExeUnit.html#aa56f63346a0777e0a2cc1a6956abc0cd">_in_calc</a>;</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span> </div>
+<div class="foldopen" id="foldopen00233" data-start="{" data-end="};">
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno"><a class="line" href="structWtVWapExeUnit_1_1__CalcFlag.html">  233</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structWtVWapExeUnit_1_1__CalcFlag.html">_CalcFlag</a></div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    {</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno"><a class="line" href="structWtVWapExeUnit_1_1__CalcFlag.html#aa19e7ccad9e36e0ba88e57df9de52d97">  236</a></span>        <span class="keywordtype">bool</span> <a class="code hl_variable" href="structWtVWapExeUnit_1_1__CalcFlag.html#aa19e7ccad9e36e0ba88e57df9de52d97">_result</a>;</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno"><a class="line" href="structWtVWapExeUnit_1_1__CalcFlag.html#a8964a508ee6a6fa8fcee1814313c4b1d">  238</a></span>        std::atomic&lt;bool&gt;* <a class="code hl_variable" href="structWtVWapExeUnit_1_1__CalcFlag.html#a8964a508ee6a6fa8fcee1814313c4b1d">_flag</a>;</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span> </div>
+<div class="foldopen" id="foldopen00244" data-start="{" data-end="}">
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno"><a class="line" href="structWtVWapExeUnit_1_1__CalcFlag.html#a0a96c5ed556167dafa8cca2ba920dfc6">  244</a></span>        <a class="code hl_function" href="structWtVWapExeUnit_1_1__CalcFlag.html#a0a96c5ed556167dafa8cca2ba920dfc6">_CalcFlag</a>(std::atomic&lt;bool&gt;*flag) :<a class="code hl_variable" href="structWtVWapExeUnit_1_1__CalcFlag.html#a8964a508ee6a6fa8fcee1814313c4b1d">_flag</a>(flag) {</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>            <a class="code hl_variable" href="structWtVWapExeUnit_1_1__CalcFlag.html#aa19e7ccad9e36e0ba88e57df9de52d97">_result</a> = <a class="code hl_variable" href="structWtVWapExeUnit_1_1__CalcFlag.html#a8964a508ee6a6fa8fcee1814313c4b1d">_flag</a>-&gt;exchange(<span class="keyword">true</span>, std::memory_order_acq_rel);</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>        }</div>
+</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
+<div class="foldopen" id="foldopen00251" data-start="{" data-end="}">
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno"><a class="line" href="structWtVWapExeUnit_1_1__CalcFlag.html#a04e2c54dc4eb31a0ee0cf8216d105871">  251</a></span>        <a class="code hl_function" href="structWtVWapExeUnit_1_1__CalcFlag.html#a04e2c54dc4eb31a0ee0cf8216d105871">~_CalcFlag</a>() {</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="structWtVWapExeUnit_1_1__CalcFlag.html#a8964a508ee6a6fa8fcee1814313c4b1d">_flag</a>)</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>                <a class="code hl_variable" href="structWtVWapExeUnit_1_1__CalcFlag.html#a8964a508ee6a6fa8fcee1814313c4b1d">_flag</a>-&gt;exchange(<span class="keyword">false</span>, std::memory_order_acq_rel);</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>        }</div>
+</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span> </div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno"><a class="line" href="structWtVWapExeUnit_1_1__CalcFlag.html#a6ede5a312e2b2cbb0c211f1654ebc956">  260</a></span>        <span class="keyword">operator</span> bool()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="structWtVWapExeUnit_1_1__CalcFlag.html#aa19e7ccad9e36e0ba88e57df9de52d97">_result</a>; }</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno"><a class="line" href="classWtVWapExeUnit.html#a722c959ce507b58d42fbd1a78bfa7132">  261</a></span>    }<a class="code hl_typedef" href="classWtVWapExeUnit.html#a722c959ce507b58d42fbd1a78bfa7132">CalcFlag</a>;</div>
+</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>};</div>
+</div>
+<div class="ttc" id="aWtOrdMon_8h_html"><div class="ttname"><a href="WtOrdMon_8h.html">WtOrdMon.h</a></div><div class="ttdoc">订单监控器头文件</div></div>
+<div class="ttc" id="aWtVWapExeUnit_8h_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="WtVWapExeUnit_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00014">WtVWapExeUnit.h:14</a></div></div>
+<div class="ttc" id="aclassExecuteContext_html"><div class="ttname"><a href="classExecuteContext.html">ExecuteContext</a></div><div class="ttdef"><b>Definition</b> <a href="ExecuteDefs_8h_source.html#l00026">ExecuteDefs.h:27</a></div></div>
+<div class="ttc" id="aclassExecuteUnit_html"><div class="ttname"><a href="classExecuteUnit.html">ExecuteUnit</a></div><div class="ttdef"><b>Definition</b> <a href="ExecuteDefs_8h_source.html#l00148">ExecuteDefs.h:149</a></div></div>
+<div class="ttc" id="aclassWTSCommodityInfo_html"><div class="ttname"><a href="classWTSCommodityInfo.html">WTSCommodityInfo</a></div><div class="ttdoc">品种信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00020">WTSContractInfo.hpp:21</a></div></div>
+<div class="ttc" id="aclassWTSSessionInfo_html"><div class="ttname"><a href="classWTSSessionInfo.html">WTSSessionInfo</a></div><div class="ttdoc">会话信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSSessionInfo_8hpp_source.html#l00020">WTSSessionInfo.hpp:21</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWtOrdMon_html"><div class="ttname"><a href="classWtOrdMon.html">WtOrdMon</a></div><div class="ttdoc">订单监控器类</div><div class="ttdef"><b>Definition</b> <a href="WtOrdMon_8h_source.html#l00034">WtOrdMon.h:35</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html"><div class="ttname"><a href="classWtVWapExeUnit.html">WtVWapExeUnit</a></div><div class="ttdoc">VWAP(成交量加权平均价格)执行单元</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00022">WtVWapExeUnit.h:22</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a0413aaa18802bb8de5d6e1383054dbee"><div class="ttname"><a href="classWtVWapExeUnit.html#a0413aaa18802bb8de5d6e1383054dbee">WtVWapExeUnit::_cancel_cnt</a></div><div class="ttdeci">uint32_t _cancel_cnt</div><div class="ttdoc">撤单计数器，记录当前执行周期内的撤单次数</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00174">WtVWapExeUnit.h:174</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a0e8058cae8ece3d92d0008d78c37d2f7"><div class="ttname"><a href="classWtVWapExeUnit.html#a0e8058cae8ece3d92d0008d78c37d2f7">WtVWapExeUnit::VwapAim</a></div><div class="ttdeci">vector&lt; double &gt; VwapAim</div><div class="ttdoc">VWAP目标数组，按分钟记录的目标VWAP预测总报单量</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00176">WtVWapExeUnit.h:176</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a136dbb0ace61d6bd535cda0b830c410f"><div class="ttname"><a href="classWtVWapExeUnit.html#a136dbb0ace61d6bd535cda0b830c410f">WtVWapExeUnit::_min_open_lots</a></div><div class="ttdeci">double _min_open_lots</div><div class="ttdoc">最小开仓数量，当需要交易的数量小于此值时不发单</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00198">WtVWapExeUnit.h:198</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a1e50d13131fdd843d0f789f259041de7"><div class="ttname"><a href="classWtVWapExeUnit.html#a1e50d13131fdd843d0f789f259041de7">WtVWapExeUnit::_fired_times</a></div><div class="ttdeci">uint32_t _fired_times</div><div class="ttdoc">已执行次数，记录当前执行周期内已经发送的订单次数</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00212">WtVWapExeUnit.h:212</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a27fc249ce9cbd2d868e156871d579712"><div class="ttname"><a href="classWtVWapExeUnit.html#a27fc249ce9cbd2d868e156871d579712">WtVWapExeUnit::on_trade</a></div><div class="ttdeci">virtual void on_trade(uint32_t localid, const char *stdCode, bool isBuy, double vol, double price) override</div><div class="ttdoc">处理成交回报</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8cpp_source.html#l00380">WtVWapExeUnit.cpp:380</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a29f984de19109cdf0124f3f211ed6319"><div class="ttname"><a href="classWtVWapExeUnit.html#a29f984de19109cdf0124f3f211ed6319">WtVWapExeUnit::_tail_secs</a></div><div class="ttdeci">uint32_t _tail_secs</div><div class="ttdoc">执行尾部时间，单位秒，用于调整最后阶段的执行策略</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00186">WtVWapExeUnit.h:186</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a3f9df8fd465558261beb101826105453"><div class="ttname"><a href="classWtVWapExeUnit.html#a3f9df8fd465558261beb101826105453">WtVWapExeUnit::_target_pos</a></div><div class="ttdeci">double _target_pos</div><div class="ttdoc">目标仓位，正数表示多头，负数表示空头</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00153">WtVWapExeUnit.h:153</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a49a86bcdfc0c22b81ea8261244752ad5"><div class="ttname"><a href="classWtVWapExeUnit.html#a49a86bcdfc0c22b81ea8261244752ad5">WtVWapExeUnit::getFactName</a></div><div class="ttdeci">virtual const char * getFactName() override</div><div class="ttdoc">获取所属执行器工厂名称</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8cpp_source.html#l00134">WtVWapExeUnit.cpp:134</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a4e3350021f9122f512a8849f03263c9d"><div class="ttname"><a href="classWtVWapExeUnit.html#a4e3350021f9122f512a8849f03263c9d">WtVWapExeUnit::_Vwap_prz</a></div><div class="ttdeci">double _Vwap_prz</div><div class="ttdoc">VWAP价格，当前计算得到的成交量加权平均价格</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00222">WtVWapExeUnit.h:222</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a4fe71c8a342145f2457fa25daa8cc911"><div class="ttname"><a href="classWtVWapExeUnit.html#a4fe71c8a342145f2457fa25daa8cc911">WtVWapExeUnit::_last_fire_time</a></div><div class="ttdeci">uint64_t _last_fire_time</div><div class="ttdoc">上次执行的时间戳，单位毫秒，用于计算下次发单时间</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00214">WtVWapExeUnit.h:214</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a50301701cab854bd6cded8e7cc033c89"><div class="ttname"><a href="classWtVWapExeUnit.html#a50301701cab854bd6cded8e7cc033c89">WtVWapExeUnit::on_order</a></div><div class="ttdeci">virtual void on_order(uint32_t localid, const char *stdCode, bool isBuy, double leftover, double price, bool isCanceled) override</div><div class="ttdoc">处理订单回报</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8cpp_source.html#l00220">WtVWapExeUnit.cpp:220</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a5213f5da403656c3da1f81348a8302b5"><div class="ttname"><a href="classWtVWapExeUnit.html#a5213f5da403656c3da1f81348a8302b5">WtVWapExeUnit::_order_lots</a></div><div class="ttdeci">double _order_lots</div><div class="ttdoc">单次发单手数，指定每次发单的标准数量</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00200">WtVWapExeUnit.h:200</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a53f4fe335761105a0492f2ee3144efc3"><div class="ttname"><a href="classWtVWapExeUnit.html#a53f4fe335761105a0492f2ee3144efc3">WtVWapExeUnit::do_calc</a></div><div class="ttdeci">void do_calc()</div><div class="ttdoc">执行仓位计算和发单操作</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8cpp_source.html#l00412">WtVWapExeUnit.cpp:412</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a598b256ea2875bd85cc5f55de12cba02"><div class="ttname"><a href="classWtVWapExeUnit.html#a598b256ea2875bd85cc5f55de12cba02">WtVWapExeUnit::_last_tick_time</a></div><div class="ttdeci">uint64_t _last_tick_time</div><div class="ttdoc">上个行情数据的时间戳，单位毫秒，用于判断行情数据是否有效</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00218">WtVWapExeUnit.h:218</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a5d52e0df5e4c394b51ace58deff27789"><div class="ttname"><a href="classWtVWapExeUnit.html#a5d52e0df5e4c394b51ace58deff27789">WtVWapExeUnit::_last_tick</a></div><div class="ttdeci">WTSTickData * _last_tick</div><div class="ttdoc">上一笔行情数据指针</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00151">WtVWapExeUnit.h:151</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a5f3f55c473d010a51dc5297cf5a1fd05"><div class="ttname"><a href="classWtVWapExeUnit.html#a5f3f55c473d010a51dc5297cf5a1fd05">WtVWapExeUnit::_total_times</a></div><div class="ttdeci">uint32_t _total_times</div><div class="ttdoc">总执行次数，指定将订单分拆为多少次执行</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00184">WtVWapExeUnit.h:184</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a6360692a98e8c7e1471be412a5838292"><div class="ttname"><a href="classWtVWapExeUnit.html#a6360692a98e8c7e1471be412a5838292">WtVWapExeUnit::_mtx_calc</a></div><div class="ttdeci">StdUniqueMutex _mtx_calc</div><div class="ttdoc">计算锁，用于保护do_calc方法的并发调用</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00157">WtVWapExeUnit.h:157</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a65c58f9d7e0321a46873bac2474078a1"><div class="ttname"><a href="classWtVWapExeUnit.html#a65c58f9d7e0321a46873bac2474078a1">WtVWapExeUnit::on_tick</a></div><div class="ttdeci">virtual void on_tick(WTSTickData *newTick) override</div><div class="ttdoc">处理行情数据回调</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8cpp_source.html#l00316">WtVWapExeUnit.cpp:316</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a6d36706c7d2ed93229128d5fafc231fd"><div class="ttname"><a href="classWtVWapExeUnit.html#a6d36706c7d2ed93229128d5fafc231fd">WtVWapExeUnit::_orders_mon</a></div><div class="ttdeci">WtOrdMon _orders_mon</div><div class="ttdoc">订单监控器，管理所有发出的订单状态</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00172">WtVWapExeUnit.h:172</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a722c959ce507b58d42fbd1a78bfa7132"><div class="ttname"><a href="classWtVWapExeUnit.html#a722c959ce507b58d42fbd1a78bfa7132">WtVWapExeUnit::CalcFlag</a></div><div class="ttdeci">struct WtVWapExeUnit::_CalcFlag CalcFlag</div><div class="ttdoc">计算锁标志结构体，实现RAII模式的原子锁</div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a72cfb8512b0b9f6c83c99f1ec6fed44f"><div class="ttname"><a href="classWtVWapExeUnit.html#a72cfb8512b0b9f6c83c99f1ec6fed44f">WtVWapExeUnit::_begin_time</a></div><div class="ttdeci">uint32_t _begin_time</div><div class="ttdoc">开始时间，格式为HHMM，如1000表示10:00</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00194">WtVWapExeUnit.h:194</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a89449d92613d7deb964995ac221cad31"><div class="ttname"><a href="classWtVWapExeUnit.html#a89449d92613d7deb964995ac221cad31">WtVWapExeUnit::getName</a></div><div class="ttdeci">virtual const char * getName() override</div><div class="ttdoc">获取执行单元名称</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8cpp_source.html#l00144">WtVWapExeUnit.cpp:144</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a8a525ca668e218f7bfc30314cd8f45b0"><div class="ttname"><a href="classWtVWapExeUnit.html#a8a525ca668e218f7bfc30314cd8f45b0">WtVWapExeUnit::_price_mode</a></div><div class="ttdeci">uint32_t _price_mode</div><div class="ttdoc">价格模式: 0-最新价, 1-最优价, 2-对手价，决定发单价格的计算方式</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00190">WtVWapExeUnit.h:190</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a8ba8b1549939d102fa29a873c445c487"><div class="ttname"><a href="classWtVWapExeUnit.html#a8ba8b1549939d102fa29a873c445c487">WtVWapExeUnit::on_entrust</a></div><div class="ttdeci">virtual void on_entrust(uint32_t localid, const char *stdCode, bool bSuccess, const char *message) override</div><div class="ttdoc">处理委托回报</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8cpp_source.html#l00392">WtVWapExeUnit.cpp:392</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a8f490b0aacd3ceab82a394f1561a87fd"><div class="ttname"><a href="classWtVWapExeUnit.html#a8f490b0aacd3ceab82a394f1561a87fd">WtVWapExeUnit::_fire_span</a></div><div class="ttdeci">uint32_t _fire_span</div><div class="ttdoc">发单间隔，单位毫秒，根据总执行时间和次数计算得出</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00210">WtVWapExeUnit.h:210</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a8fab1553f750a1f63d5cd3bcdd4a0a39"><div class="ttname"><a href="classWtVWapExeUnit.html#a8fab1553f750a1f63d5cd3bcdd4a0a39">WtVWapExeUnit::_cancel_times</a></div><div class="ttdeci">uint32_t _cancel_times</div><div class="ttdoc">撤单次数统计</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00164">WtVWapExeUnit.h:164</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a950d3c96692c83e09ff38c9866d63bc4"><div class="ttname"><a href="classWtVWapExeUnit.html#a950d3c96692c83e09ff38c9866d63bc4">WtVWapExeUnit::fire_at_once</a></div><div class="ttdeci">void fire_at_once(double qty)</div><div class="ttdoc">立即发单</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8cpp_source.html#l00568">WtVWapExeUnit.cpp:568</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a98422f6d53c94f327cd558d7769843a7"><div class="ttname"><a href="classWtVWapExeUnit.html#a98422f6d53c94f327cd558d7769843a7">WtVWapExeUnit::_last_place_time</a></div><div class="ttdeci">uint64_t _last_place_time</div><div class="ttdoc">上个下单时间戳，单位毫秒，用于计算订单是否超时需要撤单</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00216">WtVWapExeUnit.h:216</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_a9c8574a47eb0e48270074ce07ea92e06"><div class="ttname"><a href="classWtVWapExeUnit.html#a9c8574a47eb0e48270074ce07ea92e06">WtVWapExeUnit::WtVWapExeUnit</a></div><div class="ttdeci">WtVWapExeUnit()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8cpp_source.html#l00025">WtVWapExeUnit.cpp:25</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_aa56f63346a0777e0a2cc1a6956abc0cd"><div class="ttname"><a href="classWtVWapExeUnit.html#aa56f63346a0777e0a2cc1a6956abc0cd">WtVWapExeUnit::_in_calc</a></div><div class="ttdeci">std::atomic&lt; bool &gt; _in_calc</div><div class="ttdoc">计算锁标志，用于防止do_calc方法被并发调用</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00226">WtVWapExeUnit.h:226</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_aa8dc45314239812382fbb34f4149a7da"><div class="ttname"><a href="classWtVWapExeUnit.html#aa8dc45314239812382fbb34f4149a7da">WtVWapExeUnit::_sess_info</a></div><div class="ttdeci">WTSSessionInfo * _sess_info</div><div class="ttdoc">交易时间信息指针，包含交易时段和休市信息</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00162">WtVWapExeUnit.h:162</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_aa9c42fa4c9ea2bf982fdeb502c9a9784"><div class="ttname"><a href="classWtVWapExeUnit.html#aa9c42fa4c9ea2bf982fdeb502c9a9784">WtVWapExeUnit::on_channel_ready</a></div><div class="ttdeci">virtual void on_channel_ready() override</div><div class="ttdoc">处理交易通道就绪</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8cpp_source.html#l00266">WtVWapExeUnit.cpp:266</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_ab5614b05b74029c522df78c04748ec32"><div class="ttname"><a href="classWtVWapExeUnit.html#ab5614b05b74029c522df78c04748ec32">WtVWapExeUnit::_total_secs</a></div><div class="ttdeci">uint32_t _total_secs</div><div class="ttdoc">执行总时间，单位秒，指定完成整个交易的总时间范围</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00182">WtVWapExeUnit.h:182</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_abb1ebe27f8684edc32504432f7d276aa"><div class="ttname"><a href="classWtVWapExeUnit.html#abb1ebe27f8684edc32504432f7d276aa">WtVWapExeUnit::_end_time</a></div><div class="ttdeci">uint32_t _end_time</div><div class="ttdoc">结束时间，格式为HHMM，如1030表示10:30</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00196">WtVWapExeUnit.h:196</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_abe8cc87b5b5d9cc542d308345154cc82"><div class="ttname"><a href="classWtVWapExeUnit.html#abe8cc87b5b5d9cc542d308345154cc82">WtVWapExeUnit::_channel_ready</a></div><div class="ttdeci">bool _channel_ready</div><div class="ttdoc">交易通道是否就绪标志</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00155">WtVWapExeUnit.h:155</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_acc4318591def78b030f50ac51bef36f5"><div class="ttname"><a href="classWtVWapExeUnit.html#acc4318591def78b030f50ac51bef36f5">WtVWapExeUnit::_this_target</a></div><div class="ttdeci">double _this_target</div><div class="ttdoc">本轮目标仓位，当前时间点应该达到的仓位量</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00208">WtVWapExeUnit.h:208</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_ad09154ef2bf81dd1cb4059eddb7ba369"><div class="ttname"><a href="classWtVWapExeUnit.html#ad09154ef2bf81dd1cb4059eddb7ba369">WtVWapExeUnit::~WtVWapExeUnit</a></div><div class="ttdeci">virtual ~WtVWapExeUnit()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8cpp_source.html#l00050">WtVWapExeUnit.cpp:50</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_ae03fb7b9d8d8ab001d1c4d96c43ea92e"><div class="ttname"><a href="classWtVWapExeUnit.html#ae03fb7b9d8d8ab001d1c4d96c43ea92e">WtVWapExeUnit::set_position</a></div><div class="ttdeci">virtual void set_position(const char *stdCode, double newVol) override</div><div class="ttdoc">设置目标仓位</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8cpp_source.html#l00624">WtVWapExeUnit.cpp:624</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_aeb9425b74af3d11e9f3d5e450b1bf793"><div class="ttname"><a href="classWtVWapExeUnit.html#aeb9425b74af3d11e9f3d5e450b1bf793">WtVWapExeUnit::isCanCancel</a></div><div class="ttdeci">bool isCanCancel</div><div class="ttdoc">是否允许撤单标志</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00202">WtVWapExeUnit.h:202</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_aec32109283560095bf8e489bb2cfc5bd"><div class="ttname"><a href="classWtVWapExeUnit.html#aec32109283560095bf8e489bb2cfc5bd">WtVWapExeUnit::_comm_info</a></div><div class="ttdeci">WTSCommodityInfo * _comm_info</div><div class="ttdoc">品种信息指针，包含合约的交易规则和参数</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00160">WtVWapExeUnit.h:160</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_af1c8d49f8e86b1b1d8fc9436150228df"><div class="ttname"><a href="classWtVWapExeUnit.html#af1c8d49f8e86b1b1d8fc9436150228df">WtVWapExeUnit::init</a></div><div class="ttdeci">virtual void init(ExecuteContext *ctx, const char *stdCode, WTSVariant *cfg) override</div><div class="ttdoc">初始化执行单元</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8cpp_source.html#l00158">WtVWapExeUnit.cpp:158</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_af30e9469b087da1c1695a130ecca9931"><div class="ttname"><a href="classWtVWapExeUnit.html#af30e9469b087da1c1695a130ecca9931">WtVWapExeUnit::_ord_sticky</a></div><div class="ttdeci">uint32_t _ord_sticky</div><div class="ttdoc">挂单时限，单位秒，指定订单挂单后多长时间未成交则撤单</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00188">WtVWapExeUnit.h:188</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_af69f50786eaa648533b5d4674e496e89"><div class="ttname"><a href="classWtVWapExeUnit.html#af69f50786eaa648533b5d4674e496e89">WtVWapExeUnit::on_channel_lost</a></div><div class="ttdeci">virtual void on_channel_lost() override</div><div class="ttdoc">处理交易通道丢失</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8cpp_source.html#l00645">WtVWapExeUnit.cpp:645</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_afb2dff5ad73c0424a2abf3ba3f975ab5"><div class="ttname"><a href="classWtVWapExeUnit.html#afb2dff5ad73c0424a2abf3ba3f975ab5">WtVWapExeUnit::_Vwap_vol</a></div><div class="ttdeci">double _Vwap_vol</div><div class="ttdoc">VWAP单位时间下单量，根据VWAP算法计算的每个时间单元应发送的订单量</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00220">WtVWapExeUnit.h:220</a></div></div>
+<div class="ttc" id="aclassWtVWapExeUnit_html_afbec0d160bc4626aba92e43dea6044c4"><div class="ttname"><a href="classWtVWapExeUnit.html#afbec0d160bc4626aba92e43dea6044c4">WtVWapExeUnit::_price_offset</a></div><div class="ttdeci">uint32_t _price_offset</div><div class="ttdoc">挂单价格偏移，相对于基准价格的偏移量，买入时为正，卖出时为负</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00192">WtVWapExeUnit.h:192</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_a04f887fc8800d4727971dbb8eb550132"><div class="ttname"><a href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a></div><div class="ttdeci">ATPPriceType price</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00040">main.cpp:40</a></div></div>
+<div class="ttc" id="agroup__MutexUtils_html_gaff888cdcc14f5ebb7a1a9c9f7b52846f"><div class="ttname"><a href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a></div><div class="ttdeci">std::mutex StdUniqueMutex</div><div class="ttdoc">普通互斥量类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00061">StdUtils.hpp:61</a></div></div>
+<div class="ttc" id="astructWtVWapExeUnit_1_1__CalcFlag_html"><div class="ttname"><a href="structWtVWapExeUnit_1_1__CalcFlag.html">WtVWapExeUnit::_CalcFlag</a></div><div class="ttdoc">计算锁标志结构体，实现RAII模式的原子锁</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00233">WtVWapExeUnit.h:234</a></div></div>
+<div class="ttc" id="astructWtVWapExeUnit_1_1__CalcFlag_html_a04e2c54dc4eb31a0ee0cf8216d105871"><div class="ttname"><a href="structWtVWapExeUnit_1_1__CalcFlag.html#a04e2c54dc4eb31a0ee0cf8216d105871">WtVWapExeUnit::_CalcFlag::~_CalcFlag</a></div><div class="ttdeci">~_CalcFlag()</div><div class="ttdoc">析构函数，自动释放锁</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00251">WtVWapExeUnit.h:251</a></div></div>
+<div class="ttc" id="astructWtVWapExeUnit_1_1__CalcFlag_html_a0a96c5ed556167dafa8cca2ba920dfc6"><div class="ttname"><a href="structWtVWapExeUnit_1_1__CalcFlag.html#a0a96c5ed556167dafa8cca2ba920dfc6">WtVWapExeUnit::_CalcFlag::_CalcFlag</a></div><div class="ttdeci">_CalcFlag(std::atomic&lt; bool &gt; *flag)</div><div class="ttdoc">构造函数，尝试获取锁</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00244">WtVWapExeUnit.h:244</a></div></div>
+<div class="ttc" id="astructWtVWapExeUnit_1_1__CalcFlag_html_a8964a508ee6a6fa8fcee1814313c4b1d"><div class="ttname"><a href="structWtVWapExeUnit_1_1__CalcFlag.html#a8964a508ee6a6fa8fcee1814313c4b1d">WtVWapExeUnit::_CalcFlag::_flag</a></div><div class="ttdeci">std::atomic&lt; bool &gt; * _flag</div><div class="ttdoc">原子锁指针，指向要操作的原子变量</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00238">WtVWapExeUnit.h:238</a></div></div>
+<div class="ttc" id="astructWtVWapExeUnit_1_1__CalcFlag_html_aa19e7ccad9e36e0ba88e57df9de52d97"><div class="ttname"><a href="structWtVWapExeUnit_1_1__CalcFlag.html#aa19e7ccad9e36e0ba88e57df9de52d97">WtVWapExeUnit::_CalcFlag::_result</a></div><div class="ttdeci">bool _result</div><div class="ttdoc">获取锁的结果，true表示锁已被占用，false表示成功获取锁</div><div class="ttdef"><b>Definition</b> <a href="WtVWapExeUnit_8h_source.html#l00236">WtVWapExeUnit.h:236</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_35e91bc913ca608ca8aed17ce3ae7d3c.html">WtExeFact</a></li><li class="navelem"><a class="el" href="WtVWapExeUnit_8h.html">WtVWapExeUnit.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

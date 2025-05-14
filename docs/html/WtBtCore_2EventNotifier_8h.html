@@ -1,0 +1,278 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtBtCore/EventNotifier.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtBtCore_2EventNotifier_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#typedef-members">类型定义</a>  </div>
+  <div class="headertitle"><div class="title">EventNotifier.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>事件通知器对象定义，用于回测过程中的事件和数据广播  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &lt;queue&gt;</code><br />
+<code>#include &quot;<a class="el" href="WTSMarcos_8h_source.html">../Includes/WTSMarcos.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSObject_8hpp_source.html">../Includes/WTSObject.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="StdUtils_8hpp_source.html">../Share/StdUtils.hpp</a>&quot;</code><br />
+</div>
+<p><a href="WtBtCore_2EventNotifier_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html">EventNotifier</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">事件通知器类，用于回测过程中的事件、数据和资金信息广播  <a href="classEventNotifier.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a04e245a6468716fe78599ffae9fad936" id="r_a04e245a6468716fe78599ffae9fad936"><td class="memItemLeft" align="right" valign="top">typedef unsigned long(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a04e245a6468716fe78599ffae9fad936">FuncCreateMQServer</a>) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, bool)</td></tr>
+<tr class="memdesc:a04e245a6468716fe78599ffae9fad936"><td class="mdescLeft">&#160;</td><td class="mdescRight">创建消息队列服务器的函数类型  <br /></td></tr>
+<tr class="separator:a04e245a6468716fe78599ffae9fad936"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3522cc64d06d81ed85a8b524cf8b82c2" id="r_a3522cc64d06d81ed85a8b524cf8b82c2"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a3522cc64d06d81ed85a8b524cf8b82c2">FuncDestroyMQServer</a>) (unsigned long)</td></tr>
+<tr class="memdesc:a3522cc64d06d81ed85a8b524cf8b82c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">销毁消息队列服务器的函数类型  <br /></td></tr>
+<tr class="separator:a3522cc64d06d81ed85a8b524cf8b82c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87a3a860679f7f5e622261d4d0e6f287" id="r_a87a3a860679f7f5e622261d4d0e6f287"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a87a3a860679f7f5e622261d4d0e6f287">FundPublishMessage</a>) (unsigned long, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, unsigned long)</td></tr>
+<tr class="memdesc:a87a3a860679f7f5e622261d4d0e6f287"><td class="mdescLeft">&#160;</td><td class="mdescRight">发布消息的函数类型  <br /></td></tr>
+<tr class="separator:a87a3a860679f7f5e622261d4d0e6f287"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a749dc86d073c15a88e4a719af94bc813" id="r_a749dc86d073c15a88e4a719af94bc813"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>) (unsigned long, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, bool)</td></tr>
+<tr class="memdesc:a749dc86d073c15a88e4a719af94bc813"><td class="mdescLeft">&#160;</td><td class="mdescRight">日志回调函数类型  <br /></td></tr>
+<tr class="separator:a749dc86d073c15a88e4a719af94bc813"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d23775ba30cc3102a9ee6fafb76a871" id="r_a8d23775ba30cc3102a9ee6fafb76a871"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a8d23775ba30cc3102a9ee6fafb76a871">FuncRegCallbacks</a>) (<a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>)</td></tr>
+<tr class="memdesc:a8d23775ba30cc3102a9ee6fafb76a871"><td class="mdescLeft">&#160;</td><td class="mdescRight">注册回调函数的函数类型  <br /></td></tr>
+<tr class="separator:a8d23775ba30cc3102a9ee6fafb76a871"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>事件通知器对象定义，用于回测过程中的事件和数据广播 </p>
+<p>\project WonderTrader</p>
+<dl class="section author"><dt>作者</dt><dd>Wesley </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2020/03/30 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 中定义.</p>
+</div><h2 class="groupheader">类型定义说明</h2>
+<a id="a04e245a6468716fe78599ffae9fad936" name="a04e245a6468716fe78599ffae9fad936"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04e245a6468716fe78599ffae9fad936">&#9670;&#160;</a></span>FuncCreateMQServer</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef unsigned long(* FuncCreateMQServer) (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, bool)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>创建消息队列服务器的函数类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">服务器URL地址</td><td></td></tr>
+    <tr><td class="paramname">是否为服务器模式</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>服务器ID </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html#l00024">24</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3522cc64d06d81ed85a8b524cf8b82c2" name="a3522cc64d06d81ed85a8b524cf8b82c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3522cc64d06d81ed85a8b524cf8b82c2">&#9670;&#160;</a></span>FuncDestroyMQServer</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(* FuncDestroyMQServer) (unsigned long)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>销毁消息队列服务器的函数类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">服务器ID</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html#l00030">30</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a749dc86d073c15a88e4a719af94bc813" name="a749dc86d073c15a88e4a719af94bc813"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a749dc86d073c15a88e4a719af94bc813">&#9670;&#160;</a></span>FuncLogCallback</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(* FuncLogCallback) (unsigned long, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, bool)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>日志回调函数类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">服务器ID</td><td></td></tr>
+    <tr><td class="paramname">日志消息</td><td></td></tr>
+    <tr><td class="paramname">是否为服务器</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html#l00047">47</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8d23775ba30cc3102a9ee6fafb76a871" name="a8d23775ba30cc3102a9ee6fafb76a871"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d23775ba30cc3102a9ee6fafb76a871">&#9670;&#160;</a></span>FuncRegCallbacks</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(* FuncRegCallbacks) (<a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>注册回调函数的函数类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">日志回调函数</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html#l00053">53</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a87a3a860679f7f5e622261d4d0e6f287" name="a87a3a860679f7f5e622261d4d0e6f287"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87a3a860679f7f5e622261d4d0e6f287">&#9670;&#160;</a></span>FundPublishMessage</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(* FundPublishMessage) (unsigned long, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *, unsigned long)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>发布消息的函数类型 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">服务器ID</td><td></td></tr>
+    <tr><td class="paramname">主题</td><td></td></tr>
+    <tr><td class="paramname">消息内容</td><td></td></tr>
+    <tr><td class="paramname">消息长度</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html">EventNotifier.h</a> 第 <a class="el" href="WtBtCore_2EventNotifier_8h_source.html#l00039">39</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_e0a6b04728b7bc818baf88501da85ff3.html">WtBtCore</a></li><li class="navelem"><a class="el" href="WtBtCore_2EventNotifier_8h.html">EventNotifier.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

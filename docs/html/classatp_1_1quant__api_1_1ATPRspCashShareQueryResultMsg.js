@@ -1,0 +1,25 @@
+var classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg =
+[
+    [ "ATPRspCashShareQueryResultMsg", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#a6a5bf21352d90667c9b2ad9f4662be99", null ],
+    [ "~ATPRspCashShareQueryResultMsg", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#add3d7f219bdf55221aa47d9526f51703", null ],
+    [ "ATPRspCashShareQueryResultMsg", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#a9b675b08223c42aaa8425311fc2af22f", null ],
+    [ "GetAccountId", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#aca9e142f9488f56ad26afebf11255ac2", null ],
+    [ "GetAvailableQty", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#ac745dd99fcf1d7bac6f7a2f4a425b313", null ],
+    [ "GetBranchId", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#ae6f292fcf4d5a2e9ae89875dbd76ca2b", null ],
+    [ "GetCostPrice", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#aee00f225c06905818900eddb58940bdd", null ],
+    [ "GetCustId", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#afcfdb69a0cfad6abb0a481541b18a442", null ],
+    [ "GetEtfRedemptionQty", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#ad02b5a2f433f1e87a91a4f68ff4cdc97", null ],
+    [ "GetFundAccountId", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#ab1306f9f48d832f9b0510f1f7a7a2235", null ],
+    [ "GetInitQty", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#a579fa30cf7177dbd02c7ce0ef163d1ad", null ],
+    [ "GetLastPrice", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#ae4fc7b2d864ee21f4ec2ab4dd1378743", null ],
+    [ "GetLeavesQty", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#aff6996a1d04ec579f4c3f69c0b64bf36", null ],
+    [ "GetMarketId", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#a5fe66b213217af341f0cf2fe8a5a3cff", null ],
+    [ "GetMarketValue", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#a801e90a5cba4e71fe9d423c3e26412bc", null ],
+    [ "GetProfitLoss", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#a27ec58201b7ee14e7db5cc414778355c", null ],
+    [ "GetSecurityId", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#af5232e1e227dd5f0fc5ae98988fad66c", null ],
+    [ "GetSecuritySymbol", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#abc1b229b44997a76b2e07beca41d1b75", null ],
+    [ "GetSecurityType", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#ac0764a836bdd90c464c9d177e9ef4a1f", null ],
+    [ "GetStockBuy", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#afdb62167475d6d1320bad5c007fc369c", null ],
+    [ "GetStockSale", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#ab6e8f830f50546ed46b91aa9f3aa08fd", null ],
+    [ "operator=", "classatp_1_1quant__api_1_1ATPRspCashShareQueryResultMsg.html#ae63511e211d42c7d20ada881da0ffe76", null ]
+];

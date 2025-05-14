@@ -1,0 +1,545 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/ParserYD/ParserYD.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('ParserYD_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ParserYD.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="ParserYD_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="ParserYD_8h.html">ParserYD.h</a>&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;../Includes/WTSDataDef.hpp&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;../Includes/WTSContractInfo.hpp&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Includes/WTSVariant.hpp&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/IBaseDataMgr.h&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../Share/ModuleHelper.hpp&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;../Share/TimeUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;boost/filesystem.hpp&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> <span class="comment">//By Wesley @ 2022.01.05</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;../Share/fmtlib.h&quot;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="foldopen" id="foldopen00026" data-start="{" data-end="}">
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="ParserYD_8cpp.html#aa69734101d1d18b7bebd99423692db21">   26</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="ParserYD_8cpp.html#aa69734101d1d18b7bebd99423692db21">write_log</a>(<a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>* sink, <a class="code hl_typedef" href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a> ll, <span class="keyword">const</span> <span class="keywordtype">char</span>* format, <span class="keyword">const</span> Args&amp;... args)</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>{</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keywordflow">if</span> (sink == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="keyword">static</span> <span class="keyword">thread_local</span> <span class="keywordtype">char</span> buffer[512] = { 0 };</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    memset(buffer, 0, 512);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    fmt::format_to(buffer, format, args...);</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    sink-&gt;<a class="code hl_function" href="classIParserSpi.html#a82527f3641bffc8a0fa0036e5c53b0b1">handleParserLog</a>(ll, buffer);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>}</div>
+</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>{</div>
+<div class="foldopen" id="foldopen00040" data-start="{" data-end="}">
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="ParserYD_8cpp.html#ab387d2901e2c0ea868a0ecee850a575e">   40</a></span>    <a class="code hl_define" href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a> <a class="code hl_class" href="classIParserApi.html">IParserApi</a>* <a class="code hl_function" href="ParserYD_8cpp.html#ab387d2901e2c0ea868a0ecee850a575e">createParser</a>()</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    {</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        <a class="code hl_class" href="classParserYD.html">ParserYD</a>* parser = <span class="keyword">new</span> <a class="code hl_class" href="classParserYD.html">ParserYD</a>();</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <span class="keywordflow">return</span> parser;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    }</div>
+</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="foldopen" id="foldopen00046" data-start="{" data-end="}">
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="ParserYD_8cpp.html#afb97094ab761d02698b520d363c5f6f0">   46</a></span>    <a class="code hl_define" href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a> <span class="keywordtype">void</span> <a class="code hl_function" href="ParserYD_8cpp.html#afb97094ab761d02698b520d363c5f6f0">deleteParser</a>(<a class="code hl_class" href="classIParserApi.html">IParserApi</a>* &amp;parser)</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    {</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keywordflow">if</span> (<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a> != parser)</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        {</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>            <span class="keyword">delete</span> parser;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>            parser = <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        }</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    }</div>
+</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>};</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="foldopen" id="foldopen00057" data-start="{" data-end="}">
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="classParserYD.html#a59586ecff52c801b34ce9457a7afb0c5">   57</a></span><a class="code hl_function" href="classParserYD.html#a59586ecff52c801b34ce9457a7afb0c5">ParserYD::ParserYD</a>()</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    : m_pUserAPI(<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    , m_uTradingDate(0)</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    , m_bApiInited(false)</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>{</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>}</div>
+</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="foldopen" id="foldopen00065" data-start="{" data-end="}">
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classParserYD.html#ae67188f1eb20f99c6e5d2e26d4c08501">   65</a></span><a class="code hl_function" href="classParserYD.html#ae67188f1eb20f99c6e5d2e26d4c08501">ParserYD::~ParserYD</a>()</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>{</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <a class="code hl_variable" href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">m_pUserAPI</a> = <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>}</div>
+</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="foldopen" id="foldopen00070" data-start="{" data-end="}">
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="classParserYD.html#ac4535aca6a17d05cd446101b75a7b9fb">   70</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classParserYD.html#ac4535aca6a17d05cd446101b75a7b9fb">ParserYD::notifyReadyForLogin</a>(<span class="keywordtype">bool</span> hasLoginFailed)</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>{</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>)</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    {</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <a class="code hl_function" href="ParserCTP_8cpp.html#aa69734101d1d18b7bebd99423692db21">write_log</a>(<a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>, <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba3d0aabc1a000a1668922ab44aeca5771">LL_INFO</a>, <span class="stringliteral">&quot;[ParserYD] Market data server connected&quot;</span>);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        <a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>-&gt;<a class="code hl_function" href="classIParserSpi.html#a421b8d5326828d2c114efb2aa8c7721c">handleEvent</a>(<a class="code hl_enumvalue" href="WTSTypes_8h.html#a4912616b43f34be54960cc4515b824e8a2011205ddfdd2617b5041207fb120b0c">WPE_Connect</a>, 0);</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    }</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <a class="code hl_function" href="classParserYD.html#ac91baaed18e400d6b814d10d7bdf1e5c">DoLogin</a>();</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>}</div>
+</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="foldopen" id="foldopen00082" data-start="{" data-end="}">
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="classParserYD.html#a2bc8e11df6c4c353b6092b826e9899a8">   82</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classParserYD.html#a2bc8e11df6c4c353b6092b826e9899a8">ParserYD::notifyLogin</a>(<span class="keywordtype">int</span> errorNo, <span class="keywordtype">int</span> maxOrderRef, <span class="keywordtype">bool</span> isMonitor)</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>{</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keywordflow">if</span> (errorNo == 0)</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    {</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <a class="code hl_function" href="ParserCTP_8cpp.html#aa69734101d1d18b7bebd99423692db21">write_log</a>(<a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>, <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba3d0aabc1a000a1668922ab44aeca5771">LL_INFO</a>, <span class="stringliteral">&quot;[ParserYD] {} login successfully&quot;</span>, <a class="code hl_variable" href="classParserYD.html#a4ebe1f019d07db9c440eecc902e4e3bd">m_strUserID</a>);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        <a class="code hl_variable" href="classParserYD.html#a76edf57fe5f42df2389d70def29a0eba">m_uTradingDate</a> = <a class="code hl_variable" href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">m_pUserAPI</a>-&gt;<a class="code hl_function" href="classYDApi.html#acd0db33415a1cbdbb06c3ac83cf996cd">getTradingDay</a>();</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>)</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        {</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>            <a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>-&gt;<a class="code hl_function" href="classIParserSpi.html#a421b8d5326828d2c114efb2aa8c7721c">handleEvent</a>(<a class="code hl_enumvalue" href="WTSTypes_8h.html#a4912616b43f34be54960cc4515b824e8a5100f3664f0f76dd1acdcb0556635ed9">WPE_Login</a>, 0);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        }</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="comment">//如果API初始化过了，就直接订阅</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <span class="comment">//这种一般是断线重连</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classParserYD.html#a81bf040a997a9df2e3e97ea07658e6f9">m_bApiInited</a>)</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        {</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>            <span class="comment">//订阅行情数据</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>            <a class="code hl_function" href="classParserYD.html#a691630a3b19c9a9e6e63ef7833d16806">DoSubscribe</a>();</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        }</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    }</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    {</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        <a class="code hl_function" href="ParserCTP_8cpp.html#aa69734101d1d18b7bebd99423692db21">write_log</a>(<a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>, <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba3d0aabc1a000a1668922ab44aeca5771">LL_INFO</a>, <span class="stringliteral">&quot;[ParserYD] {} login failed, error no: {}&quot;</span>, <a class="code hl_variable" href="classParserYD.html#a4ebe1f019d07db9c440eecc902e4e3bd">m_strUserID</a>, errorNo);</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    }</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>}</div>
+</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="foldopen" id="foldopen00109" data-start="{" data-end="}">
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="classParserYD.html#a8cd7dc675791653cb89c893f22cb910a">  109</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classParserYD.html#a8cd7dc675791653cb89c893f22cb910a">ParserYD::notifyFinishInit</a>(<span class="keywordtype">void</span>)</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>{</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>) <a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>-&gt;<a class="code hl_function" href="classIParserSpi.html#a82527f3641bffc8a0fa0036e5c53b0b1">handleParserLog</a>(<a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba3d0aabc1a000a1668922ab44aeca5771">LL_INFO</a>, <span class="stringliteral">&quot;[ParserYD] All things ready&quot;</span>);</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <span class="comment">//如果API没有初始化过，说明这个回调是第一次触发</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="comment">//则需要触发一些订阅等操作</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="keywordflow">if</span>(!<a class="code hl_variable" href="classParserYD.html#a81bf040a997a9df2e3e97ea07658e6f9">m_bApiInited</a>)</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    {</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        <span class="comment">//订阅行情数据</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>        <a class="code hl_function" href="classParserYD.html#a691630a3b19c9a9e6e63ef7833d16806">DoSubscribe</a>();</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        <a class="code hl_variable" href="classParserYD.html#a81bf040a997a9df2e3e97ea07658e6f9">m_bApiInited</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    }</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>}</div>
+</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="foldopen" id="foldopen00124" data-start="{" data-end="}">
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="classParserYD.html#a8047b52363bce8893be23df87f7cb166">  124</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classParserYD.html#a8047b52363bce8893be23df87f7cb166">ParserYD::notifyMarketData</a>(<span class="keyword">const</span> <a class="code hl_class" href="classYDMarketData.html">YDMarketData</a> *pDepthMarketData)</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>{</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classParserYD.html#a67f922325de88253431f48e3a539d4d0">m_pBaseDataMgr</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="keyword">const</span> <a class="code hl_class" href="classYDInstrument.html">YDInstrument</a>* instInfo = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#a9a21bb6b8abf14e032cdcb7af09be629">m_pInstrument</a>;</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keyword">const</span> <a class="code hl_class" href="classYDExchange.html">YDExchange</a>* exchgInfo = instInfo-&gt;<a class="code hl_variable" href="classYDInstrument.html#af10618828f780308b22e759b109e1ff8">m_pExchange</a>;</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    uint32_t actDate = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#a64504b6be41f2a3dbadffb401e5a9de3">TradingDay</a>;</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    uint32_t actTime = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#af8c8bf8ff9903d82e625bdd2fd3c62cd">TimeStamp</a>;</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    uint32_t actHour = actTime / 10000000;</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <a class="code hl_class" href="classWTSContractInfo.html">WTSContractInfo</a>* contract = <a class="code hl_variable" href="classParserYD.html#a67f922325de88253431f48e3a539d4d0">m_pBaseDataMgr</a>-&gt;<a class="code hl_function" href="classIBaseDataMgr.html#a7902cf7c19636ee381ba9fa7a6e3f065">getContract</a>(instInfo-&gt;<a class="code hl_variable" href="classYDInstrument.html#aab6f5e7185f09123206bf4d06f403969">InstrumentID</a>, exchgInfo-&gt;<a class="code hl_variable" href="classYDExchange.html#ad173594d0588147c923c3572647102b0">ExchangeID</a>);</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="keywordflow">if</span> (contract == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* tick = <a class="code hl_function" href="classWTSTickData.html#a4b56adfd1cd4e6b95833653ca987ce43">WTSTickData::create</a>(instInfo-&gt;<a class="code hl_variable" href="classYDInstrument.html#aab6f5e7185f09123206bf4d06f403969">InstrumentID</a>);</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>    <a class="code hl_struct" href="structWTSTickStruct.html">WTSTickStruct</a>&amp; quote = tick-&gt;<a class="code hl_function" href="classWTSTickData.html#a6a81212366831e7afe3eeac41b42e7b0">getTickStruct</a>();</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    <a class="code hl_function" href="WTSMarcos_8h.html#ae3e2cd00c20ce8b9ae0ae37a089d7d5e">wt_strcpy</a>(quote.<a class="code hl_variable" href="structWTSTickStruct.html#a1fae83488fbdd65e552944bb1502b8fd">exchg</a>, contract-&gt;<a class="code hl_function" href="classWTSContractInfo.html#a4095c522d23aeb1608ce89dc69729b72">getExchg</a>());</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>    tick-&gt;<a class="code hl_function" href="classWTSTickData.html#a3f5ca8ee02338f1991293bb33ba0318d">setContractInfo</a>(contract);</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span> </div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#afd2eb785cc5bfd6ca1f93375732a09ef">action_date</a> = actDate;</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#a44aea5df719841d66b883c572ecd291d">action_time</a> = actTime;</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#a72563ba28f49fb904ddefbf652727c82">price</a> = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#a96baf3b2bf3898b49372005efc855bd2">LastPrice</a>;</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#aabf07c4d7040b85931f0882de3398379">total_volume</a> = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#a6bf32593d2ea3a002c80ef3e99026fb7">Volume</a>;</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#a9fe18bba3bedd1c23830ba835cdf5fba">trading_date</a> = <a class="code hl_variable" href="classParserYD.html#a76edf57fe5f42df2389d70def29a0eba">m_uTradingDate</a>;</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#aa4b209c7af071d33f094ec48d14ac5ad">total_turnover</a> = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#a8f028a2366a6ec0e5ba8b10b0d2a04b3">Turnover</a>;</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#a9f77ec5a68aa78149ff70544d1a5325c">open_interest</a> = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#a6715fa190d451952b2698523082b8f08">OpenInterest</a>;</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#a571f622c146287aeb5750e974fe434ae">upper_limit</a> = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#a23edba16fed3771b65e7bc6c364489cb">UpperLimitPrice</a>;</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#aa765254d43077f75d8916cf2feb919fd">lower_limit</a> = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#a876f425dd6bfb21ddb1892b44b4f778b">LowerLimitPrice</a>;</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#a17bd5a2e41a49b42c52017a208bb9375">pre_close</a> = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#a5cca3af9857fdbd5499698e15c372a04">PreClosePrice</a>;</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#a08e5338b44b175e874d45be91da587e8">pre_settle</a> = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#a4d2ebf22769ca1bab155a896580c0a90">PreSettlementPrice</a>;</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#a748c94f5e832b7c622d1b3ee6968e9a5">pre_interest</a> = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#a097dc535c2faa8c4ba9c9a29ea4ec74a">PreOpenInterest</a>;</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    <span class="comment">//委卖价格</span></div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#aab9d98249498f3987bc114764edca24e">ask_prices</a>[0] = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#ad1eb6628e2738ee47345b6a6808e5d75">AskPrice</a>;</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    <span class="comment">//委买价格</span></div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#a92c83647dcd3d77d659bff2967480489">bid_prices</a>[0] = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#ada09e9e9ae8338d84c4edbb7a191d806">BidPrice</a>;</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    <span class="comment">//委卖量</span></div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#a0c229638a3bda7a9dae9f042534b566b">ask_qty</a>[0] = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#a0107ab280bcfda248eba24c984a11823">AskVolume</a>;</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    <span class="comment">//委买量</span></div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    quote.<a class="code hl_variable" href="structWTSTickStruct.html#a70aac8776b4932b236b58a1043002f4b">bid_qty</a>[0] = pDepthMarketData-&gt;<a class="code hl_variable" href="classYDMarketData.html#a50bf1120f2e23765e619878d1a40ba1d">BidVolume</a>;</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>)</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>        <a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>-&gt;<a class="code hl_function" href="classIParserSpi.html#af9c5154456462c9b115bdc45de05ff29">handleQuote</a>(tick, 1);</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    tick-&gt;<a class="code hl_function" href="classWTSPoolObject.html#a868f127b3ccc31cba6b077803cb00951">release</a>();</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>}</div>
+</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
+<div class="foldopen" id="foldopen00176" data-start="{" data-end="}">
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno"><a class="line" href="classParserYD.html#a576c6eb9f040b76410548d3ae6517d72">  176</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classParserYD.html#a576c6eb9f040b76410548d3ae6517d72">ParserYD::init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* <a class="code hl_function" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>)</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>{</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    <a class="code hl_variable" href="classParserYD.html#ad6abc69bace1c61dbcb04cc72829b623">m_strCfgFile</a> = <a class="code hl_function" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>-&gt;getCString(<span class="stringliteral">&quot;config&quot;</span>);</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    <a class="code hl_variable" href="classParserYD.html#a4ebe1f019d07db9c440eecc902e4e3bd">m_strUserID</a> = <a class="code hl_function" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>-&gt;getCString(<span class="stringliteral">&quot;user&quot;</span>);</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>    <a class="code hl_variable" href="classParserYD.html#acbeeff7e6d1b2882fa369a152d70bf27">m_strPassword</a> = <a class="code hl_function" href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a>-&gt;getCString(<span class="stringliteral">&quot;pass&quot;</span>);</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span> </div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    std::string <span class="keyword">module</span> = config-&gt;getCString(&quot;ydmodule&quot;);</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    <span class="keywordflow">if</span> (module.empty())</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>        <span class="keyword">module</span> = &quot;yd&quot;;</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    std::string dllpath = <a class="code hl_function" href="QuoteFactory_2main_8cpp.html#a60d1186895e0d2d2edd7a2710e082cd0">getBinDir</a>() + <a class="code hl_function" href="classDLLHelper.html#a5512c5f28bf9e80413e65209c72ec21b">DLLHelper::wrap_module</a>(module.c_str(), <span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>    <a class="code hl_variable" href="classParserYD.html#aa19eaa22c014e130d580317c4b5f941a">m_hInstYD</a> = <a class="code hl_function" href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a>(dllpath.c_str());   </div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    <a class="code hl_variable" href="classParserYD.html#a812921fb8d224aae786ea43bdef8d89b">m_funcCreator</a> = (<a class="code hl_typedef" href="classParserYD.html#a812a091a99311b4e847b02221fc316db">YDCreator</a>)<a class="code hl_function" href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a>(<a class="code hl_variable" href="classParserYD.html#aa19eaa22c014e130d580317c4b5f941a">m_hInstYD</a>, <span class="stringliteral">&quot;makeYDApi&quot;</span>);</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    <a class="code hl_variable" href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">m_pUserAPI</a> = <a class="code hl_variable" href="classParserYD.html#a812921fb8d224aae786ea43bdef8d89b">m_funcCreator</a>(<a class="code hl_variable" href="classParserYD.html#ad6abc69bace1c61dbcb04cc72829b623">m_strCfgFile</a>.c_str());</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span> </div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>}</div>
+</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="foldopen" id="foldopen00194" data-start="{" data-end="}">
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno"><a class="line" href="classParserYD.html#a33e396fe44ac5c5d686ca59b5c9dd645">  194</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classParserYD.html#a33e396fe44ac5c5d686ca59b5c9dd645">ParserYD::release</a>()</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>{</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    <a class="code hl_function" href="classParserYD.html#a4e38e3deeb9460f829d81318b4ad447b">disconnect</a>();</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>}</div>
+</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span> </div>
+<div class="foldopen" id="foldopen00199" data-start="{" data-end="}">
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno"><a class="line" href="classParserYD.html#a8869bd6d1abaf6fad5d49b0842be9d08">  199</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classParserYD.html#a8869bd6d1abaf6fad5d49b0842be9d08">ParserYD::connect</a>()</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>{</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">m_pUserAPI</a>)</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>    {</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>        <a class="code hl_variable" href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">m_pUserAPI</a>-&gt;<a class="code hl_function" href="classYDApi.html#ac293c3f5fc08e039b4ed3294d76c3e40">start</a>(<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>    }</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>}</div>
+</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span> </div>
+<div class="foldopen" id="foldopen00209" data-start="{" data-end="}">
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno"><a class="line" href="classParserYD.html#a4e38e3deeb9460f829d81318b4ad447b">  209</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classParserYD.html#a4e38e3deeb9460f829d81318b4ad447b">ParserYD::disconnect</a>()</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>{</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">m_pUserAPI</a>)</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    {</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>        <a class="code hl_variable" href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">m_pUserAPI</a>-&gt;<a class="code hl_function" href="classYDApi.html#a4abbf3d25db6ec55737d589c840f42cc">disconnect</a>();</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        <a class="code hl_variable" href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">m_pUserAPI</a> = <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    }</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span> </div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>}</div>
+</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span> </div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span> </div>
+<div class="foldopen" id="foldopen00221" data-start="{" data-end="}">
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno"><a class="line" href="classParserYD.html#ac91baaed18e400d6b814d10d7bdf1e5c">  221</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classParserYD.html#ac91baaed18e400d6b814d10d7bdf1e5c">ParserYD::DoLogin</a>()</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>{</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">m_pUserAPI</a> == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    {</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    }</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span> </div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    <span class="keywordflow">if</span>(!<a class="code hl_variable" href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">m_pUserAPI</a>-&gt;<a class="code hl_function" href="classYDApi.html#aeb8e6c776b3e8d0e5d9486fd040311bb">login</a>(<a class="code hl_variable" href="classParserYD.html#a4ebe1f019d07db9c440eecc902e4e3bd">m_strUserID</a>.c_str(), <a class="code hl_variable" href="classParserYD.html#acbeeff7e6d1b2882fa369a152d70bf27">m_strPassword</a>.c_str(), <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>))</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    {</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        <span class="keywordflow">if</span>(<a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>)</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>            <a class="code hl_function" href="ParserCTP_8cpp.html#aa69734101d1d18b7bebd99423692db21">write_log</a>(<a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>, <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba50717458baf49c204bb0645418e0da15">LL_ERROR</a>, <span class="stringliteral">&quot;[ParserYD] Sending login request failed&quot;</span>);</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    }</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>}</div>
+</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span> </div>
+<div class="foldopen" id="foldopen00235" data-start="{" data-end="}">
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno"><a class="line" href="classParserYD.html#a691630a3b19c9a9e6e63ef7833d16806">  235</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classParserYD.html#a691630a3b19c9a9e6e63ef7833d16806">ParserYD::DoSubscribe</a>()</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>{</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a> codeFilter = <a class="code hl_variable" href="classParserYD.html#a3f5595f91b5dfa29a0bde921f088aaec">m_filterSubs</a>;</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    <span class="keywordflow">if</span>(codeFilter.<a class="code hl_function" href="classtsl_1_1robin__set.html#a2b8925720dcc1fb35592812c2ecb533d">empty</a>())</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    {<span class="comment">//如果订阅礼包只空的,则取出全部合约列表</span></div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    }</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    <span class="keywordtype">int</span> nCount = 0;</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>    <span class="keywordflow">for</span>(<span class="keyword">auto</span>&amp; code : codeFilter)</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    {</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>        std::size_t pos = code.<a class="code hl_function" href="classtsl_1_1robin__set.html#a6984f54d7a443994e5e27e5e782604d5">find</a>(<span class="charliteral">&#39;.&#39;</span>);</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>        <span class="keyword">const</span> <a class="code hl_class" href="classYDInstrument.html">YDInstrument</a>* instInfo = <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>        <span class="keywordflow">if</span> (pos != std::string::npos)</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>        {</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>            instInfo = <a class="code hl_variable" href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">m_pUserAPI</a>-&gt;<a class="code hl_function" href="classYDApi.html#a8685a42a7f601f38a12d519eb117501d">getInstrumentByID</a>((<span class="keywordtype">char</span>*)code.c_str() + pos + 1);</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        }</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>        {</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>            instInfo = <a class="code hl_variable" href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">m_pUserAPI</a>-&gt;<a class="code hl_function" href="classYDApi.html#a8685a42a7f601f38a12d519eb117501d">getInstrumentByID</a>((<span class="keywordtype">char</span>*)code.c_str());</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        }</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span> </div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>        <span class="keywordflow">if</span>(instInfo == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span> </div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>        <span class="keywordtype">bool</span> bRet = <a class="code hl_variable" href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">m_pUserAPI</a>-&gt;<a class="code hl_function" href="classYDApi.html#ab6651c0503d0206a1c0d2614230569eb">subscribe</a>(instInfo);</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>        <a class="code hl_function" href="ParserCTP_8cpp.html#aa69734101d1d18b7bebd99423692db21">write_log</a>(<a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>, <a class="code hl_enumvalue" href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba50717458baf49c204bb0645418e0da15">LL_ERROR</a>, <span class="stringliteral">&quot;[ParserYD] Subscribe md of {} {}&quot;</span>, code.c_str(), bRet?<span class="stringliteral">&quot;succeed&quot;</span>:<span class="stringliteral">&quot;failed&quot;</span>);</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>    }</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>}</div>
+</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span> </div>
+<div class="foldopen" id="foldopen00265" data-start="{" data-end="}">
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno"><a class="line" href="classParserYD.html#a3b70199cc7eeb9aa6ce91681e642af38">  265</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classParserYD.html#a3b70199cc7eeb9aa6ce91681e642af38">ParserYD::subscribe</a>(<span class="keyword">const</span> <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a> &amp;vecSymbols)</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>{</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classParserYD.html#a76edf57fe5f42df2389d70def29a0eba">m_uTradingDate</a> == 0)</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>    {</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>        <a class="code hl_variable" href="classParserYD.html#a3f5595f91b5dfa29a0bde921f088aaec">m_filterSubs</a> = vecSymbols;</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>    }</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>    {</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>        <a class="code hl_variable" href="classParserYD.html#a3f5595f91b5dfa29a0bde921f088aaec">m_filterSubs</a> = vecSymbols;</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>        <a class="code hl_function" href="classParserYD.html#a691630a3b19c9a9e6e63ef7833d16806">DoSubscribe</a>();</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    }</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>}</div>
+</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span> </div>
+<div class="foldopen" id="foldopen00278" data-start="{" data-end="}">
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno"><a class="line" href="classParserYD.html#a661baf71fd88f2706f5c3fc444e0a0a0">  278</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classParserYD.html#a661baf71fd88f2706f5c3fc444e0a0a0">ParserYD::unsubscribe</a>(<span class="keyword">const</span> <a class="code hl_class" href="classfastest__hashset_3_01std_1_1string_01_4.html">CodeSet</a> &amp;vecSymbols)</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>{</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>}</div>
+</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span> </div>
+<div class="foldopen" id="foldopen00282" data-start="{" data-end="}">
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno"><a class="line" href="classParserYD.html#a788808954f853b626150f4984c2594fc">  282</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classParserYD.html#a788808954f853b626150f4984c2594fc">ParserYD::isConnected</a>()</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>{</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">m_pUserAPI</a>!=<a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>}</div>
+</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span> </div>
+<div class="foldopen" id="foldopen00287" data-start="{" data-end="}">
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno"><a class="line" href="classParserYD.html#a7f4f54765f99c2c2b7bee28e706fae39">  287</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classParserYD.html#a7f4f54765f99c2c2b7bee28e706fae39">ParserYD::registerSpi</a>(<a class="code hl_class" href="classIParserSpi.html">IParserSpi</a>* listener)</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>{</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>    <a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a> = listener;</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span> </div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>    <span class="keywordflow">if</span>(<a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>)</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>        <a class="code hl_variable" href="classParserYD.html#a67f922325de88253431f48e3a539d4d0">m_pBaseDataMgr</a> = <a class="code hl_variable" href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">m_sink</a>-&gt;<a class="code hl_function" href="classIParserSpi.html#a48bc03c868be4a38bf50b355c9149a93">getBaseDataMgr</a>();</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>}</div>
+</div>
+<div class="ttc" id="aCTPLoader_8cpp_html_ab21f8ef3ba992efc1eda405bccdde69a"><div class="ttname"><a href="CTPLoader_8cpp.html#ab21f8ef3ba992efc1eda405bccdde69a">EXPORT_FLAG</a></div><div class="ttdeci">#define EXPORT_FLAG</div><div class="ttdef"><b>Definition</b> <a href="CTPLoader_8cpp_source.html#l00098">CTPLoader.cpp:98</a></div></div>
+<div class="ttc" id="aParserCTP_8cpp_html_aa69734101d1d18b7bebd99423692db21"><div class="ttname"><a href="ParserCTP_8cpp.html#aa69734101d1d18b7bebd99423692db21">write_log</a></div><div class="ttdeci">void write_log(IParserSpi *sink, WTSLogLevel ll, const char *format, const Args &amp;... args)</div><div class="ttdoc">格式化写入日志</div><div class="ttdef"><b>Definition</b> <a href="ParserCTP_8cpp_source.html#l00039">ParserCTP.cpp:39</a></div></div>
+<div class="ttc" id="aParserYD_8cpp_html_aa69734101d1d18b7bebd99423692db21"><div class="ttname"><a href="ParserYD_8cpp.html#aa69734101d1d18b7bebd99423692db21">write_log</a></div><div class="ttdeci">void write_log(IParserSpi *sink, WTSLogLevel ll, const char *format, const Args &amp;... args)</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00026">ParserYD.cpp:26</a></div></div>
+<div class="ttc" id="aParserYD_8cpp_html_ab387d2901e2c0ea868a0ecee850a575e"><div class="ttname"><a href="ParserYD_8cpp.html#ab387d2901e2c0ea868a0ecee850a575e">createParser</a></div><div class="ttdeci">EXPORT_FLAG IParserApi * createParser()</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00040">ParserYD.cpp:40</a></div></div>
+<div class="ttc" id="aParserYD_8cpp_html_afb97094ab761d02698b520d363c5f6f0"><div class="ttname"><a href="ParserYD_8cpp.html#afb97094ab761d02698b520d363c5f6f0">deleteParser</a></div><div class="ttdeci">EXPORT_FLAG void deleteParser(IParserApi *&amp;parser)</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00046">ParserYD.cpp:46</a></div></div>
+<div class="ttc" id="aParserYD_8h_html"><div class="ttname"><a href="ParserYD_8h.html">ParserYD.h</a></div></div>
+<div class="ttc" id="aQuoteFactory_2main_8cpp_html_a60d1186895e0d2d2edd7a2710e082cd0"><div class="ttname"><a href="QuoteFactory_2main_8cpp.html#a60d1186895e0d2d2edd7a2710e082cd0">getBinDir</a></div><div class="ttdeci">const char * getBinDir()</div><div class="ttdoc">获取当前可执行文件所在目录</div><div class="ttdef"><b>Definition</b> <a href="QuoteFactory_2main_8cpp_source.html#l00080">main.cpp:80</a></div></div>
+<div class="ttc" id="aTraderDumper_8cpp_html_abc68ad0fe9293fb2709e004ffe3fa333"><div class="ttname"><a href="TraderDumper_8cpp.html#abc68ad0fe9293fb2709e004ffe3fa333">config</a></div><div class="ttdeci">bool config(const char *cfgfile, bool isFile)</div><div class="ttdef"><b>Definition</b> <a href="TraderDumper_8cpp_source.html#l00022">TraderDumper.cpp:22</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_ae3e2cd00c20ce8b9ae0ae37a089d7d5e"><div class="ttname"><a href="WTSMarcos_8h.html#ae3e2cd00c20ce8b9ae0ae37a089d7d5e">wt_strcpy</a></div><div class="ttdeci">size_t wt_strcpy(char *des, const char *src, size_t len=0)</div><div class="ttdoc">字符串拷贝函数</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00155">WTSMarcos.h:155</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_a4912616b43f34be54960cc4515b824e8a2011205ddfdd2617b5041207fb120b0c"><div class="ttname"><a href="WTSTypes_8h.html#a4912616b43f34be54960cc4515b824e8a2011205ddfdd2617b5041207fb120b0c">WPE_Connect</a></div><div class="ttdeci">@ WPE_Connect</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00317">WTSTypes.h:317</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_a4912616b43f34be54960cc4515b824e8a5100f3664f0f76dd1acdcb0556635ed9"><div class="ttname"><a href="WTSTypes_8h.html#a4912616b43f34be54960cc4515b824e8a5100f3664f0f76dd1acdcb0556635ed9">WPE_Login</a></div><div class="ttdeci">@ WPE_Login</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00319">WTSTypes.h:319</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aa7b93f4aa2259e69e48f27448c247dc8"><div class="ttname"><a href="WTSTypes_8h.html#aa7b93f4aa2259e69e48f27448c247dc8">WTSLogLevel</a></div><div class="ttdeci">enum tagLogLevel WTSLogLevel</div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aed5503152b508c68a90229e513a8e15ba3d0aabc1a000a1668922ab44aeca5771"><div class="ttname"><a href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba3d0aabc1a000a1668922ab44aeca5771">LL_INFO</a></div><div class="ttdeci">@ LL_INFO</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00129">WTSTypes.h:129</a></div></div>
+<div class="ttc" id="aWTSTypes_8h_html_aed5503152b508c68a90229e513a8e15ba50717458baf49c204bb0645418e0da15"><div class="ttname"><a href="WTSTypes_8h.html#aed5503152b508c68a90229e513a8e15ba50717458baf49c204bb0645418e0da15">LL_ERROR</a></div><div class="ttdeci">@ LL_ERROR</div><div class="ttdef"><b>Definition</b> <a href="WTSTypes_8h_source.html#l00131">WTSTypes.h:131</a></div></div>
+<div class="ttc" id="aclassDLLHelper_html_a5512c5f28bf9e80413e65209c72ec21b"><div class="ttname"><a href="classDLLHelper.html#a5512c5f28bf9e80413e65209c72ec21b">DLLHelper::wrap_module</a></div><div class="ttdeci">static std::string wrap_module(const char *name, const char *unixPrefix=&quot;lib&quot;)</div><div class="ttdoc">将模块名转换为平台相关的动态库文件名</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00130">DLLHelper.hpp:130</a></div></div>
+<div class="ttc" id="aclassDLLHelper_html_ac5d55450ea114206242d9ccbfd65ac82"><div class="ttname"><a href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a></div><div class="ttdeci">static DllHandle load_library(const char *filename)</div><div class="ttdoc">加载动态库</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00058">DLLHelper.hpp:58</a></div></div>
+<div class="ttc" id="aclassDLLHelper_html_ae01c3a299dd418d0298d29fa5f5f9b2c"><div class="ttname"><a href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a></div><div class="ttdeci">static ProcHandle get_symbol(DllHandle handle, const char *name)</div><div class="ttdoc">获取动态库中的符号（函数或变量）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00107">DLLHelper.hpp:107</a></div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html_a7902cf7c19636ee381ba9fa7a6e3f065"><div class="ttname"><a href="classIBaseDataMgr.html#a7902cf7c19636ee381ba9fa7a6e3f065">IBaseDataMgr::getContract</a></div><div class="ttdeci">virtual WTSContractInfo * getContract(const char *code, const char *exchg=&quot;&quot;, uint32_t uDate=0)=0</div><div class="ttdoc">获取合约信息</div></div>
+<div class="ttc" id="aclassIParserApi_html"><div class="ttname"><a href="classIParserApi.html">IParserApi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00083">IParserApi.h:84</a></div></div>
+<div class="ttc" id="aclassIParserSpi_html"><div class="ttname"><a href="classIParserSpi.html">IParserSpi</a></div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00028">IParserApi.h:29</a></div></div>
+<div class="ttc" id="aclassIParserSpi_html_a421b8d5326828d2c114efb2aa8c7721c"><div class="ttname"><a href="classIParserSpi.html#a421b8d5326828d2c114efb2aa8c7721c">IParserSpi::handleEvent</a></div><div class="ttdeci">virtual void handleEvent(WTSParserEvent e, int32_t ec)</div><div class="ttdef"><b>Definition</b> <a href="IParserApi_8h_source.html#l00036">IParserApi.h:36</a></div></div>
+<div class="ttc" id="aclassIParserSpi_html_a48bc03c868be4a38bf50b355c9149a93"><div class="ttname"><a href="classIParserSpi.html#a48bc03c868be4a38bf50b355c9149a93">IParserSpi::getBaseDataMgr</a></div><div class="ttdeci">virtual IBaseDataMgr * getBaseDataMgr()=0</div></div>
+<div class="ttc" id="aclassIParserSpi_html_a82527f3641bffc8a0fa0036e5c53b0b1"><div class="ttname"><a href="classIParserSpi.html#a82527f3641bffc8a0fa0036e5c53b0b1">IParserSpi::handleParserLog</a></div><div class="ttdeci">virtual void handleParserLog(WTSLogLevel ll, const char *message)=0</div></div>
+<div class="ttc" id="aclassIParserSpi_html_af9c5154456462c9b115bdc45de05ff29"><div class="ttname"><a href="classIParserSpi.html#af9c5154456462c9b115bdc45de05ff29">IParserSpi::handleQuote</a></div><div class="ttdeci">virtual void handleQuote(WTSTickData *quote, uint32_t procFlag)=0</div></div>
+<div class="ttc" id="aclassParserYD_html"><div class="ttname"><a href="classParserYD.html">ParserYD</a></div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8h_source.html#l00022">ParserYD.h:23</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a055e4643cbdfdb8bf60c978897e6fc7f"><div class="ttname"><a href="classParserYD.html#a055e4643cbdfdb8bf60c978897e6fc7f">ParserYD::m_sink</a></div><div class="ttdeci">IParserSpi * m_sink</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8h_source.html#l00080">ParserYD.h:80</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a2bc8e11df6c4c353b6092b826e9899a8"><div class="ttname"><a href="classParserYD.html#a2bc8e11df6c4c353b6092b826e9899a8">ParserYD::notifyLogin</a></div><div class="ttdeci">virtual void notifyLogin(int errorNo, int maxOrderRef, bool isMonitor) override</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00082">ParserYD.cpp:82</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a33e396fe44ac5c5d686ca59b5c9dd645"><div class="ttname"><a href="classParserYD.html#a33e396fe44ac5c5d686ca59b5c9dd645">ParserYD::release</a></div><div class="ttdeci">virtual void release() override</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00194">ParserYD.cpp:194</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a3b70199cc7eeb9aa6ce91681e642af38"><div class="ttname"><a href="classParserYD.html#a3b70199cc7eeb9aa6ce91681e642af38">ParserYD::subscribe</a></div><div class="ttdeci">virtual void subscribe(const CodeSet &amp;vecSymbols) override</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00265">ParserYD.cpp:265</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a3f5595f91b5dfa29a0bde921f088aaec"><div class="ttname"><a href="classParserYD.html#a3f5595f91b5dfa29a0bde921f088aaec">ParserYD::m_filterSubs</a></div><div class="ttdeci">CodeSet m_filterSubs</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8h_source.html#l00078">ParserYD.h:78</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a43c441e865ffee9e3e39d4cbc35f73a1"><div class="ttname"><a href="classParserYD.html#a43c441e865ffee9e3e39d4cbc35f73a1">ParserYD::m_pUserAPI</a></div><div class="ttdeci">YDApi * m_pUserAPI</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8h_source.html#l00070">ParserYD.h:70</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a4e38e3deeb9460f829d81318b4ad447b"><div class="ttname"><a href="classParserYD.html#a4e38e3deeb9460f829d81318b4ad447b">ParserYD::disconnect</a></div><div class="ttdeci">virtual bool disconnect() override</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00209">ParserYD.cpp:209</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a4ebe1f019d07db9c440eecc902e4e3bd"><div class="ttname"><a href="classParserYD.html#a4ebe1f019d07db9c440eecc902e4e3bd">ParserYD::m_strUserID</a></div><div class="ttdeci">std::string m_strUserID</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8h_source.html#l00075">ParserYD.h:75</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a576c6eb9f040b76410548d3ae6517d72"><div class="ttname"><a href="classParserYD.html#a576c6eb9f040b76410548d3ae6517d72">ParserYD::init</a></div><div class="ttdeci">virtual bool init(WTSVariant *config) override</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00176">ParserYD.cpp:176</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a59586ecff52c801b34ce9457a7afb0c5"><div class="ttname"><a href="classParserYD.html#a59586ecff52c801b34ce9457a7afb0c5">ParserYD::ParserYD</a></div><div class="ttdeci">ParserYD()</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00057">ParserYD.cpp:57</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a661baf71fd88f2706f5c3fc444e0a0a0"><div class="ttname"><a href="classParserYD.html#a661baf71fd88f2706f5c3fc444e0a0a0">ParserYD::unsubscribe</a></div><div class="ttdeci">virtual void unsubscribe(const CodeSet &amp;vecSymbols) override</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00278">ParserYD.cpp:278</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a67f922325de88253431f48e3a539d4d0"><div class="ttname"><a href="classParserYD.html#a67f922325de88253431f48e3a539d4d0">ParserYD::m_pBaseDataMgr</a></div><div class="ttdeci">IBaseDataMgr * m_pBaseDataMgr</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8h_source.html#l00081">ParserYD.h:81</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a691630a3b19c9a9e6e63ef7833d16806"><div class="ttname"><a href="classParserYD.html#a691630a3b19c9a9e6e63ef7833d16806">ParserYD::DoSubscribe</a></div><div class="ttdeci">void DoSubscribe()</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00235">ParserYD.cpp:235</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a76edf57fe5f42df2389d70def29a0eba"><div class="ttname"><a href="classParserYD.html#a76edf57fe5f42df2389d70def29a0eba">ParserYD::m_uTradingDate</a></div><div class="ttdeci">uint32_t m_uTradingDate</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8h_source.html#l00069">ParserYD.h:69</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a788808954f853b626150f4984c2594fc"><div class="ttname"><a href="classParserYD.html#a788808954f853b626150f4984c2594fc">ParserYD::isConnected</a></div><div class="ttdeci">virtual bool isConnected() override</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00282">ParserYD.cpp:282</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a7f4f54765f99c2c2b7bee28e706fae39"><div class="ttname"><a href="classParserYD.html#a7f4f54765f99c2c2b7bee28e706fae39">ParserYD::registerSpi</a></div><div class="ttdeci">virtual void registerSpi(IParserSpi *listener) override</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00287">ParserYD.cpp:287</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a8047b52363bce8893be23df87f7cb166"><div class="ttname"><a href="classParserYD.html#a8047b52363bce8893be23df87f7cb166">ParserYD::notifyMarketData</a></div><div class="ttdeci">virtual void notifyMarketData(const YDMarketData *pMarketData) override</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00124">ParserYD.cpp:124</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a812921fb8d224aae786ea43bdef8d89b"><div class="ttname"><a href="classParserYD.html#a812921fb8d224aae786ea43bdef8d89b">ParserYD::m_funcCreator</a></div><div class="ttdeci">YDCreator m_funcCreator</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8h_source.html#l00085">ParserYD.h:85</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a812a091a99311b4e847b02221fc316db"><div class="ttname"><a href="classParserYD.html#a812a091a99311b4e847b02221fc316db">ParserYD::YDCreator</a></div><div class="ttdeci">YDApi *(* YDCreator)(const char *)</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8h_source.html#l00084">ParserYD.h:84</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a81bf040a997a9df2e3e97ea07658e6f9"><div class="ttname"><a href="classParserYD.html#a81bf040a997a9df2e3e97ea07658e6f9">ParserYD::m_bApiInited</a></div><div class="ttdeci">bool m_bApiInited</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8h_source.html#l00071">ParserYD.h:71</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a8869bd6d1abaf6fad5d49b0842be9d08"><div class="ttname"><a href="classParserYD.html#a8869bd6d1abaf6fad5d49b0842be9d08">ParserYD::connect</a></div><div class="ttdeci">virtual bool connect() override</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00199">ParserYD.cpp:199</a></div></div>
+<div class="ttc" id="aclassParserYD_html_a8cd7dc675791653cb89c893f22cb910a"><div class="ttname"><a href="classParserYD.html#a8cd7dc675791653cb89c893f22cb910a">ParserYD::notifyFinishInit</a></div><div class="ttdeci">virtual void notifyFinishInit(void) override</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00109">ParserYD.cpp:109</a></div></div>
+<div class="ttc" id="aclassParserYD_html_aa19eaa22c014e130d580317c4b5f941a"><div class="ttname"><a href="classParserYD.html#aa19eaa22c014e130d580317c4b5f941a">ParserYD::m_hInstYD</a></div><div class="ttdeci">DllHandle m_hInstYD</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8h_source.html#l00083">ParserYD.h:83</a></div></div>
+<div class="ttc" id="aclassParserYD_html_ac4535aca6a17d05cd446101b75a7b9fb"><div class="ttname"><a href="classParserYD.html#ac4535aca6a17d05cd446101b75a7b9fb">ParserYD::notifyReadyForLogin</a></div><div class="ttdeci">virtual void notifyReadyForLogin(bool hasLoginFailed) override</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00070">ParserYD.cpp:70</a></div></div>
+<div class="ttc" id="aclassParserYD_html_ac91baaed18e400d6b814d10d7bdf1e5c"><div class="ttname"><a href="classParserYD.html#ac91baaed18e400d6b814d10d7bdf1e5c">ParserYD::DoLogin</a></div><div class="ttdeci">void DoLogin()</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00221">ParserYD.cpp:221</a></div></div>
+<div class="ttc" id="aclassParserYD_html_acbeeff7e6d1b2882fa369a152d70bf27"><div class="ttname"><a href="classParserYD.html#acbeeff7e6d1b2882fa369a152d70bf27">ParserYD::m_strPassword</a></div><div class="ttdeci">std::string m_strPassword</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8h_source.html#l00076">ParserYD.h:76</a></div></div>
+<div class="ttc" id="aclassParserYD_html_ad6abc69bace1c61dbcb04cc72829b623"><div class="ttname"><a href="classParserYD.html#ad6abc69bace1c61dbcb04cc72829b623">ParserYD::m_strCfgFile</a></div><div class="ttdeci">std::string m_strCfgFile</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8h_source.html#l00073">ParserYD.h:73</a></div></div>
+<div class="ttc" id="aclassParserYD_html_ae67188f1eb20f99c6e5d2e26d4c08501"><div class="ttname"><a href="classParserYD.html#ae67188f1eb20f99c6e5d2e26d4c08501">ParserYD::~ParserYD</a></div><div class="ttdeci">virtual ~ParserYD()</div><div class="ttdef"><b>Definition</b> <a href="ParserYD_8cpp_source.html#l00065">ParserYD.cpp:65</a></div></div>
+<div class="ttc" id="aclassWTSContractInfo_html"><div class="ttname"><a href="classWTSContractInfo.html">WTSContractInfo</a></div><div class="ttdoc">合约信息类</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00171">WTSContractInfo.hpp:172</a></div></div>
+<div class="ttc" id="aclassWTSContractInfo_html_a4095c522d23aeb1608ce89dc69729b72"><div class="ttname"><a href="classWTSContractInfo.html#a4095c522d23aeb1608ce89dc69729b72">WTSContractInfo::getExchg</a></div><div class="ttdeci">const char * getExchg() const</div><div class="ttdef"><b>Definition</b> <a href="WTSContractInfo_8hpp_source.html#l00217">WTSContractInfo.hpp:217</a></div></div>
+<div class="ttc" id="aclassWTSPoolObject_html_a868f127b3ccc31cba6b077803cb00951"><div class="ttname"><a href="classWTSPoolObject.html#a868f127b3ccc31cba6b077803cb00951">WTSPoolObject::release</a></div><div class="ttdeci">virtual void release() override</div><div class="ttdef"><b>Definition</b> <a href="WTSObject_8hpp_source.html#l00092">WTSObject.hpp:92</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a3f5ca8ee02338f1991293bb33ba0318d"><div class="ttname"><a href="classWTSTickData.html#a3f5ca8ee02338f1991293bb33ba0318d">WTSTickData::setContractInfo</a></div><div class="ttdeci">void setContractInfo(WTSContractInfo *cInfo)</div><div class="ttdoc">设置Tick数据对应的合约信息</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01590">WTSDataDef.hpp:1590</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a4b56adfd1cd4e6b95833653ca987ce43"><div class="ttname"><a href="classWTSTickData.html#a4b56adfd1cd4e6b95833653ca987ce43">WTSTickData::create</a></div><div class="ttdeci">static WTSTickData * create(const char *stdCode)</div><div class="ttdoc">创建一个Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01270">WTSDataDef.hpp:1270</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html_a6a81212366831e7afe3eeac41b42e7b0"><div class="ttname"><a href="classWTSTickData.html#a6a81212366831e7afe3eeac41b42e7b0">WTSTickData::getTickStruct</a></div><div class="ttdeci">WTSTickStruct &amp; getTickStruct()</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01580">WTSDataDef.hpp:1580</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassYDApi_html_a4abbf3d25db6ec55737d589c840f42cc"><div class="ttname"><a href="classYDApi.html#a4abbf3d25db6ec55737d589c840f42cc">YDApi::disconnect</a></div><div class="ttdeci">virtual void disconnect(void)=0</div></div>
+<div class="ttc" id="aclassYDApi_html_a8685a42a7f601f38a12d519eb117501d"><div class="ttname"><a href="classYDApi.html#a8685a42a7f601f38a12d519eb117501d">YDApi::getInstrumentByID</a></div><div class="ttdeci">virtual const YDInstrument * getInstrumentByID(const char *instrumentID)=0</div></div>
+<div class="ttc" id="aclassYDApi_html_ab6651c0503d0206a1c0d2614230569eb"><div class="ttname"><a href="classYDApi.html#ab6651c0503d0206a1c0d2614230569eb">YDApi::subscribe</a></div><div class="ttdeci">virtual bool subscribe(const YDInstrument *pInstrument)=0</div></div>
+<div class="ttc" id="aclassYDApi_html_ac293c3f5fc08e039b4ed3294d76c3e40"><div class="ttname"><a href="classYDApi.html#ac293c3f5fc08e039b4ed3294d76c3e40">YDApi::start</a></div><div class="ttdeci">virtual bool start(YDListener *pListener)=0</div></div>
+<div class="ttc" id="aclassYDApi_html_acd0db33415a1cbdbb06c3ac83cf996cd"><div class="ttname"><a href="classYDApi.html#acd0db33415a1cbdbb06c3ac83cf996cd">YDApi::getTradingDay</a></div><div class="ttdeci">virtual int getTradingDay(void)=0</div><div class="ttdoc">can get trading day after login successfully</div></div>
+<div class="ttc" id="aclassYDApi_html_aeb8e6c776b3e8d0e5d9486fd040311bb"><div class="ttname"><a href="classYDApi.html#aeb8e6c776b3e8d0e5d9486fd040311bb">YDApi::login</a></div><div class="ttdeci">virtual bool login(const char *username, const char *password, const char *appID, const char *authCode)=0</div></div>
+<div class="ttc" id="aclassYDExchange_html"><div class="ttname"><a href="classYDExchange.html">YDExchange</a></div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00023">ydDataStruct.h:24</a></div></div>
+<div class="ttc" id="aclassYDExchange_html_ad173594d0588147c923c3572647102b0"><div class="ttname"><a href="classYDExchange.html#ad173594d0588147c923c3572647102b0">YDExchange::ExchangeID</a></div><div class="ttdeci">YDExchangeID ExchangeID</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00026">ydDataStruct.h:26</a></div></div>
+<div class="ttc" id="aclassYDInstrument_html"><div class="ttname"><a href="classYDInstrument.html">YDInstrument</a></div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00087">ydDataStruct.h:88</a></div></div>
+<div class="ttc" id="aclassYDInstrument_html_aab6f5e7185f09123206bf4d06f403969"><div class="ttname"><a href="classYDInstrument.html#aab6f5e7185f09123206bf4d06f403969">YDInstrument::InstrumentID</a></div><div class="ttdeci">YDInstrumentID InstrumentID</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00090">ydDataStruct.h:90</a></div></div>
+<div class="ttc" id="aclassYDInstrument_html_af10618828f780308b22e759b109e1ff8"><div class="ttname"><a href="classYDInstrument.html#af10618828f780308b22e759b109e1ff8">YDInstrument::m_pExchange</a></div><div class="ttdeci">const YDExchange * m_pExchange</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00115">ydDataStruct.h:115</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html"><div class="ttname"><a href="classYDMarketData.html">YDMarketData</a></div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00134">ydDataStruct.h:135</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_a0107ab280bcfda248eba24c984a11823"><div class="ttname"><a href="classYDMarketData.html#a0107ab280bcfda248eba24c984a11823">YDMarketData::AskVolume</a></div><div class="ttdeci">int AskVolume</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00148">ydDataStruct.h:148</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_a097dc535c2faa8c4ba9c9a29ea4ec74a"><div class="ttname"><a href="classYDMarketData.html#a097dc535c2faa8c4ba9c9a29ea4ec74a">YDMarketData::PreOpenInterest</a></div><div class="ttdeci">double PreOpenInterest</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00141">ydDataStruct.h:141</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_a23edba16fed3771b65e7bc6c364489cb"><div class="ttname"><a href="classYDMarketData.html#a23edba16fed3771b65e7bc6c364489cb">YDMarketData::UpperLimitPrice</a></div><div class="ttdeci">double UpperLimitPrice</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00142">ydDataStruct.h:142</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_a4d2ebf22769ca1bab155a896580c0a90"><div class="ttname"><a href="classYDMarketData.html#a4d2ebf22769ca1bab155a896580c0a90">YDMarketData::PreSettlementPrice</a></div><div class="ttdeci">double PreSettlementPrice</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00139">ydDataStruct.h:139</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_a50bf1120f2e23765e619878d1a40ba1d"><div class="ttname"><a href="classYDMarketData.html#a50bf1120f2e23765e619878d1a40ba1d">YDMarketData::BidVolume</a></div><div class="ttdeci">int BidVolume</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00147">ydDataStruct.h:147</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_a5cca3af9857fdbd5499698e15c372a04"><div class="ttname"><a href="classYDMarketData.html#a5cca3af9857fdbd5499698e15c372a04">YDMarketData::PreClosePrice</a></div><div class="ttdeci">double PreClosePrice</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00140">ydDataStruct.h:140</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_a64504b6be41f2a3dbadffb401e5a9de3"><div class="ttname"><a href="classYDMarketData.html#a64504b6be41f2a3dbadffb401e5a9de3">YDMarketData::TradingDay</a></div><div class="ttdeci">int TradingDay</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00138">ydDataStruct.h:138</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_a6715fa190d451952b2698523082b8f08"><div class="ttname"><a href="classYDMarketData.html#a6715fa190d451952b2698523082b8f08">YDMarketData::OpenInterest</a></div><div class="ttdeci">double OpenInterest</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00150">ydDataStruct.h:150</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_a6bf32593d2ea3a002c80ef3e99026fb7"><div class="ttname"><a href="classYDMarketData.html#a6bf32593d2ea3a002c80ef3e99026fb7">YDMarketData::Volume</a></div><div class="ttdeci">int Volume</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00151">ydDataStruct.h:151</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_a876f425dd6bfb21ddb1892b44b4f778b"><div class="ttname"><a href="classYDMarketData.html#a876f425dd6bfb21ddb1892b44b4f778b">YDMarketData::LowerLimitPrice</a></div><div class="ttdeci">double LowerLimitPrice</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00143">ydDataStruct.h:143</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_a8f028a2366a6ec0e5ba8b10b0d2a04b3"><div class="ttname"><a href="classYDMarketData.html#a8f028a2366a6ec0e5ba8b10b0d2a04b3">YDMarketData::Turnover</a></div><div class="ttdeci">double Turnover</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00149">ydDataStruct.h:149</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_a96baf3b2bf3898b49372005efc855bd2"><div class="ttname"><a href="classYDMarketData.html#a96baf3b2bf3898b49372005efc855bd2">YDMarketData::LastPrice</a></div><div class="ttdeci">double LastPrice</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00144">ydDataStruct.h:144</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_a9a21bb6b8abf14e032cdcb7af09be629"><div class="ttname"><a href="classYDMarketData.html#a9a21bb6b8abf14e032cdcb7af09be629">YDMarketData::m_pInstrument</a></div><div class="ttdeci">const YDInstrument * m_pInstrument</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00154">ydDataStruct.h:154</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_ad1eb6628e2738ee47345b6a6808e5d75"><div class="ttname"><a href="classYDMarketData.html#ad1eb6628e2738ee47345b6a6808e5d75">YDMarketData::AskPrice</a></div><div class="ttdeci">double AskPrice</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00146">ydDataStruct.h:146</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_ada09e9e9ae8338d84c4edbb7a191d806"><div class="ttname"><a href="classYDMarketData.html#ada09e9e9ae8338d84c4edbb7a191d806">YDMarketData::BidPrice</a></div><div class="ttdeci">double BidPrice</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00145">ydDataStruct.h:145</a></div></div>
+<div class="ttc" id="aclassYDMarketData_html_af8c8bf8ff9903d82e625bdd2fd3c62cd"><div class="ttname"><a href="classYDMarketData.html#af8c8bf8ff9903d82e625bdd2fd3c62cd">YDMarketData::TimeStamp</a></div><div class="ttdeci">int TimeStamp</div><div class="ttdef"><b>Definition</b> <a href="ydDataStruct_8h_source.html#l00152">ydDataStruct.h:152</a></div></div>
+<div class="ttc" id="aclassfastest__hashset_3_01std_1_1string_01_4_html"><div class="ttname"><a href="classfastest__hashset_3_01std_1_1string_01_4.html">fastest_hashset&lt; std::string &gt;</a></div><div class="ttdoc">字符串元素的高性能哈希集合类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00134">FasterDefs.h:135</a></div></div>
+<div class="ttc" id="aclasstsl_1_1robin__set_html_a2b8925720dcc1fb35592812c2ecb533d"><div class="ttname"><a href="classtsl_1_1robin__set.html#a2b8925720dcc1fb35592812c2ecb533d">tsl::robin_set::empty</a></div><div class="ttdeci">bool empty() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="robin__set_8h_source.html#l00226">robin_set.h:226</a></div></div>
+<div class="ttc" id="aclasstsl_1_1robin__set_html_a6984f54d7a443994e5e27e5e782604d5"><div class="ttname"><a href="classtsl_1_1robin__set.html#a6984f54d7a443994e5e27e5e782604d5">tsl::robin_set::find</a></div><div class="ttdeci">iterator find(const Key &amp;key)</div><div class="ttdef"><b>Definition</b> <a href="robin__set_8h_source.html#l00359">robin_set.h:359</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html"><div class="ttname"><a href="structWTSTickStruct.html">WTSTickStruct</a></div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00158">WTSStruct.h:159</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a08e5338b44b175e874d45be91da587e8"><div class="ttname"><a href="structWTSTickStruct.html#a08e5338b44b175e874d45be91da587e8">WTSTickStruct::pre_settle</a></div><div class="ttdeci">double pre_settle</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00185">WTSStruct.h:185</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a0c229638a3bda7a9dae9f042534b566b"><div class="ttname"><a href="structWTSTickStruct.html#a0c229638a3bda7a9dae9f042534b566b">WTSTickStruct::ask_qty</a></div><div class="ttdeci">double ask_qty[10]</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00191">WTSStruct.h:191</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a17bd5a2e41a49b42c52017a208bb9375"><div class="ttname"><a href="structWTSTickStruct.html#a17bd5a2e41a49b42c52017a208bb9375">WTSTickStruct::pre_close</a></div><div class="ttdeci">double pre_close</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00184">WTSStruct.h:184</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a1fae83488fbdd65e552944bb1502b8fd"><div class="ttname"><a href="structWTSTickStruct.html#a1fae83488fbdd65e552944bb1502b8fd">WTSTickStruct::exchg</a></div><div class="ttdeci">char exchg[MAX_EXCHANGE_LENGTH]</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00160">WTSStruct.h:160</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a44aea5df719841d66b883c572ecd291d"><div class="ttname"><a href="structWTSTickStruct.html#a44aea5df719841d66b883c572ecd291d">WTSTickStruct::action_time</a></div><div class="ttdeci">uint32_t action_time</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00181">WTSStruct.h:181</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a571f622c146287aeb5750e974fe434ae"><div class="ttname"><a href="structWTSTickStruct.html#a571f622c146287aeb5750e974fe434ae">WTSTickStruct::upper_limit</a></div><div class="ttdeci">double upper_limit</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00169">WTSStruct.h:169</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a70aac8776b4932b236b58a1043002f4b"><div class="ttname"><a href="structWTSTickStruct.html#a70aac8776b4932b236b58a1043002f4b">WTSTickStruct::bid_qty</a></div><div class="ttdeci">double bid_qty[10]</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00190">WTSStruct.h:190</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a72563ba28f49fb904ddefbf652727c82"><div class="ttname"><a href="structWTSTickStruct.html#a72563ba28f49fb904ddefbf652727c82">WTSTickStruct::price</a></div><div class="ttdeci">double price</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00163">WTSStruct.h:163</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a748c94f5e832b7c622d1b3ee6968e9a5"><div class="ttname"><a href="structWTSTickStruct.html#a748c94f5e832b7c622d1b3ee6968e9a5">WTSTickStruct::pre_interest</a></div><div class="ttdeci">double pre_interest</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00186">WTSStruct.h:186</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a92c83647dcd3d77d659bff2967480489"><div class="ttname"><a href="structWTSTickStruct.html#a92c83647dcd3d77d659bff2967480489">WTSTickStruct::bid_prices</a></div><div class="ttdeci">double bid_prices[10]</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00188">WTSStruct.h:188</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a9f77ec5a68aa78149ff70544d1a5325c"><div class="ttname"><a href="structWTSTickStruct.html#a9f77ec5a68aa78149ff70544d1a5325c">WTSTickStruct::open_interest</a></div><div class="ttdeci">double open_interest</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00176">WTSStruct.h:176</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_a9fe18bba3bedd1c23830ba835cdf5fba"><div class="ttname"><a href="structWTSTickStruct.html#a9fe18bba3bedd1c23830ba835cdf5fba">WTSTickStruct::trading_date</a></div><div class="ttdeci">uint32_t trading_date</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00179">WTSStruct.h:179</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_aa4b209c7af071d33f094ec48d14ac5ad"><div class="ttname"><a href="structWTSTickStruct.html#aa4b209c7af071d33f094ec48d14ac5ad">WTSTickStruct::total_turnover</a></div><div class="ttdeci">double total_turnover</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00174">WTSStruct.h:174</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_aa765254d43077f75d8916cf2feb919fd"><div class="ttname"><a href="structWTSTickStruct.html#aa765254d43077f75d8916cf2feb919fd">WTSTickStruct::lower_limit</a></div><div class="ttdeci">double lower_limit</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00170">WTSStruct.h:170</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_aab9d98249498f3987bc114764edca24e"><div class="ttname"><a href="structWTSTickStruct.html#aab9d98249498f3987bc114764edca24e">WTSTickStruct::ask_prices</a></div><div class="ttdeci">double ask_prices[10]</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00189">WTSStruct.h:189</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_aabf07c4d7040b85931f0882de3398379"><div class="ttname"><a href="structWTSTickStruct.html#aabf07c4d7040b85931f0882de3398379">WTSTickStruct::total_volume</a></div><div class="ttdeci">double total_volume</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00172">WTSStruct.h:172</a></div></div>
+<div class="ttc" id="astructWTSTickStruct_html_afd2eb785cc5bfd6ca1f93375732a09ef"><div class="ttname"><a href="structWTSTickStruct.html#afd2eb785cc5bfd6ca1f93375732a09ef">WTSTickStruct::action_date</a></div><div class="ttdeci">uint32_t action_date</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00180">WTSStruct.h:180</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_dc87566441725ae798f517fc6bb6dfe7.html">ParserYD</a></li><li class="navelem"><a class="el" href="ParserYD_8cpp.html">ParserYD.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

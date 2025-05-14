@@ -1,0 +1,27 @@
+var classtesting_1_1internal_1_1FloatingPoint =
+[
+    [ "FloatingPointUnion", "uniontesting_1_1internal_1_1FloatingPoint_1_1FloatingPointUnion.html", "uniontesting_1_1internal_1_1FloatingPoint_1_1FloatingPointUnion" ],
+    [ "Bits", "classtesting_1_1internal_1_1FloatingPoint.html#abf228bf6cd48f12c8b44c85b4971a731", null ],
+    [ "FloatingPoint", "classtesting_1_1internal_1_1FloatingPoint.html#a0dabf840863e0df84046f171c891fe71", null ],
+    [ "AlmostEquals", "classtesting_1_1internal_1_1FloatingPoint.html#a965214c1af2f9ac5adb1393794aa81e5", null ],
+    [ "bits", "classtesting_1_1internal_1_1FloatingPoint.html#aed49c6dadf8dff4f65fbebef29bb1ae9", null ],
+    [ "DistanceBetweenSignAndMagnitudeNumbers", "classtesting_1_1internal_1_1FloatingPoint.html#afe00f9f26ad2929a061f7e07b8a5071a", null ],
+    [ "exponent_bits", "classtesting_1_1internal_1_1FloatingPoint.html#af6bf8fab8df572ecb137a3516ff390ae", null ],
+    [ "fraction_bits", "classtesting_1_1internal_1_1FloatingPoint.html#aa17337e50a2ac855719bc0676529558f", null ],
+    [ "Infinity", "classtesting_1_1internal_1_1FloatingPoint.html#a460027cc19cf01ae8e09cc3796b2b575", null ],
+    [ "is_nan", "classtesting_1_1internal_1_1FloatingPoint.html#a1fc654fd206efa98e480aa1e034f30d5", null ],
+    [ "Max", "classtesting_1_1internal_1_1FloatingPoint.html#aae5954d8a57d3ff0987c6930cb68e114", null ],
+    [ "Max", "classtesting_1_1internal_1_1FloatingPoint.html#a145158f48d527cfc83150cc53bfd979f", null ],
+    [ "Max", "classtesting_1_1internal_1_1FloatingPoint.html#a93b5901a99236ad6eded827f76bf3a44", null ],
+    [ "ReinterpretBits", "classtesting_1_1internal_1_1FloatingPoint.html#ac551f793522e54fbd8a25acb79eac5b1", null ],
+    [ "sign_bit", "classtesting_1_1internal_1_1FloatingPoint.html#afb8a816bb598225d775caaf43a893ef0", null ],
+    [ "SignAndMagnitudeToBiased", "classtesting_1_1internal_1_1FloatingPoint.html#a2cf0e39c6ebf026bc0353100d031ca85", null ],
+    [ "kBitCount", "classtesting_1_1internal_1_1FloatingPoint.html#ab819d2e8f93e9e482373999f0f8d71b9", null ],
+    [ "kExponentBitCount", "classtesting_1_1internal_1_1FloatingPoint.html#a1973d843c00781053d3073daa8a40119", null ],
+    [ "kExponentBitMask", "classtesting_1_1internal_1_1FloatingPoint.html#a66065dfc4d5f41100f686159637af23b", null ],
+    [ "kFractionBitCount", "classtesting_1_1internal_1_1FloatingPoint.html#a0b756a6d2a4f5f5b41ca79651c06c043", null ],
+    [ "kFractionBitMask", "classtesting_1_1internal_1_1FloatingPoint.html#a0ac75d4ffd24f14bca452abe8a718da1", null ],
+    [ "kMaxUlps", "classtesting_1_1internal_1_1FloatingPoint.html#aac498b3714d93f8e88cdc30e4c5935f6", null ],
+    [ "kSignBitMask", "classtesting_1_1internal_1_1FloatingPoint.html#aca98b5ea6f2222a66a82e52421682efa", null ],
+    [ "u_", "classtesting_1_1internal_1_1FloatingPoint.html#a2e0b6bd427248b91476f3fca281f7104", null ]
+];

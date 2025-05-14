@@ -102,6 +102,8 @@ all: WtExecMon/all
 all: WtRunner/all
 all: TraderDumper/all
 all: WtShareHelper/all
+all: WtCtaStraFact/all
+all: WtCtaTwoMaFact/all
 all: WtUftCore/all
 all: WtUftStraFact/all
 all: WtUftRunner/all
@@ -149,6 +151,8 @@ preinstall: WtExecMon/preinstall
 preinstall: WtRunner/preinstall
 preinstall: TraderDumper/preinstall
 preinstall: WtShareHelper/preinstall
+preinstall: WtCtaStraFact/preinstall
+preinstall: WtCtaTwoMaFact/preinstall
 preinstall: WtUftCore/preinstall
 preinstall: WtUftStraFact/preinstall
 preinstall: WtUftRunner/preinstall
@@ -196,6 +200,8 @@ clean: WtExecMon/clean
 clean: WtRunner/clean
 clean: TraderDumper/clean
 clean: WtShareHelper/clean
+clean: WtCtaStraFact/clean
+clean: WtCtaTwoMaFact/clean
 clean: WtUftCore/clean
 clean: WtUftStraFact/clean
 clean: WtUftRunner/clean
@@ -594,6 +600,36 @@ WtCore/clean: WtCore/CMakeFiles/WtCore.dir/clean
 .PHONY : WtCore/clean
 
 #=============================================================================
+# Directory level rules for directory WtCtaStraFact
+
+# Recursive "all" directory target.
+WtCtaStraFact/all: WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/all
+.PHONY : WtCtaStraFact/all
+
+# Recursive "preinstall" directory target.
+WtCtaStraFact/preinstall:
+.PHONY : WtCtaStraFact/preinstall
+
+# Recursive "clean" directory target.
+WtCtaStraFact/clean: WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/clean
+.PHONY : WtCtaStraFact/clean
+
+#=============================================================================
+# Directory level rules for directory WtCtaTwoMaFact
+
+# Recursive "all" directory target.
+WtCtaTwoMaFact/all: WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/all
+.PHONY : WtCtaTwoMaFact/all
+
+# Recursive "preinstall" directory target.
+WtCtaTwoMaFact/preinstall:
+.PHONY : WtCtaTwoMaFact/preinstall
+
+# Recursive "clean" directory target.
+WtCtaTwoMaFact/clean: WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/clean
+.PHONY : WtCtaTwoMaFact/clean
+
+#=============================================================================
 # Directory level rules for directory WtDataStorage
 
 # Recursive "all" directory target.
@@ -870,12 +906,12 @@ WtUftStraFact/clean: WtUftStraFact/CMakeFiles/WtUftStraFact.dir/clean
 WTSUtils/CMakeFiles/WTSUtils.dir/all:
 	$(MAKE) $(MAKESILENT) -f WTSUtils/CMakeFiles/WTSUtils.dir/build.make WTSUtils/CMakeFiles/WTSUtils.dir/depend
 	$(MAKE) $(MAKESILENT) -f WTSUtils/CMakeFiles/WTSUtils.dir/build.make WTSUtils/CMakeFiles/WTSUtils.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45 "Built target WTSUtils"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44 "Built target WTSUtils"
 .PHONY : WTSUtils/CMakeFiles/WTSUtils.dir/all
 
 # Build rule for subdir invocation for target.
 WTSUtils/CMakeFiles/WTSUtils.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 26
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 25
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WTSUtils/CMakeFiles/WTSUtils.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WTSUtils/CMakeFiles/WTSUtils.dir/rule
@@ -927,7 +963,7 @@ CTPLoader/CMakeFiles/CTPLoader.dir/all: WTSUtils/CMakeFiles/WTSUtils.dir/all
 
 # Build rule for subdir invocation for target.
 CTPLoader/CMakeFiles/CTPLoader.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 27
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 26
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CTPLoader/CMakeFiles/CTPLoader.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : CTPLoader/CMakeFiles/CTPLoader.dir/rule
@@ -953,7 +989,7 @@ CTPOptLoader/CMakeFiles/CTPOptLoader.dir/all: WTSUtils/CMakeFiles/WTSUtils.dir/a
 
 # Build rule for subdir invocation for target.
 CTPOptLoader/CMakeFiles/CTPOptLoader.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 27
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 26
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CTPOptLoader/CMakeFiles/CTPOptLoader.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : CTPOptLoader/CMakeFiles/CTPOptLoader.dir/rule
@@ -981,7 +1017,7 @@ LoaderRunner/CMakeFiles/LoaderRunner.dir/all: WtBtCore/CMakeFiles/WtBtCore.dir/a
 
 # Build rule for subdir invocation for target.
 LoaderRunner/CMakeFiles/LoaderRunner.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 33
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 32
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 LoaderRunner/CMakeFiles/LoaderRunner.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : LoaderRunner/CMakeFiles/LoaderRunner.dir/rule
@@ -1132,12 +1168,12 @@ ParserXTP/CMakeFiles/ParserXTP.dir/clean:
 ParserShm/CMakeFiles/ParserShm.dir/all:
 	$(MAKE) $(MAKESILENT) -f ParserShm/CMakeFiles/ParserShm.dir/build.make ParserShm/CMakeFiles/ParserShm.dir/depend
 	$(MAKE) $(MAKESILENT) -f ParserShm/CMakeFiles/ParserShm.dir/build.make ParserShm/CMakeFiles/ParserShm.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=7 "Built target ParserShm"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num= "Built target ParserShm"
 .PHONY : ParserShm/CMakeFiles/ParserShm.dir/all
 
 # Build rule for subdir invocation for target.
 ParserShm/CMakeFiles/ParserShm.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ParserShm/CMakeFiles/ParserShm.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : ParserShm/CMakeFiles/ParserShm.dir/rule
@@ -1184,12 +1220,12 @@ ParserXeleSkt/CMakeFiles/ParserXeleSkt.dir/clean:
 WtDataStorage/CMakeFiles/WtDataStorage.dir/all: WTSUtils/CMakeFiles/WTSUtils.dir/all
 	$(MAKE) $(MAKESILENT) -f WtDataStorage/CMakeFiles/WtDataStorage.dir/build.make WtDataStorage/CMakeFiles/WtDataStorage.dir/depend
 	$(MAKE) $(MAKESILENT) -f WtDataStorage/CMakeFiles/WtDataStorage.dir/build.make WtDataStorage/CMakeFiles/WtDataStorage.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=65,66 "Built target WtDataStorage"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=66,67 "Built target WtDataStorage"
 .PHONY : WtDataStorage/CMakeFiles/WtDataStorage.dir/all
 
 # Build rule for subdir invocation for target.
 WtDataStorage/CMakeFiles/WtDataStorage.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 28
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 27
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtDataStorage/CMakeFiles/WtDataStorage.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtDataStorage/CMakeFiles/WtDataStorage.dir/rule
@@ -1210,12 +1246,12 @@ WtDataStorage/CMakeFiles/WtDataStorage.dir/clean:
 WtDataStorageAD/CMakeFiles/WtDataStorageAD.dir/all: WTSUtils/CMakeFiles/WTSUtils.dir/all
 	$(MAKE) $(MAKESILENT) -f WtDataStorageAD/CMakeFiles/WtDataStorageAD.dir/build.make WtDataStorageAD/CMakeFiles/WtDataStorageAD.dir/depend
 	$(MAKE) $(MAKESILENT) -f WtDataStorageAD/CMakeFiles/WtDataStorageAD.dir/build.make WtDataStorageAD/CMakeFiles/WtDataStorageAD.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=67,68 "Built target WtDataStorageAD"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=68,69 "Built target WtDataStorageAD"
 .PHONY : WtDataStorageAD/CMakeFiles/WtDataStorageAD.dir/all
 
 # Build rule for subdir invocation for target.
 WtDataStorageAD/CMakeFiles/WtDataStorageAD.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 28
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 27
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtDataStorageAD/CMakeFiles/WtDataStorageAD.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtDataStorageAD/CMakeFiles/WtDataStorageAD.dir/rule
@@ -1236,7 +1272,7 @@ WtDataStorageAD/CMakeFiles/WtDataStorageAD.dir/clean:
 WtDtCore/CMakeFiles/WtDtCore.dir/all:
 	$(MAKE) $(MAKESILENT) -f WtDtCore/CMakeFiles/WtDtCore.dir/build.make WtDtCore/CMakeFiles/WtDtCore.dir/depend
 	$(MAKE) $(MAKESILENT) -f WtDtCore/CMakeFiles/WtDtCore.dir/build.make WtDtCore/CMakeFiles/WtDtCore.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=69,70,71 "Built target WtDtCore"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=70,71,72 "Built target WtDtCore"
 .PHONY : WtDtCore/CMakeFiles/WtDtCore.dir/all
 
 # Build rule for subdir invocation for target.
@@ -1263,12 +1299,12 @@ WtDtHelper/CMakeFiles/WtDtHelper.dir/all: WTSUtils/CMakeFiles/WTSUtils.dir/all
 WtDtHelper/CMakeFiles/WtDtHelper.dir/all: WTSTools/CMakeFiles/WTSTools.dir/all
 	$(MAKE) $(MAKESILENT) -f WtDtHelper/CMakeFiles/WtDtHelper.dir/build.make WtDtHelper/CMakeFiles/WtDtHelper.dir/depend
 	$(MAKE) $(MAKESILENT) -f WtDtHelper/CMakeFiles/WtDtHelper.dir/build.make WtDtHelper/CMakeFiles/WtDtHelper.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=72 "Built target WtDtHelper"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=73 "Built target WtDtHelper"
 .PHONY : WtDtHelper/CMakeFiles/WtDtHelper.dir/all
 
 # Build rule for subdir invocation for target.
 WtDtHelper/CMakeFiles/WtDtHelper.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 29
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 28
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtDtHelper/CMakeFiles/WtDtHelper.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtDtHelper/CMakeFiles/WtDtHelper.dir/rule
@@ -1291,12 +1327,12 @@ WtDtPorter/CMakeFiles/WtDtPorter.dir/all: WTSTools/CMakeFiles/WTSTools.dir/all
 WtDtPorter/CMakeFiles/WtDtPorter.dir/all: WtDtCore/CMakeFiles/WtDtCore.dir/all
 	$(MAKE) $(MAKESILENT) -f WtDtPorter/CMakeFiles/WtDtPorter.dir/build.make WtDtPorter/CMakeFiles/WtDtPorter.dir/depend
 	$(MAKE) $(MAKESILENT) -f WtDtPorter/CMakeFiles/WtDtPorter.dir/build.make WtDtPorter/CMakeFiles/WtDtPorter.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=73,74 "Built target WtDtPorter"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=74,75 "Built target WtDtPorter"
 .PHONY : WtDtPorter/CMakeFiles/WtDtPorter.dir/all
 
 # Build rule for subdir invocation for target.
 WtDtPorter/CMakeFiles/WtDtPorter.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 33
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 32
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtDtPorter/CMakeFiles/WtDtPorter.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtDtPorter/CMakeFiles/WtDtPorter.dir/rule
@@ -1318,12 +1354,12 @@ WtDtServo/CMakeFiles/WtDtServo.dir/all: WTSUtils/CMakeFiles/WTSUtils.dir/all
 WtDtServo/CMakeFiles/WtDtServo.dir/all: WTSTools/CMakeFiles/WTSTools.dir/all
 	$(MAKE) $(MAKESILENT) -f WtDtServo/CMakeFiles/WtDtServo.dir/build.make WtDtServo/CMakeFiles/WtDtServo.dir/depend
 	$(MAKE) $(MAKESILENT) -f WtDtServo/CMakeFiles/WtDtServo.dir/build.make WtDtServo/CMakeFiles/WtDtServo.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=75,76 "Built target WtDtServo"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=76,77 "Built target WtDtServo"
 .PHONY : WtDtServo/CMakeFiles/WtDtServo.dir/all
 
 # Build rule for subdir invocation for target.
 WtDtServo/CMakeFiles/WtDtServo.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 30
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 29
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtDtServo/CMakeFiles/WtDtServo.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtDtServo/CMakeFiles/WtDtServo.dir/rule
@@ -1346,12 +1382,12 @@ QuoteFactory/CMakeFiles/QuoteFactory.dir/all: WTSTools/CMakeFiles/WTSTools.dir/a
 QuoteFactory/CMakeFiles/QuoteFactory.dir/all: WtDtCore/CMakeFiles/WtDtCore.dir/all
 	$(MAKE) $(MAKESILENT) -f QuoteFactory/CMakeFiles/QuoteFactory.dir/build.make QuoteFactory/CMakeFiles/QuoteFactory.dir/depend
 	$(MAKE) $(MAKESILENT) -f QuoteFactory/CMakeFiles/QuoteFactory.dir/build.make QuoteFactory/CMakeFiles/QuoteFactory.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=10 "Built target QuoteFactory"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num= "Built target QuoteFactory"
 .PHONY : QuoteFactory/CMakeFiles/QuoteFactory.dir/all
 
 # Build rule for subdir invocation for target.
 QuoteFactory/CMakeFiles/QuoteFactory.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 32
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 30
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 QuoteFactory/CMakeFiles/QuoteFactory.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : QuoteFactory/CMakeFiles/QuoteFactory.dir/rule
@@ -1372,7 +1408,7 @@ QuoteFactory/CMakeFiles/QuoteFactory.dir/clean:
 WtBtCore/CMakeFiles/WtBtCore.dir/all:
 	$(MAKE) $(MAKESILENT) -f WtBtCore/CMakeFiles/WtBtCore.dir/build.make WtBtCore/CMakeFiles/WtBtCore.dir/depend
 	$(MAKE) $(MAKESILENT) -f WtBtCore/CMakeFiles/WtBtCore.dir/build.make WtBtCore/CMakeFiles/WtBtCore.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=46,47,48,49 "Built target WtBtCore"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=45,46,47,48 "Built target WtBtCore"
 .PHONY : WtBtCore/CMakeFiles/WtBtCore.dir/all
 
 # Build rule for subdir invocation for target.
@@ -1400,12 +1436,12 @@ WtBtPorter/CMakeFiles/WtBtPorter.dir/all: WTSTools/CMakeFiles/WTSTools.dir/all
 WtBtPorter/CMakeFiles/WtBtPorter.dir/all: WtBtCore/CMakeFiles/WtBtCore.dir/all
 	$(MAKE) $(MAKESILENT) -f WtBtPorter/CMakeFiles/WtBtPorter.dir/build.make WtBtPorter/CMakeFiles/WtBtPorter.dir/depend
 	$(MAKE) $(MAKESILENT) -f WtBtPorter/CMakeFiles/WtBtPorter.dir/build.make WtBtPorter/CMakeFiles/WtBtPorter.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=50,51 "Built target WtBtPorter"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=49,50 "Built target WtBtPorter"
 .PHONY : WtBtPorter/CMakeFiles/WtBtPorter.dir/all
 
 # Build rule for subdir invocation for target.
 WtBtPorter/CMakeFiles/WtBtPorter.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 34
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 33
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtBtPorter/CMakeFiles/WtBtPorter.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtBtPorter/CMakeFiles/WtBtPorter.dir/rule
@@ -1428,12 +1464,12 @@ WtBtRunner/CMakeFiles/WtBtRunner.dir/all: WTSTools/CMakeFiles/WTSTools.dir/all
 WtBtRunner/CMakeFiles/WtBtRunner.dir/all: WtBtCore/CMakeFiles/WtBtCore.dir/all
 	$(MAKE) $(MAKESILENT) -f WtBtRunner/CMakeFiles/WtBtRunner.dir/build.make WtBtRunner/CMakeFiles/WtBtRunner.dir/depend
 	$(MAKE) $(MAKESILENT) -f WtBtRunner/CMakeFiles/WtBtRunner.dir/build.make WtBtRunner/CMakeFiles/WtBtRunner.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=52 "Built target WtBtRunner"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=51 "Built target WtBtRunner"
 .PHONY : WtBtRunner/CMakeFiles/WtBtRunner.dir/all
 
 # Build rule for subdir invocation for target.
 WtBtRunner/CMakeFiles/WtBtRunner.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 33
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 32
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtBtRunner/CMakeFiles/WtBtRunner.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtBtRunner/CMakeFiles/WtBtRunner.dir/rule
@@ -1454,12 +1490,12 @@ WtBtRunner/CMakeFiles/WtBtRunner.dir/clean:
 ParserUDP/CMakeFiles/ParserUDP.dir/all:
 	$(MAKE) $(MAKESILENT) -f ParserUDP/CMakeFiles/ParserUDP.dir/build.make ParserUDP/CMakeFiles/ParserUDP.dir/depend
 	$(MAKE) $(MAKESILENT) -f ParserUDP/CMakeFiles/ParserUDP.dir/build.make ParserUDP/CMakeFiles/ParserUDP.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num= "Built target ParserUDP"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=7 "Built target ParserUDP"
 .PHONY : ParserUDP/CMakeFiles/ParserUDP.dir/all
 
 # Build rule for subdir invocation for target.
 ParserUDP/CMakeFiles/ParserUDP.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 1
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ParserUDP/CMakeFiles/ParserUDP.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : ParserUDP/CMakeFiles/ParserUDP.dir/rule
@@ -1480,12 +1516,12 @@ ParserUDP/CMakeFiles/ParserUDP.dir/clean:
 TraderCTP/CMakeFiles/TraderCTP.dir/all:
 	$(MAKE) $(MAKESILENT) -f TraderCTP/CMakeFiles/TraderCTP.dir/build.make TraderCTP/CMakeFiles/TraderCTP.dir/depend
 	$(MAKE) $(MAKESILENT) -f TraderCTP/CMakeFiles/TraderCTP.dir/build.make TraderCTP/CMakeFiles/TraderCTP.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num= "Built target TraderCTP"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=10 "Built target TraderCTP"
 .PHONY : TraderCTP/CMakeFiles/TraderCTP.dir/all
 
 # Build rule for subdir invocation for target.
 TraderCTP/CMakeFiles/TraderCTP.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 1
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 TraderCTP/CMakeFiles/TraderCTP.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : TraderCTP/CMakeFiles/TraderCTP.dir/rule
@@ -1558,12 +1594,12 @@ TraderCTPOpt/CMakeFiles/TraderCTPOpt.dir/clean:
 TraderFemas/CMakeFiles/TraderFemas.dir/all:
 	$(MAKE) $(MAKESILENT) -f TraderFemas/CMakeFiles/TraderFemas.dir/build.make TraderFemas/CMakeFiles/TraderFemas.dir/depend
 	$(MAKE) $(MAKESILENT) -f TraderFemas/CMakeFiles/TraderFemas.dir/build.make TraderFemas/CMakeFiles/TraderFemas.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=15 "Built target TraderFemas"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num= "Built target TraderFemas"
 .PHONY : TraderFemas/CMakeFiles/TraderFemas.dir/all
 
 # Build rule for subdir invocation for target.
 TraderFemas/CMakeFiles/TraderFemas.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 TraderFemas/CMakeFiles/TraderFemas.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : TraderFemas/CMakeFiles/TraderFemas.dir/rule
@@ -1584,7 +1620,7 @@ TraderFemas/CMakeFiles/TraderFemas.dir/clean:
 TraderMocker/CMakeFiles/TraderMocker.dir/all:
 	$(MAKE) $(MAKESILENT) -f TraderMocker/CMakeFiles/TraderMocker.dir/build.make TraderMocker/CMakeFiles/TraderMocker.dir/depend
 	$(MAKE) $(MAKESILENT) -f TraderMocker/CMakeFiles/TraderMocker.dir/build.make TraderMocker/CMakeFiles/TraderMocker.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=16 "Built target TraderMocker"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=15 "Built target TraderMocker"
 .PHONY : TraderMocker/CMakeFiles/TraderMocker.dir/all
 
 # Build rule for subdir invocation for target.
@@ -1610,12 +1646,12 @@ TraderMocker/CMakeFiles/TraderMocker.dir/clean:
 TraderXTP/CMakeFiles/TraderXTP.dir/all:
 	$(MAKE) $(MAKESILENT) -f TraderXTP/CMakeFiles/TraderXTP.dir/build.make TraderXTP/CMakeFiles/TraderXTP.dir/depend
 	$(MAKE) $(MAKESILENT) -f TraderXTP/CMakeFiles/TraderXTP.dir/build.make TraderXTP/CMakeFiles/TraderXTP.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num= "Built target TraderXTP"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=16 "Built target TraderXTP"
 .PHONY : TraderXTP/CMakeFiles/TraderXTP.dir/all
 
 # Build rule for subdir invocation for target.
 TraderXTP/CMakeFiles/TraderXTP.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 1
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 TraderXTP/CMakeFiles/TraderXTP.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : TraderXTP/CMakeFiles/TraderXTP.dir/rule
@@ -1662,12 +1698,12 @@ TraderYD/CMakeFiles/TraderYD.dir/clean:
 WtExeFact/CMakeFiles/WtExeFact.dir/all:
 	$(MAKE) $(MAKESILENT) -f WtExeFact/CMakeFiles/WtExeFact.dir/build.make WtExeFact/CMakeFiles/WtExeFact.dir/depend
 	$(MAKE) $(MAKESILENT) -f WtExeFact/CMakeFiles/WtExeFact.dir/build.make WtExeFact/CMakeFiles/WtExeFact.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=77,78,79,80 "Built target WtExeFact"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=78,79,80 "Built target WtExeFact"
 .PHONY : WtExeFact/CMakeFiles/WtExeFact.dir/all
 
 # Build rule for subdir invocation for target.
 WtExeFact/CMakeFiles/WtExeFact.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 4
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 3
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtExeFact/CMakeFiles/WtExeFact.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtExeFact/CMakeFiles/WtExeFact.dir/rule
@@ -1740,12 +1776,12 @@ WtMsgQue/CMakeFiles/WtMsgQue.dir/clean:
 WtCore/CMakeFiles/WtCore.dir/all:
 	$(MAKE) $(MAKESILENT) -f WtCore/CMakeFiles/WtCore.dir/build.make WtCore/CMakeFiles/WtCore.dir/depend
 	$(MAKE) $(MAKESILENT) -f WtCore/CMakeFiles/WtCore.dir/build.make WtCore/CMakeFiles/WtCore.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=53,54,55,56,57,58,59,60,61,62,63,64 "Built target WtCore"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=52,53,54,55,56,57,58,59,60,61,62 "Built target WtCore"
 .PHONY : WtCore/CMakeFiles/WtCore.dir/all
 
 # Build rule for subdir invocation for target.
 WtCore/CMakeFiles/WtCore.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 12
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 11
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtCore/CMakeFiles/WtCore.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtCore/CMakeFiles/WtCore.dir/rule
@@ -1773,7 +1809,7 @@ WtPorter/CMakeFiles/WtPorter.dir/all: WtCore/CMakeFiles/WtCore.dir/all
 
 # Build rule for subdir invocation for target.
 WtPorter/CMakeFiles/WtPorter.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 43
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 41
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtPorter/CMakeFiles/WtPorter.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtPorter/CMakeFiles/WtPorter.dir/rule
@@ -1801,7 +1837,7 @@ WtExecMon/CMakeFiles/WtExecMon.dir/all: WtCore/CMakeFiles/WtCore.dir/all
 
 # Build rule for subdir invocation for target.
 WtExecMon/CMakeFiles/WtExecMon.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 42
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 40
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtExecMon/CMakeFiles/WtExecMon.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtExecMon/CMakeFiles/WtExecMon.dir/rule
@@ -1829,7 +1865,7 @@ WtRunner/CMakeFiles/WtRunner.dir/all: WtCore/CMakeFiles/WtCore.dir/all
 
 # Build rule for subdir invocation for target.
 WtRunner/CMakeFiles/WtRunner.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 41
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 39
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtRunner/CMakeFiles/WtRunner.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtRunner/CMakeFiles/WtRunner.dir/rule
@@ -1856,7 +1892,7 @@ TraderDumper/CMakeFiles/TraderDumper.dir/all: WTSTools/CMakeFiles/WTSTools.dir/a
 
 # Build rule for subdir invocation for target.
 TraderDumper/CMakeFiles/TraderDumper.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 30
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 29
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 TraderDumper/CMakeFiles/TraderDumper.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : TraderDumper/CMakeFiles/TraderDumper.dir/rule
@@ -1877,12 +1913,12 @@ TraderDumper/CMakeFiles/TraderDumper.dir/clean:
 WtShareHelper/CMakeFiles/WtShareHelper.dir/all:
 	$(MAKE) $(MAKESILENT) -f WtShareHelper/CMakeFiles/WtShareHelper.dir/build.make WtShareHelper/CMakeFiles/WtShareHelper.dir/depend
 	$(MAKE) $(MAKESILENT) -f WtShareHelper/CMakeFiles/WtShareHelper.dir/build.make WtShareHelper/CMakeFiles/WtShareHelper.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=92 "Built target WtShareHelper"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=92,93 "Built target WtShareHelper"
 .PHONY : WtShareHelper/CMakeFiles/WtShareHelper.dir/all
 
 # Build rule for subdir invocation for target.
 WtShareHelper/CMakeFiles/WtShareHelper.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtShareHelper/CMakeFiles/WtShareHelper.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtShareHelper/CMakeFiles/WtShareHelper.dir/rule
@@ -1897,18 +1933,70 @@ WtShareHelper/CMakeFiles/WtShareHelper.dir/clean:
 .PHONY : WtShareHelper/CMakeFiles/WtShareHelper.dir/clean
 
 #=============================================================================
+# Target rules for target WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir
+
+# All Build rule for target.
+WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/all:
+	$(MAKE) $(MAKESILENT) -f WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/build.make WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/depend
+	$(MAKE) $(MAKESILENT) -f WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/build.make WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=63,64 "Built target WtCtaStraFact"
+.PHONY : WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/all
+
+# Build rule for subdir invocation for target.
+WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
+.PHONY : WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/rule
+
+# Convenience name for target.
+WtCtaStraFact: WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/rule
+.PHONY : WtCtaStraFact
+
+# clean rule for target.
+WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/clean:
+	$(MAKE) $(MAKESILENT) -f WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/build.make WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/clean
+.PHONY : WtCtaStraFact/CMakeFiles/WtCtaStraFact.dir/clean
+
+#=============================================================================
+# Target rules for target WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir
+
+# All Build rule for target.
+WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/all:
+	$(MAKE) $(MAKESILENT) -f WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/build.make WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/depend
+	$(MAKE) $(MAKESILENT) -f WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/build.make WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=65 "Built target WtCtaTwoMaFact"
+.PHONY : WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/all
+
+# Build rule for subdir invocation for target.
+WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 1
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
+.PHONY : WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/rule
+
+# Convenience name for target.
+WtCtaTwoMaFact: WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/rule
+.PHONY : WtCtaTwoMaFact
+
+# clean rule for target.
+WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/clean:
+	$(MAKE) $(MAKESILENT) -f WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/build.make WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/clean
+.PHONY : WtCtaTwoMaFact/CMakeFiles/WtCtaTwoMaFact.dir/clean
+
+#=============================================================================
 # Target rules for target WtUftCore/CMakeFiles/WtUftCore.dir
 
 # All Build rule for target.
 WtUftCore/CMakeFiles/WtUftCore.dir/all:
 	$(MAKE) $(MAKESILENT) -f WtUftCore/CMakeFiles/WtUftCore.dir/build.make WtUftCore/CMakeFiles/WtUftCore.dir/depend
 	$(MAKE) $(MAKESILENT) -f WtUftCore/CMakeFiles/WtUftCore.dir/build.make WtUftCore/CMakeFiles/WtUftCore.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=93,94,95,96,97 "Built target WtUftCore"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yun/Documents/wondertrader/src/CMakeFiles --progress-num=94,95,96,97 "Built target WtUftCore"
 .PHONY : WtUftCore/CMakeFiles/WtUftCore.dir/all
 
 # Build rule for subdir invocation for target.
 WtUftCore/CMakeFiles/WtUftCore.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtUftCore/CMakeFiles/WtUftCore.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtUftCore/CMakeFiles/WtUftCore.dir/rule
@@ -1962,7 +2050,7 @@ WtUftRunner/CMakeFiles/WtUftRunner.dir/all: WtUftCore/CMakeFiles/WtUftCore.dir/a
 
 # Build rule for subdir invocation for target.
 WtUftRunner/CMakeFiles/WtUftRunner.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 34
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 32
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtUftRunner/CMakeFiles/WtUftRunner.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtUftRunner/CMakeFiles/WtUftRunner.dir/rule
@@ -1990,7 +2078,7 @@ WtLatencyHFT/CMakeFiles/WtLatencyHFT.dir/all: WtCore/CMakeFiles/WtCore.dir/all
 
 # Build rule for subdir invocation for target.
 WtLatencyHFT/CMakeFiles/WtLatencyHFT.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 41
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 39
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtLatencyHFT/CMakeFiles/WtLatencyHFT.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtLatencyHFT/CMakeFiles/WtLatencyHFT.dir/rule
@@ -2019,7 +2107,7 @@ WtLatencyUFT/CMakeFiles/WtLatencyUFT.dir/all: WtUftCore/CMakeFiles/WtUftCore.dir
 
 # Build rule for subdir invocation for target.
 WtLatencyUFT/CMakeFiles/WtLatencyUFT.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 35
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 34
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WtLatencyUFT/CMakeFiles/WtLatencyUFT.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yun/Documents/wondertrader/src/CMakeFiles 0
 .PHONY : WtLatencyUFT/CMakeFiles/WtLatencyUFT.dir/rule

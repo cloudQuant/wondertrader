@@ -1,0 +1,26 @@
+var ShareManager_8h =
+[
+    [ "ShareManager", "classShareManager.html", "classShareManager" ],
+    [ "func_allocate_double", "ShareManager_8h.html#af780ab44a09ee34fd891ce25f1e77067", null ],
+    [ "func_allocate_int32", "ShareManager_8h.html#a1118e0d703745cf58d495c799773078e", null ],
+    [ "func_allocate_int64", "ShareManager_8h.html#aceb92d7381c2a86875f1dd8a116d5fd4", null ],
+    [ "func_allocate_string", "ShareManager_8h.html#a04f32d2d25d8c80d0eb63255c6d4aa54", null ],
+    [ "func_allocate_uint32", "ShareManager_8h.html#a1c18ca0be307ad8e81ef8410ad2a1d00", null ],
+    [ "func_allocate_uint64", "ShareManager_8h.html#abe0ce32ef446f2ab7a85404fd40df21d", null ],
+    [ "func_commit_section", "ShareManager_8h.html#ad07fe09fcedf462d299e0f4c3c64d022", null ],
+    [ "func_get_double", "ShareManager_8h.html#ac1c70234e36c1e516c6db6ea3b907e0f", null ],
+    [ "func_get_int32", "ShareManager_8h.html#a542b68b10f514ccbec7e571d57983bcf", null ],
+    [ "func_get_int64", "ShareManager_8h.html#ae9a892bd39ad2defe3532cf539eb501a", null ],
+    [ "func_get_section_updatetime", "ShareManager_8h.html#aa028b501dfb285299565320cdc33c428", null ],
+    [ "func_get_string", "ShareManager_8h.html#a9baeb60ca68755047dda8c6902a16d97", null ],
+    [ "func_get_uint32", "ShareManager_8h.html#a85a1e48b556ba600e4bd0c7fa1a5d0de", null ],
+    [ "func_get_uint64", "ShareManager_8h.html#ab09cc8bb7e662ad32a9c672406f54fef", null ],
+    [ "func_init_master", "ShareManager_8h.html#a4c0fdacc0e3df5f2d5ebaf63df35be58", null ],
+    [ "func_set_double", "ShareManager_8h.html#a059c90722c8432c20e4b6a1de6bdb677", null ],
+    [ "func_set_int32", "ShareManager_8h.html#ababc3e4c04a989b3776f1aebab55b181", null ],
+    [ "func_set_int64", "ShareManager_8h.html#a6dbe56dd8d9e8611f4b3c95efb457c0d", null ],
+    [ "func_set_string", "ShareManager_8h.html#a2f889d38b284ab28512d670913dffe3a", null ],
+    [ "func_set_uint32", "ShareManager_8h.html#af467e6aab055e3b6ff095683a0b1935d", null ],
+    [ "func_set_uint64", "ShareManager_8h.html#ae0aeacadeeb9177275a036c7d9b44560", null ],
+    [ "USING_NS_WTP", "ShareManager_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3", null ]
+];

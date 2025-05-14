@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtCore/CtaStraContext.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('CtaStraContext_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">CtaStraContext.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="CtaStraContext_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="CtaStraContext_8h.html">CtaStraContext.h</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="WtCtaEngine_8h.html">WtCtaEngine.h</a>&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/CtaStrategyDefs.h&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;exception&gt;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;../Includes/WTSContractInfo.hpp&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="}">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classCtaStraContext.html#ace8694a39fb91f78587ea0e61641f007">   29</a></span><a class="code hl_function" href="classCtaStraContext.html#ace8694a39fb91f78587ea0e61641f007">CtaStraContext::CtaStraContext</a>(<a class="code hl_class" href="classWtCtaEngine.html">WtCtaEngine</a>* engine, <span class="keyword">const</span> <span class="keywordtype">char</span>* name, int32_t slippage)</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    : <a class="code hl_class" href="classCtaStraBaseCtx.html">CtaStraBaseCtx</a>(engine, name, slippage)</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>{</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>}</div>
+</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="}">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="classCtaStraContext.html#ac7be30e5d65af6753278f7b7e69b129d">   39</a></span><a class="code hl_function" href="classCtaStraContext.html#ac7be30e5d65af6753278f7b7e69b129d">CtaStraContext::~CtaStraContext</a>()</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>{</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>}</div>
+</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="foldopen" id="foldopen00051" data-start="{" data-end="}">
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="classCtaStraContext.html#a80473c7a95ae14a2a6ebf204d38dea2b">   51</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classCtaStraContext.html#a80473c7a95ae14a2a6ebf204d38dea2b">CtaStraContext::on_bar_close</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* code, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* newBar)</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>{</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">_strategy</a>)</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <a class="code hl_variable" href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">_strategy</a>-&gt;<a class="code hl_function" href="classCtaStrategy.html#a632d6481e61b60caeac89ee0ac70e947">on_bar</a>(<span class="keyword">this</span>, code, period, newBar);</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>}</div>
+</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="foldopen" id="foldopen00064" data-start="{" data-end="}">
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classCtaStraContext.html#ac27f7f6606841d4980ae5bf75db6f608">   64</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classCtaStraContext.html#ac27f7f6606841d4980ae5bf75db6f608">CtaStraContext::on_init</a>()</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>{</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <a class="code hl_function" href="classCtaStraBaseCtx.html#a78cc15745fadea924ac05587e16f25fc">CtaStraBaseCtx::on_init</a>();</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">_strategy</a>)</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <a class="code hl_variable" href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">_strategy</a>-&gt;<a class="code hl_function" href="classCtaStrategy.html#ab8f657bb261dce18c14204f6ffcf972d">on_init</a>(<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <a class="code hl_function" href="classCtaStraBaseCtx.html#a86630d7490f116462d00060c4b6cccae">dump_chart_info</a>();</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>}</div>
+</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="foldopen" id="foldopen00081" data-start="{" data-end="}">
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="classCtaStraContext.html#a6a369861861349a9ea8ba6c6f0cfc197">   81</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classCtaStraContext.html#a6a369861861349a9ea8ba6c6f0cfc197">CtaStraContext::on_session_begin</a>(uint32_t uTDate)</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>{</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <a class="code hl_function" href="classCtaStraBaseCtx.html#a57fcda634ad1dd709f051078adfd5a2a">CtaStraBaseCtx::on_session_begin</a>(uTDate);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">_strategy</a>)</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <a class="code hl_variable" href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">_strategy</a>-&gt;<a class="code hl_function" href="classCtaStrategy.html#aa15c9d8298f258c47e899d1c63a6d6bf">on_session_begin</a>(<span class="keyword">this</span>, uTDate);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>}</div>
+</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="foldopen" id="foldopen00096" data-start="{" data-end="}">
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="classCtaStraContext.html#a39e8ae4a87a33fa4ca7943b9c2c08f0e">   96</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classCtaStraContext.html#a39e8ae4a87a33fa4ca7943b9c2c08f0e">CtaStraContext::on_session_end</a>(uint32_t uTDate)</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>{</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">_strategy</a>)</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        <a class="code hl_variable" href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">_strategy</a>-&gt;<a class="code hl_function" href="classCtaStrategy.html#abf920544a5a420c694e8220bf758fb8b">on_session_end</a>(<span class="keyword">this</span>, uTDate);</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <a class="code hl_function" href="classCtaStraBaseCtx.html#a5b491816ce58a06a107a1df9e0e4fff6">CtaStraBaseCtx::on_session_end</a>(uTDate);</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>}</div>
+</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="foldopen" id="foldopen00112" data-start="{" data-end="}">
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="classCtaStraContext.html#a8ad6f4d9be1d8489384c59b74ae96ccc">  112</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classCtaStraContext.html#a8ad6f4d9be1d8489384c59b74ae96ccc">CtaStraContext::on_tick_updated</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* code, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick)</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>{</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="classCtaStraBaseCtx.html#a0dc4d371b87abb3a2c508035862382d3">_tick_subs</a>.find(code);</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="classCtaStraBaseCtx.html#a0dc4d371b87abb3a2c508035862382d3">_tick_subs</a>.end())</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">_strategy</a>)</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        <a class="code hl_variable" href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">_strategy</a>-&gt;<a class="code hl_function" href="classCtaStrategy.html#a2733728b438b65eac39a186fb071d002">on_tick</a>(<span class="keyword">this</span>, code, newTick);</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>}</div>
+</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="foldopen" id="foldopen00128" data-start="{" data-end="}">
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno"><a class="line" href="classCtaStraContext.html#a8532bfb15647830d57d381d5d620a747">  128</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classCtaStraContext.html#a8532bfb15647830d57d381d5d620a747">CtaStraContext::on_calculate</a>(uint32_t curDate, uint32_t curTime)</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>{</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">_strategy</a>)</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>        <a class="code hl_variable" href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">_strategy</a>-&gt;<a class="code hl_function" href="classCtaStrategy.html#ae8fa1ff4d2e2a1ac94de4c0b2153b021">on_schedule</a>(<span class="keyword">this</span>, curDate, curTime);</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>}</div>
+</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
+<div class="foldopen" id="foldopen00142" data-start="{" data-end="}">
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="classCtaStraContext.html#a069cfc5bedd0a1551212a71873f3d44f">  142</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classCtaStraContext.html#a069cfc5bedd0a1551212a71873f3d44f">CtaStraContext::on_condition_triggered</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">double</span> target, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <span class="keyword">const</span> <span class="keywordtype">char</span>* usertag)</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>{</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">_strategy</a>)</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>        <a class="code hl_variable" href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">_strategy</a>-&gt;<a class="code hl_function" href="classCtaStrategy.html#a3fae7ad0121d03e03578260efd0f9297">on_condition_triggered</a>(<span class="keyword">this</span>, stdCode, target, <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, usertag);</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>}</div>
+</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="ttc" id="aCtaStraContext_8h_html"><div class="ttname"><a href="CtaStraContext_8h.html">CtaStraContext.h</a></div><div class="ttdoc">CTA策略上下文实现</div></div>
+<div class="ttc" id="aWtCtaEngine_8h_html"><div class="ttname"><a href="WtCtaEngine_8h.html">WtCtaEngine.h</a></div><div class="ttdoc">WtCtaEngine是WonderTrader框架中的CTA策略引擎类 继承自WtEngine基类，实现了CTA策略的运行、管理和交易执行 CTA（Commodity Trading Advisor）...</div></div>
+<div class="ttc" id="aclassCtaStraBaseCtx_html"><div class="ttname"><a href="classCtaStraBaseCtx.html">CtaStraBaseCtx</a></div><div class="ttdef"><b>Definition</b> <a href="CtaStraBaseCtx_8h_source.html#l00079">CtaStraBaseCtx.h:80</a></div></div>
+<div class="ttc" id="aclassCtaStraBaseCtx_html_a0dc4d371b87abb3a2c508035862382d3"><div class="ttname"><a href="classCtaStraBaseCtx.html#a0dc4d371b87abb3a2c508035862382d3">CtaStraBaseCtx::_tick_subs</a></div><div class="ttdeci">wt_hashset&lt; std::string &gt; _tick_subs</div><div class="ttdef"><b>Definition</b> <a href="CtaStraBaseCtx_8h_source.html#l01092">CtaStraBaseCtx.h:1092</a></div></div>
+<div class="ttc" id="aclassCtaStraBaseCtx_html_a57fcda634ad1dd709f051078adfd5a2a"><div class="ttname"><a href="classCtaStraBaseCtx.html#a57fcda634ad1dd709f051078adfd5a2a">CtaStraBaseCtx::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin(uint32_t uTDate) override</div><div class="ttdoc">交易日开始事件回调</div><div class="ttdef"><b>Definition</b> <a href="CtaStraBaseCtx_8cpp_source.html#l01159">CtaStraBaseCtx.cpp:1159</a></div></div>
+<div class="ttc" id="aclassCtaStraBaseCtx_html_a5b491816ce58a06a107a1df9e0e4fff6"><div class="ttname"><a href="classCtaStraBaseCtx.html#a5b491816ce58a06a107a1df9e0e4fff6">CtaStraBaseCtx::on_session_end</a></div><div class="ttdeci">virtual void on_session_end(uint32_t uTDate) override</div><div class="ttdoc">交易日结束事件回调</div><div class="ttdef"><b>Definition</b> <a href="CtaStraBaseCtx_8cpp_source.html#l01227">CtaStraBaseCtx.cpp:1227</a></div></div>
+<div class="ttc" id="aclassCtaStraBaseCtx_html_a78cc15745fadea924ac05587e16f25fc"><div class="ttname"><a href="classCtaStraBaseCtx.html#a78cc15745fadea924ac05587e16f25fc">CtaStraBaseCtx::on_init</a></div><div class="ttdeci">virtual void on_init() override</div><div class="ttdoc">策略初始化函数</div><div class="ttdef"><b>Definition</b> <a href="CtaStraBaseCtx_8cpp_source.html#l00775">CtaStraBaseCtx.cpp:775</a></div></div>
+<div class="ttc" id="aclassCtaStraBaseCtx_html_a86630d7490f116462d00060c4b6cccae"><div class="ttname"><a href="classCtaStraBaseCtx.html#a86630d7490f116462d00060c4b6cccae">CtaStraBaseCtx::dump_chart_info</a></div><div class="ttdeci">void dump_chart_info()</div><div class="ttdoc">导出图表信息到JSON</div><div class="ttdef"><b>Definition</b> <a href="CtaStraBaseCtx_8cpp_source.html#l00791">CtaStraBaseCtx.cpp:791</a></div></div>
+<div class="ttc" id="aclassCtaStraContext_html_a069cfc5bedd0a1551212a71873f3d44f"><div class="ttname"><a href="classCtaStraContext.html#a069cfc5bedd0a1551212a71873f3d44f">CtaStraContext::on_condition_triggered</a></div><div class="ttdeci">virtual void on_condition_triggered(const char *stdCode, double target, double price, const char *usertag) override</div><div class="ttdoc">条件触发回调</div><div class="ttdef"><b>Definition</b> <a href="CtaStraContext_8cpp_source.html#l00142">CtaStraContext.cpp:142</a></div></div>
+<div class="ttc" id="aclassCtaStraContext_html_a39e8ae4a87a33fa4ca7943b9c2c08f0e"><div class="ttname"><a href="classCtaStraContext.html#a39e8ae4a87a33fa4ca7943b9c2c08f0e">CtaStraContext::on_session_end</a></div><div class="ttdeci">virtual void on_session_end(uint32_t uTDate) override</div><div class="ttdoc">交易日结束回调</div><div class="ttdef"><b>Definition</b> <a href="CtaStraContext_8cpp_source.html#l00096">CtaStraContext.cpp:96</a></div></div>
+<div class="ttc" id="aclassCtaStraContext_html_a42ad946704a021642238a2802d3942eb"><div class="ttname"><a href="classCtaStraContext.html#a42ad946704a021642238a2802d3942eb">CtaStraContext::_strategy</a></div><div class="ttdeci">CtaStrategy * _strategy</div><div class="ttdoc">策略实现类指针</div><div class="ttdef"><b>Definition</b> <a href="CtaStraContext_8h_source.html#l00121">CtaStraContext.h:121</a></div></div>
+<div class="ttc" id="aclassCtaStraContext_html_a6a369861861349a9ea8ba6c6f0cfc197"><div class="ttname"><a href="classCtaStraContext.html#a6a369861861349a9ea8ba6c6f0cfc197">CtaStraContext::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin(uint32_t uTDate) override</div><div class="ttdoc">交易日开始回调</div><div class="ttdef"><b>Definition</b> <a href="CtaStraContext_8cpp_source.html#l00081">CtaStraContext.cpp:81</a></div></div>
+<div class="ttc" id="aclassCtaStraContext_html_a80473c7a95ae14a2a6ebf204d38dea2b"><div class="ttname"><a href="classCtaStraContext.html#a80473c7a95ae14a2a6ebf204d38dea2b">CtaStraContext::on_bar_close</a></div><div class="ttdeci">virtual void on_bar_close(const char *stdCode, const char *period, WTSBarStruct *newBar) override</div><div class="ttdoc">K线周期结束回调</div><div class="ttdef"><b>Definition</b> <a href="CtaStraContext_8cpp_source.html#l00051">CtaStraContext.cpp:51</a></div></div>
+<div class="ttc" id="aclassCtaStraContext_html_a8532bfb15647830d57d381d5d620a747"><div class="ttname"><a href="classCtaStraContext.html#a8532bfb15647830d57d381d5d620a747">CtaStraContext::on_calculate</a></div><div class="ttdeci">virtual void on_calculate(uint32_t curDate, uint32_t curTime) override</div><div class="ttdoc">定时计算回调</div><div class="ttdef"><b>Definition</b> <a href="CtaStraContext_8cpp_source.html#l00128">CtaStraContext.cpp:128</a></div></div>
+<div class="ttc" id="aclassCtaStraContext_html_a8ad6f4d9be1d8489384c59b74ae96ccc"><div class="ttname"><a href="classCtaStraContext.html#a8ad6f4d9be1d8489384c59b74ae96ccc">CtaStraContext::on_tick_updated</a></div><div class="ttdeci">virtual void on_tick_updated(const char *stdCode, WTSTickData *newTick) override</div><div class="ttdoc">Tick数据更新回调</div><div class="ttdef"><b>Definition</b> <a href="CtaStraContext_8cpp_source.html#l00112">CtaStraContext.cpp:112</a></div></div>
+<div class="ttc" id="aclassCtaStraContext_html_ac27f7f6606841d4980ae5bf75db6f608"><div class="ttname"><a href="classCtaStraContext.html#ac27f7f6606841d4980ae5bf75db6f608">CtaStraContext::on_init</a></div><div class="ttdeci">virtual void on_init() override</div><div class="ttdoc">回调函数区域</div><div class="ttdef"><b>Definition</b> <a href="CtaStraContext_8cpp_source.html#l00064">CtaStraContext.cpp:64</a></div></div>
+<div class="ttc" id="aclassCtaStraContext_html_ac7be30e5d65af6753278f7b7e69b129d"><div class="ttname"><a href="classCtaStraContext.html#ac7be30e5d65af6753278f7b7e69b129d">CtaStraContext::~CtaStraContext</a></div><div class="ttdeci">virtual ~CtaStraContext()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="CtaStraContext_8cpp_source.html#l00039">CtaStraContext.cpp:39</a></div></div>
+<div class="ttc" id="aclassCtaStraContext_html_ace8694a39fb91f78587ea0e61641f007"><div class="ttname"><a href="classCtaStraContext.html#ace8694a39fb91f78587ea0e61641f007">CtaStraContext::CtaStraContext</a></div><div class="ttdeci">CtaStraContext(WtCtaEngine *engine, const char *name, int32_t slippage)</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="CtaStraContext_8cpp_source.html#l00029">CtaStraContext.cpp:29</a></div></div>
+<div class="ttc" id="aclassCtaStrategy_html_a2733728b438b65eac39a186fb071d002"><div class="ttname"><a href="classCtaStrategy.html#a2733728b438b65eac39a186fb071d002">CtaStrategy::on_tick</a></div><div class="ttdeci">virtual void on_tick(ICtaStraCtx *ctx, const char *stdCode, WTSTickData *newTick)</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyDefs_8h_source.html#l00078">CtaStrategyDefs.h:78</a></div></div>
+<div class="ttc" id="aclassCtaStrategy_html_a3fae7ad0121d03e03578260efd0f9297"><div class="ttname"><a href="classCtaStrategy.html#a3fae7ad0121d03e03578260efd0f9297">CtaStrategy::on_condition_triggered</a></div><div class="ttdeci">virtual void on_condition_triggered(ICtaStraCtx *ctx, const char *stdCode, double target, double price, const char *usertag)</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyDefs_8h_source.html#l00088">CtaStrategyDefs.h:88</a></div></div>
+<div class="ttc" id="aclassCtaStrategy_html_a632d6481e61b60caeac89ee0ac70e947"><div class="ttname"><a href="classCtaStrategy.html#a632d6481e61b60caeac89ee0ac70e947">CtaStrategy::on_bar</a></div><div class="ttdeci">virtual void on_bar(ICtaStraCtx *ctx, const char *stdCode, const char *period, WTSBarStruct *newBar)</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyDefs_8h_source.html#l00083">CtaStrategyDefs.h:83</a></div></div>
+<div class="ttc" id="aclassCtaStrategy_html_aa15c9d8298f258c47e899d1c63a6d6bf"><div class="ttname"><a href="classCtaStrategy.html#aa15c9d8298f258c47e899d1c63a6d6bf">CtaStrategy::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin(ICtaStraCtx *ctx, uint32_t uTDate)</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyDefs_8h_source.html#l00058">CtaStrategyDefs.h:58</a></div></div>
+<div class="ttc" id="aclassCtaStrategy_html_ab8f657bb261dce18c14204f6ffcf972d"><div class="ttname"><a href="classCtaStrategy.html#ab8f657bb261dce18c14204f6ffcf972d">CtaStrategy::on_init</a></div><div class="ttdeci">virtual void on_init(ICtaStraCtx *ctx)</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyDefs_8h_source.html#l00053">CtaStrategyDefs.h:53</a></div></div>
+<div class="ttc" id="aclassCtaStrategy_html_abf920544a5a420c694e8220bf758fb8b"><div class="ttname"><a href="classCtaStrategy.html#abf920544a5a420c694e8220bf758fb8b">CtaStrategy::on_session_end</a></div><div class="ttdeci">virtual void on_session_end(ICtaStraCtx *ctx, uint32_t uTDate)</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyDefs_8h_source.html#l00063">CtaStrategyDefs.h:63</a></div></div>
+<div class="ttc" id="aclassCtaStrategy_html_ae8fa1ff4d2e2a1ac94de4c0b2153b021"><div class="ttname"><a href="classCtaStrategy.html#ae8fa1ff4d2e2a1ac94de4c0b2153b021">CtaStrategy::on_schedule</a></div><div class="ttdeci">virtual void on_schedule(ICtaStraCtx *ctx, uint32_t uDate, uint32_t uTime)</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyDefs_8h_source.html#l00068">CtaStrategyDefs.h:68</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWtCtaEngine_html"><div class="ttname"><a href="classWtCtaEngine.html">WtCtaEngine</a></div><div class="ttdoc">CTA策略引擎类</div><div class="ttdef"><b>Definition</b> <a href="WtCtaEngine_8h_source.html#l00033">WtCtaEngine.h:34</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_a04f887fc8800d4727971dbb8eb550132"><div class="ttname"><a href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a></div><div class="ttdeci">ATPPriceType price</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00040">main.cpp:40</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3ce996bf6400c0a215df0636043a382c.html">WtCore</a></li><li class="navelem"><a class="el" href="CtaStraContext_8cpp.html">CtaStraContext.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

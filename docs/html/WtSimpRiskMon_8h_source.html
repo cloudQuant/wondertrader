@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtRiskMonFact/WtSimpRiskMon.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtSimpRiskMon_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtSimpRiskMon.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtSimpRiskMon_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;thread&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Includes/RiskMonDefs.h&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="WtSimpRiskMon_8h.html#a17226795848decb565e90624584e5c0f">   17</a></span><a class="code hl_variable" href="WtSimpRiskMon_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="foldopen" id="foldopen00024" data-start="{" data-end="};">
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html">   24</a></span><span class="keyword">class </span><a class="code hl_class" href="classWtSimpleRiskMon.html">WtSimpleRiskMon</a> : <span class="keyword">public</span> <a class="code hl_class" href="classWtRiskMonitor.html">WtRiskMonitor</a></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>{</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#aec50cb061f8c583d8e074279cf62534a">   31</a></span>    <a class="code hl_function" href="classWtSimpleRiskMon.html#aec50cb061f8c583d8e074279cf62534a">WtSimpleRiskMon</a>() :<a class="code hl_variable" href="classWtSimpleRiskMon.html#a124bbf781c63f62327e616aca158704d">_stopped</a>(false), <a class="code hl_variable" href="classWtSimpleRiskMon.html#a6ac1d6a476dd6d09c61e0104208f9f36">_limited</a>(false){}</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtSimpleRiskMon.html#a70bb28bb32b01369b24bc98c0a3d1f08">getName</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtSimpleRiskMon.html#a89d991679557e91b63343f5913dc3e5b">getFactName</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtSimpleRiskMon.html#a90cff801b9a1776ed0cda2a2f1d2f6e8">init</a>(<a class="code hl_class" href="classWtPortContext.html">WtPortContext</a>* ctx, <a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtSimpleRiskMon.html#a6315d65d3b08aadb7d3f0bd292f58e93">run</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtSimpleRiskMon.html#a371db45762a2510b0741e04b79479810">stop</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#a43cf3ca8f84aadbaca712851a7554218">   68</a></span>    <span class="keyword">typedef</span> std::shared_ptr&lt;std::thread&gt; <a class="code hl_typedef" href="classWtSimpleRiskMon.html#a43cf3ca8f84aadbaca712851a7554218">ThreadPtr</a>;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#a61d059c9af952a78f4da65e43bdce18c">   71</a></span>    <a class="code hl_typedef" href="classWtSimpleRiskMon.html#a43cf3ca8f84aadbaca712851a7554218">ThreadPtr</a>       <a class="code hl_variable" href="classWtSimpleRiskMon.html#a61d059c9af952a78f4da65e43bdce18c">_thrd</a>;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#a124bbf781c63f62327e616aca158704d">   74</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classWtSimpleRiskMon.html#a124bbf781c63f62327e616aca158704d">_stopped</a>;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#a6ac1d6a476dd6d09c61e0104208f9f36">   77</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classWtSimpleRiskMon.html#a6ac1d6a476dd6d09c61e0104208f9f36">_limited</a>;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#a4ae75fef862644058d3889fe6b62f656">   80</a></span>    uint64_t        <a class="code hl_variable" href="classWtSimpleRiskMon.html#a4ae75fef862644058d3889fe6b62f656">_last_time</a>;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#a766a2f69c59a0618a29690a1edad94a4">   83</a></span>    uint32_t        <a class="code hl_variable" href="classWtSimpleRiskMon.html#a766a2f69c59a0618a29690a1edad94a4">_calc_span</a>;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#aa29001a48fcbc685a482e34ee3574def">   86</a></span>    uint32_t        <a class="code hl_variable" href="classWtSimpleRiskMon.html#aa29001a48fcbc685a482e34ee3574def">_risk_span</a>;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#ad5ab217094267873a75f0a7292168d2c">   89</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classWtSimpleRiskMon.html#ad5ab217094267873a75f0a7292168d2c">_basic_ratio</a>;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#a6b835ea8f343ccdabf9e1150f2022d2b">   92</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classWtSimpleRiskMon.html#a6b835ea8f343ccdabf9e1150f2022d2b">_risk_scale</a>;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#a9ca5f8628447243a2ef886c03e5212ae">   95</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classWtSimpleRiskMon.html#a9ca5f8628447243a2ef886c03e5212ae">_inner_day_fd</a>;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#a4613129e871a8793d08e2a50c1892333">   98</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classWtSimpleRiskMon.html#a4613129e871a8793d08e2a50c1892333">_inner_day_active</a>;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#ae173ca355dfcd7c2864eb7d6677a8d42">  101</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classWtSimpleRiskMon.html#ae173ca355dfcd7c2864eb7d6677a8d42">_multi_day_fd</a>;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#a1662aab90b35ce7aa60a7c585fea4f62">  104</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classWtSimpleRiskMon.html#a1662aab90b35ce7aa60a7c585fea4f62">_multi_day_active</a>;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="classWtSimpleRiskMon.html#a561bf483a1fa4268ebb1ca4f29f35384">  107</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classWtSimpleRiskMon.html#a561bf483a1fa4268ebb1ca4f29f35384">_base_amount</a>;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>};</div>
+</div>
+<div class="ttc" id="aWtSimpRiskMon_8h_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="WtSimpRiskMon_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00017">WtSimpRiskMon.h:17</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWtPortContext_html"><div class="ttname"><a href="classWtPortContext.html">WtPortContext</a></div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00033">RiskMonDefs.h:34</a></div></div>
+<div class="ttc" id="aclassWtRiskMonitor_html"><div class="ttname"><a href="classWtRiskMonitor.html">WtRiskMonitor</a></div><div class="ttdef"><b>Definition</b> <a href="RiskMonDefs_8h_source.html#l00083">RiskMonDefs.h:84</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html"><div class="ttname"><a href="classWtSimpleRiskMon.html">WtSimpleRiskMon</a></div><div class="ttdoc">简单风险监控器类</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00024">WtSimpRiskMon.h:25</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a124bbf781c63f62327e616aca158704d"><div class="ttname"><a href="classWtSimpleRiskMon.html#a124bbf781c63f62327e616aca158704d">WtSimpleRiskMon::_stopped</a></div><div class="ttdeci">bool _stopped</div><div class="ttdoc">监控器是否已停止标记</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00074">WtSimpRiskMon.h:74</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a1662aab90b35ce7aa60a7c585fea4f62"><div class="ttname"><a href="classWtSimpleRiskMon.html#a1662aab90b35ce7aa60a7c585fea4f62">WtSimpleRiskMon::_multi_day_active</a></div><div class="ttdeci">bool _multi_day_active</div><div class="ttdoc">多日风控是否启用</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00104">WtSimpRiskMon.h:104</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a371db45762a2510b0741e04b79479810"><div class="ttname"><a href="classWtSimpleRiskMon.html#a371db45762a2510b0741e04b79479810">WtSimpleRiskMon::stop</a></div><div class="ttdeci">virtual void stop() override</div><div class="ttdoc">停止风险监控器</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8cpp_source.html#l00187">WtSimpRiskMon.cpp:187</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a43cf3ca8f84aadbaca712851a7554218"><div class="ttname"><a href="classWtSimpleRiskMon.html#a43cf3ca8f84aadbaca712851a7554218">WtSimpleRiskMon::ThreadPtr</a></div><div class="ttdeci">std::shared_ptr&lt; std::thread &gt; ThreadPtr</div><div class="ttdoc">线程指针类型定义</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00068">WtSimpRiskMon.h:68</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a4613129e871a8793d08e2a50c1892333"><div class="ttname"><a href="classWtSimpleRiskMon.html#a4613129e871a8793d08e2a50c1892333">WtSimpleRiskMon::_inner_day_active</a></div><div class="ttdeci">bool _inner_day_active</div><div class="ttdoc">日内风控是否启用</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00098">WtSimpRiskMon.h:98</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a4ae75fef862644058d3889fe6b62f656"><div class="ttname"><a href="classWtSimpleRiskMon.html#a4ae75fef862644058d3889fe6b62f656">WtSimpleRiskMon::_last_time</a></div><div class="ttdeci">uint64_t _last_time</div><div class="ttdoc">上次风控检查的时间戳</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00080">WtSimpRiskMon.h:80</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a561bf483a1fa4268ebb1ca4f29f35384"><div class="ttname"><a href="classWtSimpleRiskMon.html#a561bf483a1fa4268ebb1ca4f29f35384">WtSimpleRiskMon::_base_amount</a></div><div class="ttdeci">double _base_amount</div><div class="ttdoc">基础资金规模，用于计算盈亏率</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00107">WtSimpRiskMon.h:107</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a61d059c9af952a78f4da65e43bdce18c"><div class="ttname"><a href="classWtSimpleRiskMon.html#a61d059c9af952a78f4da65e43bdce18c">WtSimpleRiskMon::_thrd</a></div><div class="ttdeci">ThreadPtr _thrd</div><div class="ttdoc">监控线程指针</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00071">WtSimpRiskMon.h:71</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a6315d65d3b08aadb7d3f0bd292f58e93"><div class="ttname"><a href="classWtSimpleRiskMon.html#a6315d65d3b08aadb7d3f0bd292f58e93">WtSimpleRiskMon::run</a></div><div class="ttdeci">virtual void run() override</div><div class="ttdoc">启动风险监控器</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8cpp_source.html#l00084">WtSimpRiskMon.cpp:84</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a6ac1d6a476dd6d09c61e0104208f9f36"><div class="ttname"><a href="classWtSimpleRiskMon.html#a6ac1d6a476dd6d09c61e0104208f9f36">WtSimpleRiskMon::_limited</a></div><div class="ttdeci">bool _limited</div><div class="ttdoc">交易是否已被限制标记</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00077">WtSimpRiskMon.h:77</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a6b835ea8f343ccdabf9e1150f2022d2b"><div class="ttname"><a href="classWtSimpleRiskMon.html#a6b835ea8f343ccdabf9e1150f2022d2b">WtSimpleRiskMon::_risk_scale</a></div><div class="ttdeci">double _risk_scale</div><div class="ttdoc">风险控制系数，用于调整风控敏感度</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00092">WtSimpRiskMon.h:92</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a70bb28bb32b01369b24bc98c0a3d1f08"><div class="ttname"><a href="classWtSimpleRiskMon.html#a70bb28bb32b01369b24bc98c0a3d1f08">WtSimpleRiskMon::getName</a></div><div class="ttdeci">virtual const char * getName() override</div><div class="ttdoc">获取风险监控器名称</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8cpp_source.html#l00028">WtSimpRiskMon.cpp:28</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a766a2f69c59a0618a29690a1edad94a4"><div class="ttname"><a href="classWtSimpleRiskMon.html#a766a2f69c59a0618a29690a1edad94a4">WtSimpleRiskMon::_calc_span</a></div><div class="ttdeci">uint32_t _calc_span</div><div class="ttdoc">风控计算时间间隔，单位s</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00083">WtSimpRiskMon.h:83</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a89d991679557e91b63343f5913dc3e5b"><div class="ttname"><a href="classWtSimpleRiskMon.html#a89d991679557e91b63343f5913dc3e5b">WtSimpleRiskMon::getFactName</a></div><div class="ttdeci">virtual const char * getFactName() override</div><div class="ttdoc">获取风险监控器工厂名称</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8cpp_source.html#l00038">WtSimpRiskMon.cpp:38</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a90cff801b9a1776ed0cda2a2f1d2f6e8"><div class="ttname"><a href="classWtSimpleRiskMon.html#a90cff801b9a1776ed0cda2a2f1d2f6e8">WtSimpleRiskMon::init</a></div><div class="ttdeci">virtual void init(WtPortContext *ctx, WTSVariant *cfg) override</div><div class="ttdoc">初始化风险监控器</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8cpp_source.html#l00059">WtSimpRiskMon.cpp:59</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_a9ca5f8628447243a2ef886c03e5212ae"><div class="ttname"><a href="classWtSimpleRiskMon.html#a9ca5f8628447243a2ef886c03e5212ae">WtSimpleRiskMon::_inner_day_fd</a></div><div class="ttdeci">double _inner_day_fd</div><div class="ttdoc">日内高点回撤边界，单日回撤的阈值</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00095">WtSimpRiskMon.h:95</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_aa29001a48fcbc685a482e34ee3574def"><div class="ttname"><a href="classWtSimpleRiskMon.html#aa29001a48fcbc685a482e34ee3574def">WtSimpleRiskMon::_risk_span</a></div><div class="ttdeci">uint32_t _risk_span</div><div class="ttdoc">风险回撤比较的时间跨度</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00086">WtSimpRiskMon.h:86</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_ad5ab217094267873a75f0a7292168d2c"><div class="ttname"><a href="classWtSimpleRiskMon.html#ad5ab217094267873a75f0a7292168d2c">WtSimpleRiskMon::_basic_ratio</a></div><div class="ttdeci">double _basic_ratio</div><div class="ttdoc">基础盈利率，用于盈利打分计算</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00089">WtSimpRiskMon.h:89</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_ae173ca355dfcd7c2864eb7d6677a8d42"><div class="ttname"><a href="classWtSimpleRiskMon.html#ae173ca355dfcd7c2864eb7d6677a8d42">WtSimpleRiskMon::_multi_day_fd</a></div><div class="ttdeci">double _multi_day_fd</div><div class="ttdoc">多日高点回撤边界，跨多日回撤的阈值</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00101">WtSimpRiskMon.h:101</a></div></div>
+<div class="ttc" id="aclassWtSimpleRiskMon_html_aec50cb061f8c583d8e074279cf62534a"><div class="ttname"><a href="classWtSimpleRiskMon.html#aec50cb061f8c583d8e074279cf62534a">WtSimpleRiskMon::WtSimpleRiskMon</a></div><div class="ttdeci">WtSimpleRiskMon()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="WtSimpRiskMon_8h_source.html#l00031">WtSimpRiskMon.h:31</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_fcd746cc1472f3da7d7cf6dbf959d9fa.html">WtRiskMonFact</a></li><li class="navelem"><a class="el" href="WtSimpRiskMon_8h.html">WtSimpRiskMon.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

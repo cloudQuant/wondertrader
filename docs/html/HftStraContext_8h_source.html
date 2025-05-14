@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtCore/HftStraContext.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('HftStraContext_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">HftStraContext.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="HftStraContext_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="HftStraBaseCtx_8h.html">HftStraBaseCtx.h</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="HftStraContext_8h.html#a17226795848decb565e90624584e5c0f">   16</a></span><a class="code hl_variable" href="HftStraContext_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">class </span><a class="code hl_class" href="classHftStrategy.html">HftStrategy</a>;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="foldopen" id="foldopen00025" data-start="{" data-end="};">
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classHftStraContext.html">   25</a></span><span class="keyword">class </span><a class="code hl_class" href="classHftStraContext.html">HftStraContext</a> : <span class="keyword">public</span> <a class="code hl_class" href="classHftStraBaseCtx.html">HftStraBaseCtx</a></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>{</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <a class="code hl_class" href="classHftStraContext.html">HftStraContext</a>(<a class="code hl_class" href="classWtHftEngine.html">WtHftEngine</a>* engine, <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classIHftStraCtx.html#a83f0f0ed8878ced941cf9eab83320273">name</a>, <span class="keywordtype">bool</span> bAgent, int32_t slippage);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keyword">virtual</span> <a class="code hl_function" href="classHftStraContext.html#ab468860accef32b871c71e888a008300">~HftStraContext</a>();</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classHftStraContext.html#a7996575fd29b439e93a2fdcca7612532">   46</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#a7996575fd29b439e93a2fdcca7612532">set_strategy</a>(<a class="code hl_class" href="classHftStrategy.html">HftStrategy</a>* stra){ <a class="code hl_variable" href="classHftStraContext.html#a78c971b07b6365ef8a00c08f52b7b41e">_strategy</a> = stra; }</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="classHftStraContext.html#af959e1eb895bba0a70a9f8f548ef7c19">   52</a></span>    <a class="code hl_class" href="classHftStrategy.html">HftStrategy</a>* <a class="code hl_function" href="classHftStraContext.html#af959e1eb895bba0a70a9f8f548ef7c19">get_stragety</a>() { <span class="keywordflow">return</span> <a class="code hl_variable" href="classHftStraContext.html#a78c971b07b6365ef8a00c08f52b7b41e">_strategy</a>; }</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#a67f98a295ccc2ea2d1cf7317bf807b6d">on_init</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#ace05b3c851fa7390f47a7bfd6236edc3">on_session_begin</a>(uint32_t uTDate) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#a13e718178901a124cb0409922b445357">on_session_end</a>(uint32_t uTDate) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#a8337af0b5e55e505c1a1237657a90709">on_tick</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* code, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#abf612fbb426138b697eeb68af63a3272">on_order_queue</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSOrdQueData.html">WTSOrdQueData</a>* newOrdQue) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#aea930c249ee6e14e1eb6e0403fd5b61f">on_order_detail</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSOrdDtlData.html">WTSOrdDtlData</a>* newOrdDtl) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#a68d9f7c131d0ae8c4549fb6885b3c90e">on_transaction</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTransData.html">WTSTransData</a>* newTrans) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#af509053571c0e622741db88db977b7fa">on_bar</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* code, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, uint32_t times, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* newBar) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#a4a41b983dd77ab54b99221648bbc9303">on_trade</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> vol, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#ad9becb94e918625f10516b6fc30f17db">on_order</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isBuy, <span class="keywordtype">double</span> totalQty, <span class="keywordtype">double</span> leftQty, <span class="keywordtype">double</span> <a class="code hl_variable" href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a>, <span class="keywordtype">bool</span> isCanceled = <span class="keyword">false</span>) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#a0a438298726264da7be3aa1175ceb4d7">on_channel_ready</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#a59eb6c5074b05129425868582a94c61f">on_channel_lost</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span> </div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#a6c8f11190394f8c0ca831b31cc531700">on_entrust</a>(uint32_t localid, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> bSuccess, <span class="keyword">const</span> <span class="keywordtype">char</span>* message) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classHftStraContext.html#a0bd98becaf62dec278e678a689bf8eea">on_position</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keywordtype">bool</span> isLong, <span class="keywordtype">double</span> prevol, <span class="keywordtype">double</span> preavail, <span class="keywordtype">double</span> newvol, <span class="keywordtype">double</span> newavail, uint32_t tradingday) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno"><a class="line" href="classHftStraContext.html#a78c971b07b6365ef8a00c08f52b7b41e">  167</a></span>    <a class="code hl_class" href="classHftStrategy.html">HftStrategy</a>*        <a class="code hl_variable" href="classHftStraContext.html#a78c971b07b6365ef8a00c08f52b7b41e">_strategy</a>;      </div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>};</div>
+</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="ttc" id="aHftStraBaseCtx_8h_html"><div class="ttname"><a href="HftStraBaseCtx_8h.html">HftStraBaseCtx.h</a></div><div class="ttdoc">高频交易策略基础上下文头文件</div></div>
+<div class="ttc" id="aHftStraContext_8h_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="HftStraContext_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8h_source.html#l00016">HftStraContext.h:16</a></div></div>
+<div class="ttc" id="aclassHftStraBaseCtx_html"><div class="ttname"><a href="classHftStraBaseCtx.html">HftStraBaseCtx</a></div><div class="ttdoc">高频交易策略基础上下文类</div><div class="ttdef"><b>Definition</b> <a href="HftStraBaseCtx_8h_source.html#l00039">HftStraBaseCtx.h:40</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html"><div class="ttname"><a href="classHftStraContext.html">HftStraContext</a></div><div class="ttdoc">高频交易策略上下文类</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8h_source.html#l00025">HftStraContext.h:26</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_a0a438298726264da7be3aa1175ceb4d7"><div class="ttname"><a href="classHftStraContext.html#a0a438298726264da7be3aa1175ceb4d7">HftStraContext::on_channel_ready</a></div><div class="ttdeci">virtual void on_channel_ready() override</div><div class="ttdoc">交易通道就绪回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00240">HftStraContext.cpp:240</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_a0bd98becaf62dec278e678a689bf8eea"><div class="ttname"><a href="classHftStraContext.html#a0bd98becaf62dec278e678a689bf8eea">HftStraContext::on_position</a></div><div class="ttdeci">virtual void on_position(const char *stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday) override</div><div class="ttdoc">持仓回报回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00229">HftStraContext.cpp:229</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_a13e718178901a124cb0409922b445357"><div class="ttname"><a href="classHftStraContext.html#a13e718178901a124cb0409922b445357">HftStraContext::on_session_end</a></div><div class="ttdeci">virtual void on_session_end(uint32_t uTDate) override</div><div class="ttdoc">交易会话结束回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00074">HftStraContext.cpp:74</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_a4a41b983dd77ab54b99221648bbc9303"><div class="ttname"><a href="classHftStraContext.html#a4a41b983dd77ab54b99221648bbc9303">HftStraContext::on_trade</a></div><div class="ttdeci">virtual void on_trade(uint32_t localid, const char *stdCode, bool isBuy, double vol, double price) override</div><div class="ttdoc">成交回报回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00183">HftStraContext.cpp:183</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_a59eb6c5074b05129425868582a94c61f"><div class="ttname"><a href="classHftStraContext.html#a59eb6c5074b05129425868582a94c61f">HftStraContext::on_channel_lost</a></div><div class="ttdeci">virtual void on_channel_lost() override</div><div class="ttdoc">交易通道断开回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00254">HftStraContext.cpp:254</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_a67f98a295ccc2ea2d1cf7317bf807b6d"><div class="ttname"><a href="classHftStraContext.html#a67f98a295ccc2ea2d1cf7317bf807b6d">HftStraContext::on_init</a></div><div class="ttdeci">virtual void on_init() override</div><div class="ttdoc">策略初始化</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00044">HftStraContext.cpp:44</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_a68d9f7c131d0ae8c4549fb6885b3c90e"><div class="ttname"><a href="classHftStraContext.html#a68d9f7c131d0ae8c4549fb6885b3c90e">HftStraContext::on_transaction</a></div><div class="ttdeci">virtual void on_transaction(const char *stdCode, WTSTransData *newTrans) override</div><div class="ttdoc">逐笔成交数据回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00146">HftStraContext.cpp:146</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_a6c8f11190394f8c0ca831b31cc531700"><div class="ttname"><a href="classHftStraContext.html#a6c8f11190394f8c0ca831b31cc531700">HftStraContext::on_entrust</a></div><div class="ttdeci">virtual void on_entrust(uint32_t localid, const char *stdCode, bool bSuccess, const char *message) override</div><div class="ttdoc">委托提交回报回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00272">HftStraContext.cpp:272</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_a78c971b07b6365ef8a00c08f52b7b41e"><div class="ttname"><a href="classHftStraContext.html#a78c971b07b6365ef8a00c08f52b7b41e">HftStraContext::_strategy</a></div><div class="ttdeci">HftStrategy * _strategy</div><div class="ttdoc">策略实例指针</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8h_source.html#l00167">HftStraContext.h:167</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_a7996575fd29b439e93a2fdcca7612532"><div class="ttname"><a href="classHftStraContext.html#a7996575fd29b439e93a2fdcca7612532">HftStraContext::set_strategy</a></div><div class="ttdeci">void set_strategy(HftStrategy *stra)</div><div class="ttdoc">设置策略实例</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8h_source.html#l00046">HftStraContext.h:46</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_a8337af0b5e55e505c1a1237657a90709"><div class="ttname"><a href="classHftStraContext.html#a8337af0b5e55e505c1a1237657a90709">HftStraContext::on_tick</a></div><div class="ttdeci">virtual void on_tick(const char *code, WTSTickData *newTick) override</div><div class="ttdoc">行情Tick数据回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00090">HftStraContext.cpp:90</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_ab468860accef32b871c71e888a008300"><div class="ttname"><a href="classHftStraContext.html#ab468860accef32b871c71e888a008300">HftStraContext::~HftStraContext</a></div><div class="ttdeci">virtual ~HftStraContext()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00035">HftStraContext.cpp:35</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_abf612fbb426138b697eeb68af63a3272"><div class="ttname"><a href="classHftStraContext.html#abf612fbb426138b697eeb68af63a3272">HftStraContext::on_order_queue</a></div><div class="ttdeci">virtual void on_order_queue(const char *stdCode, WTSOrdQueData *newOrdQue) override</div><div class="ttdoc">委托队列数据回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00114">HftStraContext.cpp:114</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_ace05b3c851fa7390f47a7bfd6236edc3"><div class="ttname"><a href="classHftStraContext.html#ace05b3c851fa7390f47a7bfd6236edc3">HftStraContext::on_session_begin</a></div><div class="ttdeci">virtual void on_session_begin(uint32_t uTDate) override</div><div class="ttdoc">交易会话开始回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00059">HftStraContext.cpp:59</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_ad9becb94e918625f10516b6fc30f17db"><div class="ttname"><a href="classHftStraContext.html#ad9becb94e918625f10516b6fc30f17db">HftStraContext::on_order</a></div><div class="ttdeci">virtual void on_order(uint32_t localid, const char *stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled=false) override</div><div class="ttdoc">委托回报回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00206">HftStraContext.cpp:206</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_aea930c249ee6e14e1eb6e0403fd5b61f"><div class="ttname"><a href="classHftStraContext.html#aea930c249ee6e14e1eb6e0403fd5b61f">HftStraContext::on_order_detail</a></div><div class="ttdeci">virtual void on_order_detail(const char *stdCode, WTSOrdDtlData *newOrdDtl) override</div><div class="ttdoc">委托明细数据回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00130">HftStraContext.cpp:130</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_af509053571c0e622741db88db977b7fa"><div class="ttname"><a href="classHftStraContext.html#af509053571c0e622741db88db977b7fa">HftStraContext::on_bar</a></div><div class="ttdeci">virtual void on_bar(const char *code, const char *period, uint32_t times, WTSBarStruct *newBar) override</div><div class="ttdoc">K线数据回调</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8cpp_source.html#l00164">HftStraContext.cpp:164</a></div></div>
+<div class="ttc" id="aclassHftStraContext_html_af959e1eb895bba0a70a9f8f548ef7c19"><div class="ttname"><a href="classHftStraContext.html#af959e1eb895bba0a70a9f8f548ef7c19">HftStraContext::get_stragety</a></div><div class="ttdeci">HftStrategy * get_stragety()</div><div class="ttdoc">获取策略实例</div><div class="ttdef"><b>Definition</b> <a href="HftStraContext_8h_source.html#l00052">HftStraContext.h:52</a></div></div>
+<div class="ttc" id="aclassHftStrategy_html"><div class="ttname"><a href="classHftStrategy.html">HftStrategy</a></div><div class="ttdef"><b>Definition</b> <a href="HftStrategyDefs_8h_source.html#l00028">HftStrategyDefs.h:29</a></div></div>
+<div class="ttc" id="aclassIHftStraCtx_html_a83f0f0ed8878ced941cf9eab83320273"><div class="ttname"><a href="classIHftStraCtx.html#a83f0f0ed8878ced941cf9eab83320273">IHftStraCtx::name</a></div><div class="ttdeci">const char * name() const</div><div class="ttdoc">获取策略名称</div><div class="ttdef"><b>Definition</b> <a href="IHftStraCtx_8h_source.html#l00059">IHftStraCtx.h:59</a></div></div>
+<div class="ttc" id="aclassWTSOrdDtlData_html"><div class="ttname"><a href="classWTSOrdDtlData.html">WTSOrdDtlData</a></div><div class="ttdoc">委托明细数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01726">WTSDataDef.hpp:1727</a></div></div>
+<div class="ttc" id="aclassWTSOrdQueData_html"><div class="ttname"><a href="classWTSOrdQueData.html">WTSOrdQueData</a></div><div class="ttdoc">委托队列数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01613">WTSDataDef.hpp:1614</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSTransData_html"><div class="ttname"><a href="classWTSTransData.html">WTSTransData</a></div><div class="ttdoc">成交数据类</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01840">WTSDataDef.hpp:1841</a></div></div>
+<div class="ttc" id="aclassWtHftEngine_html"><div class="ttname"><a href="classWtHftEngine.html">WtHftEngine</a></div><div class="ttdoc">高频交易引擎类</div><div class="ttdef"><b>Definition</b> <a href="WtHftEngine_8h_source.html#l00039">WtHftEngine.h:40</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_a04f887fc8800d4727971dbb8eb550132"><div class="ttname"><a href="demo__send__order_8cpp.html#a04f887fc8800d4727971dbb8eb550132">price</a></div><div class="ttdeci">ATPPriceType price</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00040">main.cpp:40</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3ce996bf6400c0a215df0636043a382c.html">WtCore</a></li><li class="navelem"><a class="el" href="HftStraContext_8h.html">HftStraContext.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

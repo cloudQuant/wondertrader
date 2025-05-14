@@ -1,0 +1,293 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtCore/CtaStrategyMgr.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('CtaStrategyMgr_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">CtaStrategyMgr.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="CtaStrategyMgr_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="CtaStrategyMgr_8h.html">CtaStrategyMgr.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Share/StrUtil.hpp&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;../WTSTools/WTSLogger.h&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;boost/filesystem.hpp&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="foldopen" id="foldopen00026" data-start="{" data-end="}">
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="classCtaStrategyMgr.html#aefd91d08d4eebaebd4a15c31f82adc73">   26</a></span><a class="code hl_function" href="classCtaStrategyMgr.html#aefd91d08d4eebaebd4a15c31f82adc73">CtaStrategyMgr::CtaStrategyMgr</a>()</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>{</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>}</div>
+</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="foldopen" id="foldopen00035" data-start="{" data-end="}">
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classCtaStrategyMgr.html#a4e6ad5339ecdd56b76509a6e3a09bd10">   35</a></span><a class="code hl_function" href="classCtaStrategyMgr.html#a4e6ad5339ecdd56b76509a6e3a09bd10">CtaStrategyMgr::~CtaStrategyMgr</a>()</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>{</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>}</div>
+</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="foldopen" id="foldopen00050" data-start="{" data-end="}">
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="classCtaStrategyMgr.html#a20b70641771965c23f60b41d8dfd09d1">   50</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classCtaStrategyMgr.html#a20b70641771965c23f60b41d8dfd09d1">CtaStrategyMgr::loadFactories</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* path)</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>{</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="comment">// 检查目录是否存在</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="classStdFile.html#a65778f7268857f981a2e19acb8379761">StdFile::exists</a>(path))</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    {</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        <a class="code hl_function" href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a>(<span class="stringliteral">&quot;Directory {} of CTA strategy factory not exists&quot;</span>, path);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    }</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    uint32_t count = 0;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    boost::filesystem::path myPath(path);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    boost::filesystem::directory_iterator endIter;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="comment">// 遍历目录中的所有文件</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keywordflow">for</span> (boost::filesystem::directory_iterator iter(myPath); iter != endIter; iter++)</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    {</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <span class="comment">// 跳过子目录</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keywordflow">if</span> (boost::filesystem::is_directory(iter-&gt;path()))</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="comment">// 根据不同平台筛选动态库文件</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        <span class="keywordflow">if</span> (iter-&gt;path().extension() != <span class="stringliteral">&quot;.dll&quot;</span>)</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#else </span><span class="comment">//_UNIX</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordflow">if</span> (iter-&gt;path().extension() != <span class="stringliteral">&quot;.so&quot;</span>)</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <span class="comment">// 加载动态库</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        <a class="code hl_typedef" href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a> hInst = <a class="code hl_function" href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a>(iter-&gt;path().string().c_str());</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        <span class="keywordflow">if</span> (hInst == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        <span class="comment">// 获取工厂创建函数</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        <a class="code hl_typedef" href="CtaStrategyDefs_8h.html#a1f1f222d6c1f617d1892a8804cc1fcee">FuncCreateStraFact</a> creator = (<a class="code hl_typedef" href="CtaStrategyDefs_8h.html#a1f1f222d6c1f617d1892a8804cc1fcee">FuncCreateStraFact</a>)<a class="code hl_function" href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a>(hInst, <span class="stringliteral">&quot;createStrategyFact&quot;</span>);</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        <span class="keywordflow">if</span> (creator == <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        {</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>            <a class="code hl_function" href="classDLLHelper.html#adbde89a530ae734c57506bf9639ccc65">DLLHelper::free_library</a>(hInst);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        }</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        <span class="comment">// 创建工厂实例</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        <a class="code hl_class" href="classICtaStrategyFact.html">ICtaStrategyFact</a>* fact = creator();</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        <span class="keywordflow">if</span>(fact != <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        {</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>            <span class="comment">// 存储工厂信息</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>            <a class="code hl_struct" href="structCtaStrategyMgr_1_1__StraFactInfo.html">StraFactInfo</a>&amp; fInfo = <a class="code hl_variable" href="classCtaStrategyMgr.html#ac6c3b96fb1ca13ce2e2e2204abe6117b">_factories</a>[fact-&gt;<a class="code hl_function" href="classICtaStrategyFact.html#a93c449f334d91bcf1c277be4226c543e">getName</a>()];</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>            fInfo.<a class="code hl_variable" href="structCtaStrategyMgr_1_1__StraFactInfo.html#a57d3d99271e5a547e00bbd38ca1b518e">_module_inst</a> = hInst;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>            fInfo.<a class="code hl_variable" href="structCtaStrategyMgr_1_1__StraFactInfo.html#ad2a77d82121ef08e631dd4451715adc3">_module_path</a> = iter-&gt;path().string();</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>            fInfo.<a class="code hl_variable" href="structCtaStrategyMgr_1_1__StraFactInfo.html#ad2d8c7b3d245df8d299dbf94c25289d1">_creator</a> = creator;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>            fInfo.<a class="code hl_variable" href="structCtaStrategyMgr_1_1__StraFactInfo.html#acd0b7a92c91f0aa7018d6176598712e2">_remover</a> = (<a class="code hl_typedef" href="CtaStrategyDefs_8h.html#af076336779cb9017f4d199ba9595b1a0">FuncDeleteStraFact</a>)<a class="code hl_function" href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a>(hInst, <span class="stringliteral">&quot;deleteStrategyFact&quot;</span>);</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>            fInfo.<a class="code hl_variable" href="structCtaStrategyMgr_1_1__StraFactInfo.html#aeecbc7d184c10d206a9faad470fa5d1a">_fact</a> = fact;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>            <a class="code hl_function" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a>(<span class="stringliteral">&quot;CTA strategy factory[{}] loaded&quot;</span>, fact-&gt;<a class="code hl_function" href="classICtaStrategyFact.html#a93c449f334d91bcf1c277be4226c543e">getName</a>());</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>            count++;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        }</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        {</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>            <a class="code hl_function" href="classDLLHelper.html#adbde89a530ae734c57506bf9639ccc65">DLLHelper::free_library</a>(hInst);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>        }</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    }</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <a class="code hl_function" href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a>(<span class="stringliteral">&quot;{} CTA strategy factories in directory[{}] loaded&quot;</span>, count, path);</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>}</div>
+</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
+<div class="foldopen" id="foldopen00131" data-start="{" data-end="}">
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="classCtaStrategyMgr.html#a915b1bba814b60c5f431ea06c79dcfd3">  131</a></span><a class="code hl_typedef" href="CtaStrategyMgr_8h.html#ae541da79983288561ec3a97266ba1256">CtaStrategyPtr</a> <a class="code hl_function" href="classCtaStrategyMgr.html#a359e63dd8d06714f4b2d7fcd115ea8d2">CtaStrategyMgr::createStrategy</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* factname, <span class="keyword">const</span> <span class="keywordtype">char</span>* unitname, <span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>)</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>{</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="comment">// 查找工厂</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="classCtaStrategyMgr.html#ac6c3b96fb1ca13ce2e2e2204abe6117b">_factories</a>.find(factname);</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="classCtaStrategyMgr.html#ac6c3b96fb1ca13ce2e2e2204abe6117b">_factories</a>.end())</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>        <span class="keywordflow">return</span> <a class="code hl_typedef" href="CtaStrategyMgr_8h.html#ae541da79983288561ec3a97266ba1256">CtaStrategyPtr</a>(); <span class="comment">// 如果工厂不存在，返回空指针</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="comment">// 使用工厂创建策略实例</span></div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    <a class="code hl_struct" href="structCtaStrategyMgr_1_1__StraFactInfo.html">StraFactInfo</a>&amp; fInfo = (<a class="code hl_struct" href="structCtaStrategyMgr_1_1__StraFactInfo.html">StraFactInfo</a>&amp;)it-&gt;second;</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>    <a class="code hl_typedef" href="CtaStrategyMgr_8h.html#ae541da79983288561ec3a97266ba1256">CtaStrategyPtr</a> ret(<span class="keyword">new</span> <a class="code hl_class" href="classCtaStraWrapper.html">CtaStraWrapper</a>(fInfo.<a class="code hl_variable" href="structCtaStrategyMgr_1_1__StraFactInfo.html#aeecbc7d184c10d206a9faad470fa5d1a">_fact</a>-&gt;<a class="code hl_function" href="classICtaStrategyFact.html#aa1b77027d8fe2e08380177421ba3e773">createStrategy</a>(unitname, <span class="keywordtype">id</span>), fInfo.<a class="code hl_variable" href="structCtaStrategyMgr_1_1__StraFactInfo.html#aeecbc7d184c10d206a9faad470fa5d1a">_fact</a>));</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    <span class="comment">// 将策略实例添加到策略映射表</span></div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>    <a class="code hl_variable" href="classCtaStrategyMgr.html#ab57e734e0be36a5d2036a1a7bd5101e2">_strategies</a>[id] = ret;</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>    <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>}</div>
+</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span> </div>
+<div class="foldopen" id="foldopen00157" data-start="{" data-end="}">
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno"><a class="line" href="classCtaStrategyMgr.html#a359e63dd8d06714f4b2d7fcd115ea8d2">  157</a></span><a class="code hl_typedef" href="CtaStrategyMgr_8h.html#ae541da79983288561ec3a97266ba1256">CtaStrategyPtr</a> <a class="code hl_function" href="classCtaStrategyMgr.html#a359e63dd8d06714f4b2d7fcd115ea8d2">CtaStrategyMgr::createStrategy</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* name, <span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>)</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>{</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="comment">// 解析完整策略名称，按“.”分隔</span></div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    <a class="code hl_typedef" href="StrUtil_8hpp.html#ab8e1ede88e2ff1c3b448334e6cbd3533">StringVector</a> ay = <a class="code hl_function" href="classStrUtil.html#ab7f8887aed021ea6dafe93ce1f2b67a0">StrUtil::split</a>(name, <span class="stringliteral">&quot;.&quot;</span>);</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    <span class="keywordflow">if</span> (ay.size() &lt; 2) <span class="comment">// 检查是否有效名称</span></div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        <span class="keywordflow">return</span> <a class="code hl_typedef" href="CtaStrategyMgr_8h.html#ae541da79983288561ec3a97266ba1256">CtaStrategyPtr</a>();</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <span class="comment">// 提取工厂名和策略名</span></div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* factname = ay[0].c_str();</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* unitname = ay[1].c_str();</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    <span class="comment">// 查找工厂</span></div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="classCtaStrategyMgr.html#ac6c3b96fb1ca13ce2e2e2204abe6117b">_factories</a>.find(factname);</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="classCtaStrategyMgr.html#ac6c3b96fb1ca13ce2e2e2204abe6117b">_factories</a>.end())</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>        <span class="keywordflow">return</span> <a class="code hl_typedef" href="CtaStrategyMgr_8h.html#ae541da79983288561ec3a97266ba1256">CtaStrategyPtr</a>(); <span class="comment">// 如果工厂不存在，返回空指针</span></div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    <span class="comment">// 使用工厂创建策略实例</span></div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    <a class="code hl_struct" href="structCtaStrategyMgr_1_1__StraFactInfo.html">StraFactInfo</a>&amp; fInfo = (<a class="code hl_struct" href="structCtaStrategyMgr_1_1__StraFactInfo.html">StraFactInfo</a>&amp;)it-&gt;second;</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    <a class="code hl_typedef" href="CtaStrategyMgr_8h.html#ae541da79983288561ec3a97266ba1256">CtaStrategyPtr</a> ret(<span class="keyword">new</span> <a class="code hl_class" href="classCtaStraWrapper.html">CtaStraWrapper</a>(fInfo.<a class="code hl_variable" href="structCtaStrategyMgr_1_1__StraFactInfo.html#aeecbc7d184c10d206a9faad470fa5d1a">_fact</a>-&gt;<a class="code hl_function" href="classICtaStrategyFact.html#aa1b77027d8fe2e08380177421ba3e773">createStrategy</a>(unitname, <span class="keywordtype">id</span>), fInfo.<a class="code hl_variable" href="structCtaStrategyMgr_1_1__StraFactInfo.html#aeecbc7d184c10d206a9faad470fa5d1a">_fact</a>));</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    <span class="comment">// 将策略实例添加到策略映射表</span></div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    <a class="code hl_variable" href="classCtaStrategyMgr.html#ab57e734e0be36a5d2036a1a7bd5101e2">_strategies</a>[id] = ret;</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>}</div>
+</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
+<div class="foldopen" id="foldopen00187" data-start="{" data-end="}">
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno"><a class="line" href="classCtaStrategyMgr.html#a50cafcae421aaf293f92923ad57de425">  187</a></span><a class="code hl_typedef" href="CtaStrategyMgr_8h.html#ae541da79983288561ec3a97266ba1256">CtaStrategyPtr</a> <a class="code hl_function" href="classCtaStrategyMgr.html#a50cafcae421aaf293f92923ad57de425">CtaStrategyMgr::getStrategy</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>)</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>{</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    <span class="comment">// 在策略映射表中查找指定ID的策略</span></div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="classCtaStrategyMgr.html#ab57e734e0be36a5d2036a1a7bd5101e2">_strategies</a>.find(<span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="classCtaStrategyMgr.html#ab57e734e0be36a5d2036a1a7bd5101e2">_strategies</a>.end())</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        <span class="keywordflow">return</span> <a class="code hl_typedef" href="CtaStrategyMgr_8h.html#ae541da79983288561ec3a97266ba1256">CtaStrategyPtr</a>(); <span class="comment">// 如果策略不存在，返回空指针</span></div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <span class="keywordflow">return</span> it-&gt;second;</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>}</div>
+</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
+<div class="ttc" id="aCtaStrategyDefs_8h_html_a1f1f222d6c1f617d1892a8804cc1fcee"><div class="ttname"><a href="CtaStrategyDefs_8h.html#a1f1f222d6c1f617d1892a8804cc1fcee">FuncCreateStraFact</a></div><div class="ttdeci">ICtaStrategyFact *(* FuncCreateStraFact)()</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyDefs_8h_source.html#l00128">CtaStrategyDefs.h:128</a></div></div>
+<div class="ttc" id="aCtaStrategyDefs_8h_html_af076336779cb9017f4d199ba9595b1a0"><div class="ttname"><a href="CtaStrategyDefs_8h.html#af076336779cb9017f4d199ba9595b1a0">FuncDeleteStraFact</a></div><div class="ttdeci">void(* FuncDeleteStraFact)(ICtaStrategyFact *&amp;fact)</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyDefs_8h_source.html#l00130">CtaStrategyDefs.h:130</a></div></div>
+<div class="ttc" id="aCtaStrategyMgr_8h_html"><div class="ttname"><a href="CtaStrategyMgr_8h.html">CtaStrategyMgr.h</a></div><div class="ttdoc">CTA策略管理器头文件</div></div>
+<div class="ttc" id="aCtaStrategyMgr_8h_html_ae541da79983288561ec3a97266ba1256"><div class="ttname"><a href="CtaStrategyMgr_8h.html#ae541da79983288561ec3a97266ba1256">CtaStrategyPtr</a></div><div class="ttdeci">std::shared_ptr&lt; CtaStraWrapper &gt; CtaStrategyPtr</div><div class="ttdoc">CTA策略智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8h_source.html#l00062">CtaStrategyMgr.h:62</a></div></div>
+<div class="ttc" id="aDLLHelper_8hpp_html_a40972742af38c16d3ab2f521abf0ca8a"><div class="ttname"><a href="DLLHelper_8hpp.html#a40972742af38c16d3ab2f521abf0ca8a">DllHandle</a></div><div class="ttdeci">void * DllHandle</div><div class="ttdoc">动态库句柄类型（非Windows平台）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00032">DLLHelper.hpp:32</a></div></div>
+<div class="ttc" id="aStrUtil_8hpp_html_ab8e1ede88e2ff1c3b448334e6cbd3533"><div class="ttname"><a href="StrUtil_8hpp.html#ab8e1ede88e2ff1c3b448334e6cbd3533">StringVector</a></div><div class="ttdeci">std::vector&lt; std::string &gt; StringVector</div><div class="ttdoc">字符串数组类型</div><div class="ttdef"><b>Definition</b> <a href="StrUtil_8hpp_source.html#l00028">StrUtil.hpp:28</a></div></div>
+<div class="ttc" id="aclassCtaStraWrapper_html"><div class="ttname"><a href="classCtaStraWrapper.html">CtaStraWrapper</a></div><div class="ttdoc">CTA策略包装器类</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8h_source.html#l00025">CtaStrategyMgr.h:26</a></div></div>
+<div class="ttc" id="aclassCtaStrategyMgr_html_a20b70641771965c23f60b41d8dfd09d1"><div class="ttname"><a href="classCtaStrategyMgr.html#a20b70641771965c23f60b41d8dfd09d1">CtaStrategyMgr::loadFactories</a></div><div class="ttdeci">bool loadFactories(const char *path)</div><div class="ttdoc">加载策略工厂</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8cpp_source.html#l00050">CtaStrategyMgr.cpp:50</a></div></div>
+<div class="ttc" id="aclassCtaStrategyMgr_html_a359e63dd8d06714f4b2d7fcd115ea8d2"><div class="ttname"><a href="classCtaStrategyMgr.html#a359e63dd8d06714f4b2d7fcd115ea8d2">CtaStrategyMgr::createStrategy</a></div><div class="ttdeci">CtaStrategyPtr createStrategy(const char *name, const char *id)</div><div class="ttdoc">创建策略实例（通过完整策略名称）</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8cpp_source.html#l00157">CtaStrategyMgr.cpp:157</a></div></div>
+<div class="ttc" id="aclassCtaStrategyMgr_html_a4e6ad5339ecdd56b76509a6e3a09bd10"><div class="ttname"><a href="classCtaStrategyMgr.html#a4e6ad5339ecdd56b76509a6e3a09bd10">CtaStrategyMgr::~CtaStrategyMgr</a></div><div class="ttdeci">~CtaStrategyMgr()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8cpp_source.html#l00035">CtaStrategyMgr.cpp:35</a></div></div>
+<div class="ttc" id="aclassCtaStrategyMgr_html_a50cafcae421aaf293f92923ad57de425"><div class="ttname"><a href="classCtaStrategyMgr.html#a50cafcae421aaf293f92923ad57de425">CtaStrategyMgr::getStrategy</a></div><div class="ttdeci">CtaStrategyPtr getStrategy(const char *id)</div><div class="ttdoc">获取策略实例</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8cpp_source.html#l00187">CtaStrategyMgr.cpp:187</a></div></div>
+<div class="ttc" id="aclassCtaStrategyMgr_html_ab57e734e0be36a5d2036a1a7bd5101e2"><div class="ttname"><a href="classCtaStrategyMgr.html#ab57e734e0be36a5d2036a1a7bd5101e2">CtaStrategyMgr::_strategies</a></div><div class="ttdeci">StrategyMap _strategies</div><div class="ttdoc">已创建的策略实例映射表</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8h_source.html#l00142">CtaStrategyMgr.h:142</a></div></div>
+<div class="ttc" id="aclassCtaStrategyMgr_html_ac6c3b96fb1ca13ce2e2e2204abe6117b"><div class="ttname"><a href="classCtaStrategyMgr.html#ac6c3b96fb1ca13ce2e2e2204abe6117b">CtaStrategyMgr::_factories</a></div><div class="ttdeci">StraFactMap _factories</div><div class="ttdoc">已加载的策略工厂映射表</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8h_source.html#l00134">CtaStrategyMgr.h:134</a></div></div>
+<div class="ttc" id="aclassCtaStrategyMgr_html_aefd91d08d4eebaebd4a15c31f82adc73"><div class="ttname"><a href="classCtaStrategyMgr.html#aefd91d08d4eebaebd4a15c31f82adc73">CtaStrategyMgr::CtaStrategyMgr</a></div><div class="ttdeci">CtaStrategyMgr()</div><div class="ttdoc">构造函数</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8cpp_source.html#l00026">CtaStrategyMgr.cpp:26</a></div></div>
+<div class="ttc" id="aclassDLLHelper_html_ac5d55450ea114206242d9ccbfd65ac82"><div class="ttname"><a href="classDLLHelper.html#ac5d55450ea114206242d9ccbfd65ac82">DLLHelper::load_library</a></div><div class="ttdeci">static DllHandle load_library(const char *filename)</div><div class="ttdoc">加载动态库</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00058">DLLHelper.hpp:58</a></div></div>
+<div class="ttc" id="aclassDLLHelper_html_adbde89a530ae734c57506bf9639ccc65"><div class="ttname"><a href="classDLLHelper.html#adbde89a530ae734c57506bf9639ccc65">DLLHelper::free_library</a></div><div class="ttdeci">static void free_library(DllHandle handle)</div><div class="ttdoc">释放动态库</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00085">DLLHelper.hpp:85</a></div></div>
+<div class="ttc" id="aclassDLLHelper_html_ae01c3a299dd418d0298d29fa5f5f9b2c"><div class="ttname"><a href="classDLLHelper.html#ae01c3a299dd418d0298d29fa5f5f9b2c">DLLHelper::get_symbol</a></div><div class="ttdeci">static ProcHandle get_symbol(DllHandle handle, const char *name)</div><div class="ttdoc">获取动态库中的符号（函数或变量）</div><div class="ttdef"><b>Definition</b> <a href="DLLHelper_8hpp_source.html#l00107">DLLHelper.hpp:107</a></div></div>
+<div class="ttc" id="aclassICtaStrategyFact_html"><div class="ttname"><a href="classICtaStrategyFact.html">ICtaStrategyFact</a></div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyDefs_8h_source.html#l00098">CtaStrategyDefs.h:99</a></div></div>
+<div class="ttc" id="aclassICtaStrategyFact_html_a93c449f334d91bcf1c277be4226c543e"><div class="ttname"><a href="classICtaStrategyFact.html#a93c449f334d91bcf1c277be4226c543e">ICtaStrategyFact::getName</a></div><div class="ttdeci">virtual const char * getName()=0</div></div>
+<div class="ttc" id="aclassICtaStrategyFact_html_aa1b77027d8fe2e08380177421ba3e773"><div class="ttname"><a href="classICtaStrategyFact.html#aa1b77027d8fe2e08380177421ba3e773">ICtaStrategyFact::createStrategy</a></div><div class="ttdeci">virtual CtaStrategy * createStrategy(const char *name, const char *id)=0</div></div>
+<div class="ttc" id="aclassStdFile_html_a65778f7268857f981a2e19acb8379761"><div class="ttname"><a href="classStdFile.html#a65778f7268857f981a2e19acb8379761">StdFile::exists</a></div><div class="ttdeci">static bool exists(const char *filename)</div><div class="ttdoc">检查文件是否存在</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00221">StdUtils.hpp:221</a></div></div>
+<div class="ttc" id="aclassStrUtil_html_ab7f8887aed021ea6dafe93ce1f2b67a0"><div class="ttname"><a href="classStrUtil.html#ab7f8887aed021ea6dafe93ce1f2b67a0">StrUtil::split</a></div><div class="ttdeci">static StringVector split(const std::string &amp;str, const std::string &amp;delims=&quot;\t\n &quot;, unsigned int maxSplits=0)</div><div class="ttdoc">分割字符串为多个字符串并返回字符串数组</div><div class="ttdef"><b>Definition</b> <a href="StrUtil_8hpp_source.html#l00150">StrUtil.hpp:150</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a20d65255542e3ed5d694b529892a0f57"><div class="ttname"><a href="classWTSLogger.html#a20d65255542e3ed5d694b529892a0f57">WTSLogger::info</a></div><div class="ttdeci">static void info(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出信息级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00187">WTSLogger.h:187</a></div></div>
+<div class="ttc" id="aclassWTSLogger_html_a618c41d0ff3c1f5ce0a70d83c28bc9fc"><div class="ttname"><a href="classWTSLogger.html#a618c41d0ff3c1f5ce0a70d83c28bc9fc">WTSLogger::error</a></div><div class="ttdeci">static void error(const char *format, const Args &amp;...args)</div><div class="ttdoc">输出错误级别日志</div><div class="ttdef"><b>Definition</b> <a href="WTSLogger_8h_source.html#l00239">WTSLogger.h:239</a></div></div>
+<div class="ttc" id="astructCtaStrategyMgr_1_1__StraFactInfo_html"><div class="ttname"><a href="structCtaStrategyMgr_1_1__StraFactInfo.html">CtaStrategyMgr::_StraFactInfo</a></div><div class="ttdoc">策略工厂信息结构体</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8h_source.html#l00119">CtaStrategyMgr.h:120</a></div></div>
+<div class="ttc" id="astructCtaStrategyMgr_1_1__StraFactInfo_html_a57d3d99271e5a547e00bbd38ca1b518e"><div class="ttname"><a href="structCtaStrategyMgr_1_1__StraFactInfo.html#a57d3d99271e5a547e00bbd38ca1b518e">CtaStrategyMgr::_StraFactInfo::_module_inst</a></div><div class="ttdeci">DllHandle _module_inst</div><div class="ttdoc">动态库实例句柄</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8h_source.html#l00122">CtaStrategyMgr.h:122</a></div></div>
+<div class="ttc" id="astructCtaStrategyMgr_1_1__StraFactInfo_html_acd0b7a92c91f0aa7018d6176598712e2"><div class="ttname"><a href="structCtaStrategyMgr_1_1__StraFactInfo.html#acd0b7a92c91f0aa7018d6176598712e2">CtaStrategyMgr::_StraFactInfo::_remover</a></div><div class="ttdeci">FuncDeleteStraFact _remover</div><div class="ttdoc">删除工厂函数指针</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8h_source.html#l00125">CtaStrategyMgr.h:125</a></div></div>
+<div class="ttc" id="astructCtaStrategyMgr_1_1__StraFactInfo_html_ad2a77d82121ef08e631dd4451715adc3"><div class="ttname"><a href="structCtaStrategyMgr_1_1__StraFactInfo.html#ad2a77d82121ef08e631dd4451715adc3">CtaStrategyMgr::_StraFactInfo::_module_path</a></div><div class="ttdeci">std::string _module_path</div><div class="ttdoc">模块文件路径</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8h_source.html#l00121">CtaStrategyMgr.h:121</a></div></div>
+<div class="ttc" id="astructCtaStrategyMgr_1_1__StraFactInfo_html_ad2d8c7b3d245df8d299dbf94c25289d1"><div class="ttname"><a href="structCtaStrategyMgr_1_1__StraFactInfo.html#ad2d8c7b3d245df8d299dbf94c25289d1">CtaStrategyMgr::_StraFactInfo::_creator</a></div><div class="ttdeci">FuncCreateStraFact _creator</div><div class="ttdoc">创建工厂函数指针</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8h_source.html#l00124">CtaStrategyMgr.h:124</a></div></div>
+<div class="ttc" id="astructCtaStrategyMgr_1_1__StraFactInfo_html_aeecbc7d184c10d206a9faad470fa5d1a"><div class="ttname"><a href="structCtaStrategyMgr_1_1__StraFactInfo.html#aeecbc7d184c10d206a9faad470fa5d1a">CtaStrategyMgr::_StraFactInfo::_fact</a></div><div class="ttdeci">ICtaStrategyFact * _fact</div><div class="ttdoc">策略工厂接口指针</div><div class="ttdef"><b>Definition</b> <a href="CtaStrategyMgr_8h_source.html#l00123">CtaStrategyMgr.h:123</a></div></div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_3ce996bf6400c0a215df0636043a382c.html">WtCore</a></li><li class="navelem"><a class="el" href="CtaStrategyMgr_8cpp.html">CtaStrategyMgr.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

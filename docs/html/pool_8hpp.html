@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/Share/threadpool/pool.hpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('pool_8hpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#namespaces">命名空间</a> &#124;
+<a href="#typedef-members">类型定义</a>  </div>
+  <div class="headertitle"><div class="title">pool.hpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>线程池核心实现  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &lt;boost/ref.hpp&gt;</code><br />
+<code>#include &quot;<a class="el" href="pool__core_8hpp_source.html">./detail/pool_core.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="task__adaptors_8hpp_source.html">task_adaptors.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="locking__ptr_8hpp_source.html">./detail/locking_ptr.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="scheduling__policies_8hpp_source.html">scheduling_policies.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="size__policies_8hpp_source.html">size_policies.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="shutdown__policies_8hpp_source.html">shutdown_policies.hpp</a>&quot;</code><br />
+</div>
+<p><a href="pool_8hpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">boost::threadpool::thread_pool&lt; Task, SchedulingPolicy, SizePolicy, SizePolicyController, ShutdownPolicy &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">线程池类  <a href="classboost_1_1threadpool_1_1thread__pool.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+命名空间</h2></td></tr>
+<tr class="memitem:namespaceboost" id="r_namespaceboost"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceboost.html">boost</a></td></tr>
+<tr class="memdesc:namespaceboost"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="namespaceboost_1_1threadpool_1_1detail.html">boost::threadpool::detail</a> 命名空间包含了线程池库的内部实现细节 <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespaceboost_1_1threadpool" id="r_namespaceboost_1_1threadpool"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceboost_1_1threadpool.html">boost::threadpool</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a7570aa50154a35bba415deb195f56ae6" id="r_a7570aa50154a35bba415deb195f56ae6"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">thread_pool</a>&lt; <a class="el" href="namespaceboost_1_1threadpool.html#ac6f15485d0c9225572afc57b30f50358">task_func</a>, <a class="el" href="classboost_1_1threadpool_1_1fifo__scheduler.html">fifo_scheduler</a>, <a class="el" href="classboost_1_1threadpool_1_1static__size.html">static_size</a>, <a class="el" href="classboost_1_1threadpool_1_1resize__controller.html">resize_controller</a>, <a class="el" href="classboost_1_1threadpool_1_1wait__for__all__tasks.html">wait_for_all_tasks</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceboost_1_1threadpool.html#a7570aa50154a35bba415deb195f56ae6">boost::threadpool::fifo_pool</a></td></tr>
+<tr class="memdesc:a7570aa50154a35bba415deb195f56ae6"><td class="mdescLeft">&#160;</td><td class="mdescRight">FIFO（先进先出）线程池  <br /></td></tr>
+<tr class="separator:a7570aa50154a35bba415deb195f56ae6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80846aad706981b61bdad8cfe43f581c" id="r_a80846aad706981b61bdad8cfe43f581c"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">thread_pool</a>&lt; <a class="el" href="namespaceboost_1_1threadpool.html#ac6f15485d0c9225572afc57b30f50358">task_func</a>, <a class="el" href="classboost_1_1threadpool_1_1lifo__scheduler.html">lifo_scheduler</a>, <a class="el" href="classboost_1_1threadpool_1_1static__size.html">static_size</a>, <a class="el" href="classboost_1_1threadpool_1_1resize__controller.html">resize_controller</a>, <a class="el" href="classboost_1_1threadpool_1_1wait__for__all__tasks.html">wait_for_all_tasks</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceboost_1_1threadpool.html#a80846aad706981b61bdad8cfe43f581c">boost::threadpool::lifo_pool</a></td></tr>
+<tr class="memdesc:a80846aad706981b61bdad8cfe43f581c"><td class="mdescLeft">&#160;</td><td class="mdescRight">LIFO（后进先出）线程池  <br /></td></tr>
+<tr class="separator:a80846aad706981b61bdad8cfe43f581c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b7a71ddf4d7c9fd40b9f5141ac518e1" id="r_a2b7a71ddf4d7c9fd40b9f5141ac518e1"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classboost_1_1threadpool_1_1thread__pool.html">thread_pool</a>&lt; <a class="el" href="classboost_1_1threadpool_1_1prio__task__func.html">prio_task_func</a>, <a class="el" href="classboost_1_1threadpool_1_1prio__scheduler.html">prio_scheduler</a>, <a class="el" href="classboost_1_1threadpool_1_1static__size.html">static_size</a>, <a class="el" href="classboost_1_1threadpool_1_1resize__controller.html">resize_controller</a>, <a class="el" href="classboost_1_1threadpool_1_1wait__for__all__tasks.html">wait_for_all_tasks</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceboost_1_1threadpool.html#a2b7a71ddf4d7c9fd40b9f5141ac518e1">boost::threadpool::prio_pool</a></td></tr>
+<tr class="memdesc:a2b7a71ddf4d7c9fd40b9f5141ac518e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">优先级任务线程池  <br /></td></tr>
+<tr class="separator:a2b7a71ddf4d7c9fd40b9f5141ac518e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e167909d0dce03e625576f80359b8fb" id="r_a1e167909d0dce03e625576f80359b8fb"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="namespaceboost_1_1threadpool.html#a7570aa50154a35bba415deb195f56ae6">fifo_pool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceboost_1_1threadpool.html#a1e167909d0dce03e625576f80359b8fb">boost::threadpool::pool</a></td></tr>
+<tr class="memdesc:a1e167909d0dce03e625576f80359b8fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">标准线程池  <br /></td></tr>
+<tr class="separator:a1e167909d0dce03e625576f80359b8fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>线程池核心实现 </p>
+<p>本文件包含线程池的核心类：pool&lt;Task, SchedulingPolicy&gt;。</p>
+<p>线程池是一种在同一进程内实现异步和并行处理的机制。 pool 类提供了一种便捷的方式，将函数对象作为异步任务调度执行。 通过使用自定义的调度器，可以轻松控制这些任务的调度方式。</p>
+<p>Copyright (c) 2005-2007 Philipp Henkel</p>
+<p>Use, modification, and distribution are subject to the Boost Software License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt">http://www.boost.org/LICENSE_1_0.txt</a>)</p>
+<p><a href="http://threadpool.sourceforge.net">http://threadpool.sourceforge.net</a> </p>
+
+<p class="definition">在文件 <a class="el" href="pool_8hpp_source.html">pool.hpp</a> 中定义.</p>
+</div></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_b415f7b135736b475386968edd2cefde.html">Share</a></li><li class="navelem"><a class="el" href="dir_cde2ca495d87b0f6351e3c62be53575e.html">threadpool</a></li><li class="navelem"><a class="el" href="pool_8hpp.html">pool.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

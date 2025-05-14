@@ -1,0 +1,25 @@
+var classUftStrategy =
+[
+    [ "UftStrategy", "classUftStrategy.html#aaf8a96cc3cd37c9b5893550abb91d4d6", null ],
+    [ "~UftStrategy", "classUftStrategy.html#a5fce4784029ce2fc1f2b9ad63e930c2e", null ],
+    [ "getFactName", "classUftStrategy.html#a19a27762a06c494f87b2c8ad98e94d74", null ],
+    [ "getName", "classUftStrategy.html#a82aeb769066e50a437346df5ab4d8ccb", null ],
+    [ "id", "classUftStrategy.html#add26428e74d34a34c9fd55ae047ab7fa", null ],
+    [ "init", "classUftStrategy.html#a87eea5fd7b5d63e52a0019f164a1c234", null ],
+    [ "on_bar", "classUftStrategy.html#a07685764a6c3c024ddcf4bbc13865761", null ],
+    [ "on_channel_lost", "classUftStrategy.html#a826804174966beaae4370c6d149d591d", null ],
+    [ "on_channel_ready", "classUftStrategy.html#a7cc05494f8b238d263e4e9c7ea9750b1", null ],
+    [ "on_entrust", "classUftStrategy.html#aabc6588308e279c287dd2f6bd6ea5768", null ],
+    [ "on_init", "classUftStrategy.html#a8af8a93d09a2b86e1fcaf76c0ae1c3cd", null ],
+    [ "on_order", "classUftStrategy.html#a0dfcc40aebad51e8278c03f04d53fde3", null ],
+    [ "on_order_detail", "classUftStrategy.html#a9cf8f2f604cb403ad13e5b71004e934d", null ],
+    [ "on_order_queue", "classUftStrategy.html#a88591358174dd9461cca04f201cf1aa4", null ],
+    [ "on_params_updated", "classUftStrategy.html#aea884d556afb245a0613e6b4405c38e7", null ],
+    [ "on_position", "classUftStrategy.html#ada54cf5bdcf7ee22eb8279ba6590e3cb", null ],
+    [ "on_session_begin", "classUftStrategy.html#a615cb54b12e29a2a9842b3cd9dc19fbf", null ],
+    [ "on_session_end", "classUftStrategy.html#a03cb318bec5fda26243f8e08504ff30c", null ],
+    [ "on_tick", "classUftStrategy.html#aae1adc53245ba4955572c46fc38858e8", null ],
+    [ "on_trade", "classUftStrategy.html#af31f56e653b3007f5e15ec20850e8497", null ],
+    [ "on_transaction", "classUftStrategy.html#a19053a3ce1b415f5a0ab502820dd7c76", null ],
+    [ "_id", "classUftStrategy.html#a6b5267a9502bfd5a6cb3bff1e7ff5d60", null ]
+];

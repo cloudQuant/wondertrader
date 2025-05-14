@@ -1,0 +1,28 @@
+var structXTPOrderInfo =
+[
+    [ "business_type", "structXTPOrderInfo.html#a870e591c11e99fd08155af326428077e", null ],
+    [ "cancel_time", "structXTPOrderInfo.html#a9894593a1d120cad0166fe538908310f", null ],
+    [ "insert_time", "structXTPOrderInfo.html#adc3c4cfd72c987feb7f4fc8bf97b8655", null ],
+    [ "market", "structXTPOrderInfo.html#a298d9f423cce401c2690be731865a63e", null ],
+    [ "order_cancel_client_id", "structXTPOrderInfo.html#a914ee23811e19095be2bb43a19ca7c5d", null ],
+    [ "order_cancel_xtp_id", "structXTPOrderInfo.html#a7a223098056f4effc97c55f2220089f0", null ],
+    [ "order_client_id", "structXTPOrderInfo.html#adb7ec8545fd27fd4f0400bc2c05a5c3c", null ],
+    [ "order_local_id", "structXTPOrderInfo.html#a5fe5dde0127cc71ca23024247ebc9f5b", null ],
+    [ "order_status", "structXTPOrderInfo.html#a5547a0cce15273005953da146fb64dc5", null ],
+    [ "order_submit_status", "structXTPOrderInfo.html#a2048d02a1c34d102dc11d84bba37bb8a", null ],
+    [ "order_type", "structXTPOrderInfo.html#a9209daff6cd8daa40d2096cfe2857019", null ],
+    [ "order_xtp_id", "structXTPOrderInfo.html#ac43115267355dcdaccd2b1c178e19d49", null ],
+    [ "position_effect", "structXTPOrderInfo.html#a973d7a423fe823762c36668f3a78da97", null ],
+    [ "price", "structXTPOrderInfo.html#a3cea8f0661a91ec76b971241be0f8e26", null ],
+    [ "price_type", "structXTPOrderInfo.html#a6cb55a3084bb84cc0c36e0616fb67c23", null ],
+    [ "qty_left", "structXTPOrderInfo.html#afb437e9c67c5fc4bcdd3a8aff8a541eb", null ],
+    [ "qty_traded", "structXTPOrderInfo.html#a8fc1e810c69a4027574f03fead4e4475", null ],
+    [ "quantity", "structXTPOrderInfo.html#a51b8d583ffc6fc2e3e719540d2250000", null ],
+    [ "reserved1", "structXTPOrderInfo.html#a8dedd53f0730da5cfb7ff75fa06b9b7a", null ],
+    [ "reserved2", "structXTPOrderInfo.html#ae818965723a4b360691fdd98b825f936", null ],
+    [ "side", "structXTPOrderInfo.html#a3c22af3dac505bf667c0fbd72b65884d", null ],
+    [ "ticker", "structXTPOrderInfo.html#aa6208c0830f76dd81d127c420c2791af", null ],
+    [ "trade_amount", "structXTPOrderInfo.html#ab22291ddb32e146e93794844a9aeeb73", null ],
+    [ "u32", "structXTPOrderInfo.html#a419bbd7ae4d17103b1d43fe24c4d601f", null ],
+    [ "update_time", "structXTPOrderInfo.html#a52d205e5439ad647ffe1efc5b207629f", null ]
+];

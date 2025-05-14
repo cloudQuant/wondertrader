@@ -1,0 +1,26 @@
+var structATPRspFundQueryResultMsg =
+[
+    [ "ATPRspFundQueryResultMsg", "structATPRspFundQueryResultMsg.html#a8668e188446212742faa769991a04ccd", null ],
+    [ "ATPRspFundQueryResultMsg", "structATPRspFundQueryResultMsg.html#a8668e188446212742faa769991a04ccd", null ],
+    [ "account_id", "structATPRspFundQueryResultMsg.html#ae56fd54d0cbd7d72c3dbc668de007fbe", null ],
+    [ "available_t0", "structATPRspFundQueryResultMsg.html#ac1427c004404b1c20817f9f5fb863a5a", null ],
+    [ "available_t1", "structATPRspFundQueryResultMsg.html#affb5698b559cebef48599e509524feb0", null ],
+    [ "available_t2", "structATPRspFundQueryResultMsg.html#a83e17ce4d32e23bede88d417d639ce6e", null ],
+    [ "available_t3", "structATPRspFundQueryResultMsg.html#a20e59332d0671c14660ccd2ff29b4db2", null ],
+    [ "available_tall", "structATPRspFundQueryResultMsg.html#ae28d2fd5e3685ccd172b88b22319be7e", null ],
+    [ "branch_id", "structATPRspFundQueryResultMsg.html#ac4af251527ba75c7fa9df9ba9dd8ece1", null ],
+    [ "client_seq_id", "structATPRspFundQueryResultMsg.html#aff2cb44d98f19177b9708cc150e7a4dd", null ],
+    [ "credit_sell_frozen", "structATPRspFundQueryResultMsg.html#a3697215972546e56f76e13e12ecf26d6", null ],
+    [ "credit_sell_occupied", "structATPRspFundQueryResultMsg.html#aad9c532bf0924e9ab4d89a7d457541af", null ],
+    [ "credit_sell_pre_occupied", "structATPRspFundQueryResultMsg.html#a26c94499151340e854e76601ce744389", null ],
+    [ "cust_id", "structATPRspFundQueryResultMsg.html#aa7101ac136eb7e93f58bb9b3d405b045", null ],
+    [ "extra_data", "structATPRspFundQueryResultMsg.html#a2b2450f62aa02ca49631d3ef4affc8d5", null ],
+    [ "frozen_all", "structATPRspFundQueryResultMsg.html#a822a6ba2eccf0e7c883881dd652d6b66", null ],
+    [ "fund_account_id", "structATPRspFundQueryResultMsg.html#adc26e779c8e4b423fedfec01c604f01e", null ],
+    [ "init_credit_sell", "structATPRspFundQueryResultMsg.html#a65441a914b17665e2cb0e85b50d2e62e", null ],
+    [ "init_leaves_value", "structATPRspFundQueryResultMsg.html#a9a32cb0a2658c207c54b929b12afe6bb", null ],
+    [ "leaves_value", "structATPRspFundQueryResultMsg.html#a6e956cf6d668b859b97b27af17d73952", null ],
+    [ "query_result_code", "structATPRspFundQueryResultMsg.html#aa9c19ebf3fad12f121734fe0d732e4f2", null ],
+    [ "te_partition_no", "structATPRspFundQueryResultMsg.html#a6b1eaf5c4895cbe31921c2ff870c3786", null ],
+    [ "user_info", "structATPRspFundQueryResultMsg.html#abc669a9bd2a8be463759fd96373e0f78", null ]
+];

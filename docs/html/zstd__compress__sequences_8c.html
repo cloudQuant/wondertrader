@@ -1,0 +1,876 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/zstd_compress_sequences.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('zstd__compress__sequences_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">zstd_compress_sequences.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;<a class="el" href="zstd__compress__sequences_8h_source.html">zstd_compress_sequences.h</a>&quot;</code><br />
+</div>
+<p><a href="zstd__compress__sequences_8c_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:aff7a50e5e4bb174e7f378b54ec45c596" id="r_aff7a50e5e4bb174e7f378b54ec45c596"><td class="memItemLeft" align="right" valign="top">static unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__compress__sequences_8c.html#aff7a50e5e4bb174e7f378b54ec45c596">ZSTD_getFSEMaxSymbolValue</a> (<a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *ctable)</td></tr>
+<tr class="separator:aff7a50e5e4bb174e7f378b54ec45c596"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab943dc6e8c309b51c078abb069a95e20" id="r_ab943dc6e8c309b51c078abb069a95e20"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__compress__sequences_8c.html#ab943dc6e8c309b51c078abb069a95e20">ZSTD_NCountCost</a> (unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *count, unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> max, size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> nbSeq, unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> FSELog)</td></tr>
+<tr class="separator:ab943dc6e8c309b51c078abb069a95e20"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ccd7f6617afdfdb2e5bf67cf1b88723" id="r_a1ccd7f6617afdfdb2e5bf67cf1b88723"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__compress__sequences_8c.html#a1ccd7f6617afdfdb2e5bf67cf1b88723">ZSTD_entropyCost</a> (unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *count, unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> max, size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> total)</td></tr>
+<tr class="separator:a1ccd7f6617afdfdb2e5bf67cf1b88723"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fe10b3a3840fe9b927a318f1d9fba17" id="r_a5fe10b3a3840fe9b927a318f1d9fba17"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__compress__sequences_8c.html#a5fe10b3a3840fe9b927a318f1d9fba17">ZSTD_fseBitCost</a> (<a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *ctable, unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *count, unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> max)</td></tr>
+<tr class="separator:a5fe10b3a3840fe9b927a318f1d9fba17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27be67eb649c368226ba1b2e84480a35" id="r_a27be67eb649c368226ba1b2e84480a35"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__compress__sequences_8c.html#a27be67eb649c368226ba1b2e84480a35">ZSTD_crossEntropyCost</a> (short <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *norm, unsigned accuracyLog, unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *count, unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> max)</td></tr>
+<tr class="separator:a27be67eb649c368226ba1b2e84480a35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3a4f500515dd9a08305f05a86412067" id="r_af3a4f500515dd9a08305f05a86412067"><td class="memItemLeft" align="right" valign="top"><a class="el" href="zstd__internal_8h.html#a9f24d04af1f76716d26382540647e63d">symbolEncodingType_e</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__compress__sequences_8c.html#af3a4f500515dd9a08305f05a86412067">ZSTD_selectEncodingType</a> (FSE_repeat *repeatMode, unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *count, unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> max, size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> mostFrequent, size_t nbSeq, unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> FSELog, <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *prevCTable, short <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *defaultNorm, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> defaultNormLog, <a class="el" href="zstd__compress__sequences_8h.html#a400ed5b8721db9d0fa2c49700596a561">ZSTD_defaultPolicy_e</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> isDefaultAllowed, <a class="el" href="zstd_8h.html#a852a7e43e763f198f70b9c93121717a3">ZSTD_strategy</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> strategy)</td></tr>
+<tr class="separator:af3a4f500515dd9a08305f05a86412067"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae68aef54efc2f37dd8d2ff72bdf340fb" id="r_ae68aef54efc2f37dd8d2ff72bdf340fb"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__compress__sequences_8c.html#ae68aef54efc2f37dd8d2ff72bdf340fb">ZSTD_buildCTable</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstCapacity, <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> *nextCTable, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> FSELog, <a class="el" href="zstd__internal_8h.html#a9f24d04af1f76716d26382540647e63d">symbolEncodingType_e</a> type, unsigned *count, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> max, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *codeTable, size_t nbSeq, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ae08f9a6ee81e70f713a74a5860062841">S16</a> *defaultNorm, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> defaultNormLog, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> defaultMax, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> *prevCTable, size_t prevCTableSize, void *entropyWorkspace, size_t entropyWorkspaceSize)</td></tr>
+<tr class="separator:ae68aef54efc2f37dd8d2ff72bdf340fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab291533833a69bafbf8ed7dbbbe85839" id="r_ab291533833a69bafbf8ed7dbbbe85839"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__compress__sequences_8c.html#ab291533833a69bafbf8ed7dbbbe85839">ZSTD_encodeSequences_body</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstCapacity, <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *CTable_MatchLength, <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *mlCodeTable, <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *CTable_OffsetBits, <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *ofCodeTable, <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *CTable_LitLength, <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *llCodeTable, <a class="el" href="zstd__internal_8h.html#a2c41d44ee2a419c299584645941ffccf">seqDef</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *sequences, size_t nbSeq, int longOffsets)</td></tr>
+<tr class="separator:ab291533833a69bafbf8ed7dbbbe85839"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a4cddb00c5c7aa24af1e4b53d80b71d" id="r_a0a4cddb00c5c7aa24af1e4b53d80b71d"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__compress__sequences_8c.html#a0a4cddb00c5c7aa24af1e4b53d80b71d">ZSTD_encodeSequences_default</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstCapacity, <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *CTable_MatchLength, <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *mlCodeTable, <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *CTable_OffsetBits, <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *ofCodeTable, <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *CTable_LitLength, <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *llCodeTable, <a class="el" href="zstd__internal_8h.html#a2c41d44ee2a419c299584645941ffccf">seqDef</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *sequences, size_t nbSeq, int longOffsets)</td></tr>
+<tr class="separator:a0a4cddb00c5c7aa24af1e4b53d80b71d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe6bb240d4a59b3b8c4040daeacf7b34" id="r_afe6bb240d4a59b3b8c4040daeacf7b34"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__compress__sequences_8c.html#afe6bb240d4a59b3b8c4040daeacf7b34">ZSTD_encodeSequences</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, size_t dstCapacity, <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *CTable_MatchLength, <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *mlCodeTable, <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *CTable_OffsetBits, <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *ofCodeTable, <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *CTable_LitLength, <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *llCodeTable, <a class="el" href="zstd__internal_8h.html#a2c41d44ee2a419c299584645941ffccf">seqDef</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *sequences, size_t nbSeq, int longOffsets, int bmi2)</td></tr>
+<tr class="separator:afe6bb240d4a59b3b8c4040daeacf7b34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a311e1522938bfafc103a97df467f1d79" id="r_a311e1522938bfafc103a97df467f1d79"><td class="memItemLeft" align="right" valign="top">static unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__compress__sequences_8c.html#a311e1522938bfafc103a97df467f1d79">kInverseProbabilityLog256</a> [256]</td></tr>
+<tr class="separator:a311e1522938bfafc103a97df467f1d79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">函数说明</h2>
+<a id="ae68aef54efc2f37dd8d2ff72bdf340fb" name="ae68aef54efc2f37dd8d2ff72bdf340fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae68aef54efc2f37dd8d2ff72bdf340fb">&#9670;&#160;</a></span>ZSTD_buildCTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_buildCTable </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> *&#160;</td>
+          <td class="paramname"><em>nextCTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>FSELog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd__internal_8h.html#a9f24d04af1f76716d26382540647e63d">symbolEncodingType_e</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned *&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>max</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>codeTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>nbSeq</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ae08f9a6ee81e70f713a74a5860062841">S16</a> *&#160;</td>
+          <td class="paramname"><em>defaultNorm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>defaultNormLog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>defaultMax</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> *&#160;</td>
+          <td class="paramname"><em>prevCTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>prevCTableSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>entropyWorkspace</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>entropyWorkspaceSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__compress__sequences_8c_source.html">zstd_compress_sequences.c</a> 第 <a class="el" href="zstd__compress__sequences_8c_source.html#l00219">219</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a27be67eb649c368226ba1b2e84480a35" name="a27be67eb649c368226ba1b2e84480a35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27be67eb649c368226ba1b2e84480a35">&#9670;&#160;</a></span>ZSTD_crossEntropyCost()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTD_crossEntropyCost </td>
+          <td>(</td>
+          <td class="paramtype">short <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>norm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>accuracyLog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>max</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns the cost in bits of encoding the distribution in count using the table described by norm. The max symbol support by norm is assumed &gt;= max. norm must be valid for every symbol with non-zero probability in count. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__compress__sequences_8c_source.html">zstd_compress_sequences.c</a> 第 <a class="el" href="zstd__compress__sequences_8c_source.html#l00120">120</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afe6bb240d4a59b3b8c4040daeacf7b34" name="afe6bb240d4a59b3b8c4040daeacf7b34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe6bb240d4a59b3b8c4040daeacf7b34">&#9670;&#160;</a></span>ZSTD_encodeSequences()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_encodeSequences </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>CTable_MatchLength</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>mlCodeTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>CTable_OffsetBits</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>ofCodeTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>CTable_LitLength</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>llCodeTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd__internal_8h.html#a2c41d44ee2a419c299584645941ffccf">seqDef</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>sequences</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>nbSeq</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>longOffsets</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bmi2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__compress__sequences_8c_source.html">zstd_compress_sequences.c</a> 第 <a class="el" href="zstd__compress__sequences_8c_source.html#l00392">392</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab291533833a69bafbf8ed7dbbbe85839" name="ab291533833a69bafbf8ed7dbbbe85839"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab291533833a69bafbf8ed7dbbbe85839">&#9670;&#160;</a></span>ZSTD_encodeSequences_body()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abf752dd6259117e6d4da3b8b1fb13aaf">FORCE_INLINE_TEMPLATE</a> size_t ZSTD_encodeSequences_body </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>CTable_MatchLength</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>mlCodeTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>CTable_OffsetBits</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>ofCodeTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>CTable_LitLength</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>llCodeTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd__internal_8h.html#a2c41d44ee2a419c299584645941ffccf">seqDef</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>sequences</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>nbSeq</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>longOffsets</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__compress__sequences_8c_source.html">zstd_compress_sequences.c</a> 第 <a class="el" href="zstd__compress__sequences_8c_source.html#l00264">264</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0a4cddb00c5c7aa24af1e4b53d80b71d" name="a0a4cddb00c5c7aa24af1e4b53d80b71d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a4cddb00c5c7aa24af1e4b53d80b71d">&#9670;&#160;</a></span>ZSTD_encodeSequences_default()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTD_encodeSequences_default </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstCapacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>CTable_MatchLength</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>mlCodeTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>CTable_OffsetBits</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>ofCodeTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>CTable_LitLength</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>llCodeTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd__internal_8h.html#a2c41d44ee2a419c299584645941ffccf">seqDef</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>sequences</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>nbSeq</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>longOffsets</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__compress__sequences_8c_source.html">zstd_compress_sequences.c</a> 第 <a class="el" href="zstd__compress__sequences_8c_source.html#l00358">358</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1ccd7f6617afdfdb2e5bf67cf1b88723" name="a1ccd7f6617afdfdb2e5bf67cf1b88723"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ccd7f6617afdfdb2e5bf67cf1b88723">&#9670;&#160;</a></span>ZSTD_entropyCost()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTD_entropyCost </td>
+          <td>(</td>
+          <td class="paramtype">unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>max</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>total</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns the cost in bits of encoding the distribution described by count using the entropy bound. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__compress__sequences_8c_source.html">zstd_compress_sequences.c</a> 第 <a class="el" href="zstd__compress__sequences_8c_source.html#l00071">71</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5fe10b3a3840fe9b927a318f1d9fba17" name="a5fe10b3a3840fe9b927a318f1d9fba17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5fe10b3a3840fe9b927a318f1d9fba17">&#9670;&#160;</a></span>ZSTD_fseBitCost()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTD_fseBitCost </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>ctable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>max</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns the cost in bits of encoding the distribution in count using ctable. Returns an error if ctable cannot represent all the symbols in count. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__compress__sequences_8c_source.html">zstd_compress_sequences.c</a> 第 <a class="el" href="zstd__compress__sequences_8c_source.html#l00089">89</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aff7a50e5e4bb174e7f378b54ec45c596" name="aff7a50e5e4bb174e7f378b54ec45c596"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff7a50e5e4bb174e7f378b54ec45c596">&#9670;&#160;</a></span>ZSTD_getFSEMaxSymbolValue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static unsigned ZSTD_getFSEMaxSymbolValue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>ctable</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__compress__sequences_8c_source.html">zstd_compress_sequences.c</a> 第 <a class="el" href="zstd__compress__sequences_8c_source.html#l00046">46</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab943dc6e8c309b51c078abb069a95e20" name="ab943dc6e8c309b51c078abb069a95e20"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab943dc6e8c309b51c078abb069a95e20">&#9670;&#160;</a></span>ZSTD_NCountCost()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTD_NCountCost </td>
+          <td>(</td>
+          <td class="paramtype">unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>max</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>nbSeq</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>FSELog</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns the cost in bytes of encoding the normalized count header. Returns an error if any of the helper functions return an error. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__compress__sequences_8c_source.html">zstd_compress_sequences.c</a> 第 <a class="el" href="zstd__compress__sequences_8c_source.html#l00057">57</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af3a4f500515dd9a08305f05a86412067" name="af3a4f500515dd9a08305f05a86412067"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af3a4f500515dd9a08305f05a86412067">&#9670;&#160;</a></span>ZSTD_selectEncodingType()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="zstd__internal_8h.html#a9f24d04af1f76716d26382540647e63d">symbolEncodingType_e</a> ZSTD_selectEncodingType </td>
+          <td>(</td>
+          <td class="paramtype">FSE_repeat *&#160;</td>
+          <td class="paramname"><em>repeatMode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>max</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>mostFrequent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>nbSeq</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>FSELog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="fse_8h.html#a54dd08a75764e9f6058b47735da04eea">FSE_CTable</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>prevCTable</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">short <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>defaultNorm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>defaultNormLog</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd__compress__sequences_8h.html#a400ed5b8721db9d0fa2c49700596a561">ZSTD_defaultPolicy_e</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>isDefaultAllowed</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a852a7e43e763f198f70b9c93121717a3">ZSTD_strategy</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>strategy</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__compress__sequences_8c_source.html">zstd_compress_sequences.c</a> 第 <a class="el" href="zstd__compress__sequences_8c_source.html#l00138">138</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a311e1522938bfafc103a97df467f1d79" name="a311e1522938bfafc103a97df467f1d79"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a311e1522938bfafc103a97df467f1d79">&#9670;&#160;</a></span>kInverseProbabilityLog256</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> kInverseProbabilityLog256[256]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>初始值:</b><div class="fragment"><div class="line">= {</div>
+<div class="line">    0,    2048, 1792, 1642, 1536, 1453, 1386, 1329, 1280, 1236, 1197, 1162,</div>
+<div class="line">    1130, 1100, 1073, 1047, 1024, 1001, 980,  960,  941,  923,  906,  889,</div>
+<div class="line">    874,  859,  844,  830,  817,  804,  791,  779,  768,  756,  745,  734,</div>
+<div class="line">    724,  714,  704,  694,  685,  676,  667,  658,  650,  642,  633,  626,</div>
+<div class="line">    618,  610,  603,  595,  588,  581,  574,  567,  561,  554,  548,  542,</div>
+<div class="line">    535,  529,  523,  517,  512,  506,  500,  495,  489,  484,  478,  473,</div>
+<div class="line">    468,  463,  458,  453,  448,  443,  438,  434,  429,  424,  420,  415,</div>
+<div class="line">    411,  407,  402,  398,  394,  390,  386,  382,  377,  373,  370,  366,</div>
+<div class="line">    362,  358,  354,  350,  347,  343,  339,  336,  332,  329,  325,  322,</div>
+<div class="line">    318,  315,  311,  308,  305,  302,  298,  295,  292,  289,  286,  282,</div>
+<div class="line">    279,  276,  273,  270,  267,  264,  261,  258,  256,  253,  250,  247,</div>
+<div class="line">    244,  241,  239,  236,  233,  230,  228,  225,  222,  220,  217,  215,</div>
+<div class="line">    212,  209,  207,  204,  202,  199,  197,  194,  192,  190,  187,  185,</div>
+<div class="line">    182,  180,  178,  175,  173,  171,  168,  166,  164,  162,  159,  157,</div>
+<div class="line">    155,  153,  151,  149,  146,  144,  142,  140,  138,  136,  134,  132,</div>
+<div class="line">    130,  128,  126,  123,  121,  119,  117,  115,  114,  112,  110,  108,</div>
+<div class="line">    106,  104,  102,  100,  98,   96,   94,   93,   91,   89,   87,   85,</div>
+<div class="line">    83,   82,   80,   78,   76,   74,   73,   71,   69,   67,   66,   64,</div>
+<div class="line">    62,   61,   59,   57,   55,   54,   52,   50,   49,   47,   46,   44,</div>
+<div class="line">    42,   41,   39,   37,   36,   34,   33,   31,   30,   28,   26,   25,</div>
+<div class="line">    23,   22,   20,   19,   17,   16,   14,   13,   11,   10,   8,    7,</div>
+<div class="line">    5,    4,    2,    1,</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>-log2(x / 256) lookup table for x in [0, 256). If x == 0: Return 0 Else: Return floor(-log2(x / 256) * 256) </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__compress__sequences_8c_source.html">zstd_compress_sequences.c</a> 第 <a class="el" href="zstd__compress__sequences_8c_source.html#l00021">21</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="zstd__compress__sequences_8c.html">zstd_compress_sequences.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

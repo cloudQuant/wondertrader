@@ -1,0 +1,1096 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/zstd_ldm.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('zstd__ldm_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">zstd_ldm.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;<a class="el" href="zstd__ldm_8h_source.html">zstd_ldm.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="debug_8h_source.html">debug.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="zstd__fast_8h_source.html">zstd_fast.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="zstd__double__fast_8h_source.html">zstd_double_fast.h</a>&quot;</code><br />
+</div>
+<p><a href="zstd__ldm_8c_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a5e1e6de5198e3c74589cfe5ef73e412a" id="r_a5e1e6de5198e3c74589cfe5ef73e412a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a5e1e6de5198e3c74589cfe5ef73e412a">LDM_BUCKET_SIZE_LOG</a>&#160;&#160;&#160;3</td></tr>
+<tr class="separator:a5e1e6de5198e3c74589cfe5ef73e412a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc36f7a4b744b69414889a987578ed68" id="r_abc36f7a4b744b69414889a987578ed68"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#abc36f7a4b744b69414889a987578ed68">LDM_MIN_MATCH_LENGTH</a>&#160;&#160;&#160;64</td></tr>
+<tr class="separator:abc36f7a4b744b69414889a987578ed68"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8388eda1ab573f49cf3c50293ba7366a" id="r_a8388eda1ab573f49cf3c50293ba7366a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a8388eda1ab573f49cf3c50293ba7366a">LDM_HASH_RLOG</a>&#160;&#160;&#160;7</td></tr>
+<tr class="separator:a8388eda1ab573f49cf3c50293ba7366a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a629d57f64580cb26e0f7dea6cd1144ed" id="r_a629d57f64580cb26e0f7dea6cd1144ed"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a629d57f64580cb26e0f7dea6cd1144ed">LDM_HASH_CHAR_OFFSET</a>&#160;&#160;&#160;10</td></tr>
+<tr class="separator:a629d57f64580cb26e0f7dea6cd1144ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a516b3c0b84a8f87c0257e945fccbb1a3" id="r_a516b3c0b84a8f87c0257e945fccbb1a3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a516b3c0b84a8f87c0257e945fccbb1a3">ZSTD_ldm_adjustParameters</a> (<a class="el" href="structldmParams__t.html">ldmParams_t</a> *params, ZSTD_compressionParameters <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *cParams)</td></tr>
+<tr class="separator:a516b3c0b84a8f87c0257e945fccbb1a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3a6ee793b025994c7102e0b08918129" id="r_af3a6ee793b025994c7102e0b08918129"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#af3a6ee793b025994c7102e0b08918129">ZSTD_ldm_getTableSize</a> (<a class="el" href="structldmParams__t.html">ldmParams_t</a> params)</td></tr>
+<tr class="separator:af3a6ee793b025994c7102e0b08918129"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e65e54701af3291da1246800b46cc81" id="r_a8e65e54701af3291da1246800b46cc81"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a8e65e54701af3291da1246800b46cc81">ZSTD_ldm_getMaxNbSeq</a> (<a class="el" href="structldmParams__t.html">ldmParams_t</a> params, size_t maxChunkSize)</td></tr>
+<tr class="separator:a8e65e54701af3291da1246800b46cc81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeff39eb980049a404fe756bd1f853cf3" id="r_aeff39eb980049a404fe756bd1f853cf3"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#aeff39eb980049a404fe756bd1f853cf3">ZSTD_ldm_getSmallHash</a> (<a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> <a class="el" href="demo__send__order_8cpp.html#ab7c2d1d8d4198d62c34058543ea7cad3">value</a>, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> numBits)</td></tr>
+<tr class="separator:aeff39eb980049a404fe756bd1f853cf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0068e75ea4c9d634a3bddf8ca65bb465" id="r_a0068e75ea4c9d634a3bddf8ca65bb465"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a0068e75ea4c9d634a3bddf8ca65bb465">ZSTD_ldm_getChecksum</a> (<a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> hash, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> numBitsToDiscard)</td></tr>
+<tr class="separator:a0068e75ea4c9d634a3bddf8ca65bb465"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf9399189c53b7d33825d50b8e54cc52" id="r_adf9399189c53b7d33825d50b8e54cc52"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#adf9399189c53b7d33825d50b8e54cc52">ZSTD_ldm_getTag</a> (<a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> hash, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> hbits, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> numTagBits)</td></tr>
+<tr class="separator:adf9399189c53b7d33825d50b8e54cc52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27bb389e29ec32626dda4920938d482f" id="r_a27bb389e29ec32626dda4920938d482f"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structldmEntry__t.html">ldmEntry_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a27bb389e29ec32626dda4920938d482f">ZSTD_ldm_getBucket</a> (<a class="el" href="structldmState__t.html">ldmState_t</a> *ldmState, size_t hash, <a class="el" href="structldmParams__t.html">ldmParams_t</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ldmParams)</td></tr>
+<tr class="separator:a27bb389e29ec32626dda4920938d482f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abdbdbc0df167e86a500c2f1712d3256b" id="r_abdbdbc0df167e86a500c2f1712d3256b"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#abdbdbc0df167e86a500c2f1712d3256b">ZSTD_ldm_insertEntry</a> (<a class="el" href="structldmState__t.html">ldmState_t</a> *ldmState, size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> hash, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structldmEntry__t.html">ldmEntry_t</a> entry, <a class="el" href="structldmParams__t.html">ldmParams_t</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ldmParams)</td></tr>
+<tr class="separator:abdbdbc0df167e86a500c2f1712d3256b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97936b927358e1fce078a09183b14337" id="r_a97936b927358e1fce078a09183b14337"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a97936b927358e1fce078a09183b14337">ZSTD_ldm_makeEntryAndInsertByTag</a> (<a class="el" href="structldmState__t.html">ldmState_t</a> *ldmState, <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> rollingHash, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> hBits, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> offset, <a class="el" href="structldmParams__t.html">ldmParams_t</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ldmParams)</td></tr>
+<tr class="separator:a97936b927358e1fce078a09183b14337"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad11fb17af4c6753a8b837e36b83cd227" id="r_ad11fb17af4c6753a8b837e36b83cd227"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#ad11fb17af4c6753a8b837e36b83cd227">ZSTD_ldm_countBackwardsMatch</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *pIn, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *pAnchor, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *pMatch, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *pBase)</td></tr>
+<tr class="separator:ad11fb17af4c6753a8b837e36b83cd227"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74597cf5a26bb846f9ba49bf28e47d83" id="r_a74597cf5a26bb846f9ba49bf28e47d83"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a74597cf5a26bb846f9ba49bf28e47d83">ZSTD_ldm_fillFastTables</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *end)</td></tr>
+<tr class="separator:a74597cf5a26bb846f9ba49bf28e47d83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16008f7e84c661f3ec7cfff04a9018db" id="r_a16008f7e84c661f3ec7cfff04a9018db"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a16008f7e84c661f3ec7cfff04a9018db">ZSTD_ldm_fillLdmHashTable</a> (<a class="el" href="structldmState__t.html">ldmState_t</a> *state, <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> lastHash, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *lastHashed, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *iend, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *base, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> hBits, <a class="el" href="structldmParams__t.html">ldmParams_t</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ldmParams)</td></tr>
+<tr class="separator:a16008f7e84c661f3ec7cfff04a9018db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add33e37608aa0532f17e09147e35b07e" id="r_add33e37608aa0532f17e09147e35b07e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#add33e37608aa0532f17e09147e35b07e">ZSTD_ldm_limitTableUpdate</a> (<a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *anchor)</td></tr>
+<tr class="separator:add33e37608aa0532f17e09147e35b07e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34e0f73351fd7f82dff24832f004306d" id="r_a34e0f73351fd7f82dff24832f004306d"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a34e0f73351fd7f82dff24832f004306d">ZSTD_ldm_generateSequences_internal</a> (<a class="el" href="structldmState__t.html">ldmState_t</a> *ldmState, <a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> *rawSeqStore, <a class="el" href="structldmParams__t.html">ldmParams_t</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *params, void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:a34e0f73351fd7f82dff24832f004306d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f2f0c63c776631f58bb9d4096e98180" id="r_a2f2f0c63c776631f58bb9d4096e98180"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a2f2f0c63c776631f58bb9d4096e98180">ZSTD_ldm_reduceTable</a> (<a class="el" href="structldmEntry__t.html">ldmEntry_t</a> *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> table, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> reducerValue)</td></tr>
+<tr class="separator:a2f2f0c63c776631f58bb9d4096e98180"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f716eff3ba72e3bf3496e1c5e32718b" id="r_a2f716eff3ba72e3bf3496e1c5e32718b"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a2f716eff3ba72e3bf3496e1c5e32718b">ZSTD_ldm_generateSequences</a> (<a class="el" href="structldmState__t.html">ldmState_t</a> *ldmState, <a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> *sequences, <a class="el" href="structldmParams__t.html">ldmParams_t</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *params, void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:a2f716eff3ba72e3bf3496e1c5e32718b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50969cde88da356517fcda2578a2bd3b" id="r_a50969cde88da356517fcda2578a2bd3b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a50969cde88da356517fcda2578a2bd3b">ZSTD_ldm_skipSequences</a> (<a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> *rawSeqStore, size_t srcSize, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> minMatch)</td></tr>
+<tr class="separator:a50969cde88da356517fcda2578a2bd3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c4f8e6e2c6883a5c7bfe2f060f0ef26" id="r_a9c4f8e6e2c6883a5c7bfe2f060f0ef26"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structrawSeq.html">rawSeq</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a9c4f8e6e2c6883a5c7bfe2f060f0ef26">maybeSplitSequence</a> (<a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> *rawSeqStore, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> remaining, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> minMatch)</td></tr>
+<tr class="separator:a9c4f8e6e2c6883a5c7bfe2f060f0ef26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f1d346a64dbbf66d83dbadab7e9be84" id="r_a6f1d346a64dbbf66d83dbadab7e9be84"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__ldm_8c.html#a6f1d346a64dbbf66d83dbadab7e9be84">ZSTD_ldm_blockCompress</a> (<a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> *rawSeqStore, <a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *ms, <a class="el" href="structseqStore__t.html">seqStore_t</a> *seqStore, <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> rep[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>], void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:a6f1d346a64dbbf66d83dbadab7e9be84"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a5e1e6de5198e3c74589cfe5ef73e412a" name="a5e1e6de5198e3c74589cfe5ef73e412a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e1e6de5198e3c74589cfe5ef73e412a">&#9670;&#160;</a></span>LDM_BUCKET_SIZE_LOG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LDM_BUCKET_SIZE_LOG&#160;&#160;&#160;3</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00016">16</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a629d57f64580cb26e0f7dea6cd1144ed" name="a629d57f64580cb26e0f7dea6cd1144ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a629d57f64580cb26e0f7dea6cd1144ed">&#9670;&#160;</a></span>LDM_HASH_CHAR_OFFSET</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LDM_HASH_CHAR_OFFSET&#160;&#160;&#160;10</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00019">19</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8388eda1ab573f49cf3c50293ba7366a" name="a8388eda1ab573f49cf3c50293ba7366a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8388eda1ab573f49cf3c50293ba7366a">&#9670;&#160;</a></span>LDM_HASH_RLOG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LDM_HASH_RLOG&#160;&#160;&#160;7</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00018">18</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abc36f7a4b744b69414889a987578ed68" name="abc36f7a4b744b69414889a987578ed68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc36f7a4b744b69414889a987578ed68">&#9670;&#160;</a></span>LDM_MIN_MATCH_LENGTH</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LDM_MIN_MATCH_LENGTH&#160;&#160;&#160;64</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00017">17</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a9c4f8e6e2c6883a5c7bfe2f060f0ef26" name="a9c4f8e6e2c6883a5c7bfe2f060f0ef26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c4f8e6e2c6883a5c7bfe2f060f0ef26">&#9670;&#160;</a></span>maybeSplitSequence()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structrawSeq.html">rawSeq</a> maybeSplitSequence </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>rawSeqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>remaining</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>minMatch</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>If the sequence length is longer than remaining then the sequence is split between this block and the next.</p>
+<p>Returns the current sequence to handle, or if the rest of the block should be literals, it returns a sequence with offset == 0. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00518">518</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a516b3c0b84a8f87c0257e945fccbb1a3" name="a516b3c0b84a8f87c0257e945fccbb1a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a516b3c0b84a8f87c0257e945fccbb1a3">&#9670;&#160;</a></span>ZSTD_ldm_adjustParameters()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ZSTD_ldm_adjustParameters </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structldmParams__t.html">ldmParams_t</a> *&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_compressionParameters <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>cParams</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8h.html#a516b3c0b84a8f87c0257e945fccbb1a3">ZSTD_ldm_adjustParameters()</a> : If the params-&gt;hashRateLog is not set, set it to its default value based on windowLog and params-&gt;hashLog.</p>
+<p>Ensures that params-&gt;bucketSizeLog is &lt;= params-&gt;hashLog (setting it to params-&gt;hashLog if it is not).</p>
+<p>Ensures that the minMatchLength &gt;= targetLength during optimal parsing. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00021">21</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6f1d346a64dbbf66d83dbadab7e9be84" name="a6f1d346a64dbbf66d83dbadab7e9be84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f1d346a64dbbf66d83dbadab7e9be84">&#9670;&#160;</a></span>ZSTD_ldm_blockCompress()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_ldm_blockCompress </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>rawSeqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>seqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>rep</em>[ZSTD_REP_NUM], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8h.html#a6f1d346a64dbbf66d83dbadab7e9be84">ZSTD_ldm_blockCompress()</a>:</p>
+<p>Compresses a block using the predefined sequences, along with a secondary block compressor. The literals section of every sequence is passed to the secondary block compressor, and those sequences are interspersed with the predefined sequences. Returns the length of the last literals. Updates <code>rawSeqStore.pos</code> to indicate how many sequences have been consumed. <code>rawSeqStore.seq</code> may also be updated to split the last sequence between two blocks. </p><dl class="section return"><dt>返回</dt><dd>The length of the last literals.</dd></dl>
+<p>NOTE: The source must be at most the maximum block size, but the predefined sequences can be any size, and may be longer than the block. In the case that they are longer than the block, the last sequences may need to be split into two. We handle that case correctly, and update <code>rawSeqStore</code> appropriately. NOTE: This function does not return any errors. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00542">542</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad11fb17af4c6753a8b837e36b83cd227" name="ad11fb17af4c6753a8b837e36b83cd227"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad11fb17af4c6753a8b837e36b83cd227">&#9670;&#160;</a></span>ZSTD_ldm_countBackwardsMatch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTD_ldm_countBackwardsMatch </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>pIn</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>pAnchor</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>pMatch</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>pBase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8c.html#ad11fb17af4c6753a8b837e36b83cd227">ZSTD_ldm_countBackwardsMatch()</a> : Returns the number of bytes that match backwards before pIn and pMatch.</p>
+<p>We count only bytes where pMatch &gt;= pBase and pIn &gt;= pAnchor. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00150">150</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a74597cf5a26bb846f9ba49bf28e47d83" name="a74597cf5a26bb846f9ba49bf28e47d83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74597cf5a26bb846f9ba49bf28e47d83">&#9670;&#160;</a></span>ZSTD_ldm_fillFastTables()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTD_ldm_fillFastTables </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>end</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8c.html#a74597cf5a26bb846f9ba49bf28e47d83">ZSTD_ldm_fillFastTables()</a> :</p>
+<p>Fills the relevant tables for the ZSTD_fast and ZSTD_dfast strategies. This is similar to ZSTD_loadDictionaryContent.</p>
+<p>The tables for the other strategies are filled within their block compressors. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00170">170</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a16008f7e84c661f3ec7cfff04a9018db" name="a16008f7e84c661f3ec7cfff04a9018db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16008f7e84c661f3ec7cfff04a9018db">&#9670;&#160;</a></span>ZSTD_ldm_fillLdmHashTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> ZSTD_ldm_fillLdmHashTable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structldmState__t.html">ldmState_t</a> *&#160;</td>
+          <td class="paramname"><em>state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>lastHash</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>lastHashed</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>iend</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>base</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>hBits</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structldmParams__t.html">ldmParams_t</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>ldmParams</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8c.html#a16008f7e84c661f3ec7cfff04a9018db">ZSTD_ldm_fillLdmHashTable()</a> :</p>
+<p>Fills hashTable from (lastHashed + 1) to iend (non-inclusive). lastHash is the rolling hash that corresponds to lastHashed.</p>
+<p>Returns the rolling hash corresponding to position iend-1. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00206">206</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2f716eff3ba72e3bf3496e1c5e32718b" name="a2f716eff3ba72e3bf3496e1c5e32718b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f716eff3ba72e3bf3496e1c5e32718b">&#9670;&#160;</a></span>ZSTD_ldm_generateSequences()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_ldm_generateSequences </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structldmState__t.html">ldmState_t</a> *&#160;</td>
+          <td class="paramname"><em>ldms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>sequences</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structldmParams__t.html">ldmParams_t</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8h.html#a673d683de40a7f5b2050e4cb5437d38f">ZSTD_ldm_generateSequences()</a>:</p>
+<p>Generates the sequences using the long distance match finder. Generates long range matching sequences in <code>sequences</code>, which parse a prefix of the source. <code>sequences</code> must be large enough to store every sequence, which can be checked with <code><a class="el" href="zstd__ldm_8h.html#a8e65e54701af3291da1246800b46cc81">ZSTD_ldm_getMaxNbSeq()</a></code>. </p><dl class="section return"><dt>返回</dt><dd>0 or an error code.</dd></dl>
+<p>NOTE: The user must have called <a class="el" href="zstd__compress__internal_8h.html#aa6a6e9e05ea422bb1e34c052865fd30e">ZSTD_window_update()</a> for all of the input they have, even if they pass it to <a class="el" href="zstd__ldm_8h.html#a673d683de40a7f5b2050e4cb5437d38f">ZSTD_ldm_generateSequences()</a> in chunks. NOTE: This function returns an error if it runs out of space to store sequences. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00414">414</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a34e0f73351fd7f82dff24832f004306d" name="a34e0f73351fd7f82dff24832f004306d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34e0f73351fd7f82dff24832f004306d">&#9670;&#160;</a></span>ZSTD_ldm_generateSequences_internal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static size_t ZSTD_ldm_generateSequences_internal </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structldmState__t.html">ldmState_t</a> *&#160;</td>
+          <td class="paramname"><em>ldmState</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>rawSeqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structldmParams__t.html">ldmParams_t</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00241">241</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a27bb389e29ec32626dda4920938d482f" name="a27bb389e29ec32626dda4920938d482f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27bb389e29ec32626dda4920938d482f">&#9670;&#160;</a></span>ZSTD_ldm_getBucket()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structldmEntry__t.html">ldmEntry_t</a> * ZSTD_ldm_getBucket </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structldmState__t.html">ldmState_t</a> *&#160;</td>
+          <td class="paramname"><em>ldmState</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>hash</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structldmParams__t.html">ldmParams_t</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>ldmParams</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8c.html#a27bb389e29ec32626dda4920938d482f">ZSTD_ldm_getBucket()</a> : Returns a pointer to the start of the bucket associated with hash. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00100">100</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0068e75ea4c9d634a3bddf8ca65bb465" name="a0068e75ea4c9d634a3bddf8ca65bb465"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0068e75ea4c9d634a3bddf8ca65bb465">&#9670;&#160;</a></span>ZSTD_ldm_getChecksum()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ZSTD_ldm_getChecksum </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>hash</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>numBitsToDiscard</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8c.html#a0068e75ea4c9d634a3bddf8ca65bb465">ZSTD_ldm_getChecksum()</a> : numBitsToDiscard should be &lt;= 32 </p><dl class="section return"><dt>返回</dt><dd>: the next most significant 32 bits after numBitsToDiscard </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00076">76</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8e65e54701af3291da1246800b46cc81" name="a8e65e54701af3291da1246800b46cc81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e65e54701af3291da1246800b46cc81">&#9670;&#160;</a></span>ZSTD_ldm_getMaxNbSeq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_ldm_getMaxNbSeq </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structldmParams__t.html">ldmParams_t</a>&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>maxChunkSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>ZSTD_ldm_getSeqSpace() : Return an upper bound on the number of sequences that can be produced by the long distance matcher, or 0 if LDM is disabled. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00058">58</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aeff39eb980049a404fe756bd1f853cf3" name="aeff39eb980049a404fe756bd1f853cf3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeff39eb980049a404fe756bd1f853cf3">&#9670;&#160;</a></span>ZSTD_ldm_getSmallHash()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ZSTD_ldm_getSmallHash </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>numBits</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8c.html#aeff39eb980049a404fe756bd1f853cf3">ZSTD_ldm_getSmallHash()</a> : numBits should be &lt;= 32 If numBits==0, returns 0. </p><dl class="section return"><dt>返回</dt><dd>: the most significant numBits of value. </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00067">67</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af3a6ee793b025994c7102e0b08918129" name="af3a6ee793b025994c7102e0b08918129"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af3a6ee793b025994c7102e0b08918129">&#9670;&#160;</a></span>ZSTD_ldm_getTableSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_ldm_getTableSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structldmParams__t.html">ldmParams_t</a>&#160;</td>
+          <td class="paramname"><em>params</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8h.html#af3a6ee793b025994c7102e0b08918129">ZSTD_ldm_getTableSize()</a> : Estimate the space needed for long distance matching tables or 0 if LDM is disabled. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00048">48</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adf9399189c53b7d33825d50b8e54cc52" name="adf9399189c53b7d33825d50b8e54cc52"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf9399189c53b7d33825d50b8e54cc52">&#9670;&#160;</a></span>ZSTD_ldm_getTag()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ZSTD_ldm_getTag </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a>&#160;</td>
+          <td class="paramname"><em>hash</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>hbits</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>numTagBits</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8c.html#adf9399189c53b7d33825d50b8e54cc52">ZSTD_ldm_getTag()</a> ; Given the hash, returns the most significant numTagBits bits after (32 + hbits) bits.</p>
+<p>If there are not enough bits remaining, return the last numTagBits bits. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00088">88</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abdbdbc0df167e86a500c2f1712d3256b" name="abdbdbc0df167e86a500c2f1712d3256b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abdbdbc0df167e86a500c2f1712d3256b">&#9670;&#160;</a></span>ZSTD_ldm_insertEntry()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTD_ldm_insertEntry </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structldmState__t.html">ldmState_t</a> *&#160;</td>
+          <td class="paramname"><em>ldmState</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>hash</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structldmEntry__t.html">ldmEntry_t</a>&#160;</td>
+          <td class="paramname"><em>entry</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structldmParams__t.html">ldmParams_t</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>ldmParams</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8c.html#abdbdbc0df167e86a500c2f1712d3256b">ZSTD_ldm_insertEntry()</a> : Insert the entry with corresponding hash into the hash table </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00108">108</a> 行定义.</p>
+
+</div>
+</div>
+<a id="add33e37608aa0532f17e09147e35b07e" name="add33e37608aa0532f17e09147e35b07e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add33e37608aa0532f17e09147e35b07e">&#9670;&#160;</a></span>ZSTD_ldm_limitTableUpdate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTD_ldm_limitTableUpdate </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structZSTD__matchState__t.html">ZSTD_matchState_t</a> *&#160;</td>
+          <td class="paramname"><em>ms</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58">BYTE</a> *&#160;</td>
+          <td class="paramname"><em>anchor</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8c.html#add33e37608aa0532f17e09147e35b07e">ZSTD_ldm_limitTableUpdate()</a> :</p>
+<p>Sets cctx-&gt;nextToUpdate to a position corresponding closer to anchor if it is far way (after a long match, only update tables a limited amount). </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00232">232</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a97936b927358e1fce078a09183b14337" name="a97936b927358e1fce078a09183b14337"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a97936b927358e1fce078a09183b14337">&#9670;&#160;</a></span>ZSTD_ldm_makeEntryAndInsertByTag()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTD_ldm_makeEntryAndInsertByTag </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structldmState__t.html">ldmState_t</a> *&#160;</td>
+          <td class="paramname"><em>ldmState</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#a24c386d3758eba951eb7532fdbb45804">U64</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>rollingHash</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>hBits</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structldmParams__t.html">ldmParams_t</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>ldmParams</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8c.html#a97936b927358e1fce078a09183b14337">ZSTD_ldm_makeEntryAndInsertByTag()</a> :</p>
+<p>Gets the small hash, checksum, and tag from the rollingHash.</p>
+<p>If the tag matches (1 &lt;&lt; ldmParams.hashRateLog)-1, then creates an ldmEntry from the offset, and inserts it into the hash table.</p>
+<p>hBits is the length of the small hash, which is the most significant hBits of rollingHash. The checksum is the next 32 most significant bits, followed by ldmParams.hashRateLog bits that make up the tag. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00128">128</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2f2f0c63c776631f58bb9d4096e98180" name="a2f2f0c63c776631f58bb9d4096e98180"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f2f0c63c776631f58bb9d4096e98180">&#9670;&#160;</a></span>ZSTD_ldm_reduceTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTD_ldm_reduceTable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structldmEntry__t.html">ldmEntry_t</a> *<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>table</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>reducerValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8c.html#a2f2f0c63c776631f58bb9d4096e98180">ZSTD_ldm_reduceTable()</a> : reduce table indexes by <code>reducerValue</code> </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00404">404</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a50969cde88da356517fcda2578a2bd3b" name="a50969cde88da356517fcda2578a2bd3b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50969cde88da356517fcda2578a2bd3b">&#9670;&#160;</a></span>ZSTD_ldm_skipSequences()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ZSTD_ldm_skipSequences </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrawSeqStore__t.html">rawSeqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>rawSeqStore</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>minMatch</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__ldm_8h.html#a50969cde88da356517fcda2578a2bd3b">ZSTD_ldm_skipSequences()</a>:</p>
+<p>Skip past <code>srcSize</code> bytes worth of sequences in <code>rawSeqStore</code>. Avoids emitting matches less than <code>minMatch</code> bytes. Must be called for data with is not passed to <a class="el" href="zstd__ldm_8h.html#a6f1d346a64dbbf66d83dbadab7e9be84">ZSTD_ldm_blockCompress()</a>. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__ldm_8c_source.html">zstd_ldm.c</a> 第 <a class="el" href="zstd__ldm_8c_source.html#l00483">483</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="zstd__ldm_8c.html">zstd_ldm.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

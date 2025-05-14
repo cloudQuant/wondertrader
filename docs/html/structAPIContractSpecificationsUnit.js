@@ -1,0 +1,27 @@
+var structAPIContractSpecificationsUnit =
+[
+    [ "APIContractSpecificationsUnit", "structAPIContractSpecificationsUnit.html#a9ccc273e29898de51497eb8f909109c4", null ],
+    [ "APIContractSpecificationsUnit", "structAPIContractSpecificationsUnit.html#a9ccc273e29898de51497eb8f909109c4", null ],
+    [ "associate_date", "structAPIContractSpecificationsUnit.html#a5d0b5f5c5e84fe8da8c2fc9d3a109ac8", null ],
+    [ "associate_serial_num", "structAPIContractSpecificationsUnit.html#ab366de98ba5be189bca6a3913f042e97", null ],
+    [ "branch_id", "structAPIContractSpecificationsUnit.html#a045f6c2fd9df0d4cc8d49dc95271fda7", null ],
+    [ "contract_serial_num", "structAPIContractSpecificationsUnit.html#af8c48bc406fa2762ed490962f9123428", null ],
+    [ "credit_identification", "structAPIContractSpecificationsUnit.html#a53f6e6b7919cdf2977f56e06cf251ec4", null ],
+    [ "deposit_ration", "structAPIContractSpecificationsUnit.html#ac3478b471f25f6f32db0f649489485d1", null ],
+    [ "expiration_date", "structAPIContractSpecificationsUnit.html#af7f395ffb3b929143afb63462317b3b4", null ],
+    [ "first_use_private_amount", "structAPIContractSpecificationsUnit.html#ab8f1969c25bdd06e54a0254605abef3e", null ],
+    [ "interest_rate_product", "structAPIContractSpecificationsUnit.html#a25fc041654f70ae629eb907d808ff4bc", null ],
+    [ "market_id", "structAPIContractSpecificationsUnit.html#a2cb79461227a701486e92f66f552d557", null ],
+    [ "opening_amt", "structAPIContractSpecificationsUnit.html#a90d202398a3233cca3953be525fa084e", null ],
+    [ "opening_date", "structAPIContractSpecificationsUnit.html#a0d9f980f2860e963da358e917c1a76aa", null ],
+    [ "opening_price", "structAPIContractSpecificationsUnit.html#aebbe456f18aaa780413c3d01cbb52e0c", null ],
+    [ "opening_qty", "structAPIContractSpecificationsUnit.html#aef496187b1933c8cbcf3dbbded38942c", null ],
+    [ "opening_serial_num", "structAPIContractSpecificationsUnit.html#a51cff1b4f53ed7f9db71c29ad49567b6", null ],
+    [ "repayment_amt", "structAPIContractSpecificationsUnit.html#ac43447e2251abb9bcd9ea13b2e788a68", null ],
+    [ "repayment_qty", "structAPIContractSpecificationsUnit.html#a7ff0aecabf75b8cdb92d3249f55fc6a3", null ],
+    [ "roll_over_number", "structAPIContractSpecificationsUnit.html#aaf4b30ba765b4db63f2d6ab0eb6257e6", null ],
+    [ "security_id", "structAPIContractSpecificationsUnit.html#a06a07cdccaff4ce95af62afa3d8687d4", null ],
+    [ "trading_amt", "structAPIContractSpecificationsUnit.html#a70cb9a6600e0e5692e1ac0f563580bec", null ],
+    [ "unsettled_default_interest", "structAPIContractSpecificationsUnit.html#a4eb370c9f070693ef7be6f8c6fe7777b", null ],
+    [ "unsettled_interest", "structAPIContractSpecificationsUnit.html#a48f1ceb2919ad2ab640c1b7f2bc2ceaa", null ]
+];

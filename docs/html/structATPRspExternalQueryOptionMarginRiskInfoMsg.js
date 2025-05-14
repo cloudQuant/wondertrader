@@ -1,0 +1,26 @@
+var structATPRspExternalQueryOptionMarginRiskInfoMsg =
+[
+    [ "ATPRspExternalQueryOptionMarginRiskInfoMsg", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#ab4c96e5e4102e3895f55cd7273276286", null ],
+    [ "ATPRspExternalQueryOptionMarginRiskInfoMsg", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#ab4c96e5e4102e3895f55cd7273276286", null ],
+    [ "account_id", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a3573ce3f36319628ca2472a68799c76f", null ],
+    [ "client_seq_id", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a2cc70a51cf0daff94c391126d550adba", null ],
+    [ "cust_id", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a632dc2b8ce6e166c2c0a3d40173aad60", null ],
+    [ "exchange_margin_amt", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a85605054d0f7f81ce9c4d680e37f00c3", null ],
+    [ "fund_account_id", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a3ec972824337a078317fe0e73d31333c", null ],
+    [ "last_risk_value1", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a6aa63fb1466f4d4dce99e95c3a193820", null ],
+    [ "last_risk_value2", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a824acfe30b9e7176b0f99d0413bb9590", null ],
+    [ "member_margin_amt", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#ab8cc60ebbd1b19edaaedb92690bcb1da", null ],
+    [ "min_risk_value0", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a167bf315c870cd277fcad170b3dd86e6", null ],
+    [ "min_risk_value1", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#ac8d0cf600e87d9d8db4ed2bc46779524", null ],
+    [ "min_risk_value2", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a880da8393a6a2838b9a7e5cf4c2a9e3c", null ],
+    [ "query_result_code", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a11658fb6ae0ac0be261aa18f8eb80d16", null ],
+    [ "risk_level", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a1323b594c4206e22bb4fb8a7e031ef07", null ],
+    [ "risk_margin_amt0", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a15cbd806af946a9e1de9d7bef59fff6e", null ],
+    [ "risk_margin_amt1", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a190ca172a20c921a00f473e6b2cd1b05", null ],
+    [ "risk_margin_amt2", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#afc1c47f1d5a6084602cb50d791500a5e", null ],
+    [ "risk_value0", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#ac5a096dd6b45dfdbe6e6d80d81a6bc2b", null ],
+    [ "risk_value1", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a21e0cd48dbb787af524057860d03f332", null ],
+    [ "risk_value2", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#abe26437060e45fffd1060f0bed5b39a3", null ],
+    [ "today_in_amt", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#ac9b630d1f613c047f1b6f4002861f8ca", null ],
+    [ "user_info", "structATPRspExternalQueryOptionMarginRiskInfoMsg.html#a646ba9b85c63337fc5feb706ab4cd301", null ]
+];

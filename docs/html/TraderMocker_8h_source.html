@@ -1,0 +1,352 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/TraderMocker/TraderMocker.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('TraderMocker_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">TraderMocker.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="TraderMocker_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &lt;atomic&gt;</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;boost/asio.hpp&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;boost/array.hpp&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;boost/asio/io_service.hpp&gt;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;../Includes/FasterDefs.h&quot;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;../Includes/ITraderApi.h&quot;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;../Includes/WTSCollection.hpp&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><a class="code hl_define" href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    <span class="keyword">class </span><a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>;</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><a class="code hl_define" href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="TraderMocker_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">   18</a></span><a class="code hl_variable" href="TraderMocker_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> *  仿真交易器</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> */</span></div>
+<div class="foldopen" id="foldopen00023" data-start="{" data-end="};">
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classTraderMocker.html">   23</a></span><span class="keyword">class </span><a class="code hl_class" href="classTraderMocker.html">TraderMocker</a> : <span class="keyword">public</span> <a class="code hl_class" href="classITraderApi.html">ITraderApi</a></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>{</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <a class="code hl_function" href="classTraderMocker.html#ab6ae3f0facdced20e0cb03b3f778867e">TraderMocker</a>();</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <a class="code hl_function" href="classTraderMocker.html#a6dc28d9ad7f7630e87ab9586da81a447">~TraderMocker</a>();</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="comment">/*</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">    *   撮合 定时器</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">    */</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    int32_t     <a class="code hl_function" href="classTraderMocker.html#a1c9b3abbc0f1ff0c6f38307271c7f067">match_once</a>();</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    uint32_t    <a class="code hl_function" href="classTraderMocker.html#a6e9718a6185f92c50033024c9704c8dd">makeTradeID</a>();</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    uint32_t    <a class="code hl_function" href="classTraderMocker.html#a1188af3cbc67a594713ff0035bc7b19b">makeOrderID</a>();</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordtype">void</span>        <a class="code hl_function" href="classTraderMocker.html#a2945ba4a153c77ef6ab25e88e72cf059">load_positions</a>();</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keywordtype">void</span>        <a class="code hl_function" href="classTraderMocker.html#a539d49130e16b6b630d8277e800ddfae">save_positions</a>();</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a5f9b979cdace7771c6a25b025b00ab00">   43</a></span>    <a class="code hl_typedef" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>    <a class="code hl_variable" href="classTraderMocker.html#a5f9b979cdace7771c6a25b025b00ab00">_thrd_match</a>;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a0058941e876abe2cbd672e5b8c3e1a19">   44</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classTraderMocker.html#a0058941e876abe2cbd672e5b8c3e1a19">_terminated</a>;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classTraderMocker.html#ad78ecf2c5c8a3b6e7dae4b14b22f284e">   46</a></span>    <a class="code hl_typedef" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a>      <a class="code hl_variable" href="classTraderMocker.html#ad78ecf2c5c8a3b6e7dae4b14b22f284e">_mutex_api</a>;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="classTraderMocker.html#ad3dce67ac8d3d78c0b195ed3b8dc5add">   48</a></span>    std::atomic&lt;uint32_t&gt;   <a class="code hl_variable" href="classTraderMocker.html#ad3dce67ac8d3d78c0b195ed3b8dc5add">_auto_trade_id</a>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="classTraderMocker.html#ad828b5bb425783f1c59e3febc9f98a9c">   49</a></span>    std::atomic&lt;uint32_t&gt;   <a class="code hl_variable" href="classTraderMocker.html#ad828b5bb425783f1c59e3febc9f98a9c">_auto_order_id</a>;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a797b1ace75e2e904060a077c579ca919">   50</a></span>    std::atomic&lt;uint32_t&gt;   <a class="code hl_variable" href="classTraderMocker.html#a797b1ace75e2e904060a077c579ca919">_auto_entrust_id</a>;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a6453eae2f46cc3246391f87cc0341072">   52</a></span>    <a class="code hl_class" href="classITraderSpi.html">ITraderSpi</a>* <a class="code hl_variable" href="classTraderMocker.html#a6453eae2f46cc3246391f87cc0341072">_listener</a>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="classTraderMocker.html#abd0b5b9fc561d9f25c89789c3fd7b7ea">   53</a></span>    <a class="code hl_class" href="classIBaseDataMgr.html">IBaseDataMgr</a>*       <a class="code hl_variable" href="classTraderMocker.html#abd0b5b9fc561d9f25c89789c3fd7b7ea">_bd_mgr</a>;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a4c3c29f7a4a1153cb7717c5c562e13a1">   55</a></span>    <a class="code hl_typedef" href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a>        <a class="code hl_variable" href="classTraderMocker.html#a4c3c29f7a4a1153cb7717c5c562e13a1">_thrd_worker</a>;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="classTraderMocker.html#af231cfc42ffecd38df5baba7035242aa">   57</a></span>    uint32_t        <a class="code hl_variable" href="classTraderMocker.html#af231cfc42ffecd38df5baba7035242aa">_millisecs</a>;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="classTraderMocker.html#ae6e00429204b0aa9782d7b37275157e8">   58</a></span>    uint32_t        <a class="code hl_variable" href="classTraderMocker.html#ae6e00429204b0aa9782d7b37275157e8">_mocker_id</a>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="classTraderMocker.html#afc2dcecb2f09ec19fa98202f3d137f46">   59</a></span>    <span class="keywordtype">bool</span>            <a class="code hl_variable" href="classTraderMocker.html#afc2dcecb2f09ec19fa98202f3d137f46">_use_newpx</a>;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a64e98c7733767371790862849ea23555">   60</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classTraderMocker.html#a64e98c7733767371790862849ea23555">_max_qty</a>;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classTraderMocker.html#ad273b40f526cb277488cc9d7b900ca44">   61</a></span>    <span class="keywordtype">double</span>          <a class="code hl_variable" href="classTraderMocker.html#ad273b40f526cb277488cc9d7b900ca44">_min_qty</a>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a6f1d44bf484745ec078432d69ea7c87e">   63</a></span>    <a class="code hl_class" href="classWTSArray.html">WTSArray</a>*       <a class="code hl_variable" href="classTraderMocker.html#a6f1d44bf484745ec078432d69ea7c87e">_orders</a>;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a233086e50ddf3326ac3c8b9041bfb3f8">   64</a></span>    <a class="code hl_class" href="classWTSArray.html">WTSArray</a>*       <a class="code hl_variable" href="classTraderMocker.html#a233086e50ddf3326ac3c8b9041bfb3f8">_trades</a>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a4536126f699024ca07bfa297d3c2bdd1">   65</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classWTSHashMap.html">WTSHashMap&lt;std::string&gt;</a> <a class="code hl_typedef" href="classTraderMocker.html#a4536126f699024ca07bfa297d3c2bdd1">TickCache</a>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a895bfdc0e248b03c4495c47e3e392c18">   66</a></span>    <a class="code hl_class" href="classWTSHashMap.html">TickCache</a>*      <a class="code hl_variable" href="classTraderMocker.html#a895bfdc0e248b03c4495c47e3e392c18">_ticks</a>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a3c64766b4d18f08ead409365564a87d9">   68</a></span>    <span class="keyword">typedef</span> <a class="code hl_class" href="classWTSHashMap.html">WTSHashMap&lt;std::string&gt;</a> <a class="code hl_typedef" href="classTraderMocker.html#a3c64766b4d18f08ead409365564a87d9">OrderCache</a>;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a7cef04e15c7a886d631c8c89ebd4569b">   69</a></span>    <a class="code hl_class" href="classWTSHashMap.html">OrderCache</a>*         <a class="code hl_variable" href="classTraderMocker.html#a7cef04e15c7a886d631c8c89ebd4569b">_awaits</a>;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a2901746650d07f899e611cd01ec35451">   70</a></span>    <a class="code hl_typedef" href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a>  <a class="code hl_variable" href="classTraderMocker.html#a2901746650d07f899e611cd01ec35451">_mtx_awaits</a>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a74d25124a2f4482ff34f912b5e09181e">   72</a></span>    <a class="code hl_class" href="classwt__hashset.html">wt_hashset&lt;std::string&gt;</a> <a class="code hl_variable" href="classTraderMocker.html#a74d25124a2f4482ff34f912b5e09181e">_codes</a>;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a0fbbb180081a545af04ad9bff49844d6">   74</a></span>    uint64_t        <a class="code hl_variable" href="classTraderMocker.html#a0fbbb180081a545af04ad9bff49844d6">_max_tick_time</a>;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a62542fbff8fe75c0c47c14d105f68f02">   75</a></span>    uint64_t        <a class="code hl_variable" href="classTraderMocker.html#a62542fbff8fe75c0c47c14d105f68f02">_last_match_time</a>;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="foldopen" id="foldopen00077" data-start="{" data-end="};">
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="structTraderMocker_1_1__PosUnit.html">   77</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structTraderMocker_1_1__PosUnit.html">_PosUnit</a></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    {</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="structTraderMocker_1_1__PosUnit.html#a5421fced2f0134a40f925b845430fc5a">   79</a></span>        <span class="keywordtype">double</span>  <a class="code hl_variable" href="structTraderMocker_1_1__PosUnit.html#a5421fced2f0134a40f925b845430fc5a">_volume</a>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="structTraderMocker_1_1__PosUnit.html#a304fbda583f99635c9998db784e18530">   80</a></span>        <span class="keywordtype">double</span>  <a class="code hl_variable" href="structTraderMocker_1_1__PosUnit.html#a304fbda583f99635c9998db784e18530">_frozen</a>;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a61f2f7a2299a091004aab693bbe9d803">   81</a></span>    } <a class="code hl_typedef" href="classTraderMocker.html#a61f2f7a2299a091004aab693bbe9d803">PosUnit</a>;</div>
+</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="foldopen" id="foldopen00083" data-start="{" data-end="};">
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="structTraderMocker_1_1__PosItem.html">   83</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structTraderMocker_1_1__PosItem.html">_PosItem</a></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    {</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="structTraderMocker_1_1__PosItem.html#a71c00c657c521582eec9ff8bb04b3350">   85</a></span>        <span class="keywordtype">char</span>    <a class="code hl_variable" href="structTraderMocker_1_1__PosItem.html#a71c00c657c521582eec9ff8bb04b3350">_exchg</a>[<a class="code hl_define" href="WTSMarcos_8h.html#a43110534aa06a6d801f0f875c3cf4f1c">MAX_INSTRUMENT_LENGTH</a>];</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="structTraderMocker_1_1__PosItem.html#abacb7c5734d5c12db7c1ba8bdbb6c02d">   86</a></span>        <span class="keywordtype">char</span>    <a class="code hl_variable" href="structTraderMocker_1_1__PosItem.html#abacb7c5734d5c12db7c1ba8bdbb6c02d">_code</a>[<a class="code hl_define" href="WTSMarcos_8h.html#a43110534aa06a6d801f0f875c3cf4f1c">MAX_INSTRUMENT_LENGTH</a>];</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="structTraderMocker_1_1__PosItem.html#ab337ec892db392dc85d1ba47395a8b8c">   88</a></span>        <a class="code hl_struct" href="structTraderMocker_1_1__PosUnit.html">PosUnit</a>     <a class="code hl_variable" href="structTraderMocker_1_1__PosItem.html#ab337ec892db392dc85d1ba47395a8b8c">_long</a>;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="structTraderMocker_1_1__PosItem.html#aee75c6de5a53fb43ddea773b12d370c1">   89</a></span>        <a class="code hl_struct" href="structTraderMocker_1_1__PosUnit.html">PosUnit</a>     <a class="code hl_variable" href="structTraderMocker_1_1__PosItem.html#aee75c6de5a53fb43ddea773b12d370c1">_short</a>;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="foldopen" id="foldopen00091" data-start="{" data-end="}">
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="structTraderMocker_1_1__PosItem.html#a072ea1f656defdee733a50d1775a653a">   91</a></span>        <a class="code hl_function" href="structTraderMocker_1_1__PosItem.html#a072ea1f656defdee733a50d1775a653a">_PosItem</a>()</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        {</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>            memset(<span class="keyword">this</span>, 0, <span class="keyword">sizeof</span>(<a class="code hl_struct" href="structTraderMocker_1_1__PosItem.html">_PosItem</a>));</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        }</div>
+</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a3784cc697bf14afbc47b7d0e451854a3">   95</a></span>    } <a class="code hl_typedef" href="classTraderMocker.html#a3784cc697bf14afbc47b7d0e451854a3">PosItem</a>;</div>
+</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a992bb09c58db6ab69a7b1dfd64284aa5">   97</a></span>    <a class="code hl_class" href="classwt__hashmap.html">wt_hashmap&lt;std::string, PosItem&gt;</a> <a class="code hl_variable" href="classTraderMocker.html#a992bb09c58db6ab69a7b1dfd64284aa5">_positions</a>;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a3c961a9cb93fff9995da68f63b5f06e9">   98</a></span>    std::string     <a class="code hl_variable" href="classTraderMocker.html#a3c961a9cb93fff9995da68f63b5f06e9">_pos_file</a>;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a2a34938466da04214e3248ecbb2b1c3f">  101</a></span>    <span class="keywordtype">int</span>         <a class="code hl_variable" href="classTraderMocker.html#a2a34938466da04214e3248ecbb2b1c3f">_udp_port</a>;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="classTraderMocker.html#ac3a668088bdf891e10d773927aa819c8">  103</a></span>    boost::asio::ip::udp::endpoint  <a class="code hl_variable" href="classTraderMocker.html#ac3a668088bdf891e10d773927aa819c8">_broad_ep</a>;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a74b97240561b77ef682721e3fe423131">  104</a></span>    boost::asio::io_service         <a class="code hl_variable" href="classTraderMocker.html#a74b97240561b77ef682721e3fe423131">_io_service</a>;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a5a76dcc3df1bb0b4149dafb6251a4c2e">  106</a></span>    boost::asio::ip::udp::socket*   <a class="code hl_variable" href="classTraderMocker.html#a5a76dcc3df1bb0b4149dafb6251a4c2e">_b_socket</a>;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="classTraderMocker.html#a0f1412badce4c89370b2be376fcf18f5">  108</a></span>    boost::array&lt;char, 1024&gt; <a class="code hl_variable" href="classTraderMocker.html#a0f1412badce4c89370b2be376fcf18f5">_b_buffer</a>;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classTraderMocker.html#a35f50448b91b701ca27165adc2a17280">handle_read</a>(<span class="keyword">const</span> boost::system::error_code&amp; e, std::size_t bytes_transferred, <span class="keywordtype">bool</span> isBroad);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classTraderMocker.html#a16489703afe56e04d6c6d5418c0349c4">extract_buffer</a>(uint32_t length, <span class="keywordtype">bool</span> isBroad);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="keywordtype">void</span>    <a class="code hl_function" href="classTraderMocker.html#ac1bbee584fc2d95e521eb90ab4d7f93c">reconn_udp</a>();</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="comment">//ITraderApi</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classTraderMocker.html#a35f596468cc179e81a84d667aa0eb314">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a> *params) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderMocker.html#acdb1c033990713ebf11fc594dd31ff06">release</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderMocker.html#a9531996a910eafb2082d4a1f77048376">registerSpi</a>(<a class="code hl_class" href="classITraderSpi.html">ITraderSpi</a> *listener) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderMocker.html#a1ca6bbe50d31e64a7f2f76ddcebf1daf">connect</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classTraderMocker.html#ab714c73ffcb5e8bd1efb4a9c046d8de7">disconnect</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classTraderMocker.html#a726d732a886c2fd0e6ad24194bb4ec32">isConnected</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classTraderMocker.html#a97215a6708ef42e718ea0d4d17df4690">makeEntrustID</a>(<span class="keywordtype">char</span>* buffer, <span class="keywordtype">int</span> length) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderMocker.html#af9feab4894539e70b264f55542c3c7ba">login</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_variable" href="demo__send__order_8cpp.html#a6dfa0071362986f2680867cd51fa2ea8">user</a>, <span class="keyword">const</span> <span class="keywordtype">char</span>* pass, <span class="keyword">const</span> <span class="keywordtype">char</span>* productInfo) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderMocker.html#ad883bccbfc3241ea863335d85782ba98">logout</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderMocker.html#a4754767657197984260b59a9d0764bbb">orderInsert</a>(<a class="code hl_class" href="classWTSEntrust.html">WTSEntrust</a>* eutrust) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderMocker.html#ad218ad2aa0bfedf4ba45bcf7c49aa455">orderAction</a>(<a class="code hl_class" href="classWTSEntrustAction.html">WTSEntrustAction</a>* action) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderMocker.html#a16beef4be4a836fb14070092024b8baa">queryAccount</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderMocker.html#ae9257f0c772f5417d0f83b06bf7f1eed">queryPositions</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderMocker.html#afa0f9632df931a802476c82c1ad3723c">queryOrders</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classTraderMocker.html#a47c331db38f49d60aa23b2dd91817e1a">queryTrades</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>};</div>
+</div>
+<div class="ttc" id="aTraderMocker_8h_html_a9e1fc31194100ab43bbad77a2f5c12b3"><div class="ttname"><a href="TraderMocker_8h.html#a9e1fc31194100ab43bbad77a2f5c12b3">USING_NS_WTP</a></div><div class="ttdeci">NS_WTP_END USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00018">TraderMocker.h:18</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a0588b0f85be4d70813e3cc9a1fbf19e4"><div class="ttname"><a href="WTSMarcos_8h.html#a0588b0f85be4d70813e3cc9a1fbf19e4">NS_WTP_BEGIN</a></div><div class="ttdeci">#define NS_WTP_BEGIN</div><div class="ttdoc">命名空间定义宏</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00085">WTSMarcos.h:85</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a43110534aa06a6d801f0f875c3cf4f1c"><div class="ttname"><a href="WTSMarcos_8h.html#a43110534aa06a6d801f0f875c3cf4f1c">MAX_INSTRUMENT_LENGTH</a></div><div class="ttdeci">#define MAX_INSTRUMENT_LENGTH</div><div class="ttdoc">合约代码最大长度限制</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00030">WTSMarcos.h:30</a></div></div>
+<div class="ttc" id="aWTSMarcos_8h_html_a5da4b88d7c6e99888ed7c2baf9425aee"><div class="ttname"><a href="WTSMarcos_8h.html#a5da4b88d7c6e99888ed7c2baf9425aee">NS_WTP_END</a></div><div class="ttdeci">#define NS_WTP_END</div><div class="ttdef"><b>Definition</b> <a href="WTSMarcos_8h_source.html#l00086">WTSMarcos.h:86</a></div></div>
+<div class="ttc" id="aclassIBaseDataMgr_html"><div class="ttname"><a href="classIBaseDataMgr.html">IBaseDataMgr</a></div><div class="ttdoc">基础数据管理器接口</div><div class="ttdef"><b>Definition</b> <a href="IBaseDataMgr_8h_source.html#l00075">IBaseDataMgr.h:76</a></div></div>
+<div class="ttc" id="aclassITraderApi_html"><div class="ttname"><a href="classITraderApi.html">ITraderApi</a></div><div class="ttdef"><b>Definition</b> <a href="ITraderApi_8h_source.html#l00189">ITraderApi.h:190</a></div></div>
+<div class="ttc" id="aclassITraderSpi_html"><div class="ttname"><a href="classITraderSpi.html">ITraderSpi</a></div><div class="ttdef"><b>Definition</b> <a href="ITraderApi_8h_source.html#l00098">ITraderApi.h:99</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html"><div class="ttname"><a href="classTraderMocker.html">TraderMocker</a></div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00023">TraderMocker.h:24</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a0058941e876abe2cbd672e5b8c3e1a19"><div class="ttname"><a href="classTraderMocker.html#a0058941e876abe2cbd672e5b8c3e1a19">TraderMocker::_terminated</a></div><div class="ttdeci">bool _terminated</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00044">TraderMocker.h:44</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a0f1412badce4c89370b2be376fcf18f5"><div class="ttname"><a href="classTraderMocker.html#a0f1412badce4c89370b2be376fcf18f5">TraderMocker::_b_buffer</a></div><div class="ttdeci">boost::array&lt; char, 1024 &gt; _b_buffer</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00108">TraderMocker.h:108</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a0fbbb180081a545af04ad9bff49844d6"><div class="ttname"><a href="classTraderMocker.html#a0fbbb180081a545af04ad9bff49844d6">TraderMocker::_max_tick_time</a></div><div class="ttdeci">uint64_t _max_tick_time</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00074">TraderMocker.h:74</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a1188af3cbc67a594713ff0035bc7b19b"><div class="ttname"><a href="classTraderMocker.html#a1188af3cbc67a594713ff0035bc7b19b">TraderMocker::makeOrderID</a></div><div class="ttdeci">uint32_t makeOrderID()</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00115">TraderMocker.cpp:115</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a16489703afe56e04d6c6d5418c0349c4"><div class="ttname"><a href="classTraderMocker.html#a16489703afe56e04d6c6d5418c0349c4">TraderMocker::extract_buffer</a></div><div class="ttdeci">void extract_buffer(uint32_t length, bool isBroad)</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00985">TraderMocker.cpp:985</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a16beef4be4a836fb14070092024b8baa"><div class="ttname"><a href="classTraderMocker.html#a16beef4be4a836fb14070092024b8baa">TraderMocker::queryAccount</a></div><div class="ttdeci">virtual int queryAccount() override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00830">TraderMocker.cpp:830</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a1c9b3abbc0f1ff0c6f38307271c7f067"><div class="ttname"><a href="classTraderMocker.html#a1c9b3abbc0f1ff0c6f38307271c7f067">TraderMocker::match_once</a></div><div class="ttdeci">int32_t match_once()</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00328">TraderMocker.cpp:328</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a1ca6bbe50d31e64a7f2f76ddcebf1daf"><div class="ttname"><a href="classTraderMocker.html#a1ca6bbe50d31e64a7f2f76ddcebf1daf">TraderMocker::connect</a></div><div class="ttdeci">virtual void connect() override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00689">TraderMocker.cpp:689</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a233086e50ddf3326ac3c8b9041bfb3f8"><div class="ttname"><a href="classTraderMocker.html#a233086e50ddf3326ac3c8b9041bfb3f8">TraderMocker::_trades</a></div><div class="ttdeci">WTSArray * _trades</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00064">TraderMocker.h:64</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a2901746650d07f899e611cd01ec35451"><div class="ttname"><a href="classTraderMocker.html#a2901746650d07f899e611cd01ec35451">TraderMocker::_mtx_awaits</a></div><div class="ttdeci">StdUniqueMutex _mtx_awaits</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00070">TraderMocker.h:70</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a2945ba4a153c77ef6ab25e88e72cf059"><div class="ttname"><a href="classTraderMocker.html#a2945ba4a153c77ef6ab25e88e72cf059">TraderMocker::load_positions</a></div><div class="ttdeci">void load_positions()</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00549">TraderMocker.cpp:549</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a2a34938466da04214e3248ecbb2b1c3f"><div class="ttname"><a href="classTraderMocker.html#a2a34938466da04214e3248ecbb2b1c3f">TraderMocker::_udp_port</a></div><div class="ttdeci">int _udp_port</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00101">TraderMocker.h:101</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a35f50448b91b701ca27165adc2a17280"><div class="ttname"><a href="classTraderMocker.html#a35f50448b91b701ca27165adc2a17280">TraderMocker::handle_read</a></div><div class="ttdeci">void handle_read(const boost::system::error_code &amp;e, std::size_t bytes_transferred, bool isBroad)</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00935">TraderMocker.cpp:935</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a35f596468cc179e81a84d667aa0eb314"><div class="ttname"><a href="classTraderMocker.html#a35f596468cc179e81a84d667aa0eb314">TraderMocker::init</a></div><div class="ttdeci">virtual bool init(WTSVariant *params) override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00518">TraderMocker.cpp:518</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a3784cc697bf14afbc47b7d0e451854a3"><div class="ttname"><a href="classTraderMocker.html#a3784cc697bf14afbc47b7d0e451854a3">TraderMocker::PosItem</a></div><div class="ttdeci">struct TraderMocker::_PosItem PosItem</div></div>
+<div class="ttc" id="aclassTraderMocker_html_a3c64766b4d18f08ead409365564a87d9"><div class="ttname"><a href="classTraderMocker.html#a3c64766b4d18f08ead409365564a87d9">TraderMocker::OrderCache</a></div><div class="ttdeci">WTSHashMap&lt; std::string &gt; OrderCache</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00068">TraderMocker.h:68</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a3c961a9cb93fff9995da68f63b5f06e9"><div class="ttname"><a href="classTraderMocker.html#a3c961a9cb93fff9995da68f63b5f06e9">TraderMocker::_pos_file</a></div><div class="ttdeci">std::string _pos_file</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00098">TraderMocker.h:98</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a4536126f699024ca07bfa297d3c2bdd1"><div class="ttname"><a href="classTraderMocker.html#a4536126f699024ca07bfa297d3c2bdd1">TraderMocker::TickCache</a></div><div class="ttdeci">WTSHashMap&lt; std::string &gt; TickCache</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00065">TraderMocker.h:65</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a4754767657197984260b59a9d0764bbb"><div class="ttname"><a href="classTraderMocker.html#a4754767657197984260b59a9d0764bbb">TraderMocker::orderInsert</a></div><div class="ttdeci">virtual int orderInsert(WTSEntrust *eutrust) override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00138">TraderMocker.cpp:138</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a47c331db38f49d60aa23b2dd91817e1a"><div class="ttname"><a href="classTraderMocker.html#a47c331db38f49d60aa23b2dd91817e1a">TraderMocker::queryTrades</a></div><div class="ttdeci">virtual int queryTrades() override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00923">TraderMocker.cpp:923</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a4c3c29f7a4a1153cb7717c5c562e13a1"><div class="ttname"><a href="classTraderMocker.html#a4c3c29f7a4a1153cb7717c5c562e13a1">TraderMocker::_thrd_worker</a></div><div class="ttdeci">StdThreadPtr _thrd_worker</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00055">TraderMocker.h:55</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a539d49130e16b6b630d8277e800ddfae"><div class="ttname"><a href="classTraderMocker.html#a539d49130e16b6b630d8277e800ddfae">TraderMocker::save_positions</a></div><div class="ttdeci">void save_positions()</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00592">TraderMocker.cpp:592</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a5a76dcc3df1bb0b4149dafb6251a4c2e"><div class="ttname"><a href="classTraderMocker.html#a5a76dcc3df1bb0b4149dafb6251a4c2e">TraderMocker::_b_socket</a></div><div class="ttdeci">boost::asio::ip::udp::socket * _b_socket</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00106">TraderMocker.h:106</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a5f9b979cdace7771c6a25b025b00ab00"><div class="ttname"><a href="classTraderMocker.html#a5f9b979cdace7771c6a25b025b00ab00">TraderMocker::_thrd_match</a></div><div class="ttdeci">StdThreadPtr _thrd_match</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00043">TraderMocker.h:43</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a61f2f7a2299a091004aab693bbe9d803"><div class="ttname"><a href="classTraderMocker.html#a61f2f7a2299a091004aab693bbe9d803">TraderMocker::PosUnit</a></div><div class="ttdeci">struct TraderMocker::_PosUnit PosUnit</div></div>
+<div class="ttc" id="aclassTraderMocker_html_a62542fbff8fe75c0c47c14d105f68f02"><div class="ttname"><a href="classTraderMocker.html#a62542fbff8fe75c0c47c14d105f68f02">TraderMocker::_last_match_time</a></div><div class="ttdeci">uint64_t _last_match_time</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00075">TraderMocker.h:75</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a6453eae2f46cc3246391f87cc0341072"><div class="ttname"><a href="classTraderMocker.html#a6453eae2f46cc3246391f87cc0341072">TraderMocker::_listener</a></div><div class="ttdeci">ITraderSpi * _listener</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00052">TraderMocker.h:52</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a64e98c7733767371790862849ea23555"><div class="ttname"><a href="classTraderMocker.html#a64e98c7733767371790862849ea23555">TraderMocker::_max_qty</a></div><div class="ttdeci">double _max_qty</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00060">TraderMocker.h:60</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a6dc28d9ad7f7630e87ab9586da81a447"><div class="ttname"><a href="classTraderMocker.html#a6dc28d9ad7f7630e87ab9586da81a447">TraderMocker::~TraderMocker</a></div><div class="ttdeci">~TraderMocker()</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00098">TraderMocker.cpp:98</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a6e9718a6185f92c50033024c9704c8dd"><div class="ttname"><a href="classTraderMocker.html#a6e9718a6185f92c50033024c9704c8dd">TraderMocker::makeTradeID</a></div><div class="ttdeci">uint32_t makeTradeID()</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00110">TraderMocker.cpp:110</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a6f1d44bf484745ec078432d69ea7c87e"><div class="ttname"><a href="classTraderMocker.html#a6f1d44bf484745ec078432d69ea7c87e">TraderMocker::_orders</a></div><div class="ttdeci">WTSArray * _orders</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00063">TraderMocker.h:63</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a726d732a886c2fd0e6ad24194bb4ec32"><div class="ttname"><a href="classTraderMocker.html#a726d732a886c2fd0e6ad24194bb4ec32">TraderMocker::isConnected</a></div><div class="ttdeci">virtual bool isConnected() override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00718">TraderMocker.cpp:718</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a74b97240561b77ef682721e3fe423131"><div class="ttname"><a href="classTraderMocker.html#a74b97240561b77ef682721e3fe423131">TraderMocker::_io_service</a></div><div class="ttdeci">boost::asio::io_service _io_service</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00104">TraderMocker.h:104</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a74d25124a2f4482ff34f912b5e09181e"><div class="ttname"><a href="classTraderMocker.html#a74d25124a2f4482ff34f912b5e09181e">TraderMocker::_codes</a></div><div class="ttdeci">wt_hashset&lt; std::string &gt; _codes</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00072">TraderMocker.h:72</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a797b1ace75e2e904060a077c579ca919"><div class="ttname"><a href="classTraderMocker.html#a797b1ace75e2e904060a077c579ca919">TraderMocker::_auto_entrust_id</a></div><div class="ttdeci">std::atomic&lt; uint32_t &gt; _auto_entrust_id</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00050">TraderMocker.h:50</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a7cef04e15c7a886d631c8c89ebd4569b"><div class="ttname"><a href="classTraderMocker.html#a7cef04e15c7a886d631c8c89ebd4569b">TraderMocker::_awaits</a></div><div class="ttdeci">OrderCache * _awaits</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00069">TraderMocker.h:69</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a895bfdc0e248b03c4495c47e3e392c18"><div class="ttname"><a href="classTraderMocker.html#a895bfdc0e248b03c4495c47e3e392c18">TraderMocker::_ticks</a></div><div class="ttdeci">TickCache * _ticks</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00066">TraderMocker.h:66</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a9531996a910eafb2082d4a1f77048376"><div class="ttname"><a href="classTraderMocker.html#a9531996a910eafb2082d4a1f77048376">TraderMocker::registerSpi</a></div><div class="ttdeci">virtual void registerSpi(ITraderSpi *listener) override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00659">TraderMocker.cpp:659</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a97215a6708ef42e718ea0d4d17df4690"><div class="ttname"><a href="classTraderMocker.html#a97215a6708ef42e718ea0d4d17df4690">TraderMocker::makeEntrustID</a></div><div class="ttdeci">virtual bool makeEntrustID(char *buffer, int length) override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00120">TraderMocker.cpp:120</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_a992bb09c58db6ab69a7b1dfd64284aa5"><div class="ttname"><a href="classTraderMocker.html#a992bb09c58db6ab69a7b1dfd64284aa5">TraderMocker::_positions</a></div><div class="ttdeci">wt_hashmap&lt; std::string, PosItem &gt; _positions</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00097">TraderMocker.h:97</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_ab6ae3f0facdced20e0cb03b3f778867e"><div class="ttname"><a href="classTraderMocker.html#ab6ae3f0facdced20e0cb03b3f778867e">TraderMocker::TraderMocker</a></div><div class="ttdeci">TraderMocker()</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00081">TraderMocker.cpp:81</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_ab714c73ffcb5e8bd1efb4a9c046d8de7"><div class="ttname"><a href="classTraderMocker.html#ab714c73ffcb5e8bd1efb4a9c046d8de7">TraderMocker::disconnect</a></div><div class="ttdeci">virtual void disconnect() override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00705">TraderMocker.cpp:705</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_abd0b5b9fc561d9f25c89789c3fd7b7ea"><div class="ttname"><a href="classTraderMocker.html#abd0b5b9fc561d9f25c89789c3fd7b7ea">TraderMocker::_bd_mgr</a></div><div class="ttdeci">IBaseDataMgr * _bd_mgr</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00053">TraderMocker.h:53</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_ac1bbee584fc2d95e521eb90ab4d7f93c"><div class="ttname"><a href="classTraderMocker.html#ac1bbee584fc2d95e521eb90ab4d7f93c">TraderMocker::reconn_udp</a></div><div class="ttdeci">void reconn_udp()</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00666">TraderMocker.cpp:666</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_ac3a668088bdf891e10d773927aa819c8"><div class="ttname"><a href="classTraderMocker.html#ac3a668088bdf891e10d773927aa819c8">TraderMocker::_broad_ep</a></div><div class="ttdeci">boost::asio::ip::udp::endpoint _broad_ep</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00103">TraderMocker.h:103</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_acdb1c033990713ebf11fc594dd31ff06"><div class="ttname"><a href="classTraderMocker.html#acdb1c033990713ebf11fc594dd31ff06">TraderMocker::release</a></div><div class="ttdeci">virtual void release() override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00640">TraderMocker.cpp:640</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_ad218ad2aa0bfedf4ba45bcf7c49aa455"><div class="ttname"><a href="classTraderMocker.html#ad218ad2aa0bfedf4ba45bcf7c49aa455">TraderMocker::orderAction</a></div><div class="ttdeci">virtual int orderAction(WTSEntrustAction *action) override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00750">TraderMocker.cpp:750</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_ad273b40f526cb277488cc9d7b900ca44"><div class="ttname"><a href="classTraderMocker.html#ad273b40f526cb277488cc9d7b900ca44">TraderMocker::_min_qty</a></div><div class="ttdeci">double _min_qty</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00061">TraderMocker.h:61</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_ad3dce67ac8d3d78c0b195ed3b8dc5add"><div class="ttname"><a href="classTraderMocker.html#ad3dce67ac8d3d78c0b195ed3b8dc5add">TraderMocker::_auto_trade_id</a></div><div class="ttdeci">std::atomic&lt; uint32_t &gt; _auto_trade_id</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00048">TraderMocker.h:48</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_ad78ecf2c5c8a3b6e7dae4b14b22f284e"><div class="ttname"><a href="classTraderMocker.html#ad78ecf2c5c8a3b6e7dae4b14b22f284e">TraderMocker::_mutex_api</a></div><div class="ttdeci">StdUniqueMutex _mutex_api</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00046">TraderMocker.h:46</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_ad828b5bb425783f1c59e3febc9f98a9c"><div class="ttname"><a href="classTraderMocker.html#ad828b5bb425783f1c59e3febc9f98a9c">TraderMocker::_auto_order_id</a></div><div class="ttdeci">std::atomic&lt; uint32_t &gt; _auto_order_id</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00049">TraderMocker.h:49</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_ad883bccbfc3241ea863335d85782ba98"><div class="ttname"><a href="classTraderMocker.html#ad883bccbfc3241ea863335d85782ba98">TraderMocker::logout</a></div><div class="ttdeci">virtual int logout() override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00745">TraderMocker.cpp:745</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_ae6e00429204b0aa9782d7b37275157e8"><div class="ttname"><a href="classTraderMocker.html#ae6e00429204b0aa9782d7b37275157e8">TraderMocker::_mocker_id</a></div><div class="ttdeci">uint32_t _mocker_id</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00058">TraderMocker.h:58</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_ae9257f0c772f5417d0f83b06bf7f1eed"><div class="ttname"><a href="classTraderMocker.html#ae9257f0c772f5417d0f83b06bf7f1eed">TraderMocker::queryPositions</a></div><div class="ttdeci">virtual int queryPositions() override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00862">TraderMocker.cpp:862</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_af231cfc42ffecd38df5baba7035242aa"><div class="ttname"><a href="classTraderMocker.html#af231cfc42ffecd38df5baba7035242aa">TraderMocker::_millisecs</a></div><div class="ttdeci">uint32_t _millisecs</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00057">TraderMocker.h:57</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_af9feab4894539e70b264f55542c3c7ba"><div class="ttname"><a href="classTraderMocker.html#af9feab4894539e70b264f55542c3c7ba">TraderMocker::login</a></div><div class="ttdeci">virtual int login(const char *user, const char *pass, const char *productInfo) override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00723">TraderMocker.cpp:723</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_afa0f9632df931a802476c82c1ad3723c"><div class="ttname"><a href="classTraderMocker.html#afa0f9632df931a802476c82c1ad3723c">TraderMocker::queryOrders</a></div><div class="ttdeci">virtual int queryOrders() override</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8cpp_source.html#l00911">TraderMocker.cpp:911</a></div></div>
+<div class="ttc" id="aclassTraderMocker_html_afc2dcecb2f09ec19fa98202f3d137f46"><div class="ttname"><a href="classTraderMocker.html#afc2dcecb2f09ec19fa98202f3d137f46">TraderMocker::_use_newpx</a></div><div class="ttdeci">bool _use_newpx</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00059">TraderMocker.h:59</a></div></div>
+<div class="ttc" id="aclassWTSArray_html"><div class="ttname"><a href="classWTSArray.html">WTSArray</a></div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00032">WTSCollection.hpp:33</a></div></div>
+<div class="ttc" id="aclassWTSEntrustAction_html"><div class="ttname"><a href="classWTSEntrustAction.html">WTSEntrustAction</a></div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00142">WTSTradeDef.hpp:143</a></div></div>
+<div class="ttc" id="aclassWTSEntrust_html"><div class="ttname"><a href="classWTSEntrust.html">WTSEntrust</a></div><div class="ttdef"><b>Definition</b> <a href="WTSTradeDef_8hpp_source.html#l00025">WTSTradeDef.hpp:26</a></div></div>
+<div class="ttc" id="aclassWTSHashMap_html"><div class="ttname"><a href="classWTSHashMap.html">WTSHashMap</a></div><div class="ttdef"><b>Definition</b> <a href="WTSCollection_8hpp_source.html#l00594">WTSCollection.hpp:595</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclasswt__hashmap_html"><div class="ttname"><a href="classwt__hashmap.html">wt_hashmap</a></div><div class="ttdoc">WonderTrader通用高性能哈希表模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00162">FasterDefs.h:163</a></div></div>
+<div class="ttc" id="aclasswt__hashset_html"><div class="ttname"><a href="classwt__hashset.html">wt_hashset</a></div><div class="ttdoc">WonderTrader通用高性能哈希集合模板类</div><div class="ttdef"><b>Definition</b> <a href="FasterDefs_8h_source.html#l00197">FasterDefs.h:198</a></div></div>
+<div class="ttc" id="ademo__send__order_8cpp_html_a6dfa0071362986f2680867cd51fa2ea8"><div class="ttname"><a href="demo__send__order_8cpp.html#a6dfa0071362986f2680867cd51fa2ea8">user</a></div><div class="ttdeci">std::string user</div><div class="ttdef"><b>Definition</b> <a href="API_2AtpTradeApi_2demo_2all__message__demo_2main_8cpp_source.html#l00022">main.cpp:22</a></div></div>
+<div class="ttc" id="agroup__MutexUtils_html_gaff888cdcc14f5ebb7a1a9c9f7b52846f"><div class="ttname"><a href="group__MutexUtils.html#gaff888cdcc14f5ebb7a1a9c9f7b52846f">StdUniqueMutex</a></div><div class="ttdeci">std::mutex StdUniqueMutex</div><div class="ttdoc">普通互斥量类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00061">StdUtils.hpp:61</a></div></div>
+<div class="ttc" id="agroup__ThreadUtils_html_gaf9ea8e1e64d43ab034614d39d0b35776"><div class="ttname"><a href="group__ThreadUtils.html#gaf9ea8e1e64d43ab034614d39d0b35776">StdThreadPtr</a></div><div class="ttdeci">std::shared_ptr&lt; StdThread &gt; StdThreadPtr</div><div class="ttdoc">线程智能指针类型</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00042">StdUtils.hpp:42</a></div></div>
+<div class="ttc" id="astructTraderMocker_1_1__PosItem_html"><div class="ttname"><a href="structTraderMocker_1_1__PosItem.html">TraderMocker::_PosItem</a></div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00083">TraderMocker.h:84</a></div></div>
+<div class="ttc" id="astructTraderMocker_1_1__PosItem_html_a072ea1f656defdee733a50d1775a653a"><div class="ttname"><a href="structTraderMocker_1_1__PosItem.html#a072ea1f656defdee733a50d1775a653a">TraderMocker::_PosItem::_PosItem</a></div><div class="ttdeci">_PosItem()</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00091">TraderMocker.h:91</a></div></div>
+<div class="ttc" id="astructTraderMocker_1_1__PosItem_html_a71c00c657c521582eec9ff8bb04b3350"><div class="ttname"><a href="structTraderMocker_1_1__PosItem.html#a71c00c657c521582eec9ff8bb04b3350">TraderMocker::_PosItem::_exchg</a></div><div class="ttdeci">char _exchg[MAX_INSTRUMENT_LENGTH]</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00085">TraderMocker.h:85</a></div></div>
+<div class="ttc" id="astructTraderMocker_1_1__PosItem_html_ab337ec892db392dc85d1ba47395a8b8c"><div class="ttname"><a href="structTraderMocker_1_1__PosItem.html#ab337ec892db392dc85d1ba47395a8b8c">TraderMocker::_PosItem::_long</a></div><div class="ttdeci">PosUnit _long</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00088">TraderMocker.h:88</a></div></div>
+<div class="ttc" id="astructTraderMocker_1_1__PosItem_html_abacb7c5734d5c12db7c1ba8bdbb6c02d"><div class="ttname"><a href="structTraderMocker_1_1__PosItem.html#abacb7c5734d5c12db7c1ba8bdbb6c02d">TraderMocker::_PosItem::_code</a></div><div class="ttdeci">char _code[MAX_INSTRUMENT_LENGTH]</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00086">TraderMocker.h:86</a></div></div>
+<div class="ttc" id="astructTraderMocker_1_1__PosItem_html_aee75c6de5a53fb43ddea773b12d370c1"><div class="ttname"><a href="structTraderMocker_1_1__PosItem.html#aee75c6de5a53fb43ddea773b12d370c1">TraderMocker::_PosItem::_short</a></div><div class="ttdeci">PosUnit _short</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00089">TraderMocker.h:89</a></div></div>
+<div class="ttc" id="astructTraderMocker_1_1__PosUnit_html"><div class="ttname"><a href="structTraderMocker_1_1__PosUnit.html">TraderMocker::_PosUnit</a></div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00077">TraderMocker.h:78</a></div></div>
+<div class="ttc" id="astructTraderMocker_1_1__PosUnit_html_a304fbda583f99635c9998db784e18530"><div class="ttname"><a href="structTraderMocker_1_1__PosUnit.html#a304fbda583f99635c9998db784e18530">TraderMocker::_PosUnit::_frozen</a></div><div class="ttdeci">double _frozen</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00080">TraderMocker.h:80</a></div></div>
+<div class="ttc" id="astructTraderMocker_1_1__PosUnit_html_a5421fced2f0134a40f925b845430fc5a"><div class="ttname"><a href="structTraderMocker_1_1__PosUnit.html#a5421fced2f0134a40f925b845430fc5a">TraderMocker::_PosUnit::_volume</a></div><div class="ttdeci">double _volume</div><div class="ttdef"><b>Definition</b> <a href="TraderMocker_8h_source.html#l00079">TraderMocker.h:79</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_4ec2f953be859dc3aaecc895910aa74e.html">TraderMocker</a></li><li class="navelem"><a class="el" href="TraderMocker_8h.html">TraderMocker.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

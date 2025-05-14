@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtUftCore/WtHelper.cpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtUftCore_2WtHelper_8cpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtHelper.cpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtUftCore_2WtHelper_8cpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="WtUftCore_2WtHelper_8h.html">WtHelper.h</a>&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;../Share/StrUtil.hpp&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;../Share/StdUtils.hpp&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;boost/filesystem.hpp&gt;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#ifdef _MSC_VER</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;direct.h&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#else   </span><span class="comment">//UNIX</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;unistd.h&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>uint32_t <a class="code hl_variable" href="classWtHelper.html#afc2da5a9b5fe7c77fb47d13b5838fd69">WtHelper::_cur_date</a> = 0;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>uint32_t <a class="code hl_variable" href="classWtHelper.html#addd84a1e96da770a1c09d23a129c2a3e">WtHelper::_cur_time</a> = 0;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>uint32_t <a class="code hl_variable" href="classWtHelper.html#acb5d525f095b894b292ad4a416390540">WtHelper::_cur_secs</a> = 0;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>uint32_t <a class="code hl_variable" href="classWtHelper.html#a3e39202d7d661ca348aa040a9c8699df">WtHelper::_cur_tdate</a> = 0;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>std::string <a class="code hl_variable" href="classWtHelper.html#a760ae0a1885801110a87cfe769691742">WtHelper::_inst_dir</a>;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>std::string <a class="code hl_variable" href="classWtHelper.html#a2395e49f7a9814b8272cb03fbea4c12d">WtHelper::_gen_dir</a> = <span class="stringliteral">&quot;./generated/&quot;</span>;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>std::string <a class="code hl_function" href="classWtHelper.html#ac5e1e8cf33bf4c502aedaf6c6db62ab5">WtHelper::getCWD</a>()</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>{</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">static</span> std::string _cwd;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordflow">if</span>(_cwd.empty())</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    {</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        <span class="keywordtype">char</span>   buffer[256];</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#ifdef _MSC_VER</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        <span class="comment">// _getcwd(buffer, 255);</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="keywordflow">if</span> (_getcwd(buffer, <span class="keyword">sizeof</span>(buffer)) == <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>            <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;Failed to get current working directory on Windows&quot;</span>);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        }</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#else   </span><span class="comment">//UNIX</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="comment">// getcwd(buffer, 255);</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        <span class="keywordflow">if</span> (getcwd(buffer, <span class="keyword">sizeof</span>(buffer)) == <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>            <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;Failed to get current working directory on UNIX&quot;</span>);</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        }</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        _cwd = <a class="code hl_function" href="classStrUtil.html#a6d993d2350e32ceedca3811eee1370db">StrUtil::standardisePath</a>(buffer);</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    }   </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">return</span> _cwd;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>}</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>std::string <a class="code hl_function" href="classWtHelper.html#a5f3d18491cb2fdf9486baadb5db3f110">WtHelper::getModulePath</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* moduleName, <span class="keyword">const</span> <span class="keywordtype">char</span>* subDir, <span class="keywordtype">bool</span> isCWD <span class="comment">/* = true */</span>)</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>{</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    std::stringstream ss;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    ss &lt;&lt; (isCWD?<a class="code hl_function" href="classWtHelper.html#ac5e1e8cf33bf4c502aedaf6c6db62ab5">getCWD</a>():<a class="code hl_function" href="classWtHelper.html#af1a7e612c19e279fc8b57066cad0c2f9">getInstDir</a>()) &lt;&lt; subDir &lt;&lt; <span class="stringliteral">&quot;/&quot;</span> &lt;&lt; moduleName;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keywordflow">return</span> ss.str();</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>}</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtHelper.html#a99639dc8fa1fb1a24e9a3929c32b583b">WtHelper::getStraDataDir</a>()</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>{</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keyword">static</span> std::string folder = <a class="code hl_function" href="classStrUtil.html#a6d993d2350e32ceedca3811eee1370db">StrUtil::standardisePath</a>(<a class="code hl_variable" href="classWtHelper.html#a2395e49f7a9814b8272cb03fbea4c12d">_gen_dir</a>) + <span class="stringliteral">&quot;stradata/&quot;</span>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="classStdFile.html#a65778f7268857f981a2e19acb8379761">StdFile::exists</a>(folder.c_str()))</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        boost::filesystem::create_directories(folder);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keywordflow">return</span> folder.c_str();</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>}</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtHelper.html#ab1ab6b26847e827d63ddda2c7e6de00e">WtHelper::getStraUsrDatDir</a>()</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>{</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keyword">static</span> std::string folder = <a class="code hl_function" href="classStrUtil.html#a6d993d2350e32ceedca3811eee1370db">StrUtil::standardisePath</a>(<a class="code hl_variable" href="classWtHelper.html#a2395e49f7a9814b8272cb03fbea4c12d">_gen_dir</a>) + <span class="stringliteral">&quot;userdata/&quot;</span>;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="classStdFile.html#a65778f7268857f981a2e19acb8379761">StdFile::exists</a>(folder.c_str()))</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        boost::filesystem::create_directories(folder);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="keywordflow">return</span> folder.c_str();</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>}</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtHelper.html#abb1e5b65775cc630a9fcabe71a3da098">WtHelper::getPortifolioDir</a>()</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>{</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="keyword">static</span> std::string folder = <a class="code hl_function" href="classStrUtil.html#a6d993d2350e32ceedca3811eee1370db">StrUtil::standardisePath</a>(<a class="code hl_variable" href="classWtHelper.html#a2395e49f7a9814b8272cb03fbea4c12d">_gen_dir</a>) + <span class="stringliteral">&quot;portfolio/&quot;</span>;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="classStdFile.html#a65778f7268857f981a2e19acb8379761">StdFile::exists</a>(folder.c_str()))</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>        boost::filesystem::create_directories(folder);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keywordflow">return</span> folder.c_str();</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>}</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtHelper.html#ae245ba819e4637d80f4326b05e494e15">WtHelper::getOutputDir</a>()</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>{</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="keyword">static</span> std::string folder = <a class="code hl_function" href="classStrUtil.html#a6d993d2350e32ceedca3811eee1370db">StrUtil::standardisePath</a>(<a class="code hl_variable" href="classWtHelper.html#a2395e49f7a9814b8272cb03fbea4c12d">_gen_dir</a>) + <span class="stringliteral">&quot;outputs/&quot;</span>;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="classStdFile.html#a65778f7268857f981a2e19acb8379761">StdFile::exists</a>(folder.c_str()))</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        boost::filesystem::create_directories(folder);</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="keywordflow">return</span> folder.c_str();</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>}</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtHelper.html#a356cdee3e964dc55067a8da0dabb5620">WtHelper::getBaseDir</a>()</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>{</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="keyword">static</span> std::string folder = <a class="code hl_function" href="classStrUtil.html#a6d993d2350e32ceedca3811eee1370db">StrUtil::standardisePath</a>(<a class="code hl_variable" href="classWtHelper.html#a2395e49f7a9814b8272cb03fbea4c12d">_gen_dir</a>);</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="classStdFile.html#a65778f7268857f981a2e19acb8379761">StdFile::exists</a>(folder.c_str()))</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        boost::filesystem::create_directories(folder);</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="keywordflow">return</span> folder.c_str();</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>}</div>
+<div class="ttc" id="aWtUftCore_2WtHelper_8h_html"><div class="ttname"><a href="WtUftCore_2WtHelper_8h.html">WtHelper.h</a></div><div class="ttdoc">WonderTrader辅助工具类头文件</div></div>
+<div class="ttc" id="aclassStdFile_html_a65778f7268857f981a2e19acb8379761"><div class="ttname"><a href="classStdFile.html#a65778f7268857f981a2e19acb8379761">StdFile::exists</a></div><div class="ttdeci">static bool exists(const char *filename)</div><div class="ttdoc">检查文件是否存在</div><div class="ttdef"><b>Definition</b> <a href="StdUtils_8hpp_source.html#l00221">StdUtils.hpp:221</a></div></div>
+<div class="ttc" id="aclassStrUtil_html_a6d993d2350e32ceedca3811eee1370db"><div class="ttname"><a href="classStrUtil.html#a6d993d2350e32ceedca3811eee1370db">StrUtil::standardisePath</a></div><div class="ttdeci">static std::string standardisePath(const std::string &amp;init, bool bIsDir=true)</div><div class="ttdoc">标准化路径格式 - 仅使用正斜杠，目录以斜杠结尾</div><div class="ttdef"><b>Definition</b> <a href="StrUtil_8hpp_source.html#l00360">StrUtil.hpp:360</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_a2395e49f7a9814b8272cb03fbea4c12d"><div class="ttname"><a href="classWtHelper.html#a2395e49f7a9814b8272cb03fbea4c12d">WtHelper::_gen_dir</a></div><div class="ttdeci">static std::string _gen_dir</div><div class="ttdoc">生成文件输出目录</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2WtHelper_8h_source.html#l00163">WtHelper.h:163</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_a356cdee3e964dc55067a8da0dabb5620"><div class="ttname"><a href="classWtHelper.html#a356cdee3e964dc55067a8da0dabb5620">WtHelper::getBaseDir</a></div><div class="ttdeci">static const char * getBaseDir()</div><div class="ttdoc">获取基础目录</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2WtHelper_8cpp_source.html#l00165">WtHelper.cpp:165</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_a3e39202d7d661ca348aa040a9c8699df"><div class="ttname"><a href="classWtHelper.html#a3e39202d7d661ca348aa040a9c8699df">WtHelper::_cur_tdate</a></div><div class="ttdeci">static uint32_t _cur_tdate</div><div class="ttdoc">当前交易日，格式YYYYMMDD</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2WtHelper_8h_source.html#l00153">WtHelper.h:153</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_a5f3d18491cb2fdf9486baadb5db3f110"><div class="ttname"><a href="classWtHelper.html#a5f3d18491cb2fdf9486baadb5db3f110">WtHelper::getModulePath</a></div><div class="ttdeci">static std::string getModulePath(const char *moduleName, const char *subDir, bool isCWD=true)</div><div class="ttdoc">获取模块路径</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2WtHelper_8cpp_source.html#l00083">WtHelper.cpp:83</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_a760ae0a1885801110a87cfe769691742"><div class="ttname"><a href="classWtHelper.html#a760ae0a1885801110a87cfe769691742">WtHelper::_inst_dir</a></div><div class="ttdeci">static std::string _inst_dir</div><div class="ttdoc">实例所在目录，存储应用程序实例的安装路径</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2WtHelper_8h_source.html#l00057">WtHelper.h:57</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_a99639dc8fa1fb1a24e9a3929c32b583b"><div class="ttname"><a href="classWtHelper.html#a99639dc8fa1fb1a24e9a3929c32b583b">WtHelper::getStraDataDir</a></div><div class="ttdeci">static const char * getStraDataDir()</div><div class="ttdoc">获取策略数据目录</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2WtHelper_8cpp_source.html#l00095">WtHelper.cpp:95</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_ab1ab6b26847e827d63ddda2c7e6de00e"><div class="ttname"><a href="classWtHelper.html#ab1ab6b26847e827d63ddda2c7e6de00e">WtHelper::getStraUsrDatDir</a></div><div class="ttdeci">static const char * getStraUsrDatDir()</div><div class="ttdoc">获取策略用户数据目录</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2WtHelper_8cpp_source.html#l00123">WtHelper.cpp:123</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_abb1e5b65775cc630a9fcabe71a3da098"><div class="ttname"><a href="classWtHelper.html#abb1e5b65775cc630a9fcabe71a3da098">WtHelper::getPortifolioDir</a></div><div class="ttdeci">static const char * getPortifolioDir()</div><div class="ttdoc">获取组合目录</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2WtHelper_8cpp_source.html#l00137">WtHelper.cpp:137</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_ac5e1e8cf33bf4c502aedaf6c6db62ab5"><div class="ttname"><a href="classWtHelper.html#ac5e1e8cf33bf4c502aedaf6c6db62ab5">WtHelper::getCWD</a></div><div class="ttdeci">static std::string getCWD()</div><div class="ttdoc">获取当前工作目录</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2WtHelper_8cpp_source.html#l00031">WtHelper.cpp:31</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_acb5d525f095b894b292ad4a416390540"><div class="ttname"><a href="classWtHelper.html#acb5d525f095b894b292ad4a416390540">WtHelper::_cur_secs</a></div><div class="ttdeci">static uint32_t _cur_secs</div><div class="ttdoc">当前秒数，包含毫秒</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2WtHelper_8h_source.html#l00148">WtHelper.h:148</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_addd84a1e96da770a1c09d23a129c2a3e"><div class="ttname"><a href="classWtHelper.html#addd84a1e96da770a1c09d23a129c2a3e">WtHelper::_cur_time</a></div><div class="ttdeci">static uint32_t _cur_time</div><div class="ttdoc">当前时间，以分钟为准，格式HHMM</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2WtHelper_8h_source.html#l00143">WtHelper.h:143</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_ae245ba819e4637d80f4326b05e494e15"><div class="ttname"><a href="classWtHelper.html#ae245ba819e4637d80f4326b05e494e15">WtHelper::getOutputDir</a></div><div class="ttdeci">static const char * getOutputDir()</div><div class="ttdoc">获取输出目录</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2WtHelper_8cpp_source.html#l00063">WtHelper.cpp:63</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_af1a7e612c19e279fc8b57066cad0c2f9"><div class="ttname"><a href="classWtHelper.html#af1a7e612c19e279fc8b57066cad0c2f9">WtHelper::getInstDir</a></div><div class="ttdeci">static const std::string &amp; getInstDir()</div><div class="ttdoc">获取实例目录</div><div class="ttdef"><b>Definition</b> <a href="WtBtCore_2WtHelper_8h_source.html#l00041">WtHelper.h:41</a></div></div>
+<div class="ttc" id="aclassWtHelper_html_afc2da5a9b5fe7c77fb47d13b5838fd69"><div class="ttname"><a href="classWtHelper.html#afc2da5a9b5fe7c77fb47d13b5838fd69">WtHelper::_cur_date</a></div><div class="ttdeci">static uint32_t _cur_date</div><div class="ttdoc">当前日期，格式YYYYMMDD</div><div class="ttdef"><b>Definition</b> <a href="WtCore_2WtHelper_8h_source.html#l00138">WtHelper.h:138</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_d8cf3075eb9e2bed05522e3b08b8e887.html">WtUftCore</a></li><li class="navelem"><a class="el" href="WtUftCore_2WtHelper_8cpp.html">WtHelper.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

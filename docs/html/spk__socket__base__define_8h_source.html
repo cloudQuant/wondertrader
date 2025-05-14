@@ -1,0 +1,420 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/sutil/net/spk_socket_base_define.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('spk__socket__base__define_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">spk_socket_base_define.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="spk__socket__base__define_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright 2009-2016 the original author or authors.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * you may not use this file except in compliance with the License.</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * You may obtain a copy of the License at</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *     http://www.apache.org/licenses/LICENSE-2.0</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * Unless required by applicable law or agreed to in writing, software</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * See the License for the specific language governing permissions and</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * limitations under the License.</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#ifndef _SPK_SOCKET_BASE_DEFINE_H</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#define _SPK_SOCKET_BASE_DEFINE_H</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include    &lt;<a class="code" href="types_8h.html">sutil/types.h</a>&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment"> * 平台相关的预编译宏设置</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#if defined (__WINDOWS__) || defined (__MINGW__)</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#   define  __SPK_INVALID_SOCKET        INVALID_SOCKET</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#   define  __SPK_IS_INVALID_SOCKET(s)  ((s) == INVALID_SOCKET)</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a15b99dc916fb87ea907792096a868b27">   48</a></span><span class="preprocessor">#   define  __SPK_INVALID_SOCKET        -1</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a73758275d39624b00b576cb4c0f7a3a5">   49</a></span><span class="preprocessor">#   define  __SPK_IS_INVALID_SOCKET(s)  ((s) &lt; 0)</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#ifndef TCP_KEEPIDLE</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#   if defined (__APPLE__)</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#       define  TCP_KEEPIDLE            TCP_KEEPALIVE</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#   endif</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="comment"> * 常量定义</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#ae81ca76c21d58d524474315e67874c18">   67</a></span><span class="preprocessor">#define SPK_MAX_IP_LEN                  (16)</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a669b83228334dcaf4c58651a9fef891b">   69</a></span><span class="preprocessor">#define SPK_MAX_IPV6_LEN                (40)</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a79ffd258f18a079b0f13261b4ce7f085">   71</a></span><span class="preprocessor">#define SPK_MAX_URI_LEN                 (128)</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a28df1e72d85255030ad43cc59a4bf8e3">   73</a></span><span class="preprocessor">#define SPK_MAX_PROTOCOL_NAME_LEN       (32)</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a03e30b718fe5ba2d4d0fc25df2c89778">   75</a></span><span class="preprocessor">#define SPK_MAX_PROTOCOL_MEMO_LEN       (64)</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#afbbb0d5353d9a0e28d62fd5128b0f8b0">   77</a></span><span class="preprocessor">#define SPK_MAC_SEGS_CNT                (6)</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a84c16befac70b4d7b7ac12a97c85a8ca">   79</a></span><span class="preprocessor">#define SPK_MAX_MAC_LEN                 (20)</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#adb2cbae9e66d63b151a5b802845f60cf">   81</a></span><span class="preprocessor">#define SPK_MAX_MAC_ALGIN_LEN           (24)</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a98307970a76778c008b44060797db570">   83</a></span><span class="preprocessor">#define SPK_MAX_DRIVER_ID_LEN           (24)</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">#if defined(__MINGW__) || defined(__CYGWIN__) || defined(__WINDOWS__)</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="preprocessor">#   define  SPK_MAX_SO_BACKLOG          (128)</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a86227e1e19577536f39445af07e2ccaf">   89</a></span><span class="preprocessor">#   define  SPK_MAX_SO_BACKLOG          (SOMAXCONN)</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#acf5d7624c448f0cdd08c193143d21fc6">   93</a></span><span class="preprocessor">#define SPK_DEFAULT_SO_BACKLOG          SPK_MAX_SO_BACKLOG</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#aa569ee2b849fd05c3bad4c2a7452a71a">   95</a></span><span class="preprocessor">#define SPK_DEFAULT_SO_RCVBUF           (1024)</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a5a69fdf0e8a3d2a25c2357ae3f3d72f9">   97</a></span><span class="preprocessor">#define SPK_DEFAULT_SO_SNDBUF           (1024)</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#aa5d1a09f1d89ef97b657eec1024f0ef6">   99</a></span><span class="preprocessor">#define SPK_DEFAULT_TCP_NODELAY         (1)</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a440c8b6efb5705a3e0e63fb220e2a97e">  102</a></span><span class="preprocessor">#define SPK_DEFAULT_CONN_TIMEOUT_MS     (10000)</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a809ba4ac8f831e216a68ab117b3d1031">  104</a></span><span class="preprocessor">#define SPK_MAX_CONN_TIMEOUT_MS         (60000)</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="preprocessor">#ifndef SPK_DEFAULT_SO_TIMEOUT_MS</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a1a8270c2c61c0143034a005fca1f7cc8">  108</a></span><span class="preprocessor">#   define  SPK_DEFAULT_SO_TIMEOUT_MS   (15000)</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a6c81243f87d1a43658cd4df579b4b375">  111</a></span><span class="preprocessor">#define SPK_SHORT_SO_TIMEOUT_MS         (5000)</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a383fa3e27e8d0b39c69df2347c9144bb">  113</a></span><span class="preprocessor">#define SPK_SHORTEST_SO_TIMEOUT_MS      (1000)</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a11d616ca4620ac88e7bc94d3d8f474f6">  115</a></span><span class="preprocessor">#define SPK_LONG_SO_TIMEOUT_MS          (30000)</span></div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a09e83a3b83b80c3ae8f0612aec34efb6">  117</a></span><span class="preprocessor">#define SPK_LONGEST_SO_TIMEOUT_MS       (60000)</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a40288399700dd31ed62c50cecf041d31">  120</a></span><span class="preprocessor">#define SPK_DEFAULT_SO_KEEPALIVE        (1)</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#ac030d08a50f85d77c393a2de261d97c0">  122</a></span><span class="preprocessor">#define SPK_DEFAULT_TCP_KEEPIDLE        (90)</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#ad86efe6c9bc119fa7874729e2e2b1fc2">  124</a></span><span class="preprocessor">#define SPK_DEFAULT_TCP_KEEPINTVL       (30)</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a89f05ff510d715c9703135d72d489be0">  126</a></span><span class="preprocessor">#define SPK_DEFAULT_TCP_KEEPCNT         (9)</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="comment"> * 常量定义（枚举类型定义）</span></div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
+<div class="foldopen" id="foldopen00137" data-start="{" data-end="};">
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834">  137</a></span><span class="keyword">typedef</span> <span class="keyword">enum</span> <a class="code hl_enumeration" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834">_eSSocketProtocolType</a> {</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834afcfea896e65823a9c356380e530035da">  138</a></span>    <a class="code hl_enumvalue" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834afcfea896e65823a9c356380e530035da">SPK_SOCKET_PROTOCOL_TCP</a>             = 0,    </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a0a0cdf3edfa29ccd44b99c55916461fc">  139</a></span>    <a class="code hl_enumvalue" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a0a0cdf3edfa29ccd44b99c55916461fc">SPK_SOCKET_PROTOCOL_IPC</a>             = 1,    </div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834ab54907fefd11b7f44efd8428d41066f8">  140</a></span>    <a class="code hl_enumvalue" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834ab54907fefd11b7f44efd8428d41066f8">SPK_SOCKET_PROTOCOL_UDP_UCAST</a>       = 2,    </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a5e055494ba40332c8a416b1164405d52">  141</a></span>    <a class="code hl_enumvalue" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a5e055494ba40332c8a416b1164405d52">SPK_SOCKET_PROTOCOL_UDP_MCAST</a>       = 3,    </div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a9d2f2d3683dda9edfc451f3816ed7b4e">  142</a></span>    <a class="code hl_enumvalue" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a9d2f2d3683dda9edfc451f3816ed7b4e">SPK_SOCKET_PROTOCOL_PGM</a>             = 4,    </div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a36a5be8b224afecb45b37d1829b7b416">  143</a></span>    <a class="code hl_enumvalue" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a36a5be8b224afecb45b37d1829b7b416">SPK_SOCKET_PROTOCOL_EPGM</a>            = 5,    </div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    <a class="code hl_enumvalue" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a1a1f037abfdaa56ea67a7c198d51a9d6">__MAX_SPK_SOCKET_PROTOCOL</a></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a1a1f037abfdaa56ea67a7c198d51a9d6">  145</a></span>} <a class="code hl_typedef" href="spk__socket__base__define_8h.html#a5387875da6375cb544d6a387fd045744">eSSocketProtocolTypeT</a>;</div>
+</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="comment">/* ===================================================================</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span><span class="comment"> * 结构体定义</span></div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span><span class="comment"> * =================================================================== */</span></div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
+<div class="foldopen" id="foldopen00156" data-start="{" data-end="};">
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno"><a class="line" href="struct__SSocketUriInfo.html">  156</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="struct__SSocketUriInfo.html">_SSocketUriInfo</a> {</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno"><a class="line" href="struct__SSocketUriInfo.html#af032d7a0442be162dff4747266f23f0f">  158</a></span>    <span class="keywordtype">char</span>                <a class="code hl_variable" href="struct__SSocketUriInfo.html#af032d7a0442be162dff4747266f23f0f">uri</a>[<a class="code hl_define" href="spk__socket__base__define_8h.html#a79ffd258f18a079b0f13261b4ce7f085">SPK_MAX_URI_LEN</a>];</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a8f1a43f2b31647ff7d9bb4e950ea54e9">  159</a></span>} <a class="code hl_typedef" href="spk__socket__base__define_8h.html#a8f1a43f2b31647ff7d9bb4e950ea54e9">SSocketUriInfoT</a>;</div>
+</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span> </div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span><span class="comment">/* 结构体初始化值定义 */</span></div>
+<div class="foldopen" id="foldopen00163" data-start="" data-end="">
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a4bccbc0452efe05eeebb9a3a07554dc4">  163</a></span><span class="preprocessor">#define NULLOBJ_SOCKET_URI_INFO                                         \</span></div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span><span class="preprocessor">        {0}</span></div>
+</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
+<div class="foldopen" id="foldopen00171" data-start="{" data-end="};">
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno"><a class="line" href="struct__SSocketIpPortInfo.html">  171</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="struct__SSocketIpPortInfo.html">_SSocketIpPortInfo</a> {</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    <span class="keyword">union </span>{</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>        <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno"><a class="line" href="struct__SSocketIpPortInfo.html#a353803d33c4a30b06be52eada7f1f292">  175</a></span>            <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ada4c95a4173a4bb540c8a7f80f3665d2">uint32</a>      <a class="code hl_variable" href="struct__SSocketIpPortInfo.html#a353803d33c4a30b06be52eada7f1f292">ipValue</a>;</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno"><a class="line" href="struct__SSocketIpPortInfo.html#ab21f5cb40f3ea7e5295a6bdbc861686a">  177</a></span>            <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>       <a class="code hl_variable" href="struct__SSocketIpPortInfo.html#ab21f5cb40f3ea7e5295a6bdbc861686a">port</a>;</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        };</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno"><a class="line" href="struct__SSocketIpPortInfo.html#ad1e74ec5b3c4e43c4cd24af121a102fb">  180</a></span>        <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a>          <a class="code hl_variable" href="struct__SSocketIpPortInfo.html#ad1e74ec5b3c4e43c4cd24af121a102fb">__ipPortValue</a>;</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>    };</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span> </div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno"><a class="line" href="struct__SSocketIpPortInfo.html#a15432c9bcf9ddc02e6db9d3ed532fd66">  184</a></span>    <span class="keywordtype">char</span>                <a class="code hl_variable" href="struct__SSocketIpPortInfo.html#a15432c9bcf9ddc02e6db9d3ed532fd66">ipStr</a>[<a class="code hl_define" href="spk__socket__base__define_8h.html#ae81ca76c21d58d524474315e67874c18">SPK_MAX_IP_LEN</a>];</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a0514b56fefa4b7686e054b4bef7b13ce">  185</a></span>} <a class="code hl_typedef" href="spk__socket__base__define_8h.html#a0514b56fefa4b7686e054b4bef7b13ce">SSocketIpPortInfoT</a>;</div>
+</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span> </div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span><span class="comment">/* 结构体初始化值定义 */</span></div>
+<div class="foldopen" id="foldopen00189" data-start="" data-end="">
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#abad9e90c9c360567ac3fef4424193150">  189</a></span><span class="preprocessor">#define NULLOBJ_SOCKET_IP_PORT_INFO                                     \</span></div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span><span class="preprocessor">        {{0, 0}}, {0}</span></div>
+</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span> </div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="foldopen" id="foldopen00197" data-start="{" data-end="};">
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno"><a class="line" href="struct__SSocketChannelInfo.html">  197</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="struct__SSocketChannelInfo.html">_SSocketChannelInfo</a> {</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    <span class="keyword">union </span>{</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno"><a class="line" href="struct__SSocketChannelInfo.html#a5b35782757ffa8dad4631496a773e103">  200</a></span>        <a class="code hl_define" href="types_8h.html#af716e1b9fb8dae961adc7777f82515c2">SPK_SOCKET</a>      <a class="code hl_variable" href="struct__SSocketChannelInfo.html#a5b35782757ffa8dad4631496a773e103">socketFd</a>;</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno"><a class="line" href="struct__SSocketChannelInfo.html#ace3226a11c7af5d12653995b7777953e">  202</a></span>        <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a>          <a class="code hl_variable" href="struct__SSocketChannelInfo.html#ace3226a11c7af5d12653995b7777953e">__socket_fd_filler</a>;</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    };</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno"><a class="line" href="struct__SSocketChannelInfo.html#a0b52f6cb733e5af4ee9b1fc377b5dda0">  206</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>               <a class="code hl_variable" href="struct__SSocketChannelInfo.html#a0b52f6cb733e5af4ee9b1fc377b5dda0">remotePort</a>;</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span> </div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno"><a class="line" href="struct__SSocketChannelInfo.html#a94924dcf2567a30a032c2cc4eae7e743">  209</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ada4c95a4173a4bb540c8a7f80f3665d2">uint32</a>              <a class="code hl_variable" href="struct__SSocketChannelInfo.html#a94924dcf2567a30a032c2cc4eae7e743">origRemoteIp</a>;</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span> </div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno"><a class="line" href="struct__SSocketChannelInfo.html#ae28c9417f89e10c0c3d7ab5c366bce84">  215</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>               <a class="code hl_variable" href="struct__SSocketChannelInfo.html#ae28c9417f89e10c0c3d7ab5c366bce84">protocolType</a>;</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span> </div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno"><a class="line" href="struct__SSocketChannelInfo.html#aab762eb5a1dd3d0a4d370dc971648fed">  218</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>               <a class="code hl_variable" href="struct__SSocketChannelInfo.html#aab762eb5a1dd3d0a4d370dc971648fed">_isNetByteOrder</a>;</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span> </div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno"><a class="line" href="struct__SSocketChannelInfo.html#a04512018bb7d89c0f83399a561c5f544">  221</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>               <a class="code hl_variable" href="struct__SSocketChannelInfo.html#a04512018bb7d89c0f83399a561c5f544">_isBroken</a>;</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span> </div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno"><a class="line" href="struct__SSocketChannelInfo.html#a6daf9e1b3349b5b4c09ce4dfccac2b55">  224</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>               <a class="code hl_variable" href="struct__SSocketChannelInfo.html#a6daf9e1b3349b5b4c09ce4dfccac2b55">_isSendBroken</a>;</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span> </div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno"><a class="line" href="struct__SSocketChannelInfo.html#a6caec1562241738ebd4cfadb981790fb">  227</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>               <a class="code hl_variable" href="struct__SSocketChannelInfo.html#a6caec1562241738ebd4cfadb981790fb">_isTryConnecting</a>;</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span> </div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno"><a class="line" href="struct__SSocketChannelInfo.html#a875408e2f1554e4dcf2e13d38bbb4fcf">  230</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a>               <a class="code hl_variable" href="struct__SSocketChannelInfo.html#a875408e2f1554e4dcf2e13d38bbb4fcf">__filler</a>[3];</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span> </div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno"><a class="line" href="struct__SSocketChannelInfo.html#adf18fda3f861fc7d7b01cf3d530f1c90">  233</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a>               <a class="code hl_variable" href="struct__SSocketChannelInfo.html#adf18fda3f861fc7d7b01cf3d530f1c90">connectTime</a>;</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span> </div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno"><a class="line" href="struct__SSocketChannelInfo.html#a524d49ea74defbea774f568a1cd46be6">  236</a></span>    <span class="keywordtype">char</span>                <a class="code hl_variable" href="struct__SSocketChannelInfo.html#a524d49ea74defbea774f568a1cd46be6">remoteAddr</a>[<a class="code hl_define" href="spk__socket__base__define_8h.html#a79ffd258f18a079b0f13261b4ce7f085">SPK_MAX_URI_LEN</a>];</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a4226d862135c97d8fb3b9083ca20cfdc">  237</a></span>} <a class="code hl_typedef" href="spk__socket__base__define_8h.html#a4226d862135c97d8fb3b9083ca20cfdc">SSocketChannelInfoT</a>;</div>
+</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span> </div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span> </div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span><span class="comment">/* 结构体初始化值定义 */</span></div>
+<div class="foldopen" id="foldopen00241" data-start="" data-end="">
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#a0eafde1120d9eb6f9f155243784bd388">  241</a></span><span class="preprocessor">#define NULLOBJ_SOCKET_CHANNEL_INFO                                     \</span></div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span><span class="preprocessor">        {__SPK_INVALID_SOCKET}, \</span></div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span><span class="preprocessor">        0, 0, \</span></div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span><span class="preprocessor">        0, 0, 0, 0, 0, {0}, \</span></div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span><span class="preprocessor">        0, {0}</span></div>
+</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
+<div class="foldopen" id="foldopen00252" data-start="{" data-end="};">
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html">  252</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="struct__SSocketOptionConfig.html">_SSocketOptionConfig</a> {</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#a8b74ea9fc1ab1a353341b93890a1053c">  254</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>               <a class="code hl_variable" href="struct__SSocketOptionConfig.html#a8b74ea9fc1ab1a353341b93890a1053c">soRcvbuf</a>;</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#a4439185997432d37e81390634b4df1ec">  256</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>               <a class="code hl_variable" href="struct__SSocketOptionConfig.html#a4439185997432d37e81390634b4df1ec">soSndbuf</a>;</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#a5cc9efd9b34d932d0ed0eaac44dcf320">  259</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aaf44e46c719bc25ff3de1341e7aa4094">int8</a>                <a class="code hl_variable" href="struct__SSocketOptionConfig.html#a5cc9efd9b34d932d0ed0eaac44dcf320">tcpNodelay</a>;</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#a1c02952c2eb7b816cdeb6edcd7ee1cf6">  261</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aaf44e46c719bc25ff3de1341e7aa4094">int8</a>                <a class="code hl_variable" href="struct__SSocketOptionConfig.html#a1c02952c2eb7b816cdeb6edcd7ee1cf6">quickAck</a>;</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span> </div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#a1bfc82d2a910bba9dc0c0559b4fd0300">  264</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aaf44e46c719bc25ff3de1341e7aa4094">int8</a>                <a class="code hl_variable" href="struct__SSocketOptionConfig.html#a1bfc82d2a910bba9dc0c0559b4fd0300">mcastTtlNum</a>;</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#aa700e8ad08f610dffb2b07dbdd776938">  266</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aaf44e46c719bc25ff3de1341e7aa4094">int8</a>                <a class="code hl_variable" href="struct__SSocketOptionConfig.html#aa700e8ad08f610dffb2b07dbdd776938">mcastLoopbackDisabled</a>;</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span> </div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#abe6b6752899ee86dd903a97eb9188704">  269</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aa2af87dc3681cf517e4b9e14c6f0244e">uint16</a>              <a class="code hl_variable" href="struct__SSocketOptionConfig.html#abe6b6752899ee86dd903a97eb9188704">soBacklog</a>;</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#abc17677b03857fa3da1ff50063ec3b24">  271</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aa2af87dc3681cf517e4b9e14c6f0244e">uint16</a>              <a class="code hl_variable" href="struct__SSocketOptionConfig.html#abc17677b03857fa3da1ff50063ec3b24">connTimeoutMs</a>;</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span> </div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#abbde600b2afc0033120590cb1781cfa5">  274</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a8d62856ddcc3b33af5e7ac690128275d">int16</a>               <a class="code hl_variable" href="struct__SSocketOptionConfig.html#abbde600b2afc0033120590cb1781cfa5">keepIdle</a>;</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#a632fc4427e61cea67f4483d1596451bb">  276</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a8d62856ddcc3b33af5e7ac690128275d">int16</a>               <a class="code hl_variable" href="struct__SSocketOptionConfig.html#a632fc4427e61cea67f4483d1596451bb">keepIntvl</a>;</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#ab3eb96773c931937785223a932b473ca">  278</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aaf44e46c719bc25ff3de1341e7aa4094">int8</a>                <a class="code hl_variable" href="struct__SSocketOptionConfig.html#ab3eb96773c931937785223a932b473ca">keepalive</a>;</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#a22c5671b8e3e10396c08835b479e1e56">  280</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aaf44e46c719bc25ff3de1341e7aa4094">int8</a>                <a class="code hl_variable" href="struct__SSocketOptionConfig.html#a22c5671b8e3e10396c08835b479e1e56">keepCnt</a>;</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span> </div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#a97597ec4c26453c60b6a63a475bcbe03">  283</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aaf44e46c719bc25ff3de1341e7aa4094">int8</a>                <a class="code hl_variable" href="struct__SSocketOptionConfig.html#a97597ec4c26453c60b6a63a475bcbe03">disableReuseAddr</a>;</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#a0fe9086850e89358f27b9d7fc4279cdc">  285</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aaf44e46c719bc25ff3de1341e7aa4094">int8</a>                <a class="code hl_variable" href="struct__SSocketOptionConfig.html#a0fe9086850e89358f27b9d7fc4279cdc">enableReusePort</a>;</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#ac1b5003659e5c761fbf612357d21d7f2">  287</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aaf44e46c719bc25ff3de1341e7aa4094">int8</a>                <a class="code hl_variable" href="struct__SSocketOptionConfig.html#ac1b5003659e5c761fbf612357d21d7f2">__filler</a>[4];</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span> </div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#a4fc5b9d655bf22ef28a3f61000a8905e">  290</a></span>    <a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>               <a class="code hl_variable" href="struct__SSocketOptionConfig.html#a4fc5b9d655bf22ef28a3f61000a8905e">localSendingPort</a>;</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#a7797bed41014a23faeb16ca1e6654f0a">  292</a></span>    <span class="keywordtype">char</span>                <a class="code hl_variable" href="struct__SSocketOptionConfig.html#a7797bed41014a23faeb16ca1e6654f0a">localSendingIp</a>[<a class="code hl_define" href="spk__socket__base__define_8h.html#ae81ca76c21d58d524474315e67874c18">SPK_MAX_IP_LEN</a> + 4];</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno"><a class="line" href="struct__SSocketOptionConfig.html#a92fc3d083cbb4b68f02645c724bfb97c">  294</a></span>    <span class="keywordtype">char</span>                <a class="code hl_variable" href="struct__SSocketOptionConfig.html#a92fc3d083cbb4b68f02645c724bfb97c">mcastInterfaceIp</a>[<a class="code hl_define" href="spk__socket__base__define_8h.html#ae81ca76c21d58d524474315e67874c18">SPK_MAX_IP_LEN</a> + 4];</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#ac3e9da1700ebc172502de35ce4248134">  295</a></span>} <a class="code hl_typedef" href="spk__socket__base__define_8h.html#ac3e9da1700ebc172502de35ce4248134">SSocketOptionConfigT</a>;</div>
+</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span> </div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span> </div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span><span class="comment">/* 结构体初始化值定义 */</span></div>
+<div class="foldopen" id="foldopen00299" data-start="" data-end="">
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno"><a class="line" href="spk__socket__base__define_8h.html#af203a5e2a6a05636055537b01d68aadf">  299</a></span><span class="preprocessor">#define NULLOBJ_SOCKET_OPTION_CONFIG                                    \</span></div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span><span class="preprocessor">        SPK_DEFAULT_SO_RCVBUF, SPK_DEFAULT_SO_SNDBUF, \</span></div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span><span class="preprocessor">        SPK_DEFAULT_TCP_NODELAY, 0, \</span></div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span><span class="preprocessor">        0, 0, \</span></div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span><span class="preprocessor">        SPK_MAX_SO_BACKLOG, SPK_DEFAULT_CONN_TIMEOUT_MS, \</span></div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span><span class="preprocessor">        SPK_DEFAULT_TCP_KEEPIDLE, SPK_DEFAULT_TCP_KEEPINTVL, \</span></div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span><span class="preprocessor">        SPK_DEFAULT_SO_KEEPALIVE, SPK_DEFAULT_TCP_KEEPCNT, \</span></div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span><span class="preprocessor">        0, 0, {0}, \</span></div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span><span class="preprocessor">        0, {0}, {0}</span></div>
+</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span><span class="comment">/* -------------------------           */</span></div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span> </div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span> </div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>}</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span> </div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span><span class="preprocessor">#endif  </span><span class="comment">/* _SPK_SOCKET_BASE_DEFINE_H */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_a1b09856a6463f2bcc4bd8ff0e4e3ee0f"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a1b09856a6463f2bcc4bd8ff0e4e3ee0f">uint8</a></div><div class="ttdeci">unsigned __int8 uint8</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00073">itpdk_typedef.h:73</a></div></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_a8d62856ddcc3b33af5e7ac690128275d"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a8d62856ddcc3b33af5e7ac690128275d">int16</a></div><div class="ttdeci">__int16 int16</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00069">itpdk_typedef.h:69</a></div></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_a92a47ab0e245f0ae4d01c38a64b6c427"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#a92a47ab0e245f0ae4d01c38a64b6c427">int64</a></div><div class="ttdeci">__int64 int64</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00071">itpdk_typedef.h:71</a></div></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_aa2af87dc3681cf517e4b9e14c6f0244e"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aa2af87dc3681cf517e4b9e14c6f0244e">uint16</a></div><div class="ttdeci">unsigned __int16 uint16</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00074">itpdk_typedef.h:74</a></div></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_aaf44e46c719bc25ff3de1341e7aa4094"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aaf44e46c719bc25ff3de1341e7aa4094">int8</a></div><div class="ttdeci">__int8 int8</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00068">itpdk_typedef.h:68</a></div></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_ac6afe794ed283c11fb63426a58188e5e"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a></div><div class="ttdeci">unsigned __int64 uint64</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00076">itpdk_typedef.h:76</a></div></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_ad3ce9f24199b79b2629169eebf59489b"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a></div><div class="ttdeci">__int32 int32</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00070">itpdk_typedef.h:70</a></div></div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_ada4c95a4173a4bb540c8a7f80f3665d2"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ada4c95a4173a4bb540c8a7f80f3665d2">uint32</a></div><div class="ttdeci">unsigned __int32 uint32</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00075">itpdk_typedef.h:75</a></div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_a025df6e8e2f4e25818ac53825fbb8834"><div class="ttname"><a href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834">_eSSocketProtocolType</a></div><div class="ttdeci">_eSSocketProtocolType</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00137">spk_socket_base_define.h:137</a></div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_a025df6e8e2f4e25818ac53825fbb8834a0a0cdf3edfa29ccd44b99c55916461fc"><div class="ttname"><a href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a0a0cdf3edfa29ccd44b99c55916461fc">SPK_SOCKET_PROTOCOL_IPC</a></div><div class="ttdeci">@ SPK_SOCKET_PROTOCOL_IPC</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00139">spk_socket_base_define.h:139</a></div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_a025df6e8e2f4e25818ac53825fbb8834a1a1f037abfdaa56ea67a7c198d51a9d6"><div class="ttname"><a href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a1a1f037abfdaa56ea67a7c198d51a9d6">__MAX_SPK_SOCKET_PROTOCOL</a></div><div class="ttdeci">@ __MAX_SPK_SOCKET_PROTOCOL</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00145">spk_socket_base_define.h:144</a></div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_a025df6e8e2f4e25818ac53825fbb8834a36a5be8b224afecb45b37d1829b7b416"><div class="ttname"><a href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a36a5be8b224afecb45b37d1829b7b416">SPK_SOCKET_PROTOCOL_EPGM</a></div><div class="ttdeci">@ SPK_SOCKET_PROTOCOL_EPGM</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00143">spk_socket_base_define.h:143</a></div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_a025df6e8e2f4e25818ac53825fbb8834a5e055494ba40332c8a416b1164405d52"><div class="ttname"><a href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a5e055494ba40332c8a416b1164405d52">SPK_SOCKET_PROTOCOL_UDP_MCAST</a></div><div class="ttdeci">@ SPK_SOCKET_PROTOCOL_UDP_MCAST</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00141">spk_socket_base_define.h:141</a></div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_a025df6e8e2f4e25818ac53825fbb8834a9d2f2d3683dda9edfc451f3816ed7b4e"><div class="ttname"><a href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834a9d2f2d3683dda9edfc451f3816ed7b4e">SPK_SOCKET_PROTOCOL_PGM</a></div><div class="ttdeci">@ SPK_SOCKET_PROTOCOL_PGM</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00142">spk_socket_base_define.h:142</a></div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_a025df6e8e2f4e25818ac53825fbb8834ab54907fefd11b7f44efd8428d41066f8"><div class="ttname"><a href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834ab54907fefd11b7f44efd8428d41066f8">SPK_SOCKET_PROTOCOL_UDP_UCAST</a></div><div class="ttdeci">@ SPK_SOCKET_PROTOCOL_UDP_UCAST</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00140">spk_socket_base_define.h:140</a></div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_a025df6e8e2f4e25818ac53825fbb8834afcfea896e65823a9c356380e530035da"><div class="ttname"><a href="spk__socket__base__define_8h.html#a025df6e8e2f4e25818ac53825fbb8834afcfea896e65823a9c356380e530035da">SPK_SOCKET_PROTOCOL_TCP</a></div><div class="ttdeci">@ SPK_SOCKET_PROTOCOL_TCP</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00138">spk_socket_base_define.h:138</a></div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_a0514b56fefa4b7686e054b4bef7b13ce"><div class="ttname"><a href="spk__socket__base__define_8h.html#a0514b56fefa4b7686e054b4bef7b13ce">SSocketIpPortInfoT</a></div><div class="ttdeci">struct _SSocketIpPortInfo SSocketIpPortInfoT</div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_a4226d862135c97d8fb3b9083ca20cfdc"><div class="ttname"><a href="spk__socket__base__define_8h.html#a4226d862135c97d8fb3b9083ca20cfdc">SSocketChannelInfoT</a></div><div class="ttdeci">struct _SSocketChannelInfo SSocketChannelInfoT</div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_a5387875da6375cb544d6a387fd045744"><div class="ttname"><a href="spk__socket__base__define_8h.html#a5387875da6375cb544d6a387fd045744">eSSocketProtocolTypeT</a></div><div class="ttdeci">enum _eSSocketProtocolType eSSocketProtocolTypeT</div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_a79ffd258f18a079b0f13261b4ce7f085"><div class="ttname"><a href="spk__socket__base__define_8h.html#a79ffd258f18a079b0f13261b4ce7f085">SPK_MAX_URI_LEN</a></div><div class="ttdeci">#define SPK_MAX_URI_LEN</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00071">spk_socket_base_define.h:71</a></div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_a8f1a43f2b31647ff7d9bb4e950ea54e9"><div class="ttname"><a href="spk__socket__base__define_8h.html#a8f1a43f2b31647ff7d9bb4e950ea54e9">SSocketUriInfoT</a></div><div class="ttdeci">struct _SSocketUriInfo SSocketUriInfoT</div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_ac3e9da1700ebc172502de35ce4248134"><div class="ttname"><a href="spk__socket__base__define_8h.html#ac3e9da1700ebc172502de35ce4248134">SSocketOptionConfigT</a></div><div class="ttdeci">struct _SSocketOptionConfig SSocketOptionConfigT</div></div>
+<div class="ttc" id="aspk__socket__base__define_8h_html_ae81ca76c21d58d524474315e67874c18"><div class="ttname"><a href="spk__socket__base__define_8h.html#ae81ca76c21d58d524474315e67874c18">SPK_MAX_IP_LEN</a></div><div class="ttdeci">#define SPK_MAX_IP_LEN</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00067">spk_socket_base_define.h:67</a></div></div>
+<div class="ttc" id="astruct__SSocketChannelInfo_html"><div class="ttname"><a href="struct__SSocketChannelInfo.html">_SSocketChannelInfo</a></div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00197">spk_socket_base_define.h:197</a></div></div>
+<div class="ttc" id="astruct__SSocketChannelInfo_html_a04512018bb7d89c0f83399a561c5f544"><div class="ttname"><a href="struct__SSocketChannelInfo.html#a04512018bb7d89c0f83399a561c5f544">_SSocketChannelInfo::_isBroken</a></div><div class="ttdeci">uint8 _isBroken</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00221">spk_socket_base_define.h:221</a></div></div>
+<div class="ttc" id="astruct__SSocketChannelInfo_html_a0b52f6cb733e5af4ee9b1fc377b5dda0"><div class="ttname"><a href="struct__SSocketChannelInfo.html#a0b52f6cb733e5af4ee9b1fc377b5dda0">_SSocketChannelInfo::remotePort</a></div><div class="ttdeci">int32 remotePort</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00206">spk_socket_base_define.h:206</a></div></div>
+<div class="ttc" id="astruct__SSocketChannelInfo_html_a524d49ea74defbea774f568a1cd46be6"><div class="ttname"><a href="struct__SSocketChannelInfo.html#a524d49ea74defbea774f568a1cd46be6">_SSocketChannelInfo::remoteAddr</a></div><div class="ttdeci">char remoteAddr[SPK_MAX_URI_LEN]</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00236">spk_socket_base_define.h:236</a></div></div>
+<div class="ttc" id="astruct__SSocketChannelInfo_html_a5b35782757ffa8dad4631496a773e103"><div class="ttname"><a href="struct__SSocketChannelInfo.html#a5b35782757ffa8dad4631496a773e103">_SSocketChannelInfo::socketFd</a></div><div class="ttdeci">SPK_SOCKET socketFd</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00200">spk_socket_base_define.h:200</a></div></div>
+<div class="ttc" id="astruct__SSocketChannelInfo_html_a6caec1562241738ebd4cfadb981790fb"><div class="ttname"><a href="struct__SSocketChannelInfo.html#a6caec1562241738ebd4cfadb981790fb">_SSocketChannelInfo::_isTryConnecting</a></div><div class="ttdeci">uint8 _isTryConnecting</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00227">spk_socket_base_define.h:227</a></div></div>
+<div class="ttc" id="astruct__SSocketChannelInfo_html_a6daf9e1b3349b5b4c09ce4dfccac2b55"><div class="ttname"><a href="struct__SSocketChannelInfo.html#a6daf9e1b3349b5b4c09ce4dfccac2b55">_SSocketChannelInfo::_isSendBroken</a></div><div class="ttdeci">uint8 _isSendBroken</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00224">spk_socket_base_define.h:224</a></div></div>
+<div class="ttc" id="astruct__SSocketChannelInfo_html_a875408e2f1554e4dcf2e13d38bbb4fcf"><div class="ttname"><a href="struct__SSocketChannelInfo.html#a875408e2f1554e4dcf2e13d38bbb4fcf">_SSocketChannelInfo::__filler</a></div><div class="ttdeci">uint8 __filler[3]</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00230">spk_socket_base_define.h:230</a></div></div>
+<div class="ttc" id="astruct__SSocketChannelInfo_html_a94924dcf2567a30a032c2cc4eae7e743"><div class="ttname"><a href="struct__SSocketChannelInfo.html#a94924dcf2567a30a032c2cc4eae7e743">_SSocketChannelInfo::origRemoteIp</a></div><div class="ttdeci">uint32 origRemoteIp</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00209">spk_socket_base_define.h:209</a></div></div>
+<div class="ttc" id="astruct__SSocketChannelInfo_html_aab762eb5a1dd3d0a4d370dc971648fed"><div class="ttname"><a href="struct__SSocketChannelInfo.html#aab762eb5a1dd3d0a4d370dc971648fed">_SSocketChannelInfo::_isNetByteOrder</a></div><div class="ttdeci">uint8 _isNetByteOrder</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00218">spk_socket_base_define.h:218</a></div></div>
+<div class="ttc" id="astruct__SSocketChannelInfo_html_ace3226a11c7af5d12653995b7777953e"><div class="ttname"><a href="struct__SSocketChannelInfo.html#ace3226a11c7af5d12653995b7777953e">_SSocketChannelInfo::__socket_fd_filler</a></div><div class="ttdeci">uint64 __socket_fd_filler</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00202">spk_socket_base_define.h:202</a></div></div>
+<div class="ttc" id="astruct__SSocketChannelInfo_html_adf18fda3f861fc7d7b01cf3d530f1c90"><div class="ttname"><a href="struct__SSocketChannelInfo.html#adf18fda3f861fc7d7b01cf3d530f1c90">_SSocketChannelInfo::connectTime</a></div><div class="ttdeci">int64 connectTime</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00233">spk_socket_base_define.h:233</a></div></div>
+<div class="ttc" id="astruct__SSocketChannelInfo_html_ae28c9417f89e10c0c3d7ab5c366bce84"><div class="ttname"><a href="struct__SSocketChannelInfo.html#ae28c9417f89e10c0c3d7ab5c366bce84">_SSocketChannelInfo::protocolType</a></div><div class="ttdeci">uint8 protocolType</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00215">spk_socket_base_define.h:215</a></div></div>
+<div class="ttc" id="astruct__SSocketIpPortInfo_html"><div class="ttname"><a href="struct__SSocketIpPortInfo.html">_SSocketIpPortInfo</a></div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00171">spk_socket_base_define.h:171</a></div></div>
+<div class="ttc" id="astruct__SSocketIpPortInfo_html_a15432c9bcf9ddc02e6db9d3ed532fd66"><div class="ttname"><a href="struct__SSocketIpPortInfo.html#a15432c9bcf9ddc02e6db9d3ed532fd66">_SSocketIpPortInfo::ipStr</a></div><div class="ttdeci">char ipStr[SPK_MAX_IP_LEN]</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00184">spk_socket_base_define.h:184</a></div></div>
+<div class="ttc" id="astruct__SSocketIpPortInfo_html_a353803d33c4a30b06be52eada7f1f292"><div class="ttname"><a href="struct__SSocketIpPortInfo.html#a353803d33c4a30b06be52eada7f1f292">_SSocketIpPortInfo::ipValue</a></div><div class="ttdeci">uint32 ipValue</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00175">spk_socket_base_define.h:175</a></div></div>
+<div class="ttc" id="astruct__SSocketIpPortInfo_html_ab21f5cb40f3ea7e5295a6bdbc861686a"><div class="ttname"><a href="struct__SSocketIpPortInfo.html#ab21f5cb40f3ea7e5295a6bdbc861686a">_SSocketIpPortInfo::port</a></div><div class="ttdeci">int32 port</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00177">spk_socket_base_define.h:177</a></div></div>
+<div class="ttc" id="astruct__SSocketIpPortInfo_html_ad1e74ec5b3c4e43c4cd24af121a102fb"><div class="ttname"><a href="struct__SSocketIpPortInfo.html#ad1e74ec5b3c4e43c4cd24af121a102fb">_SSocketIpPortInfo::__ipPortValue</a></div><div class="ttdeci">uint64 __ipPortValue</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00180">spk_socket_base_define.h:180</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html"><div class="ttname"><a href="struct__SSocketOptionConfig.html">_SSocketOptionConfig</a></div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00252">spk_socket_base_define.h:252</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_a0fe9086850e89358f27b9d7fc4279cdc"><div class="ttname"><a href="struct__SSocketOptionConfig.html#a0fe9086850e89358f27b9d7fc4279cdc">_SSocketOptionConfig::enableReusePort</a></div><div class="ttdeci">int8 enableReusePort</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00285">spk_socket_base_define.h:285</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_a1bfc82d2a910bba9dc0c0559b4fd0300"><div class="ttname"><a href="struct__SSocketOptionConfig.html#a1bfc82d2a910bba9dc0c0559b4fd0300">_SSocketOptionConfig::mcastTtlNum</a></div><div class="ttdeci">int8 mcastTtlNum</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00264">spk_socket_base_define.h:264</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_a1c02952c2eb7b816cdeb6edcd7ee1cf6"><div class="ttname"><a href="struct__SSocketOptionConfig.html#a1c02952c2eb7b816cdeb6edcd7ee1cf6">_SSocketOptionConfig::quickAck</a></div><div class="ttdeci">int8 quickAck</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00261">spk_socket_base_define.h:261</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_a22c5671b8e3e10396c08835b479e1e56"><div class="ttname"><a href="struct__SSocketOptionConfig.html#a22c5671b8e3e10396c08835b479e1e56">_SSocketOptionConfig::keepCnt</a></div><div class="ttdeci">int8 keepCnt</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00280">spk_socket_base_define.h:280</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_a4439185997432d37e81390634b4df1ec"><div class="ttname"><a href="struct__SSocketOptionConfig.html#a4439185997432d37e81390634b4df1ec">_SSocketOptionConfig::soSndbuf</a></div><div class="ttdeci">int32 soSndbuf</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00256">spk_socket_base_define.h:256</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_a4fc5b9d655bf22ef28a3f61000a8905e"><div class="ttname"><a href="struct__SSocketOptionConfig.html#a4fc5b9d655bf22ef28a3f61000a8905e">_SSocketOptionConfig::localSendingPort</a></div><div class="ttdeci">int32 localSendingPort</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00290">spk_socket_base_define.h:290</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_a5cc9efd9b34d932d0ed0eaac44dcf320"><div class="ttname"><a href="struct__SSocketOptionConfig.html#a5cc9efd9b34d932d0ed0eaac44dcf320">_SSocketOptionConfig::tcpNodelay</a></div><div class="ttdeci">int8 tcpNodelay</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00259">spk_socket_base_define.h:259</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_a632fc4427e61cea67f4483d1596451bb"><div class="ttname"><a href="struct__SSocketOptionConfig.html#a632fc4427e61cea67f4483d1596451bb">_SSocketOptionConfig::keepIntvl</a></div><div class="ttdeci">int16 keepIntvl</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00276">spk_socket_base_define.h:276</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_a7797bed41014a23faeb16ca1e6654f0a"><div class="ttname"><a href="struct__SSocketOptionConfig.html#a7797bed41014a23faeb16ca1e6654f0a">_SSocketOptionConfig::localSendingIp</a></div><div class="ttdeci">char localSendingIp[SPK_MAX_IP_LEN+4]</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00292">spk_socket_base_define.h:292</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_a8b74ea9fc1ab1a353341b93890a1053c"><div class="ttname"><a href="struct__SSocketOptionConfig.html#a8b74ea9fc1ab1a353341b93890a1053c">_SSocketOptionConfig::soRcvbuf</a></div><div class="ttdeci">int32 soRcvbuf</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00254">spk_socket_base_define.h:254</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_a92fc3d083cbb4b68f02645c724bfb97c"><div class="ttname"><a href="struct__SSocketOptionConfig.html#a92fc3d083cbb4b68f02645c724bfb97c">_SSocketOptionConfig::mcastInterfaceIp</a></div><div class="ttdeci">char mcastInterfaceIp[SPK_MAX_IP_LEN+4]</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00294">spk_socket_base_define.h:294</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_a97597ec4c26453c60b6a63a475bcbe03"><div class="ttname"><a href="struct__SSocketOptionConfig.html#a97597ec4c26453c60b6a63a475bcbe03">_SSocketOptionConfig::disableReuseAddr</a></div><div class="ttdeci">int8 disableReuseAddr</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00283">spk_socket_base_define.h:283</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_aa700e8ad08f610dffb2b07dbdd776938"><div class="ttname"><a href="struct__SSocketOptionConfig.html#aa700e8ad08f610dffb2b07dbdd776938">_SSocketOptionConfig::mcastLoopbackDisabled</a></div><div class="ttdeci">int8 mcastLoopbackDisabled</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00266">spk_socket_base_define.h:266</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_ab3eb96773c931937785223a932b473ca"><div class="ttname"><a href="struct__SSocketOptionConfig.html#ab3eb96773c931937785223a932b473ca">_SSocketOptionConfig::keepalive</a></div><div class="ttdeci">int8 keepalive</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00278">spk_socket_base_define.h:278</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_abbde600b2afc0033120590cb1781cfa5"><div class="ttname"><a href="struct__SSocketOptionConfig.html#abbde600b2afc0033120590cb1781cfa5">_SSocketOptionConfig::keepIdle</a></div><div class="ttdeci">int16 keepIdle</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00274">spk_socket_base_define.h:274</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_abc17677b03857fa3da1ff50063ec3b24"><div class="ttname"><a href="struct__SSocketOptionConfig.html#abc17677b03857fa3da1ff50063ec3b24">_SSocketOptionConfig::connTimeoutMs</a></div><div class="ttdeci">uint16 connTimeoutMs</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00271">spk_socket_base_define.h:271</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_abe6b6752899ee86dd903a97eb9188704"><div class="ttname"><a href="struct__SSocketOptionConfig.html#abe6b6752899ee86dd903a97eb9188704">_SSocketOptionConfig::soBacklog</a></div><div class="ttdeci">uint16 soBacklog</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00269">spk_socket_base_define.h:269</a></div></div>
+<div class="ttc" id="astruct__SSocketOptionConfig_html_ac1b5003659e5c761fbf612357d21d7f2"><div class="ttname"><a href="struct__SSocketOptionConfig.html#ac1b5003659e5c761fbf612357d21d7f2">_SSocketOptionConfig::__filler</a></div><div class="ttdeci">int8 __filler[4]</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00287">spk_socket_base_define.h:287</a></div></div>
+<div class="ttc" id="astruct__SSocketUriInfo_html"><div class="ttname"><a href="struct__SSocketUriInfo.html">_SSocketUriInfo</a></div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00156">spk_socket_base_define.h:156</a></div></div>
+<div class="ttc" id="astruct__SSocketUriInfo_html_af032d7a0442be162dff4747266f23f0f"><div class="ttname"><a href="struct__SSocketUriInfo.html#af032d7a0442be162dff4747266f23f0f">_SSocketUriInfo::uri</a></div><div class="ttdeci">char uri[SPK_MAX_URI_LEN]</div><div class="ttdef"><b>Definition</b> <a href="spk__socket__base__define_8h_source.html#l00158">spk_socket_base_define.h:158</a></div></div>
+<div class="ttc" id="atypes_8h_html"><div class="ttname"><a href="types_8h.html">types.h</a></div></div>
+<div class="ttc" id="atypes_8h_html_af716e1b9fb8dae961adc7777f82515c2"><div class="ttname"><a href="types_8h.html#af716e1b9fb8dae961adc7777f82515c2">SPK_SOCKET</a></div><div class="ttdeci">#define SPK_SOCKET</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00538">types.h:538</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_248d918e0c46523948aef7b06f6106c0.html">sutil</a></li><li class="navelem"><a class="el" href="dir_c987e70cbc9e5d3b2eeb9e681bd06b56.html">net</a></li><li class="navelem"><a class="el" href="spk__socket__base__define_8h.html">spk_socket_base_define.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

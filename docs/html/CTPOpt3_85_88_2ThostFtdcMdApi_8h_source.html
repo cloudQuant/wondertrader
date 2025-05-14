@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/CTPOpt3.5.8/ThostFtdcMdApi.h Ê∫êÊñá‰ª∂</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">È´òÊÄßËÉΩÈáèÂåñ‰∫§ÊòìÂπ≥Âè∞</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Âà∂‰ΩúËÄÖ Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','ÊêúÁ¥¢');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">ËΩΩÂÖ•‰∏≠...</div>
+<div class="SRStatus" id="Searching">ÊêúÁ¥¢‰∏≠...</div>
+<div class="SRStatus" id="NoMatches">Êú™ÊâæÂà∞</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ThostFtdcMdApi.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h.html">ÊµèËßàËØ•Êñá‰ª∂ÁöÑÊñáÊ°£.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#if !defined(SOPT_THOST_FTDCMDAPI_H)</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#define SOPT_THOST_FTDCMDAPI_H</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#if _MSC_VER &gt; 1000</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#endif </span><span class="comment">// _MSC_VER &gt; 1000</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;<a class="code" href="CTPOpt3_85_88_2ThostFtdcUserApiStruct_8h.html">ThostFtdcUserApiStruct.h</a>&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#if defined(ISLIB) &amp;&amp; defined(WIN32)</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#ifdef LIB_MD_API_EXPORT</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define MD_API_EXPORT __declspec(dllexport)</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#define MD_API_EXPORT __declspec(dllimport)</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="CTPOpt3_85_88_2ThostFtdcMdApi_8h.html#abdb311c4242db54fbea2f116659ad786">   26</a></span><span class="preprocessor">#define MD_API_EXPORT </span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="}">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="namespacectp__sopt.html">   29</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacectp__sopt.html">ctp_sopt</a></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>{</div>
+<div class="foldopen" id="foldopen00031" data-start="{" data-end="};">
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdSpi.html">   31</a></span><span class="keyword">class </span><a class="code hl_class" href="classctp__sopt_1_1CThostFtdcMdSpi.html">CThostFtdcMdSpi</a></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>{</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdSpi.html#a430114aac98d9f7ac435b82116150938">   35</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdSpi.html#a430114aac98d9f7ac435b82116150938">OnFrontConnected</a>(){};</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdSpi.html#a4789a228ccfce16e0edec7787f34f1cd">   44</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdSpi.html#a4789a228ccfce16e0edec7787f34f1cd">OnFrontDisconnected</a>(<span class="keywordtype">int</span> nReason){};</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdSpi.html#a692a69348a601f99b02a40c2e3a07e43">   48</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdSpi.html#a692a69348a601f99b02a40c2e3a07e43">OnHeartBeatWarning</a>(<span class="keywordtype">int</span> nTimeLapse){};</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdSpi.html#a786f04fb1b9697c1dddf8b9deaef8f70">   52</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdSpi.html#a786f04fb1b9697c1dddf8b9deaef8f70">OnRspUserLogin</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspUserLoginField.html">CThostFtdcRspUserLoginField</a> *pRspUserLogin, <a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast) {};</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdSpi.html#aceb0b7cc3800fbad403f4e37ff0631aa">   55</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdSpi.html#aceb0b7cc3800fbad403f4e37ff0631aa">OnRspUserLogout</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcUserLogoutField.html">CThostFtdcUserLogoutField</a> *pUserLogout, <a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast) {};</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdSpi.html#aa504da8d637ec0f3ca9ac5f291c07473">   58</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdSpi.html#aa504da8d637ec0f3ca9ac5f291c07473">OnRspError</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast) {};</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdSpi.html#ac969c25d5ee33e02272e70f126d3e450">   61</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdSpi.html#ac969c25d5ee33e02272e70f126d3e450">OnRspSubMarketData</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a> *pSpecificInstrument, <a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast) {};</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdSpi.html#a227831a52af9255031a0c6b0932a25ef">   64</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdSpi.html#a227831a52af9255031a0c6b0932a25ef">OnRspUnSubMarketData</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a> *pSpecificInstrument, <a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast) {};</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdSpi.html#ad38fbfc4e5723f50e5905069ef13c270">   67</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdSpi.html#ad38fbfc4e5723f50e5905069ef13c270">OnRspSubForQuoteRsp</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a> *pSpecificInstrument, <a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast) {};</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdSpi.html#a4c84d2e52ab146417d69ae5a542c6dac">   70</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdSpi.html#a4c84d2e52ab146417d69ae5a542c6dac">OnRspUnSubForQuoteRsp</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcSpecificInstrumentField.html">CThostFtdcSpecificInstrumentField</a> *pSpecificInstrument, <a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcRspInfoField.html">CThostFtdcRspInfoField</a> *pRspInfo, <span class="keywordtype">int</span> nRequestID, <span class="keywordtype">bool</span> bIsLast) {};</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdSpi.html#a8448e6534f092d40809d0e1c89cb5cde">   73</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdSpi.html#a8448e6534f092d40809d0e1c89cb5cde">OnRtnDepthMarketData</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcDepthMarketDataField.html">CThostFtdcDepthMarketDataField</a> *pDepthMarketData) {};</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdSpi.html#ac89afe02ae1f129e4be33e80ae60a972">   76</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdSpi.html#ac89afe02ae1f129e4be33e80ae60a972">OnRtnForQuoteRsp</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcForQuoteRspField.html">CThostFtdcForQuoteRspField</a> *pForQuoteRsp) {};</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>};</div>
+</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="foldopen" id="foldopen00079" data-start="{" data-end="};">
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html">   79</a></span><span class="keyword">class </span><a class="code hl_define" href="CTP6_83_815_2ThostFtdcMdApi_8h.html#abdb311c4242db54fbea2f116659ad786">MD_API_EXPORT</a> <a class="code hl_class" href="classctp__sopt_1_1CThostFtdcMdApi.html">CThostFtdcMdApi</a></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>{</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#a7e17c9e8794d42478daa29d9ebdac476">   86</a></span>    <span class="keyword">static</span> <a class="code hl_class" href="classctp__sopt_1_1CThostFtdcMdApi.html">CThostFtdcMdApi</a> *<a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#a7e17c9e8794d42478daa29d9ebdac476">CreateFtdcMdApi</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *pszFlowPath = <span class="stringliteral">&quot;&quot;</span>, <span class="keyword">const</span> <span class="keywordtype">bool</span> bIsUsingUdp=<span class="keyword">false</span>, <span class="keyword">const</span> <span class="keywordtype">bool</span> bIsMulticast=<span class="keyword">false</span>);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#a63d87f5aa8393c3aa392448af064e366">   90</a></span>    <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#a63d87f5aa8393c3aa392448af064e366">GetApiVersion</a>();</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#a91e006b56f10d1722d86602c546a4c51">   94</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#a91e006b56f10d1722d86602c546a4c51">Release</a>() = 0;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#a17d4aa3385d43d6571b18f36b83a609d">   98</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#a17d4aa3385d43d6571b18f36b83a609d">Init</a>() = 0;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#a8798e4ca6175cc4e46714abff2f7948c">  102</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#a8798e4ca6175cc4e46714abff2f7948c">Join</a>() = 0;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#a97d493668aa8d0514bb53d1a92227b09">  107</a></span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#a97d493668aa8d0514bb53d1a92227b09">GetTradingDay</a>() = 0;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#add115e9a16d2072cb54b49c7b699ff56">  113</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#add115e9a16d2072cb54b49c7b699ff56">RegisterFront</a>(<span class="keywordtype">char</span> *pszFrontAddress) = 0;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#a08171e279b382461ca30d26a1c197de6">  120</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#a08171e279b382461ca30d26a1c197de6">RegisterNameServer</a>(<span class="keywordtype">char</span> *pszNsAddress) = 0;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#a943b83a71ea8e6c3de1f4f3dee3aa4ca">  124</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#a943b83a71ea8e6c3de1f4f3dee3aa4ca">RegisterFensUserInfo</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcFensUserInfoField.html">CThostFtdcFensUserInfoField</a> * pFensUserInfo) = 0;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#aadbc83e0aa25ee51b2635ec9d543552f">  128</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#aadbc83e0aa25ee51b2635ec9d543552f">RegisterSpi</a>(<a class="code hl_class" href="classctp__sopt_1_1CThostFtdcMdSpi.html">CThostFtdcMdSpi</a> *pSpi) = 0;</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    </div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#ae896dbb5bcad7fe48c35dcaa82c19a93">  134</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#ae896dbb5bcad7fe48c35dcaa82c19a93">SubscribeMarketData</a>(<span class="keywordtype">char</span> *ppInstrumentID[], <span class="keywordtype">int</span> nCount) = 0;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#a1b62575cc9031c8bd92ffae727e20a86">  140</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#a1b62575cc9031c8bd92ffae727e20a86">UnSubscribeMarketData</a>(<span class="keywordtype">char</span> *ppInstrumentID[], <span class="keywordtype">int</span> nCount) = 0;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    </div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#adc5816d75b8daafdbf26d4145fa2a499">  146</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#adc5816d75b8daafdbf26d4145fa2a499">SubscribeForQuoteRsp</a>(<span class="keywordtype">char</span> *ppInstrumentID[], <span class="keywordtype">int</span> nCount) = 0;</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#acb676989857778eabbc36d5e4854c554">  152</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#acb676989857778eabbc36d5e4854c554">UnSubscribeForQuoteRsp</a>(<span class="keywordtype">char</span> *ppInstrumentID[], <span class="keywordtype">int</span> nCount) = 0;</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#a14daafa76f5f002e3ae9b788944827a2">  155</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#a14daafa76f5f002e3ae9b788944827a2">ReqUserLogin</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcReqUserLoginField.html">CThostFtdcReqUserLoginField</a> *pReqUserLoginField, <span class="keywordtype">int</span> nRequestID) = 0;</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    </div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#a76198ae6672711ca486c44204fd1716f">  159</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#a76198ae6672711ca486c44204fd1716f">ReqUserLogout</a>(<a class="code hl_struct" href="structctp__sopt_1_1CThostFtdcUserLogoutField.html">CThostFtdcUserLogoutField</a> *pUserLogout, <span class="keywordtype">int</span> nRequestID) = 0;</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span><span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno"><a class="line" href="classctp__sopt_1_1CThostFtdcMdApi.html#ab495e8c620d859b3758a1a39b1d18ec3">  161</a></span>    <a class="code hl_function" href="classctp__sopt_1_1CThostFtdcMdApi.html#ab495e8c620d859b3758a1a39b1d18ec3">~CThostFtdcMdApi</a>(){};</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>};</div>
+</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>}</div>
+</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aCTP6_83_815_2ThostFtdcMdApi_8h_html_abdb311c4242db54fbea2f116659ad786"><div class="ttname"><a href="CTP6_83_815_2ThostFtdcMdApi_8h.html#abdb311c4242db54fbea2f116659ad786">MD_API_EXPORT</a></div><div class="ttdeci">#define MD_API_EXPORT</div><div class="ttdef"><b>Definition</b> <a href="CTP6_83_815_2ThostFtdcMdApi_8h_source.html#l00026">ThostFtdcMdApi.h:26</a></div></div>
+<div class="ttc" id="aCTPOpt3_85_88_2ThostFtdcUserApiStruct_8h_html"><div class="ttname"><a href="CTPOpt3_85_88_2ThostFtdcUserApiStruct_8h.html">ThostFtdcUserApiStruct.h</a></div><div class="ttdoc">∂®“Â¡ÀøÕªß∂ÀΩ”ø⁄ π”√µƒ“µŒÒ ˝æ›Ω·ππ @history 20060106 ’‘∫ËÍª ¥¥Ω®∏√Œƒº˛</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html">ctp_sopt::CThostFtdcMdApi</a></div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00079">ThostFtdcMdApi.h:80</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_a08171e279b382461ca30d26a1c197de6"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#a08171e279b382461ca30d26a1c197de6">ctp_sopt::CThostFtdcMdApi::RegisterNameServer</a></div><div class="ttdeci">virtual void RegisterNameServer(char *pszNsAddress)=0</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_a14daafa76f5f002e3ae9b788944827a2"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#a14daafa76f5f002e3ae9b788944827a2">ctp_sopt::CThostFtdcMdApi::ReqUserLogin</a></div><div class="ttdeci">virtual int ReqUserLogin(CThostFtdcReqUserLoginField *pReqUserLoginField, int nRequestID)=0</div><div class="ttdoc">”√ªßµ«¬º«Î«Û</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_a17d4aa3385d43d6571b18f36b83a609d"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#a17d4aa3385d43d6571b18f36b83a609d">ctp_sopt::CThostFtdcMdApi::Init</a></div><div class="ttdeci">virtual void Init()=0</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_a1b62575cc9031c8bd92ffae727e20a86"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#a1b62575cc9031c8bd92ffae727e20a86">ctp_sopt::CThostFtdcMdApi::UnSubscribeMarketData</a></div><div class="ttdeci">virtual int UnSubscribeMarketData(char *ppInstrumentID[], int nCount)=0</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_a63d87f5aa8393c3aa392448af064e366"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#a63d87f5aa8393c3aa392448af064e366">ctp_sopt::CThostFtdcMdApi::GetApiVersion</a></div><div class="ttdeci">static const char * GetApiVersion()</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_a76198ae6672711ca486c44204fd1716f"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#a76198ae6672711ca486c44204fd1716f">ctp_sopt::CThostFtdcMdApi::ReqUserLogout</a></div><div class="ttdeci">virtual int ReqUserLogout(CThostFtdcUserLogoutField *pUserLogout, int nRequestID)=0</div><div class="ttdoc">µ«≥ˆ«Î«Û</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_a7e17c9e8794d42478daa29d9ebdac476"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#a7e17c9e8794d42478daa29d9ebdac476">ctp_sopt::CThostFtdcMdApi::CreateFtdcMdApi</a></div><div class="ttdeci">static CThostFtdcMdApi * CreateFtdcMdApi(const char *pszFlowPath=&quot;&quot;, const bool bIsUsingUdp=false, const bool bIsMulticast=false)</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_a8798e4ca6175cc4e46714abff2f7948c"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#a8798e4ca6175cc4e46714abff2f7948c">ctp_sopt::CThostFtdcMdApi::Join</a></div><div class="ttdeci">virtual int Join()=0</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_a91e006b56f10d1722d86602c546a4c51"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#a91e006b56f10d1722d86602c546a4c51">ctp_sopt::CThostFtdcMdApi::Release</a></div><div class="ttdeci">virtual void Release()=0</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_a943b83a71ea8e6c3de1f4f3dee3aa4ca"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#a943b83a71ea8e6c3de1f4f3dee3aa4ca">ctp_sopt::CThostFtdcMdApi::RegisterFensUserInfo</a></div><div class="ttdeci">virtual void RegisterFensUserInfo(CThostFtdcFensUserInfoField *pFensUserInfo)=0</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_a97d493668aa8d0514bb53d1a92227b09"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#a97d493668aa8d0514bb53d1a92227b09">ctp_sopt::CThostFtdcMdApi::GetTradingDay</a></div><div class="ttdeci">virtual const char * GetTradingDay()=0</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_aadbc83e0aa25ee51b2635ec9d543552f"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#aadbc83e0aa25ee51b2635ec9d543552f">ctp_sopt::CThostFtdcMdApi::RegisterSpi</a></div><div class="ttdeci">virtual void RegisterSpi(CThostFtdcMdSpi *pSpi)=0</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_ab495e8c620d859b3758a1a39b1d18ec3"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#ab495e8c620d859b3758a1a39b1d18ec3">ctp_sopt::CThostFtdcMdApi::~CThostFtdcMdApi</a></div><div class="ttdeci">~CThostFtdcMdApi()</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00161">ThostFtdcMdApi.h:161</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_acb676989857778eabbc36d5e4854c554"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#acb676989857778eabbc36d5e4854c554">ctp_sopt::CThostFtdcMdApi::UnSubscribeForQuoteRsp</a></div><div class="ttdeci">virtual int UnSubscribeForQuoteRsp(char *ppInstrumentID[], int nCount)=0</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_adc5816d75b8daafdbf26d4145fa2a499"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#adc5816d75b8daafdbf26d4145fa2a499">ctp_sopt::CThostFtdcMdApi::SubscribeForQuoteRsp</a></div><div class="ttdeci">virtual int SubscribeForQuoteRsp(char *ppInstrumentID[], int nCount)=0</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_add115e9a16d2072cb54b49c7b699ff56"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#add115e9a16d2072cb54b49c7b699ff56">ctp_sopt::CThostFtdcMdApi::RegisterFront</a></div><div class="ttdeci">virtual void RegisterFront(char *pszFrontAddress)=0</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdApi_html_ae896dbb5bcad7fe48c35dcaa82c19a93"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdApi.html#ae896dbb5bcad7fe48c35dcaa82c19a93">ctp_sopt::CThostFtdcMdApi::SubscribeMarketData</a></div><div class="ttdeci">virtual int SubscribeMarketData(char *ppInstrumentID[], int nCount)=0</div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdSpi_html"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdSpi.html">ctp_sopt::CThostFtdcMdSpi</a></div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00031">ThostFtdcMdApi.h:32</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdSpi_html_a227831a52af9255031a0c6b0932a25ef"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdSpi.html#a227831a52af9255031a0c6b0932a25ef">ctp_sopt::CThostFtdcMdSpi::OnRspUnSubMarketData</a></div><div class="ttdeci">virtual void OnRspUnSubMarketData(CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">»°œ˚∂©‘ƒ––«È”¶¥</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00064">ThostFtdcMdApi.h:64</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdSpi_html_a430114aac98d9f7ac435b82116150938"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdSpi.html#a430114aac98d9f7ac435b82116150938">ctp_sopt::CThostFtdcMdSpi::OnFrontConnected</a></div><div class="ttdeci">virtual void OnFrontConnected()</div><div class="ttdoc">µ±øÕªß∂À”ÎΩª“◊∫ÛÃ®Ω®¡¢∆Õ®–≈¡¨Ω” ±£®ªπŒ¥µ«¬º«∞£©£¨∏√∑Ω∑®±ªµ˜”√°£</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00035">ThostFtdcMdApi.h:35</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdSpi_html_a4789a228ccfce16e0edec7787f34f1cd"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdSpi.html#a4789a228ccfce16e0edec7787f34f1cd">ctp_sopt::CThostFtdcMdSpi::OnFrontDisconnected</a></div><div class="ttdeci">virtual void OnFrontDisconnected(int nReason)</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00044">ThostFtdcMdApi.h:44</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdSpi_html_a4c84d2e52ab146417d69ae5a542c6dac"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdSpi.html#a4c84d2e52ab146417d69ae5a542c6dac">ctp_sopt::CThostFtdcMdSpi::OnRspUnSubForQuoteRsp</a></div><div class="ttdeci">virtual void OnRspUnSubForQuoteRsp(CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">»°œ˚∂©‘ƒ—Øº€”¶¥</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00070">ThostFtdcMdApi.h:70</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdSpi_html_a692a69348a601f99b02a40c2e3a07e43"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdSpi.html#a692a69348a601f99b02a40c2e3a07e43">ctp_sopt::CThostFtdcMdSpi::OnHeartBeatWarning</a></div><div class="ttdeci">virtual void OnHeartBeatWarning(int nTimeLapse)</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00048">ThostFtdcMdApi.h:48</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdSpi_html_a786f04fb1b9697c1dddf8b9deaef8f70"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdSpi.html#a786f04fb1b9697c1dddf8b9deaef8f70">ctp_sopt::CThostFtdcMdSpi::OnRspUserLogin</a></div><div class="ttdeci">virtual void OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">µ«¬º«Î«ÛœÏ”¶</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00052">ThostFtdcMdApi.h:52</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdSpi_html_a8448e6534f092d40809d0e1c89cb5cde"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdSpi.html#a8448e6534f092d40809d0e1c89cb5cde">ctp_sopt::CThostFtdcMdSpi::OnRtnDepthMarketData</a></div><div class="ttdeci">virtual void OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *pDepthMarketData)</div><div class="ttdoc">…Ó∂»––«ÈÕ®÷™</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00073">ThostFtdcMdApi.h:73</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdSpi_html_aa504da8d637ec0f3ca9ac5f291c07473"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdSpi.html#aa504da8d637ec0f3ca9ac5f291c07473">ctp_sopt::CThostFtdcMdSpi::OnRspError</a></div><div class="ttdeci">virtual void OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">¥ÌŒÛ”¶¥</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00058">ThostFtdcMdApi.h:58</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdSpi_html_ac89afe02ae1f129e4be33e80ae60a972"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdSpi.html#ac89afe02ae1f129e4be33e80ae60a972">ctp_sopt::CThostFtdcMdSpi::OnRtnForQuoteRsp</a></div><div class="ttdeci">virtual void OnRtnForQuoteRsp(CThostFtdcForQuoteRspField *pForQuoteRsp)</div><div class="ttdoc">—Øº€Õ®÷™</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00076">ThostFtdcMdApi.h:76</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdSpi_html_ac969c25d5ee33e02272e70f126d3e450"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdSpi.html#ac969c25d5ee33e02272e70f126d3e450">ctp_sopt::CThostFtdcMdSpi::OnRspSubMarketData</a></div><div class="ttdeci">virtual void OnRspSubMarketData(CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">∂©‘ƒ––«È”¶¥</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00061">ThostFtdcMdApi.h:61</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdSpi_html_aceb0b7cc3800fbad403f4e37ff0631aa"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdSpi.html#aceb0b7cc3800fbad403f4e37ff0631aa">ctp_sopt::CThostFtdcMdSpi::OnRspUserLogout</a></div><div class="ttdeci">virtual void OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">µ«≥ˆ«Î«ÛœÏ”¶</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00055">ThostFtdcMdApi.h:55</a></div></div>
+<div class="ttc" id="aclassctp__sopt_1_1CThostFtdcMdSpi_html_ad38fbfc4e5723f50e5905069ef13c270"><div class="ttname"><a href="classctp__sopt_1_1CThostFtdcMdSpi.html#ad38fbfc4e5723f50e5905069ef13c270">ctp_sopt::CThostFtdcMdSpi::OnRspSubForQuoteRsp</a></div><div class="ttdeci">virtual void OnRspSubForQuoteRsp(CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)</div><div class="ttdoc">∂©‘ƒ—Øº€”¶¥</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00067">ThostFtdcMdApi.h:67</a></div></div>
+<div class="ttc" id="anamespacectp__sopt_html"><div class="ttname"><a href="namespacectp__sopt.html">ctp_sopt</a></div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcMdApi_8h_source.html#l00029">ThostFtdcMdApi.h:30</a></div></div>
+<div class="ttc" id="astructctp__sopt_1_1CThostFtdcDepthMarketDataField_html"><div class="ttname"><a href="structctp__sopt_1_1CThostFtdcDepthMarketDataField.html">ctp_sopt::CThostFtdcDepthMarketDataField</a></div><div class="ttdoc">…Ó∂»––«È</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcUserApiStruct_8h_source.html#l00885">ThostFtdcUserApiStruct.h:886</a></div></div>
+<div class="ttc" id="astructctp__sopt_1_1CThostFtdcFensUserInfoField_html"><div class="ttname"><a href="structctp__sopt_1_1CThostFtdcFensUserInfoField.html">ctp_sopt::CThostFtdcFensUserInfoField</a></div><div class="ttdoc">Fens”√ªß–≈œ¢</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcUserApiStruct_8h_source.html#l10292">ThostFtdcUserApiStruct.h:10293</a></div></div>
+<div class="ttc" id="astructctp__sopt_1_1CThostFtdcForQuoteRspField_html"><div class="ttname"><a href="structctp__sopt_1_1CThostFtdcForQuoteRspField.html">ctp_sopt::CThostFtdcForQuoteRspField</a></div><div class="ttdoc">∑¢∏¯◊ˆ –…Ãµƒ—Øº€«Î«Û</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcUserApiStruct_8h_source.html#l04111">ThostFtdcUserApiStruct.h:4112</a></div></div>
+<div class="ttc" id="astructctp__sopt_1_1CThostFtdcReqUserLoginField_html"><div class="ttname"><a href="structctp__sopt_1_1CThostFtdcReqUserLoginField.html">ctp_sopt::CThostFtdcReqUserLoginField</a></div><div class="ttdoc">”√ªßµ«¬º«Î«Û</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcUserApiStruct_8h_source.html#l00032">ThostFtdcUserApiStruct.h:33</a></div></div>
+<div class="ttc" id="astructctp__sopt_1_1CThostFtdcRspInfoField_html"><div class="ttname"><a href="structctp__sopt_1_1CThostFtdcRspInfoField.html">ctp_sopt::CThostFtdcRspInfoField</a></div><div class="ttdoc">œÏ”¶–≈œ¢</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcUserApiStruct_8h_source.html#l00363">ThostFtdcUserApiStruct.h:364</a></div></div>
+<div class="ttc" id="astructctp__sopt_1_1CThostFtdcRspUserLoginField_html"><div class="ttname"><a href="structctp__sopt_1_1CThostFtdcRspUserLoginField.html">ctp_sopt::CThostFtdcRspUserLoginField</a></div><div class="ttdoc">”√ªßµ«¬º”¶¥</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcUserApiStruct_8h_source.html#l00061">ThostFtdcUserApiStruct.h:62</a></div></div>
+<div class="ttc" id="astructctp__sopt_1_1CThostFtdcSpecificInstrumentField_html"><div class="ttname"><a href="structctp__sopt_1_1CThostFtdcSpecificInstrumentField.html">ctp_sopt::CThostFtdcSpecificInstrumentField</a></div><div class="ttdoc">÷∏∂®µƒ∫œ‘º</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcUserApiStruct_8h_source.html#l06448">ThostFtdcUserApiStruct.h:6449</a></div></div>
+<div class="ttc" id="astructctp__sopt_1_1CThostFtdcUserLogoutField_html"><div class="ttname"><a href="structctp__sopt_1_1CThostFtdcUserLogoutField.html">ctp_sopt::CThostFtdcUserLogoutField</a></div><div class="ttdoc">”√ªßµ«≥ˆ«Î«Û</div><div class="ttdef"><b>Definition</b> <a href="CTPOpt3_85_88_2ThostFtdcUserApiStruct_8h_source.html#l00092">ThostFtdcUserApiStruct.h:93</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_79b1fe32d2ca1f50d62743a0dc1893a8.html">CTPOpt3.5.8</a></li><li class="navelem"><a class="el" href="CTPOpt3_85_88_2ThostFtdcMdApi_8h.html">ThostFtdcMdApi.h</a></li>
+    <li class="footer">Âà∂‰ΩúËÄÖ <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

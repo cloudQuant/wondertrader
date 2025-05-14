@@ -1,0 +1,2050 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/zstd_internal.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('zstd__internal_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#enum-members">枚举</a> &#124;
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">zstd_internal.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &quot;<a class="el" href="WTSUtils_2zstdlib_2compiler_8h_source.html">compiler.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="mem_8h_source.html">mem.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="debug_8h_source.html">debug.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="error__private_8h_source.html">error_private.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="zstd_8h_source.html">zstd.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="fse_8h_source.html">fse.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="huf_8h_source.html">huf.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="xxhash_8h_source.html">xxhash.h</a>&quot;</code><br />
+</div>
+<p><a href="zstd__internal_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structseqDef__s.html">seqDef_s</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structseqStore__t.html">seqStore_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structZSTD__frameSizeInfo.html">ZSTD_frameSizeInfo</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structblockProperties__t.html">blockProperties_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:ad88034c8350c3d479ce0db09fd8ee0c8" id="r_ad88034c8350c3d479ce0db09fd8ee0c8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ad88034c8350c3d479ce0db09fd8ee0c8">ZSTD_STATIC_LINKING_ONLY</a></td></tr>
+<tr class="separator:ad88034c8350c3d479ce0db09fd8ee0c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d2a6fcfd814db079898717019641487" id="r_a0d2a6fcfd814db079898717019641487"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a0d2a6fcfd814db079898717019641487">FSE_STATIC_LINKING_ONLY</a></td></tr>
+<tr class="separator:a0d2a6fcfd814db079898717019641487"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7691fd75a0d8bc9d2b1544f0df8e381c" id="r_a7691fd75a0d8bc9d2b1544f0df8e381c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a7691fd75a0d8bc9d2b1544f0df8e381c">HUF_STATIC_LINKING_ONLY</a></td></tr>
+<tr class="separator:a7691fd75a0d8bc9d2b1544f0df8e381c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a546f2633ae1036f49bdc5582971d7f1e" id="r_a546f2633ae1036f49bdc5582971d7f1e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a546f2633ae1036f49bdc5582971d7f1e">XXH_STATIC_LINKING_ONLY</a>&#160;&#160;&#160;/* <a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> */</td></tr>
+<tr class="separator:a546f2633ae1036f49bdc5582971d7f1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb3f1363cae8dbe0254134253984490c" id="r_adb3f1363cae8dbe0254134253984490c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#adb3f1363cae8dbe0254134253984490c">ZSTD_STATIC_ASSERT</a>(c)&#160;&#160;&#160;<a class="el" href="debug_8h.html#a0eb676ca6c75ca5c67f93092d6f39fc0">DEBUG_STATIC_ASSERT</a>(c)</td></tr>
+<tr class="separator:adb3f1363cae8dbe0254134253984490c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a665e5ea865f07b1c036fb5e84fdd6b1e" id="r_a665e5ea865f07b1c036fb5e84fdd6b1e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a665e5ea865f07b1c036fb5e84fdd6b1e">ZSTD_isError</a>&#160;&#160;&#160;<a class="el" href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a>   /* for inlining */</td></tr>
+<tr class="separator:a665e5ea865f07b1c036fb5e84fdd6b1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ab2ee8300d3fe2724cf97953dac66d0" id="r_a7ab2ee8300d3fe2724cf97953dac66d0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a7ab2ee8300d3fe2724cf97953dac66d0">FSE_isError</a>&#160;&#160;&#160;<a class="el" href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a></td></tr>
+<tr class="separator:a7ab2ee8300d3fe2724cf97953dac66d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2de9e4837283ff6a5d5f4e2f43c6fed" id="r_ad2de9e4837283ff6a5d5f4e2f43c6fed"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ad2de9e4837283ff6a5d5f4e2f43c6fed">HUF_isError</a>&#160;&#160;&#160;<a class="el" href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a></td></tr>
+<tr class="separator:ad2de9e4837283ff6a5d5f4e2f43c6fed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3acffbd305ee72dcd4593c0d8af64a4f" id="r_a3acffbd305ee72dcd4593c0d8af64a4f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a3acffbd305ee72dcd4593c0d8af64a4f">MIN</a>(a,  b)&#160;&#160;&#160;((a)&lt;(b) ? (a) : (b))</td></tr>
+<tr class="separator:a3acffbd305ee72dcd4593c0d8af64a4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa99ec4acc4ecb2dc3c2d05da15d0e3f" id="r_afa99ec4acc4ecb2dc3c2d05da15d0e3f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f">MAX</a>(a,  b)&#160;&#160;&#160;((a)&gt;(b) ? (a) : (b))</td></tr>
+<tr class="separator:afa99ec4acc4ecb2dc3c2d05da15d0e3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d0783e849b3fc286fe720307a952d26" id="r_a5d0783e849b3fc286fe720307a952d26"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a5d0783e849b3fc286fe720307a952d26">RETURN_ERROR_IF</a>(cond,  err, ...)</td></tr>
+<tr class="separator:a5d0783e849b3fc286fe720307a952d26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d4f39f1cb8d10dd9b7ea6ce7badaae1" id="r_a2d4f39f1cb8d10dd9b7ea6ce7badaae1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a2d4f39f1cb8d10dd9b7ea6ce7badaae1">RETURN_ERROR</a>(err, ...)</td></tr>
+<tr class="separator:a2d4f39f1cb8d10dd9b7ea6ce7badaae1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ee8764705277539a9c911cfb62dd077" id="r_a3ee8764705277539a9c911cfb62dd077"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a3ee8764705277539a9c911cfb62dd077">FORWARD_IF_ERROR</a>(err, ...)</td></tr>
+<tr class="separator:a3ee8764705277539a9c911cfb62dd077"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a154df9c68162f6b05e66068f181bf1d7" id="r_a154df9c68162f6b05e66068f181bf1d7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a154df9c68162f6b05e66068f181bf1d7">ZSTD_OPT_NUM</a>&#160;&#160;&#160;(1&lt;&lt;12)</td></tr>
+<tr class="separator:a154df9c68162f6b05e66068f181bf1d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea22fafe4da68c23971fc7cb20f42d47" id="r_aea22fafe4da68c23971fc7cb20f42d47"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>&#160;&#160;&#160;3                 /* <a class="el" href="demo__send__order_8cpp.html#a288747feb4c69d1b451212dd707f961b">number</a> of repcodes */</td></tr>
+<tr class="separator:aea22fafe4da68c23971fc7cb20f42d47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6517f19e1b6cf57df8e1ad017c6c4bfd" id="r_a6517f19e1b6cf57df8e1ad017c6c4bfd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a6517f19e1b6cf57df8e1ad017c6c4bfd">ZSTD_REP_MOVE</a>&#160;&#160;&#160;(<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>-1)</td></tr>
+<tr class="separator:a6517f19e1b6cf57df8e1ad017c6c4bfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1841fd1a462d245d8c73dce55e2f45da" id="r_a1841fd1a462d245d8c73dce55e2f45da"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a1841fd1a462d245d8c73dce55e2f45da">KB</a>&#160;&#160;&#160;*(1 &lt;&lt;10)</td></tr>
+<tr class="separator:a1841fd1a462d245d8c73dce55e2f45da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6b38d492364d98453284934ed7caee9" id="r_aa6b38d492364d98453284934ed7caee9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#aa6b38d492364d98453284934ed7caee9">MB</a>&#160;&#160;&#160;*(1 &lt;&lt;20)</td></tr>
+<tr class="separator:aa6b38d492364d98453284934ed7caee9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44172ac633c517cb4c9e278cef36b000" id="r_a44172ac633c517cb4c9e278cef36b000"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a44172ac633c517cb4c9e278cef36b000">GB</a>&#160;&#160;&#160;*(1U&lt;&lt;30)</td></tr>
+<tr class="separator:a44172ac633c517cb4c9e278cef36b000"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6b8f3261ae9e2e1043380c192f7b5f0" id="r_aa6b8f3261ae9e2e1043380c192f7b5f0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#aa6b8f3261ae9e2e1043380c192f7b5f0">BIT7</a>&#160;&#160;&#160;128</td></tr>
+<tr class="separator:aa6b8f3261ae9e2e1043380c192f7b5f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc2d074401e2b6322ee8f03476c24677" id="r_acc2d074401e2b6322ee8f03476c24677"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#acc2d074401e2b6322ee8f03476c24677">BIT6</a>&#160;&#160;&#160;64</td></tr>
+<tr class="separator:acc2d074401e2b6322ee8f03476c24677"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae692bc3df48028ceb1ddc2534a993bb8" id="r_ae692bc3df48028ceb1ddc2534a993bb8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ae692bc3df48028ceb1ddc2534a993bb8">BIT5</a>&#160;&#160;&#160;32</td></tr>
+<tr class="separator:ae692bc3df48028ceb1ddc2534a993bb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa731e0b6cf75f4e637ee88959315f5e4" id="r_aa731e0b6cf75f4e637ee88959315f5e4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#aa731e0b6cf75f4e637ee88959315f5e4">BIT4</a>&#160;&#160;&#160;16</td></tr>
+<tr class="separator:aa731e0b6cf75f4e637ee88959315f5e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a601923eba46784638244c1ebf2622a2a" id="r_a601923eba46784638244c1ebf2622a2a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a601923eba46784638244c1ebf2622a2a">BIT1</a>&#160;&#160;&#160;2</td></tr>
+<tr class="separator:a601923eba46784638244c1ebf2622a2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4d43f8748b542bce39e18790f845ecc" id="r_ad4d43f8748b542bce39e18790f845ecc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ad4d43f8748b542bce39e18790f845ecc">BIT0</a>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:ad4d43f8748b542bce39e18790f845ecc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a504d416546fe6dfed90633018055f69d" id="r_a504d416546fe6dfed90633018055f69d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a504d416546fe6dfed90633018055f69d">ZSTD_WINDOWLOG_ABSOLUTEMIN</a>&#160;&#160;&#160;10</td></tr>
+<tr class="separator:a504d416546fe6dfed90633018055f69d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a848b8bb509d81cc5dae17b3f0f695be7" id="r_a848b8bb509d81cc5dae17b3f0f695be7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a848b8bb509d81cc5dae17b3f0f695be7">ZSTD_FRAMEIDSIZE</a>&#160;&#160;&#160;4   /* magic <a class="el" href="demo__send__order_8cpp.html#a288747feb4c69d1b451212dd707f961b">number</a> size */</td></tr>
+<tr class="separator:a848b8bb509d81cc5dae17b3f0f695be7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a456a4a9b8a37496e42ad1f91bd4e4b91" id="r_a456a4a9b8a37496e42ad1f91bd4e4b91"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a456a4a9b8a37496e42ad1f91bd4e4b91">ZSTD_BLOCKHEADERSIZE</a>&#160;&#160;&#160;3   /* <a class="el" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a> standard doesn't allow `static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>` variable to be <a class="el" href="API_2AtpTradeApi_2demo_2simple__demo_2main_8cpp.html#a347fd65fce8f2409e533eb1badd110e0">init</a> using another `static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>` variable */</td></tr>
+<tr class="separator:a456a4a9b8a37496e42ad1f91bd4e4b91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64b641e99ede5ac8ea5d5543e56b28e4" id="r_a64b641e99ede5ac8ea5d5543e56b28e4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a64b641e99ede5ac8ea5d5543e56b28e4">MIN_SEQUENCES_SIZE</a>&#160;&#160;&#160;1 /* nbSeq==0 */</td></tr>
+<tr class="separator:a64b641e99ede5ac8ea5d5543e56b28e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9a173ad4492fd5a86d622dca70a1da3" id="r_ab9a173ad4492fd5a86d622dca70a1da3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ab9a173ad4492fd5a86d622dca70a1da3">MIN_CBLOCK_SIZE</a>&#160;&#160;&#160;(1 /*litCSize*/ + 1 /* RLE or RAW */ + <a class="el" href="zstd__internal_8h.html#a64b641e99ede5ac8ea5d5543e56b28e4">MIN_SEQUENCES_SIZE</a> /* nbSeq==0 */)   /* for a non-null block */</td></tr>
+<tr class="separator:ab9a173ad4492fd5a86d622dca70a1da3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f84a999a7ca2aa1629665a89a662683" id="r_a2f84a999a7ca2aa1629665a89a662683"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a2f84a999a7ca2aa1629665a89a662683">HufLog</a>&#160;&#160;&#160;12</td></tr>
+<tr class="separator:a2f84a999a7ca2aa1629665a89a662683"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e43abcb0fb1bc3d2b8a461daa4de371" id="r_a9e43abcb0fb1bc3d2b8a461daa4de371"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a9e43abcb0fb1bc3d2b8a461daa4de371">LONGNBSEQ</a>&#160;&#160;&#160;0x7F00</td></tr>
+<tr class="separator:a9e43abcb0fb1bc3d2b8a461daa4de371"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d835b35b6582451a75dc6ff464a9e75" id="r_a2d835b35b6582451a75dc6ff464a9e75"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a2d835b35b6582451a75dc6ff464a9e75">MINMATCH</a>&#160;&#160;&#160;3</td></tr>
+<tr class="separator:a2d835b35b6582451a75dc6ff464a9e75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac102bcc91a5308464fc6f5b0039ec886" id="r_ac102bcc91a5308464fc6f5b0039ec886"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ac102bcc91a5308464fc6f5b0039ec886">Litbits</a>&#160;&#160;&#160;8</td></tr>
+<tr class="separator:ac102bcc91a5308464fc6f5b0039ec886"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0351e69d42178cb6fb2859a1a1d853d5" id="r_a0351e69d42178cb6fb2859a1a1d853d5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a0351e69d42178cb6fb2859a1a1d853d5">MaxLit</a>&#160;&#160;&#160;((1&lt;&lt;<a class="el" href="zstd__internal_8h.html#ac102bcc91a5308464fc6f5b0039ec886">Litbits</a>) - 1)</td></tr>
+<tr class="separator:a0351e69d42178cb6fb2859a1a1d853d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fc62dd4928331efa2e34ed6cc3a8130" id="r_a4fc62dd4928331efa2e34ed6cc3a8130"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a4fc62dd4928331efa2e34ed6cc3a8130">MaxML</a>&#160;&#160;&#160;52</td></tr>
+<tr class="separator:a4fc62dd4928331efa2e34ed6cc3a8130"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3791b3a0dfbaa61ee240d5d1c548a7b0" id="r_a3791b3a0dfbaa61ee240d5d1c548a7b0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a3791b3a0dfbaa61ee240d5d1c548a7b0">MaxLL</a>&#160;&#160;&#160;35</td></tr>
+<tr class="separator:a3791b3a0dfbaa61ee240d5d1c548a7b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8a29668fac591869d620fcdb1abf305" id="r_ae8a29668fac591869d620fcdb1abf305"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ae8a29668fac591869d620fcdb1abf305">DefaultMaxOff</a>&#160;&#160;&#160;28</td></tr>
+<tr class="separator:ae8a29668fac591869d620fcdb1abf305"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab01fb39c723245d01032f5a759ba2b0c" id="r_ab01fb39c723245d01032f5a759ba2b0c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ab01fb39c723245d01032f5a759ba2b0c">MaxOff</a>&#160;&#160;&#160;31</td></tr>
+<tr class="separator:ab01fb39c723245d01032f5a759ba2b0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4a404dfe486525359937319436db121" id="r_aa4a404dfe486525359937319436db121"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#aa4a404dfe486525359937319436db121">MaxSeq</a>&#160;&#160;&#160;<a class="el" href="divsufsort_8c.html#ad448d437b99a125bd9344585d4f02e9a">MAX</a>(<a class="el" href="zstd__internal_8h.html#a3791b3a0dfbaa61ee240d5d1c548a7b0">MaxLL</a>, <a class="el" href="zstd__internal_8h.html#a4fc62dd4928331efa2e34ed6cc3a8130">MaxML</a>)   /* Assumption : <a class="el" href="zstd__internal_8h.html#ab01fb39c723245d01032f5a759ba2b0c">MaxOff</a> &lt; <a class="el" href="zstd__internal_8h.html#a3791b3a0dfbaa61ee240d5d1c548a7b0">MaxLL</a>,<a class="el" href="zstd__internal_8h.html#a4fc62dd4928331efa2e34ed6cc3a8130">MaxML</a> */</td></tr>
+<tr class="separator:aa4a404dfe486525359937319436db121"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a714e57f17112763cbe7effbdd8cd0f17" id="r_a714e57f17112763cbe7effbdd8cd0f17"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a714e57f17112763cbe7effbdd8cd0f17">MLFSELog</a>&#160;&#160;&#160;9</td></tr>
+<tr class="separator:a714e57f17112763cbe7effbdd8cd0f17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9fe41e24ab2ae3e7c1302dc3f9dc11c" id="r_ab9fe41e24ab2ae3e7c1302dc3f9dc11c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ab9fe41e24ab2ae3e7c1302dc3f9dc11c">LLFSELog</a>&#160;&#160;&#160;9</td></tr>
+<tr class="separator:ab9fe41e24ab2ae3e7c1302dc3f9dc11c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4165c4763105841899baf3da34f3b43" id="r_af4165c4763105841899baf3da34f3b43"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#af4165c4763105841899baf3da34f3b43">OffFSELog</a>&#160;&#160;&#160;8</td></tr>
+<tr class="separator:af4165c4763105841899baf3da34f3b43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6bf3b376b2b1ef660735d7cb09abc949" id="r_a6bf3b376b2b1ef660735d7cb09abc949"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a6bf3b376b2b1ef660735d7cb09abc949">MaxFSELog</a>&#160;&#160;&#160;<a class="el" href="divsufsort_8c.html#ad448d437b99a125bd9344585d4f02e9a">MAX</a>(<a class="el" href="divsufsort_8c.html#ad448d437b99a125bd9344585d4f02e9a">MAX</a>(<a class="el" href="zstd__internal_8h.html#a714e57f17112763cbe7effbdd8cd0f17">MLFSELog</a>, <a class="el" href="zstd__internal_8h.html#ab9fe41e24ab2ae3e7c1302dc3f9dc11c">LLFSELog</a>), <a class="el" href="zstd__internal_8h.html#af4165c4763105841899baf3da34f3b43">OffFSELog</a>)</td></tr>
+<tr class="separator:a6bf3b376b2b1ef660735d7cb09abc949"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4cf2a8505f0c0582562d5273046a784" id="r_ad4cf2a8505f0c0582562d5273046a784"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ad4cf2a8505f0c0582562d5273046a784">LL_DEFAULTNORMLOG</a>&#160;&#160;&#160;6  /* for static allocation */</td></tr>
+<tr class="separator:ad4cf2a8505f0c0582562d5273046a784"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a863ba3017d707e46c2994fbcae751eda" id="r_a863ba3017d707e46c2994fbcae751eda"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a863ba3017d707e46c2994fbcae751eda">ML_DEFAULTNORMLOG</a>&#160;&#160;&#160;6  /* for static allocation */</td></tr>
+<tr class="separator:a863ba3017d707e46c2994fbcae751eda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51aa4b7d9192fdcd790747fb97584d55" id="r_a51aa4b7d9192fdcd790747fb97584d55"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a51aa4b7d9192fdcd790747fb97584d55">OF_DEFAULTNORMLOG</a>&#160;&#160;&#160;5  /* for static allocation */</td></tr>
+<tr class="separator:a51aa4b7d9192fdcd790747fb97584d55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb3499b7464ed71e04b64ede8460bbe0" id="r_acb3499b7464ed71e04b64ede8460bbe0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#acb3499b7464ed71e04b64ede8460bbe0">COPY8</a>(d,  s)&#160;&#160;&#160;{ <a class="el" href="zstd__internal_8h.html#ac227bfd4a30c12ee8b3fba963025e51c">ZSTD_copy8</a>(d,s); d+=8; s+=8; }</td></tr>
+<tr class="separator:acb3499b7464ed71e04b64ede8460bbe0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff62c773a3f2ee9846cf4c6ed920a4e5" id="r_aff62c773a3f2ee9846cf4c6ed920a4e5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#aff62c773a3f2ee9846cf4c6ed920a4e5">COPY16</a>(d,  s)&#160;&#160;&#160;{ <a class="el" href="zstd__internal_8h.html#aa52a0e981664c70359a4f52ce3697044">ZSTD_copy16</a>(d,s); d+=16; s+=16; }</td></tr>
+<tr class="separator:aff62c773a3f2ee9846cf4c6ed920a4e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c25b8b5da6a100a9be35a3783cd28ac" id="r_a4c25b8b5da6a100a9be35a3783cd28ac"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a4c25b8b5da6a100a9be35a3783cd28ac">WILDCOPY_OVERLENGTH</a>&#160;&#160;&#160;32</td></tr>
+<tr class="separator:a4c25b8b5da6a100a9be35a3783cd28ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea5ee23cf0eb1af6b6deed83247d9fac" id="r_aea5ee23cf0eb1af6b6deed83247d9fac"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#aea5ee23cf0eb1af6b6deed83247d9fac">WILDCOPY_VECLEN</a>&#160;&#160;&#160;16</td></tr>
+<tr class="separator:aea5ee23cf0eb1af6b6deed83247d9fac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:a2c41d44ee2a419c299584645941ffccf" id="r_a2c41d44ee2a419c299584645941ffccf"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structseqDef__s.html">seqDef_s</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a2c41d44ee2a419c299584645941ffccf">seqDef</a></td></tr>
+<tr class="separator:a2c41d44ee2a419c299584645941ffccf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+枚举</h2></td></tr>
+<tr class="memitem:a781951c5a4951f8bb0ea9e713dfacf80" id="r_a781951c5a4951f8bb0ea9e713dfacf80"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a781951c5a4951f8bb0ea9e713dfacf80">blockType_e</a> { <a class="el" href="zstd__internal_8h.html#a781951c5a4951f8bb0ea9e713dfacf80ae51d86e4cf0d2fe87057fe2f611d6612">bt_raw</a>
+, <a class="el" href="zstd__internal_8h.html#a781951c5a4951f8bb0ea9e713dfacf80a86534bb7a856201720b5f3a5701b901f">bt_rle</a>
+, <a class="el" href="zstd__internal_8h.html#a781951c5a4951f8bb0ea9e713dfacf80a17cf7509664e69986dd783e11f90f91d">bt_compressed</a>
+, <a class="el" href="zstd__internal_8h.html#a781951c5a4951f8bb0ea9e713dfacf80ae34e04758ff61b311d911d06f2e0d4c7">bt_reserved</a>
+ }</td></tr>
+<tr class="separator:a781951c5a4951f8bb0ea9e713dfacf80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f24d04af1f76716d26382540647e63d" id="r_a9f24d04af1f76716d26382540647e63d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a9f24d04af1f76716d26382540647e63d">symbolEncodingType_e</a> { <a class="el" href="zstd__internal_8h.html#a9f24d04af1f76716d26382540647e63da75591083ccde4196b0a0559dbc1996ba">set_basic</a>
+, <a class="el" href="zstd__internal_8h.html#a9f24d04af1f76716d26382540647e63daefea2208d46625c28915bed539811d39">set_rle</a>
+, <a class="el" href="zstd__internal_8h.html#a9f24d04af1f76716d26382540647e63daaf6c0ebe228a25f457e97545e7a87309">set_compressed</a>
+, <a class="el" href="zstd__internal_8h.html#a9f24d04af1f76716d26382540647e63da036c56560f59455ef3e70b9fd2b97303">set_repeat</a>
+ }</td></tr>
+<tr class="separator:a9f24d04af1f76716d26382540647e63d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea52188369fa44532ad1f7c325cff4a0" id="r_aea52188369fa44532ad1f7c325cff4a0"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#aea52188369fa44532ad1f7c325cff4a0">ZSTD_overlap_e</a> { <a class="el" href="zstd__internal_8h.html#aea52188369fa44532ad1f7c325cff4a0a3a1e7de479ae265f95f6611917376f4e">ZSTD_no_overlap</a>
+, <a class="el" href="zstd__internal_8h.html#aea52188369fa44532ad1f7c325cff4a0a24511f674a1e46c3ee0004cd9e58cbc0">ZSTD_overlap_src_before_dst</a>
+ }</td></tr>
+<tr class="separator:aea52188369fa44532ad1f7c325cff4a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:ac227bfd4a30c12ee8b3fba963025e51c" id="r_ac227bfd4a30c12ee8b3fba963025e51c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ac227bfd4a30c12ee8b3fba963025e51c">ZSTD_copy8</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>)</td></tr>
+<tr class="separator:ac227bfd4a30c12ee8b3fba963025e51c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa52a0e981664c70359a4f52ce3697044" id="r_aa52a0e981664c70359a4f52ce3697044"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#aa52a0e981664c70359a4f52ce3697044">ZSTD_copy16</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>)</td></tr>
+<tr class="separator:aa52a0e981664c70359a4f52ce3697044"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5773b31147f6642565cd93ca8864f81" id="r_ae5773b31147f6642565cd93ca8864f81"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#acdb32e49e718aa032c6b04b4a237131e">FORCE_INLINE_ATTR</a> <a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abb568b4457858d8f44c8f0d40ba33613">DONT_VECTORIZE</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ae5773b31147f6642565cd93ca8864f81">ZSTD_wildcopy</a> (void *<a class="el" href="zbuff_8h.html#a08f683b5840d86269fccb0ca7609598c">dst</a>, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, ptrdiff_t length, <a class="el" href="zstd__internal_8h.html#aea52188369fa44532ad1f7c325cff4a0">ZSTD_overlap_e</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> ovtype)</td></tr>
+<tr class="separator:ae5773b31147f6642565cd93ca8864f81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae387cc078a5eb661e2ac980cbe512cf2" id="r_ae387cc078a5eb661e2ac980cbe512cf2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ae387cc078a5eb661e2ac980cbe512cf2">ZSTD_getSeqStore</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#a9ccc575a7e1f1afd01e76c0fa98d957d">ZSTD_CCtx</a> *ctx)</td></tr>
+<tr class="separator:ae387cc078a5eb661e2ac980cbe512cf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ddae2b7cdd2cd02d82df2de7e626315" id="r_a0ddae2b7cdd2cd02d82df2de7e626315"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a0ddae2b7cdd2cd02d82df2de7e626315">ZSTD_seqToCodes</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structseqStore__t.html">seqStore_t</a> *seqStorePtr)</td></tr>
+<tr class="separator:a0ddae2b7cdd2cd02d82df2de7e626315"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf3d500bcf39cd8fedb3d5163eb5f364" id="r_aaf3d500bcf39cd8fedb3d5163eb5f364"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#aaf3d500bcf39cd8fedb3d5163eb5f364">ZSTD_malloc</a> (size_t size, ZSTD_customMem customMem)</td></tr>
+<tr class="separator:aaf3d500bcf39cd8fedb3d5163eb5f364"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5d7955d9d6318f2d6a09797b37dd691" id="r_ae5d7955d9d6318f2d6a09797b37dd691"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ae5d7955d9d6318f2d6a09797b37dd691">ZSTD_calloc</a> (size_t size, ZSTD_customMem customMem)</td></tr>
+<tr class="separator:ae5d7955d9d6318f2d6a09797b37dd691"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9fbb7e3dcf0e887ae8a05914ebdf0c53" id="r_a9fbb7e3dcf0e887ae8a05914ebdf0c53"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a9fbb7e3dcf0e887ae8a05914ebdf0c53">ZSTD_free</a> (void *ptr, ZSTD_customMem customMem)</td></tr>
+<tr class="separator:a9fbb7e3dcf0e887ae8a05914ebdf0c53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58556a7f639bfe3425fd7bf42b421e69" id="r_a58556a7f639bfe3425fd7bf42b421e69"><td class="memItemLeft" align="right" valign="top"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a58556a7f639bfe3425fd7bf42b421e69">ZSTD_highbit32</a> (<a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> val)</td></tr>
+<tr class="separator:a58556a7f639bfe3425fd7bf42b421e69"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add2ddac2f9396e37f68acd80d4c5cedb" id="r_add2ddac2f9396e37f68acd80d4c5cedb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#add2ddac2f9396e37f68acd80d4c5cedb">ZSTD_invalidateRepCodes</a> (<a class="el" href="zstd_8h.html#a9ccc575a7e1f1afd01e76c0fa98d957d">ZSTD_CCtx</a> *cctx)</td></tr>
+<tr class="separator:add2ddac2f9396e37f68acd80d4c5cedb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6d9ed5da5bfdf578587adfbff628914" id="r_ae6d9ed5da5bfdf578587adfbff628914"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ae6d9ed5da5bfdf578587adfbff628914">ZSTD_getcBlockSize</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize, <a class="el" href="structblockProperties__t.html">blockProperties_t</a> *bpPtr)</td></tr>
+<tr class="separator:ae6d9ed5da5bfdf578587adfbff628914"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9823b75f8714fe6107131aaf9367e6ef" id="r_a9823b75f8714fe6107131aaf9367e6ef"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a9823b75f8714fe6107131aaf9367e6ef">ZSTD_decodeSeqHeaders</a> (<a class="el" href="zstd_8h.html#a9ce4435ca683f0e7cb2b90ca9eb1fce4">ZSTD_DCtx</a> *dctx, int *nbSeqPtr, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *<a class="el" href="zbuff_8h.html#a49286b6a0dd3728961b8ff1f1730a982">src</a>, size_t srcSize)</td></tr>
+<tr class="separator:a9823b75f8714fe6107131aaf9367e6ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:aa668bde4400836eae36d781b2e037f54" id="r_aa668bde4400836eae36d781b2e037f54"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#aa668bde4400836eae36d781b2e037f54">repStartValue</a> [<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>] = { 1, 4, 8 }</td></tr>
+<tr class="separator:aa668bde4400836eae36d781b2e037f54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e7d6a8bff343a172bddda14bb3c7928" id="r_a9e7d6a8bff343a172bddda14bb3c7928"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a9e7d6a8bff343a172bddda14bb3c7928">ZSTD_fcs_fieldSize</a> [4] = { 0, 2, 4, 8 }</td></tr>
+<tr class="separator:a9e7d6a8bff343a172bddda14bb3c7928"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7309aa3e16fa91e2f30ee36e6d6076d7" id="r_a7309aa3e16fa91e2f30ee36e6d6076d7"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a7309aa3e16fa91e2f30ee36e6d6076d7">ZSTD_did_fieldSize</a> [4] = { 0, 1, 2, 4 }</td></tr>
+<tr class="separator:a7309aa3e16fa91e2f30ee36e6d6076d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45e39260b36946c53894fd9fa4aaebf9" id="r_a45e39260b36946c53894fd9fa4aaebf9"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a45e39260b36946c53894fd9fa4aaebf9">ZSTD_blockHeaderSize</a> = <a class="el" href="zstd__internal_8h.html#a456a4a9b8a37496e42ad1f91bd4e4b91">ZSTD_BLOCKHEADERSIZE</a></td></tr>
+<tr class="separator:a45e39260b36946c53894fd9fa4aaebf9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa85e890f904f0c27d7c05e07f3d8defa" id="r_aa85e890f904f0c27d7c05e07f3d8defa"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#aa85e890f904f0c27d7c05e07f3d8defa">LL_bits</a> [<a class="el" href="zstd__internal_8h.html#a3791b3a0dfbaa61ee240d5d1c548a7b0">MaxLL</a>+1]</td></tr>
+<tr class="separator:aa85e890f904f0c27d7c05e07f3d8defa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d328234937dd0e78035e8ddf94e3548" id="r_a7d328234937dd0e78035e8ddf94e3548"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ae08f9a6ee81e70f713a74a5860062841">S16</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a7d328234937dd0e78035e8ddf94e3548">LL_defaultNorm</a> [<a class="el" href="zstd__internal_8h.html#a3791b3a0dfbaa61ee240d5d1c548a7b0">MaxLL</a>+1]</td></tr>
+<tr class="separator:a7d328234937dd0e78035e8ddf94e3548"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a439e5b9d38309396b31562cfafd18709" id="r_a439e5b9d38309396b31562cfafd18709"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a439e5b9d38309396b31562cfafd18709">LL_defaultNormLog</a> = <a class="el" href="zstd__internal_8h.html#ad4cf2a8505f0c0582562d5273046a784">LL_DEFAULTNORMLOG</a></td></tr>
+<tr class="separator:a439e5b9d38309396b31562cfafd18709"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b9e032a946250542d3ec1a804d687b9" id="r_a6b9e032a946250542d3ec1a804d687b9"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a6b9e032a946250542d3ec1a804d687b9">ML_bits</a> [<a class="el" href="zstd__internal_8h.html#a4fc62dd4928331efa2e34ed6cc3a8130">MaxML</a>+1]</td></tr>
+<tr class="separator:a6b9e032a946250542d3ec1a804d687b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca274bab04eda94e8752c9522ae36d6b" id="r_aca274bab04eda94e8752c9522ae36d6b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ae08f9a6ee81e70f713a74a5860062841">S16</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#aca274bab04eda94e8752c9522ae36d6b">ML_defaultNorm</a> [<a class="el" href="zstd__internal_8h.html#a4fc62dd4928331efa2e34ed6cc3a8130">MaxML</a>+1]</td></tr>
+<tr class="separator:aca274bab04eda94e8752c9522ae36d6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad62bc0b5d9e41c7ab4706c0f443f8706" id="r_ad62bc0b5d9e41c7ab4706c0f443f8706"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ad62bc0b5d9e41c7ab4706c0f443f8706">ML_defaultNormLog</a> = <a class="el" href="zstd__internal_8h.html#a863ba3017d707e46c2994fbcae751eda">ML_DEFAULTNORMLOG</a></td></tr>
+<tr class="separator:ad62bc0b5d9e41c7ab4706c0f443f8706"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae08f864d3b8ce8d8fe75790eac3c0488" id="r_ae08f864d3b8ce8d8fe75790eac3c0488"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ae08f9a6ee81e70f713a74a5860062841">S16</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#ae08f864d3b8ce8d8fe75790eac3c0488">OF_defaultNorm</a> [<a class="el" href="zstd__internal_8h.html#ae8a29668fac591869d620fcdb1abf305">DefaultMaxOff</a>+1]</td></tr>
+<tr class="separator:ae08f864d3b8ce8d8fe75790eac3c0488"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65fa6b34642df3be2ec0bb03f2214038" id="r_a65fa6b34642df3be2ec0bb03f2214038"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="zstd__internal_8h.html#a65fa6b34642df3be2ec0bb03f2214038">OF_defaultNormLog</a> = <a class="el" href="zstd__internal_8h.html#a51aa4b7d9192fdcd790747fb97584d55">OF_DEFAULTNORMLOG</a></td></tr>
+<tr class="separator:a65fa6b34642df3be2ec0bb03f2214038"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="ad4d43f8748b542bce39e18790f845ecc" name="ad4d43f8748b542bce39e18790f845ecc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4d43f8748b542bce39e18790f845ecc">&#9670;&#160;</a></span>BIT0</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BIT0&#160;&#160;&#160;1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00119">119</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a601923eba46784638244c1ebf2622a2a" name="a601923eba46784638244c1ebf2622a2a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a601923eba46784638244c1ebf2622a2a">&#9670;&#160;</a></span>BIT1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BIT1&#160;&#160;&#160;2</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00118">118</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa731e0b6cf75f4e637ee88959315f5e4" name="aa731e0b6cf75f4e637ee88959315f5e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa731e0b6cf75f4e637ee88959315f5e4">&#9670;&#160;</a></span>BIT4</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BIT4&#160;&#160;&#160;16</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00117">117</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae692bc3df48028ceb1ddc2534a993bb8" name="ae692bc3df48028ceb1ddc2534a993bb8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae692bc3df48028ceb1ddc2534a993bb8">&#9670;&#160;</a></span>BIT5</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BIT5&#160;&#160;&#160;32</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00116">116</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acc2d074401e2b6322ee8f03476c24677" name="acc2d074401e2b6322ee8f03476c24677"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc2d074401e2b6322ee8f03476c24677">&#9670;&#160;</a></span>BIT6</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BIT6&#160;&#160;&#160;64</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00115">115</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa6b8f3261ae9e2e1043380c192f7b5f0" name="aa6b8f3261ae9e2e1043380c192f7b5f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6b8f3261ae9e2e1043380c192f7b5f0">&#9670;&#160;</a></span>BIT7</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BIT7&#160;&#160;&#160;128</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00114">114</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aff62c773a3f2ee9846cf4c6ed920a4e5" name="aff62c773a3f2ee9846cf4c6ed920a4e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff62c773a3f2ee9846cf4c6ed920a4e5">&#9670;&#160;</a></span>COPY16</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define COPY16</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">d, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">s&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;{ <a class="el" href="zstd__internal_8h.html#aa52a0e981664c70359a4f52ce3697044">ZSTD_copy16</a>(d,s); d+=16; s+=16; }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00198">198</a> 行定义.</p>
+
+</div>
+</div>
+<a id="acb3499b7464ed71e04b64ede8460bbe0" name="acb3499b7464ed71e04b64ede8460bbe0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb3499b7464ed71e04b64ede8460bbe0">&#9670;&#160;</a></span>COPY8</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define COPY8</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">d, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">s&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;{ <a class="el" href="zstd__internal_8h.html#ac227bfd4a30c12ee8b3fba963025e51c">ZSTD_copy8</a>(d,s); d+=8; s+=8; }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00196">196</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae8a29668fac591869d620fcdb1abf305" name="ae8a29668fac591869d620fcdb1abf305"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8a29668fac591869d620fcdb1abf305">&#9670;&#160;</a></span>DefaultMaxOff</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DefaultMaxOff&#160;&#160;&#160;28</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00145">145</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3ee8764705277539a9c911cfb62dd077" name="a3ee8764705277539a9c911cfb62dd077"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ee8764705277539a9c911cfb62dd077">&#9670;&#160;</a></span>FORWARD_IF_ERROR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FORWARD_IF_ERROR</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">err, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">  <span class="keywordflow">do</span> { \</div>
+<div class="line">    <span class="keywordtype">size_t</span> <span class="keyword">const</span> err_code = (err); \</div>
+<div class="line">    if (<a class="code hl_function" href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a>(err_code)) { \</div>
+<div class="line">      RAWLOG(3, <span class="stringliteral">&quot;%s:%d: ERROR!: forwarding error in %s: %s&quot;</span>, __FILE__, __LINE__, <a class="code hl_define" href="zstd_8h.html#adbbadef2056cbbc1b4d24523c2c6cb5b">ZSTD_QUOTE</a>(err), <a class="code hl_function" href="error__private_8h.html#abc6626d7ae7f1d68f00b53c1bbdd368a">ERR_getErrorName</a>(err_code)); \</div>
+<div class="line">      RAWLOG(3, <span class="stringliteral">&quot;: &quot;</span> __VA_ARGS__); \</div>
+<div class="line">      RAWLOG(3, <span class="stringliteral">&quot;\n&quot;</span>); \</div>
+<div class="line">      <span class="keywordflow">return</span> err_code; \</div>
+<div class="line">    } \</div>
+<div class="line">  } <span class="keywordflow">while</span>(0);</div>
+<div class="ttc" id="aerror__private_8h_html_a5af8533d1342b5eedad6e03a82c3b1fe"><div class="ttname"><a href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a></div><div class="ttdeci">ERR_STATIC unsigned ERR_isError(size_t code)</div><div class="ttdef"><b>Definition</b> <a href="error__private_8h_source.html#l00056">error_private.h:56</a></div></div>
+<div class="ttc" id="aerror__private_8h_html_abc6626d7ae7f1d68f00b53c1bbdd368a"><div class="ttname"><a href="error__private_8h.html#abc6626d7ae7f1d68f00b53c1bbdd368a">ERR_getErrorName</a></div><div class="ttdeci">ERR_STATIC const char * ERR_getErrorName(size_t code)</div><div class="ttdef"><b>Definition</b> <a href="error__private_8h_source.html#l00067">error_private.h:67</a></div></div>
+<div class="ttc" id="azstd_8h_html_adbbadef2056cbbc1b4d24523c2c6cb5b"><div class="ttname"><a href="zstd_8h.html#adbbadef2056cbbc1b4d24523c2c6cb5b">ZSTD_QUOTE</a></div><div class="ttdeci">#define ZSTD_QUOTE(str)</div><div class="ttdef"><b>Definition</b> <a href="zstd_8h_source.html#l00081">zstd.h:81</a></div></div>
+</div><!-- fragment --><p>If the provided expression evaluates to an error code, returns that error code.</p>
+<p>In debug modes, prints additional information. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00089">89</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7ab2ee8300d3fe2724cf97953dac66d0" name="a7ab2ee8300d3fe2724cf97953dac66d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ab2ee8300d3fe2724cf97953dac66d0">&#9670;&#160;</a></span>FSE_isError</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_isError&#160;&#160;&#160;<a class="el" href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00044">44</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0d2a6fcfd814db079898717019641487" name="a0d2a6fcfd814db079898717019641487"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d2a6fcfd814db079898717019641487">&#9670;&#160;</a></span>FSE_STATIC_LINKING_ONLY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FSE_STATIC_LINKING_ONLY</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00028">28</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a44172ac633c517cb4c9e278cef36b000" name="a44172ac633c517cb4c9e278cef36b000"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44172ac633c517cb4c9e278cef36b000">&#9670;&#160;</a></span>GB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define GB&#160;&#160;&#160;*(1U&lt;&lt;30)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00112">112</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad2de9e4837283ff6a5d5f4e2f43c6fed" name="ad2de9e4837283ff6a5d5f4e2f43c6fed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2de9e4837283ff6a5d5f4e2f43c6fed">&#9670;&#160;</a></span>HUF_isError</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_isError&#160;&#160;&#160;<a class="el" href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00045">45</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7691fd75a0d8bc9d2b1544f0df8e381c" name="a7691fd75a0d8bc9d2b1544f0df8e381c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7691fd75a0d8bc9d2b1544f0df8e381c">&#9670;&#160;</a></span>HUF_STATIC_LINKING_ONLY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HUF_STATIC_LINKING_ONLY</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00030">30</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2f84a999a7ca2aa1629665a89a662683" name="a2f84a999a7ca2aa1629665a89a662683"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f84a999a7ca2aa1629665a89a662683">&#9670;&#160;</a></span>HufLog</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define HufLog&#160;&#160;&#160;12</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00134">134</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1841fd1a462d245d8c73dce55e2f45da" name="a1841fd1a462d245d8c73dce55e2f45da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1841fd1a462d245d8c73dce55e2f45da">&#9670;&#160;</a></span>KB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define KB&#160;&#160;&#160;*(1 &lt;&lt;10)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00110">110</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac102bcc91a5308464fc6f5b0039ec886" name="ac102bcc91a5308464fc6f5b0039ec886"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac102bcc91a5308464fc6f5b0039ec886">&#9670;&#160;</a></span>Litbits</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define Litbits&#160;&#160;&#160;8</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00141">141</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad4cf2a8505f0c0582562d5273046a784" name="ad4cf2a8505f0c0582562d5273046a784"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4cf2a8505f0c0582562d5273046a784">&#9670;&#160;</a></span>LL_DEFAULTNORMLOG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LL_DEFAULTNORMLOG&#160;&#160;&#160;6  /* for static allocation */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00163">163</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab9fe41e24ab2ae3e7c1302dc3f9dc11c" name="ab9fe41e24ab2ae3e7c1302dc3f9dc11c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9fe41e24ab2ae3e7c1302dc3f9dc11c">&#9670;&#160;</a></span>LLFSELog</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LLFSELog&#160;&#160;&#160;9</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00149">149</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9e43abcb0fb1bc3d2b8a461daa4de371" name="a9e43abcb0fb1bc3d2b8a461daa4de371"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e43abcb0fb1bc3d2b8a461daa4de371">&#9670;&#160;</a></span>LONGNBSEQ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LONGNBSEQ&#160;&#160;&#160;0x7F00</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00137">137</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afa99ec4acc4ecb2dc3c2d05da15d0e3f" name="afa99ec4acc4ecb2dc3c2d05da15d0e3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa99ec4acc4ecb2dc3c2d05da15d0e3f">&#9670;&#160;</a></span>MAX</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MAX</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">a, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">b&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;((a)&gt;(b) ? (a) : (b))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00054">54</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6bf3b376b2b1ef660735d7cb09abc949" name="a6bf3b376b2b1ef660735d7cb09abc949"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6bf3b376b2b1ef660735d7cb09abc949">&#9670;&#160;</a></span>MaxFSELog</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MaxFSELog&#160;&#160;&#160;<a class="el" href="divsufsort_8c.html#ad448d437b99a125bd9344585d4f02e9a">MAX</a>(<a class="el" href="divsufsort_8c.html#ad448d437b99a125bd9344585d4f02e9a">MAX</a>(<a class="el" href="zstd__internal_8h.html#a714e57f17112763cbe7effbdd8cd0f17">MLFSELog</a>, <a class="el" href="zstd__internal_8h.html#ab9fe41e24ab2ae3e7c1302dc3f9dc11c">LLFSELog</a>), <a class="el" href="zstd__internal_8h.html#af4165c4763105841899baf3da34f3b43">OffFSELog</a>)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00151">151</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0351e69d42178cb6fb2859a1a1d853d5" name="a0351e69d42178cb6fb2859a1a1d853d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0351e69d42178cb6fb2859a1a1d853d5">&#9670;&#160;</a></span>MaxLit</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MaxLit&#160;&#160;&#160;((1&lt;&lt;<a class="el" href="zstd__internal_8h.html#ac102bcc91a5308464fc6f5b0039ec886">Litbits</a>) - 1)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00142">142</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3791b3a0dfbaa61ee240d5d1c548a7b0" name="a3791b3a0dfbaa61ee240d5d1c548a7b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3791b3a0dfbaa61ee240d5d1c548a7b0">&#9670;&#160;</a></span>MaxLL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MaxLL&#160;&#160;&#160;35</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00144">144</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4fc62dd4928331efa2e34ed6cc3a8130" name="a4fc62dd4928331efa2e34ed6cc3a8130"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4fc62dd4928331efa2e34ed6cc3a8130">&#9670;&#160;</a></span>MaxML</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MaxML&#160;&#160;&#160;52</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00143">143</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab01fb39c723245d01032f5a759ba2b0c" name="ab01fb39c723245d01032f5a759ba2b0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab01fb39c723245d01032f5a759ba2b0c">&#9670;&#160;</a></span>MaxOff</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MaxOff&#160;&#160;&#160;31</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00146">146</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa4a404dfe486525359937319436db121" name="aa4a404dfe486525359937319436db121"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa4a404dfe486525359937319436db121">&#9670;&#160;</a></span>MaxSeq</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MaxSeq&#160;&#160;&#160;<a class="el" href="divsufsort_8c.html#ad448d437b99a125bd9344585d4f02e9a">MAX</a>(<a class="el" href="zstd__internal_8h.html#a3791b3a0dfbaa61ee240d5d1c548a7b0">MaxLL</a>, <a class="el" href="zstd__internal_8h.html#a4fc62dd4928331efa2e34ed6cc3a8130">MaxML</a>)   /* Assumption : <a class="el" href="zstd__internal_8h.html#ab01fb39c723245d01032f5a759ba2b0c">MaxOff</a> &lt; <a class="el" href="zstd__internal_8h.html#a3791b3a0dfbaa61ee240d5d1c548a7b0">MaxLL</a>,<a class="el" href="zstd__internal_8h.html#a4fc62dd4928331efa2e34ed6cc3a8130">MaxML</a> */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00147">147</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa6b38d492364d98453284934ed7caee9" name="aa6b38d492364d98453284934ed7caee9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6b38d492364d98453284934ed7caee9">&#9670;&#160;</a></span>MB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MB&#160;&#160;&#160;*(1 &lt;&lt;20)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00111">111</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3acffbd305ee72dcd4593c0d8af64a4f" name="a3acffbd305ee72dcd4593c0d8af64a4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3acffbd305ee72dcd4593c0d8af64a4f">&#9670;&#160;</a></span>MIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MIN</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">a, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">b&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;((a)&lt;(b) ? (a) : (b))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00053">53</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab9a173ad4492fd5a86d622dca70a1da3" name="ab9a173ad4492fd5a86d622dca70a1da3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9a173ad4492fd5a86d622dca70a1da3">&#9670;&#160;</a></span>MIN_CBLOCK_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MIN_CBLOCK_SIZE&#160;&#160;&#160;(1 /*litCSize*/ + 1 /* RLE or RAW */ + <a class="el" href="zstd__internal_8h.html#a64b641e99ede5ac8ea5d5543e56b28e4">MIN_SEQUENCES_SIZE</a> /* nbSeq==0 */)   /* for a non-null block */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00132">132</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a64b641e99ede5ac8ea5d5543e56b28e4" name="a64b641e99ede5ac8ea5d5543e56b28e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64b641e99ede5ac8ea5d5543e56b28e4">&#9670;&#160;</a></span>MIN_SEQUENCES_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MIN_SEQUENCES_SIZE&#160;&#160;&#160;1 /* nbSeq==0 */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00131">131</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2d835b35b6582451a75dc6ff464a9e75" name="a2d835b35b6582451a75dc6ff464a9e75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d835b35b6582451a75dc6ff464a9e75">&#9670;&#160;</a></span>MINMATCH</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MINMATCH&#160;&#160;&#160;3</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00139">139</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a863ba3017d707e46c2994fbcae751eda" name="a863ba3017d707e46c2994fbcae751eda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a863ba3017d707e46c2994fbcae751eda">&#9670;&#160;</a></span>ML_DEFAULTNORMLOG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ML_DEFAULTNORMLOG&#160;&#160;&#160;6  /* for static allocation */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00180">180</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a714e57f17112763cbe7effbdd8cd0f17" name="a714e57f17112763cbe7effbdd8cd0f17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a714e57f17112763cbe7effbdd8cd0f17">&#9670;&#160;</a></span>MLFSELog</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MLFSELog&#160;&#160;&#160;9</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00148">148</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a51aa4b7d9192fdcd790747fb97584d55" name="a51aa4b7d9192fdcd790747fb97584d55"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51aa4b7d9192fdcd790747fb97584d55">&#9670;&#160;</a></span>OF_DEFAULTNORMLOG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define OF_DEFAULTNORMLOG&#160;&#160;&#160;5  /* for static allocation */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00187">187</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af4165c4763105841899baf3da34f3b43" name="af4165c4763105841899baf3da34f3b43"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4165c4763105841899baf3da34f3b43">&#9670;&#160;</a></span>OffFSELog</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define OffFSELog&#160;&#160;&#160;8</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00150">150</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2d4f39f1cb8d10dd9b7ea6ce7badaae1" name="a2d4f39f1cb8d10dd9b7ea6ce7badaae1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d4f39f1cb8d10dd9b7ea6ce7badaae1">&#9670;&#160;</a></span>RETURN_ERROR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define RETURN_ERROR</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">err, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">  <span class="keywordflow">do</span> { \</div>
+<div class="line">    RAWLOG(3, <span class="stringliteral">&quot;%s:%d: ERROR!: unconditional check failed, returning %s&quot;</span>, __FILE__, __LINE__, <a class="code hl_define" href="zstd_8h.html#adbbadef2056cbbc1b4d24523c2c6cb5b">ZSTD_QUOTE</a>(<a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(err))); \</div>
+<div class="line">    RAWLOG(3, <span class="stringliteral">&quot;: &quot;</span> __VA_ARGS__); \</div>
+<div class="line">    RAWLOG(3, <span class="stringliteral">&quot;\n&quot;</span>); \</div>
+<div class="line">    <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(err); \</div>
+<div class="line">  } <span class="keywordflow">while</span>(0);</div>
+<div class="ttc" id="aerror__private_8h_html_a24803eff45eace63df5ec3f331e3fccc"><div class="ttname"><a href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a></div><div class="ttdeci">#define ERROR(name)</div><div class="ttdef"><b>Definition</b> <a href="error__private_8h_source.html#l00053">error_private.h:53</a></div></div>
+</div><!-- fragment --><p>Unconditionally return the specified error.</p>
+<p>In debug modes, prints additional information. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00076">76</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5d0783e849b3fc286fe720307a952d26" name="a5d0783e849b3fc286fe720307a952d26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d0783e849b3fc286fe720307a952d26">&#9670;&#160;</a></span>RETURN_ERROR_IF</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define RETURN_ERROR_IF</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">cond, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">err, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">  <span class="keywordflow">if</span> (cond) { \</div>
+<div class="line">    RAWLOG(3, <span class="stringliteral">&quot;%s:%d: ERROR!: check %s failed, returning %s&quot;</span>, __FILE__, __LINE__, <a class="code hl_define" href="zstd_8h.html#adbbadef2056cbbc1b4d24523c2c6cb5b">ZSTD_QUOTE</a>(cond), <a class="code hl_define" href="zstd_8h.html#adbbadef2056cbbc1b4d24523c2c6cb5b">ZSTD_QUOTE</a>(<a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(err))); \</div>
+<div class="line">    RAWLOG(3, <span class="stringliteral">&quot;: &quot;</span> __VA_ARGS__); \</div>
+<div class="line">    RAWLOG(3, <span class="stringliteral">&quot;\n&quot;</span>); \</div>
+<div class="line">    <span class="keywordflow">return</span> <a class="code hl_define" href="error__private_8h.html#a24803eff45eace63df5ec3f331e3fccc">ERROR</a>(err); \</div>
+<div class="line">  }</div>
+</div><!-- fragment --><p>Return the specified error if the condition evaluates to true.</p>
+<p>In debug modes, prints additional information. In order to do that (particularly, printing the conditional that failed), this can't just wrap <a class="el" href="zstd__internal_8h.html#a2d4f39f1cb8d10dd9b7ea6ce7badaae1">RETURN_ERROR()</a>. </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00063">63</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4c25b8b5da6a100a9be35a3783cd28ac" name="a4c25b8b5da6a100a9be35a3783cd28ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c25b8b5da6a100a9be35a3783cd28ac">&#9670;&#160;</a></span>WILDCOPY_OVERLENGTH</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define WILDCOPY_OVERLENGTH&#160;&#160;&#160;32</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00200">200</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aea5ee23cf0eb1af6b6deed83247d9fac" name="aea5ee23cf0eb1af6b6deed83247d9fac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea5ee23cf0eb1af6b6deed83247d9fac">&#9670;&#160;</a></span>WILDCOPY_VECLEN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define WILDCOPY_VECLEN&#160;&#160;&#160;16</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00201">201</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a546f2633ae1036f49bdc5582971d7f1e" name="a546f2633ae1036f49bdc5582971d7f1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a546f2633ae1036f49bdc5582971d7f1e">&#9670;&#160;</a></span>XXH_STATIC_LINKING_ONLY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define XXH_STATIC_LINKING_ONLY&#160;&#160;&#160;/* <a class="el" href="xxhash_8h.html#a0702bdbc80b0cf9e94f2379f7d839b8c">XXH64_state_t</a> */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00033">33</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a456a4a9b8a37496e42ad1f91bd4e4b91" name="a456a4a9b8a37496e42ad1f91bd4e4b91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a456a4a9b8a37496e42ad1f91bd4e4b91">&#9670;&#160;</a></span>ZSTD_BLOCKHEADERSIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZSTD_BLOCKHEADERSIZE&#160;&#160;&#160;3   /* <a class="el" href="cpu_8h.html#ab4ea6500801cc6f149d5ea05a269e08d">C</a> standard doesn't allow `static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>` variable to be <a class="el" href="API_2AtpTradeApi_2demo_2simple__demo_2main_8cpp.html#a347fd65fce8f2409e533eb1badd110e0">init</a> using another `static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>` variable */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00127">127</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a848b8bb509d81cc5dae17b3f0f695be7" name="a848b8bb509d81cc5dae17b3f0f695be7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a848b8bb509d81cc5dae17b3f0f695be7">&#9670;&#160;</a></span>ZSTD_FRAMEIDSIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZSTD_FRAMEIDSIZE&#160;&#160;&#160;4   /* magic <a class="el" href="demo__send__order_8cpp.html#a288747feb4c69d1b451212dd707f961b">number</a> size */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00125">125</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a665e5ea865f07b1c036fb5e84fdd6b1e" name="a665e5ea865f07b1c036fb5e84fdd6b1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a665e5ea865f07b1c036fb5e84fdd6b1e">&#9670;&#160;</a></span>ZSTD_isError</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZSTD_isError&#160;&#160;&#160;<a class="el" href="error__private_8h.html#a5af8533d1342b5eedad6e03a82c3b1fe">ERR_isError</a>   /* for inlining */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00043">43</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a154df9c68162f6b05e66068f181bf1d7" name="a154df9c68162f6b05e66068f181bf1d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a154df9c68162f6b05e66068f181bf1d7">&#9670;&#160;</a></span>ZSTD_OPT_NUM</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZSTD_OPT_NUM&#160;&#160;&#160;(1&lt;&lt;12)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00104">104</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6517f19e1b6cf57df8e1ad017c6c4bfd" name="a6517f19e1b6cf57df8e1ad017c6c4bfd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6517f19e1b6cf57df8e1ad017c6c4bfd">&#9670;&#160;</a></span>ZSTD_REP_MOVE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZSTD_REP_MOVE&#160;&#160;&#160;(<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>-1)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00107">107</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aea22fafe4da68c23971fc7cb20f42d47" name="aea22fafe4da68c23971fc7cb20f42d47"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea22fafe4da68c23971fc7cb20f42d47">&#9670;&#160;</a></span>ZSTD_REP_NUM</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZSTD_REP_NUM&#160;&#160;&#160;3                 /* <a class="el" href="demo__send__order_8cpp.html#a288747feb4c69d1b451212dd707f961b">number</a> of repcodes */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00106">106</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adb3f1363cae8dbe0254134253984490c" name="adb3f1363cae8dbe0254134253984490c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb3f1363cae8dbe0254134253984490c">&#9670;&#160;</a></span>ZSTD_STATIC_ASSERT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZSTD_STATIC_ASSERT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">c</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="debug_8h.html#a0eb676ca6c75ca5c67f93092d6f39fc0">DEBUG_STATIC_ASSERT</a>(c)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00042">42</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad88034c8350c3d479ce0db09fd8ee0c8" name="ad88034c8350c3d479ce0db09fd8ee0c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad88034c8350c3d479ce0db09fd8ee0c8">&#9670;&#160;</a></span>ZSTD_STATIC_LINKING_ONLY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZSTD_STATIC_LINKING_ONLY</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00026">26</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a504d416546fe6dfed90633018055f69d" name="a504d416546fe6dfed90633018055f69d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a504d416546fe6dfed90633018055f69d">&#9670;&#160;</a></span>ZSTD_WINDOWLOG_ABSOLUTEMIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ZSTD_WINDOWLOG_ABSOLUTEMIN&#160;&#160;&#160;10</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00121">121</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类型定义说明</h2>
+<a id="a2c41d44ee2a419c299584645941ffccf" name="a2c41d44ee2a419c299584645941ffccf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c41d44ee2a419c299584645941ffccf">&#9670;&#160;</a></span>seqDef</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structseqDef__s.html">seqDef_s</a> <a class="el" href="zstd__internal_8h.html#a2c41d44ee2a419c299584645941ffccf">seqDef</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">枚举类型说明</h2>
+<a id="a781951c5a4951f8bb0ea9e713dfacf80" name="a781951c5a4951f8bb0ea9e713dfacf80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a781951c5a4951f8bb0ea9e713dfacf80">&#9670;&#160;</a></span>blockType_e</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="zstd__internal_8h.html#a781951c5a4951f8bb0ea9e713dfacf80">blockType_e</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a781951c5a4951f8bb0ea9e713dfacf80ae51d86e4cf0d2fe87057fe2f611d6612" name="a781951c5a4951f8bb0ea9e713dfacf80ae51d86e4cf0d2fe87057fe2f611d6612"></a>bt_raw&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a781951c5a4951f8bb0ea9e713dfacf80a86534bb7a856201720b5f3a5701b901f" name="a781951c5a4951f8bb0ea9e713dfacf80a86534bb7a856201720b5f3a5701b901f"></a>bt_rle&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a781951c5a4951f8bb0ea9e713dfacf80a17cf7509664e69986dd783e11f90f91d" name="a781951c5a4951f8bb0ea9e713dfacf80a17cf7509664e69986dd783e11f90f91d"></a>bt_compressed&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a781951c5a4951f8bb0ea9e713dfacf80ae34e04758ff61b311d911d06f2e0d4c7" name="a781951c5a4951f8bb0ea9e713dfacf80ae34e04758ff61b311d911d06f2e0d4c7"></a>bt_reserved&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00129">129</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9f24d04af1f76716d26382540647e63d" name="a9f24d04af1f76716d26382540647e63d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f24d04af1f76716d26382540647e63d">&#9670;&#160;</a></span>symbolEncodingType_e</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="zstd__internal_8h.html#a9f24d04af1f76716d26382540647e63d">symbolEncodingType_e</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="a9f24d04af1f76716d26382540647e63da75591083ccde4196b0a0559dbc1996ba" name="a9f24d04af1f76716d26382540647e63da75591083ccde4196b0a0559dbc1996ba"></a>set_basic&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a9f24d04af1f76716d26382540647e63daefea2208d46625c28915bed539811d39" name="a9f24d04af1f76716d26382540647e63daefea2208d46625c28915bed539811d39"></a>set_rle&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a9f24d04af1f76716d26382540647e63daaf6c0ebe228a25f457e97545e7a87309" name="a9f24d04af1f76716d26382540647e63daaf6c0ebe228a25f457e97545e7a87309"></a>set_compressed&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a9f24d04af1f76716d26382540647e63da036c56560f59455ef3e70b9fd2b97303" name="a9f24d04af1f76716d26382540647e63da036c56560f59455ef3e70b9fd2b97303"></a>set_repeat&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00135">135</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aea52188369fa44532ad1f7c325cff4a0" name="aea52188369fa44532ad1f7c325cff4a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea52188369fa44532ad1f7c325cff4a0">&#9670;&#160;</a></span>ZSTD_overlap_e</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="zstd__internal_8h.html#aea52188369fa44532ad1f7c325cff4a0">ZSTD_overlap_e</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">枚举值</th></tr><tr><td class="fieldname"><a id="aea52188369fa44532ad1f7c325cff4a0a3a1e7de479ae265f95f6611917376f4e" name="aea52188369fa44532ad1f7c325cff4a0a3a1e7de479ae265f95f6611917376f4e"></a>ZSTD_no_overlap&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aea52188369fa44532ad1f7c325cff4a0a24511f674a1e46c3ee0004cd9e58cbc0" name="aea52188369fa44532ad1f7c325cff4a0a24511f674a1e46c3ee0004cd9e58cbc0"></a>ZSTD_overlap_src_before_dst&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00203">203</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="ae5d7955d9d6318f2d6a09797b37dd691" name="ae5d7955d9d6318f2d6a09797b37dd691"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5d7955d9d6318f2d6a09797b37dd691">&#9670;&#160;</a></span>ZSTD_calloc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * ZSTD_calloc </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_customMem&#160;</td>
+          <td class="paramname"><em>customMem</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__common_8c_source.html">zstd_common.c</a> 第 <a class="el" href="zstd__common_8c_source.html#l00063">63</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa52a0e981664c70359a4f52ce3697044" name="aa52a0e981664c70359a4f52ce3697044"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa52a0e981664c70359a4f52ce3697044">&#9670;&#160;</a></span>ZSTD_copy16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTD_copy16 </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00197">197</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac227bfd4a30c12ee8b3fba963025e51c" name="ac227bfd4a30c12ee8b3fba963025e51c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac227bfd4a30c12ee8b3fba963025e51c">&#9670;&#160;</a></span>ZSTD_copy8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ZSTD_copy8 </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00194">194</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9823b75f8714fe6107131aaf9367e6ef" name="a9823b75f8714fe6107131aaf9367e6ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9823b75f8714fe6107131aaf9367e6ef">&#9670;&#160;</a></span>ZSTD_decodeSeqHeaders()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_decodeSeqHeaders </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a9ce4435ca683f0e7cb2b90ca9eb1fce4">ZSTD_DCtx</a> *&#160;</td>
+          <td class="paramname"><em>dctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>nbSeqPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__internal_8h.html#a9823b75f8714fe6107131aaf9367e6ef">ZSTD_decodeSeqHeaders()</a> : decode sequence header from src </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__block_8c_source.html">zstd_decompress_block.c</a> 第 <a class="el" href="zstd__decompress__block_8c_source.html#l00480">480</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9fbb7e3dcf0e887ae8a05914ebdf0c53" name="a9fbb7e3dcf0e887ae8a05914ebdf0c53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fbb7e3dcf0e887ae8a05914ebdf0c53">&#9670;&#160;</a></span>ZSTD_free()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ZSTD_free </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_customMem&#160;</td>
+          <td class="paramname"><em>customMem</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__common_8c_source.html">zstd_common.c</a> 第 <a class="el" href="zstd__common_8c_source.html#l00075">75</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae6d9ed5da5bfdf578587adfbff628914" name="ae6d9ed5da5bfdf578587adfbff628914"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6d9ed5da5bfdf578587adfbff628914">&#9670;&#160;</a></span>ZSTD_getcBlockSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t ZSTD_getcBlockSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structblockProperties__t.html">blockProperties_t</a> *&#160;</td>
+          <td class="paramname"><em>bpPtr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__internal_8h.html#ae6d9ed5da5bfdf578587adfbff628914">ZSTD_getcBlockSize()</a> : Provides the size of compressed block from block header <code>src</code> </p>
+
+<p class="definition">在文件 <a class="el" href="zstd__decompress__block_8c_source.html">zstd_decompress_block.c</a> 第 <a class="el" href="zstd__decompress__block_8c_source.html#l00056">56</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae387cc078a5eb661e2ac980cbe512cf2" name="ae387cc078a5eb661e2ac980cbe512cf2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae387cc078a5eb661e2ac980cbe512cf2">&#9670;&#160;</a></span>ZSTD_getSeqStore()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structseqStore__t.html">seqStore_t</a> * ZSTD_getSeqStore </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="zstd_8h.html#a9ccc575a7e1f1afd01e76c0fa98d957d">ZSTD_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__compress_8c_source.html">zstd_compress.c</a> 第 <a class="el" href="zstd__compress_8c_source.html#l00184">184</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a58556a7f639bfe3425fd7bf42b421e69" name="a58556a7f639bfe3425fd7bf42b421e69"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58556a7f639bfe3425fd7bf42b421e69">&#9670;&#160;</a></span>ZSTD_highbit32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ZSTD_highbit32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a>&#160;</td>
+          <td class="paramname"><em>val</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00294">294</a> 行定义.</p>
+
+</div>
+</div>
+<a id="add2ddac2f9396e37f68acd80d4c5cedb" name="add2ddac2f9396e37f68acd80d4c5cedb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add2ddac2f9396e37f68acd80d4c5cedb">&#9670;&#160;</a></span>ZSTD_invalidateRepCodes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ZSTD_invalidateRepCodes </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="zstd_8h.html#a9ccc575a7e1f1afd01e76c0fa98d957d">ZSTD_CCtx</a> *&#160;</td>
+          <td class="paramname"><em>cctx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__compress_8c_source.html">zstd_compress.c</a> 第 <a class="el" href="zstd__compress_8c_source.html#l01558">1558</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaf3d500bcf39cd8fedb3d5163eb5f364" name="aaf3d500bcf39cd8fedb3d5163eb5f364"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf3d500bcf39cd8fedb3d5163eb5f364">&#9670;&#160;</a></span>ZSTD_malloc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * ZSTD_malloc </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ZSTD_customMem&#160;</td>
+          <td class="paramname"><em>customMem</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__common_8c_source.html">zstd_common.c</a> 第 <a class="el" href="zstd__common_8c_source.html#l00056">56</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0ddae2b7cdd2cd02d82df2de7e626315" name="a0ddae2b7cdd2cd02d82df2de7e626315"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ddae2b7cdd2cd02d82df2de7e626315">&#9670;&#160;</a></span>ZSTD_seqToCodes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ZSTD_seqToCodes </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="structseqStore__t.html">seqStore_t</a> *&#160;</td>
+          <td class="paramname"><em>seqStorePtr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__compress_8c_source.html">zstd_compress.c</a> 第 <a class="el" href="zstd__compress_8c_source.html#l01902">1902</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae5773b31147f6642565cd93ca8864f81" name="ae5773b31147f6642565cd93ca8864f81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5773b31147f6642565cd93ca8864f81">&#9670;&#160;</a></span>ZSTD_wildcopy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="mem_8h.html#acf4d568511d5e964c3579616a28ab62b">MEM_STATIC</a> <a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#acdb32e49e718aa032c6b04b4a237131e">FORCE_INLINE_ATTR</a> <a class="el" href="WTSUtils_2zstdlib_2compiler_8h.html#abb568b4457858d8f44c8f0d40ba33613">DONT_VECTORIZE</a> void ZSTD_wildcopy </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> void *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ptrdiff_t&#160;</td>
+          <td class="paramname"><em>length</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="zstd__internal_8h.html#aea52188369fa44532ad1f7c325cff4a0">ZSTD_overlap_e</a> <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a>&#160;</td>
+          <td class="paramname"><em>ovtype</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="zstd__internal_8h.html#ae5773b31147f6642565cd93ca8864f81">ZSTD_wildcopy()</a> : Custom version of memcpy(), can over read/write up to WILDCOPY_OVERLENGTH bytes (if length==0) </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ovtype</td><td>controls the overlap detection<ul>
+<li>ZSTD_no_overlap: The source and destination are guaranteed to be at least WILDCOPY_VECLEN bytes apart.</li>
+<li>ZSTD_overlap_src_before_dst: The src and dst may overlap, but they MUST be at least 8 bytes apart. The src buffer must be before the dst buffer. </li>
+</ul>
+</td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00217">217</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="aa85e890f904f0c27d7c05e07f3d8defa" name="aa85e890f904f0c27d7c05e07f3d8defa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa85e890f904f0c27d7c05e07f3d8defa">&#9670;&#160;</a></span>LL_bits</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> LL_bits[<a class="el" href="zstd__internal_8h.html#a3791b3a0dfbaa61ee240d5d1c548a7b0">MaxLL</a>+1]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>初始值:</b><div class="fragment"><div class="line">= { 0, 0, 0, 0, 0, 0, 0, 0,</div>
+<div class="line">                                      0, 0, 0, 0, 0, 0, 0, 0,</div>
+<div class="line">                                      1, 1, 1, 1, 2, 2, 3, 3,</div>
+<div class="line">                                      4, 6, 7, 8, 9,10,11,12,</div>
+<div class="line">                                     13,14,15,16 }</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00153">153</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7d328234937dd0e78035e8ddf94e3548" name="a7d328234937dd0e78035e8ddf94e3548"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d328234937dd0e78035e8ddf94e3548">&#9670;&#160;</a></span>LL_defaultNorm</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ae08f9a6ee81e70f713a74a5860062841">S16</a> LL_defaultNorm[<a class="el" href="zstd__internal_8h.html#a3791b3a0dfbaa61ee240d5d1c548a7b0">MaxLL</a>+1]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>初始值:</b><div class="fragment"><div class="line">= { 4, 3, 2, 2, 2, 2, 2, 2,</div>
+<div class="line">                                             2, 2, 2, 2, 2, 1, 1, 1,</div>
+<div class="line">                                             2, 2, 2, 2, 2, 2, 2, 2,</div>
+<div class="line">                                             2, 3, 2, 1, 1, 1, 1, 1,</div>
+<div class="line">                                            -1,-1,-1,-1 }</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00158">158</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a439e5b9d38309396b31562cfafd18709" name="a439e5b9d38309396b31562cfafd18709"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a439e5b9d38309396b31562cfafd18709">&#9670;&#160;</a></span>LL_defaultNormLog</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> LL_defaultNormLog = <a class="el" href="zstd__internal_8h.html#ad4cf2a8505f0c0582562d5273046a784">LL_DEFAULTNORMLOG</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00164">164</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6b9e032a946250542d3ec1a804d687b9" name="a6b9e032a946250542d3ec1a804d687b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b9e032a946250542d3ec1a804d687b9">&#9670;&#160;</a></span>ML_bits</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ML_bits[<a class="el" href="zstd__internal_8h.html#a4fc62dd4928331efa2e34ed6cc3a8130">MaxML</a>+1]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>初始值:</b><div class="fragment"><div class="line">= { 0, 0, 0, 0, 0, 0, 0, 0,</div>
+<div class="line">                                      0, 0, 0, 0, 0, 0, 0, 0,</div>
+<div class="line">                                      0, 0, 0, 0, 0, 0, 0, 0,</div>
+<div class="line">                                      0, 0, 0, 0, 0, 0, 0, 0,</div>
+<div class="line">                                      1, 1, 1, 1, 2, 2, 3, 3,</div>
+<div class="line">                                      4, 4, 5, 7, 8, 9,10,11,</div>
+<div class="line">                                     12,13,14,15,16 }</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00166">166</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aca274bab04eda94e8752c9522ae36d6b" name="aca274bab04eda94e8752c9522ae36d6b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca274bab04eda94e8752c9522ae36d6b">&#9670;&#160;</a></span>ML_defaultNorm</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ae08f9a6ee81e70f713a74a5860062841">S16</a> ML_defaultNorm[<a class="el" href="zstd__internal_8h.html#a4fc62dd4928331efa2e34ed6cc3a8130">MaxML</a>+1]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>初始值:</b><div class="fragment"><div class="line">= { 1, 4, 3, 2, 2, 2, 2, 2,</div>
+<div class="line">                                             2, 1, 1, 1, 1, 1, 1, 1,</div>
+<div class="line">                                             1, 1, 1, 1, 1, 1, 1, 1,</div>
+<div class="line">                                             1, 1, 1, 1, 1, 1, 1, 1,</div>
+<div class="line">                                             1, 1, 1, 1, 1, 1, 1, 1,</div>
+<div class="line">                                             1, 1, 1, 1, 1, 1,-1,-1,</div>
+<div class="line">                                            -1,-1,-1,-1,-1 }</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00173">173</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad62bc0b5d9e41c7ab4706c0f443f8706" name="ad62bc0b5d9e41c7ab4706c0f443f8706"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad62bc0b5d9e41c7ab4706c0f443f8706">&#9670;&#160;</a></span>ML_defaultNormLog</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> ML_defaultNormLog = <a class="el" href="zstd__internal_8h.html#a863ba3017d707e46c2994fbcae751eda">ML_DEFAULTNORMLOG</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00181">181</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae08f864d3b8ce8d8fe75790eac3c0488" name="ae08f864d3b8ce8d8fe75790eac3c0488"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae08f864d3b8ce8d8fe75790eac3c0488">&#9670;&#160;</a></span>OF_defaultNorm</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ae08f9a6ee81e70f713a74a5860062841">S16</a> OF_defaultNorm[<a class="el" href="zstd__internal_8h.html#ae8a29668fac591869d620fcdb1abf305">DefaultMaxOff</a>+1]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>初始值:</b><div class="fragment"><div class="line">= { 1, 1, 1, 1, 1, 1, 2, 2,</div>
+<div class="line">                                                     2, 1, 1, 1, 1, 1, 1, 1,</div>
+<div class="line">                                                     1, 1, 1, 1, 1, 1, 1, 1,</div>
+<div class="line">                                                    -1,-1,-1,-1,-1 }</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00183">183</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a65fa6b34642df3be2ec0bb03f2214038" name="a65fa6b34642df3be2ec0bb03f2214038"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65fa6b34642df3be2ec0bb03f2214038">&#9670;&#160;</a></span>OF_defaultNormLog</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> OF_defaultNormLog = <a class="el" href="zstd__internal_8h.html#a51aa4b7d9192fdcd790747fb97584d55">OF_DEFAULTNORMLOG</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00188">188</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa668bde4400836eae36d781b2e037f54" name="aa668bde4400836eae36d781b2e037f54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa668bde4400836eae36d781b2e037f54">&#9670;&#160;</a></span>repStartValue</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> <a class="el" href="mem_8h.html#ac3df7cf3c8cb172a588adec881447d68">U32</a> repStartValue[<a class="el" href="zstd__internal_8h.html#aea22fafe4da68c23971fc7cb20f42d47">ZSTD_REP_NUM</a>] = { 1, 4, 8 }</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00108">108</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a45e39260b36946c53894fd9fa4aaebf9" name="a45e39260b36946c53894fd9fa4aaebf9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45e39260b36946c53894fd9fa4aaebf9">&#9670;&#160;</a></span>ZSTD_blockHeaderSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t ZSTD_blockHeaderSize = <a class="el" href="zstd__internal_8h.html#a456a4a9b8a37496e42ad1f91bd4e4b91">ZSTD_BLOCKHEADERSIZE</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00128">128</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7309aa3e16fa91e2f30ee36e6d6076d7" name="a7309aa3e16fa91e2f30ee36e6d6076d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7309aa3e16fa91e2f30ee36e6d6076d7">&#9670;&#160;</a></span>ZSTD_did_fieldSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t ZSTD_did_fieldSize[4] = { 0, 1, 2, 4 }</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00123">123</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9e7d6a8bff343a172bddda14bb3c7928" name="a9e7d6a8bff343a172bddda14bb3c7928"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e7d6a8bff343a172bddda14bb3c7928">&#9670;&#160;</a></span>ZSTD_fcs_fieldSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> size_t ZSTD_fcs_fieldSize[4] = { 0, 2, 4, 8 }</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="zstd__internal_8h_source.html">zstd_internal.h</a> 第 <a class="el" href="zstd__internal_8h_source.html#l00122">122</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="zstd__internal_8h.html">zstd_internal.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

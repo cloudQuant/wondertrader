@@ -1,0 +1,492 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtMsgQue/WtMsgQue.cpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtMsgQue_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">WtMsgQue.cpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>消息队列模块对外接口实现  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="WtMsgQue_8h_source.html">WtMsgQue.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="MQManager_8h_source.html">MQManager.h</a>&quot;</code><br />
+</div>
+<p><a href="WtMsgQue_8cpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a511581341e73e3cb6949e0fc6750e96c" id="r_a511581341e73e3cb6949e0fc6750e96c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMQManager.html">MQManager</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtMsgQue_8cpp.html#a511581341e73e3cb6949e0fc6750e96c">getMgr</a> ()</td></tr>
+<tr class="memdesc:a511581341e73e3cb6949e0fc6750e96c"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取MQManager单例  <br /></td></tr>
+<tr class="separator:a511581341e73e3cb6949e0fc6750e96c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c1c36e643976e8571a08b94aca560f0" id="r_a0c1c36e643976e8571a08b94aca560f0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtMsgQue_8cpp.html#a0c1c36e643976e8571a08b94aca560f0">regiter_callbacks</a> (<a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a> cbLog)</td></tr>
+<tr class="memdesc:a0c1c36e643976e8571a08b94aca560f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">注册日志回调函数实现  <br /></td></tr>
+<tr class="separator:a0c1c36e643976e8571a08b94aca560f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63853fada9418e030e3b1f1524f4167c" id="r_a63853fada9418e030e3b1f1524f4167c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtMsgQue_8cpp.html#a63853fada9418e030e3b1f1524f4167c">create_server</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *url, bool confirm)</td></tr>
+<tr class="memdesc:a63853fada9418e030e3b1f1524f4167c"><td class="mdescLeft">&#160;</td><td class="mdescRight">创建消息队列服务端实现  <br /></td></tr>
+<tr class="separator:a63853fada9418e030e3b1f1524f4167c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b2921c5b6d38b98612a1c3fdbf5710e" id="r_a6b2921c5b6d38b98612a1c3fdbf5710e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtMsgQue_8cpp.html#a6b2921c5b6d38b98612a1c3fdbf5710e">destroy_server</a> (<a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> id)</td></tr>
+<tr class="memdesc:a6b2921c5b6d38b98612a1c3fdbf5710e"><td class="mdescLeft">&#160;</td><td class="mdescRight">销毁消息队列服务端实现  <br /></td></tr>
+<tr class="separator:a6b2921c5b6d38b98612a1c3fdbf5710e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89af7a3898ef0183983910a56f531477" id="r_a89af7a3898ef0183983910a56f531477"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtMsgQue_8cpp.html#a89af7a3898ef0183983910a56f531477">publish_message</a> (<a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> id, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *topic, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *data, <a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> dataLen)</td></tr>
+<tr class="memdesc:a89af7a3898ef0183983910a56f531477"><td class="mdescLeft">&#160;</td><td class="mdescRight">发布消息实现  <br /></td></tr>
+<tr class="separator:a89af7a3898ef0183983910a56f531477"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a18f4c96c84f8825bba47f7a20b53f7" id="r_a6a18f4c96c84f8825bba47f7a20b53f7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtMsgQue_8cpp.html#a6a18f4c96c84f8825bba47f7a20b53f7">create_client</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *url, <a class="el" href="WtMsgQue_2PorterDefs_8h.html#abfe504ced42fb9276c87c445aafadd09">FuncMQCallback</a> cb)</td></tr>
+<tr class="memdesc:a6a18f4c96c84f8825bba47f7a20b53f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">创建消息队列客户端实现  <br /></td></tr>
+<tr class="separator:a6a18f4c96c84f8825bba47f7a20b53f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fcc8e97a5219b1f7f8d5b7f087aece0" id="r_a3fcc8e97a5219b1f7f8d5b7f087aece0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtMsgQue_8cpp.html#a3fcc8e97a5219b1f7f8d5b7f087aece0">destroy_client</a> (<a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> id)</td></tr>
+<tr class="memdesc:a3fcc8e97a5219b1f7f8d5b7f087aece0"><td class="mdescLeft">&#160;</td><td class="mdescRight">销毁消息队列客户端实现  <br /></td></tr>
+<tr class="separator:a3fcc8e97a5219b1f7f8d5b7f087aece0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ff2f55b35c613bf582137a4cb9cf635" id="r_a9ff2f55b35c613bf582137a4cb9cf635"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtMsgQue_8cpp.html#a9ff2f55b35c613bf582137a4cb9cf635">subscribe_topic</a> (<a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> id, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *topic)</td></tr>
+<tr class="memdesc:a9ff2f55b35c613bf582137a4cb9cf635"><td class="mdescLeft">&#160;</td><td class="mdescRight">订阅主题实现  <br /></td></tr>
+<tr class="separator:a9ff2f55b35c613bf582137a4cb9cf635"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d630686788f40c28e774d0081906bcf" id="r_a3d630686788f40c28e774d0081906bcf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtMsgQue_8cpp.html#a3d630686788f40c28e774d0081906bcf">start_client</a> (<a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> id)</td></tr>
+<tr class="memdesc:a3d630686788f40c28e774d0081906bcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">启动客户端实现  <br /></td></tr>
+<tr class="separator:a3d630686788f40c28e774d0081906bcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a17226795848decb565e90624584e5c0f" id="r_a17226795848decb565e90624584e5c0f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtMsgQue_8cpp.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></td></tr>
+<tr class="separator:a17226795848decb565e90624584e5c0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>消息队列模块对外接口实现 </p>
+<p>\project WonderTrader</p>
+<dl class="section author"><dt>作者</dt><dd>Wesley </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2020/03/30</dd></dl>
+<p>实现了消息队列模块的C接口，通过单例模式的MQManager实现服务端和客户端的管理 </p>
+
+<p class="definition">在文件 <a class="el" href="WtMsgQue_8cpp_source.html">WtMsgQue.cpp</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="a6a18f4c96c84f8825bba47f7a20b53f7" name="a6a18f4c96c84f8825bba47f7a20b53f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a18f4c96c84f8825bba47f7a20b53f7">&#9670;&#160;</a></span>create_client()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> create_client </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>url</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtMsgQue_2PorterDefs_8h.html#abfe504ced42fb9276c87c445aafadd09">FuncMQCallback</a>&#160;</td>
+          <td class="paramname"><em>cb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>创建消息队列客户端实现 </p>
+<p>创建消息队列客户端</p>
+<p>通过MQManager单例创建一个新的消息队列客户端 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">url</td><td>要连接的服务器地址，格式如"tcp://127.0.0.1:5555" </td></tr>
+    <tr><td class="paramname">cb</td><td>消息接收回调函数，用于处理收到的消息 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>新创建的客户端ID </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtMsgQue_8cpp_source.html">WtMsgQue.cpp</a> 第 <a class="el" href="WtMsgQue_8cpp_source.html#l00086">86</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a63853fada9418e030e3b1f1524f4167c" name="a63853fada9418e030e3b1f1524f4167c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a63853fada9418e030e3b1f1524f4167c">&#9670;&#160;</a></span>create_server()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> create_server </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>url</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>confirm</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>创建消息队列服务端实现 </p>
+<p>创建消息队列服务端</p>
+<p>通过MQManager单例创建一个新的消息队列服务端 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">url</td><td>服务端绑定的地址，格式如"tcp://0.0.0.0:5555" </td></tr>
+    <tr><td class="paramname">confirm</td><td>是否需要消息确认 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>新创建的服务端ID </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtMsgQue_8cpp_source.html">WtMsgQue.cpp</a> 第 <a class="el" href="WtMsgQue_8cpp_source.html#l00050">50</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3fcc8e97a5219b1f7f8d5b7f087aece0" name="a3fcc8e97a5219b1f7f8d5b7f087aece0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fcc8e97a5219b1f7f8d5b7f087aece0">&#9670;&#160;</a></span>destroy_client()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void destroy_client </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td>
+          <td class="paramname"><em>id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>销毁消息队列客户端实现 </p>
+<p>销毁消息队列客户端</p>
+<p>通过MQManager单例销毁指定的消息队列客户端 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>要销毁的客户端ID </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtMsgQue_8cpp_source.html">WtMsgQue.cpp</a> 第 <a class="el" href="WtMsgQue_8cpp_source.html#l00096">96</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6b2921c5b6d38b98612a1c3fdbf5710e" name="a6b2921c5b6d38b98612a1c3fdbf5710e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b2921c5b6d38b98612a1c3fdbf5710e">&#9670;&#160;</a></span>destroy_server()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void destroy_server </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td>
+          <td class="paramname"><em>id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>销毁消息队列服务端实现 </p>
+<p>销毁消息队列服务端</p>
+<p>通过MQManager单例销毁指定的消息队列服务端 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>要销毁的服务端ID </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtMsgQue_8cpp_source.html">WtMsgQue.cpp</a> 第 <a class="el" href="WtMsgQue_8cpp_source.html#l00061">61</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a511581341e73e3cb6949e0fc6750e96c" name="a511581341e73e3cb6949e0fc6750e96c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a511581341e73e3cb6949e0fc6750e96c">&#9670;&#160;</a></span>getMgr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMQManager.html">MQManager</a> &amp; getMgr </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取MQManager单例 </p>
+<p>使用单例模式创建并返回MQManager对象，确保整个应用中只有一个实例 </p><dl class="section return"><dt>返回</dt><dd>MQManager单例的引用 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtMsgQue_8cpp_source.html">WtMsgQue.cpp</a> 第 <a class="el" href="WtMsgQue_8cpp_source.html#l00027">27</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a89af7a3898ef0183983910a56f531477" name="a89af7a3898ef0183983910a56f531477"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89af7a3898ef0183983910a56f531477">&#9670;&#160;</a></span>publish_message()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void publish_message </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td>
+          <td class="paramname"><em>id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>topic</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td>
+          <td class="paramname"><em>dataLen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>发布消息实现 </p>
+<p>发布消息</p>
+<p>通过MQManager单例发布消息到指定的主题 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>服务端ID </td></tr>
+    <tr><td class="paramname">topic</td><td>消息主题 </td></tr>
+    <tr><td class="paramname">data</td><td>消息数据指针 </td></tr>
+    <tr><td class="paramname">dataLen</td><td>消息数据长度 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtMsgQue_8cpp_source.html">WtMsgQue.cpp</a> 第 <a class="el" href="WtMsgQue_8cpp_source.html#l00074">74</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0c1c36e643976e8571a08b94aca560f0" name="a0c1c36e643976e8571a08b94aca560f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c1c36e643976e8571a08b94aca560f0">&#9670;&#160;</a></span>regiter_callbacks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void regiter_callbacks </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WtBtCore_2EventNotifier_8h.html#a749dc86d073c15a88e4a719af94bc813">FuncLogCallback</a>&#160;</td>
+          <td class="paramname"><em>cbLog</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>注册日志回调函数实现 </p>
+<p>注册日志回调函数</p>
+<p>将日志回调函数传递给MQManager单例 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cbLog</td><td>日志回调函数，接收ID、消息和是否为服务端的标志 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtMsgQue_8cpp_source.html">WtMsgQue.cpp</a> 第 <a class="el" href="WtMsgQue_8cpp_source.html#l00038">38</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3d630686788f40c28e774d0081906bcf" name="a3d630686788f40c28e774d0081906bcf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d630686788f40c28e774d0081906bcf">&#9670;&#160;</a></span>start_client()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void start_client </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td>
+          <td class="paramname"><em>id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>启动客户端实现 </p>
+<p>启动客户端</p>
+<p>通过MQManager单例启动指定的客户端，开始接收消息 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>要启动的客户端ID </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtMsgQue_8cpp_source.html">WtMsgQue.cpp</a> 第 <a class="el" href="WtMsgQue_8cpp_source.html#l00117">117</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9ff2f55b35c613bf582137a4cb9cf635" name="a9ff2f55b35c613bf582137a4cb9cf635"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ff2f55b35c613bf582137a4cb9cf635">&#9670;&#160;</a></span>subscribe_topic()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void subscribe_topic </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td>
+          <td class="paramname"><em>id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>topic</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>订阅主题实现 </p>
+<p>订阅主题</p>
+<p>通过MQManager单例为指定的客户端订阅特定的消息主题 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>客户端ID </td></tr>
+    <tr><td class="paramname">topic</td><td>要订阅的主题 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtMsgQue_8cpp_source.html">WtMsgQue.cpp</a> 第 <a class="el" href="WtMsgQue_8cpp_source.html#l00107">107</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a17226795848decb565e90624584e5c0f" name="a17226795848decb565e90624584e5c0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17226795848decb565e90624584e5c0f">&#9670;&#160;</a></span>USING_NS_WTP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">USING_NS_WTP</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="WtMsgQue_8cpp_source.html">WtMsgQue.cpp</a> 第 <a class="el" href="WtMsgQue_8cpp_source.html#l00020">20</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_67f0927ed8325567405dded17dc3dbdc.html">WtMsgQue</a></li><li class="navelem"><a class="el" href="WtMsgQue_8cpp.html">WtMsgQue.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,1847 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/API/oesApi0.17.5.8/include/sutil/compiler.h 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#define-members">宏定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">compiler.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;<a class="el" href="types_8h_source.html">sutil/types.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="stdc_8h_source.html">sutil/stdc.h</a>&gt;</code><br />
+<code>#include &lt;stdio.h&gt;</code><br />
+<code>#include &lt;stdlib.h&gt;</code><br />
+<code>#include &lt;stddef.h&gt;</code><br />
+<code>#include &lt;limits.h&gt;</code><br />
+<code>#include &lt;errno.h&gt;</code><br />
+<code>#include &lt;assert.h&gt;</code><br />
+<code>#include &lt;sys/select.h&gt;</code><br />
+<code>#include &lt;time.h&gt;</code><br />
+</div>
+<p><a href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a96deb7ba5a74848afb710cc4ee6d2c08" id="r_a96deb7ba5a74848afb710cc4ee6d2c08"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a>&#160;&#160;&#160;<a class="el" href="stdc_8h.html#a00d24c7231be28dbaf71f5408f30e44c">inline</a></td></tr>
+<tr class="separator:a96deb7ba5a74848afb710cc4ee6d2c08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3df218f206cf4d3cbb0c97c4b565e57e" id="r_a3df218f206cf4d3cbb0c97c4b565e57e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a3df218f206cf4d3cbb0c97c4b565e57e">__spk_always_inline</a>&#160;&#160;&#160;<a class="el" href="stdc_8h.html#a00d24c7231be28dbaf71f5408f30e44c">inline</a></td></tr>
+<tr class="separator:a3df218f206cf4d3cbb0c97c4b565e57e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa710764c0ca60f045b14aa5c86165599" id="r_aa710764c0ca60f045b14aa5c86165599"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#aa710764c0ca60f045b14aa5c86165599">__spk_likely</a>(x)&#160;&#160;&#160;(x)</td></tr>
+<tr class="separator:aa710764c0ca60f045b14aa5c86165599"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4792953518002b6d1736a90ce80a94dd" id="r_a4792953518002b6d1736a90ce80a94dd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a4792953518002b6d1736a90ce80a94dd">__spk_unlikely</a>(x)&#160;&#160;&#160;(x)</td></tr>
+<tr class="separator:a4792953518002b6d1736a90ce80a94dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a217a0bd562b98ae8c2ffce44935351e1" id="r_a217a0bd562b98ae8c2ffce44935351e1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a217a0bd562b98ae8c2ffce44935351e1">likely</a>(x)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#aa710764c0ca60f045b14aa5c86165599">__spk_likely</a>(x)</td></tr>
+<tr class="separator:a217a0bd562b98ae8c2ffce44935351e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6c45889010c1bd68631771b64f18101" id="r_ac6c45889010c1bd68631771b64f18101"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ac6c45889010c1bd68631771b64f18101">unlikely</a>(x)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a4792953518002b6d1736a90ce80a94dd">__spk_unlikely</a>(x)</td></tr>
+<tr class="separator:ac6c45889010c1bd68631771b64f18101"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fb2431b46656ad0908c4e0195540182" id="r_a4fb2431b46656ad0908c4e0195540182"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a4fb2431b46656ad0908c4e0195540182">__attribute__</a>(<a class="el" href="classA.html">A</a>)</td></tr>
+<tr class="separator:a4fb2431b46656ad0908c4e0195540182"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a942d24a0bd29b7c5227b6f5134b53b16" id="r_a942d24a0bd29b7c5227b6f5134b53b16"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a942d24a0bd29b7c5227b6f5134b53b16">__attribute_align</a>(x)</td></tr>
+<tr class="separator:a942d24a0bd29b7c5227b6f5134b53b16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a896f0b60c30ef86fe19d43f1966ff2fd" id="r_a896f0b60c30ef86fe19d43f1966ff2fd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a896f0b60c30ef86fe19d43f1966ff2fd">__attribute_deprecated</a></td></tr>
+<tr class="separator:a896f0b60c30ef86fe19d43f1966ff2fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67ee3bd4c8a6a6b44a7d26c38238baba" id="r_a67ee3bd4c8a6a6b44a7d26c38238baba"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a67ee3bd4c8a6a6b44a7d26c38238baba">__attribute_unused</a></td></tr>
+<tr class="separator:a67ee3bd4c8a6a6b44a7d26c38238baba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a520a93730da646b0fbee09d441c8549e" id="r_a520a93730da646b0fbee09d441c8549e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a520a93730da646b0fbee09d441c8549e">__thread</a>&#160;&#160;&#160;__thread</td></tr>
+<tr class="separator:a520a93730da646b0fbee09d441c8549e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60885c31ba0b70a4806c74af641b0922" id="r_a60885c31ba0b70a4806c74af641b0922"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a60885c31ba0b70a4806c74af641b0922">SPK_INTERNAL_INLINE</a>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a></td></tr>
+<tr class="separator:a60885c31ba0b70a4806c74af641b0922"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c478205fd0f7d970b0ed885520f294e" id="r_a3c478205fd0f7d970b0ed885520f294e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a3c478205fd0f7d970b0ed885520f294e">SPK_TESTABLE_STATIC</a>&#160;&#160;&#160;static</td></tr>
+<tr class="separator:a3c478205fd0f7d970b0ed885520f294e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab895e4951eb53123d4aa60fbba9573ca" id="r_ab895e4951eb53123d4aa60fbba9573ca"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ab895e4951eb53123d4aa60fbba9573ca">SPK_NEG</a>(x)&#160;&#160;&#160;((x) &gt; 0 ? -(x) : (x))</td></tr>
+<tr class="separator:ab895e4951eb53123d4aa60fbba9573ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a276e8a32e0bbf024aadd9420b8f2d3b3" id="r_a276e8a32e0bbf024aadd9420b8f2d3b3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a276e8a32e0bbf024aadd9420b8f2d3b3">offsetof</a>(TYPE,  MEMBER)&#160;&#160;&#160;            <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a2872cbf5784bb424a728987239a2418c">__spk_offsetof</a>(TYPE, MEMBER)</td></tr>
+<tr class="separator:a276e8a32e0bbf024aadd9420b8f2d3b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa06910d90372b14a0756bf14cdc64811" id="r_aa06910d90372b14a0756bf14cdc64811"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#aa06910d90372b14a0756bf14cdc64811">container_of</a>(PTR,  TYPE,  MEMBER)&#160;&#160;&#160;            <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ab45fa5da462d2859a7cb5e4bb469d54b">__spk_container_of</a>(PTR, TYPE, MEMBER)</td></tr>
+<tr class="separator:aa06910d90372b14a0756bf14cdc64811"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2872cbf5784bb424a728987239a2418c" id="r_a2872cbf5784bb424a728987239a2418c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a2872cbf5784bb424a728987239a2418c">__spk_offsetof</a>(TYPE,  MEMBER)&#160;&#160;&#160;            ( (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>) &amp;((TYPE *) 0)-&gt;MEMBER )</td></tr>
+<tr class="separator:a2872cbf5784bb424a728987239a2418c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab45fa5da462d2859a7cb5e4bb469d54b" id="r_ab45fa5da462d2859a7cb5e4bb469d54b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ab45fa5da462d2859a7cb5e4bb469d54b">__spk_container_of</a>(PTR,  TYPE,  MEMBER)&#160;&#160;&#160;            ( (TYPE *) ((char *) (PTR) - <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a276e8a32e0bbf024aadd9420b8f2d3b3">offsetof</a>(TYPE, MEMBER)) )</td></tr>
+<tr class="separator:ab45fa5da462d2859a7cb5e4bb469d54b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3b5509dd420f8e9b438ea910d0c04f4" id="r_ae3b5509dd420f8e9b438ea910d0c04f4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ae3b5509dd420f8e9b438ea910d0c04f4">__spk_sizeof_submember</a>(TYPE,  MEMBER)&#160;&#160;&#160;            ( sizeof(((TYPE *) 0)-&gt;MEMBER) )</td></tr>
+<tr class="separator:ae3b5509dd420f8e9b438ea910d0c04f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab19f8d13f2273b2698110dbf8c548f86" id="r_ab19f8d13f2273b2698110dbf8c548f86"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ab19f8d13f2273b2698110dbf8c548f86">SPK_CEIL_TIMES</a>(SIZE,  BASESIZE)&#160;&#160;&#160;        ( ((SIZE) + (BASESIZE) - 1) / (BASESIZE) )</td></tr>
+<tr class="separator:ab19f8d13f2273b2698110dbf8c548f86"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf60e547bab7411b6009e9a340bcaba0" id="r_adf60e547bab7411b6009e9a340bcaba0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#adf60e547bab7411b6009e9a340bcaba0">SPK_ADJUST_SIZE</a>(SIZE,  BASESIZE)&#160;&#160;&#160;        ( <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ab19f8d13f2273b2698110dbf8c548f86">SPK_CEIL_TIMES</a>((SIZE), (BASESIZE)) * (BASESIZE) )</td></tr>
+<tr class="separator:adf60e547bab7411b6009e9a340bcaba0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa42c0791b118fc9ca69ed00b9d6ff7ba" id="r_aa42c0791b118fc9ca69ed00b9d6ff7ba"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#aa42c0791b118fc9ca69ed00b9d6ff7ba">SPK_FLOOR_TIMES</a>(SIZE,  BASESIZE)&#160;&#160;&#160;        ( (SIZE) / (BASESIZE) )</td></tr>
+<tr class="separator:aa42c0791b118fc9ca69ed00b9d6ff7ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f00f91c7c1b5dd56187cdd99085b3f0" id="r_a1f00f91c7c1b5dd56187cdd99085b3f0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a1f00f91c7c1b5dd56187cdd99085b3f0">SPK_FLOOR_SIZE</a>(SIZE,  BASESIZE)&#160;&#160;&#160;        ( <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#aa42c0791b118fc9ca69ed00b9d6ff7ba">SPK_FLOOR_TIMES</a>((SIZE), (BASESIZE)) * (BASESIZE) )</td></tr>
+<tr class="separator:a1f00f91c7c1b5dd56187cdd99085b3f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad595e04dc6c1185b47e838cd35091455" id="r_ad595e04dc6c1185b47e838cd35091455"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ad595e04dc6c1185b47e838cd35091455">SPK_ROUND_TIMES</a>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a6a8d3eb4058f20ef2e9e70fb97cd4c4a">SPK_SIGNED_ROUND_TIMES</a></td></tr>
+<tr class="separator:ad595e04dc6c1185b47e838cd35091455"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7c23b3749d53e82dd65e004bf00ce70" id="r_ab7c23b3749d53e82dd65e004bf00ce70"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ab7c23b3749d53e82dd65e004bf00ce70">SPK_UNSIGNED_ROUND_TIMES</a>(SIZE,  BASESIZE)&#160;&#160;&#160;        ( ((SIZE) + ((BASESIZE) &gt;&gt; 1)) / (BASESIZE) )</td></tr>
+<tr class="separator:ab7c23b3749d53e82dd65e004bf00ce70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a8d3eb4058f20ef2e9e70fb97cd4c4a" id="r_a6a8d3eb4058f20ef2e9e70fb97cd4c4a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a6a8d3eb4058f20ef2e9e70fb97cd4c4a">SPK_SIGNED_ROUND_TIMES</a>(SIZE,  BASESIZE)</td></tr>
+<tr class="separator:a6a8d3eb4058f20ef2e9e70fb97cd4c4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a076c26b0a63b1b80b06cd4c70fb2e6aa" id="r_a076c26b0a63b1b80b06cd4c70fb2e6aa"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a076c26b0a63b1b80b06cd4c70fb2e6aa">SPK_ROUND_SIZE</a>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a4a3ed935103ffcf1c25c0b6d367d1c48">SPK_SIGNED_ROUND_SIZE</a></td></tr>
+<tr class="separator:a076c26b0a63b1b80b06cd4c70fb2e6aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74bf63664b4a9d9aeecc078996ae0e75" id="r_a74bf63664b4a9d9aeecc078996ae0e75"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a74bf63664b4a9d9aeecc078996ae0e75">SPK_UNSIGNED_ROUND_SIZE</a>(SIZE,  BASESIZE)&#160;&#160;&#160;        ( <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ab7c23b3749d53e82dd65e004bf00ce70">SPK_UNSIGNED_ROUND_TIMES</a>((SIZE), (BASESIZE)) * (BASESIZE) )</td></tr>
+<tr class="separator:a74bf63664b4a9d9aeecc078996ae0e75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a3ed935103ffcf1c25c0b6d367d1c48" id="r_a4a3ed935103ffcf1c25c0b6d367d1c48"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a4a3ed935103ffcf1c25c0b6d367d1c48">SPK_SIGNED_ROUND_SIZE</a>(SIZE,  BASESIZE)&#160;&#160;&#160;        ( <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a6a8d3eb4058f20ef2e9e70fb97cd4c4a">SPK_SIGNED_ROUND_TIMES</a>((SIZE), (BASESIZE)) * (BASESIZE) )</td></tr>
+<tr class="separator:a4a3ed935103ffcf1c25c0b6d367d1c48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37ea49eaa0d6f2bd5e2f7d75eaf178c0" id="r_a37ea49eaa0d6f2bd5e2f7d75eaf178c0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>(SIZE,  BASESIZE)&#160;&#160;&#160;        ( ((SIZE) + (BASESIZE - 1)) &amp; ~(BASESIZE - 1) )</td></tr>
+<tr class="separator:a37ea49eaa0d6f2bd5e2f7d75eaf178c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3305acb816366af17c3132993fa4b402" id="r_a3305acb816366af17c3132993fa4b402"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a3305acb816366af17c3132993fa4b402">SPK_ALIGN_SIZE4</a>(SIZE)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 4)</td></tr>
+<tr class="separator:a3305acb816366af17c3132993fa4b402"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1077712ef46e21fd882b0d791eb93bd3" id="r_a1077712ef46e21fd882b0d791eb93bd3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a1077712ef46e21fd882b0d791eb93bd3">SPK_ALIGN_SIZE8</a>(SIZE)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 8)</td></tr>
+<tr class="separator:a1077712ef46e21fd882b0d791eb93bd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a9aba7108f66459294ff684a6b3ddec" id="r_a7a9aba7108f66459294ff684a6b3ddec"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a7a9aba7108f66459294ff684a6b3ddec">SPK_ALIGN_SIZE16</a>(SIZE)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 16)</td></tr>
+<tr class="separator:a7a9aba7108f66459294ff684a6b3ddec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22a031118dac7cfb3000e1f7ed4beb61" id="r_a22a031118dac7cfb3000e1f7ed4beb61"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a22a031118dac7cfb3000e1f7ed4beb61">SPK_ALIGN_SIZE32</a>(SIZE)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 32)</td></tr>
+<tr class="separator:a22a031118dac7cfb3000e1f7ed4beb61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a562bd123b903a365ef2e7bf9c4b978b6" id="r_a562bd123b903a365ef2e7bf9c4b978b6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a562bd123b903a365ef2e7bf9c4b978b6">SPK_ALIGN_SIZE256</a>(SIZE)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 256)</td></tr>
+<tr class="separator:a562bd123b903a365ef2e7bf9c4b978b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac460a56d9d08400b8da118c9f0d70ff6" id="r_ac460a56d9d08400b8da118c9f0d70ff6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ac460a56d9d08400b8da118c9f0d70ff6">SPK_ALIGN_SIZE1024</a>(SIZE)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 1024)</td></tr>
+<tr class="separator:ac460a56d9d08400b8da118c9f0d70ff6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58141fa1aba91ecc0ff038ec5f9fd301" id="r_a58141fa1aba91ecc0ff038ec5f9fd301"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a58141fa1aba91ecc0ff038ec5f9fd301">SPK_ALIGN_SIZE4096</a>(SIZE)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 4096)</td></tr>
+<tr class="separator:a58141fa1aba91ecc0ff038ec5f9fd301"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23104d03a9c76186d01f99921a7719a2" id="r_a23104d03a9c76186d01f99921a7719a2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a23104d03a9c76186d01f99921a7719a2">SPK_ALIGN_SIZE8192</a>(SIZE)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 8192)</td></tr>
+<tr class="separator:a23104d03a9c76186d01f99921a7719a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf1e935a88dc17ba3ba3b8537ec0577f" id="r_aaf1e935a88dc17ba3ba3b8537ec0577f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#aaf1e935a88dc17ba3ba3b8537ec0577f">__spk_bswap32</a>(x)&#160;&#160;&#160;((<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ada4c95a4173a4bb540c8a7f80f3665d2">uint32</a>) <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ae0ca93e0889bf78574a3870abb9a3180">__SPK_SWAP_INT32</a>(x))</td></tr>
+<tr class="separator:aaf1e935a88dc17ba3ba3b8537ec0577f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e79f73bb9a2ddd9fce9130646b6ae5a" id="r_a7e79f73bb9a2ddd9fce9130646b6ae5a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a7e79f73bb9a2ddd9fce9130646b6ae5a">__spk_bswap64</a>(x)&#160;&#160;&#160;((<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a>) <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a08b2dac20a09513dc041c64df54ba930">__SPK_SWAP_INT64</a>(x))</td></tr>
+<tr class="separator:a7e79f73bb9a2ddd9fce9130646b6ae5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae890266f12769427bfca684c5bfbcf6c" id="r_ae890266f12769427bfca684c5bfbcf6c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ae890266f12769427bfca684c5bfbcf6c">__spk_bswap32_direct</a>(x)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a5a30d355d3a55f7cb747cc77b1d5fda4">__SPK_SWAP_INT32_DIRECT</a>(x)</td></tr>
+<tr class="separator:ae890266f12769427bfca684c5bfbcf6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53d969bd1b70f515f8caef680f740259" id="r_a53d969bd1b70f515f8caef680f740259"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a53d969bd1b70f515f8caef680f740259">__spk_bswap64_direct</a>(x)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ad0297bc4230c9fc38b3ad8f5dfddb56c">__SPK_SWAP_INT64_DIRECT</a>(x)</td></tr>
+<tr class="separator:a53d969bd1b70f515f8caef680f740259"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81b56dcf7afbf5df6482deaa569dd411" id="r_a81b56dcf7afbf5df6482deaa569dd411"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a81b56dcf7afbf5df6482deaa569dd411">__spk_bswap16</a>(x)&#160;&#160;&#160;((<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aa2af87dc3681cf517e4b9e14c6f0244e">uint16</a>) <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a19764151dcc966dea7dc144cc6f0fdb7">__SPK_SWAP_INT16</a>(x))</td></tr>
+<tr class="separator:a81b56dcf7afbf5df6482deaa569dd411"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb466c7e3303d86a4f6e953bdcc7f767" id="r_aeb466c7e3303d86a4f6e953bdcc7f767"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#aeb466c7e3303d86a4f6e953bdcc7f767">__spk_bswap16_direct</a>(x)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ac0da56a29dc937733d9fda8ee1c1d958">__SPK_SWAP_INT16_DIRECT</a>(x)</td></tr>
+<tr class="separator:aeb466c7e3303d86a4f6e953bdcc7f767"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19764151dcc966dea7dc144cc6f0fdb7" id="r_a19764151dcc966dea7dc144cc6f0fdb7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a19764151dcc966dea7dc144cc6f0fdb7">__SPK_SWAP_INT16</a>(x)</td></tr>
+<tr class="separator:a19764151dcc966dea7dc144cc6f0fdb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0ca93e0889bf78574a3870abb9a3180" id="r_ae0ca93e0889bf78574a3870abb9a3180"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ae0ca93e0889bf78574a3870abb9a3180">__SPK_SWAP_INT32</a>(x)</td></tr>
+<tr class="separator:ae0ca93e0889bf78574a3870abb9a3180"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08b2dac20a09513dc041c64df54ba930" id="r_a08b2dac20a09513dc041c64df54ba930"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a08b2dac20a09513dc041c64df54ba930">__SPK_SWAP_INT64</a>(x)</td></tr>
+<tr class="separator:a08b2dac20a09513dc041c64df54ba930"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0da56a29dc937733d9fda8ee1c1d958" id="r_ac0da56a29dc937733d9fda8ee1c1d958"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ac0da56a29dc937733d9fda8ee1c1d958">__SPK_SWAP_INT16_DIRECT</a>(x)&#160;&#160;&#160;        ( *(<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aa2af87dc3681cf517e4b9e14c6f0244e">uint16</a> *) &amp;(x) = <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a19764151dcc966dea7dc144cc6f0fdb7">__SPK_SWAP_INT16</a>(*(<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aa2af87dc3681cf517e4b9e14c6f0244e">uint16</a> *) &amp;(x)) )</td></tr>
+<tr class="separator:ac0da56a29dc937733d9fda8ee1c1d958"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a30d355d3a55f7cb747cc77b1d5fda4" id="r_a5a30d355d3a55f7cb747cc77b1d5fda4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a5a30d355d3a55f7cb747cc77b1d5fda4">__SPK_SWAP_INT32_DIRECT</a>(x)&#160;&#160;&#160;        ( *(<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ada4c95a4173a4bb540c8a7f80f3665d2">uint32</a> *) &amp;(x) = <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ae0ca93e0889bf78574a3870abb9a3180">__SPK_SWAP_INT32</a>(*(<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ada4c95a4173a4bb540c8a7f80f3665d2">uint32</a> *) &amp;(x)) )</td></tr>
+<tr class="separator:a5a30d355d3a55f7cb747cc77b1d5fda4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0297bc4230c9fc38b3ad8f5dfddb56c" id="r_ad0297bc4230c9fc38b3ad8f5dfddb56c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ad0297bc4230c9fc38b3ad8f5dfddb56c">__SPK_SWAP_INT64_DIRECT</a>(x)&#160;&#160;&#160;        ( *(<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a> *) &amp;(x) = <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a08b2dac20a09513dc041c64df54ba930">__SPK_SWAP_INT64</a>(*(<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a> *) &amp;(x)) )</td></tr>
+<tr class="separator:ad0297bc4230c9fc38b3ad8f5dfddb56c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a883330e51486cee330b577d80be53c7a" id="r_a883330e51486cee330b577d80be53c7a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a883330e51486cee330b577d80be53c7a">SPK_SWAP_INT16</a>(x)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a81b56dcf7afbf5df6482deaa569dd411">__spk_bswap16</a>(x)</td></tr>
+<tr class="separator:a883330e51486cee330b577d80be53c7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade4273ab7d9fac81e1d867901fe40ce2" id="r_ade4273ab7d9fac81e1d867901fe40ce2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ade4273ab7d9fac81e1d867901fe40ce2">SPK_SWAP_INT32</a>(x)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#aaf1e935a88dc17ba3ba3b8537ec0577f">__spk_bswap32</a>(x)</td></tr>
+<tr class="separator:ade4273ab7d9fac81e1d867901fe40ce2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a846cdad1e185aed7c86ac5a50235a24c" id="r_a846cdad1e185aed7c86ac5a50235a24c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a846cdad1e185aed7c86ac5a50235a24c">SPK_SWAP_INT64</a>(x)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a7e79f73bb9a2ddd9fce9130646b6ae5a">__spk_bswap64</a>(x)</td></tr>
+<tr class="separator:a846cdad1e185aed7c86ac5a50235a24c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7f88be45274bab06de2883a572738a7" id="r_ab7f88be45274bab06de2883a572738a7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ab7f88be45274bab06de2883a572738a7">SPK_SWAP_INT16_DIRECT</a>(x)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#aeb466c7e3303d86a4f6e953bdcc7f767">__spk_bswap16_direct</a>(x)</td></tr>
+<tr class="separator:ab7f88be45274bab06de2883a572738a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d7e185f6c041a15931b43b4576be07b" id="r_a6d7e185f6c041a15931b43b4576be07b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a6d7e185f6c041a15931b43b4576be07b">SPK_SWAP_INT32_DIRECT</a>(x)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ae890266f12769427bfca684c5bfbcf6c">__spk_bswap32_direct</a>(x)</td></tr>
+<tr class="separator:a6d7e185f6c041a15931b43b4576be07b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41080bfa7998b2e75a016346820f1e77" id="r_a41080bfa7998b2e75a016346820f1e77"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a41080bfa7998b2e75a016346820f1e77">SPK_SWAP_INT64_DIRECT</a>(x)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a53d969bd1b70f515f8caef680f740259">__spk_bswap64_direct</a>(x)</td></tr>
+<tr class="separator:a41080bfa7998b2e75a016346820f1e77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5533368234fb19587d19cf026f1fae6a" id="r_a5533368234fb19587d19cf026f1fae6a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a5533368234fb19587d19cf026f1fae6a">SPK_SLEEP_YIELD</a>()</td></tr>
+<tr class="separator:a5533368234fb19587d19cf026f1fae6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82d3f9d49ca1e5a0b04b491e7a44d659" id="r_a82d3f9d49ca1e5a0b04b491e7a44d659"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a82d3f9d49ca1e5a0b04b491e7a44d659">SPK_SCHED_YIELD</a>()&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a5533368234fb19587d19cf026f1fae6a">SPK_SLEEP_YIELD</a>()</td></tr>
+<tr class="separator:a82d3f9d49ca1e5a0b04b491e7a44d659"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add5111a40d0ebb96e997f951567cded9" id="r_add5111a40d0ebb96e997f951567cded9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#add5111a40d0ebb96e997f951567cded9">SPK_SLEEP_MS</a>(MS)</td></tr>
+<tr class="separator:add5111a40d0ebb96e997f951567cded9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20222dbebfb3bcb654ccc9bc1087fcad" id="r_a20222dbebfb3bcb654ccc9bc1087fcad"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a20222dbebfb3bcb654ccc9bc1087fcad">SPK_SLEEP_US</a>(US)</td></tr>
+<tr class="separator:a20222dbebfb3bcb654ccc9bc1087fcad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e255b175727f4aa4801ed0ae9b697aa" id="r_a8e255b175727f4aa4801ed0ae9b697aa"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a8e255b175727f4aa4801ed0ae9b697aa">SPK_SLEEP_NS</a>(NS)</td></tr>
+<tr class="separator:a8e255b175727f4aa4801ed0ae9b697aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a624c5c52a7c47b465e66fee1cfc812c9" id="r_a624c5c52a7c47b465e66fee1cfc812c9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a624c5c52a7c47b465e66fee1cfc812c9">SPK_TIMED_SLEEP</a>(MS)&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#add5111a40d0ebb96e997f951567cded9">SPK_SLEEP_MS</a>(MS)</td></tr>
+<tr class="separator:a624c5c52a7c47b465e66fee1cfc812c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d037cd5c97421d495679ab6a80dcbbb" id="r_a1d037cd5c97421d495679ab6a80dcbbb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a1d037cd5c97421d495679ab6a80dcbbb">SPK_TIMED_SLEEP_SINCE</a>(MS,  P_SINCE_TV)</td></tr>
+<tr class="separator:a1d037cd5c97421d495679ab6a80dcbbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d6a7361d3933eed1b974d59b3a2e013" id="r_a9d6a7361d3933eed1b974d59b3a2e013"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a9d6a7361d3933eed1b974d59b3a2e013">SPK_TIMED_SLEEP_SINCE_TS</a>(MS,  P_SINCE_TS)</td></tr>
+<tr class="separator:a9d6a7361d3933eed1b974d59b3a2e013"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a532af7fc4eef93776e94829bc4655d9d" id="r_a532af7fc4eef93776e94829bc4655d9d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a532af7fc4eef93776e94829bc4655d9d">SPK_COMPILER_BARRIER</a>()&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a6a7b47fa0121092d4cc86bb444f6cffa">__SPK_compiler_barrier</a>()</td></tr>
+<tr class="separator:a532af7fc4eef93776e94829bc4655d9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20385d9a211b8a4f36f118d9e79c21b0" id="r_a20385d9a211b8a4f36f118d9e79c21b0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a20385d9a211b8a4f36f118d9e79c21b0">__SPK_CPU_RELAX</a>()&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a6a7b47fa0121092d4cc86bb444f6cffa">__SPK_compiler_barrier</a>()</td></tr>
+<tr class="separator:a20385d9a211b8a4f36f118d9e79c21b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae37d4cee676319764fb4a24b59946404" id="r_ae37d4cee676319764fb4a24b59946404"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ae37d4cee676319764fb4a24b59946404">SPK_ACCESS_ONCE</a>(x)&#160;&#160;&#160;(* ((<a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> typeof(x) *) &amp;(x)) )</td></tr>
+<tr class="separator:ae37d4cee676319764fb4a24b59946404"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a6a7b47fa0121092d4cc86bb444f6cffa" id="r_a6a7b47fa0121092d4cc86bb444f6cffa"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a3df218f206cf4d3cbb0c97c4b565e57e">__spk_always_inline</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a6a7b47fa0121092d4cc86bb444f6cffa">__SPK_compiler_barrier</a> (void)</td></tr>
+<tr class="separator:a6a7b47fa0121092d4cc86bb444f6cffa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>编译器/平台相关的宏定义</p>
+<dl class="section version"><dt>版本</dt><dd>$Id$ </dd></dl>
+<dl class="section since"><dt>自从</dt><dd>2011/07/07 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 中定义.</p>
+</div><h2 class="groupheader">宏定义说明</h2>
+<a id="a4fb2431b46656ad0908c4e0195540182" name="a4fb2431b46656ad0908c4e0195540182"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4fb2431b46656ad0908c4e0195540182">&#9670;&#160;</a></span>__attribute__</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __attribute__</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><a class="el" href="classA.html">A</a></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00143">143</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a942d24a0bd29b7c5227b6f5134b53b16" name="a942d24a0bd29b7c5227b6f5134b53b16"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a942d24a0bd29b7c5227b6f5134b53b16">&#9670;&#160;</a></span>__attribute_align</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __attribute_align</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00147">147</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a896f0b60c30ef86fe19d43f1966ff2fd" name="a896f0b60c30ef86fe19d43f1966ff2fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a896f0b60c30ef86fe19d43f1966ff2fd">&#9670;&#160;</a></span>__attribute_deprecated</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __attribute_deprecated</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00151">151</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a67ee3bd4c8a6a6b44a7d26c38238baba" name="a67ee3bd4c8a6a6b44a7d26c38238baba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67ee3bd4c8a6a6b44a7d26c38238baba">&#9670;&#160;</a></span>__attribute_unused</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __attribute_unused</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00155">155</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a96deb7ba5a74848afb710cc4ee6d2c08" name="a96deb7ba5a74848afb710cc4ee6d2c08"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96deb7ba5a74848afb710cc4ee6d2c08">&#9670;&#160;</a></span>__inline</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __inline&#160;&#160;&#160;<a class="el" href="stdc_8h.html#a00d24c7231be28dbaf71f5408f30e44c">inline</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00082">82</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3df218f206cf4d3cbb0c97c4b565e57e" name="a3df218f206cf4d3cbb0c97c4b565e57e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3df218f206cf4d3cbb0c97c4b565e57e">&#9670;&#160;</a></span>__spk_always_inline</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __spk_always_inline&#160;&#160;&#160;<a class="el" href="stdc_8h.html#a00d24c7231be28dbaf71f5408f30e44c">inline</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00084">84</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a81b56dcf7afbf5df6482deaa569dd411" name="a81b56dcf7afbf5df6482deaa569dd411"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81b56dcf7afbf5df6482deaa569dd411">&#9670;&#160;</a></span>__spk_bswap16</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __spk_bswap16</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;((<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aa2af87dc3681cf517e4b9e14c6f0244e">uint16</a>) <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a19764151dcc966dea7dc144cc6f0fdb7">__SPK_SWAP_INT16</a>(x))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00382">382</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aeb466c7e3303d86a4f6e953bdcc7f767" name="aeb466c7e3303d86a4f6e953bdcc7f767"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb466c7e3303d86a4f6e953bdcc7f767">&#9670;&#160;</a></span>__spk_bswap16_direct</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __spk_bswap16_direct</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ac0da56a29dc937733d9fda8ee1c1d958">__SPK_SWAP_INT16_DIRECT</a>(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00383">383</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaf1e935a88dc17ba3ba3b8537ec0577f" name="aaf1e935a88dc17ba3ba3b8537ec0577f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf1e935a88dc17ba3ba3b8537ec0577f">&#9670;&#160;</a></span>__spk_bswap32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __spk_bswap32</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;((<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ada4c95a4173a4bb540c8a7f80f3665d2">uint32</a>) <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ae0ca93e0889bf78574a3870abb9a3180">__SPK_SWAP_INT32</a>(x))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00370">370</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae890266f12769427bfca684c5bfbcf6c" name="ae890266f12769427bfca684c5bfbcf6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae890266f12769427bfca684c5bfbcf6c">&#9670;&#160;</a></span>__spk_bswap32_direct</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __spk_bswap32_direct</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a5a30d355d3a55f7cb747cc77b1d5fda4">__SPK_SWAP_INT32_DIRECT</a>(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00373">373</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7e79f73bb9a2ddd9fce9130646b6ae5a" name="a7e79f73bb9a2ddd9fce9130646b6ae5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e79f73bb9a2ddd9fce9130646b6ae5a">&#9670;&#160;</a></span>__spk_bswap64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __spk_bswap64</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;((<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a>) <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a08b2dac20a09513dc041c64df54ba930">__SPK_SWAP_INT64</a>(x))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00371">371</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a53d969bd1b70f515f8caef680f740259" name="a53d969bd1b70f515f8caef680f740259"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53d969bd1b70f515f8caef680f740259">&#9670;&#160;</a></span>__spk_bswap64_direct</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __spk_bswap64_direct</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ad0297bc4230c9fc38b3ad8f5dfddb56c">__SPK_SWAP_INT64_DIRECT</a>(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00374">374</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab45fa5da462d2859a7cb5e4bb469d54b" name="ab45fa5da462d2859a7cb5e4bb469d54b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab45fa5da462d2859a7cb5e4bb469d54b">&#9670;&#160;</a></span>__spk_container_of</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __spk_container_of</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">PTR, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">TYPE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">MEMBER&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;            ( (TYPE *) ((char *) (PTR) - <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a276e8a32e0bbf024aadd9420b8f2d3b3">offsetof</a>(TYPE, MEMBER)) )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00235">235</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a20385d9a211b8a4f36f118d9e79c21b0" name="a20385d9a211b8a4f36f118d9e79c21b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20385d9a211b8a4f36f118d9e79c21b0">&#9670;&#160;</a></span>__SPK_CPU_RELAX</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __SPK_CPU_RELAX</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a6a7b47fa0121092d4cc86bb444f6cffa">__SPK_compiler_barrier</a>()</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00754">754</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa710764c0ca60f045b14aa5c86165599" name="aa710764c0ca60f045b14aa5c86165599"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa710764c0ca60f045b14aa5c86165599">&#9670;&#160;</a></span>__spk_likely</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __spk_likely</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00100">100</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2872cbf5784bb424a728987239a2418c" name="a2872cbf5784bb424a728987239a2418c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2872cbf5784bb424a728987239a2418c">&#9670;&#160;</a></span>__spk_offsetof</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __spk_offsetof</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">TYPE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">MEMBER&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;            ( (<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ad3ce9f24199b79b2629169eebf59489b">int32</a>) &amp;((TYPE *) 0)-&gt;MEMBER )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00232">232</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae3b5509dd420f8e9b438ea910d0c04f4" name="ae3b5509dd420f8e9b438ea910d0c04f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3b5509dd420f8e9b438ea910d0c04f4">&#9670;&#160;</a></span>__spk_sizeof_submember</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __spk_sizeof_submember</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">TYPE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">MEMBER&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;            ( sizeof(((TYPE *) 0)-&gt;MEMBER) )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00238">238</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a19764151dcc966dea7dc144cc6f0fdb7" name="a19764151dcc966dea7dc144cc6f0fdb7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19764151dcc966dea7dc144cc6f0fdb7">&#9670;&#160;</a></span>__SPK_SWAP_INT16</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __SPK_SWAP_INT16</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">        ( ((((<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aa2af87dc3681cf517e4b9e14c6f0244e">uint16</a>) x) &gt;&gt; 8) &amp; 0x00FF) \</div>
+<div class="line">                | ((((<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aa2af87dc3681cf517e4b9e14c6f0244e">uint16</a>) x) &lt;&lt; 8) &amp; 0xFF00) )</div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_aa2af87dc3681cf517e4b9e14c6f0244e"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aa2af87dc3681cf517e4b9e14c6f0244e">uint16</a></div><div class="ttdeci">unsigned __int16 uint16</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00074">itpdk_typedef.h:74</a></div></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00390">390</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac0da56a29dc937733d9fda8ee1c1d958" name="ac0da56a29dc937733d9fda8ee1c1d958"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0da56a29dc937733d9fda8ee1c1d958">&#9670;&#160;</a></span>__SPK_SWAP_INT16_DIRECT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __SPK_SWAP_INT16_DIRECT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;        ( *(<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aa2af87dc3681cf517e4b9e14c6f0244e">uint16</a> *) &amp;(x) = <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a19764151dcc966dea7dc144cc6f0fdb7">__SPK_SWAP_INT16</a>(*(<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#aa2af87dc3681cf517e4b9e14c6f0244e">uint16</a> *) &amp;(x)) )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00413">413</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae0ca93e0889bf78574a3870abb9a3180" name="ae0ca93e0889bf78574a3870abb9a3180"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0ca93e0889bf78574a3870abb9a3180">&#9670;&#160;</a></span>__SPK_SWAP_INT32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __SPK_SWAP_INT32</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">        ( ((((<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ada4c95a4173a4bb540c8a7f80f3665d2">uint32</a>) x) &gt;&gt; 24) &amp; 0x000000FF) \</div>
+<div class="line">                | ((((<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ada4c95a4173a4bb540c8a7f80f3665d2">uint32</a>) x) &gt;&gt;  8) &amp; 0x0000FF00) \</div>
+<div class="line">                | ((((<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ada4c95a4173a4bb540c8a7f80f3665d2">uint32</a>) x) &lt;&lt;  8) &amp; 0x00FF0000) \</div>
+<div class="line">                | ((((<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ada4c95a4173a4bb540c8a7f80f3665d2">uint32</a>) x) &lt;&lt; 24) &amp; 0xFF000000) )</div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_ada4c95a4173a4bb540c8a7f80f3665d2"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ada4c95a4173a4bb540c8a7f80f3665d2">uint32</a></div><div class="ttdeci">unsigned __int32 uint32</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00075">itpdk_typedef.h:75</a></div></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00395">395</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5a30d355d3a55f7cb747cc77b1d5fda4" name="a5a30d355d3a55f7cb747cc77b1d5fda4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a30d355d3a55f7cb747cc77b1d5fda4">&#9670;&#160;</a></span>__SPK_SWAP_INT32_DIRECT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __SPK_SWAP_INT32_DIRECT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;        ( *(<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ada4c95a4173a4bb540c8a7f80f3665d2">uint32</a> *) &amp;(x) = <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ae0ca93e0889bf78574a3870abb9a3180">__SPK_SWAP_INT32</a>(*(<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ada4c95a4173a4bb540c8a7f80f3665d2">uint32</a> *) &amp;(x)) )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00417">417</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a08b2dac20a09513dc041c64df54ba930" name="a08b2dac20a09513dc041c64df54ba930"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08b2dac20a09513dc041c64df54ba930">&#9670;&#160;</a></span>__SPK_SWAP_INT64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __SPK_SWAP_INT64</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">        ( ((((<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a>) x) &gt;&gt; 56) &amp; 0x00000000000000FF) \</div>
+<div class="line">                | ((((<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a>) x) &gt;&gt; 40) &amp; 0x000000000000FF00) \</div>
+<div class="line">                | ((((<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a>) x) &gt;&gt; 24) &amp; 0x0000000000FF0000) \</div>
+<div class="line">                | ((((<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a>) x) &gt;&gt;  8) &amp; 0x00000000FF000000) \</div>
+<div class="line">                | ((((<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a>) x) &lt;&lt;  8) &amp; 0x000000FF00000000) \</div>
+<div class="line">                | ((((<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a>) x) &lt;&lt; 24) &amp; 0x0000FF0000000000) \</div>
+<div class="line">                | ((((<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a>) x) &lt;&lt; 40) &amp; 0x00FF000000000000) \</div>
+<div class="line">                | ((((<a class="code hl_typedef" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a>) x) &lt;&lt; 56) &amp; 0xFF00000000000000) )</div>
+<div class="ttc" id="acmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_html_ac6afe794ed283c11fb63426a58188e5e"><div class="ttname"><a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a></div><div class="ttdeci">unsigned __int64 uint64</div><div class="ttdef"><b>Definition</b> <a href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h_source.html#l00076">itpdk_typedef.h:76</a></div></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00402">402</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad0297bc4230c9fc38b3ad8f5dfddb56c" name="ad0297bc4230c9fc38b3ad8f5dfddb56c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0297bc4230c9fc38b3ad8f5dfddb56c">&#9670;&#160;</a></span>__SPK_SWAP_INT64_DIRECT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __SPK_SWAP_INT64_DIRECT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;        ( *(<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a> *) &amp;(x) = <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a08b2dac20a09513dc041c64df54ba930">__SPK_SWAP_INT64</a>(*(<a class="el" href="cmaritpdk5_81_820_80_2include_2itpdk_2itpdk__typedef_8h.html#ac6afe794ed283c11fb63426a58188e5e">uint64</a> *) &amp;(x)) )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00421">421</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4792953518002b6d1736a90ce80a94dd" name="a4792953518002b6d1736a90ce80a94dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4792953518002b6d1736a90ce80a94dd">&#9670;&#160;</a></span>__spk_unlikely</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __spk_unlikely</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00101">101</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a520a93730da646b0fbee09d441c8549e" name="a520a93730da646b0fbee09d441c8549e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a520a93730da646b0fbee09d441c8549e">&#9670;&#160;</a></span>__thread</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __thread&#160;&#160;&#160;__thread</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00171">171</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa06910d90372b14a0756bf14cdc64811" name="aa06910d90372b14a0756bf14cdc64811"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa06910d90372b14a0756bf14cdc64811">&#9670;&#160;</a></span>container_of</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define container_of</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">PTR, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">TYPE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">MEMBER&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;            <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ab45fa5da462d2859a7cb5e4bb469d54b">__spk_container_of</a>(PTR, TYPE, MEMBER)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00227">227</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a217a0bd562b98ae8c2ffce44935351e1" name="a217a0bd562b98ae8c2ffce44935351e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a217a0bd562b98ae8c2ffce44935351e1">&#9670;&#160;</a></span>likely</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define likely</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#aa710764c0ca60f045b14aa5c86165599">__spk_likely</a>(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00111">111</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a276e8a32e0bbf024aadd9420b8f2d3b3" name="a276e8a32e0bbf024aadd9420b8f2d3b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a276e8a32e0bbf024aadd9420b8f2d3b3">&#9670;&#160;</a></span>offsetof</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define offsetof</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">TYPE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">MEMBER&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;            <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a2872cbf5784bb424a728987239a2418c">__spk_offsetof</a>(TYPE, MEMBER)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00222">222</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae37d4cee676319764fb4a24b59946404" name="ae37d4cee676319764fb4a24b59946404"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae37d4cee676319764fb4a24b59946404">&#9670;&#160;</a></span>SPK_ACCESS_ONCE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_ACCESS_ONCE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;(* ((<a class="el" href="stdc_8h.html#af55a5e48555be7d32ad73e76cf5d4db0">volatile</a> typeof(x) *) &amp;(x)) )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00769">769</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adf60e547bab7411b6009e9a340bcaba0" name="adf60e547bab7411b6009e9a340bcaba0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf60e547bab7411b6009e9a340bcaba0">&#9670;&#160;</a></span>SPK_ADJUST_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_ADJUST_SIZE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">BASESIZE&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;        ( <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ab19f8d13f2273b2698110dbf8c548f86">SPK_CEIL_TIMES</a>((SIZE), (BASESIZE)) * (BASESIZE) )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00256">256</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a37ea49eaa0d6f2bd5e2f7d75eaf178c0" name="a37ea49eaa0d6f2bd5e2f7d75eaf178c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">&#9670;&#160;</a></span>SPK_ALIGN_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_ALIGN_SIZE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">BASESIZE&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;        ( ((SIZE) + (BASESIZE - 1)) &amp; ~(BASESIZE - 1) )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00318">318</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac460a56d9d08400b8da118c9f0d70ff6" name="ac460a56d9d08400b8da118c9f0d70ff6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac460a56d9d08400b8da118c9f0d70ff6">&#9670;&#160;</a></span>SPK_ALIGN_SIZE1024</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_ALIGN_SIZE1024</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 1024)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00343">343</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7a9aba7108f66459294ff684a6b3ddec" name="a7a9aba7108f66459294ff684a6b3ddec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a9aba7108f66459294ff684a6b3ddec">&#9670;&#160;</a></span>SPK_ALIGN_SIZE16</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_ALIGN_SIZE16</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 16)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00331">331</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a562bd123b903a365ef2e7bf9c4b978b6" name="a562bd123b903a365ef2e7bf9c4b978b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a562bd123b903a365ef2e7bf9c4b978b6">&#9670;&#160;</a></span>SPK_ALIGN_SIZE256</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_ALIGN_SIZE256</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 256)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00339">339</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a22a031118dac7cfb3000e1f7ed4beb61" name="a22a031118dac7cfb3000e1f7ed4beb61"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22a031118dac7cfb3000e1f7ed4beb61">&#9670;&#160;</a></span>SPK_ALIGN_SIZE32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_ALIGN_SIZE32</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 32)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00335">335</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3305acb816366af17c3132993fa4b402" name="a3305acb816366af17c3132993fa4b402"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3305acb816366af17c3132993fa4b402">&#9670;&#160;</a></span>SPK_ALIGN_SIZE4</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_ALIGN_SIZE4</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 4)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00323">323</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a58141fa1aba91ecc0ff038ec5f9fd301" name="a58141fa1aba91ecc0ff038ec5f9fd301"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58141fa1aba91ecc0ff038ec5f9fd301">&#9670;&#160;</a></span>SPK_ALIGN_SIZE4096</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_ALIGN_SIZE4096</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 4096)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00347">347</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1077712ef46e21fd882b0d791eb93bd3" name="a1077712ef46e21fd882b0d791eb93bd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1077712ef46e21fd882b0d791eb93bd3">&#9670;&#160;</a></span>SPK_ALIGN_SIZE8</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_ALIGN_SIZE8</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 8)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00327">327</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a23104d03a9c76186d01f99921a7719a2" name="a23104d03a9c76186d01f99921a7719a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a23104d03a9c76186d01f99921a7719a2">&#9670;&#160;</a></span>SPK_ALIGN_SIZE8192</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_ALIGN_SIZE8192</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a37ea49eaa0d6f2bd5e2f7d75eaf178c0">SPK_ALIGN_SIZE</a>((SIZE), 8192)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00351">351</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab19f8d13f2273b2698110dbf8c548f86" name="ab19f8d13f2273b2698110dbf8c548f86"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab19f8d13f2273b2698110dbf8c548f86">&#9670;&#160;</a></span>SPK_CEIL_TIMES</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_CEIL_TIMES</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">BASESIZE&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;        ( ((SIZE) + (BASESIZE) - 1) / (BASESIZE) )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00248">248</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a532af7fc4eef93776e94829bc4655d9d" name="a532af7fc4eef93776e94829bc4655d9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a532af7fc4eef93776e94829bc4655d9d">&#9670;&#160;</a></span>SPK_COMPILER_BARRIER</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_COMPILER_BARRIER</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a6a7b47fa0121092d4cc86bb444f6cffa">__SPK_compiler_barrier</a>()</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00736">736</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1f00f91c7c1b5dd56187cdd99085b3f0" name="a1f00f91c7c1b5dd56187cdd99085b3f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f00f91c7c1b5dd56187cdd99085b3f0">&#9670;&#160;</a></span>SPK_FLOOR_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_FLOOR_SIZE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">BASESIZE&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;        ( <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#aa42c0791b118fc9ca69ed00b9d6ff7ba">SPK_FLOOR_TIMES</a>((SIZE), (BASESIZE)) * (BASESIZE) )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00274">274</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa42c0791b118fc9ca69ed00b9d6ff7ba" name="aa42c0791b118fc9ca69ed00b9d6ff7ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa42c0791b118fc9ca69ed00b9d6ff7ba">&#9670;&#160;</a></span>SPK_FLOOR_TIMES</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_FLOOR_TIMES</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">BASESIZE&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;        ( (SIZE) / (BASESIZE) )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00266">266</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a60885c31ba0b70a4806c74af641b0922" name="a60885c31ba0b70a4806c74af641b0922"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60885c31ba0b70a4806c74af641b0922">&#9670;&#160;</a></span>SPK_INTERNAL_INLINE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_INTERNAL_INLINE&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00186">186</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab895e4951eb53123d4aa60fbba9573ca" name="ab895e4951eb53123d4aa60fbba9573ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab895e4951eb53123d4aa60fbba9573ca">&#9670;&#160;</a></span>SPK_NEG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_NEG</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;((x) &gt; 0 ? -(x) : (x))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00210">210</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a076c26b0a63b1b80b06cd4c70fb2e6aa" name="a076c26b0a63b1b80b06cd4c70fb2e6aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a076c26b0a63b1b80b06cd4c70fb2e6aa">&#9670;&#160;</a></span>SPK_ROUND_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_ROUND_SIZE&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a4a3ed935103ffcf1c25c0b6d367d1c48">SPK_SIGNED_ROUND_SIZE</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00302">302</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad595e04dc6c1185b47e838cd35091455" name="ad595e04dc6c1185b47e838cd35091455"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad595e04dc6c1185b47e838cd35091455">&#9670;&#160;</a></span>SPK_ROUND_TIMES</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_ROUND_TIMES&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a6a8d3eb4058f20ef2e9e70fb97cd4c4a">SPK_SIGNED_ROUND_TIMES</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00284">284</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a82d3f9d49ca1e5a0b04b491e7a44d659" name="a82d3f9d49ca1e5a0b04b491e7a44d659"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82d3f9d49ca1e5a0b04b491e7a44d659">&#9670;&#160;</a></span>SPK_SCHED_YIELD</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_SCHED_YIELD</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a5533368234fb19587d19cf026f1fae6a">SPK_SLEEP_YIELD</a>()</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00488">488</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4a3ed935103ffcf1c25c0b6d367d1c48" name="a4a3ed935103ffcf1c25c0b6d367d1c48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a3ed935103ffcf1c25c0b6d367d1c48">&#9670;&#160;</a></span>SPK_SIGNED_ROUND_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_SIGNED_ROUND_SIZE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">BASESIZE&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;        ( <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a6a8d3eb4058f20ef2e9e70fb97cd4c4a">SPK_SIGNED_ROUND_TIMES</a>((SIZE), (BASESIZE)) * (BASESIZE) )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00309">309</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6a8d3eb4058f20ef2e9e70fb97cd4c4a" name="a6a8d3eb4058f20ef2e9e70fb97cd4c4a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a8d3eb4058f20ef2e9e70fb97cd4c4a">&#9670;&#160;</a></span>SPK_SIGNED_ROUND_TIMES</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_SIGNED_ROUND_TIMES</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">BASESIZE&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">        ( ((SIZE) + (((SIZE) &gt;= 0 ? (BASESIZE) : -(BASESIZE)) &gt;&gt; 1)) \</div>
+<div class="line">                / (BASESIZE) )</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00291">291</a> 行定义.</p>
+
+</div>
+</div>
+<a id="add5111a40d0ebb96e997f951567cded9" name="add5111a40d0ebb96e997f951567cded9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add5111a40d0ebb96e997f951567cded9">&#9670;&#160;</a></span>SPK_SLEEP_MS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_SLEEP_MS</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">MS</td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> { \</div>
+<div class="line">        <span class="keyword">struct </span>timeval  __SLEEP_MS_tv = {0, 0}; \</div>
+<div class="line">        <span class="keywordtype">long</span>            __SLEEP_MS_msec = (MS); \</div>
+<div class="line">        if (__SLEEP_MS_msec &lt; 1000) { \</div>
+<div class="line">            __SLEEP_MS_tv.tv_usec = __SLEEP_MS_msec * 1000; \</div>
+<div class="line">        } <span class="keywordflow">else</span> { \</div>
+<div class="line">            __SLEEP_MS_tv.tv_sec = (__SLEEP_MS_msec / 1000); \</div>
+<div class="line">            __SLEEP_MS_tv.tv_usec = (__SLEEP_MS_msec % 1000) * 1000; \</div>
+<div class="line">        } \</div>
+<div class="line">        select(0, (fd_set *) <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, (fd_set *) <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, (fd_set *) <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, \</div>
+<div class="line">                &amp;__SLEEP_MS_tv); \</div>
+<div class="line">    } <span class="keywordflow">while</span> (0)</div>
+<div class="ttc" id="atypes_8h_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00295">types.h:295</a></div></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00519">519</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8e255b175727f4aa4801ed0ae9b697aa" name="a8e255b175727f4aa4801ed0ae9b697aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e255b175727f4aa4801ed0ae9b697aa">&#9670;&#160;</a></span>SPK_SLEEP_NS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_SLEEP_NS</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">NS</td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> { \</div>
+<div class="line">        <span class="keyword">struct </span>timeval  __SLEEP_NS_tv = {0, ((NS) % 1000000000) / 1000}; \</div>
+<div class="line">        select(0, (fd_set *) <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, (fd_set *) <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, (fd_set *) <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, \</div>
+<div class="line">                &amp;__SLEEP_NS_tv); \</div>
+<div class="line">    } <span class="keywordflow">while</span> (0)</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00605">605</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a20222dbebfb3bcb654ccc9bc1087fcad" name="a20222dbebfb3bcb654ccc9bc1087fcad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20222dbebfb3bcb654ccc9bc1087fcad">&#9670;&#160;</a></span>SPK_SLEEP_US</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_SLEEP_US</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">US</td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> { \</div>
+<div class="line">        <span class="keyword">struct </span>timeval  __SLEEP_US_tv = {0, 0}; \</div>
+<div class="line">        <span class="keywordtype">long</span>            __SLEEP_US_msec = (US); \</div>
+<div class="line">        if (__SLEEP_US_msec &lt; 1000000) { \</div>
+<div class="line">            __SLEEP_US_tv.tv_usec = __SLEEP_US_msec; \</div>
+<div class="line">        } <span class="keywordflow">else</span> { \</div>
+<div class="line">            __SLEEP_US_tv.tv_sec = (__SLEEP_US_msec / 1000000); \</div>
+<div class="line">            __SLEEP_US_tv.tv_usec = (__SLEEP_US_msec % 1000000); \</div>
+<div class="line">        } \</div>
+<div class="line">        select(0, (fd_set *) <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, (fd_set *) <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, (fd_set *) <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, \</div>
+<div class="line">                &amp;__SLEEP_US_tv); \</div>
+<div class="line">    } <span class="keywordflow">while</span> (0)</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00565">565</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5533368234fb19587d19cf026f1fae6a" name="a5533368234fb19587d19cf026f1fae6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5533368234fb19587d19cf026f1fae6a">&#9670;&#160;</a></span>SPK_SLEEP_YIELD</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_SLEEP_YIELD</td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> { \</div>
+<div class="line">        <span class="keyword">struct </span>timeval  __SLEEP_YIELD_tv = {0, 1}; \</div>
+<div class="line">        select(0, (fd_set *) <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, (fd_set *) <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, (fd_set *) <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, \</div>
+<div class="line">                &amp;__SLEEP_YIELD_tv); \</div>
+<div class="line">    } <span class="keywordflow">while</span> (0)</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00465">465</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a883330e51486cee330b577d80be53c7a" name="a883330e51486cee330b577d80be53c7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a883330e51486cee330b577d80be53c7a">&#9670;&#160;</a></span>SPK_SWAP_INT16</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_SWAP_INT16</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a81b56dcf7afbf5df6482deaa569dd411">__spk_bswap16</a>(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00434">434</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab7f88be45274bab06de2883a572738a7" name="ab7f88be45274bab06de2883a572738a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab7f88be45274bab06de2883a572738a7">&#9670;&#160;</a></span>SPK_SWAP_INT16_DIRECT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_SWAP_INT16_DIRECT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#aeb466c7e3303d86a4f6e953bdcc7f767">__spk_bswap16_direct</a>(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00437">437</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ade4273ab7d9fac81e1d867901fe40ce2" name="ade4273ab7d9fac81e1d867901fe40ce2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade4273ab7d9fac81e1d867901fe40ce2">&#9670;&#160;</a></span>SPK_SWAP_INT32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_SWAP_INT32</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#aaf1e935a88dc17ba3ba3b8537ec0577f">__spk_bswap32</a>(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00435">435</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6d7e185f6c041a15931b43b4576be07b" name="a6d7e185f6c041a15931b43b4576be07b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d7e185f6c041a15931b43b4576be07b">&#9670;&#160;</a></span>SPK_SWAP_INT32_DIRECT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_SWAP_INT32_DIRECT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ae890266f12769427bfca684c5bfbcf6c">__spk_bswap32_direct</a>(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00438">438</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a846cdad1e185aed7c86ac5a50235a24c" name="a846cdad1e185aed7c86ac5a50235a24c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a846cdad1e185aed7c86ac5a50235a24c">&#9670;&#160;</a></span>SPK_SWAP_INT64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_SWAP_INT64</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a7e79f73bb9a2ddd9fce9130646b6ae5a">__spk_bswap64</a>(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00436">436</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a41080bfa7998b2e75a016346820f1e77" name="a41080bfa7998b2e75a016346820f1e77"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41080bfa7998b2e75a016346820f1e77">&#9670;&#160;</a></span>SPK_SWAP_INT64_DIRECT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_SWAP_INT64_DIRECT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a53d969bd1b70f515f8caef680f740259">__spk_bswap64_direct</a>(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00439">439</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3c478205fd0f7d970b0ed885520f294e" name="a3c478205fd0f7d970b0ed885520f294e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c478205fd0f7d970b0ed885520f294e">&#9670;&#160;</a></span>SPK_TESTABLE_STATIC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_TESTABLE_STATIC&#160;&#160;&#160;static</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00197">197</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a624c5c52a7c47b465e66fee1cfc812c9" name="a624c5c52a7c47b465e66fee1cfc812c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a624c5c52a7c47b465e66fee1cfc812c9">&#9670;&#160;</a></span>SPK_TIMED_SLEEP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_TIMED_SLEEP</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">MS</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#add5111a40d0ebb96e997f951567cded9">SPK_SLEEP_MS</a>(MS)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00647">647</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1d037cd5c97421d495679ab6a80dcbbb" name="a1d037cd5c97421d495679ab6a80dcbbb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d037cd5c97421d495679ab6a80dcbbb">&#9670;&#160;</a></span>SPK_TIMED_SLEEP_SINCE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_TIMED_SLEEP_SINCE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">MS, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">P_SINCE_TV&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> { \</div>
+<div class="line">        <span class="keyword">struct </span>timeval  __TIMED_SINCE_now; \</div>
+<div class="line">        <span class="keywordtype">long</span>            __TIMED_SINCE_diff; \</div>
+<div class="line">        <span class="keywordtype">long</span>            __TIMED_SINCE_msec = (MS); \</div>
+<div class="line">        __spk_gettimeofday(&amp;__TIMED_SINCE_now, (<span class="keyword">struct</span> timezone *) <a class="code hl_define" href="types_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>); \</div>
+<div class="line">        __TIMED_SINCE_diff = \</div>
+<div class="line">                (__TIMED_SINCE_now.tv_sec - (P_SINCE_TV)-&gt;tv_sec) * 1000 \</div>
+<div class="line">                + (__TIMED_SINCE_now.tv_usec - (P_SINCE_TV)-&gt;<a class="code hl_variable" href="types_8h.html#a2c06bf4a6f239555307d0218923cc8de">tv_usec</a>) / 1000; \</div>
+<div class="line">        if (__TIMED_SINCE_diff &lt; __TIMED_SINCE_msec) { \</div>
+<div class="line">            __TIMED_SINCE_msec -= __TIMED_SINCE_diff; \</div>
+<div class="line">            SPK_TIMED_SLEEP(__TIMED_SINCE_msec); \</div>
+<div class="line">        } \</div>
+<div class="line">    } <span class="keywordflow">while</span> (0)</div>
+<div class="ttc" id="atypes_8h_html_a2c06bf4a6f239555307d0218923cc8de"><div class="ttname"><a href="types_8h.html#a2c06bf4a6f239555307d0218923cc8de">tv_usec</a></div><div class="ttdeci">int32 tv_usec</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00581">types.h:581</a></div></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00687">687</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9d6a7361d3933eed1b974d59b3a2e013" name="a9d6a7361d3933eed1b974d59b3a2e013"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d6a7361d3933eed1b974d59b3a2e013">&#9670;&#160;</a></span>SPK_TIMED_SLEEP_SINCE_TS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_TIMED_SLEEP_SINCE_TS</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">MS, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">P_SINCE_TS&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> { \</div>
+<div class="line">        <span class="keyword">struct </span>timeval  __TIMED_SINCE_TS_tmp; \</div>
+<div class="line">        __TIMED_SINCE_TS_tmp.tv_sec = (P_SINCE_TS)-&gt;tv_sec; \</div>
+<div class="line">        __TIMED_SINCE_TS_tmp.tv_usec = (P_SINCE_TS)-&gt;<a class="code hl_variable" href="types_8h.html#a92d4da914e8ad70a990daa3878f5d566">tv_nsec</a> / 1000; \</div>
+<div class="line">        SPK_TIMED_SLEEP_SINCE((MS), &amp;__TIMED_SINCE_TS_tmp); \</div>
+<div class="line">    } <span class="keywordflow">while</span> (0)</div>
+<div class="ttc" id="atypes_8h_html_a92d4da914e8ad70a990daa3878f5d566"><div class="ttname"><a href="types_8h.html#a92d4da914e8ad70a990daa3878f5d566">tv_nsec</a></div><div class="ttdeci">int32 tv_nsec</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00593">types.h:593</a></div></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00710">710</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a74bf63664b4a9d9aeecc078996ae0e75" name="a74bf63664b4a9d9aeecc078996ae0e75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74bf63664b4a9d9aeecc078996ae0e75">&#9670;&#160;</a></span>SPK_UNSIGNED_ROUND_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_UNSIGNED_ROUND_SIZE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">BASESIZE&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;        ( <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#ab7c23b3749d53e82dd65e004bf00ce70">SPK_UNSIGNED_ROUND_TIMES</a>((SIZE), (BASESIZE)) * (BASESIZE) )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00305">305</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab7c23b3749d53e82dd65e004bf00ce70" name="ab7c23b3749d53e82dd65e004bf00ce70"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab7c23b3749d53e82dd65e004bf00ce70">&#9670;&#160;</a></span>SPK_UNSIGNED_ROUND_TIMES</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SPK_UNSIGNED_ROUND_TIMES</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">SIZE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">BASESIZE&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;        ( ((SIZE) + ((BASESIZE) &gt;&gt; 1)) / (BASESIZE) )</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00287">287</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac6c45889010c1bd68631771b64f18101" name="ac6c45889010c1bd68631771b64f18101"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6c45889010c1bd68631771b64f18101">&#9670;&#160;</a></span>unlikely</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define unlikely</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a4792953518002b6d1736a90ce80a94dd">__spk_unlikely</a>(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00120">120</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a6a7b47fa0121092d4cc86bb444f6cffa" name="a6a7b47fa0121092d4cc86bb444f6cffa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a7b47fa0121092d4cc86bb444f6cffa">&#9670;&#160;</a></span>__SPK_compiler_barrier()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a3df218f206cf4d3cbb0c97c4b565e57e">__spk_always_inline</a> void __SPK_compiler_barrier </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html">compiler.h</a> 第 <a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h_source.html#l00727">727</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_32137984f496da46263d816e0d6dc804.html">API</a></li><li class="navelem"><a class="el" href="dir_5d86b406ee298b6872363dee8d5d4bb3.html">oesApi0.17.5.8</a></li><li class="navelem"><a class="el" href="dir_a4c0c3865b0b7ec8a37b8b8c3fc7d249.html">include</a></li><li class="navelem"><a class="el" href="dir_248d918e0c46523948aef7b06f6106c0.html">sutil</a></li><li class="navelem"><a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html">compiler.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

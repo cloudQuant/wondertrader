@@ -1,0 +1,479 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: IDataManager类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classIDataManager.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="classIDataManager-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">IDataManager类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="IDataManager_8h_source.html">IDataManager.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:ac6bc667a1affe3506b6d56f6502b5d0e" id="r_ac6bc667a1affe3506b6d56f6502b5d0e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataManager.html#ac6bc667a1affe3506b6d56f6502b5d0e">get_tick_slice</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t count, uint64_t etime=0)</td></tr>
+<tr class="separator:ac6bc667a1affe3506b6d56f6502b5d0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39d5f459a57184201dec93a3138fae29" id="r_a39d5f459a57184201dec93a3138fae29"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSOrdQueSlice.html">WTSOrdQueSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataManager.html#a39d5f459a57184201dec93a3138fae29">get_order_queue_slice</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t count, uint64_t etime=0)</td></tr>
+<tr class="separator:a39d5f459a57184201dec93a3138fae29"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a282aea9a253c8e60476af6262af63ac8" id="r_a282aea9a253c8e60476af6262af63ac8"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSOrdDtlSlice.html">WTSOrdDtlSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataManager.html#a282aea9a253c8e60476af6262af63ac8">get_order_detail_slice</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t count, uint64_t etime=0)</td></tr>
+<tr class="separator:a282aea9a253c8e60476af6262af63ac8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a901cc62ae8e1a6f3080a05d0eed0a5be" id="r_a901cc62ae8e1a6f3080a05d0eed0a5be"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTransSlice.html">WTSTransSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataManager.html#a901cc62ae8e1a6f3080a05d0eed0a5be">get_transaction_slice</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t count, uint64_t etime=0)</td></tr>
+<tr class="separator:a901cc62ae8e1a6f3080a05d0eed0a5be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab30b8d7170fc583968550f6f89f3bf25" id="r_ab30b8d7170fc583968550f6f89f3bf25"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataManager.html#ab30b8d7170fc583968550f6f89f3bf25">get_kline_slice</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, <a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a> period, uint32_t times, uint32_t count, uint64_t etime=0)</td></tr>
+<tr class="separator:ab30b8d7170fc583968550f6f89f3bf25"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a3628cbfeef72d4be7fb059ac4ad3cf" id="r_a4a3628cbfeef72d4be7fb059ac4ad3cf"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classWTSTickData.html">WTSTickData</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataManager.html#a4a3628cbfeef72d4be7fb059ac4ad3cf">grab_last_tick</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode)</td></tr>
+<tr class="separator:a4a3628cbfeef72d4be7fb059ac4ad3cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4862d54a9f28558cd66c6475c916395e" id="r_a4862d54a9f28558cd66c6475c916395e"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataManager.html#a4862d54a9f28558cd66c6475c916395e">get_adjusting_factor</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *stdCode, uint32_t uDate)</td></tr>
+<tr class="separator:a4862d54a9f28558cd66c6475c916395e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a829674144b4410147b3e1f9bc8beddaa" id="r_a829674144b4410147b3e1f9bc8beddaa"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIDataManager.html#a829674144b4410147b3e1f9bc8beddaa">get_adjusting_flag</a> ()</td></tr>
+<tr class="separator:a829674144b4410147b3e1f9bc8beddaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock">
+<p class="definition">在文件 <a class="el" href="IDataManager_8h_source.html">IDataManager.h</a> 第 <a class="el" href="IDataManager_8h_source.html#l00013">13</a> 行定义.</p>
+</div><h2 class="groupheader">成员函数说明</h2>
+<a id="a4862d54a9f28558cd66c6475c916395e" name="a4862d54a9f28558cd66c6475c916395e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4862d54a9f28558cd66c6475c916395e">&#9670;&#160;</a></span>get_adjusting_factor()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual double IDataManager::get_adjusting_factor </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>uDate</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classWtDtMgr.html#ad95c02b7148be0d26851d8cb9ce32002">WtDtMgr</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="IDataManager_8h_source.html">IDataManager.h</a> 第 <a class="el" href="IDataManager_8h_source.html#l00024">24</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a829674144b4410147b3e1f9bc8beddaa" name="a829674144b4410147b3e1f9bc8beddaa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a829674144b4410147b3e1f9bc8beddaa">&#9670;&#160;</a></span>get_adjusting_flag()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual uint32_t IDataManager::get_adjusting_flag </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classWtDtMgr.html#a0e856283b2047e222e5ab07b056dbfc9">WtDtMgr</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="IDataManager_8h_source.html">IDataManager.h</a> 第 <a class="el" href="IDataManager_8h_source.html#l00026">26</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab30b8d7170fc583968550f6f89f3bf25" name="ab30b8d7170fc583968550f6f89f3bf25"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab30b8d7170fc583968550f6f89f3bf25">&#9670;&#160;</a></span>get_kline_slice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classWTSKlineSlice.html">WTSKlineSlice</a> * IDataManager::get_kline_slice </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSTypes_8h.html#a27f5d8bd7208a5fc1d044c6f5961904c">WTSKlinePeriod</a>&#160;</td>
+          <td class="paramname"><em>period</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>times</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classWtSimpDataMgr.html#a272786f2ebf90b2797d7bd63baa114ab">WtSimpDataMgr</a>, <a class="el" href="classWtDtMgr.html#ab4cdcf2a7c5069b105a9a89902e04c54">WtDtMgr</a> , 以及 <a class="el" href="classWtUftDtMgr.html#abb0907d29372f4f4bd49971cc7414842">WtUftDtMgr</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="IDataManager_8h_source.html">IDataManager.h</a> 第 <a class="el" href="IDataManager_8h_source.html#l00020">20</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a282aea9a253c8e60476af6262af63ac8" name="a282aea9a253c8e60476af6262af63ac8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a282aea9a253c8e60476af6262af63ac8">&#9670;&#160;</a></span>get_order_detail_slice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classWTSOrdDtlSlice.html">WTSOrdDtlSlice</a> * IDataManager::get_order_detail_slice </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classWtDtMgr.html#ad16ee5b66e8b4d52d7c218d242bdbae0">WtDtMgr</a> , 以及 <a class="el" href="classWtUftDtMgr.html#af58ff84dbe7a2b8cfc68f10940cc4086">WtUftDtMgr</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="IDataManager_8h_source.html">IDataManager.h</a> 第 <a class="el" href="IDataManager_8h_source.html#l00018">18</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a39d5f459a57184201dec93a3138fae29" name="a39d5f459a57184201dec93a3138fae29"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39d5f459a57184201dec93a3138fae29">&#9670;&#160;</a></span>get_order_queue_slice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classWTSOrdQueSlice.html">WTSOrdQueSlice</a> * IDataManager::get_order_queue_slice </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classWtDtMgr.html#abfaaf3a4147a851ef033d0ddb130579e">WtDtMgr</a> , 以及 <a class="el" href="classWtUftDtMgr.html#ac54e30b7a08be8d4eab8eba7c89a4a0c">WtUftDtMgr</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="IDataManager_8h_source.html">IDataManager.h</a> 第 <a class="el" href="IDataManager_8h_source.html#l00017">17</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac6bc667a1affe3506b6d56f6502b5d0e" name="ac6bc667a1affe3506b6d56f6502b5d0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6bc667a1affe3506b6d56f6502b5d0e">&#9670;&#160;</a></span>get_tick_slice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classWTSTickSlice.html">WTSTickSlice</a> * IDataManager::get_tick_slice </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classWtSimpDataMgr.html#a42fb88e8f621a3144a4f5eb41453e3ac">WtSimpDataMgr</a>, <a class="el" href="classWtDtMgr.html#a7621426df582e4c1a818623bb25b2d14">WtDtMgr</a> , 以及 <a class="el" href="classWtUftDtMgr.html#a73bf74dbe78586bd9935ca75e6ff8ff4">WtUftDtMgr</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="IDataManager_8h_source.html">IDataManager.h</a> 第 <a class="el" href="IDataManager_8h_source.html#l00016">16</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a901cc62ae8e1a6f3080a05d0eed0a5be" name="a901cc62ae8e1a6f3080a05d0eed0a5be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a901cc62ae8e1a6f3080a05d0eed0a5be">&#9670;&#160;</a></span>get_transaction_slice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classWTSTransSlice.html">WTSTransSlice</a> * IDataManager::get_transaction_slice </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>etime</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classWtDtMgr.html#a37e9c31e3357b5c043f12ed5aa27981d">WtDtMgr</a> , 以及 <a class="el" href="classWtUftDtMgr.html#a64795a9fd191ad4d0ab0065006b8b1a2">WtUftDtMgr</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="IDataManager_8h_source.html">IDataManager.h</a> 第 <a class="el" href="IDataManager_8h_source.html#l00019">19</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4a3628cbfeef72d4be7fb059ac4ad3cf" name="a4a3628cbfeef72d4be7fb059ac4ad3cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a3628cbfeef72d4be7fb059ac4ad3cf">&#9670;&#160;</a></span>grab_last_tick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classWTSTickData.html">WTSTickData</a> * IDataManager::grab_last_tick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>stdCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>被 <a class="el" href="classWtSimpDataMgr.html#ab52a2a8f17dc4407094e0a1f0db73fbe">WtSimpDataMgr</a>, <a class="el" href="classWtDtMgr.html#a6cd8f89ff3aa31eac4b0cc54d363a65d">WtDtMgr</a> , 以及 <a class="el" href="classWtUftDtMgr.html#ab3aa5e855f94b62d823f6fb05c8093d9">WtUftDtMgr</a> 重载.</p>
+
+<p class="definition">在文件 <a class="el" href="IDataManager_8h_source.html">IDataManager.h</a> 第 <a class="el" href="IDataManager_8h_source.html#l00022">22</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>src/Includes/<a class="el" href="IDataManager_8h_source.html">IDataManager.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classIDataManager.html">IDataManager</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

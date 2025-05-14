@@ -1,0 +1,600 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtDtPorter/WtDtPorter.cpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtDtPorter_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">WtDtPorter.cpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>WonderTrader数据处理模块的C接口实现  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="WtDtPorter_8h_source.html">WtDtPorter.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WtDtPorter_2WtDtRunner_8h_source.html">WtDtRunner.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WtDtCore_2WtHelper_8h_source.html">../WtDtCore/WtHelper.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSLogger_8h_source.html">../WTSTools/WTSLogger.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="ModuleHelper_8hpp_source.html">../Share/ModuleHelper.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="WTSVersion_8h_source.html">../Includes/WTSVersion.h</a>&quot;</code><br />
+</div>
+<p><a href="WtDtPorter_8cpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a046d496fdc3bf2de86bcdbcb276f592d" id="r_a046d496fdc3bf2de86bcdbcb276f592d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classWtDtRunner.html">WtDtRunner</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtPorter_8cpp.html#a046d496fdc3bf2de86bcdbcb276f592d">getRunner</a> ()</td></tr>
+<tr class="memdesc:a046d496fdc3bf2de86bcdbcb276f592d"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取全局数据处理运行器实例  <br /></td></tr>
+<tr class="separator:a046d496fdc3bf2de86bcdbcb276f592d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b21c448e66ba44f72439cb411d03fee" id="r_a9b21c448e66ba44f72439cb411d03fee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtPorter_8cpp.html#a9b21c448e66ba44f72439cb411d03fee">initialize</a> (<a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> cfgFile, <a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a> logCfg, bool bCfgFile, bool bLogCfgFile)</td></tr>
+<tr class="memdesc:a9b21c448e66ba44f72439cb411d03fee"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化数据处理模块  <br /></td></tr>
+<tr class="separator:a9b21c448e66ba44f72439cb411d03fee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a011cfecbf1cc7aea656da1554c8f0e7f" id="r_a011cfecbf1cc7aea656da1554c8f0e7f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtPorter_8cpp.html#a011cfecbf1cc7aea656da1554c8f0e7f">start</a> (bool bAsync)</td></tr>
+<tr class="memdesc:a011cfecbf1cc7aea656da1554c8f0e7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">启动数据处理模块  <br /></td></tr>
+<tr class="separator:a011cfecbf1cc7aea656da1554c8f0e7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada199ed63f32eb9f9d6ce141d5d820ec" id="r_ada199ed63f32eb9f9d6ce141d5d820ec"><td class="memItemLeft" align="right" valign="top"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtPorter_8cpp.html#ada199ed63f32eb9f9d6ce141d5d820ec">get_version</a> ()</td></tr>
+<tr class="memdesc:ada199ed63f32eb9f9d6ce141d5d820ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取模块版本信息  <br /></td></tr>
+<tr class="separator:ada199ed63f32eb9f9d6ce141d5d820ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a5fedc7463c63fcd029ee1f93f063a3" id="r_a2a5fedc7463c63fcd029ee1f93f063a3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtPorter_8cpp.html#a2a5fedc7463c63fcd029ee1f93f063a3">write_log</a> (unsigned int level, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *message, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *catName)</td></tr>
+<tr class="memdesc:a2a5fedc7463c63fcd029ee1f93f063a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">写入日志  <br /></td></tr>
+<tr class="separator:a2a5fedc7463c63fcd029ee1f93f063a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7c500d7e168519d199e72d020aeadb3" id="r_af7c500d7e168519d199e72d020aeadb3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtPorter_8cpp.html#af7c500d7e168519d199e72d020aeadb3">create_ext_parser</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *id)</td></tr>
+<tr class="memdesc:af7c500d7e168519d199e72d020aeadb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">创建扩展解析器  <br /></td></tr>
+<tr class="separator:af7c500d7e168519d199e72d020aeadb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94304b0cdce650d652930eca1da3a10e" id="r_a94304b0cdce650d652930eca1da3a10e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtPorter_8cpp.html#a94304b0cdce650d652930eca1da3a10e">parser_push_quote</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *id, <a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *curTick, <a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a> uProcFlag)</td></tr>
+<tr class="memdesc:a94304b0cdce650d652930eca1da3a10e"><td class="mdescLeft">&#160;</td><td class="mdescRight">推送行情数据  <br /></td></tr>
+<tr class="separator:a94304b0cdce650d652930eca1da3a10e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f58fff87f72a5fdde7eba309d5be924" id="r_a0f58fff87f72a5fdde7eba309d5be924"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtPorter_8cpp.html#a0f58fff87f72a5fdde7eba309d5be924">register_parser_callbacks</a> (<a class="el" href="WtDtPorter_2PorterDefs_8h.html#a19abdbb76592f69c751dc63b6978c3bc">FuncParserEvtCallback</a> cbEvt, <a class="el" href="WtDtPorter_2PorterDefs_8h.html#a6036ab6dc363c10ac1af93552add37cc">FuncParserSubCallback</a> cbSub)</td></tr>
+<tr class="memdesc:a0f58fff87f72a5fdde7eba309d5be924"><td class="mdescLeft">&#160;</td><td class="mdescRight">注册解析器回调函数  <br /></td></tr>
+<tr class="separator:a0f58fff87f72a5fdde7eba309d5be924"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84d6d41c60e616fab3014fb30dac2773" id="r_a84d6d41c60e616fab3014fb30dac2773"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtPorter_8cpp.html#a84d6d41c60e616fab3014fb30dac2773">create_ext_dumper</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *id)</td></tr>
+<tr class="memdesc:a84d6d41c60e616fab3014fb30dac2773"><td class="mdescLeft">&#160;</td><td class="mdescRight">创建扩展数据导出器  <br /></td></tr>
+<tr class="separator:a84d6d41c60e616fab3014fb30dac2773"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f82ffd854ba398a2cb162907d89efe9" id="r_a3f82ffd854ba398a2cb162907d89efe9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtPorter_8cpp.html#a3f82ffd854ba398a2cb162907d89efe9">register_extended_dumper</a> (<a class="el" href="WtDtPorter_2PorterDefs_8h.html#adc4513b79f4c5b470eb9dbcfae034f3d">FuncDumpBars</a> barDumper, <a class="el" href="WtDtPorter_2PorterDefs_8h.html#a9c9111f37d33566db91bab58d98463fe">FuncDumpTicks</a> tickDumper)</td></tr>
+<tr class="memdesc:a3f82ffd854ba398a2cb162907d89efe9"><td class="mdescLeft">&#160;</td><td class="mdescRight">注册扩展数据导出器的基础数据回调  <br /></td></tr>
+<tr class="separator:a3f82ffd854ba398a2cb162907d89efe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac94804f3c224e92a86345732f4b94046" id="r_ac94804f3c224e92a86345732f4b94046"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtPorter_8cpp.html#ac94804f3c224e92a86345732f4b94046">register_extended_hftdata_dumper</a> (<a class="el" href="WtDtPorter_2PorterDefs_8h.html#a5f4a554e983f0d8709b79940cde62dba">FuncDumpOrdQue</a> ordQueDumper, <a class="el" href="WtDtPorter_2PorterDefs_8h.html#a01d26dff0ca98d73297c7fca7dd2789f">FuncDumpOrdDtl</a> ordDtlDumper, <a class="el" href="WtDtPorter_2PorterDefs_8h.html#a8a8857d86ecda6e85f2d98f067735680">FuncDumpTrans</a> transDumper)</td></tr>
+<tr class="memdesc:ac94804f3c224e92a86345732f4b94046"><td class="mdescLeft">&#160;</td><td class="mdescRight">注册扩展数据导出器的高频数据回调  <br /></td></tr>
+<tr class="separator:ac94804f3c224e92a86345732f4b94046"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a1c00b66b793e799ab324e7092d25e54f" id="r_a1c00b66b793e799ab324e7092d25e54f"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="WtDtPorter_8cpp.html#a1c00b66b793e799ab324e7092d25e54f">PLATFORM_NAME</a> [] = &quot;UNIX&quot;</td></tr>
+<tr class="memdesc:a1c00b66b793e799ab324e7092d25e54f"><td class="mdescLeft">&#160;</td><td class="mdescRight">平台名称常量，UNIX版本  <br /></td></tr>
+<tr class="separator:a1c00b66b793e799ab324e7092d25e54f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>WonderTrader数据处理模块的C接口实现 </p>
+<p>\project WonderTrader</p>
+<dl class="section author"><dt>作者</dt><dd>Wesley </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2020/03/30</dd></dl>
+<p>实现了WonderTrader数据处理模块的所有对外接口功能， 包括模块初始化、数据接收和导出、解析器和导出器的创建等 主要作为与外部系统集成的通道，将调用转发到WtDtRunner实例 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtPorter_8cpp_source.html">WtDtPorter.cpp</a> 中定义.</p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="a84d6d41c60e616fab3014fb30dac2773" name="a84d6d41c60e616fab3014fb30dac2773"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84d6d41c60e616fab3014fb30dac2773">&#9670;&#160;</a></span>create_ext_dumper()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool create_ext_dumper </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>创建扩展数据导出器 </p>
+<p>创建一个外部扩展的数据导出器 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>导出器标识符，必须全局唯一 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>创建是否成功，true成功，false失败 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtDtPorter_8cpp_source.html">WtDtPorter.cpp</a> 第 <a class="el" href="WtDtPorter_8cpp_source.html#l00204">204</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af7c500d7e168519d199e72d020aeadb3" name="af7c500d7e168519d199e72d020aeadb3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7c500d7e168519d199e72d020aeadb3">&#9670;&#160;</a></span>create_ext_parser()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool create_ext_parser </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>创建扩展解析器 </p>
+<p>创建外部数据解析器</p>
+<p>创建一个外部扩展的行情解析器 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>解析器标识符，必须全局唯一 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>创建是否成功，true成功，false失败 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtDtPorter_8cpp_source.html">WtDtPorter.cpp</a> 第 <a class="el" href="WtDtPorter_8cpp_source.html#l00163">163</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ada199ed63f32eb9f9d6ce141d5d820ec" name="ada199ed63f32eb9f9d6ce141d5d820ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada199ed63f32eb9f9d6ce141d5d820ec">&#9670;&#160;</a></span>get_version()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char * get_version </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取模块版本信息 </p>
+<p>获取数据服务模块版本号</p>
+<p>获取版本信息</p>
+<p>返回包含平台名称、版本号和编译日期时间的完整版本信息 </p><dl class="section return"><dt>返回</dt><dd>版本信息字符串 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtDtPorter_8cpp_source.html">WtDtPorter.cpp</a> 第 <a class="el" href="WtDtPorter_8cpp_source.html#l00115">115</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a046d496fdc3bf2de86bcdbcb276f592d" name="a046d496fdc3bf2de86bcdbcb276f592d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a046d496fdc3bf2de86bcdbcb276f592d">&#9670;&#160;</a></span>getRunner()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWtDtRunner.html">WtDtRunner</a> &amp; getRunner </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>获取全局数据处理运行器实例 </p>
+<p>获取运行器实例的外部函数声明</p>
+<p>获取全局运行器实例</p>
+<p>获取WtDtRunner全局实例的外部函数声明</p>
+<p>获取全局回测引擎实例</p>
+<p>获取WtDtRunner的全局单例，采用单例模式确保在整个运行期间只有一个实例 </p><dl class="section return"><dt>返回</dt><dd><a class="el" href="classWtDtRunner.html" title="WonderTrader数据处理模块的运行器类">WtDtRunner</a>&amp; 数据处理运行器实例的引用 </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="WtDtPorter_8cpp_source.html">WtDtPorter.cpp</a> 第 <a class="el" href="WtDtPorter_8cpp_source.html#l00074">74</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a9b21c448e66ba44f72439cb411d03fee" name="a9b21c448e66ba44f72439cb411d03fee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b21c448e66ba44f72439cb411d03fee">&#9670;&#160;</a></span>initialize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void initialize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>cfgFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#ac25509d4a6621101451db7aeca0b7d1e">WtString</a>&#160;</td>
+          <td class="paramname"><em>logCfg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bCfgFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bLogCfgFile</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>初始化数据处理模块 </p>
+<p>根据配置初始化数据处理模块，在Windows上还会启用崩溃转储功能 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cfgFile</td><td>配置文件路径或内容 </td></tr>
+    <tr><td class="paramname">logCfg</td><td>日志配置文件路径或内容 </td></tr>
+    <tr><td class="paramname">bCfgFile</td><td>是否为配置文件路径，true表示文件路径，false表示内存配置内容 </td></tr>
+    <tr><td class="paramname">bLogCfgFile</td><td>是否为日志配置文件路径，true表示文件路径，false表示内存配置内容 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtDtPorter_8cpp_source.html">WtDtPorter.cpp</a> 第 <a class="el" href="WtDtPorter_8cpp_source.html#l00089">89</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a94304b0cdce650d652930eca1da3a10e" name="a94304b0cdce650d652930eca1da3a10e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a94304b0cdce650d652930eca1da3a10e">&#9670;&#160;</a></span>parser_push_quote()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void parser_push_quote </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWTSTickStruct.html">WTSTickStruct</a> *&#160;</td>
+          <td class="paramname"><em>curTick</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WTSMarcos_8h.html#a137b118e8aaff7fc7ff0a17f2bd7141e">WtUInt32</a>&#160;</td>
+          <td class="paramname"><em>uProcFlag</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>推送行情数据 </p>
+<p>将行情数据推送到解析器</p>
+<p>将tick行情数据推送给数据处理模块进行处理 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>解析器标识符 </td></tr>
+    <tr><td class="paramname">curTick</td><td>当前tick数据结构指针 </td></tr>
+    <tr><td class="paramname">uProcFlag</td><td>处理标记，参见接口定义 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtDtPorter_8cpp_source.html">WtDtPorter.cpp</a> 第 <a class="el" href="WtDtPorter_8cpp_source.html#l00176">176</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3f82ffd854ba398a2cb162907d89efe9" name="a3f82ffd854ba398a2cb162907d89efe9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f82ffd854ba398a2cb162907d89efe9">&#9670;&#160;</a></span>register_extended_dumper()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void register_extended_dumper </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WtDtPorter_2PorterDefs_8h.html#adc4513b79f4c5b470eb9dbcfae034f3d">FuncDumpBars</a>&#160;</td>
+          <td class="paramname"><em>barDumper</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtPorter_2PorterDefs_8h.html#a9c9111f37d33566db91bab58d98463fe">FuncDumpTicks</a>&#160;</td>
+          <td class="paramname"><em>tickDumper</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>注册扩展数据导出器的基础数据回调 </p>
+<p>注册K线和适价数据的导出回调函数 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">barDumper</td><td>K线数据导出回调函数 </td></tr>
+    <tr><td class="paramname">tickDumper</td><td>适价数据导出回调函数 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtDtPorter_8cpp_source.html">WtDtPorter.cpp</a> 第 <a class="el" href="WtDtPorter_8cpp_source.html#l00216">216</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac94804f3c224e92a86345732f4b94046" name="ac94804f3c224e92a86345732f4b94046"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac94804f3c224e92a86345732f4b94046">&#9670;&#160;</a></span>register_extended_hftdata_dumper()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void register_extended_hftdata_dumper </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WtDtPorter_2PorterDefs_8h.html#a5f4a554e983f0d8709b79940cde62dba">FuncDumpOrdQue</a>&#160;</td>
+          <td class="paramname"><em>ordQueDumper</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtPorter_2PorterDefs_8h.html#a01d26dff0ca98d73297c7fca7dd2789f">FuncDumpOrdDtl</a>&#160;</td>
+          <td class="paramname"><em>ordDtlDumper</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtPorter_2PorterDefs_8h.html#a8a8857d86ecda6e85f2d98f067735680">FuncDumpTrans</a>&#160;</td>
+          <td class="paramname"><em>transDumper</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>注册扩展数据导出器的高频数据回调 </p>
+<p>注册委托队列、委托明细和成交数据的导出回调函数 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ordQueDumper</td><td>委托队列数据导出回调函数 </td></tr>
+    <tr><td class="paramname">ordDtlDumper</td><td>委托明细数据导出回调函数 </td></tr>
+    <tr><td class="paramname">transDumper</td><td>成交数据导出回调函数 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtDtPorter_8cpp_source.html">WtDtPorter.cpp</a> 第 <a class="el" href="WtDtPorter_8cpp_source.html#l00229">229</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0f58fff87f72a5fdde7eba309d5be924" name="a0f58fff87f72a5fdde7eba309d5be924"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f58fff87f72a5fdde7eba309d5be924">&#9670;&#160;</a></span>register_parser_callbacks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void register_parser_callbacks </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="WtDtPorter_2PorterDefs_8h.html#a19abdbb76592f69c751dc63b6978c3bc">FuncParserEvtCallback</a>&#160;</td>
+          <td class="paramname"><em>cbEvt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="WtDtPorter_2PorterDefs_8h.html#a6036ab6dc363c10ac1af93552add37cc">FuncParserSubCallback</a>&#160;</td>
+          <td class="paramname"><em>cbSub</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>注册解析器回调函数 </p>
+<p>注册行情解析器回调函数</p>
+<p>注册行情解析器的事件和订阅回调函数 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cbEvt</td><td>行情解析器事件回调函数 </td></tr>
+    <tr><td class="paramname">cbSub</td><td>行情订阅结果回调函数 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtDtPorter_8cpp_source.html">WtDtPorter.cpp</a> 第 <a class="el" href="WtDtPorter_8cpp_source.html#l00188">188</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a011cfecbf1cc7aea656da1554c8f0e7f" name="a011cfecbf1cc7aea656da1554c8f0e7f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a011cfecbf1cc7aea656da1554c8f0e7f">&#9670;&#160;</a></span>start()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void start </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bAsync</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>启动数据处理模块 </p>
+<p>启动数据处理模块，开始正常工作 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bAsync</td><td>是否异步启动，true表示异步启动，false表示同步启动 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtDtPorter_8cpp_source.html">WtDtPorter.cpp</a> 第 <a class="el" href="WtDtPorter_8cpp_source.html#l00104">104</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2a5fedc7463c63fcd029ee1f93f063a3" name="a2a5fedc7463c63fcd029ee1f93f063a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a5fedc7463c63fcd029ee1f93f063a3">&#9670;&#160;</a></span>write_log()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void write_log </td>
+          <td>(</td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>message</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> char *&#160;</td>
+          <td class="paramname"><em>catName</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>写入日志 </p>
+<p>将指定级别的日志写入指定的日志类别中 </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">level</td><td>日志级别，参见WTSLogLevel枚举 </td></tr>
+    <tr><td class="paramname">message</td><td>日志消息内容 </td></tr>
+    <tr><td class="paramname">catName</td><td>日志类别名称，空字符串表示使用默认类别 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">在文件 <a class="el" href="WtDtPorter_8cpp_source.html">WtDtPorter.cpp</a> 第 <a class="el" href="WtDtPorter_8cpp_source.html#l00140">140</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a1c00b66b793e799ab324e7092d25e54f" name="a1c00b66b793e799ab324e7092d25e54f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c00b66b793e799ab324e7092d25e54f">&#9670;&#160;</a></span>PLATFORM_NAME</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char PLATFORM_NAME[] = &quot;UNIX&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>平台名称常量，UNIX版本 </p>
+<p>用于可执行文件版本标识，指示UNIX/Linux平台 </p>
+
+<p class="definition">在文件 <a class="el" href="WtDtPorter_8cpp_source.html">WtDtPorter.cpp</a> 第 <a class="el" href="WtDtPorter_8cpp_source.html#l00041">41</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_a1e191ac351261b7a05020a3948e707e.html">WtDtPorter</a></li><li class="navelem"><a class="el" href="WtDtPorter_8cpp.html">WtDtPorter.cpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

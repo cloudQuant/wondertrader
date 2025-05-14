@@ -1,0 +1,971 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: ATPRspOrderStatusAckMsg结构体 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('structATPRspOrderStatusAckMsg.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pub-attribs">Public 属性</a> &#124;
+<a href="structATPRspOrderStatusAckMsg-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">ATPRspOrderStatusAckMsg结构体 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>委托状态响应消息  
+ <a href="structATPRspOrderStatusAckMsg.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:aa4ff80155984f03d635700515461da9b" id="r_aa4ff80155984f03d635700515461da9b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#aa4ff80155984f03d635700515461da9b">ATPRspOrderStatusAckMsg</a> ()</td></tr>
+<tr class="memdesc:aa4ff80155984f03d635700515461da9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">特殊委托标识，右起第一个bit位是夜市委托标志位：0-正常委托、1-夜市委托（ATP3.2.0开始支持）  <br /></td></tr>
+<tr class="separator:aa4ff80155984f03d635700515461da9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4ff80155984f03d635700515461da9b" id="r_aa4ff80155984f03d635700515461da9b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#aa4ff80155984f03d635700515461da9b">ATPRspOrderStatusAckMsg</a> ()</td></tr>
+<tr class="memdesc:aa4ff80155984f03d635700515461da9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">客户自定义委托批号，对于撤单返回响应，为原订单的客户自定义委托批号(ATP V3.2.3版本开始支持)  <br /></td></tr>
+<tr class="separator:aa4ff80155984f03d635700515461da9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public 属性</h2></td></tr>
+<tr class="memitem:a4a2b0b036ae0771a25bec7eff3f1af08" id="r_a4a2b0b036ae0771a25bec7eff3f1af08"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ae739dda4b0d0f5b49cbc294ae09db1ff">ATPPartitionType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a4a2b0b036ae0771a25bec7eff3f1af08">partition</a></td></tr>
+<tr class="separator:a4a2b0b036ae0771a25bec7eff3f1af08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a908a07e957b339f9f39057ad117d09a8" id="r_a908a07e957b339f9f39057ad117d09a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a114ae6e4900890453f34c6a5362ae9cd">ATPIndexType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a908a07e957b339f9f39057ad117d09a8">index</a></td></tr>
+<tr class="memdesc:a908a07e957b339f9f39057ad117d09a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">分区号  <br /></td></tr>
+<tr class="separator:a908a07e957b339f9f39057ad117d09a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada675e6bc3ed41f82172ac69f97ed808" id="r_ada675e6bc3ed41f82172ac69f97ed808"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a1ea549eae9760d6c7e6049c482634d8a">ATPBusinessTypeType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#ada675e6bc3ed41f82172ac69f97ed808">business_type</a></td></tr>
+<tr class="memdesc:ada675e6bc3ed41f82172ac69f97ed808"><td class="mdescLeft">&#160;</td><td class="mdescRight">回报记录号  <br /></td></tr>
+<tr class="separator:ada675e6bc3ed41f82172ac69f97ed808"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7035cac8c3f4b152e200734c9c8a4fa7" id="r_a7035cac8c3f4b152e200734c9c8a4fa7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a62c029a015059f54f350a2248d9d92ce">ATPClOrdNOType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a7035cac8c3f4b152e200734c9c8a4fa7">cl_ord_no</a></td></tr>
+<tr class="memdesc:a7035cac8c3f4b152e200734c9c8a4fa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">业务类型  <br /></td></tr>
+<tr class="separator:a7035cac8c3f4b152e200734c9c8a4fa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02ff274ecf5ec3e4f50bdeb071fc9376" id="r_a02ff274ecf5ec3e4f50bdeb071fc9376"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a2c5f8f1f13955d84215ec1abeecd8773">ATPSecurityIDType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a02ff274ecf5ec3e4f50bdeb071fc9376">security_id</a></td></tr>
+<tr class="memdesc:a02ff274ecf5ec3e4f50bdeb071fc9376"><td class="mdescLeft">&#160;</td><td class="mdescRight">客户订单编号  <br /></td></tr>
+<tr class="separator:a02ff274ecf5ec3e4f50bdeb071fc9376"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75295aab7c32252cf3cb90de4594217d" id="r_a75295aab7c32252cf3cb90de4594217d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ac24f28542ed63f699fa9629b7aadfd4d">ATPMarketIDType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a75295aab7c32252cf3cb90de4594217d">market_id</a></td></tr>
+<tr class="memdesc:a75295aab7c32252cf3cb90de4594217d"><td class="mdescLeft">&#160;</td><td class="mdescRight">证券代码/合约编码  <br /></td></tr>
+<tr class="separator:a75295aab7c32252cf3cb90de4594217d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabc0b9633d6bd082b1e753233fb27008" id="r_aabc0b9633d6bd082b1e753233fb27008"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a418f3b8ee098cc1e30edf7f4de2f9947">ATPExecTypeType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#aabc0b9633d6bd082b1e753233fb27008">exec_type</a></td></tr>
+<tr class="memdesc:aabc0b9633d6bd082b1e753233fb27008"><td class="mdescLeft">&#160;</td><td class="mdescRight">市场代码  <br /></td></tr>
+<tr class="separator:aabc0b9633d6bd082b1e753233fb27008"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06d0e925d729a1e311b91d7e156537af" id="r_a06d0e925d729a1e311b91d7e156537af"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a5ab063645e536bbad877ae76bc878fb1">ATPOrdStatusType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a06d0e925d729a1e311b91d7e156537af">ord_status</a></td></tr>
+<tr class="memdesc:a06d0e925d729a1e311b91d7e156537af"><td class="mdescLeft">&#160;</td><td class="mdescRight">当前委托执行类型  <br /></td></tr>
+<tr class="separator:a06d0e925d729a1e311b91d7e156537af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83d5857fb6a60cfe654f567417291243" id="r_a83d5857fb6a60cfe654f567417291243"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ad1d7b3bdd1a5dd9aaff0548cb1af554c">ATPCustIDType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a83d5857fb6a60cfe654f567417291243">cust_id</a></td></tr>
+<tr class="memdesc:a83d5857fb6a60cfe654f567417291243"><td class="mdescLeft">&#160;</td><td class="mdescRight">当前申报的状态,（对于撤单委托，填写被撤委托的当前状态，找不到原始委托时，固定填8= Reject ）  <br /></td></tr>
+<tr class="separator:a83d5857fb6a60cfe654f567417291243"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3632728844382cd49907adbe69a8e750" id="r_a3632728844382cd49907adbe69a8e750"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a944e73e5fff21c05c7bee13551ce8684">ATPFundAccountIDType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a3632728844382cd49907adbe69a8e750">fund_account_id</a></td></tr>
+<tr class="memdesc:a3632728844382cd49907adbe69a8e750"><td class="mdescLeft">&#160;</td><td class="mdescRight">客户号ID  <br /></td></tr>
+<tr class="separator:a3632728844382cd49907adbe69a8e750"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49b75b92915f80edd0c8f24fcb8e5ff6" id="r_a49b75b92915f80edd0c8f24fcb8e5ff6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ad5b8462d0dfbb4d845f24922c9264827">ATPAccountIDType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a49b75b92915f80edd0c8f24fcb8e5ff6">account_id</a></td></tr>
+<tr class="memdesc:a49b75b92915f80edd0c8f24fcb8e5ff6"><td class="mdescLeft">&#160;</td><td class="mdescRight">资金账户ID  <br /></td></tr>
+<tr class="separator:a49b75b92915f80edd0c8f24fcb8e5ff6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af92b04a5f79a19d3439644573cbb76a8" id="r_af92b04a5f79a19d3439644573cbb76a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a3aee0f0071e2da158321e820b9e5f3cc">ATPPriceType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#af92b04a5f79a19d3439644573cbb76a8">price</a></td></tr>
+<tr class="memdesc:af92b04a5f79a19d3439644573cbb76a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">证券账户ID  <br /></td></tr>
+<tr class="separator:af92b04a5f79a19d3439644573cbb76a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66d6188d5f13ce994717d62fa99de704" id="r_a66d6188d5f13ce994717d62fa99de704"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a2e64ace481fa7cc17b884c5a0f58d655">ATPQtyType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a66d6188d5f13ce994717d62fa99de704">order_qty</a></td></tr>
+<tr class="memdesc:a66d6188d5f13ce994717d62fa99de704"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托价格N13(4)（上交所市价转限价申报时，这里填写转为限价订单的价格，其他订单填0）  <br /></td></tr>
+<tr class="separator:a66d6188d5f13ce994717d62fa99de704"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade6a9d03816ec7bc3d9eb6b98051c2dd" id="r_ade6a9d03816ec7bc3d9eb6b98051c2dd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a2e64ace481fa7cc17b884c5a0f58d655">ATPQtyType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#ade6a9d03816ec7bc3d9eb6b98051c2dd">leaves_qty</a></td></tr>
+<tr class="memdesc:ade6a9d03816ec7bc3d9eb6b98051c2dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">委托数量N15(2)（股票为股、基金为份、上海债券默认为张（使用时请务必与券商确认），其他为张）  <br /></td></tr>
+<tr class="separator:ade6a9d03816ec7bc3d9eb6b98051c2dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aedbd30e260d8cce59062aa1cbe2adee4" id="r_aedbd30e260d8cce59062aa1cbe2adee4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a2e64ace481fa7cc17b884c5a0f58d655">ATPQtyType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#aedbd30e260d8cce59062aa1cbe2adee4">cum_qty</a></td></tr>
+<tr class="memdesc:aedbd30e260d8cce59062aa1cbe2adee4"><td class="mdescLeft">&#160;</td><td class="mdescRight">未成交部分的数量N15(2)（股票为股、基金为份、上海债券默认为张（使用时请务必与券商确认），其他为张）  <br /></td></tr>
+<tr class="separator:aedbd30e260d8cce59062aa1cbe2adee4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a057938e1a7e0a64e531993f2b8b32877" id="r_a057938e1a7e0a64e531993f2b8b32877"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#acc5c0c2a6f232867a3b0ab9d30724b65">ATPSideType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a057938e1a7e0a64e531993f2b8b32877">side</a></td></tr>
+<tr class="memdesc:a057938e1a7e0a64e531993f2b8b32877"><td class="mdescLeft">&#160;</td><td class="mdescRight">累计成交数量N15(2)（股票为股、基金为份、上海债券默认为张（使用时请务必与券商确认），其他为张）  <br /></td></tr>
+<tr class="separator:a057938e1a7e0a64e531993f2b8b32877"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaeea5b44940a81ae5eef0434679f948e" id="r_aaeea5b44940a81ae5eef0434679f948e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#aa1c0815a16f3f551bb3927156d6eaa47">ATPTimeStampType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#aaeea5b44940a81ae5eef0434679f948e">transact_time</a></td></tr>
+<tr class="memdesc:aaeea5b44940a81ae5eef0434679f948e"><td class="mdescLeft">&#160;</td><td class="mdescRight">买卖方向  <br /></td></tr>
+<tr class="separator:aaeea5b44940a81ae5eef0434679f948e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0901eec8707bed91f2e601410a6b80e0" id="r_a0901eec8707bed91f2e601410a6b80e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ab8abad05e29df293d56e746edddb6939">ATPUserInfoType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a0901eec8707bed91f2e601410a6b80e0">user_info</a></td></tr>
+<tr class="memdesc:a0901eec8707bed91f2e601410a6b80e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">回报时间（如果是ATP的Ack则回报时间为ATP的，如果是交易所的确认则回报时间为交易所的。同理，成交回报都是交易所的回报时间）  <br /></td></tr>
+<tr class="separator:a0901eec8707bed91f2e601410a6b80e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a755ff7e3fd1addde3872ee2db60473c9" id="r_a755ff7e3fd1addde3872ee2db60473c9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ad66d50493ac022813bb83f4036c2a5a2">ATPOrderIDType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a755ff7e3fd1addde3872ee2db60473c9">order_id</a></td></tr>
+<tr class="memdesc:a755ff7e3fd1addde3872ee2db60473c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">用户私有信息  <br /></td></tr>
+<tr class="separator:a755ff7e3fd1addde3872ee2db60473c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7132bff9829a32f170698b229008c68" id="r_ac7132bff9829a32f170698b229008c68"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a520482390ac9d5d2bd5abd30522ce76a">ATPClOrdIDType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#ac7132bff9829a32f170698b229008c68">cl_ord_id</a></td></tr>
+<tr class="memdesc:ac7132bff9829a32f170698b229008c68"><td class="mdescLeft">&#160;</td><td class="mdescRight">交易所订单编号  <br /></td></tr>
+<tr class="separator:ac7132bff9829a32f170698b229008c68"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58e5a4736b569e3e85b15cdea69ccc9f" id="r_a58e5a4736b569e3e85b15cdea69ccc9f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a9fdd4417adcb5d2c5a48da1d8c11f56b">ATPExtraData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a58e5a4736b569e3e85b15cdea69ccc9f">extra_data</a></td></tr>
+<tr class="memdesc:a58e5a4736b569e3e85b15cdea69ccc9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">申报合同号 上交所：以QP1开头，表示为交易所保证金强制平仓；以CV1开头，表示为交易所备兑强制平仓；  <br /></td></tr>
+<tr class="separator:a58e5a4736b569e3e85b15cdea69ccc9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a532e96a39ef5319ae44a2fa0f716bb25" id="r_a532e96a39ef5319ae44a2fa0f716bb25"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#aec0a514cad97bce8e0f2a2a0b1f9ec3b">ATPClientSeqIDType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a532e96a39ef5319ae44a2fa0f716bb25">client_seq_id</a></td></tr>
+<tr class="memdesc:a532e96a39ef5319ae44a2fa0f716bb25"><td class="mdescLeft">&#160;</td><td class="mdescRight">扩展字段  <br /></td></tr>
+<tr class="separator:a532e96a39ef5319ae44a2fa0f716bb25"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af19f2f66756213865a03a3d7ea20e786" id="r_af19f2f66756213865a03a3d7ea20e786"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a62c029a015059f54f350a2248d9d92ce">ATPClOrdNOType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#af19f2f66756213865a03a3d7ea20e786">orig_cl_ord_no</a></td></tr>
+<tr class="memdesc:af19f2f66756213865a03a3d7ea20e786"><td class="mdescLeft">&#160;</td><td class="mdescRight">用户系统消息序号  <br /></td></tr>
+<tr class="separator:af19f2f66756213865a03a3d7ea20e786"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae15ceb5a02df632e3c7497c1b7a03937" id="r_ae15ceb5a02df632e3c7497c1b7a03937"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a4caafa134fdfbf09810cbfc707fc4b84">ATPAmtType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#ae15ceb5a02df632e3c7497c1b7a03937">frozen_trade_value</a></td></tr>
+<tr class="memdesc:ae15ceb5a02df632e3c7497c1b7a03937"><td class="mdescLeft">&#160;</td><td class="mdescRight">对于撤单返回的状态响应，为原始委托的客户合同号，指示被撤消订单的cl_ord_no; 对于委托确认，取值为0  <br /></td></tr>
+<tr class="separator:ae15ceb5a02df632e3c7497c1b7a03937"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bf3072d2f4752f0faea5c9d26c5de72" id="r_a2bf3072d2f4752f0faea5c9d26c5de72"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a4caafa134fdfbf09810cbfc707fc4b84">ATPAmtType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a2bf3072d2f4752f0faea5c9d26c5de72">frozen_fee</a></td></tr>
+<tr class="memdesc:a2bf3072d2f4752f0faea5c9d26c5de72"><td class="mdescLeft">&#160;</td><td class="mdescRight">冻结交易金额N18(4)  <br /></td></tr>
+<tr class="separator:a2bf3072d2f4752f0faea5c9d26c5de72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adebd0df1c6ef451d3916eecd9ed8a98a" id="r_adebd0df1c6ef451d3916eecd9ed8a98a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ad6f454d9452f5ff0606c6dab7cb7657f">ATPRejectReasonCodeType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#adebd0df1c6ef451d3916eecd9ed8a98a">reject_reason_code</a></td></tr>
+<tr class="memdesc:adebd0df1c6ef451d3916eecd9ed8a98a"><td class="mdescLeft">&#160;</td><td class="mdescRight">冻结费用N18(4)  <br /></td></tr>
+<tr class="separator:adebd0df1c6ef451d3916eecd9ed8a98a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a347a85494002a9b359b5eea5f6cc5797" id="r_a347a85494002a9b359b5eea5f6cc5797"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a140b20c53c76585804e8dd971fbde78a">ATPOrdRejReasonType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a347a85494002a9b359b5eea5f6cc5797">ord_rej_reason</a></td></tr>
+<tr class="memdesc:a347a85494002a9b359b5eea5f6cc5797"><td class="mdescLeft">&#160;</td><td class="mdescRight">拒绝原因代码；可调用GetErrorInfo错误码查询函数，传入错误码及错误码类型-5 拒绝原因错误码类型，即可查询到错误描述信息  <br /></td></tr>
+<tr class="separator:a347a85494002a9b359b5eea5f6cc5797"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65c7d88a2b65ee6e5dfaadd2ac697834" id="r_a65c7d88a2b65ee6e5dfaadd2ac697834"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#aee1fcee934f37cba21aef909c69909c3">ATPOrdTypeType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a65c7d88a2b65ee6e5dfaadd2ac697834">order_type</a></td></tr>
+<tr class="memdesc:a65c7d88a2b65ee6e5dfaadd2ac697834"><td class="mdescLeft">&#160;</td><td class="mdescRight">拒绝原因描述信息；当交易所拒绝时，这里填写交易所返回的拒绝原因代码。可调用GetErrorInfo错误码查询函数，传入错误码及错误码类型-1交易所拒绝原因错误码类型，即可查询错误描述信息  <br /></td></tr>
+<tr class="separator:a65c7d88a2b65ee6e5dfaadd2ac697834"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a991c7e1968a5d9d652808ad03f4dbcd0" id="r_a991c7e1968a5d9d652808ad03f4dbcd0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#adfc00c923b23308437ab3dfad17221cf">ATPTimeInForceType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a991c7e1968a5d9d652808ad03f4dbcd0">time_in_force</a></td></tr>
+<tr class="memdesc:a991c7e1968a5d9d652808ad03f4dbcd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">订单类型  <br /></td></tr>
+<tr class="separator:a991c7e1968a5d9d652808ad03f4dbcd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9b1251fd4e120567a36e8f3e7d41ddf" id="r_ab9b1251fd4e120567a36e8f3e7d41ddf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a0200a13a03c1d81bbcf2cd0fc5f7c681">ATPPositionEffectType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#ab9b1251fd4e120567a36e8f3e7d41ddf">position_effect</a></td></tr>
+<tr class="memdesc:ab9b1251fd4e120567a36e8f3e7d41ddf"><td class="mdescLeft">&#160;</td><td class="mdescRight">订单有效时间类型（无意义）  <br /></td></tr>
+<tr class="separator:ab9b1251fd4e120567a36e8f3e7d41ddf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e21fcededd43df3427ed80cd44abc5b" id="r_a7e21fcededd43df3427ed80cd44abc5b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a3ddafb8b1038d60bb818ebf68b275431">ATPCoveredOrUncoveredType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a7e21fcededd43df3427ed80cd44abc5b">covered_or_uncovered</a></td></tr>
+<tr class="memdesc:a7e21fcededd43df3427ed80cd44abc5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">开平仓标志（用于期权业务）  <br /></td></tr>
+<tr class="separator:a7e21fcededd43df3427ed80cd44abc5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab92d2fb95dfad82712865c6931d7609e" id="r_ab92d2fb95dfad82712865c6931d7609e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a24523af0485abd17afff8f51c9c1ae1d">ATPAccountSubCodeType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#ab92d2fb95dfad82712865c6931d7609e">account_sub_code</a></td></tr>
+<tr class="memdesc:ab92d2fb95dfad82712865c6931d7609e"><td class="mdescLeft">&#160;</td><td class="mdescRight">备兑标签（用于期权业务）  <br /></td></tr>
+<tr class="separator:ab92d2fb95dfad82712865c6931d7609e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a180be3e3d76349d74da0c9fe2de3f644" id="r_a180be3e3d76349d74da0c9fe2de3f644"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a279b029dad4ee629ec8c259e53fa3ad0">ATPQuoteFlagType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a180be3e3d76349d74da0c9fe2de3f644">quote_flag</a></td></tr>
+<tr class="memdesc:a180be3e3d76349d74da0c9fe2de3f644"><td class="mdescLeft">&#160;</td><td class="mdescRight">账户子编码（无意义）  <br /></td></tr>
+<tr class="separator:a180be3e3d76349d74da0c9fe2de3f644"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac40d8762ab9b3d37b00c80f02a343ff2" id="r_ac40d8762ab9b3d37b00c80f02a343ff2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a0081463fd190567a56ffe8377859f490">ATPSecuritySymbolType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#ac40d8762ab9b3d37b00c80f02a343ff2">security_symbol</a></td></tr>
+<tr class="memdesc:ac40d8762ab9b3d37b00c80f02a343ff2"><td class="mdescLeft">&#160;</td><td class="mdescRight">是否报价订单（无意义）  <br /></td></tr>
+<tr class="separator:ac40d8762ab9b3d37b00c80f02a343ff2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a623156123f9102cad956be7ff299dedf" id="r_a623156123f9102cad956be7ff299dedf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ab802a4aa7fe278a9ffa1f13e78c923c6">ATPSecondaryOrderIDType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a623156123f9102cad956be7ff299dedf">secondary_order_id</a></td></tr>
+<tr class="memdesc:a623156123f9102cad956be7ff299dedf"><td class="mdescLeft">&#160;</td><td class="mdescRight">证券简称  <br /></td></tr>
+<tr class="separator:a623156123f9102cad956be7ff299dedf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2658667e9967bf767aa3705124565bf" id="r_ac2658667e9967bf767aa3705124565bf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a62c029a015059f54f350a2248d9d92ce">ATPClOrdNOType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#ac2658667e9967bf767aa3705124565bf">parent_cl_ord_no</a></td></tr>
+<tr class="memdesc:ac2658667e9967bf767aa3705124565bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">组合编码（用于期权业务）  <br /></td></tr>
+<tr class="separator:ac2658667e9967bf767aa3705124565bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25795f3e7654207bf6989be1cc9199d9" id="r_a25795f3e7654207bf6989be1cc9199d9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a0b7466b60ed9e61809b4d47898374c14">ATPParticularFlagsType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#a25795f3e7654207bf6989be1cc9199d9">particular_flags</a></td></tr>
+<tr class="memdesc:a25795f3e7654207bf6989be1cc9199d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">批量订单母单编号  <br /></td></tr>
+<tr class="separator:a25795f3e7654207bf6989be1cc9199d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aebfa459afc2654941da4fb7725c3b2e9" id="r_aebfa459afc2654941da4fb7725c3b2e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="arginV4_81_81_2include_2trade_2atp__trade__types_8h.html#a402a07f9e02b86e440d1184975311a74">ATPBatchClOrdNoType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structATPRspOrderStatusAckMsg.html#aebfa459afc2654941da4fb7725c3b2e9">batch_cl_ord_no</a></td></tr>
+<tr class="memdesc:aebfa459afc2654941da4fb7725c3b2e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">特殊委托标识，右起第一个bit位是夜市委托标志位：0-正常委托、1-夜市委托（ATP3.2.0开始支持）  <br /></td></tr>
+<tr class="separator:aebfa459afc2654941da4fb7725c3b2e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>委托状态响应消息 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01068">1068</a> 行定义.</p>
+</div><h2 class="groupheader">构造及析构函数说明</h2>
+<a id="aa4ff80155984f03d635700515461da9b" name="aa4ff80155984f03d635700515461da9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa4ff80155984f03d635700515461da9b">&#9670;&#160;</a></span>ATPRspOrderStatusAckMsg() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ATPRspOrderStatusAckMsg::ATPRspOrderStatusAckMsg </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>特殊委托标识，右起第一个bit位是夜市委托标志位：0-正常委托、1-夜市委托（ATP3.2.0开始支持） </p>
+
+</div>
+</div>
+<a id="aa4ff80155984f03d635700515461da9b" name="aa4ff80155984f03d635700515461da9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa4ff80155984f03d635700515461da9b">&#9670;&#160;</a></span>ATPRspOrderStatusAckMsg() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ATPRspOrderStatusAckMsg::ATPRspOrderStatusAckMsg </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>客户自定义委托批号，对于撤单返回响应，为原订单的客户自定义委托批号(ATP V3.2.3版本开始支持) </p>
+
+</div>
+</div>
+<h2 class="groupheader">类成员变量说明</h2>
+<a id="a49b75b92915f80edd0c8f24fcb8e5ff6" name="a49b75b92915f80edd0c8f24fcb8e5ff6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49b75b92915f80edd0c8f24fcb8e5ff6">&#9670;&#160;</a></span>account_id</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ad5b8462d0dfbb4d845f24922c9264827">ATPAccountIDType</a> ATPRspOrderStatusAckMsg::account_id</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>资金账户ID </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01080">1080</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab92d2fb95dfad82712865c6931d7609e" name="ab92d2fb95dfad82712865c6931d7609e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab92d2fb95dfad82712865c6931d7609e">&#9670;&#160;</a></span>account_sub_code</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a24523af0485abd17afff8f51c9c1ae1d">ATPAccountSubCodeType</a> ATPRspOrderStatusAckMsg::account_sub_code</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>备兑标签（用于期权业务） </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01101">1101</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aebfa459afc2654941da4fb7725c3b2e9" name="aebfa459afc2654941da4fb7725c3b2e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aebfa459afc2654941da4fb7725c3b2e9">&#9670;&#160;</a></span>batch_cl_ord_no</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="arginV4_81_81_2include_2trade_2atp__trade__types_8h.html#a402a07f9e02b86e440d1184975311a74">ATPBatchClOrdNoType</a> ATPRspOrderStatusAckMsg::batch_cl_ord_no</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>特殊委托标识，右起第一个bit位是夜市委托标志位：0-正常委托、1-夜市委托（ATP3.2.0开始支持） </p>
+
+<p class="definition">在文件 <a class="el" href="arginV4_81_81_2include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="arginV4_81_81_2include_2trade_2atp__trade__msg_8h_source.html#l01111">1111</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ada675e6bc3ed41f82172ac69f97ed808" name="ada675e6bc3ed41f82172ac69f97ed808"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada675e6bc3ed41f82172ac69f97ed808">&#9670;&#160;</a></span>business_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a1ea549eae9760d6c7e6049c482634d8a">ATPBusinessTypeType</a> ATPRspOrderStatusAckMsg::business_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>回报记录号 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01072">1072</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac7132bff9829a32f170698b229008c68" name="ac7132bff9829a32f170698b229008c68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7132bff9829a32f170698b229008c68">&#9670;&#160;</a></span>cl_ord_id</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a520482390ac9d5d2bd5abd30522ce76a">ATPClOrdIDType</a> ATPRspOrderStatusAckMsg::cl_ord_id</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>交易所订单编号 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01089">1089</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7035cac8c3f4b152e200734c9c8a4fa7" name="a7035cac8c3f4b152e200734c9c8a4fa7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7035cac8c3f4b152e200734c9c8a4fa7">&#9670;&#160;</a></span>cl_ord_no</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a62c029a015059f54f350a2248d9d92ce">ATPClOrdNOType</a> ATPRspOrderStatusAckMsg::cl_ord_no</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>业务类型 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01073">1073</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a532e96a39ef5319ae44a2fa0f716bb25" name="a532e96a39ef5319ae44a2fa0f716bb25"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a532e96a39ef5319ae44a2fa0f716bb25">&#9670;&#160;</a></span>client_seq_id</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#aec0a514cad97bce8e0f2a2a0b1f9ec3b">ATPClientSeqIDType</a> ATPRspOrderStatusAckMsg::client_seq_id</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>扩展字段 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01091">1091</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7e21fcededd43df3427ed80cd44abc5b" name="a7e21fcededd43df3427ed80cd44abc5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e21fcededd43df3427ed80cd44abc5b">&#9670;&#160;</a></span>covered_or_uncovered</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a3ddafb8b1038d60bb818ebf68b275431">ATPCoveredOrUncoveredType</a> ATPRspOrderStatusAckMsg::covered_or_uncovered</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>开平仓标志（用于期权业务） </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01100">1100</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aedbd30e260d8cce59062aa1cbe2adee4" name="aedbd30e260d8cce59062aa1cbe2adee4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aedbd30e260d8cce59062aa1cbe2adee4">&#9670;&#160;</a></span>cum_qty</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a2e64ace481fa7cc17b884c5a0f58d655">ATPQtyType</a> ATPRspOrderStatusAckMsg::cum_qty</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>未成交部分的数量N15(2)（股票为股、基金为份、上海债券默认为张（使用时请务必与券商确认），其他为张） </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01084">1084</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a83d5857fb6a60cfe654f567417291243" name="a83d5857fb6a60cfe654f567417291243"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83d5857fb6a60cfe654f567417291243">&#9670;&#160;</a></span>cust_id</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ad1d7b3bdd1a5dd9aaff0548cb1af554c">ATPCustIDType</a> ATPRspOrderStatusAckMsg::cust_id</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>当前申报的状态,（对于撤单委托，填写被撤委托的当前状态，找不到原始委托时，固定填8= Reject ） </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01078">1078</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aabc0b9633d6bd082b1e753233fb27008" name="aabc0b9633d6bd082b1e753233fb27008"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aabc0b9633d6bd082b1e753233fb27008">&#9670;&#160;</a></span>exec_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a418f3b8ee098cc1e30edf7f4de2f9947">ATPExecTypeType</a> ATPRspOrderStatusAckMsg::exec_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>市场代码 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01076">1076</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a58e5a4736b569e3e85b15cdea69ccc9f" name="a58e5a4736b569e3e85b15cdea69ccc9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58e5a4736b569e3e85b15cdea69ccc9f">&#9670;&#160;</a></span>extra_data</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a9fdd4417adcb5d2c5a48da1d8c11f56b">ATPExtraData</a> ATPRspOrderStatusAckMsg::extra_data</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>申报合同号 上交所：以QP1开头，表示为交易所保证金强制平仓；以CV1开头，表示为交易所备兑强制平仓； </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01090">1090</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2bf3072d2f4752f0faea5c9d26c5de72" name="a2bf3072d2f4752f0faea5c9d26c5de72"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2bf3072d2f4752f0faea5c9d26c5de72">&#9670;&#160;</a></span>frozen_fee</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a4caafa134fdfbf09810cbfc707fc4b84">ATPAmtType</a> ATPRspOrderStatusAckMsg::frozen_fee</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>冻结交易金额N18(4) </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01094">1094</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae15ceb5a02df632e3c7497c1b7a03937" name="ae15ceb5a02df632e3c7497c1b7a03937"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae15ceb5a02df632e3c7497c1b7a03937">&#9670;&#160;</a></span>frozen_trade_value</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a4caafa134fdfbf09810cbfc707fc4b84">ATPAmtType</a> ATPRspOrderStatusAckMsg::frozen_trade_value</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>对于撤单返回的状态响应，为原始委托的客户合同号，指示被撤消订单的cl_ord_no; 对于委托确认，取值为0 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01093">1093</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a3632728844382cd49907adbe69a8e750" name="a3632728844382cd49907adbe69a8e750"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3632728844382cd49907adbe69a8e750">&#9670;&#160;</a></span>fund_account_id</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a944e73e5fff21c05c7bee13551ce8684">ATPFundAccountIDType</a> ATPRspOrderStatusAckMsg::fund_account_id</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>客户号ID </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01079">1079</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a908a07e957b339f9f39057ad117d09a8" name="a908a07e957b339f9f39057ad117d09a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a908a07e957b339f9f39057ad117d09a8">&#9670;&#160;</a></span>index</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a114ae6e4900890453f34c6a5362ae9cd">ATPIndexType</a> ATPRspOrderStatusAckMsg::index</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>分区号 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01071">1071</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ade6a9d03816ec7bc3d9eb6b98051c2dd" name="ade6a9d03816ec7bc3d9eb6b98051c2dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade6a9d03816ec7bc3d9eb6b98051c2dd">&#9670;&#160;</a></span>leaves_qty</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a2e64ace481fa7cc17b884c5a0f58d655">ATPQtyType</a> ATPRspOrderStatusAckMsg::leaves_qty</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>委托数量N15(2)（股票为股、基金为份、上海债券默认为张（使用时请务必与券商确认），其他为张） </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01083">1083</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a75295aab7c32252cf3cb90de4594217d" name="a75295aab7c32252cf3cb90de4594217d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75295aab7c32252cf3cb90de4594217d">&#9670;&#160;</a></span>market_id</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ac24f28542ed63f699fa9629b7aadfd4d">ATPMarketIDType</a> ATPRspOrderStatusAckMsg::market_id</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>证券代码/合约编码 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01075">1075</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a347a85494002a9b359b5eea5f6cc5797" name="a347a85494002a9b359b5eea5f6cc5797"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a347a85494002a9b359b5eea5f6cc5797">&#9670;&#160;</a></span>ord_rej_reason</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a140b20c53c76585804e8dd971fbde78a">ATPOrdRejReasonType</a> ATPRspOrderStatusAckMsg::ord_rej_reason</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>拒绝原因代码；可调用GetErrorInfo错误码查询函数，传入错误码及错误码类型-5 拒绝原因错误码类型，即可查询到错误描述信息 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01096">1096</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a06d0e925d729a1e311b91d7e156537af" name="a06d0e925d729a1e311b91d7e156537af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06d0e925d729a1e311b91d7e156537af">&#9670;&#160;</a></span>ord_status</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a5ab063645e536bbad877ae76bc878fb1">ATPOrdStatusType</a> ATPRspOrderStatusAckMsg::ord_status</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>当前委托执行类型 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01077">1077</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a755ff7e3fd1addde3872ee2db60473c9" name="a755ff7e3fd1addde3872ee2db60473c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a755ff7e3fd1addde3872ee2db60473c9">&#9670;&#160;</a></span>order_id</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ad66d50493ac022813bb83f4036c2a5a2">ATPOrderIDType</a> ATPRspOrderStatusAckMsg::order_id</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>用户私有信息 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01088">1088</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a66d6188d5f13ce994717d62fa99de704" name="a66d6188d5f13ce994717d62fa99de704"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66d6188d5f13ce994717d62fa99de704">&#9670;&#160;</a></span>order_qty</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a2e64ace481fa7cc17b884c5a0f58d655">ATPQtyType</a> ATPRspOrderStatusAckMsg::order_qty</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>委托价格N13(4)（上交所市价转限价申报时，这里填写转为限价订单的价格，其他订单填0） </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01082">1082</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a65c7d88a2b65ee6e5dfaadd2ac697834" name="a65c7d88a2b65ee6e5dfaadd2ac697834"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65c7d88a2b65ee6e5dfaadd2ac697834">&#9670;&#160;</a></span>order_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#aee1fcee934f37cba21aef909c69909c3">ATPOrdTypeType</a> ATPRspOrderStatusAckMsg::order_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>拒绝原因描述信息；当交易所拒绝时，这里填写交易所返回的拒绝原因代码。可调用GetErrorInfo错误码查询函数，传入错误码及错误码类型-1交易所拒绝原因错误码类型，即可查询错误描述信息 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01097">1097</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af19f2f66756213865a03a3d7ea20e786" name="af19f2f66756213865a03a3d7ea20e786"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af19f2f66756213865a03a3d7ea20e786">&#9670;&#160;</a></span>orig_cl_ord_no</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a62c029a015059f54f350a2248d9d92ce">ATPClOrdNOType</a> ATPRspOrderStatusAckMsg::orig_cl_ord_no</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>用户系统消息序号 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01092">1092</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac2658667e9967bf767aa3705124565bf" name="ac2658667e9967bf767aa3705124565bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2658667e9967bf767aa3705124565bf">&#9670;&#160;</a></span>parent_cl_ord_no</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a62c029a015059f54f350a2248d9d92ce">ATPClOrdNOType</a> ATPRspOrderStatusAckMsg::parent_cl_ord_no</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>组合编码（用于期权业务） </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01105">1105</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a25795f3e7654207bf6989be1cc9199d9" name="a25795f3e7654207bf6989be1cc9199d9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a25795f3e7654207bf6989be1cc9199d9">&#9670;&#160;</a></span>particular_flags</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a0b7466b60ed9e61809b4d47898374c14">ATPParticularFlagsType</a> ATPRspOrderStatusAckMsg::particular_flags</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>批量订单母单编号 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01106">1106</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4a2b0b036ae0771a25bec7eff3f1af08" name="a4a2b0b036ae0771a25bec7eff3f1af08"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a2b0b036ae0771a25bec7eff3f1af08">&#9670;&#160;</a></span>partition</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ae739dda4b0d0f5b49cbc294ae09db1ff">ATPPartitionType</a> ATPRspOrderStatusAckMsg::partition</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01070">1070</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab9b1251fd4e120567a36e8f3e7d41ddf" name="ab9b1251fd4e120567a36e8f3e7d41ddf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9b1251fd4e120567a36e8f3e7d41ddf">&#9670;&#160;</a></span>position_effect</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a0200a13a03c1d81bbcf2cd0fc5f7c681">ATPPositionEffectType</a> ATPRspOrderStatusAckMsg::position_effect</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>订单有效时间类型（无意义） </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01099">1099</a> 行定义.</p>
+
+</div>
+</div>
+<a id="af92b04a5f79a19d3439644573cbb76a8" name="af92b04a5f79a19d3439644573cbb76a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af92b04a5f79a19d3439644573cbb76a8">&#9670;&#160;</a></span>price</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a3aee0f0071e2da158321e820b9e5f3cc">ATPPriceType</a> ATPRspOrderStatusAckMsg::price</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>证券账户ID </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01081">1081</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a180be3e3d76349d74da0c9fe2de3f644" name="a180be3e3d76349d74da0c9fe2de3f644"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a180be3e3d76349d74da0c9fe2de3f644">&#9670;&#160;</a></span>quote_flag</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a279b029dad4ee629ec8c259e53fa3ad0">ATPQuoteFlagType</a> ATPRspOrderStatusAckMsg::quote_flag</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>账户子编码（无意义） </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01102">1102</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adebd0df1c6ef451d3916eecd9ed8a98a" name="adebd0df1c6ef451d3916eecd9ed8a98a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adebd0df1c6ef451d3916eecd9ed8a98a">&#9670;&#160;</a></span>reject_reason_code</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ad6f454d9452f5ff0606c6dab7cb7657f">ATPRejectReasonCodeType</a> ATPRspOrderStatusAckMsg::reject_reason_code</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>冻结费用N18(4) </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01095">1095</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a623156123f9102cad956be7ff299dedf" name="a623156123f9102cad956be7ff299dedf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a623156123f9102cad956be7ff299dedf">&#9670;&#160;</a></span>secondary_order_id</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ab802a4aa7fe278a9ffa1f13e78c923c6">ATPSecondaryOrderIDType</a> ATPRspOrderStatusAckMsg::secondary_order_id</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>证券简称 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01104">1104</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a02ff274ecf5ec3e4f50bdeb071fc9376" name="a02ff274ecf5ec3e4f50bdeb071fc9376"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02ff274ecf5ec3e4f50bdeb071fc9376">&#9670;&#160;</a></span>security_id</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a2c5f8f1f13955d84215ec1abeecd8773">ATPSecurityIDType</a> ATPRspOrderStatusAckMsg::security_id</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>客户订单编号 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01074">1074</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac40d8762ab9b3d37b00c80f02a343ff2" name="ac40d8762ab9b3d37b00c80f02a343ff2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac40d8762ab9b3d37b00c80f02a343ff2">&#9670;&#160;</a></span>security_symbol</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#a0081463fd190567a56ffe8377859f490">ATPSecuritySymbolType</a> ATPRspOrderStatusAckMsg::security_symbol</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>是否报价订单（无意义） </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01103">1103</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a057938e1a7e0a64e531993f2b8b32877" name="a057938e1a7e0a64e531993f2b8b32877"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a057938e1a7e0a64e531993f2b8b32877">&#9670;&#160;</a></span>side</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#acc5c0c2a6f232867a3b0ab9d30724b65">ATPSideType</a> ATPRspOrderStatusAckMsg::side</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>累计成交数量N15(2)（股票为股、基金为份、上海债券默认为张（使用时请务必与券商确认），其他为张） </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01085">1085</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a991c7e1968a5d9d652808ad03f4dbcd0" name="a991c7e1968a5d9d652808ad03f4dbcd0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a991c7e1968a5d9d652808ad03f4dbcd0">&#9670;&#160;</a></span>time_in_force</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#adfc00c923b23308437ab3dfad17221cf">ATPTimeInForceType</a> ATPRspOrderStatusAckMsg::time_in_force</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>订单类型 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01098">1098</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aaeea5b44940a81ae5eef0434679f948e" name="aaeea5b44940a81ae5eef0434679f948e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaeea5b44940a81ae5eef0434679f948e">&#9670;&#160;</a></span>transact_time</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#aa1c0815a16f3f551bb3927156d6eaa47">ATPTimeStampType</a> ATPRspOrderStatusAckMsg::transact_time</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>买卖方向 </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01086">1086</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0901eec8707bed91f2e601410a6b80e0" name="a0901eec8707bed91f2e601410a6b80e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0901eec8707bed91f2e601410a6b80e0">&#9670;&#160;</a></span>user_info</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="include_2trade_2atp__trade__types_8h.html#ab8abad05e29df293d56e746edddb6939">ATPUserInfoType</a> ATPRspOrderStatusAckMsg::user_info</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>回报时间（如果是ATP的Ack则回报时间为ATP的，如果是交易所的确认则回报时间为交易所的。同理，成交回报都是交易所的回报时间） </p>
+
+<p class="definition">在文件 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a> 第 <a class="el" href="include_2trade_2atp__trade__msg_8h_source.html#l01087">1087</a> 行定义.</p>
+
+</div>
+</div>
+<hr/>该结构体的文档由以下文件生成:<ul>
+<li>src/API/AtpTradeApi/include/trade/<a class="el" href="include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a></li>
+<li>src/API/AtpTradeApiMarginV4.1.1/include/trade/<a class="el" href="arginV4_81_81_2include_2trade_2atp__trade__msg_8h_source.html">atp_trade_msg.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="structATPRspOrderStatusAckMsg.html">ATPRspOrderStatusAckMsg</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

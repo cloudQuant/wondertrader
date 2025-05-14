@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WtSelStraFact/WtStraDtSel.h 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('WtStraDtSel_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">WtStraDtSel.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="WtStraDtSel_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;../Includes/SelStrategyDefs.h&quot;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;unordered_set&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="WtStraDtSel_8h.html#a17226795848decb565e90624584e5c0f">   13</a></span><a class="code hl_variable" href="WtStraDtSel_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a>;</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="foldopen" id="foldopen00021" data-start="{" data-end="};">
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="classWtStraDtSel.html">   21</a></span><span class="keyword">class </span><a class="code hl_class" href="classWtStraDtSel.html">WtStraDtSel</a> : <span class="keyword">public</span> <a class="code hl_class" href="classSelStrategy.html">SelStrategy</a></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>{</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <a class="code hl_class" href="classWtStraDtSel.html">WtStraDtSel</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keywordtype">id</span>);</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <a class="code hl_function" href="classWtStraDtSel.html#a1ca16534b81f96df1ea58f598786dbd7">~WtStraDtSel</a>();</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtStraDtSel.html#ac6e89abcf60c70dcab67b7e95ed1fd1f">getName</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="classWtStraDtSel.html#ae70cb3728273910ac529c6dd4310efed">getFactName</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classWtStraDtSel.html#ab619e7dff20d6ab23bc1127df9d087a8">init</a>(<a class="code hl_class" href="classWTSVariant.html">WTSVariant</a>* cfg) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtStraDtSel.html#af7d10276b5f798277e8b04c5ac8f4029">on_init</a>(<a class="code hl_class" href="classISelStraCtx.html">ISelStraCtx</a>* ctx) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtStraDtSel.html#abb077e2bbac6cf5db44590725e22d8c2">on_schedule</a>(<a class="code hl_class" href="classISelStraCtx.html">ISelStraCtx</a>* ctx, uint32_t uDate, uint32_t uTime) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtStraDtSel.html#acc3ab8524cc7da5d7ef2f31551bf3fe3">on_tick</a>(<a class="code hl_class" href="classISelStraCtx.html">ISelStraCtx</a>* ctx, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <a class="code hl_class" href="classWTSTickData.html">WTSTickData</a>* newTick) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classWtStraDtSel.html#abef3686a4cee99db74539b46f8277858">on_bar</a>(<a class="code hl_class" href="classISelStraCtx.html">ISelStraCtx</a>* ctx, <span class="keyword">const</span> <span class="keywordtype">char</span>* stdCode, <span class="keyword">const</span> <span class="keywordtype">char</span>* period, <a class="code hl_struct" href="structWTSBarStruct.html">WTSBarStruct</a>* newBar) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="classWtStraDtSel.html#a3212503806c6b3c406643121ffd82fbe">   88</a></span>    <span class="keywordtype">double</span>      <a class="code hl_variable" href="classWtStraDtSel.html#a3212503806c6b3c406643121ffd82fbe">_k1</a>;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="classWtStraDtSel.html#a2343eac8c71ac609e77125a34514def1">   90</a></span>    <span class="keywordtype">double</span>      <a class="code hl_variable" href="classWtStraDtSel.html#a2343eac8c71ac609e77125a34514def1">_k2</a>;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="classWtStraDtSel.html#a7e38c633112c3c603faf2469ab41c02b">   92</a></span>    uint32_t    <a class="code hl_variable" href="classWtStraDtSel.html#a7e38c633112c3c603faf2469ab41c02b">_days</a>;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="classWtStraDtSel.html#a2779f843946c0a4c64ab2a069461c7d6">   95</a></span>    std::string <a class="code hl_variable" href="classWtStraDtSel.html#a2779f843946c0a4c64ab2a069461c7d6">_period</a>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="classWtStraDtSel.html#a152c7350c06081aa12964c365fdcedff">   97</a></span>    uint32_t    <a class="code hl_variable" href="classWtStraDtSel.html#a152c7350c06081aa12964c365fdcedff">_count</a>;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="classWtStraDtSel.html#a2f795f1da6efb6ceddb296396f95b729">  100</a></span>    <span class="keywordtype">bool</span>        <a class="code hl_variable" href="classWtStraDtSel.html#a2f795f1da6efb6ceddb296396f95b729">_isstk</a>;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="classWtStraDtSel.html#a9900dbf4ee4ca5640325fba15e0124e7">  103</a></span>    std::unordered_set&lt;std::string&gt; <a class="code hl_variable" href="classWtStraDtSel.html#a9900dbf4ee4ca5640325fba15e0124e7">_codes</a>;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>};</div>
+</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="ttc" id="aWtStraDtSel_8h_html_a17226795848decb565e90624584e5c0f"><div class="ttname"><a href="WtStraDtSel_8h.html#a17226795848decb565e90624584e5c0f">USING_NS_WTP</a></div><div class="ttdeci">USING_NS_WTP</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8h_source.html#l00013">WtStraDtSel.h:13</a></div></div>
+<div class="ttc" id="aclassISelStraCtx_html"><div class="ttname"><a href="classISelStraCtx.html">ISelStraCtx</a></div><div class="ttdoc">选股策略上下文接口</div><div class="ttdef"><b>Definition</b> <a href="ISelStraCtx_8h_source.html#l00038">ISelStraCtx.h:39</a></div></div>
+<div class="ttc" id="aclassSelStrategy_html"><div class="ttname"><a href="classSelStrategy.html">SelStrategy</a></div><div class="ttdef"><b>Definition</b> <a href="SelStrategyDefs_8h_source.html#l00025">SelStrategyDefs.h:26</a></div></div>
+<div class="ttc" id="aclassWTSTickData_html"><div class="ttname"><a href="classWTSTickData.html">WTSTickData</a></div><div class="ttdoc">Tick数据对象</div><div class="ttdef"><b>Definition</b> <a href="WTSDataDef_8hpp_source.html#l01251">WTSDataDef.hpp:1252</a></div></div>
+<div class="ttc" id="aclassWTSVariant_html"><div class="ttname"><a href="classWTSVariant.html">WTSVariant</a></div><div class="ttdoc">变量类</div><div class="ttdef"><b>Definition</b> <a href="WTSVariant_8hpp_source.html#l00037">WTSVariant.hpp:38</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html"><div class="ttname"><a href="classWtStraDtSel.html">WtStraDtSel</a></div><div class="ttdoc">双突破(Dual Thrust)选股策略类</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8h_source.html#l00021">WtStraDtSel.h:22</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_a152c7350c06081aa12964c365fdcedff"><div class="ttname"><a href="classWtStraDtSel.html#a152c7350c06081aa12964c365fdcedff">WtStraDtSel::_count</a></div><div class="ttdeci">uint32_t _count</div><div class="ttdoc">加载K线条数</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8h_source.html#l00097">WtStraDtSel.h:97</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_a1ca16534b81f96df1ea58f598786dbd7"><div class="ttname"><a href="classWtStraDtSel.html#a1ca16534b81f96df1ea58f598786dbd7">WtStraDtSel::~WtStraDtSel</a></div><div class="ttdeci">~WtStraDtSel()</div><div class="ttdoc">析构函数</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8cpp_source.html#l00039">WtStraDtSel.cpp:39</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_a2343eac8c71ac609e77125a34514def1"><div class="ttname"><a href="classWtStraDtSel.html#a2343eac8c71ac609e77125a34514def1">WtStraDtSel::_k2</a></div><div class="ttdeci">double _k2</div><div class="ttdoc">下边界系数</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8h_source.html#l00090">WtStraDtSel.h:90</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_a2779f843946c0a4c64ab2a069461c7d6"><div class="ttname"><a href="classWtStraDtSel.html#a2779f843946c0a4c64ab2a069461c7d6">WtStraDtSel::_period</a></div><div class="ttdeci">std::string _period</div><div class="ttdoc">数据周期</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8h_source.html#l00095">WtStraDtSel.h:95</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_a2f795f1da6efb6ceddb296396f95b729"><div class="ttname"><a href="classWtStraDtSel.html#a2f795f1da6efb6ceddb296396f95b729">WtStraDtSel::_isstk</a></div><div class="ttdeci">bool _isstk</div><div class="ttdoc">是否为股票</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8h_source.html#l00100">WtStraDtSel.h:100</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_a3212503806c6b3c406643121ffd82fbe"><div class="ttname"><a href="classWtStraDtSel.html#a3212503806c6b3c406643121ffd82fbe">WtStraDtSel::_k1</a></div><div class="ttdeci">double _k1</div><div class="ttdoc">上边界系数</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8h_source.html#l00088">WtStraDtSel.h:88</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_a7e38c633112c3c603faf2469ab41c02b"><div class="ttname"><a href="classWtStraDtSel.html#a7e38c633112c3c603faf2469ab41c02b">WtStraDtSel::_days</a></div><div class="ttdeci">uint32_t _days</div><div class="ttdoc">计算区间天数</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8h_source.html#l00092">WtStraDtSel.h:92</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_a9900dbf4ee4ca5640325fba15e0124e7"><div class="ttname"><a href="classWtStraDtSel.html#a9900dbf4ee4ca5640325fba15e0124e7">WtStraDtSel::_codes</a></div><div class="ttdeci">std::unordered_set&lt; std::string &gt; _codes</div><div class="ttdoc">合约代码集合</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8h_source.html#l00103">WtStraDtSel.h:103</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_ab619e7dff20d6ab23bc1127df9d087a8"><div class="ttname"><a href="classWtStraDtSel.html#ab619e7dff20d6ab23bc1127df9d087a8">WtStraDtSel::init</a></div><div class="ttdeci">virtual bool init(WTSVariant *cfg) override</div><div class="ttdoc">初始化策略</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8cpp_source.html#l00070">WtStraDtSel.cpp:70</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_abb077e2bbac6cf5db44590725e22d8c2"><div class="ttname"><a href="classWtStraDtSel.html#abb077e2bbac6cf5db44590725e22d8c2">WtStraDtSel::on_schedule</a></div><div class="ttdeci">virtual void on_schedule(ISelStraCtx *ctx, uint32_t uDate, uint32_t uTime) override</div><div class="ttdoc">定时调度回调</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8cpp_source.html#l00121">WtStraDtSel.cpp:121</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_abef3686a4cee99db74539b46f8277858"><div class="ttname"><a href="classWtStraDtSel.html#abef3686a4cee99db74539b46f8277858">WtStraDtSel::on_bar</a></div><div class="ttdeci">virtual void on_bar(ISelStraCtx *ctx, const char *stdCode, const char *period, WTSBarStruct *newBar) override</div><div class="ttdoc">K线数据回调</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8cpp_source.html#l00256">WtStraDtSel.cpp:256</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_ac6e89abcf60c70dcab67b7e95ed1fd1f"><div class="ttname"><a href="classWtStraDtSel.html#ac6e89abcf60c70dcab67b7e95ed1fd1f">WtStraDtSel::getName</a></div><div class="ttdeci">virtual const char * getName() override</div><div class="ttdoc">获取策略名称</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8cpp_source.html#l00049">WtStraDtSel.cpp:49</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_acc3ab8524cc7da5d7ef2f31551bf3fe3"><div class="ttname"><a href="classWtStraDtSel.html#acc3ab8524cc7da5d7ef2f31551bf3fe3">WtStraDtSel::on_tick</a></div><div class="ttdeci">virtual void on_tick(ISelStraCtx *ctx, const char *stdCode, WTSTickData *newTick) override</div><div class="ttdoc">行情数据Tick回调</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8cpp_source.html#l00243">WtStraDtSel.cpp:243</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_ae70cb3728273910ac529c6dd4310efed"><div class="ttname"><a href="classWtStraDtSel.html#ae70cb3728273910ac529c6dd4310efed">WtStraDtSel::getFactName</a></div><div class="ttdeci">virtual const char * getFactName() override</div><div class="ttdoc">获取策略所属工厂名称</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8cpp_source.html#l00059">WtStraDtSel.cpp:59</a></div></div>
+<div class="ttc" id="aclassWtStraDtSel_html_af7d10276b5f798277e8b04c5ac8f4029"><div class="ttname"><a href="classWtStraDtSel.html#af7d10276b5f798277e8b04c5ac8f4029">WtStraDtSel::on_init</a></div><div class="ttdeci">virtual void on_init(ISelStraCtx *ctx) override</div><div class="ttdoc">策略初始化回调</div><div class="ttdef"><b>Definition</b> <a href="WtStraDtSel_8cpp_source.html#l00104">WtStraDtSel.cpp:104</a></div></div>
+<div class="ttc" id="astructWTSBarStruct_html"><div class="ttname"><a href="structWTSBarStruct.html">WTSBarStruct</a></div><div class="ttdoc">K线数据结构体</div><div class="ttdef"><b>Definition</b> <a href="WTSStruct_8h_source.html#l00101">WTSStruct.h:102</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_219ea3680aa257ac1884dac670b79d6e.html">WtSelStraFact</a></li><li class="navelem"><a class="el" href="WtStraDtSel_8h.html">WtStraDtSel.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

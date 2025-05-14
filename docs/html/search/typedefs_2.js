@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['barblock_0',['BarBlock',['../classWTSKlineSlice.html#a47fff81e914cd5062c0341fecc35172c',1,'WTSKlineSlice']]],
+  ['barcache_1',['BarCache',['../classWtDataManager.html#a0367974813163e71d0aca4f47ecd42cc',1,'WtDataManager']]],
+  ['barcacheitem_2',['BarCacheItem',['../DataDefineAD_8h.html#a54c63a7d1299c0db4689cce400f08911',1,'DataDefineAD.h']]],
+  ['barcachemap_3',['BarCacheMap',['../classWtDataManager.html#a87de30186cb32861d62d77c18166bec5',1,'WtDataManager']]],
+  ['barscache_4',['barscache',['../classHisDataReplayer.html#a310e971b3b3b92077a2cbda965dfd418',1,'HisDataReplayer::BarsCache'],['../classWtDataReader.html#af350f4eee7c7858c0fb35bba1d9ada57',1,'WtDataReader::BarsCache'],['../classWtRdmDtReader.html#a1f0c8471c5dba3c11afff169ac89e3f9',1,'WtRdmDtReader::BarsCache'],['../classWtDataReaderAD.html#a45efc8ff2bc9e807f4b338d7be21c02d',1,'WtDataReaderAD::BarsCache'],['../classWtRdmDtReaderAD.html#a6b98dcf0b99f23f8ccce7e707e318cea',1,'WtRdmDtReaderAD::BarsCache']]],
+  ['barslist_5',['barslist',['../classHisDataReplayer.html#afd08a7a48b9f89a2109cc18b093a9042',1,'HisDataReplayer::BarsList'],['../classWtDataReader.html#a15921e1a955ec770516983a6bae21779',1,'WtDataReader::BarsList'],['../classWtRdmDtReader.html#a5ec7644b33daca6322463547568cfd50',1,'WtRdmDtReader::BarsList'],['../classWtDataReaderAD.html#aad478efa1cd8d496115ef9005f1de6ed',1,'WtDataReaderAD::BarsList'],['../classWtRdmDtReaderAD.html#a613ba34fde6f5c8997734e246d9156ff',1,'WtRdmDtReaderAD::BarsList']]],
+  ['barslistptr_6',['BarsListPtr',['../classHisDataReplayer.html#a317ea56c646e063a125851026f80487e',1,'HisDataReplayer']]],
+  ['base_5ftype_7',['base_type',['../classYAML_1_1detail_1_1iterator__base.html#a076d93543c6a9b9675b2fca6061af11d',1,'YAML::detail::iterator_base']]],
+  ['basicnarrowiomanip_8',['BasicNarrowIoManip',['../classtesting_1_1Message.html#a391c6b2afc501b8a94ac363e38d5c4ca',1,'testing::Message']]],
+  ['biggestint_9',['BiggestInt',['../namespacetesting_1_1internal.html#a05c6bd9ede5ccdf25191a590d610dcc6',1,'testing::internal']]],
+  ['bits_10',['Bits',['../classtesting_1_1internal_1_1FloatingPoint.html#abf228bf6cd48f12c8b44c85b4971a731',1,'testing::internal::FloatingPoint']]],
+  ['blockheader_11',['blockheader',['../DataDefine_8h.html#a3948fe73dffa6bbcab642076d843e500',1,'BlockHeader:&#160;DataDefine.h'],['../DataDefineAD_8h.html#a3948fe73dffa6bbcab642076d843e500',1,'BlockHeader:&#160;DataDefineAD.h'],['../namespaceuft.html#a8deca25019a755718467932a358b1531',1,'uft::BlockHeader']]],
+  ['blockheaderv2_12',['BlockHeaderV2',['../DataDefine_8h.html#aeb32fd61420728bd56d54d147f73081d',1,'DataDefine.h']]],
+  ['blocktype_13',['blocktype',['../DataDefineAD_8h.html#aa4cc3f75d67ebc728b5d638c389c5fb4',1,'BlockType:&#160;DataDefineAD.h'],['../DataDefine_8h.html#aa4cc3f75d67ebc728b5d638c389c5fb4',1,'BlockType:&#160;DataDefine.h']]],
+  ['boostfileptr_14',['BoostFilePtr',['../BoostFile_8hpp.html#a596e60eb12117122d44c36f261d58a04',1,'BoostFile.hpp']]],
+  ['boostmfptr_15',['boostmfptr',['../WtRdmDtReader_8h.html#a16644ae522884159c76caeb752193f4f',1,'BoostMFPtr:&#160;WtRdmDtReader.h'],['../WtDataWriter_8h.html#a16644ae522884159c76caeb752193f4f',1,'BoostMFPtr:&#160;WtDataWriter.h'],['../WtBtDtReader_8h.html#a16644ae522884159c76caeb752193f4f',1,'BoostMFPtr:&#160;WtBtDtReader.h'],['../WtKVCache_8hpp.html#a16644ae522884159c76caeb752193f4f',1,'BoostMFPtr:&#160;WtKVCache.hpp'],['../WtDataWriterAD_8h.html#a16644ae522884159c76caeb752193f4f',1,'BoostMFPtr:&#160;WtDataWriterAD.h'],['../UftStraContext_8h.html#a16644ae522884159c76caeb752193f4f',1,'BoostMFPtr:&#160;UftStraContext.h']]],
+  ['boostworkerptr_16',['boostworkerptr',['../classTraderXTPXAlgo.html#a17e2e92c85f5cca43839d0a816fad4be',1,'TraderXTPXAlgo::BoostWorkerPtr'],['../classTraderXTP.html#a9a1fdabbe42ecbba22be2894a4c1ac24',1,'TraderXTP::BoostWorkerPtr'],['../classParserXTP.html#a2d75b301e9229f65f057167aec8209a2',1,'ParserXTP::BoostWorkerPtr']]],
+  ['bucket_5fentry_17',['bucket_entry',['../classtsl_1_1detail__robin__hash_1_1robin__hash.html#a8ff6168096f15f7e65b4b4daae46193d',1,'tsl::detail_robin_hash::robin_hash']]],
+  ['bucket_5fentry_5fptr_18',['bucket_entry_ptr',['../classtsl_1_1detail__robin__hash_1_1robin__hash_1_1robin__iterator.html#a1c6e0d625b0090e564dac6b1b44c95aa',1,'tsl::detail_robin_hash::robin_hash::robin_iterator']]],
+  ['bucket_5fhash_19',['bucket_hash',['../classtsl_1_1detail__robin__hash_1_1bucket__entry.html#aabafa3819701976752393badeba57027',1,'tsl::detail_robin_hash::bucket_entry']]],
+  ['buckets_5fallocator_20',['buckets_allocator',['../classtsl_1_1detail__robin__hash_1_1robin__hash.html#a94e3aff310a7ab3c49f438960177e535',1,'tsl::detail_robin_hash::robin_hash']]],
+  ['buckets_5fcontainer_5ftype_21',['buckets_container_type',['../classtsl_1_1detail__robin__hash_1_1robin__hash.html#a92947203a2e56f9d68196e2454d1ffe5',1,'tsl::detail_robin_hash::robin_hash']]],
+  ['buffer_5ft_22',['buffer_t',['../zstdmt__compress_8c.html#a81b62558b8599f883304a26b742aa44f',1,'zstdmt_compress.c']]],
+  ['businessabstracttype_23',['businessabstracttype',['../include_2trade_2atp__trade__types_8h.html#a3f15905b4220e9d5161a83d9f97c5c1a',1,'BusinessAbstractType:&#160;atp_trade_types.h'],['../arginV4_81_81_2include_2trade_2atp__trade__types_8h.html#a3f15905b4220e9d5161a83d9f97c5c1a',1,'BusinessAbstractType:&#160;atp_trade_types.h']]],
+  ['byte_24',['byte',['../WTSExpressData_8hpp.html#a4ae1dab0fb4b072a66584546209e7d58',1,'BYTE:&#160;WTSExpressData.hpp'],['../mem_8h.html#a4ae1dab0fb4b072a66584546209e7d58',1,'BYTE:&#160;mem.h'],['../xxhash_8c.html#a4ae1dab0fb4b072a66584546209e7d58',1,'BYTE:&#160;xxhash.c']]]
+];

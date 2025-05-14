@@ -1,0 +1,2566 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WonderTrader: src/WTSUtils/zstdlib/divsufsort.c 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">WonderTrader<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">高性能量化交易平台</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('divsufsort_8c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#func-members">函数</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">divsufsort.c 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;assert.h&gt;</code><br />
+<code>#include &lt;stdio.h&gt;</code><br />
+<code>#include &lt;stdlib.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="divsufsort_8h_source.html">divsufsort.h</a>&quot;</code><br />
+</div>
+<p><a href="divsufsort_8c_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__trbudget__t.html">_trbudget_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a2eb6f9e0395b47b8d5e3eeae4fe0c116" id="r_a2eb6f9e0395b47b8d5e3eeae4fe0c116"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a>&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a></td></tr>
+<tr class="separator:a2eb6f9e0395b47b8d5e3eeae4fe0c116"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6572f1706059832f94025fa12c6c45ed" id="r_a6572f1706059832f94025fa12c6c45ed"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a6572f1706059832f94025fa12c6c45ed">ALPHABET_SIZE</a>&#160;&#160;&#160;(256)</td></tr>
+<tr class="separator:a6572f1706059832f94025fa12c6c45ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f1b403a53af4084a579cbae01e7f34c" id="r_a5f1b403a53af4084a579cbae01e7f34c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a5f1b403a53af4084a579cbae01e7f34c">BUCKET_A_SIZE</a>&#160;&#160;&#160;(<a class="el" href="divsufsort_8c.html#a6572f1706059832f94025fa12c6c45ed">ALPHABET_SIZE</a>)</td></tr>
+<tr class="separator:a5f1b403a53af4084a579cbae01e7f34c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65c54022c6abbad80d3a5decad9a5f6d" id="r_a65c54022c6abbad80d3a5decad9a5f6d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a65c54022c6abbad80d3a5decad9a5f6d">BUCKET_B_SIZE</a>&#160;&#160;&#160;(<a class="el" href="divsufsort_8c.html#a6572f1706059832f94025fa12c6c45ed">ALPHABET_SIZE</a> * <a class="el" href="divsufsort_8c.html#a6572f1706059832f94025fa12c6c45ed">ALPHABET_SIZE</a>)</td></tr>
+<tr class="separator:a65c54022c6abbad80d3a5decad9a5f6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a858f398400eb7a9ac22713f3553feb" id="r_a5a858f398400eb7a9ac22713f3553feb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a5a858f398400eb7a9ac22713f3553feb">SS_INSERTIONSORT_THRESHOLD</a>&#160;&#160;&#160;(8)</td></tr>
+<tr class="separator:a5a858f398400eb7a9ac22713f3553feb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08cd223b2c9a4cbf647274d46a45a733" id="r_a08cd223b2c9a4cbf647274d46a45a733"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a08cd223b2c9a4cbf647274d46a45a733">SS_BLOCKSIZE</a>&#160;&#160;&#160;(1024)</td></tr>
+<tr class="separator:a08cd223b2c9a4cbf647274d46a45a733"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81ff4283b0f558f524273900e3eaac08" id="r_a81ff4283b0f558f524273900e3eaac08"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a81ff4283b0f558f524273900e3eaac08">SS_MISORT_STACKSIZE</a>&#160;&#160;&#160;(96)</td></tr>
+<tr class="separator:a81ff4283b0f558f524273900e3eaac08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a738e9cfc278fe48fb08c8657e3afd878" id="r_a738e9cfc278fe48fb08c8657e3afd878"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a738e9cfc278fe48fb08c8657e3afd878">SS_SMERGE_STACKSIZE</a>&#160;&#160;&#160;(32)</td></tr>
+<tr class="separator:a738e9cfc278fe48fb08c8657e3afd878"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17e941a787219c4a650618035b4dc61f" id="r_a17e941a787219c4a650618035b4dc61f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a17e941a787219c4a650618035b4dc61f">TR_INSERTIONSORT_THRESHOLD</a>&#160;&#160;&#160;(8)</td></tr>
+<tr class="separator:a17e941a787219c4a650618035b4dc61f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1364e4e63b8ed23692eb50321e597138" id="r_a1364e4e63b8ed23692eb50321e597138"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a1364e4e63b8ed23692eb50321e597138">TR_STACKSIZE</a>&#160;&#160;&#160;(64)</td></tr>
+<tr class="separator:a1364e4e63b8ed23692eb50321e597138"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5107c7781c3e326264fa507ddde22d47" id="r_a5107c7781c3e326264fa507ddde22d47"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a5107c7781c3e326264fa507ddde22d47">SWAP</a>(_a,  _b)&#160;&#160;&#160;do { t = (_a); (_a) = (_b); (_b) = t; } while(0)</td></tr>
+<tr class="separator:a5107c7781c3e326264fa507ddde22d47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a926c1ab4f6ca8b244750377dcdea9ec1" id="r_a926c1ab4f6ca8b244750377dcdea9ec1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a926c1ab4f6ca8b244750377dcdea9ec1">MIN</a>(_a,  _b)&#160;&#160;&#160;(((_a) &lt; (_b)) ? (_a) : (_b))</td></tr>
+<tr class="separator:a926c1ab4f6ca8b244750377dcdea9ec1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad448d437b99a125bd9344585d4f02e9a" id="r_ad448d437b99a125bd9344585d4f02e9a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#ad448d437b99a125bd9344585d4f02e9a">MAX</a>(_a,  _b)&#160;&#160;&#160;(((_a) &gt; (_b)) ? (_a) : (_b))</td></tr>
+<tr class="separator:ad448d437b99a125bd9344585d4f02e9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad74e4c4355110af960d47f5f8fc180c3" id="r_ad74e4c4355110af960d47f5f8fc180c3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#ad74e4c4355110af960d47f5f8fc180c3">STACK_PUSH</a>(_a,  _b,  _c,  _d)</td></tr>
+<tr class="separator:ad74e4c4355110af960d47f5f8fc180c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f8c46c22837b2f21a9b4781f81a88bd" id="r_a0f8c46c22837b2f21a9b4781f81a88bd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a0f8c46c22837b2f21a9b4781f81a88bd">STACK_PUSH5</a>(_a,  _b,  _c,  _d,  _e)</td></tr>
+<tr class="separator:a0f8c46c22837b2f21a9b4781f81a88bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88f1ff1ac325c41f23cc15bef5422485" id="r_a88f1ff1ac325c41f23cc15bef5422485"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a88f1ff1ac325c41f23cc15bef5422485">STACK_POP</a>(_a,  _b,  _c,  _d)</td></tr>
+<tr class="separator:a88f1ff1ac325c41f23cc15bef5422485"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a087bacc2e0ad4bbb8fe7dca57662fb5a" id="r_a087bacc2e0ad4bbb8fe7dca57662fb5a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a087bacc2e0ad4bbb8fe7dca57662fb5a">STACK_POP5</a>(_a,  _b,  _c,  _d,  _e)</td></tr>
+<tr class="separator:a087bacc2e0ad4bbb8fe7dca57662fb5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab513d045e5a285866ec209fe4183dc3" id="r_aab513d045e5a285866ec209fe4183dc3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#aab513d045e5a285866ec209fe4183dc3">BUCKET_A</a>(_c0)&#160;&#160;&#160;bucket_A[(_c0)]</td></tr>
+<tr class="separator:aab513d045e5a285866ec209fe4183dc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab709a1f5c6d1c1426ef834b13004987a" id="r_ab709a1f5c6d1c1426ef834b13004987a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#ab709a1f5c6d1c1426ef834b13004987a">BUCKET_B</a>(_c0,  _c1)&#160;&#160;&#160;(bucket_B[(_c1) * <a class="el" href="divsufsort_8c.html#a6572f1706059832f94025fa12c6c45ed">ALPHABET_SIZE</a> + (_c0)])</td></tr>
+<tr class="separator:ab709a1f5c6d1c1426ef834b13004987a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43519a7093bc1c0d5a77870a7c23fba5" id="r_a43519a7093bc1c0d5a77870a7c23fba5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a43519a7093bc1c0d5a77870a7c23fba5">BUCKET_BSTAR</a>(_c0,  _c1)&#160;&#160;&#160;(bucket_B[(_c0) * <a class="el" href="divsufsort_8c.html#a6572f1706059832f94025fa12c6c45ed">ALPHABET_SIZE</a> + (_c1)])</td></tr>
+<tr class="separator:a43519a7093bc1c0d5a77870a7c23fba5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6423a880df59733d2d9b509c7718d3a9" id="r_a6423a880df59733d2d9b509c7718d3a9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a6423a880df59733d2d9b509c7718d3a9">STACK_SIZE</a>&#160;&#160;&#160;<a class="el" href="divsufsort_8c.html#a81ff4283b0f558f524273900e3eaac08">SS_MISORT_STACKSIZE</a></td></tr>
+<tr class="separator:a6423a880df59733d2d9b509c7718d3a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6423a880df59733d2d9b509c7718d3a9" id="r_a6423a880df59733d2d9b509c7718d3a9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a6423a880df59733d2d9b509c7718d3a9">STACK_SIZE</a>&#160;&#160;&#160;<a class="el" href="divsufsort_8c.html#a1364e4e63b8ed23692eb50321e597138">TR_STACKSIZE</a></td></tr>
+<tr class="separator:a6423a880df59733d2d9b509c7718d3a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:ad06fbb2fbee0a4c4f28f07c7b2977d5a" id="r_ad06fbb2fbee0a4c4f28f07c7b2977d5a"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__trbudget__t.html">_trbudget_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#ad06fbb2fbee0a4c4f28f07c7b2977d5a">trbudget_t</a></td></tr>
+<tr class="separator:ad06fbb2fbee0a4c4f28f07c7b2977d5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a4261acc0f803a4c3c2b592413886ed19" id="r_a4261acc0f803a4c3c2b592413886ed19"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a4261acc0f803a4c3c2b592413886ed19">ss_ilg</a> (int n)</td></tr>
+<tr class="separator:a4261acc0f803a4c3c2b592413886ed19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56da2cb4b693fcbc35bba708b25eba85" id="r_a56da2cb4b693fcbc35bba708b25eba85"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a56da2cb4b693fcbc35bba708b25eba85">ss_compare</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *T, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *p1, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *p2, int depth)</td></tr>
+<tr class="separator:a56da2cb4b693fcbc35bba708b25eba85"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86960670f08ca09f9c1f133e10aec2e5" id="r_a86960670f08ca09f9c1f133e10aec2e5"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a86960670f08ca09f9c1f133e10aec2e5">ss_insertionsort</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *T, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *PA, int *first, int *last, int depth)</td></tr>
+<tr class="separator:a86960670f08ca09f9c1f133e10aec2e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32337c527c7811e7e1ca4129ee9b4f09" id="r_a32337c527c7811e7e1ca4129ee9b4f09"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a32337c527c7811e7e1ca4129ee9b4f09">ss_fixdown</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *Td, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *PA, int *SA, int i, int size)</td></tr>
+<tr class="separator:a32337c527c7811e7e1ca4129ee9b4f09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6fa542a721c91a6aadde1ff6f07ac6d" id="r_ac6fa542a721c91a6aadde1ff6f07ac6d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#ac6fa542a721c91a6aadde1ff6f07ac6d">ss_heapsort</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *Td, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *PA, int *SA, int size)</td></tr>
+<tr class="separator:ac6fa542a721c91a6aadde1ff6f07ac6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa479c166d27347c3e0b784237bc4003b" id="r_aa479c166d27347c3e0b784237bc4003b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#aa479c166d27347c3e0b784237bc4003b">ss_median3</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *Td, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *PA, int *v1, int *v2, int *v3)</td></tr>
+<tr class="separator:aa479c166d27347c3e0b784237bc4003b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e32c5bb64918dcd9a1c3c12c4aaf1ee" id="r_a8e32c5bb64918dcd9a1c3c12c4aaf1ee"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a8e32c5bb64918dcd9a1c3c12c4aaf1ee">ss_median5</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *Td, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *PA, int *v1, int *v2, int *v3, int *v4, int *v5)</td></tr>
+<tr class="separator:a8e32c5bb64918dcd9a1c3c12c4aaf1ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7448c5344ad10a099d56ee3e1e327dee" id="r_a7448c5344ad10a099d56ee3e1e327dee"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a7448c5344ad10a099d56ee3e1e327dee">ss_pivot</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *Td, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *PA, int *first, int *last)</td></tr>
+<tr class="separator:a7448c5344ad10a099d56ee3e1e327dee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b6c2f2d964a6793a3ba77cceb313878" id="r_a8b6c2f2d964a6793a3ba77cceb313878"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a8b6c2f2d964a6793a3ba77cceb313878">ss_partition</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *PA, int *first, int *last, int depth)</td></tr>
+<tr class="separator:a8b6c2f2d964a6793a3ba77cceb313878"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92ff0b02f957f9fdcc2aae319c0d71e0" id="r_a92ff0b02f957f9fdcc2aae319c0d71e0"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a92ff0b02f957f9fdcc2aae319c0d71e0">ss_mintrosort</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *T, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *PA, int *first, int *last, int depth)</td></tr>
+<tr class="separator:a92ff0b02f957f9fdcc2aae319c0d71e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20f960151c32f8144b74427f4d76a362" id="r_a20f960151c32f8144b74427f4d76a362"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a20f960151c32f8144b74427f4d76a362">sssort</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *T, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *PA, int *first, int *last, int *buf, int bufsize, int depth, int n, int lastsuffix)</td></tr>
+<tr class="separator:a20f960151c32f8144b74427f4d76a362"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae49091a34d542139089a5ea424e846e1" id="r_ae49091a34d542139089a5ea424e846e1"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#ae49091a34d542139089a5ea424e846e1">tr_ilg</a> (int n)</td></tr>
+<tr class="separator:ae49091a34d542139089a5ea424e846e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01c621338424d2b24bfbb7157aa9808c" id="r_a01c621338424d2b24bfbb7157aa9808c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a01c621338424d2b24bfbb7157aa9808c">tr_insertionsort</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *ISAd, int *first, int *last)</td></tr>
+<tr class="separator:a01c621338424d2b24bfbb7157aa9808c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a422f4012b005c2d5d4d73e9281eadbda" id="r_a422f4012b005c2d5d4d73e9281eadbda"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a422f4012b005c2d5d4d73e9281eadbda">tr_fixdown</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *ISAd, int *SA, int i, int size)</td></tr>
+<tr class="separator:a422f4012b005c2d5d4d73e9281eadbda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe952bd83b4607b77dc75d98352412e6" id="r_abe952bd83b4607b77dc75d98352412e6"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#abe952bd83b4607b77dc75d98352412e6">tr_heapsort</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *ISAd, int *SA, int size)</td></tr>
+<tr class="separator:abe952bd83b4607b77dc75d98352412e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4778b21842ea517a0892d0dc5a2f7f00" id="r_a4778b21842ea517a0892d0dc5a2f7f00"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a4778b21842ea517a0892d0dc5a2f7f00">tr_median3</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *ISAd, int *v1, int *v2, int *v3)</td></tr>
+<tr class="separator:a4778b21842ea517a0892d0dc5a2f7f00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afbd52e78488966d40e359582ae509963" id="r_afbd52e78488966d40e359582ae509963"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#afbd52e78488966d40e359582ae509963">tr_median5</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *ISAd, int *v1, int *v2, int *v3, int *v4, int *v5)</td></tr>
+<tr class="separator:afbd52e78488966d40e359582ae509963"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2fc3fa4f36cbe48644a5e6f510d7bb3" id="r_aa2fc3fa4f36cbe48644a5e6f510d7bb3"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#aa2fc3fa4f36cbe48644a5e6f510d7bb3">tr_pivot</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *ISAd, int *first, int *last)</td></tr>
+<tr class="separator:aa2fc3fa4f36cbe48644a5e6f510d7bb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2807f57057157d937501ac6c76dce463" id="r_a2807f57057157d937501ac6c76dce463"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a2807f57057157d937501ac6c76dce463">trbudget_init</a> (<a class="el" href="divsufsort_8c.html#ad06fbb2fbee0a4c4f28f07c7b2977d5a">trbudget_t</a> *budget, int chance, int incval)</td></tr>
+<tr class="separator:a2807f57057157d937501ac6c76dce463"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ca20e753bcffbfe4f582912fb587cb6" id="r_a0ca20e753bcffbfe4f582912fb587cb6"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a0ca20e753bcffbfe4f582912fb587cb6">trbudget_check</a> (<a class="el" href="divsufsort_8c.html#ad06fbb2fbee0a4c4f28f07c7b2977d5a">trbudget_t</a> *budget, int size)</td></tr>
+<tr class="separator:a0ca20e753bcffbfe4f582912fb587cb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f5eaaa82eb3eba45e442c5a8b623751" id="r_a2f5eaaa82eb3eba45e442c5a8b623751"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a2f5eaaa82eb3eba45e442c5a8b623751">tr_partition</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *ISAd, int *first, int *middle, int *last, int **pa, int **pb, int v)</td></tr>
+<tr class="separator:a2f5eaaa82eb3eba45e442c5a8b623751"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ffc8a99d418804f67c4283d77d7aa70" id="r_a4ffc8a99d418804f67c4283d77d7aa70"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a4ffc8a99d418804f67c4283d77d7aa70">tr_copy</a> (int *ISA, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *SA, int *first, int *a, int *b, int *last, int depth)</td></tr>
+<tr class="separator:a4ffc8a99d418804f67c4283d77d7aa70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6eb516b15d3245eb7ccc0fa50ef92ad7" id="r_a6eb516b15d3245eb7ccc0fa50ef92ad7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a6eb516b15d3245eb7ccc0fa50ef92ad7">tr_partialcopy</a> (int *ISA, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *SA, int *first, int *a, int *b, int *last, int depth)</td></tr>
+<tr class="separator:a6eb516b15d3245eb7ccc0fa50ef92ad7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1692365dde5602b85607e26331b4614" id="r_ab1692365dde5602b85607e26331b4614"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#ab1692365dde5602b85607e26331b4614">tr_introsort</a> (int *ISA, <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *ISAd, int *SA, int *first, int *last, <a class="el" href="divsufsort_8c.html#ad06fbb2fbee0a4c4f28f07c7b2977d5a">trbudget_t</a> *budget)</td></tr>
+<tr class="separator:ab1692365dde5602b85607e26331b4614"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abfed5bb2294f23bbca5c7335f7a86bd4" id="r_abfed5bb2294f23bbca5c7335f7a86bd4"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#abfed5bb2294f23bbca5c7335f7a86bd4">trsort</a> (int *ISA, int *SA, int n, int depth)</td></tr>
+<tr class="separator:abfed5bb2294f23bbca5c7335f7a86bd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f76c6d4d28bbe00bbb5c2b47045fbf4" id="r_a1f76c6d4d28bbe00bbb5c2b47045fbf4"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a1f76c6d4d28bbe00bbb5c2b47045fbf4">sort_typeBstar</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *T, int *SA, int *bucket_A, int *bucket_B, int n, int openMP)</td></tr>
+<tr class="separator:a1f76c6d4d28bbe00bbb5c2b47045fbf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afbb47a458a15bbf28d4b74aaa16fd2d1" id="r_afbb47a458a15bbf28d4b74aaa16fd2d1"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#afbb47a458a15bbf28d4b74aaa16fd2d1">construct_SA</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *T, int *SA, int *bucket_A, int *bucket_B, int n, int m)</td></tr>
+<tr class="separator:afbb47a458a15bbf28d4b74aaa16fd2d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ccf6369fe31d58436977f12ff9a5806" id="r_a5ccf6369fe31d58436977f12ff9a5806"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a5ccf6369fe31d58436977f12ff9a5806">construct_BWT</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *T, int *SA, int *bucket_A, int *bucket_B, int n, int m)</td></tr>
+<tr class="separator:a5ccf6369fe31d58436977f12ff9a5806"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf259159664b4f7ac0f1957147f83167" id="r_adf259159664b4f7ac0f1957147f83167"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#adf259159664b4f7ac0f1957147f83167">construct_BWT_indexes</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *T, int *SA, int *bucket_A, int *bucket_B, int n, int m, unsigned char *num_indexes, int *indexes)</td></tr>
+<tr class="separator:adf259159664b4f7ac0f1957147f83167"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad018c2c1a45780704e06793a6533355d" id="r_ad018c2c1a45780704e06793a6533355d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#ad018c2c1a45780704e06793a6533355d">divsufsort</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *T, int *SA, int n, int openMP)</td></tr>
+<tr class="separator:ad018c2c1a45780704e06793a6533355d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed979b095573f0ec58f304d169de5ce9" id="r_aed979b095573f0ec58f304d169de5ce9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#aed979b095573f0ec58f304d169de5ce9">divbwt</a> (<a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *T, unsigned char *U, int *<a class="el" href="classA.html">A</a>, int n, unsigned char *num_indexes, int *indexes, int openMP)</td></tr>
+<tr class="separator:aed979b095573f0ec58f304d169de5ce9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a16097db8a324e5d3753bd431880178df" id="r_a16097db8a324e5d3753bd431880178df"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="divsufsort_8c.html#a16097db8a324e5d3753bd431880178df">lg_table</a> [256]</td></tr>
+<tr class="separator:a16097db8a324e5d3753bd431880178df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">宏定义说明</h2>
+<a id="a6572f1706059832f94025fa12c6c45ed" name="a6572f1706059832f94025fa12c6c45ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6572f1706059832f94025fa12c6c45ed">&#9670;&#160;</a></span>ALPHABET_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ALPHABET_SIZE&#160;&#160;&#160;(256)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00056">56</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aab513d045e5a285866ec209fe4183dc3" name="aab513d045e5a285866ec209fe4183dc3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab513d045e5a285866ec209fe4183dc3">&#9670;&#160;</a></span>BUCKET_A</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BUCKET_A</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_c0</td><td>)</td>
+          <td>&#160;&#160;&#160;bucket_A[(_c0)]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00128">128</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5f1b403a53af4084a579cbae01e7f34c" name="a5f1b403a53af4084a579cbae01e7f34c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f1b403a53af4084a579cbae01e7f34c">&#9670;&#160;</a></span>BUCKET_A_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BUCKET_A_SIZE&#160;&#160;&#160;(<a class="el" href="divsufsort_8c.html#a6572f1706059832f94025fa12c6c45ed">ALPHABET_SIZE</a>)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00058">58</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab709a1f5c6d1c1426ef834b13004987a" name="ab709a1f5c6d1c1426ef834b13004987a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab709a1f5c6d1c1426ef834b13004987a">&#9670;&#160;</a></span>BUCKET_B</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BUCKET_B</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_c0, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_c1&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;(bucket_B[(_c1) * <a class="el" href="divsufsort_8c.html#a6572f1706059832f94025fa12c6c45ed">ALPHABET_SIZE</a> + (_c0)])</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00133">133</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a65c54022c6abbad80d3a5decad9a5f6d" name="a65c54022c6abbad80d3a5decad9a5f6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65c54022c6abbad80d3a5decad9a5f6d">&#9670;&#160;</a></span>BUCKET_B_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BUCKET_B_SIZE&#160;&#160;&#160;(<a class="el" href="divsufsort_8c.html#a6572f1706059832f94025fa12c6c45ed">ALPHABET_SIZE</a> * <a class="el" href="divsufsort_8c.html#a6572f1706059832f94025fa12c6c45ed">ALPHABET_SIZE</a>)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00059">59</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a43519a7093bc1c0d5a77870a7c23fba5" name="a43519a7093bc1c0d5a77870a7c23fba5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43519a7093bc1c0d5a77870a7c23fba5">&#9670;&#160;</a></span>BUCKET_BSTAR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BUCKET_BSTAR</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_c0, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_c1&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;(bucket_B[(_c0) * <a class="el" href="divsufsort_8c.html#a6572f1706059832f94025fa12c6c45ed">ALPHABET_SIZE</a> + (_c1)])</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00134">134</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2eb6f9e0395b47b8d5e3eeae4fe0c116" name="a2eb6f9e0395b47b8d5e3eeae4fe0c116"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2eb6f9e0395b47b8d5e3eeae4fe0c116">&#9670;&#160;</a></span>INLINE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define INLINE&#160;&#160;&#160;<a class="el" href="API_2oesApi0_817_85_88_2include_2sutil_2compiler_8h.html#a96deb7ba5a74848afb710cc4ee6d2c08">__inline</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00050">50</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad448d437b99a125bd9344585d4f02e9a" name="ad448d437b99a125bd9344585d4f02e9a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad448d437b99a125bd9344585d4f02e9a">&#9670;&#160;</a></span>MAX</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MAX</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_a, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_b&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;(((_a) &gt; (_b)) ? (_a) : (_b))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00100">100</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a926c1ab4f6ca8b244750377dcdea9ec1" name="a926c1ab4f6ca8b244750377dcdea9ec1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a926c1ab4f6ca8b244750377dcdea9ec1">&#9670;&#160;</a></span>MIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MIN</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_a, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_b&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;(((_a) &lt; (_b)) ? (_a) : (_b))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00097">97</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a08cd223b2c9a4cbf647274d46a45a733" name="a08cd223b2c9a4cbf647274d46a45a733"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08cd223b2c9a4cbf647274d46a45a733">&#9670;&#160;</a></span>SS_BLOCKSIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SS_BLOCKSIZE&#160;&#160;&#160;(1024)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00077">77</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a5a858f398400eb7a9ac22713f3553feb" name="a5a858f398400eb7a9ac22713f3553feb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a858f398400eb7a9ac22713f3553feb">&#9670;&#160;</a></span>SS_INSERTIONSORT_THRESHOLD</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SS_INSERTIONSORT_THRESHOLD&#160;&#160;&#160;(8)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00066">66</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a81ff4283b0f558f524273900e3eaac08" name="a81ff4283b0f558f524273900e3eaac08"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81ff4283b0f558f524273900e3eaac08">&#9670;&#160;</a></span>SS_MISORT_STACKSIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SS_MISORT_STACKSIZE&#160;&#160;&#160;(96)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00081">81</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a738e9cfc278fe48fb08c8657e3afd878" name="a738e9cfc278fe48fb08c8657e3afd878"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a738e9cfc278fe48fb08c8657e3afd878">&#9670;&#160;</a></span>SS_SMERGE_STACKSIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SS_SMERGE_STACKSIZE&#160;&#160;&#160;(32)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00087">87</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a88f1ff1ac325c41f23cc15bef5422485" name="a88f1ff1ac325c41f23cc15bef5422485"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88f1ff1ac325c41f23cc15bef5422485">&#9670;&#160;</a></span>STACK_POP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STACK_POP</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_a, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_b, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_c, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_d&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">  <span class="keywordflow">do</span> {\</div>
+<div class="line">    assert(0 &lt;= ssize);\</div>
+<div class="line">    if(ssize == 0) { <span class="keywordflow">return</span>; }\</div>
+<div class="line">    (_a) = stack[--ssize].a, (_b) = stack[ssize].b,\</div>
+<div class="line">    (_c) = stack[ssize].c, (_d) = stack[ssize].d;\</div>
+<div class="line">  } <span class="keywordflow">while</span>(0)</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00114">114</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a087bacc2e0ad4bbb8fe7dca57662fb5a" name="a087bacc2e0ad4bbb8fe7dca57662fb5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a087bacc2e0ad4bbb8fe7dca57662fb5a">&#9670;&#160;</a></span>STACK_POP5</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STACK_POP5</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_a, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_b, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_c, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_d, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_e&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">  <span class="keywordflow">do</span> {\</div>
+<div class="line">    assert(0 &lt;= ssize);\</div>
+<div class="line">    if(ssize == 0) { <span class="keywordflow">return</span>; }\</div>
+<div class="line">    (_a) = stack[--ssize].a, (_b) = stack[ssize].b,\</div>
+<div class="line">    (_c) = stack[ssize].c, (_d) = stack[ssize].d, (_e) = stack[ssize].e;\</div>
+<div class="line">  } <span class="keywordflow">while</span>(0)</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00121">121</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad74e4c4355110af960d47f5f8fc180c3" name="ad74e4c4355110af960d47f5f8fc180c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad74e4c4355110af960d47f5f8fc180c3">&#9670;&#160;</a></span>STACK_PUSH</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STACK_PUSH</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_a, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_b, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_c, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_d&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">  <span class="keywordflow">do</span> {\</div>
+<div class="line">    assert(ssize &lt; <a class="code hl_define" href="divsufsort_8c.html#a6423a880df59733d2d9b509c7718d3a9">STACK_SIZE</a>);\</div>
+<div class="line">    stack[ssize].a = (_a), stack[ssize].b = (_b),\</div>
+<div class="line">    stack[ssize].c = (_c), stack[ssize++].d = (_d);\</div>
+<div class="line">  } <span class="keywordflow">while</span>(0)</div>
+<div class="ttc" id="adivsufsort_8c_html_a6423a880df59733d2d9b509c7718d3a9"><div class="ttname"><a href="divsufsort_8c.html#a6423a880df59733d2d9b509c7718d3a9">STACK_SIZE</a></div><div class="ttdeci">#define STACK_SIZE</div></div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00102">102</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0f8c46c22837b2f21a9b4781f81a88bd" name="a0f8c46c22837b2f21a9b4781f81a88bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f8c46c22837b2f21a9b4781f81a88bd">&#9670;&#160;</a></span>STACK_PUSH5</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STACK_PUSH5</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_a, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_b, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_c, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_d, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_e&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">  <span class="keywordflow">do</span> {\</div>
+<div class="line">    assert(ssize &lt; <a class="code hl_define" href="divsufsort_8c.html#a6423a880df59733d2d9b509c7718d3a9">STACK_SIZE</a>);\</div>
+<div class="line">    stack[ssize].a = (_a), stack[ssize].b = (_b),\</div>
+<div class="line">    stack[ssize].c = (_c), stack[ssize].d = (_d), stack[ssize++].e = (_e);\</div>
+<div class="line">  } <span class="keywordflow">while</span>(0)</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00108">108</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6423a880df59733d2d9b509c7718d3a9" name="a6423a880df59733d2d9b509c7718d3a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6423a880df59733d2d9b509c7718d3a9">&#9670;&#160;</a></span>STACK_SIZE <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STACK_SIZE&#160;&#160;&#160;<a class="el" href="divsufsort_8c.html#a81ff4283b0f558f524273900e3eaac08">SS_MISORT_STACKSIZE</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6423a880df59733d2d9b509c7718d3a9" name="a6423a880df59733d2d9b509c7718d3a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6423a880df59733d2d9b509c7718d3a9">&#9670;&#160;</a></span>STACK_SIZE <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STACK_SIZE&#160;&#160;&#160;<a class="el" href="divsufsort_8c.html#a1364e4e63b8ed23692eb50321e597138">TR_STACKSIZE</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5107c7781c3e326264fa507ddde22d47" name="a5107c7781c3e326264fa507ddde22d47"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5107c7781c3e326264fa507ddde22d47">&#9670;&#160;</a></span>SWAP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SWAP</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_a, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_b&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;do { t = (_a); (_a) = (_b); (_b) = t; } while(0)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00094">94</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a17e941a787219c4a650618035b4dc61f" name="a17e941a787219c4a650618035b4dc61f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17e941a787219c4a650618035b4dc61f">&#9670;&#160;</a></span>TR_INSERTIONSORT_THRESHOLD</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define TR_INSERTIONSORT_THRESHOLD&#160;&#160;&#160;(8)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00088">88</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1364e4e63b8ed23692eb50321e597138" name="a1364e4e63b8ed23692eb50321e597138"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1364e4e63b8ed23692eb50321e597138">&#9670;&#160;</a></span>TR_STACKSIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define TR_STACKSIZE&#160;&#160;&#160;(64)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00089">89</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">类型定义说明</h2>
+<a id="ad06fbb2fbee0a4c4f28f07c7b2977d5a" name="ad06fbb2fbee0a4c4f28f07c7b2977d5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad06fbb2fbee0a4c4f28f07c7b2977d5a">&#9670;&#160;</a></span>trbudget_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="struct__trbudget__t.html">_trbudget_t</a> <a class="el" href="divsufsort_8c.html#ad06fbb2fbee0a4c4f28f07c7b2977d5a">trbudget_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01040">1040</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a5ccf6369fe31d58436977f12ff9a5806" name="a5ccf6369fe31d58436977f12ff9a5806"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ccf6369fe31d58436977f12ff9a5806">&#9670;&#160;</a></span>construct_BWT()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int construct_BWT </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>T</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>SA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>bucket_A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>bucket_B</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>m</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01677">1677</a> 行定义.</p>
+
+</div>
+</div>
+<a id="adf259159664b4f7ac0f1957147f83167" name="adf259159664b4f7ac0f1957147f83167"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf259159664b4f7ac0f1957147f83167">&#9670;&#160;</a></span>construct_BWT_indexes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int construct_BWT_indexes </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>T</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>SA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>bucket_A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>bucket_B</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned char *&#160;</td>
+          <td class="paramname"><em>num_indexes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>indexes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01748">1748</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afbb47a458a15bbf28d4b74aaa16fd2d1" name="afbb47a458a15bbf28d4b74aaa16fd2d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afbb47a458a15bbf28d4b74aaa16fd2d1">&#9670;&#160;</a></span>construct_SA()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void construct_SA </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>T</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>SA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>bucket_A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>bucket_B</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>m</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01613">1613</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aed979b095573f0ec58f304d169de5ce9" name="aed979b095573f0ec58f304d169de5ce9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed979b095573f0ec58f304d169de5ce9">&#9670;&#160;</a></span>divbwt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int divbwt </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>T</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned char *&#160;</td>
+          <td class="paramname"><em>U</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned char *&#160;</td>
+          <td class="paramname"><em>num_indexes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>indexes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>openMP</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Constructs the burrows-wheeler transformed string of a given string. </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">T</td><td>[0..n-1] The input string. </td></tr>
+    <tr><td class="paramname">U</td><td>[0..n-1] The output string. (can be T) </td></tr>
+    <tr><td class="paramname"><a class="el" href="classA.html">A</a></td><td>[0..n-1] The temporary array. (can be NULL) </td></tr>
+    <tr><td class="paramname">n</td><td>The length of the given string. </td></tr>
+    <tr><td class="paramname">num_indexes</td><td>The length of secondary indexes array. (can be NULL) </td></tr>
+    <tr><td class="paramname">indexes</td><td>The secondary indexes array. (can be NULL) </td></tr>
+    <tr><td class="paramname">openMP</td><td>enables OpenMP optimization. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>The primary index if no error occurred, -1 or -2 otherwise. </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01876">1876</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ad018c2c1a45780704e06793a6533355d" name="ad018c2c1a45780704e06793a6533355d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad018c2c1a45780704e06793a6533355d">&#9670;&#160;</a></span>divsufsort()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int divsufsort </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>T</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>SA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>openMP</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Constructs the suffix array of a given string. </p><dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">T</td><td>[0..n-1] The input string. </td></tr>
+    <tr><td class="paramname">SA</td><td>[0..n-1] The output array of suffixes. </td></tr>
+    <tr><td class="paramname">n</td><td>The length of the given string. </td></tr>
+    <tr><td class="paramname">openMP</td><td>enables OpenMP optimization. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>0 if no error occurred, -1 or -2 otherwise. </dd></dl>
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01847">1847</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a1f76c6d4d28bbe00bbb5c2b47045fbf4" name="a1f76c6d4d28bbe00bbb5c2b47045fbf4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f76c6d4d28bbe00bbb5c2b47045fbf4">&#9670;&#160;</a></span>sort_typeBstar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int sort_typeBstar </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>T</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>SA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>bucket_A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>bucket_B</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>openMP</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01441">1441</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a56da2cb4b693fcbc35bba708b25eba85" name="a56da2cb4b693fcbc35bba708b25eba85"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56da2cb4b693fcbc35bba708b25eba85">&#9670;&#160;</a></span>ss_compare()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int ss_compare </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>T</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>p1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>p2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>depth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00231">231</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a32337c527c7811e7e1ca4129ee9b4f09" name="a32337c527c7811e7e1ca4129ee9b4f09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32337c527c7811e7e1ca4129ee9b4f09">&#9670;&#160;</a></span>ss_fixdown()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> void ss_fixdown </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>Td</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>PA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>SA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>i</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00282">282</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ac6fa542a721c91a6aadde1ff6f07ac6d" name="ac6fa542a721c91a6aadde1ff6f07ac6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6fa542a721c91a6aadde1ff6f07ac6d">&#9670;&#160;</a></span>ss_heapsort()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ss_heapsort </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>Td</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>PA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>SA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00299">299</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4261acc0f803a4c3c2b592413886ed19" name="a4261acc0f803a4c3c2b592413886ed19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4261acc0f803a4c3c2b592413886ed19">&#9670;&#160;</a></span>ss_ilg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int ss_ilg </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00155">155</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a86960670f08ca09f9c1f133e10aec2e5" name="a86960670f08ca09f9c1f133e10aec2e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86960670f08ca09f9c1f133e10aec2e5">&#9670;&#160;</a></span>ss_insertionsort()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ss_insertionsort </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>T</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>PA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>first</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>last</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>depth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00257">257</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa479c166d27347c3e0b784237bc4003b" name="aa479c166d27347c3e0b784237bc4003b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa479c166d27347c3e0b784237bc4003b">&#9670;&#160;</a></span>ss_median3()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int * ss_median3 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>Td</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>PA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v3</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00324">324</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8e32c5bb64918dcd9a1c3c12c4aaf1ee" name="a8e32c5bb64918dcd9a1c3c12c4aaf1ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e32c5bb64918dcd9a1c3c12c4aaf1ee">&#9670;&#160;</a></span>ss_median5()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int * ss_median5 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>Td</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>PA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v3</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v4</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v5</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00338">338</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a92ff0b02f957f9fdcc2aae319c0d71e0" name="a92ff0b02f957f9fdcc2aae319c0d71e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92ff0b02f957f9fdcc2aae319c0d71e0">&#9670;&#160;</a></span>ss_mintrosort()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ss_mintrosort </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>T</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>PA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>first</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>last</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>depth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00400">400</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a8b6c2f2d964a6793a3ba77cceb313878" name="a8b6c2f2d964a6793a3ba77cceb313878"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b6c2f2d964a6793a3ba77cceb313878">&#9670;&#160;</a></span>ss_partition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int * ss_partition </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>PA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>first</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>last</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>depth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00381">381</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a7448c5344ad10a099d56ee3e1e327dee" name="a7448c5344ad10a099d56ee3e1e327dee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7448c5344ad10a099d56ee3e1e327dee">&#9670;&#160;</a></span>ss_pivot()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int * ss_pivot </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>Td</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>PA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>first</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>last</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00353">353</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a20f960151c32f8144b74427f4d76a362" name="a20f960151c32f8144b74427f4d76a362"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20f960151c32f8144b74427f4d76a362">&#9670;&#160;</a></span>sssort()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void sssort </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> unsigned char *&#160;</td>
+          <td class="paramname"><em>T</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>PA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>first</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>last</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>buf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bufsize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>depth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>lastsuffix</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00836">836</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4ffc8a99d418804f67c4283d77d7aa70" name="a4ffc8a99d418804f67c4283d77d7aa70"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ffc8a99d418804f67c4283d77d7aa70">&#9670;&#160;</a></span>tr_copy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void tr_copy </td>
+          <td>(</td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>ISA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>SA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>first</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>last</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>depth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01112">1112</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a422f4012b005c2d5d4d73e9281eadbda" name="a422f4012b005c2d5d4d73e9281eadbda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a422f4012b005c2d5d4d73e9281eadbda">&#9670;&#160;</a></span>tr_fixdown()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> void tr_fixdown </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>ISAd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>SA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>i</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00946">946</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abe952bd83b4607b77dc75d98352412e6" name="abe952bd83b4607b77dc75d98352412e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe952bd83b4607b77dc75d98352412e6">&#9670;&#160;</a></span>tr_heapsort()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void tr_heapsort </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>ISAd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>SA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00962">962</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ae49091a34d542139089a5ea424e846e1" name="ae49091a34d542139089a5ea424e846e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae49091a34d542139089a5ea424e846e1">&#9670;&#160;</a></span>tr_ilg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int tr_ilg </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00911">911</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a01c621338424d2b24bfbb7157aa9808c" name="a01c621338424d2b24bfbb7157aa9808c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01c621338424d2b24bfbb7157aa9808c">&#9670;&#160;</a></span>tr_insertionsort()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void tr_insertionsort </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>ISAd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>first</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>last</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00927">927</a> 行定义.</p>
+
+</div>
+</div>
+<a id="ab1692365dde5602b85607e26331b4614" name="ab1692365dde5602b85607e26331b4614"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1692365dde5602b85607e26331b4614">&#9670;&#160;</a></span>tr_introsort()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void tr_introsort </td>
+          <td>(</td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>ISA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>ISAd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>SA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>first</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>last</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="divsufsort_8c.html#ad06fbb2fbee0a4c4f28f07c7b2977d5a">trbudget_t</a> *&#160;</td>
+          <td class="paramname"><em>budget</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01175">1175</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a4778b21842ea517a0892d0dc5a2f7f00" name="a4778b21842ea517a0892d0dc5a2f7f00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4778b21842ea517a0892d0dc5a2f7f00">&#9670;&#160;</a></span>tr_median3()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int * tr_median3 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>ISAd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v3</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00987">987</a> 行定义.</p>
+
+</div>
+</div>
+<a id="afbd52e78488966d40e359582ae509963" name="afbd52e78488966d40e359582ae509963"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afbd52e78488966d40e359582ae509963">&#9670;&#160;</a></span>tr_median5()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int * tr_median5 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>ISAd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v3</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v4</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>v5</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01000">1000</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a6eb516b15d3245eb7ccc0fa50ef92ad7" name="a6eb516b15d3245eb7ccc0fa50ef92ad7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6eb516b15d3245eb7ccc0fa50ef92ad7">&#9670;&#160;</a></span>tr_partialcopy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void tr_partialcopy </td>
+          <td>(</td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>ISA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>SA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>first</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>last</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>depth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01137">1137</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2f5eaaa82eb3eba45e442c5a8b623751" name="a2f5eaaa82eb3eba45e442c5a8b623751"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f5eaaa82eb3eba45e442c5a8b623751">&#9670;&#160;</a></span>tr_partition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> void tr_partition </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>ISAd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>first</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>middle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>last</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int **&#160;</td>
+          <td class="paramname"><em>pa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int **&#160;</td>
+          <td class="paramname"><em>pb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>v</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01070">1070</a> 行定义.</p>
+
+</div>
+</div>
+<a id="aa2fc3fa4f36cbe48644a5e6f510d7bb3" name="aa2fc3fa4f36cbe48644a5e6f510d7bb3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2fc3fa4f36cbe48644a5e6f510d7bb3">&#9670;&#160;</a></span>tr_pivot()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int * tr_pivot </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int *&#160;</td>
+          <td class="paramname"><em>ISAd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>first</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>last</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01015">1015</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a0ca20e753bcffbfe4f582912fb587cb6" name="a0ca20e753bcffbfe4f582912fb587cb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ca20e753bcffbfe4f582912fb587cb6">&#9670;&#160;</a></span>trbudget_check()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> int trbudget_check </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="divsufsort_8c.html#ad06fbb2fbee0a4c4f28f07c7b2977d5a">trbudget_t</a> *&#160;</td>
+          <td class="paramname"><em>budget</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01057">1057</a> 行定义.</p>
+
+</div>
+</div>
+<a id="a2807f57057157d937501ac6c76dce463" name="a2807f57057157d937501ac6c76dce463"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2807f57057157d937501ac6c76dce463">&#9670;&#160;</a></span>trbudget_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="divsufsort_8c.html#a2eb6f9e0395b47b8d5e3eeae4fe0c116">INLINE</a> void trbudget_init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="divsufsort_8c.html#ad06fbb2fbee0a4c4f28f07c7b2977d5a">trbudget_t</a> *&#160;</td>
+          <td class="paramname"><em>budget</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>chance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>incval</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01050">1050</a> 行定义.</p>
+
+</div>
+</div>
+<a id="abfed5bb2294f23bbca5c7335f7a86bd4" name="abfed5bb2294f23bbca5c7335f7a86bd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abfed5bb2294f23bbca5c7335f7a86bd4">&#9670;&#160;</a></span>trsort()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void trsort </td>
+          <td>(</td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>ISA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>SA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>depth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l01402">1402</a> 行定义.</p>
+
+</div>
+</div>
+<h2 class="groupheader">变量说明</h2>
+<a id="a16097db8a324e5d3753bd431880178df" name="a16097db8a324e5d3753bd431880178df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16097db8a324e5d3753bd431880178df">&#9670;&#160;</a></span>lg_table</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="stdc_8h.html#a2c212835823e3c54a8ab6d95c652660e">const</a> int lg_table[256]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>初始值:</b><div class="fragment"><div class="line">= {</div>
+<div class="line"> -1,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,</div>
+<div class="line">  5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,</div>
+<div class="line">  6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,</div>
+<div class="line">  6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,</div>
+<div class="line">  7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,</div>
+<div class="line">  7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,</div>
+<div class="line">  7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,</div>
+<div class="line">  7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7</div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">在文件 <a class="el" href="divsufsort_8c_source.html">divsufsort.c</a> 第 <a class="el" href="divsufsort_8c_source.html#l00140">140</a> 行定义.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_8e3bfc8dab912a27460c89228d733de9.html">WTSUtils</a></li><li class="navelem"><a class="el" href="dir_09f9dced7964346ef4dbda3b26837f94.html">zstdlib</a></li><li class="navelem"><a class="el" href="divsufsort_8c.html">divsufsort.c</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>
